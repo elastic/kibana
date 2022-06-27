@@ -8,7 +8,10 @@
 
 const dedent = require('dedent');
 const getopts = require('getopts');
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 const { Cluster } = require('../cluster');
+const { parseTimeoutToMs } = require('../utils');
 
 exports.description = 'Downloads and run from a nightly snapshot';
 
@@ -28,6 +31,11 @@ exports.help = (defaults = {}) => {
       -E                Additional key=value settings to pass to Elasticsearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on Elasticsearch
+      --use-cached      Skips cache verification and use cached ES snapshot.
+      --skip-ready-check  Disable the ready check,
+      --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
+      --plugins         Comma seperated list of Elasticsearch plugins to install
+      --secure-files     Comma seperated list of secure_setting_name=/path pairs
 
     Example:
 
@@ -36,6 +44,13 @@ exports.help = (defaults = {}) => {
 };
 
 exports.run = async (defaults = {}) => {
+  const runStartTime = Date.now();
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+  const reportTime = getTimeReporter(log, 'scripts/es snapshot');
+
   const argv = process.argv.slice(2);
   const options = getopts(argv, {
     alias: {
@@ -43,11 +58,14 @@ exports.run = async (defaults = {}) => {
       installPath: 'install-path',
       dataArchive: 'data-archive',
       esArgs: 'E',
+      useCached: 'use-cached',
+      skipReadyCheck: 'skip-ready-check',
+      readyTimeout: 'ready-timeout',
+      secureFiles: 'secure-files',
     },
 
-    string: ['version'],
-
-    boolean: ['download-only'],
+    string: ['version', 'ready-timeout'],
+    boolean: ['download-only', 'use-cached', 'skip-ready-check'],
 
     default: defaults,
   });
@@ -56,12 +74,30 @@ exports.run = async (defaults = {}) => {
   if (options['download-only']) {
     await cluster.downloadSnapshot(options);
   } else {
+    const installStartTime = Date.now();
     const { installPath } = await cluster.installSnapshot(options);
 
     if (options.dataArchive) {
       await cluster.extractDataDirectory(installPath, options.dataArchive);
     }
+    if (options.plugins) {
+      await cluster.installPlugins(installPath, options.plugins, options);
+    }
+    if (options.secureFiles) {
+      const pairs = options.secureFiles.split(',').map((kv) => kv.split('=').map((v) => v.trim()));
+      await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
+    }
 
-    await cluster.run(installPath, options);
+    reportTime(installStartTime, 'installed', {
+      success: true,
+      ...options,
+    });
+
+    await cluster.run(installPath, {
+      reportTime,
+      startTime: runStartTime,
+      ...options,
+      readyTimeout: parseTimeoutToMs(options.readyTimeout),
+    });
   }
 };

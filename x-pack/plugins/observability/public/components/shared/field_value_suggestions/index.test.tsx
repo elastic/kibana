@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { FieldValueSuggestions } from './index';
+import { FieldValueSuggestions } from '.';
 import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import * as searchHook from '../../../hooks/use_es_search';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 jest.setTimeout(30000);
 
@@ -95,6 +95,7 @@ describe('FieldValueSuggestions', () => {
           selectedValue={[]}
           filters={[]}
           asCombobox={false}
+          allowExclusions={true}
         />
       </EuiThemeProvider>
     );
@@ -119,6 +120,7 @@ describe('FieldValueSuggestions', () => {
           excludedValue={['Pak']}
           filters={[]}
           asCombobox={false}
+          allowExclusions={true}
         />
       </EuiThemeProvider>
     );

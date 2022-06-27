@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { config, InfraConfig, InfraServerPlugin, InfraPluginSetup } from './plugin';
+import { PluginInitializerContext } from '@kbn/core/server';
+import { config, InfraConfig, InfraServerPlugin } from './plugin';
 
-export { config, InfraConfig, InfraPluginSetup };
-export { InfraRequestHandlerContext } from './types';
+export type { InfraPluginSetup, InfraPluginStart, InfraRequestHandlerContext } from './types';
+export type { InfraConfig };
+export { config };
 
 export function plugin(context: PluginInitializerContext) {
   return new InfraServerPlugin(context);

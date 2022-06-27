@@ -13,7 +13,9 @@ import {
   ChromeBreadcrumb,
   IBasePath,
   ChromeStart,
-} from '../../../../../src/core/public';
+} from '@kbn/core/public';
+
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export interface CanvasPlatformService {
   getBasePath: () => string;
@@ -27,6 +29,8 @@ export interface CanvasPlatformService {
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   setRecentlyAccessed: (link: string, label: string, id: string) => void;
   setFullscreen: ChromeStart['setIsVisible'];
+  redirectLegacyUrl?: SpacesPluginStart['ui']['redirectLegacyUrl'];
+  getLegacyUrlConflict?: SpacesPluginStart['ui']['components']['getLegacyUrlConflict'];
 
   // TODO: these should go away.  We want thin accessors, not entire objects.
   // Entire objects are hard to mock, and hide our dependency on the external service.

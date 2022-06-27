@@ -6,22 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { nodeTypes } from './index';
+import { nodeTypes } from '.';
 
 import { buildNode, buildNodeWithArgumentNodes, toElasticsearchQuery } from './function';
 import { toElasticsearchQuery as isFunctionToElasticsearchQuery } from '../functions/is';
-import { IndexPatternBase } from '../../es_query';
+import { DataViewBase } from '../../es_query';
 import { fields } from '../../filters/stubs/fields.mocks';
 
 jest.mock('../grammar');
 
 describe('kuery node types', () => {
   describe('function', () => {
-    let indexPattern: IndexPatternBase;
+    let indexPattern: DataViewBase;
 
     beforeEach(() => {
       indexPattern = {
         fields,
+        title: 'dataView',
       };
     });
 

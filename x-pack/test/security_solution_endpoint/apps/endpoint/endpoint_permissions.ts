@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUserAndRole,
   deleteUserAndRole,
   ROLES,
 } from '../../../common/services/security_solution';
-import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
@@ -20,8 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
 
-  // failing ES promotion: https://github.com/elastic/kibana/issues/110309
-  describe.skip('Endpoint permissions:', () => {
+  describe('Endpoint permissions:', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
@@ -51,6 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           // Log the user back out
+          // NOTE: Logout needs to happen before anything else to avoid flaky behavior
           await PageObjects.security.forceLogout();
 
           // delete role/user

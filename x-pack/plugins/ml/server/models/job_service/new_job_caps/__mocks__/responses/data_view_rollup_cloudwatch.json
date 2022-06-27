@@ -1,0 +1,151 @@
+[
+  {
+    "id": "d6ac99b0-2777-11ec-8e1c-aba6d0767aaa",
+    "title": "cloud_roll_index",
+    "fieldFormatMap": {},
+    "typeMeta": {
+      "params": {
+        "rollup_index": "cloud_roll_index"
+      },
+      "aggs": {
+        "date_histogram": {
+          "@timestamp": {
+            "agg": "date_histogram",
+            "fixed_interval": "5m",
+            "time_zone": "UTC"
+          }
+        }
+      }
+    },
+    "fields": [
+      {
+        "count": 0,
+        "name": "_source",
+        "type": "_source",
+        "esTypes": [
+          "_source"
+        ],
+        "scripted": false,
+        "searchable": false,
+        "aggregatable": false,
+        "readFromDocValues": false
+      },
+      {
+        "count": 0,
+        "name": "_id",
+        "type": "string",
+        "esTypes": [
+          "_id"
+        ],
+        "scripted": false,
+        "searchable": true,
+        "aggregatable": false,
+        "readFromDocValues": false
+      },
+      {
+        "count": 0,
+        "name": "_type",
+        "type": "string",
+        "scripted": false,
+        "searchable": false,
+        "aggregatable": false,
+        "readFromDocValues": false
+      },
+      {
+        "count": 0,
+        "name": "_index",
+        "type": "string",
+        "esTypes": [
+          "_index"
+        ],
+        "scripted": false,
+        "searchable": true,
+        "aggregatable": true,
+        "readFromDocValues": false
+      },
+      {
+        "count": 0,
+        "name": "_score",
+        "type": "number",
+        "scripted": false,
+        "searchable": false,
+        "aggregatable": false,
+        "readFromDocValues": false
+      },
+      {
+        "count": 0,
+        "name": "@timestamp",
+        "type": "date",
+        "esTypes": [
+          "date"
+        ],
+        "scripted": false,
+        "searchable": true,
+        "aggregatable": true,
+        "readFromDocValues": true
+      }
+    ],
+    "timeFieldName": "@timestamp",
+    "type": "rollup",
+    "metaFields": [
+      "_source",
+      "_id",
+      "_type",
+      "_index",
+      "_score"
+    ],
+    "version": "WzY5NjEsNF0=",
+    "originalSavedObjectBody": {
+      "fieldAttrs": "{}",
+      "title": "cloud_roll_index",
+      "timeFieldName": "@timestamp",
+      "fields": "[]",
+      "type": "rollup",
+      "typeMeta": "{\"params\":{\"rollup_index\":\"cloud_roll_index\"},\"aggs\":{\"date_histogram\":{\"@timestamp\":{\"agg\":\"date_histogram\",\"fixed_interval\":\"5m\",\"time_zone\":\"UTC\"}}}}",
+      "runtimeFieldMap": "{}"
+    },
+    "shortDotsEnable": false,
+    "fieldFormats": {
+      "fieldFormats": {},
+      "defaultMap": {
+        "ip": {
+          "id": "ip",
+          "params": {}
+        },
+        "date": {
+          "id": "date",
+          "params": {}
+        },
+        "date_nanos": {
+          "id": "date_nanos",
+          "params": {},
+          "es": true
+        },
+        "number": {
+          "id": "number",
+          "params": {}
+        },
+        "boolean": {
+          "id": "boolean",
+          "params": {}
+        },
+        "histogram": {
+          "id": "histogram",
+          "params": {}
+        },
+        "_source": {
+          "id": "_source",
+          "params": {}
+        },
+        "_default_": {
+          "id": "string",
+          "params": {}
+        }
+      },
+      "metaParamsOptions": {}
+    },
+    "fieldAttrs": {},
+    "runtimeFieldMap": {},
+    "allowNoIndex": false
+  }
+]

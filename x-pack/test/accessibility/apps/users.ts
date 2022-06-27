@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
 
-  describe('Kibana users page a11y tests', () => {
+  describe('Kibana users Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.security.clickElasticsearchUsers();
@@ -88,18 +88,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for edit user panel', async () => {
+      await PageObjects.settings.clickLinkText('Users');
       await PageObjects.settings.clickLinkText('deleteA11y');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for change password screen', async () => {
+      await PageObjects.settings.clickLinkText('Users');
       await PageObjects.settings.clickLinkText('deleteA11y');
       await find.clickByButtonText('Change password');
       await a11y.testAppSnapshot();
-      await testSubjects.click('formFlyoutCancelButton');
+      await testSubjects.click('changePasswordFormCancelButton');
     });
 
     it('a11y test for deactivate user screen', async () => {
+      await PageObjects.settings.clickLinkText('Users');
       await PageObjects.settings.clickLinkText('deleteA11y');
       await find.clickByButtonText('Deactivate user');
       await a11y.testAppSnapshot();

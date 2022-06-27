@@ -7,10 +7,10 @@
  */
 
 import { join } from 'path';
-import { rmdir, mkdtemp, readFile, readdir } from 'fs/promises';
+import { rm, mkdtemp, readFile, readdir } from 'fs/promises';
 import moment from 'moment-timezone';
+import { getNextRollingTime } from '@kbn/core-logging-server-internal';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
-import { getNextRollingTime } from '../appenders/rolling_file/policies/time_interval/get_next_rolling_time';
 
 const flushDelay = 250;
 const delay = (waitInMs: number) => new Promise((resolve) => setTimeout(resolve, waitInMs));
@@ -19,7 +19,6 @@ const flush = async () => delay(flushDelay);
 function createRoot(appenderConfig: any) {
   return kbnTestServer.createRoot({
     logging: {
-      silent: true, // set "true" in kbnTestServer
       appenders: {
         'rolling-file': appenderConfig,
       },
@@ -49,7 +48,7 @@ describe('RollingFileAppender', () => {
 
   afterEach(async () => {
     if (testDir) {
-      await rmdir(testDir, { recursive: true });
+      await rm(testDir, { recursive: true });
     }
 
     if (root) {

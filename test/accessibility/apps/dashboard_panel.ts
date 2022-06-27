@@ -14,14 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const inspector = getService('inspector');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/112920
-  describe.skip('Dashboard Panel', () => {
+  describe('Dashboard Panel', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-
-      await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.common.navigateToApp('dashboard');
       await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
     });
@@ -63,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('dashboard panel full screen', async () => {
       const header = await dashboardPanelActions.getPanelHeading('[Flights] Flight count');
-      await dashboardPanelActions.toggleContextMenu(header);
+      await dashboardPanelActions.openContextMenuMorePanel(header);
 
       await testSubjects.click('embeddablePanelAction-togglePanel');
       await a11y.testAppSnapshot();

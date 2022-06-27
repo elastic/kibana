@@ -68,7 +68,6 @@ describe('transform_elastic_named_search_to_list_item', () => {
         _index: LIST_INDEX,
         _score: 0,
         _source: getSearchEsListItemMock(),
-        _type: '',
         matched_queries: ['1.0'],
       },
     ];
@@ -107,7 +106,6 @@ describe('transform_elastic_named_search_to_list_item', () => {
         _index: LIST_INDEX,
         _score: 0,
         _source: getSearchEsListItemMock(),
-        _type: '',
         matched_queries: ['0.0'],
       },
     ];
@@ -138,7 +136,6 @@ describe('transform_elastic_named_search_to_list_item', () => {
         _index: LIST_INDEX,
         _score: 0,
         _source: getSearchEsListItemMock(),
-        _type: '',
         matched_queries: ['1.0'],
       },
     ];

@@ -5,35 +5,53 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "aggs": Array [],
-        "index": Array [
+        "colorMode": Array [
+          "None",
+        ],
+        "font": Array [
           Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "id": Array [
-                    "123",
+                  "align": Array [
+                    "center",
+                  ],
+                  "family": Array [
+                    "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                  ],
+                  "sizeUnit": Array [
+                    "pt",
+                  ],
+                  "weight": Array [
+                    "bold",
                   ],
                 },
-                "function": "indexPatternLoad",
+                "function": "font",
                 "type": "function",
               },
             ],
             "type": "expression",
           },
         ],
-        "metricsAtAllLevels": Array [
-          false,
+        "labelFont": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "size": Array [
+                    "14",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
-        "partialRows": Array [
-          false,
-        ],
-      },
-      "function": "esaggs",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {
         "percentageMode": Array [
           true,
         ],
@@ -54,35 +72,53 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "aggs": Array [],
-        "index": Array [
+        "colorMode": Array [
+          "None",
+        ],
+        "font": Array [
           Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "id": Array [
-                    "123",
+                  "align": Array [
+                    "center",
+                  ],
+                  "family": Array [
+                    "'Inter', 'Inter UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+                  ],
+                  "sizeUnit": Array [
+                    "pt",
+                  ],
+                  "weight": Array [
+                    "bold",
                   ],
                 },
-                "function": "indexPatternLoad",
+                "function": "font",
                 "type": "function",
               },
             ],
             "type": "expression",
           },
         ],
-        "metricsAtAllLevels": Array [
-          false,
+        "labelFont": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "align": Array [
+                    "center",
+                  ],
+                  "size": Array [
+                    "14",
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
-        "partialRows": Array [
-          false,
-        ],
-      },
-      "function": "esaggs",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {
         "showLabels": Array [
           false,
         ],

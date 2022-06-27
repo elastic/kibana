@@ -6,11 +6,10 @@
  */
 
 import moment from 'moment-timezone';
-import axios from 'axios';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { mountWithIntl } from '@kbn/test/jest';
-import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
+import { init } from './client_integration/helpers/http_requests';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { Index } from '../common/types';
 import {
   retryLifecycleActionExtension,
@@ -23,16 +22,13 @@ import {
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 
-// We need to init the http with a mock for any tests that depend upon the http service.
-// For example, add_lifecycle_confirm_modal makes an API request in its componentDidMount
-// lifecycle method. If we don't mock this, CI will fail with "Call retries were exceeded".
-// This expects HttpSetup but we're giving it AxiosInstance.
-// @ts-ignore
-initHttp(axios.create({ adapter: axiosXhrAdapter }));
+const { httpSetup } = init();
+
+initHttp(httpSetup);
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
-jest.mock('../../../plugins/index_management/public', async () => {
-  const { indexManagementMock } = await import('../../../plugins/index_management/public/mocks');
+jest.mock('@kbn/index-management-plugin/public', async () => {
+  const { indexManagementMock } = await import('@kbn/index-management-plugin/public/mocks');
   return indexManagementMock.createSetup();
 });
 
@@ -41,10 +37,10 @@ const indexWithoutLifecyclePolicy: Index = {
   status: 'open',
   name: 'noPolicy',
   uuid: 'BJ-nrZYuSrG-jaofr6SeLg',
-  primary: '1',
-  replica: '1',
-  documents: '1',
-  documents_deleted: '0',
+  primary: 1,
+  replica: 1,
+  documents: 1,
+  documents_deleted: 0,
   size: '3.4kb',
   primary_size: '3.4kb',
   aliases: 'none',
@@ -61,10 +57,10 @@ const indexWithLifecyclePolicy: Index = {
   status: 'open',
   name: 'testy3',
   uuid: 'XL11TLa3Tvq298_dMUzLHQ',
-  primary: '1',
-  replica: '1',
-  documents: '2',
-  documents_deleted: '0',
+  primary: 1,
+  replica: 1,
+  documents: 2,
+  documents_deleted: 0,
   size: '6.5kb',
   primary_size: '6.5kb',
   aliases: 'none',
@@ -89,10 +85,10 @@ const indexWithLifecycleError = {
   status: 'open',
   name: 'testy3',
   uuid: 'XL11TLa3Tvq298_dMUzLHQ',
-  primary: '1',
-  replica: '1',
-  documents: '2',
-  documents_deleted: '0',
+  primary: 1,
+  replica: 1,
+  documents: 2,
+  documents_deleted: 0,
   size: '6.5kb',
   primary_size: '6.5kb',
   aliases: 'none',
@@ -113,7 +109,6 @@ const indexWithLifecycleError = {
     step_info: {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
-      stack_trace: 'fakestacktrace',
     },
     phase_execution: {
       policy: 'testy',
@@ -257,14 +252,14 @@ describe('extend index management', () => {
       const extension = ilmSummaryExtension(indexWithLifecyclePolicy, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
 
     test('should return extension when index has lifecycle error', () => {
       const extension = ilmSummaryExtension(indexWithLifecycleError, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
   });
 

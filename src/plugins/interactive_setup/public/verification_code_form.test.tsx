@@ -9,7 +9,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { Providers } from './plugin';
 import { VerificationCodeForm } from './verification_code_form';
@@ -21,6 +21,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 describe('VerificationCodeForm', () => {
   jest.setTimeout(20_000);
 
+  const theme$ = themeServiceMock.createTheme$();
+
   it('calls enrollment API when submitting form', async () => {
     const coreStart = coreMock.createStart();
     coreStart.http.post.mockResolvedValue({});
@@ -28,7 +30,7 @@ describe('VerificationCodeForm', () => {
     const onSuccess = jest.fn();
 
     const { findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart} theme$={theme$}>
         <VerificationCodeForm onSuccess={onSuccess} />
       </Providers>
     );
@@ -65,14 +67,14 @@ describe('VerificationCodeForm', () => {
     const onSuccess = jest.fn();
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers http={coreStart.http}>
+      <Providers services={coreStart} theme$={theme$}>
         <VerificationCodeForm onSuccess={onSuccess} />
       </Providers>
     );
 
     fireEvent.click(await findByRole('button', { name: 'Verify', hidden: true }));
 
-    await findAllByText(/Enter a verification code/i);
+    await findAllByText(/Enter the verification code from the Kibana server/i);
 
     fireEvent.input(await findByLabelText('Digit 1'), {
       target: { value: '1' },

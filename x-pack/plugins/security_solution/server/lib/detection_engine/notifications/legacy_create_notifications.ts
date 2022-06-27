@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { SanitizedAlert } from '../../../../../alerting/common';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
 import { CreateNotificationParams, LegacyRuleNotificationAlertTypeParams } from './legacy_types';
-// eslint-disable-next-line no-restricted-imports
-import { legacyAddTags } from './legacy_add_tags';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -22,11 +20,11 @@ export const legacyCreateNotifications = async ({
   ruleAlertId,
   interval,
   name,
-}: CreateNotificationParams): Promise<SanitizedAlert<LegacyRuleNotificationAlertTypeParams>> =>
+}: CreateNotificationParams): Promise<SanitizedRule<LegacyRuleNotificationAlertTypeParams>> =>
   rulesClient.create<LegacyRuleNotificationAlertTypeParams>({
     data: {
       name,
-      tags: legacyAddTags([], ruleAlertId),
+      tags: [],
       alertTypeId: LEGACY_NOTIFICATIONS_ID,
       consumer: SERVER_APP_ID,
       params: {

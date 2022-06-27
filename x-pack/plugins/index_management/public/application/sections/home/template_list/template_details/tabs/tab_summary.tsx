@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -209,7 +209,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <EuiCodeBlock lang="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
+              <EuiCodeBlock language="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
             </EuiDescriptionListDescription>
           </>
         )}

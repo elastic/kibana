@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
-import { unremovablePackages, installationStatuses } from '../../../../common';
+import { installationStatuses, KibanaSavedObjectType } from '../../../../common';
 import { KibanaAssetType } from '../../../types';
 import type { AssetType, Installable, Installation } from '../../../types';
 
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
+export type { SearchParams } from './get';
 export {
   getCategories,
   getFile,
@@ -21,21 +22,13 @@ export {
   getPackageInfo,
   getPackages,
   getLimitedPackages,
-  SearchParams,
 } from './get';
 
-export {
-  BulkInstallResponse,
-  IBulkInstallPackageError,
-  handleInstallPackageFailure,
-  installPackage,
-  ensureInstalledPackage,
-} from './install';
-export { removeInstallation } from './remove';
+export { getBundledPackages } from './bundled_packages';
 
-export function isUnremovablePackage(value: string): boolean {
-  return unremovablePackages.includes(value);
-}
+export type { BulkInstallResponse, IBulkInstallPackageError } from './install';
+export { handleInstallPackageFailure, installPackage, ensureInstalledPackage } from './install';
+export { removeInstallation } from './remove';
 
 export class PackageNotInstalledError extends Error {
   constructor(pkgkey: string) {
@@ -45,7 +38,7 @@ export class PackageNotInstalledError extends Error {
 
 // only Kibana Assets use Saved Objects at this point
 export const savedObjectTypes: AssetType[] = Object.values(KibanaAssetType);
-
+export const kibanaSavedObjectTypes: KibanaSavedObjectType[] = Object.values(KibanaSavedObjectType);
 export function createInstallableFrom<T>(
   from: T,
   savedObject?: SavedObject<Installation>
@@ -53,7 +46,7 @@ export function createInstallableFrom<T>(
   return savedObject
     ? {
         ...from,
-        status: installationStatuses.Installed,
+        status: savedObject.attributes.install_status,
         savedObject,
       }
     : {

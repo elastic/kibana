@@ -12,6 +12,7 @@ import { useValues } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '..';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { CursorIcon } from '../../../icons';
 
@@ -25,6 +26,7 @@ import {
 import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
+import { SuggestedCurationsCallout } from '../../engine_overview/components/suggested_curations_callout';
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSection, AnalyticsTable, RecentQueriesTable } from '../components';
 import {
@@ -38,7 +40,6 @@ import {
   TOP_QUERIES_NO_CLICKS,
   RECENT_QUERIES,
 } from '../constants';
-import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../index';
 
 import './analytics.scss';
 
@@ -60,6 +61,7 @@ export const Analytics: React.FC = () => {
 
   return (
     <AnalyticsLayout isAnalyticsView title={ANALYTICS_TITLE}>
+      <SuggestedCurationsCallout />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={1}>
           <AnalyticsCards

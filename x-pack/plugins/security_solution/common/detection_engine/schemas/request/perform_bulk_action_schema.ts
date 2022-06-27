@@ -6,13 +6,35 @@
  */
 
 import * as t from 'io-ts';
-import { bulkAction, queryOrUndefined } from '../common/schemas';
+import { NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
+import { BulkAction, queryOrUndefined, bulkActionEditPayload } from '../common/schemas';
 
-export const performBulkActionSchema = t.exact(
-  t.type({
-    query: queryOrUndefined,
-    action: bulkAction,
-  })
-);
+export const performBulkActionSchema = t.intersection([
+  t.exact(
+    t.type({
+      query: queryOrUndefined,
+    })
+  ),
+  t.exact(t.partial({ ids: NonEmptyArray(t.string) })),
+  t.union([
+    t.exact(
+      t.type({
+        action: t.union([
+          t.literal(BulkAction.delete),
+          t.literal(BulkAction.disable),
+          t.literal(BulkAction.duplicate),
+          t.literal(BulkAction.enable),
+          t.literal(BulkAction.export),
+        ]),
+      })
+    ),
+    t.exact(
+      t.type({
+        action: t.literal(BulkAction.edit),
+        [BulkAction.edit]: NonEmptyArray(bulkActionEditPayload),
+      })
+    ),
+  ]),
+]);
 
 export type PerformBulkActionSchema = t.TypeOf<typeof performBulkActionSchema>;

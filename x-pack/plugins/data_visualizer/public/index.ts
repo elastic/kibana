@@ -11,11 +11,15 @@ export function plugin() {
   return new DataVisualizerPlugin();
 }
 
-export { DataVisualizerPluginStart } from './plugin';
+export type { DataVisualizerPluginStart } from './plugin';
 
 export type {
   FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
   IndexDataVisualizerViewProps,
 } from './application';
-export type { ResultLink } from './application/common/components/results_links';
+export type {
+  GetAdditionalLinksParams,
+  ResultLink,
+  GetAdditionalLinks,
+} from './application/common/components/results_links';

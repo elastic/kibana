@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { AggGroupNames } from '../../../data/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../visualizations/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { TableVisParams, VIS_TYPE_TABLE } from '../common';
 import { TableOptions } from './components/table_vis_options_lazy';
 import { toExpressionAst } from './to_ast';
@@ -35,9 +35,11 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
       showToolbar: false,
       totalFunc: 'sum',
       percentageCol: '',
+      autoFitRowToContent: false,
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: TableOptions,
     schemas: [
       {
@@ -46,7 +48,13 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
         title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.metricTitle', {
           defaultMessage: 'Metric',
         }),
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         aggSettings: {
           top_hits: {
             allowStrings: true,
@@ -61,7 +69,14 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
         title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
           defaultMessage: 'Split rows',
         }),
-        aggFilter: ['!filter'],
+        aggFilter: [
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!multi_terms',
+          '!significant_text',
+          '!rare_terms',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -71,11 +86,20 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!filter'],
+        aggFilter: [
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!multi_terms',
+          '!significant_text',
+          '!rare_terms',
+        ],
       },
     ],
   },
+  fetchDatatable: true,
   toExpressionAst,
+  hasPartialRows: (vis) => vis.params.showPartialRows,
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
   requiresSearch: true,
 };

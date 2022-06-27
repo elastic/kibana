@@ -26,6 +26,20 @@
 
 import './index.scss';
 
+import type {
+  InjectedMetadataSetup,
+  InjectedMetadataStart,
+} from '@kbn/core-injected-metadata-browser';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+
+import type {
+  FatalErrorsSetup,
+  FatalErrorsStart,
+  FatalErrorInfo,
+} from '@kbn/core-fatal-errors-browser';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -46,24 +60,17 @@ import {
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
   NavType,
+  ChromeHelpMenuActions,
 } from './chrome';
-import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
-import { I18nStart } from './i18n';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
-import {
-  Plugin,
-  AsyncPlugin,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginOpaqueId,
-} from './plugins';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
+import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
 
 export type {
   PackageInfo,
@@ -71,9 +78,25 @@ export type {
   IExternalUrlPolicy,
   DomainDeprecationDetails,
 } from '../server/types';
-export type { CoreContext, CoreSystem } from './core_system';
+export type { CoreContext } from '@kbn/core-base-browser-internal';
+export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
+
+export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+export type {
+  AnalyticsClient,
+  Event,
+  EventContext,
+  EventType,
+  EventTypeOpts,
+  IShipper,
+  ShipperClassConstructor,
+  OptInConfig,
+  ContextProviderOpts,
+  TelemetryCounter,
+} from '@kbn/analytics-client';
+export { TelemetryCounterType } from '@kbn/analytics-client';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -95,6 +118,7 @@ export type {
   PublicAppInfo,
   PublicAppDeepLinkInfo,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
 } from './application';
 
 export { SimpleSavedObject } from './saved_objects';
@@ -122,7 +146,6 @@ export type {
   SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
-  SavedObjectsClient,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -157,6 +180,7 @@ export type {
   IAnonymousPaths,
   IExternalUrl,
   IHttpInterceptController,
+  ResponseErrorBody,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
 } from './http';
@@ -184,13 +208,19 @@ export type {
   ErrorToastOptions,
 } from './notifications';
 
+export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
+
 export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
 
-export type { KibanaExecutionContext } from './execution_context';
+export type {
+  KibanaExecutionContext,
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from './execution_context';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
@@ -207,6 +237,8 @@ export type { KibanaExecutionContext } from './execution_context';
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link AnalyticsServiceSetup} */
+  analytics: AnalyticsServiceSetup;
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /** {@link FatalErrorsSetup} */
@@ -217,15 +249,12 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   notifications: NotificationsSetup;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
+  /** {@link ExecutionContextSetup} */
+  executionContext: ExecutionContextSetup;
+  /** {@link InjectedMetadataSetup} */
+  injectedMetadata: InjectedMetadataSetup;
+  /** {@link ThemeServiceSetup} */
+  theme: ThemeServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
@@ -252,12 +281,16 @@ export type StartServicesAccessor<
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreStart {
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
   /** {@link ApplicationStart} */
   application: ApplicationStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
   /** {@link DocLinksStart} */
   docLinks: DocLinksStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
   /** {@link HttpStart} */
   http: HttpStart;
   /** {@link SavedObjectsStart} */
@@ -274,15 +307,10 @@ export interface CoreStart {
   fatalErrors: FatalErrorsStart;
   /** {@link DeprecationsServiceStart} */
   deprecations: DeprecationsServiceStart;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
+  /** {@link ThemeServiceStart} */
+  theme: ThemeServiceStart;
+  /** {@link InjectedMetadataStart} */
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export type {
@@ -290,6 +318,7 @@ export type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeHelpMenuActions,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
@@ -315,7 +344,6 @@ export type {
   NotificationsSetup,
   NotificationsStart,
   Plugin,
-  AsyncPlugin,
   PluginInitializer,
   PluginInitializerContext,
   SavedObjectsStart,

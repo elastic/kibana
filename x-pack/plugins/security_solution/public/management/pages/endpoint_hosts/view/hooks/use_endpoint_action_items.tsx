@@ -6,15 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { APP_ID } from '../../../../../../common/constants';
-import { pagePathGetters } from '../../../../../../../fleet/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { useWithShowEndpointResponder } from '../../../../hooks';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
 import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
-import { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_rotuer';
+import { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
@@ -30,6 +32,10 @@ export const useEndpointActionItems = (
   const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
+  const showEndpointResponseActionsConsole = useWithShowEndpointResponder();
+  const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsConsoleEnabled'
+  );
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -65,9 +71,9 @@ export const useEndpointActionItems = (
         // Un-isolate is always available to users regardless of license level
         isolationActions.push({
           'data-test-subj': 'unIsolateLink',
-          icon: 'logoSecurity',
+          icon: 'lockOpen',
           key: 'unIsolateHost',
-          navigateAppId: APP_ID,
+          navigateAppId: APP_UI_ID,
           navigateOptions: {
             path: endpointUnIsolatePath,
           },
@@ -83,9 +89,9 @@ export const useEndpointActionItems = (
         // For Platinum++ licenses, users also have ability to isolate
         isolationActions.push({
           'data-test-subj': 'isolateLink',
-          icon: 'logoSecurity',
+          icon: 'lock',
           key: 'isolateHost',
-          navigateAppId: APP_ID,
+          navigateAppId: APP_UI_ID,
           navigateOptions: {
             path: endpointIsolatePath,
           },
@@ -101,11 +107,30 @@ export const useEndpointActionItems = (
 
       return [
         ...isolationActions,
+        ...(isResponseActionsConsoleEnabled
+          ? [
+              {
+                'data-test-subj': 'console',
+                icon: 'console',
+                key: 'consoleLink',
+                onClick: (ev: React.MouseEvent) => {
+                  ev.preventDefault();
+                  showEndpointResponseActionsConsole(endpointMetadata);
+                },
+                children: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.actions.console"
+                    defaultMessage="Launch responder"
+                  />
+                ),
+              },
+            ]
+          : []),
         {
           'data-test-subj': 'hostLink',
           icon: 'logoSecurity',
           key: 'hostDetailsLink',
-          navigateAppId: APP_ID,
+          navigateAppId: APP_UI_ID,
           navigateOptions: { path: `/hosts/${endpointHostName}` },
           href: getAppUrl({ path: `/hosts/${endpointHostName}` }),
           children: (
@@ -192,5 +217,13 @@ export const useEndpointActionItems = (
     }
 
     return [];
-  }, [allCurrentUrlParams, endpointMetadata, fleetAgentPolicies, getAppUrl, isPlatinumPlus]);
+  }, [
+    allCurrentUrlParams,
+    endpointMetadata,
+    fleetAgentPolicies,
+    getAppUrl,
+    isPlatinumPlus,
+    isResponseActionsConsoleEnabled,
+    showEndpointResponseActionsConsole,
+  ]);
 };

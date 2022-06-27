@@ -8,4 +8,6 @@
 
 export { createHistory, History } from './history';
 export { createStorage, Storage, StorageKeys } from './storage';
-export { createSettings, Settings, DevToolsSettings, DEFAULT_SETTINGS } from './settings';
+export type { DevToolsSettings } from './settings';
+export { createSettings, Settings, DEFAULT_SETTINGS } from './settings';
+export { AutocompleteInfo, getAutocompleteInfo, setAutocompleteInfo } from './autocomplete';

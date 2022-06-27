@@ -31,23 +31,24 @@ import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import { EditorFrame, EditorFrameProps } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from 'src/core/public/mocks';
-import { fromExpression } from '@kbn/interpreter/common';
+import { coreMock } from '@kbn/core/public/mocks';
 import {
   createMockVisualization,
   createMockDatasource,
   DatasourceMock,
   createExpressionRendererMock,
+  mockStoreDeps,
 } from '../../mocks';
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
-import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { DragDrop } from '../../drag_drop';
-import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
-import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
-import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
+import { toExpression } from '@kbn/interpreter';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -144,22 +145,19 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      const lensStore = (
-        await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
-          preloadedState: {
-            activeDatasourceId: 'testDatasource',
-            datasourceStates: {
-              testDatasource: {
-                isLoading: true,
-                state: {
-                  internalState1: '',
-                },
+      const { lensStore } = await mountWithProvider(<EditorFrame {...props} />, {
+        preloadedState: {
+          activeDatasourceId: 'testDatasource',
+          datasourceStates: {
+            testDatasource: {
+              isLoading: true,
+              state: {
+                internalState1: '',
               },
             },
           },
-        })
-      ).lensStore;
+        },
+      });
       expect(mockDatasource.renderDataPanel).not.toHaveBeenCalled();
       lensStore.dispatch(
         setState({
@@ -196,7 +194,6 @@ describe('editor_frame', () => {
       };
 
       await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
         preloadedState: {
           visualization: { activeId: 'testVis', state: initialState },
         },
@@ -212,10 +209,20 @@ describe('editor_frame', () => {
     it('should render the resulting expression using the expression renderer', async () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
 
-      const props = {
+      const props: EditorFrameProps = {
         ...getDefaultProps(),
         visualizationMap: {
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          testVis: {
+            ...mockVisualization,
+            toExpression: (state, datasourceLayers, attrs, datasourceExpressionsByLayers = {}) =>
+              toExpression({
+                type: 'expression',
+                chain: [
+                  ...(datasourceExpressionsByLayers.first?.chain ?? []),
+                  { type: 'function', function: 'testVis', arguments: {} },
+                ],
+              }),
+          },
         },
         datasourceMap: {
           testDatasource: {
@@ -228,7 +235,6 @@ describe('editor_frame', () => {
       };
       instance = (
         await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
           preloadedState: {
             visualization: { activeId: 'testVis', state: {} },
             datasourceStates: {
@@ -246,136 +252,8 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-        "kibana
-        | lens_merge_tables layerIds=\\"first\\" tables={datasource}
+        "datasource
         | testVis"
-      `);
-    });
-
-    it('should render individual expression for each given layer', async () => {
-      mockDatasource.toExpression.mockReturnValue('datasource');
-      mockDatasource2.toExpression.mockImplementation((_state, layerId) => `datasource_${layerId}`);
-      mockDatasource.initialize.mockImplementation((initialState) => Promise.resolve(initialState));
-      mockDatasource.getLayers.mockReturnValue(['first', 'second']);
-      mockDatasource2.initialize.mockImplementation((initialState) =>
-        Promise.resolve(initialState)
-      );
-      mockDatasource2.getLayers.mockReturnValue(['third']);
-
-      const props = {
-        ...getDefaultProps(),
-        visualizationMap: {
-          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
-        },
-        datasourceMap: {
-          testDatasource: {
-            ...mockDatasource,
-            toExpression: () => 'datasource',
-          },
-          testDatasource2: {
-            ...mockDatasource2,
-            toExpression: () => 'datasource_second',
-          },
-        },
-
-        ExpressionRenderer: expressionRendererMock,
-      };
-
-      instance = (
-        await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
-          preloadedState: {
-            visualization: { activeId: 'testVis', state: {} },
-            datasourceStates: {
-              testDatasource: {
-                isLoading: false,
-                state: {
-                  internalState1: '',
-                },
-              },
-              testDatasource2: {
-                isLoading: false,
-                state: {
-                  internalState1: '',
-                },
-              },
-            },
-          },
-        })
-      ).instance;
-
-      instance.update();
-
-      expect(
-        fromExpression(instance.find(expressionRendererMock).prop('expression') as string)
-      ).toEqual({
-        type: 'expression',
-        chain: expect.arrayContaining([
-          expect.objectContaining({
-            arguments: expect.objectContaining({ layerIds: ['first', 'second', 'third'] }),
-          }),
-        ]),
-      });
-      expect(fromExpression(instance.find(expressionRendererMock).prop('expression') as string))
-        .toMatchInlineSnapshot(`
-        Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {},
-              "function": "kibana",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "layerIds": Array [
-                  "first",
-                  "second",
-                  "third",
-                ],
-                "tables": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {},
-                        "function": "datasource",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {},
-                        "function": "datasource",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {},
-                        "function": "datasource_second",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
-                ],
-              },
-              "function": "lens_merge_tables",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {},
-              "function": "testVis",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        }
       `);
     });
   });
@@ -395,7 +273,6 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
         preloadedState: {
           activeDatasourceId: 'testDatasource',
           visualization: { activeId: mockVisualization.id, state: {} },
@@ -414,8 +291,7 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -437,7 +313,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data });
+      await mountWithProvider(<EditorFrame {...props} />);
 
       const setDatasourceState = (mockDatasource.renderDataPanel as jest.Mock).mock.calls[0][1]
         .setState;
@@ -474,7 +350,6 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
         preloadedState: { visualization: { activeId: mockVisualization.id, state: {} } },
       });
 
@@ -482,6 +357,9 @@ describe('editor_frame', () => {
         datasourceId: 'testDatasource',
         getOperationForColumnId: jest.fn(),
         getTableSpec: jest.fn(),
+        getVisualDefaults: jest.fn(),
+        getSourceId: jest.fn(),
+        getFilters: jest.fn(),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 
@@ -491,8 +369,7 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -523,7 +400,6 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
       await mountWithProvider(<EditorFrame {...props} />, {
-        data: props.plugins.data,
         preloadedState: {
           datasourceStates: {
             testDatasource: {
@@ -560,6 +436,7 @@ describe('editor_frame', () => {
     }
 
     beforeEach(async () => {
+      mockVisualization2.initialize.mockReturnValue({ initial: true });
       mockDatasource.getLayers.mockReturnValue(['first', 'second']);
       mockDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
         {
@@ -574,21 +451,27 @@ describe('editor_frame', () => {
         },
       ]);
 
+      const visualizationMap = {
+        testVis: mockVisualization,
+        testVis2: mockVisualization2,
+      };
+
+      const datasourceMap = {
+        testDatasource: mockDatasource,
+        testDatasource2: mockDatasource2,
+      };
+
       const props = {
         ...getDefaultProps(),
-        visualizationMap: {
-          testVis: mockVisualization,
-          testVis2: mockVisualization2,
-        },
-        datasourceMap: {
-          testDatasource: mockDatasource,
-          testDatasource2: mockDatasource2,
-        },
-
+        visualizationMap,
+        datasourceMap,
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
-        .instance;
+      instance = (
+        await mountWithProvider(<EditorFrame {...props} />, {
+          storeDeps: mockStoreDeps({ datasourceMap, visualizationMap }),
+        })
+      ).instance;
 
       // necessary to flush elements to dom synchronously
       instance.update();
@@ -692,7 +575,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data });
+      await mountWithProvider(<EditorFrame {...props} />);
 
       expect(mockDatasource.getDatasourceSuggestionsFromCurrentState).toHaveBeenCalled();
       expect(mockDatasource2.getDatasourceSuggestionsFromCurrentState).not.toHaveBeenCalled();
@@ -725,7 +608,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data });
+      await mountWithProvider(<EditorFrame {...props} />);
 
       expect(mockVisualization.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
@@ -793,8 +676,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
-        .instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
 
       expect(
         instance
@@ -840,15 +722,13 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
-        .instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
 
       act(() => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
-      // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
@@ -898,8 +778,7 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      instance = (await mountWithProvider(<EditorFrame {...props} />, { data: props.plugins.data }))
-        .instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
 
       act(() => {
         instance.find('[data-test-subj="lnsWorkspace"]').last().simulate('drop');
@@ -929,7 +808,7 @@ describe('editor_frame', () => {
               },
               {
                 score: 0.6,
-                state: {},
+                state: suggestionVisState,
                 title: 'Suggestion2',
                 previewIcon: 'empty',
               },
@@ -940,7 +819,7 @@ describe('editor_frame', () => {
             getSuggestions: () => [
               {
                 score: 0.8,
-                state: suggestionVisState,
+                state: {},
                 title: 'Suggestion3',
                 previewIcon: 'empty',
               },
@@ -968,7 +847,6 @@ describe('editor_frame', () => {
       } as EditorFrameProps;
       instance = (
         await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
           preloadedState: {
             datasourceStates: {
               testDatasource: {
@@ -982,6 +860,8 @@ describe('editor_frame', () => {
         })
       ).instance;
 
+      instance.update();
+
       act(() => {
         instance.find('[data-test-subj="mockVisA"]').find(DragDrop).prop('onDrop')!(
           {
@@ -994,7 +874,7 @@ describe('editor_frame', () => {
         );
       });
 
-      expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
         })
@@ -1037,20 +917,8 @@ describe('editor_frame', () => {
         visualizationMap: {
           testVis: {
             ...mockVisualization,
-            getSuggestions: () => [
-              {
-                score: 0.2,
-                state: {},
-                title: 'Suggestion1',
-                previewIcon: 'empty',
-              },
-              {
-                score: 0.6,
-                state: {},
-                title: 'Suggestion2',
-                previewIcon: 'empty',
-              },
-            ],
+            // do not return suggestions for the currently active vis, otherwise it will be chosen
+            getSuggestions: () => [],
           },
           testVis2: {
             ...mockVisualization2,
@@ -1080,11 +948,8 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       } as EditorFrameProps;
 
-      instance = (
-        await mountWithProvider(<EditorFrame {...props} />, {
-          data: props.plugins.data,
-        })
-      ).instance;
+      instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+      instance.update();
 
       act(() => {
         instance.find(DragDrop).filter('[dataTestSubj="lnsWorkspace"]').prop('onDrop')!(

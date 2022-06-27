@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export {
-  extractQueryParams,
-  indices,
-  SectionLoading,
-} from '../../../../src/plugins/es_ui_shared/public';
+export { extractQueryParams, indices, SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+
+export { KibanaThemeProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';

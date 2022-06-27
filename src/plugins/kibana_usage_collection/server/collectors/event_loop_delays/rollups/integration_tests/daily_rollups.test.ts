@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { Logger, ISavedObjectsRepository } from '../../../../../../../core/server';
+import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import {
   createTestServers,
   TestElasticsearchUtils,
   TestKibanaUtils,
   createRootWithCorePlugins,
-} from '../../../../../../../core/test_helpers/kbn_server';
+} from '@kbn/core/test_helpers/kbn_server';
 import { rollDailyData } from '../daily';
-import { metricsServiceMock } from '../../../../../../../core/server/mocks';
+import { metricsServiceMock } from '@kbn/core/server/mocks';
 
 import {
   SAVED_OBJECTS_DAILY_TYPE,
@@ -56,7 +56,8 @@ const outdatedRawEventLoopDelaysDaily = [
   createRawObject(moment().subtract(7, 'days')),
 ];
 
-describe('daily rollups integration test', () => {
+// FLAKY https://github.com/elastic/kibana/issues/111821
+describe.skip('daily rollups integration test', () => {
   let esServer: TestElasticsearchUtils;
   let root: TestKibanaUtils['root'];
   let internalRepository: ISavedObjectsRepository;

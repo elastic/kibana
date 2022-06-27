@@ -7,14 +7,14 @@
  */
 
 import { mapRange } from './map_range';
-import { FilterMeta, RangeFilter, Filter } from '../../../../../common';
+import { FilterMeta, RangeFilter, Filter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   describe('mapRange()', () => {
     test('should return the key and value for matching filters with gt/lt', async () => {
       const filter = {
         meta: { index: 'logstash-*' } as FilterMeta,
-        range: { bytes: { lt: 2048, gt: 1024 } },
+        query: { range: { bytes: { lt: 2048, gt: 1024 } } },
       } as RangeFilter;
       const result = mapRange(filter);
 

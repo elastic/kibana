@@ -4,42 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { TIMESTAMP } from '@kbn/rule-data-utils';
+
 import { get } from 'lodash/fp';
 import set from 'set-value';
-import {
-  ThresholdNormalized,
-  TimestampOverrideOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Logger, SavedObject } from '../../../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BaseHit } from '../../../../../common/detection_engine/types';
 import { TermAggregationBucket } from '../../../types';
-import { GenericBulkCreateResponse } from '../bulk_create_factory';
-import {
-  calculateThresholdSignalUuid,
-  getThresholdAggregationParts,
-  getThresholdTermsHash,
-} from '../utils';
+import { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
+import { calculateThresholdSignalUuid, getThresholdAggregationParts } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type {
   MultiAggBucket,
   SignalSource,
   SignalSearchResponse,
   ThresholdSignalHistory,
-  AlertAttributes,
   BulkCreate,
   WrapHits,
 } from '../types';
-import { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 
 interface BulkCreateThresholdSignalsParams {
   someResult: SignalSearchResponse;
-  ruleSO: SavedObject<AlertAttributes<ThresholdRuleParams>>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  completeRule: CompleteRule<ThresholdRuleParams>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
   filter: unknown;
@@ -56,15 +52,14 @@ const getTransformedHits = (
   inputIndex: string,
   startedAt: Date,
   from: Date,
-  logger: Logger,
   threshold: ThresholdNormalized,
-  ruleId: string,
-  filter: unknown,
-  timestampOverride: TimestampOverrideOrUndefined,
-  signalHistory: ThresholdSignalHistory
+  ruleId: string
 ) => {
+  if (results.aggregations == null) {
+    return [];
+  }
   const aggParts = threshold.field.length
-    ? results.aggregations && getThresholdAggregationParts(results.aggregations)
+    ? getThresholdAggregationParts(results.aggregations)
     : {
         field: null,
         index: 0,
@@ -96,7 +91,8 @@ const getTransformedHits = (
               ...val.terms,
             ].filter((term) => term.field != null),
             cardinality: val.cardinality,
-            topThresholdHits: val.topThresholdHits,
+            maxTimestamp: val.maxTimestamp,
+            minTimestamp: val.minTimestamp,
             docCount: val.docCount,
           };
           acc.push(el as MultiAggBucket);
@@ -113,11 +109,13 @@ const getTransformedHits = (
             ? [
                 {
                   field: threshold.cardinality[0].field,
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   value: bucket.cardinality_count!.value,
                 },
               ]
             : undefined,
-          topThresholdHits: bucket.top_threshold_hits,
+          maxTimestamp: bucket.max_timestamp.value_as_string,
+          minTimestamp: bucket.min_timestamp.value_as_string,
           docCount: bucket.doc_count,
         };
         acc.push(el as MultiAggBucket);
@@ -128,32 +126,16 @@ const getTransformedHits = (
   };
 
   return getCombinations(
-    (results.aggregations![aggParts.name] as { buckets: TermAggregationBucket[] }).buckets,
+    (results.aggregations[aggParts.name] as { buckets: TermAggregationBucket[] }).buckets,
     0,
     aggParts.field
   ).reduce((acc: Array<BaseHit<SignalSource>>, bucket) => {
-    const hit = bucket.topThresholdHits?.hits.hits[0];
-    if (hit == null) {
-      return acc;
-    }
-
-    const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
-    if (timestampArray == null) {
-      return acc;
-    }
-
-    const timestamp = timestampArray[0];
-    if (typeof timestamp !== 'string') {
-      return acc;
-    }
-
-    const termsHash = getThresholdTermsHash(bucket.terms);
-    const signalHit = signalHistory[termsHash];
-
     const source = {
-      '@timestamp': timestamp,
+      [TIMESTAMP]: bucket.maxTimestamp,
       ...bucket.terms.reduce<object>((termAcc, term) => {
-        if (!term.field.startsWith('signal.')) {
+        if (!term.field.startsWith('signal.') && !term.field.startsWith('kibana.alert.')) {
+          // We don't want to overwrite `signal.*` fields.
+          // See: https://github.com/elastic/kibana/issues/83218
           return {
             ...termAcc,
             [term.field]: term.value,
@@ -169,8 +151,7 @@ const getTransformedHits = (
         // threshold set in the timeline search. The upper bound will always be
         // the `original_time` of the signal (the timestamp of the latest event
         // in the set).
-        from:
-          signalHit?.lastSignalTimestamp != null ? new Date(signalHit!.lastSignalTimestamp) : from,
+        from: new Date(bucket.minTimestamp) ?? from,
       },
     };
 
@@ -197,24 +178,16 @@ export const transformThresholdResultsToEcs = (
   inputIndex: string,
   startedAt: Date,
   from: Date,
-  filter: unknown,
-  logger: Logger,
   threshold: ThresholdNormalized,
-  ruleId: string,
-  timestampOverride: TimestampOverrideOrUndefined,
-  signalHistory: ThresholdSignalHistory
+  ruleId: string
 ): SignalSearchResponse => {
   const transformedHits = getTransformedHits(
     results,
     inputIndex,
     startedAt,
     from,
-    logger,
     threshold,
-    ruleId,
-    filter,
-    timestampOverride,
-    signalHistory
+    ruleId
   );
   const thresholdResults = {
     ...results,
@@ -233,20 +206,16 @@ export const transformThresholdResultsToEcs = (
 
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
-): Promise<GenericBulkCreateResponse<{}>> => {
-  const ruleParams = params.ruleSO.attributes.params;
+): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
+  const ruleParams = params.completeRule.ruleParams;
   const thresholdResults = params.someResult;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.from,
-    params.filter,
-    params.logger,
     ruleParams.threshold,
-    ruleParams.ruleId,
-    ruleParams.timestampOverride,
-    params.signalHistory
+    ruleParams.ruleId
   );
 
   return params.bulkCreate(

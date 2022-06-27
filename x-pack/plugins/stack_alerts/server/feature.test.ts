@@ -6,9 +6,9 @@
  */
 
 import { AlertingBuiltinsPlugin } from './plugin';
-import { coreMock } from '../../../../src/core/server/mocks';
-import { alertsMock } from '../../alerting/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 describe('Stack Alerts Feature Privileges', () => {
@@ -32,10 +32,15 @@ describe('Stack Alerts Feature Privileges', () => {
       BUILT_IN_ALERTS_FEATURE.privileges?.all?.alerting?.rule?.all ?? [];
     const typesInFeaturePrivilegeRead =
       BUILT_IN_ALERTS_FEATURE.privileges?.read?.alerting?.rule?.read ?? [];
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(typesInFeaturePrivilege.length);
-    expect(alertingSetup.registerType.mock.calls.length).toEqual(typesInFeaturePrivilegeAll.length);
+    // transform alerting rule is initialized during the transform plugin setup
     expect(alertingSetup.registerType.mock.calls.length).toEqual(
-      typesInFeaturePrivilegeRead.length
+      typesInFeaturePrivilege.length - 1
+    );
+    expect(alertingSetup.registerType.mock.calls.length).toEqual(
+      typesInFeaturePrivilegeAll.length - 1
+    );
+    expect(alertingSetup.registerType.mock.calls.length).toEqual(
+      typesInFeaturePrivilegeRead.length - 1
     );
 
     alertingSetup.registerType.mock.calls.forEach((call) => {

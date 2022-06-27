@@ -6,14 +6,20 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/dom';
-import { render, mockAppIndexPattern } from './rtl_helpers';
+import { screen } from '@testing-library/dom';
+import { render, mockAppDataView } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
-import * as obsvInd from './utils/observability_index_patterns';
-import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
+import * as obsvDataViews from '../../../utils/observability_data_views/observability_data_views';
+import * as pluginHook from '../../../hooks/use_plugin_context';
+import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
+jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
+  appMountParameters: {
+    setHeaderActionMenu: jest.fn(),
+  },
+} as any);
 describe('ExploratoryView', () => {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   beforeEach(() => {
     const indexPattern = createStubIndexPattern({
@@ -34,42 +40,36 @@ describe('ExploratoryView', () => {
       },
     });
 
-    jest.spyOn(obsvInd, 'ObservabilityIndexPatterns').mockReturnValue({
-      getIndexPattern: jest.fn().mockReturnValue(indexPattern),
+    jest.spyOn(obsvDataViews, 'ObservabilityDataViews').mockReturnValue({
+      getDataView: jest.fn().mockReturnValue(indexPattern),
     } as any);
   });
 
   it('renders exploratory view', async () => {
-    render(<ExploratoryView />);
+    render(<ExploratoryView />, { initSeries: { data: [] } });
 
-    expect(await screen.findByText(/open in lens/i)).toBeInTheDocument();
-    expect(
-      await screen.findByRole('heading', { name: /Performance Distribution/i })
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/No series found. Please add a series./i)).toBeInTheDocument();
+    expect(await screen.findByText(/Hide chart/i)).toBeInTheDocument();
   });
 
   it('renders lens component when there is series', async () => {
-    const initSeries = {
-      data: {
-        'ux-series': {
-          isNew: true,
-          dataType: 'ux' as const,
-          reportType: 'data-distribution' as const,
-          breakdown: 'user_agent .name',
-          reportDefinitions: { 'service.name': ['elastic-co'] },
-          time: { from: 'now-15m', to: 'now' },
-        },
-      },
-    };
+    render(<ExploratoryView />);
 
-    render(<ExploratoryView />, { initSeries });
-
-    expect(await screen.findByText(/open in lens/i)).toBeInTheDocument();
     expect((await screen.findAllByText('Performance distribution'))[0]).toBeInTheDocument();
     expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
 
-    await waitFor(() => {
-      screen.getByRole('table', { name: /this table contains 1 rows\./i });
-    });
+    expect(screen.getByTestId('exploratoryViewSeriesPanel0')).toBeInTheDocument();
+  });
+
+  it('shows/hides the chart', async () => {
+    render(<ExploratoryView />);
+
+    const toggleButton = await screen.findByText('Hide chart');
+    expect(toggleButton).toBeInTheDocument();
+
+    toggleButton.click();
+
+    expect(toggleButton.textContent).toBe('Show chart');
+    expect(screen.queryByText('Refresh')).toBeNull();
   });
 });

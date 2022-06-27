@@ -28,6 +28,7 @@ const actionConnector = {
   actionTypeId: '.servicenow',
   name: 'ServiceNow ITSM',
   isPreconfigured: false,
+  isDeprecated: false,
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },
@@ -160,6 +161,28 @@ describe('useGetChoices', () => {
     expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
       text: 'An error occurred',
       title: 'Unable to get choices',
+    });
+  });
+
+  it('returns an empty array if the response is not an array', async () => {
+    getChoicesMock.mockResolvedValue({
+      status: 'ok',
+      data: {},
+    });
+
+    const { result } = renderHook<UseGetChoicesProps, UseGetChoices>(() =>
+      useGetChoices({
+        http: services.http,
+        actionConnector: undefined,
+        toastNotifications: services.notifications.toasts,
+        fields,
+        onSuccess,
+      })
+    );
+
+    expect(result.current).toEqual({
+      isLoading: false,
+      choices: [],
     });
   });
 });

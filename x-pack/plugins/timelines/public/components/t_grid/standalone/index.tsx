@@ -4,14 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useDispatch } from 'react-redux';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Filter, Query } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { Direction, EntityType } from '../../../../common/search_strategy';
-import type { CoreStart } from '../../../../../../../src/core/public';
 import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 
 import type {
@@ -24,12 +28,6 @@ import type {
   BulkActionsProp,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import {
-  esQuery,
-  Filter,
-  Query,
-  DataPublicPluginStart,
-} from '../../../../../../../src/plugins/data/public';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { combineQueries, getCombinedFilterQuery } from '../helpers';
@@ -38,19 +36,19 @@ import type { State } from '../../../store/t_grid';
 import { useTimelineEvents } from '../../../container';
 import { StatefulBody } from '../body';
 import { LastUpdatedAt } from '../..';
-import {
-  SELECTOR_TIMELINE_GLOBAL_CONTAINER,
-  UpdatedFlexItem,
-  UpdatedFlexGroup,
-  FullWidthFlexGroup,
-} from '../styles';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
-import { AddToCaseAction } from '../../actions/timeline/cases/add_to_case_action';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
 
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+`;
+
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
-const STANDALONE_ID = 'standalone-t-grid';
+export const STANDALONE_ID = 'standalone-t-grid';
 const EMPTY_DATA_PROVIDERS: DataProvider[] = [];
 
 const TitleText = styled.span`
@@ -78,21 +76,17 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 `;
 
 export interface TGridStandaloneProps {
-  appId: string;
-  casePermissions: {
-    crud: boolean;
-    read: boolean;
-  } | null;
-  afterCaseSelection?: Function;
   columns: ColumnHeaderOptions[];
+  dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
+  disabledCellActions: string[];
   end: string;
   entityType?: EntityType;
   loadingText: React.ReactNode;
   filters: Filter[];
   footerText: React.ReactNode;
-  filterStatus: AlertStatus;
+  filterStatus?: AlertStatus;
   hasAlertsCrudPermissions: ({
     ruleConsumer,
     ruleProducer,
@@ -102,11 +96,14 @@ export interface TGridStandaloneProps {
   }) => boolean;
   height?: number;
   indexNames: string[];
+  itemsPerPage?: number;
   itemsPerPageOptions: number[];
   query: Query;
   onRuleChange?: () => void;
+  onStateChange?: (state: State) => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  runtimeMappings: MappingRuntimeFields;
   setRefetch: (ref: () => void) => void;
   start: string;
   sort: SortColumnTimeline[];
@@ -116,15 +113,16 @@ export interface TGridStandaloneProps {
   bulkActions?: BulkActionsProp;
   data?: DataPublicPluginStart;
   unit?: (total: number) => React.ReactNode;
+  showCheckboxes?: boolean;
+  queryFields?: string[];
 }
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
-  afterCaseSelection,
-  appId,
-  casePermissions,
   columns,
+  dataViewId = null,
   defaultCellActions,
   deletedEventIds,
+  disabledCellActions,
   end,
   entityType = 'alerts',
   loadingText,
@@ -133,11 +131,13 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   filterStatus,
   hasAlertsCrudPermissions,
   indexNames,
+  itemsPerPage,
   itemsPerPageOptions,
   onRuleChange,
   query,
   renderCellValue,
   rowRenderers,
+  runtimeMappings,
   setRefetch,
   start,
   sort,
@@ -146,6 +146,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   trailingControlColumns,
   data,
   unit,
+  showCheckboxes = true,
+  bulkActions = {},
+  queryFields = [],
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -157,7 +160,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const {
     itemsPerPage: itemsPerPageStore,
     itemsPerPageOptions: itemsPerPageOptionsStore,
-    queryFields,
+    queryFields: queryFieldsFromState,
     sort: sortStore,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
@@ -171,7 +174,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const combinedQueries = useMemo(
     () =>
       combineQueries({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         dataProviders: EMPTY_DATA_PROVIDERS,
         indexPattern: indexPatterns,
         browserFields,
@@ -194,17 +197,18 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         (acc, c) => (c.linkField != null ? [...acc, c.id, c.linkField] : [...acc, c.id]),
         []
       ),
-      ...(queryFields ?? []),
+      ...(queryFieldsFromState ?? []),
     ],
-    [columnsHeader, queryFields]
+    [columnsHeader, queryFieldsFromState]
   );
 
   const sortField = useMemo(
     () =>
-      sortStore.map(({ columnId, columnType, sortDirection }) => ({
+      sortStore.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sortStore]
   );
@@ -213,14 +217,16 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     loading,
     { consumers, events, updatedAt, loadPage, pageInfo, refetch, totalCount = 0, inspect },
   ] = useTimelineEvents({
+    dataViewId,
     docValueFields: [],
     entityType,
     excludeEcsData: true,
     fields,
-    filterQuery: combinedQueries!.filterQuery,
+    filterQuery: combinedQueries?.filterQuery,
     id: STANDALONE_ID,
     indexNames,
     limit: itemsPerPageStore,
+    runtimeMappings,
     sort: sortField,
     startDate: start,
     endDate: end,
@@ -256,25 +262,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   );
   const hasAlerts = totalCountMinusDeleted > 0;
 
-  const activeCaseFlowId = useSelector((state: State) => tGridSelectors.activeCaseFlowId(state));
-  const selectedEvent = useMemo(() => {
-    const matchedEvent = events.find((event) => event.ecs._id === activeCaseFlowId);
-    if (matchedEvent) {
-      return matchedEvent;
-    } else {
-      return undefined;
-    }
-  }, [events, activeCaseFlowId]);
-
-  const addToCaseActionProps = useMemo(() => {
-    return {
-      event: selectedEvent,
-      casePermissions: casePermissions ?? null,
-      appId,
-      onClose: afterCaseSelection,
-    };
-  }, [appId, casePermissions, afterCaseSelection, selectedEvent]);
-
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
     [deletedEventIds, events]
@@ -283,7 +270,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   const filterQuery = useMemo(
     () =>
       getCombinedFilterQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         dataProviders: EMPTY_DATA_PROVIDERS,
         indexPattern: indexPatterns,
         browserFields,
@@ -311,9 +298,9 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
           end,
         },
         indexNames,
-        itemsPerPage: itemsPerPageStore,
+        itemsPerPage: itemsPerPage || itemsPerPageStore,
         itemsPerPageOptions,
-        showCheckboxes: true,
+        showCheckboxes,
       })
     );
     dispatch(
@@ -324,6 +311,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         sort,
         loadingText,
         unit,
+        queryFields,
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -377,6 +365,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       browserFields={browserFields}
                       data={nonDeletedEvents}
                       defaultCellActions={defaultCellActions}
+                      disabledCellActions={disabledCellActions}
                       filterQuery={filterQuery}
                       hasAlertsCrud={hasAlertsCrud}
                       hasAlertsCrudPermissions={hasAlertsCrudPermissions}
@@ -398,6 +387,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       unit={unit}
                       filterStatus={filterStatus}
                       trailingControlColumns={trailingControlColumns}
+                      showCheckboxes={showCheckboxes}
+                      bulkActions={bulkActions}
                     />
                   </ScrollableFlexItem>
                 </FullWidthFlexGroup>
@@ -405,7 +396,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
             </EventsContainerLoading>
           </TimelineContext.Provider>
         ) : null}
-        <AddToCaseAction {...addToCaseActionProps} disableAlerts />
       </AlertsTableWrapper>
     </InspectButtonContainer>
   );

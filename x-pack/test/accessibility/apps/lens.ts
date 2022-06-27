@@ -13,12 +13,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
+  const kibanaServer = getService('kibanaServer');
 
-  describe('Lens', () => {
+  describe('Lens Accessibility', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
+      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     after(async () => {
@@ -28,7 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.clickDeleteSelected();
       await PageObjects.common.clickConfirmOnModal();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+      );
     });
 
     it('lens', async () => {
@@ -114,8 +119,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('change chart type', async () => {
-      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.openChartSwitchPopover();
+      await PageObjects.lens.waitForSearchInputValue('line');
       await a11y.testAppSnapshot();
+      await testSubjects.click('lnsChartSwitchPopover_line');
     });
 
     it('change chart type via suggestions', async () => {
@@ -139,23 +146,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.createLayer();
 
       await PageObjects.lens.switchToVisualization('area');
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
 
-      await PageObjects.lens.configureDimension(
-        {
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'median',
-          field: 'bytes',
-        },
-        1
-      );
+      await PageObjects.lens.configureDimension({
+        dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'median',
+        field: 'bytes',
+      });
       await a11y.testAppSnapshot();
     });
 

@@ -5,13 +5,9 @@
  * 2.0.
  */
 
+import { Artifact, ArtifactsClientInterface, ListArtifactsProps } from '@kbn/fleet-plugin/server';
+import { ListResult } from '@kbn/fleet-plugin/common';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
-import {
-  Artifact,
-  ArtifactsClientInterface,
-  ListArtifactsProps,
-} from '../../../../../fleet/server';
-import { ListResult } from '../../../../../fleet/common';
 
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
@@ -37,6 +33,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
     return {
       type: idPieces[1],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       decodedSha256: idPieces.pop()!,
       identifier: idPieces.join('-'),
     };
@@ -74,7 +71,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
   async deleteArtifact(id: string) {
     // Ignoring the `id` not being in the type until we can refactor the types in endpoint.
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const artifactId = (await this.getArtifact(id))?.id!;
     return this.fleetArtifacts.deleteArtifact(artifactId);
   }

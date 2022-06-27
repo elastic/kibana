@@ -42,12 +42,30 @@ export const NAV = {
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
     defaultMessage: 'Users and roles',
   }),
+  API_KEYS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.apiKeys', {
+    defaultMessage: 'API keys',
+  }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
   }),
   SCHEMA: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.schema', {
     defaultMessage: 'Schema',
   }),
+  SYNCHRONIZATION: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.synchronization', {
+    defaultMessage: 'Synchronization',
+  }),
+  SYNCHRONIZATION_FREQUENCY: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationFrequency',
+    {
+      defaultMessage: 'Frequency',
+    }
+  ),
+  SYNCHRONIZATION_ASSETS_AND_OBJECTS: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationAssetsAndObjects',
+    {
+      defaultMessage: 'Assets and objects',
+    }
+  ),
   DISPLAY_SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.displaySettings', {
     defaultMessage: 'Display Settings',
   }),
@@ -127,6 +145,10 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluence',
     { defaultMessage: 'Confluence' }
   ),
+  CONFLUENCE_CONNECTOR_PACKAGE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluenceConnectorPackage',
+    { defaultMessage: 'Confluence Connector Package' }
+  ),
   CONFLUENCE_SERVER: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluenceServer',
     { defaultMessage: 'Confluence (Server)' }
@@ -155,8 +177,17 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.jiraServer',
     { defaultMessage: 'Jira (Server)' }
   ),
+  NETWORK_DRVE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.networkDrive',
+    {
+      defaultMessage: 'Network Drive',
+    }
+  ),
   ONEDRIVE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.oneDrive', {
     defaultMessage: 'OneDrive',
+  }),
+  OUTLOOK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.outlook', {
+    defaultMessage: 'Outlook',
   }),
   SALESFORCE: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.salesforce',
@@ -174,15 +205,35 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePoint',
     { defaultMessage: 'SharePoint Online' }
   ),
+  SHAREPOINT_CONNECTOR_PACKAGE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePointConnectorPackage',
+    { defaultMessage: 'SharePoint Online Connector Package' }
+  ),
+  SHAREPOINT_SERVER: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePointServer',
+    { defaultMessage: 'SharePoint Server' }
+  ),
   SLACK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.slack', {
     defaultMessage: 'Slack',
+  }),
+  TEAMS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.teams', {
+    defaultMessage: 'Teams',
   }),
   ZENDESK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.zendesk', {
     defaultMessage: 'Zendesk',
   }),
+  ZOOM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.zoom', {
+    defaultMessage: 'Zoom',
+  }),
   CUSTOM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.custom', {
     defaultMessage: 'Custom API Source',
   }),
+  CUSTOM_CONNECTOR_PACKAGE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.customConnectorPackage',
+    {
+      defaultMessage: 'Custom Connector Package',
+    }
+  ),
 };
 
 export const SOURCE_OBJ_TYPES = {
@@ -238,12 +289,12 @@ export const SOURCE_OBJ_TYPES = {
     defaultMessage: 'Bugs',
   }),
   ISSUES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.issues', {
-    defaultMessage: 'Issues',
+    defaultMessage: 'Issues (including comments)',
   }),
   PULL_REQUESTS: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.objTypes.pullRequests',
     {
-      defaultMessage: 'Pull Requests',
+      defaultMessage: 'Pull Requests (including comments)',
     }
   ),
   REPOSITORY_LIST: i18n.translate(
@@ -252,6 +303,9 @@ export const SOURCE_OBJ_TYPES = {
       defaultMessage: 'Repository List',
     }
   ),
+  FILES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.files', {
+    defaultMessage: 'Files (markdown only)',
+  }),
   EMAILS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.emails', {
     defaultMessage: 'Emails',
   }),
@@ -272,6 +326,9 @@ export const SOURCE_OBJ_TYPES = {
   }),
   CAMPAIGNS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.campaigns', {
     defaultMessage: 'Campaigns',
+  }),
+  CASES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.cases', {
+    defaultMessage: 'Cases (including feeds and comments)',
   }),
   USERS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.objTypes.users', {
     defaultMessage: 'Users',
@@ -308,6 +365,146 @@ export const SOURCE_OBJ_TYPES = {
   ),
 };
 
+export const SOURCE_CATEGORIES = {
+  ACCOUNT_MANAGEMENT: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.accountManagement',
+    {
+      defaultMessage: 'Account management',
+    }
+  ),
+  ATLASSIAN: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.atlassian', {
+    defaultMessage: 'Atlassian',
+  }),
+  BUG_TRACKING: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.bugTracking',
+    {
+      defaultMessage: 'Bug tracking',
+    }
+  ),
+  CHAT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.chat', {
+    defaultMessage: 'Chat',
+  }),
+  CLOUD: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
+    defaultMessage: 'Cloud',
+  }),
+  CODE_REPOSITORY: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.codeRepository',
+    {
+      defaultMessage: 'Code repository',
+    }
+  ),
+  COLLABORATION: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.collaboration',
+    {
+      defaultMessage: 'Collaboration',
+    }
+  ),
+  COMMUNICATION: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.communication',
+    {
+      defaultMessage: 'Communication',
+    }
+  ),
+  CRM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.crm', {
+    defaultMessage: 'CRM',
+  }),
+  CUSTOMER_RELATIONSHIP_MANAGEMENT: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.customerRelationshipManagement',
+    {
+      defaultMessage: 'Customer relationship management',
+    }
+  ),
+  CUSTOMER_SERVICE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.customerService',
+    {
+      defaultMessage: 'Customer service',
+    }
+  ),
+  EMAIL: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.email', {
+    defaultMessage: 'Email',
+  }),
+  FILE_SHARING: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing',
+    {
+      defaultMessage: 'File sharing',
+    }
+  ),
+  GOOGLE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.google', {
+    defaultMessage: 'Google',
+  }),
+  GSUITE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.gsuite', {
+    defaultMessage: 'GSuite',
+  }),
+  HELP: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.help', {
+    defaultMessage: 'Help',
+  }),
+  HELPDESK: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.helpdesk', {
+    defaultMessage: 'Helpdesk',
+  }),
+  INSTANT_MESSAGING: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.instantMessaging',
+    {
+      defaultMessage: 'Instant messaging',
+    }
+  ),
+  INTRANET: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.intranet', {
+    defaultMessage: 'Intranet',
+  }),
+  MICROSOFT: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.microsoft', {
+    defaultMessage: 'Microsoft',
+  }),
+  OFFICE_365: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.office', {
+    defaultMessage: 'Office 365',
+  }),
+  PRODUCTIVITY: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.productivity',
+    {
+      defaultMessage: 'Productivity',
+    }
+  ),
+  PROJECT_MANAGEMENT: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.projectManagement',
+    {
+      defaultMessage: 'Project management',
+    }
+  ),
+  SOFTWARE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.software', {
+    defaultMessage: 'Software',
+  }),
+  STORAGE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
+    defaultMessage: 'Storage',
+  }),
+  TICKETING: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.ticketing', {
+    defaultMessage: 'Ticketing',
+  }),
+  VERSION_CONTROL: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.categories.versionControl',
+    {
+      defaultMessage: 'Version control',
+    }
+  ),
+  WIKI: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.wiki', {
+    defaultMessage: 'Wiki',
+  }),
+  WORKFLOW: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.workflow', {
+    defaultMessage: 'Workflow',
+  }),
+};
+
+export const API_KEYS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.apiKeysTitle',
+  {
+    defaultMessage: 'API keys',
+  }
+);
+
+export const API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.apiKeyLabel',
+  {
+    defaultMessage: 'API key',
+  }
+);
+
 export const GITHUB_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.applicationLinkTitles.github',
   {
@@ -315,9 +512,11 @@ export const GITHUB_LINK_TITLE = i18n.translate(
   }
 );
 
-export const CUSTOM_SERVICE_TYPE = 'custom';
+export const GITHUB_VIA_APP_SERVICE_TYPE = 'github_via_app';
+export const GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE = 'github_enterprise_server_via_app';
 
-export const WORKPLACE_SEARCH_URL_PREFIX = '/app/enterprise_search/workplace_search';
+export const CUSTOM_SERVICE_TYPE = 'custom';
+export const EXTERNAL_SERVICE_TYPE = 'external';
 
 export const DOCUMENTATION_LINK_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.documentation',
@@ -432,6 +631,20 @@ export const BASE_URL_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.baseUrl.label',
   {
     defaultMessage: 'Base URL',
+  }
+);
+
+export const EXTERNAL_CONNECTOR_URL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.externalConnectorUrl.label',
+  {
+    defaultMessage: 'Connector URL',
+  }
+);
+
+export const EXTERNAL_CONNECTOR_API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.externalConnectorApiKey.label',
+  {
+    defaultMessage: 'Connector API key',
   }
 );
 
@@ -745,6 +958,18 @@ export const DESCRIPTION_LABEL = i18n.translate(
   }
 );
 
+export const BLOCK_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.blockLabel', {
+  defaultMessage: 'Block',
+});
+
+export const BETWEEN_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.betweenLabel', {
+  defaultMessage: 'between',
+});
+
+export const ON_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.onLabel', {
+  defaultMessage: 'on',
+});
+
 export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
   defaultMessage: 'and',
 });
@@ -828,5 +1053,16 @@ export const PLATINUM_FEATURE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.platinumFeature',
   {
     defaultMessage: 'Platinum feature',
+  }
+);
+
+export const COPY_TOOLTIP = i18n.translate('xpack.enterpriseSearch.workplaceSearch.copy.tooltip', {
+  defaultMessage: 'Copy to clipboard',
+});
+
+export const COPIED_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.copied.tooltip',
+  {
+    defaultMessage: 'Copied!',
   }
 );

@@ -10,9 +10,9 @@ import querystring from 'querystring';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
-import { LogMeta } from '@kbn/logging';
-import { Logger } from '../../logging';
+import type { LogMeta, Logger } from '@kbn/logging';
 import { getResponsePayloadBytes } from './get_payload_size';
+import type { KibanaRequestState } from '../router';
 
 const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
@@ -65,6 +65,8 @@ export function getEcsResponseLog(request: Request, log: Logger) {
   const bytes = getResponsePayloadBytes(response, log);
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
 
+  const traceId = (request.app as KibanaRequestState).traceId;
+
   const meta: LogMeta = {
     client: {
       ip: request.info.remoteAddress,
@@ -95,6 +97,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
     user_agent: {
       original: request.headers['user-agent'],
     },
+    trace: traceId ? { id: traceId } : undefined,
   };
 
   return {

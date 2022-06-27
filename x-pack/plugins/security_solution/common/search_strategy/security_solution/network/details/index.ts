@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { HostEcs } from '../../../../ecs/host';
 import { GeoEcs } from '../../../../ecs/geo';
 import { Inspect, Maybe, TotalValue, Hit, ShardsResponse } from '../../../common';
@@ -49,7 +49,7 @@ interface ResultHit<T> {
       total: TotalValue | number;
       max_score: number | null;
       hits: Array<{
-        _source: T;
+        fields: T;
         sort?: [number];
         _index?: string;
         _type?: string;

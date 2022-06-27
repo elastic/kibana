@@ -6,22 +6,29 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import {
+  FieldLabels,
+  LABEL_FIELDS_FILTER,
+  RECORDS_FIELD,
+  REPORT_METRIC_FIELD,
+  ReportTypes,
+} from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
+  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../constants/elasticsearch_fieldnames';
 
-import { CPU_USAGE, MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
+import { CPU_USAGE, SYSTEM_MEMORY_USAGE, MOBILE_APP, RESPONSE_LATENCY } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getMobileKPIDistributionConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'data-distribution',
+    reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: 'bar',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
@@ -33,10 +40,10 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
       },
     ],
     hasOperationType: false,
-    filterFields: Object.keys(MobileFields),
+    filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
-      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
+      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], dataView),
     ],
     labels: {
       ...FieldLabels,
@@ -49,16 +56,34 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
         label: RESPONSE_LATENCY,
         field: TRANSACTION_DURATION,
         id: TRANSACTION_DURATION,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: transaction`,
+          },
+        ],
       },
       {
-        label: MEMORY_USAGE,
+        label: SYSTEM_MEMORY_USAGE,
         field: METRIC_SYSTEM_MEMORY_USAGE,
         id: METRIC_SYSTEM_MEMORY_USAGE,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
       {
         label: CPU_USAGE,
         field: METRIC_SYSTEM_CPU_USAGE,
         id: METRIC_SYSTEM_CPU_USAGE,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
     ],
   };

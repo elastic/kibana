@@ -10,31 +10,7 @@
  * WARNING: these typings are incomplete
  */
 
-import { JsonValue } from '@kbn/utility-types';
-import { KueryNode, KueryQueryOptions } from '..';
-import { IndexPatternBase } from '../..';
-
-export type FunctionName =
-  | 'is'
-  | 'and'
-  | 'or'
-  | 'not'
-  | 'range'
-  | 'exists'
-  | 'geoBoundingBox'
-  | 'geoPolygon'
-  | 'nested';
-
-interface FunctionType {
-  buildNode: (functionName: FunctionName, ...args: any[]) => FunctionTypeBuildNode;
-  buildNodeWithArgumentNodes: (functionName: FunctionName, args: any[]) => FunctionTypeBuildNode;
-  toElasticsearchQuery: (
-    node: any,
-    indexPattern?: IndexPatternBase,
-    config?: KueryQueryOptions,
-    context?: Record<string, any>
-  ) => JsonValue;
-}
+export type FunctionName = 'is' | 'and' | 'or' | 'not' | 'range' | 'exists' | 'nested';
 
 export interface FunctionTypeBuildNode {
   type: 'function';
@@ -43,44 +19,7 @@ export interface FunctionTypeBuildNode {
   arguments: any[];
 }
 
-interface LiteralType {
-  buildNode: (value: null | boolean | number | string) => LiteralTypeBuildNode;
-  toElasticsearchQuery: (node: any) => null | boolean | number | string;
-}
-
-export interface LiteralTypeBuildNode {
-  type: 'literal';
-  value: null | boolean | number | string;
-}
-
-interface NamedArgType {
-  buildNode: (name: string, value: any) => NamedArgTypeBuildNode;
-  toElasticsearchQuery: (node: any) => JsonValue;
-}
-
-export interface NamedArgTypeBuildNode {
-  type: 'namedArg';
-  name: string;
-  value: any;
-}
-
-interface WildcardType {
-  wildcardSymbol: string;
-  buildNode: (value: string) => WildcardTypeBuildNode | KueryNode;
-  test: (node: any, string: string) => boolean;
-  toElasticsearchQuery: (node: any) => string;
-  toQueryStringQuery: (node: any) => string;
-  hasLeadingWildcard: (node: any) => boolean;
-}
-
 export interface WildcardTypeBuildNode {
   type: 'wildcard';
   value: string;
-}
-
-export interface NodeTypes {
-  function: FunctionType;
-  literal: LiteralType;
-  namedArg: NamedArgType;
-  wildcard: WildcardType;
 }

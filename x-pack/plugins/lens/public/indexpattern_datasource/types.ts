@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { IndexPatternColumn, IncompleteColumn } from './operations';
-import type { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/public';
-import type { FieldSpec } from '../../../../../src/plugins/data/common';
+import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { DragDropIdentifier } from '../drag_drop/providers';
-import type { FieldFormatParams } from '../../../../../src/plugins/field_formats/common';
+import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
+import { DragDropOperation } from '../types';
 
-export {
-  FieldBasedIndexPatternColumn,
-  IndexPatternColumn,
+export type {
+  GenericIndexPatternColumn,
   OperationType,
   IncompleteColumn,
+  FieldBasedIndexPatternColumn,
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -27,6 +28,7 @@ export {
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -36,17 +38,23 @@ export {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './operations';
+
+export type { FormulaPublicApi } from './operations/definitions/formula/formula_public_api';
 
 export type DraggedField = DragDropIdentifier & {
   field: IndexPatternField;
   indexPatternId: string;
 };
+
 export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];
   getFieldByName(name: string): IndexPatternField | undefined;
   title: string;
+  name?: string;
   timeFieldName?: string;
   fieldFormatMap?: Record<
     string,
@@ -67,7 +75,7 @@ export type IndexPatternField = FieldSpec & {
 
 export interface IndexPatternLayer {
   columnOrder: string[];
-  columns: Record<string, IndexPatternColumn>;
+  columns: Record<string, GenericIndexPatternColumn>;
   // Each layer is tied to the index pattern that created it
   indexPatternId: string;
   // Partial columns represent the temporary invalid states
@@ -79,6 +87,7 @@ export interface IndexPatternPersistedState {
 }
 
 export type PersistedIndexPatternLayer = Omit<IndexPatternLayer, 'indexPatternId'>;
+
 export interface IndexPatternPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, IndexPatternLayer>;
@@ -99,4 +108,10 @@ export interface IndexPatternPrivateState {
 export interface IndexPatternRef {
   id: string;
   title: string;
+  name?: string;
+}
+
+export interface DataViewDragDropOperation extends DragDropOperation {
+  dataView: IndexPattern;
+  column?: GenericIndexPatternColumn;
 }

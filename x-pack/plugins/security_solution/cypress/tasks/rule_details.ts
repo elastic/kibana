@@ -19,20 +19,26 @@ import {
 import {
   ALERTS_TAB,
   BACK_TO_RULES,
+  DATA_VIEW_DETAILS,
   EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
   RULE_SWITCH,
+  DEFINITION_DETAILS,
+  INDEX_PATTERNS_DETAILS,
+  DETAILS_TITLE,
+  DETAILS_DESCRIPTION,
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
-export const activatesRule = () => {
-  cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
+export const enablesRule = () => {
+  // Rules get enabled via _bulk_action endpoint
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.wait('@bulk_update').then(({ response }) => {
-    cy.wrap(response!.statusCode).should('eql', 200);
+  cy.wait('@bulk_action').then(({ response }) => {
+    cy.wrap(response?.statusCode).should('eql', 200);
   });
 };
 
@@ -58,20 +64,15 @@ export const addsFieldsToTimeline = (search: string, fields: string[]) => {
   closeFieldsBrowser();
 };
 
-export const openExceptionModalFromRuleSettings = () => {
+export const openExceptionFlyoutFromRuleSettings = () => {
   cy.get(ADD_EXCEPTIONS_BTN).click();
   cy.get(LOADING_SPINNER).should('not.exist');
   cy.get(FIELD_INPUT).should('be.visible');
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
-  cy.get(ADD_EXCEPTIONS_BTN).click();
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('be.visible');
-  cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
+  openExceptionFlyoutFromRuleSettings();
+  cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
@@ -87,7 +88,12 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.get(EXCEPTIONS_TAB).click();
+  cy.root()
+    .pipe(($el) => {
+      $el.find(EXCEPTIONS_TAB).trigger('click');
+      return $el.find(ADD_EXCEPTIONS_BTN);
+    })
+    .should('be.visible');
 };
 
 export const removeException = () => {
@@ -106,4 +112,19 @@ export const waitForTheRuleToBeExecuted = () => {
 
 export const goBackToAllRulesTable = () => {
   cy.get(BACK_TO_RULES).click();
+};
+
+export const getDetails = (title: string) =>
+  cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
+
+export const hasIndexPatterns = (indexPatterns: string) => {
+  cy.get(DEFINITION_DETAILS).within(() => {
+    getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
+  });
+};
+
+export const doesNotHaveDataView = () => {
+  cy.get(DEFINITION_DETAILS).within(() => {
+    cy.get(DETAILS_TITLE).within(() => cy.get(DATA_VIEW_DETAILS).should('not.exist'));
+  });
 };

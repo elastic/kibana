@@ -7,7 +7,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButtonEmpty,
@@ -25,8 +25,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { CronEditor } from '../../../../../../../../src/plugins/es_ui_shared/public';
-import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
+import { CronEditor } from '@kbn/es-ui-shared-plugin/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 
 import { indices } from '../../../../shared_imports';
 import { documentationLinks } from '../../../services/documentation_links';
@@ -74,7 +74,7 @@ export class StepLogistics extends Component {
 
     if (!isValidatingIndexPattern && hasMatchingIndices) {
       return (
-        <EuiTextColor color="secondary" data-test-subj="fieldIndexPatternSuccessMessage">
+        <EuiTextColor color="success" data-test-subj="fieldIndexPatternSuccessMessage">
           <p>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpHasMatchesLabel"

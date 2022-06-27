@@ -8,12 +8,12 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+
 import type { HomeProps } from './home';
 import { Home } from './home';
+import { Welcome } from './welcome';
 
-import { FeatureCatalogueCategory } from '../../services';
-import { telemetryPluginMock } from '../../../../telemetry/public/mocks';
-
+let mockHasIntegrationsPermission = true;
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
@@ -22,10 +22,17 @@ jest.mock('../kibana_services', () => ({
     chrome: {
       setBreadcrumbs: () => {},
     },
+    application: {
+      capabilities: {
+        navLinks: {
+          integrations: mockHasIntegrationsPermission,
+        },
+      },
+    },
   }),
 }));
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   overviewPageActions: jest.fn().mockReturnValue([]),
   OverviewPageFooter: jest.fn().mockReturnValue(<></>),
   KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
@@ -35,6 +42,7 @@ describe('home', () => {
   let defaultProps: HomeProps;
 
   beforeEach(() => {
+    mockHasIntegrationsPermission = true;
     defaultProps = {
       directories: [],
       solutions: [],
@@ -47,11 +55,10 @@ describe('home', () => {
         setItem: jest.fn(),
       },
       urlBasePath: 'goober',
-      telemetry: telemetryPluginMock.createStartContract(),
       addBasePath(url) {
         return `base_path/${url}`;
       },
-      hasUserIndexPattern: jest.fn(async () => true),
+      hasUserDataView: jest.fn(async () => true),
     };
   });
 
@@ -124,7 +131,7 @@ describe('home', () => {
         icon: 'indexPatternApp',
         path: 'index_management_landing_page',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin' as const,
       };
 
       const component = await renderHome({
@@ -142,7 +149,7 @@ describe('home', () => {
         icon: 'managementApp',
         path: 'management_landing_page',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin' as const,
       };
 
       const component = await renderHome({
@@ -164,7 +171,7 @@ describe('home', () => {
             path: 'path-to-advanced_settings',
             showOnHomePage: false,
             title: 'Advanced settings',
-            category: FeatureCatalogueCategory.ADMIN,
+            category: 'admin',
           },
         ],
       });
@@ -177,35 +184,35 @@ describe('home', () => {
     test('should show the welcome screen if enabled, and there are no index patterns defined', async () => {
       defaultProps.localStorage.getItem = jest.fn(() => 'true');
 
-      const hasUserIndexPattern = jest.fn(async () => false);
-      const component = await renderHome({ hasUserIndexPattern });
+      const hasUserDataView = jest.fn(async () => false);
+      const component = await renderHome({ hasUserDataView });
 
       expect(defaultProps.localStorage.getItem).toHaveBeenCalledTimes(1);
 
-      expect(component).toMatchSnapshot();
+      expect(component.find(Welcome).exists()).toBe(true);
     });
 
     test('stores skip welcome setting if skipped', async () => {
       defaultProps.localStorage.getItem = jest.fn(() => 'true');
 
-      const hasUserIndexPattern = jest.fn(async () => false);
-      const component = await renderHome({ hasUserIndexPattern });
+      const hasUserDataView = jest.fn(async () => false);
+      const component = await renderHome({ hasUserDataView });
 
       component.instance().skipWelcome();
       component.update();
 
       expect(defaultProps.localStorage.setItem).toHaveBeenCalledWith('home:welcome:show', 'false');
 
-      expect(component).toMatchSnapshot();
+      expect(component.find(Welcome).exists()).toBe(false);
     });
 
     test('should show the normal home page if loading fails', async () => {
       defaultProps.localStorage.getItem = jest.fn(() => 'true');
 
-      const hasUserIndexPattern = jest.fn(() => Promise.reject('Doh!'));
-      const component = await renderHome({ hasUserIndexPattern });
+      const hasUserDataView = jest.fn(() => Promise.reject('Doh!'));
+      const component = await renderHome({ hasUserDataView });
 
-      expect(component).toMatchSnapshot();
+      expect(component.find(Welcome).exists()).toBe(false);
     });
 
     test('should show the normal home page if welcome screen is disabled locally', async () => {
@@ -213,14 +220,22 @@ describe('home', () => {
 
       const component = await renderHome();
 
-      expect(component).toMatchSnapshot();
+      expect(component.find(Welcome).exists()).toBe(false);
+    });
+
+    test("should show the normal home page if user doesn't have access to integrations", async () => {
+      mockHasIntegrationsPermission = false;
+
+      const component = await renderHome();
+
+      expect(component.find(Welcome).exists()).toBe(false);
     });
   });
 
   describe('isNewKibanaInstance', () => {
     test('should set isNewKibanaInstance to true when there are no index patterns', async () => {
-      const hasUserIndexPattern = jest.fn(async () => false);
-      const component = await renderHome({ hasUserIndexPattern });
+      const hasUserDataView = jest.fn(async () => false);
+      const component = await renderHome({ hasUserDataView });
 
       expect(component.state().isNewKibanaInstance).toBe(true);
 
@@ -228,8 +243,8 @@ describe('home', () => {
     });
 
     test('should set isNewKibanaInstance to false when there are index patterns', async () => {
-      const hasUserIndexPattern = jest.fn(async () => true);
-      const component = await renderHome({ hasUserIndexPattern });
+      const hasUserDataView = jest.fn(async () => true);
+      const component = await renderHome({ hasUserDataView });
 
       expect(component.state().isNewKibanaInstance).toBe(false);
 
@@ -237,10 +252,10 @@ describe('home', () => {
     });
 
     test('should safely handle exceptions', async () => {
-      const hasUserIndexPattern = jest.fn(() => {
+      const hasUserDataView = jest.fn(() => {
         throw new Error('simulated find error');
       });
-      const component = await renderHome({ hasUserIndexPattern });
+      const component = await renderHome({ hasUserDataView });
 
       expect(component.state().isNewKibanaInstance).toBe(false);
 

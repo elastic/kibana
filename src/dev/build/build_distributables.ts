@@ -6,14 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
-import { Config, createRunner } from './lib';
+import { Config, createRunner, Task, GlobalTask } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  dockerContextUseLocalArtifact: boolean | null;
+  dockerCrossCompile: boolean;
+  dockerPush: boolean;
+  dockerTagQualifier: string | null;
   downloadFreshNode: boolean;
+  downloadCloudDependencies: boolean;
   initialize: boolean;
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
@@ -21,20 +26,21 @@ export interface BuildOptions {
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerUBI: boolean;
-  createDockerCentOS: boolean;
+  createDockerUbuntu: boolean;
   createDockerCloud: boolean;
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   createExamplePlugins: boolean;
+  eprRegistry: 'production' | 'snapshot';
 }
 
-export async function buildDistributables(log: ToolingLog, options: BuildOptions) {
+export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
   log.verbose('building distributables with options:', options);
 
-  const config = await Config.create(options);
+  const config: Config = await Config.create(options);
 
-  const run = createRunner({
+  const run: (task: Task | GlobalTask) => Promise<void> = createRunner({
     config,
     log,
   });
@@ -68,19 +74,22 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
     await run(Tasks.BuildBazelPackages);
-    await run(Tasks.BuildPackages);
+    await run(Tasks.BuildXpack);
     await run(Tasks.BuildKibanaPlatformPlugins);
     await run(Tasks.TranspileBabel);
     await run(Tasks.CreatePackageJson);
     await run(Tasks.InstallDependencies);
     await run(Tasks.GeneratePackagesOptimizedAssets);
-    await run(Tasks.CleanPackages);
+    await run(Tasks.DeleteBazelPackagesFromBuildRoot);
     await run(Tasks.CreateNoticeFile);
     await run(Tasks.UpdateLicenseFile);
     await run(Tasks.RemovePackageJsonDeps);
+    await run(Tasks.CleanPackageManagerRelatedFiles);
     await run(Tasks.CleanTypescript);
     await run(Tasks.CleanExtraFilesFromModules);
     await run(Tasks.CleanEmptyFolders);
+    await run(Tasks.FleetDownloadElasticGpgKey);
+    await run(Tasks.BundleFleetPackages);
   }
 
   /**
@@ -123,13 +132,17 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateDockerUBI);
   }
 
-  if (options.createDockerCentOS) {
-    // control w/ --docker-images or --skip-docker-centos or --skip-os-packages
-    await run(Tasks.CreateDockerCentOS);
+  if (options.createDockerUbuntu) {
+    // control w/ --docker-images or --skip-docker-ubuntu or --skip-os-packages
+    await run(Tasks.CreateDockerUbuntu);
   }
 
   if (options.createDockerCloud) {
-    // control w/ --docker-images and --docker-cloud
+    // control w/ --docker-images and --skip-docker-cloud
+    if (options.downloadCloudDependencies) {
+      // control w/ --skip-cloud-dependencies-download
+      await run(Tasks.DownloadCloudDependencies);
+    }
     await run(Tasks.CreateDockerCloud);
   }
 

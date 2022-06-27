@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { fetchProvider } from './collector_fetch';
 
 const getMockFetchClients = (hits?: unknown[]) => {
   const fetchParamsMock = createCollectorFetchContextMock();
-  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: { hits: { hits } } });
+  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ hits: { hits } });
   return fetchParamsMock;
 };
 

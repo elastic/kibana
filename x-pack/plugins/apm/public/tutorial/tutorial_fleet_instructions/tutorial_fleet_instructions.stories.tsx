@@ -7,7 +7,7 @@
 
 import { Story } from '@storybook/react';
 import React from 'react';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import TutorialFleetInstructions from '.';
 
 interface Args {
@@ -23,6 +23,7 @@ function Wrapper({ hasFleetPoliciesWithApmIntegration }: Args) {
       http={http}
       basePath="http://localhost:5601"
       isDarkTheme={false}
+      kibanaVersion="8.0.0"
     />
   );
 }

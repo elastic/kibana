@@ -7,7 +7,6 @@
 
 import { uniq } from 'lodash';
 import { useQuery } from 'react-query';
-import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -16,12 +15,14 @@ export const useOsqueryPolicies = () => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  const { isLoading: osqueryPoliciesLoading, data: osqueryPolicies = [] } = useQuery(
+  return useQuery(
     ['osqueryPolicies'],
-    () => http.get('/internal/osquery/fleet_wrapper/package_policies'),
+    () =>
+      http.get<{ items: Array<{ policy_id: string }> }>(
+        '/internal/osquery/fleet_wrapper/package_policies'
+      ),
     {
-      select: (response) =>
-        uniq<string>(response.items.map((p: { policy_id: string }) => p.policy_id)),
+      select: (response) => uniq<string>(response.items.map((p) => p.policy_id)),
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
@@ -30,9 +31,5 @@ export const useOsqueryPolicies = () => {
           }),
         }),
     }
-  );
-  return useMemo(
-    () => ({ osqueryPoliciesLoading, osqueryPolicies }),
-    [osqueryPoliciesLoading, osqueryPolicies]
   );
 };

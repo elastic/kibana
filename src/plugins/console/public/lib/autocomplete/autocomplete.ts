@@ -11,24 +11,24 @@ import { i18n } from '@kbn/i18n';
 
 // TODO: All of these imports need to be moved to the core editor so that it can inject components from there.
 import {
-  getTopLevelUrlCompleteComponents,
   getEndpointBodyCompleteComponents,
   getGlobalAutocompleteComponents,
+  getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
   // @ts-ignore
 } from '../kb/kb';
 
 import { createTokenIterator } from '../../application/factories';
-import { Position, Token, Range, CoreEditor } from '../../types';
+import type { CoreEditor, Position, Range, Token } from '../../types';
 import type RowParser from '../row_parser';
 
 import * as utils from '../utils';
 
 // @ts-ignore
 import { populateContext } from './engine';
-import { AutoCompleteContext, ResultTerm } from './types';
+import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
 // @ts-ignore
-import { URL_PATH_END_MARKER } from './components/index';
+import { URL_PATH_END_MARKER } from './components';
 
 let lastEvaluatedToken: Token | null = null;
 
@@ -335,14 +335,98 @@ export default function ({
     });
   }
 
+  function replaceLinesWithPrefixPieces(prefixPieces: string[], startLineNumber: number) {
+    const middlePiecesCount = prefixPieces.length - 1;
+    prefixPieces.forEach((piece, index) => {
+      if (index >= middlePiecesCount) {
+        return;
+      }
+      const line = startLineNumber + index + 1;
+      const column = editor.getLineValue(line).length - 1;
+      const start = { lineNumber: line, column: 0 };
+      const end = { lineNumber: line, column };
+      editor.replace({ start, end }, piece);
+    });
+  }
+
+  /**
+   * Get a different set of templates based on the value configured in the request.
+   * For example, when creating a snapshot repository of different types (`fs`, `url` etc),
+   * different properties are inserted in the textarea based on the type.
+   * E.g. https://github.com/elastic/kibana/blob/main/src/plugins/console/server/lib/spec_definitions/json/overrides/snapshot.create_repository.json
+   */
+  function getConditionalTemplate(
+    name: string,
+    autocompleteRules: Record<string, unknown> | null | undefined
+  ) {
+    const obj = autocompleteRules && autocompleteRules[name];
+
+    if (obj) {
+      const currentLineNumber = editor.getCurrentPosition().lineNumber;
+
+      if (hasOneOfIn(obj)) {
+        // Get the line number of value that should provide different templates based on that
+        const startLine = getStartLineNumber(currentLineNumber, obj.__one_of);
+        // Join line values from start to current line
+        const lines = editor.getLines(startLine, currentLineNumber).join('\n');
+        // Get the correct template by comparing the autocomplete rules against the lines
+        const prop = getProperty(lines, obj.__one_of);
+        if (prop && prop.__template) {
+          return prop.__template;
+        }
+      }
+    }
+  }
+
+  /**
+   * Check if object has a property of '__one_of'
+   */
+  function hasOneOfIn(value: unknown): value is { __one_of: DataAutoCompleteRulesOneOf[] } {
+    return typeof value === 'object' && value !== null && '__one_of' in value;
+  }
+
+  /**
+   * Get the start line of value that matches the autocomplete rules condition
+   */
+  function getStartLineNumber(currentLine: number, rules: DataAutoCompleteRulesOneOf[]): number {
+    if (currentLine === 1) {
+      return currentLine;
+    }
+    const value = editor.getLineValue(currentLine);
+    const prop = getProperty(value, rules);
+    if (prop) {
+      return currentLine;
+    }
+    return getStartLineNumber(currentLine - 1, rules);
+  }
+
+  /**
+   * Get the matching property based on the given condition
+   */
+  function getProperty(condition: string, rules: DataAutoCompleteRulesOneOf[]) {
+    return rules.find((rule) => {
+      if (rule.__condition && rule.__condition.lines_regex) {
+        return new RegExp(rule.__condition.lines_regex, 'm').test(condition);
+      }
+      return false;
+    });
+  }
+
   function applyTerm(term: {
     value?: string;
     context?: AutoCompleteContext;
-    template?: { __raw: boolean; value: string };
+    template?: { __raw?: boolean; value?: string; [key: string]: unknown };
     insertValue?: string;
   }) {
     const context = term.context!;
 
+    if (context?.endpoint && term.value) {
+      const { data_autocomplete_rules: autocompleteRules } = context.endpoint;
+      const template = getConditionalTemplate(term.value, autocompleteRules);
+      if (template) {
+        term.template = template;
+      }
+    }
     // make sure we get up to date replacement info.
     addReplacementInfoToContext(context, editor.getCurrentPosition(), term.insertValue);
 
@@ -390,11 +474,35 @@ export default function ({
         templateInserted = false;
       }
     }
+    const linesToMoveDown = (context.prefixToAdd ?? '').match(/\n|\r/g)?.length ?? 0;
 
-    valueToInsert = context.prefixToAdd + valueToInsert + context.suffixToAdd;
+    let prefix = context.prefixToAdd ?? '';
 
     // disable listening to the changes we are making.
     editor.off('changeSelection', editorChangeListener);
+
+    // if should add chars on the previous not empty line
+    if (linesToMoveDown) {
+      const [firstPart = '', ...prefixPieces] = context.prefixToAdd?.split(/\n|\r/g) ?? [];
+      const lastPart = _.last(prefixPieces) ?? '';
+      const { start } = context.rangeToReplace!;
+      const end = { ...start, column: start.column + firstPart.length };
+
+      // adding only the content of prefix before newlines
+      editor.replace({ start, end }, firstPart);
+
+      // replacing prefix pieces without the last one, which is handled separately
+      if (prefixPieces.length - 1 > 0) {
+        replaceLinesWithPrefixPieces(prefixPieces, start.lineNumber);
+      }
+
+      // and the last prefix line, keeping the editor's own newlines.
+      prefix = lastPart;
+      context.rangeToReplace!.start.lineNumber = context.rangeToReplace!.end.lineNumber;
+      context.rangeToReplace!.start.column = 0;
+    }
+
+    valueToInsert = prefix + valueToInsert + context.suffixToAdd;
 
     if (context.rangeToReplace!.start.column !== context.rangeToReplace!.end.column) {
       editor.replace(context.rangeToReplace!, valueToInsert);
@@ -410,7 +518,7 @@ export default function ({
       column:
         context.rangeToReplace!.start.column +
         termAsString.length +
-        context.prefixToAdd!.length +
+        prefix.length +
         (templateInserted ? 0 : context.suffixToAdd!.length),
     };
 
@@ -671,6 +779,47 @@ export default function ({
     }
   }
 
+  function addCommaToPrefixOnAutocomplete(
+    nonEmptyToken: Token | null,
+    context: AutoCompleteContext,
+    charsToSkipOnSameLine: number = 1
+  ) {
+    if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
+      const { position } = nonEmptyToken;
+      // if not on the first line
+      if (context.rangeToReplace && context.rangeToReplace.start?.lineNumber > 1) {
+        const prevTokenLineNumber = position.lineNumber;
+        const line = context.editor?.getLineValue(prevTokenLineNumber) ?? '';
+        const prevLineLength = line.length;
+        const linesToEnter = context.rangeToReplace.end.lineNumber - prevTokenLineNumber;
+
+        const isTheSameLine = linesToEnter === 0;
+        let startColumn = prevLineLength + 1;
+        let spaces = context.rangeToReplace.start.column - 1;
+
+        if (isTheSameLine) {
+          // prevent last char line from replacing
+          startColumn = position.column + charsToSkipOnSameLine;
+          // one char for pasted " and one for ,
+          spaces = context.rangeToReplace.end.column - startColumn - 2;
+        }
+
+        // go back to the end of the previous line
+        context.rangeToReplace = {
+          start: { lineNumber: prevTokenLineNumber, column: startColumn },
+          end: { ...context.rangeToReplace.end },
+        };
+
+        spaces = spaces >= 0 ? spaces : 0;
+        const spacesToEnter = isTheSameLine ? (spaces === 0 ? 1 : spaces) : spaces;
+        const newLineChars = `\n`.repeat(linesToEnter >= 0 ? linesToEnter : 0);
+        const whitespaceChars = ' '.repeat(spacesToEnter);
+        // add a comma at the end of the previous line, a new line and indentation
+        context.prefixToAdd = `,${newLineChars}${whitespaceChars}`;
+      }
+    }
+  }
+
   function addBodyPrefixSuffixToContext(context: AutoCompleteContext) {
     // Figure out what happens next to the token to see whether it needs trailing commas etc.
 
@@ -758,12 +907,19 @@ export default function ({
       case 'paren.lparen':
       case 'punctuation.comma':
       case 'punctuation.colon':
+      case 'punctuation.start_triple_quote':
       case 'method':
         break;
+      case 'text':
+      case 'string':
+      case 'constant.numeric':
+      case 'constant.language.boolean':
+      case 'punctuation.end_triple_quote':
+        addCommaToPrefixOnAutocomplete(nonEmptyToken, context, nonEmptyToken?.value.length);
+        break;
       default:
-        if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
-          context.prefixToAdd = ', ';
-        }
+        addCommaToPrefixOnAutocomplete(nonEmptyToken, context);
+        break;
     }
 
     return context;
@@ -802,7 +958,7 @@ export default function ({
 
   function addPathAutoCompleteSetToContext(context: AutoCompleteContext, pos: Position) {
     const ret = getCurrentMethodAndTokenPaths(editor, pos, parser);
-    context.method = ret.method;
+    context.method = ret.method?.toUpperCase();
     context.token = ret.token;
     context.otherTokenValues = ret.otherTokenValues;
     context.urlTokenPath = ret.urlTokenPath;
@@ -929,9 +1085,12 @@ export default function ({
       return; // wait for the next typing.
     }
 
+    // if the column or the line number have not changed for the last token and
+    // user did not provided a new value, then we should not show autocomplete
+    // this guards against triggering autocomplete when clicking around the editor
     if (
-      lastEvaluatedToken.position.column !== currentToken.position.column ||
-      lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber ||
+      (lastEvaluatedToken.position.column !== currentToken.position.column ||
+        lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber) &&
       lastEvaluatedToken.value === currentToken.value
     ) {
       // not on the same place or nothing changed, cache and wait for the next time
@@ -945,6 +1104,9 @@ export default function ({
       case 'paren.rparen':
       case 'punctuation.colon':
       case 'punctuation.comma':
+      case 'comment.line':
+      case 'comment.punctuation':
+      case 'comment.block':
       case 'UNKNOWN':
         return;
     }

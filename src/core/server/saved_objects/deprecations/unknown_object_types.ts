@@ -6,21 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { DeprecationsDetails } from '../../deprecations';
 import { IScopedClusterClient } from '../../elasticsearch';
+import { getAggregatedTypesDocuments } from '../migrations/actions/check_for_unknown_docs';
+import { addExcludedTypesToBoolQuery } from '../migrations/model/helpers';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsRawDocSource } from '../serialization';
-import type { KibanaConfigType } from '../../kibana_config';
-import type { SavedObjectConfig } from '../saved_objects_config';
 import { getIndexForType } from '../service/lib';
 
 interface UnknownTypesDeprecationOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   esClient: IScopedClusterClient;
-  kibanaConfig: KibanaConfigType;
-  savedObjectsConfig: SavedObjectConfig;
+  kibanaIndex: string;
   kibanaVersion: string;
 }
 
@@ -31,13 +28,11 @@ const getTargetIndices = ({
   types,
   typeRegistry,
   kibanaVersion,
-  kibanaConfig,
-  savedObjectsConfig,
+  kibanaIndex,
 }: {
   types: string[];
   typeRegistry: ISavedObjectTypeRegistry;
-  savedObjectsConfig: SavedObjectConfig;
-  kibanaConfig: KibanaConfigType;
+  kibanaIndex: string;
   kibanaVersion: string;
 }) => {
   return [
@@ -46,52 +41,33 @@ const getTargetIndices = ({
         getIndexForType({
           type,
           typeRegistry,
-          migV2Enabled: savedObjectsConfig.migration.enableV2,
           kibanaVersion,
-          defaultIndex: kibanaConfig.index,
+          defaultIndex: kibanaIndex,
         })
       )
     ),
   ];
 };
 
-const getUnknownTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContainer => {
-  return {
-    bool: {
-      must_not: knownTypes.map((type) => ({
-        term: { type },
-      })),
-    },
-  };
-};
-
 const getUnknownSavedObjects = async ({
   typeRegistry,
   esClient,
-  kibanaConfig,
-  savedObjectsConfig,
+  kibanaIndex,
   kibanaVersion,
 }: UnknownTypesDeprecationOptions) => {
   const knownTypes = getKnownTypes(typeRegistry);
   const targetIndices = getTargetIndices({
     types: knownTypes,
     typeRegistry,
-    kibanaConfig,
+    kibanaIndex,
     kibanaVersion,
-    savedObjectsConfig,
   });
-  const query = getUnknownTypesQuery(knownTypes);
-
-  const { body } = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
-    index: targetIndices,
-    body: {
-      size: 10000,
-      query,
-    },
-  });
-  const { hits: unknownDocs } = body.hits;
-
-  return unknownDocs.map((doc) => ({ id: doc._id, type: doc._source?.type ?? 'unknown' }));
+  const excludeRegisteredTypes = addExcludedTypesToBoolQuery(knownTypes);
+  return await getAggregatedTypesDocuments(
+    esClient.asInternalUser,
+    targetIndices,
+    excludeRegisteredTypes
+  );
 };
 
 export const getUnknownTypesDeprecations = async (
@@ -140,33 +116,30 @@ export const getUnknownTypesDeprecations = async (
 interface DeleteUnknownTypesOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   esClient: IScopedClusterClient;
-  kibanaConfig: KibanaConfigType;
-  savedObjectsConfig: SavedObjectConfig;
+  kibanaIndex: string;
   kibanaVersion: string;
 }
 
 export const deleteUnknownTypeObjects = async ({
   esClient,
   typeRegistry,
-  kibanaConfig,
-  savedObjectsConfig,
+  kibanaIndex,
   kibanaVersion,
 }: DeleteUnknownTypesOptions) => {
   const knownTypes = getKnownTypes(typeRegistry);
   const targetIndices = getTargetIndices({
     types: knownTypes,
     typeRegistry,
-    kibanaConfig,
+    kibanaIndex,
     kibanaVersion,
-    savedObjectsConfig,
   });
-  const query = getUnknownTypesQuery(knownTypes);
+  const nonRegisteredTypesQuery = addExcludedTypesToBoolQuery(knownTypes);
 
   await esClient.asInternalUser.deleteByQuery({
     index: targetIndices,
     wait_for_completion: false,
     body: {
-      query,
+      query: nonRegisteredTypesQuery,
     },
   });
 };

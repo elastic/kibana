@@ -10,8 +10,9 @@ import {
   EmbeddableInput,
   EmbeddableStateWithType,
   PanelState,
-} from '../../../../src/plugins/embeddable/common/types';
-import { SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/common/lib/saved_object_embeddable';
+} from '@kbn/embeddable-plugin/common/types';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common/lib/saved_object_embeddable';
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -22,6 +23,7 @@ import {
 } from './bwc/types';
 
 import { GridData } from './embeddable/types';
+
 export type PanelId = string;
 export type SavedObjectId = string;
 
@@ -96,8 +98,10 @@ export type SavedDashboardPanel730ToLatest = Pick<
 
 // Making this interface because so much of the Container type from embeddable is tied up in public
 // Once that is all available from common, we should be able to move the dashboard_container type to our common as well
+
 export interface DashboardContainerStateWithType extends EmbeddableStateWithType {
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
+  controlGroupInput?: PersistableControlGroupInput;
 }

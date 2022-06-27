@@ -5,32 +5,22 @@
  * 2.0.
  */
 
-import { nextTick } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
-import { homePluginMock } from 'src/plugins/home/public/mocks';
-import { securityMock } from '../../security/public/mocks';
-import { fullStoryApiMock, initializeFullStoryMock } from './plugin.test.mocks';
-import { CloudPlugin, CloudConfigType, loadFullStoryUserId } from './plugin';
-import { Observable, Subject } from 'rxjs';
+import { nextTick } from '@kbn/test-jest-helpers';
+import { coreMock } from '@kbn/core/public/mocks';
+import { homePluginMock } from '@kbn/home-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { CloudPlugin, CloudConfigType } from './plugin';
+import { firstValueFrom } from 'rxjs';
+import { Sha256 } from '@kbn/core/public/utils';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
-    describe('setupFullstory', () => {
+    describe('setupFullStory', () => {
       beforeEach(() => {
         jest.clearAllMocks();
       });
 
-      const setupPlugin = async ({
-        config = {},
-        securityEnabled = true,
-        currentUserProps = {},
-        currentAppId$ = undefined,
-      }: {
-        config?: Partial<CloudConfigType>;
-        securityEnabled?: boolean;
-        currentUserProps?: Record<string, any>;
-        currentAppId$?: Observable<string | undefined>;
-      }) => {
+      const setupPlugin = async ({ config = {} }: { config?: Partial<CloudConfigType> }) => {
         const initContext = coreMock.createPluginInitializerContext({
           id: 'cloudId',
           base_url: 'https://cloud.elastic.co',
@@ -40,6 +30,236 @@ describe('Cloud Plugin', () => {
           full_story: {
             enabled: false,
           },
+          chat: {
+            enabled: false,
+          },
+          ...config,
+        });
+
+        const plugin = new CloudPlugin(initContext);
+
+        const coreSetup = coreMock.createSetup();
+
+        const setup = plugin.setup(coreSetup, {});
+
+        // Wait for FullStory dynamic import to resolve
+        await new Promise((r) => setImmediate(r));
+
+        return { initContext, plugin, setup, coreSetup };
+      };
+
+      test('register the shipper FullStory with correct args when enabled and org_id are set', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' } },
+        });
+
+        expect(coreSetup.analytics.registerShipper).toHaveBeenCalled();
+        expect(coreSetup.analytics.registerShipper).toHaveBeenCalledWith(expect.anything(), {
+          fullStoryOrgId: 'foo',
+          scriptUrl: '/internal/cloud/100/fullstory.js',
+          namespace: 'FSKibana',
+        });
+      });
+
+      it('does not call initializeFullStory when enabled=false', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { full_story: { enabled: false, org_id: 'foo' } },
+        });
+        expect(coreSetup.analytics.registerShipper).not.toHaveBeenCalled();
+      });
+
+      it('does not call initializeFullStory when org_id is undefined', async () => {
+        const { coreSetup } = await setupPlugin({ config: { full_story: { enabled: true } } });
+        expect(coreSetup.analytics.registerShipper).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('setupTelemetryContext', () => {
+      const username = '1234';
+      const expectedHashedPlainUsername = new Sha256().update(username, 'utf8').digest('hex');
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      const setupPlugin = async ({
+        config = {},
+        securityEnabled = true,
+        currentUserProps = {},
+      }: {
+        config?: Partial<CloudConfigType>;
+        securityEnabled?: boolean;
+        currentUserProps?: Record<string, any> | Error;
+      }) => {
+        const initContext = coreMock.createPluginInitializerContext({
+          base_url: 'https://cloud.elastic.co',
+          deployment_url: '/abc123',
+          profile_url: '/profile/alice',
+          organization_url: '/org/myOrg',
+          full_story: {
+            enabled: false,
+          },
+          chat: {
+            enabled: false,
+          },
+          ...config,
+        });
+
+        const plugin = new CloudPlugin(initContext);
+
+        const coreSetup = coreMock.createSetup();
+        const securitySetup = securityMock.createSetup();
+        if (currentUserProps instanceof Error) {
+          securitySetup.authc.getCurrentUser.mockRejectedValue(currentUserProps);
+        } else {
+          securitySetup.authc.getCurrentUser.mockResolvedValue(
+            securityMock.createMockAuthenticatedUser(currentUserProps)
+          );
+        }
+
+        const setup = plugin.setup(coreSetup, securityEnabled ? { security: securitySetup } : {});
+
+        return { initContext, plugin, setup, coreSetup };
+      };
+
+      test('register the context provider for the cloud user with hashed user ID when security is available', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { id: 'cloudId' },
+          currentUserProps: { username },
+        });
+
+        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
+
+        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
+          ([{ name }]) => name === 'cloud_user_id'
+        )!;
+
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: '5ef112cfdae3dea57097bc276e275b2816e73ef2a398dc0ffaf5b6b4e3af2041',
+          isElasticCloudUser: false,
+        });
+      });
+
+      it('user hash includes cloud id', async () => {
+        const { coreSetup: coreSetup1 } = await setupPlugin({
+          config: { id: 'esOrg1' },
+          currentUserProps: { username },
+        });
+
+        const [{ context$: context1$ }] =
+          coreSetup1.analytics.registerContextProvider.mock.calls.find(
+            ([{ name }]) => name === 'cloud_user_id'
+          )!;
+
+        const { userId: hashId1 } = (await firstValueFrom(context1$)) as { userId: string };
+        expect(hashId1).not.toEqual(expectedHashedPlainUsername);
+
+        const { coreSetup: coreSetup2 } = await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg2' },
+          currentUserProps: { username },
+        });
+
+        const [{ context$: context2$ }] =
+          coreSetup2.analytics.registerContextProvider.mock.calls.find(
+            ([{ name }]) => name === 'cloud_user_id'
+          )!;
+
+        const { userId: hashId2 } = (await firstValueFrom(context2$)) as { userId: string };
+        expect(hashId2).not.toEqual(expectedHashedPlainUsername);
+
+        expect(hashId1).not.toEqual(hashId2);
+      });
+
+      test('user hash does not include cloudId when user is an Elastic Cloud user', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { id: 'cloudDeploymentId' },
+          currentUserProps: { username, elastic_cloud_user: true },
+        });
+
+        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
+
+        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
+          ([{ name }]) => name === 'cloud_user_id'
+        )!;
+
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: expectedHashedPlainUsername,
+          isElasticCloudUser: true,
+        });
+      });
+
+      test('user hash does not include cloudId when not provided', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: {},
+          currentUserProps: { username },
+        });
+
+        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
+
+        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
+          ([{ name }]) => name === 'cloud_user_id'
+        )!;
+
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: expectedHashedPlainUsername,
+          isElasticCloudUser: false,
+        });
+      });
+
+      test('user hash is undefined when failed to fetch a user', async () => {
+        const { coreSetup } = await setupPlugin({
+          currentUserProps: new Error('failed to fetch a user'),
+        });
+
+        expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();
+
+        const [{ context$ }] = coreSetup.analytics.registerContextProvider.mock.calls.find(
+          ([{ name }]) => name === 'cloud_user_id'
+        )!;
+
+        await expect(firstValueFrom(context$)).resolves.toEqual({
+          userId: undefined,
+          isElasticCloudUser: false,
+        });
+      });
+    });
+
+    describe('setupChat', () => {
+      let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
+
+      beforeEach(() => {
+        consoleMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
+      });
+
+      afterEach(() => {
+        consoleMock.mockRestore();
+      });
+
+      const setupPlugin = async ({
+        config = {},
+        securityEnabled = true,
+        currentUserProps = {},
+        isCloudEnabled = true,
+        failHttp = false,
+      }: {
+        config?: Partial<CloudConfigType>;
+        securityEnabled?: boolean;
+        currentUserProps?: Record<string, any>;
+        isCloudEnabled?: boolean;
+        failHttp?: boolean;
+      }) => {
+        const initContext = coreMock.createPluginInitializerContext({
+          id: isCloudEnabled ? 'cloud-id' : null,
+          base_url: 'https://cloud.elastic.co',
+          deployment_url: '/abc123',
+          profile_url: '/profile/alice',
+          organization_url: '/org/myOrg',
+          full_story: {
+            enabled: false,
+          },
+          chat: {
+            enabled: false,
+          },
           ...config,
         });
 
@@ -47,143 +267,55 @@ describe('Cloud Plugin', () => {
 
         const coreSetup = coreMock.createSetup();
         const coreStart = coreMock.createStart();
-        if (currentAppId$) {
-          coreStart.application.currentAppId$ = currentAppId$;
+
+        if (failHttp) {
+          coreSetup.http.get.mockImplementation(() => {
+            throw new Error('HTTP request failed');
+          });
         }
+
         coreSetup.getStartServices.mockResolvedValue([coreStart, {}, undefined]);
+
         const securitySetup = securityMock.createSetup();
         securitySetup.authc.getCurrentUser.mockResolvedValue(
           securityMock.createMockAuthenticatedUser(currentUserProps)
         );
 
         const setup = plugin.setup(coreSetup, securityEnabled ? { security: securitySetup } : {});
-        // Wait for fullstory dynamic import to resolve
-        await new Promise((r) => setImmediate(r));
 
-        return { initContext, plugin, setup };
+        return { initContext, plugin, setup, coreSetup };
       };
 
-      it('calls initializeFullStory with correct args when enabled and org_id are set', async () => {
-        const { initContext } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
-        });
-
-        expect(initializeFullStoryMock).toHaveBeenCalled();
-        const { basePath, orgId, packageInfo } = initializeFullStoryMock.mock.calls[0][0];
-        expect(basePath.prepend).toBeDefined();
-        expect(orgId).toEqual('foo');
-        expect(packageInfo).toEqual(initContext.env.packageInfo);
+      it('chatConfig is not retrieved if cloud is not enabled', async () => {
+        const { coreSetup } = await setupPlugin({ isCloudEnabled: false });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
       });
 
-      it('calls FS.identify with hashed user ID when security is available', async () => {
-        await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
-        });
-
-        expect(fullStoryApiMock.identify).toHaveBeenCalledWith(
-          '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
-          {
-            version_str: 'version',
-            version_major_int: -1,
-            version_minor_int: -1,
-            version_patch_int: -1,
-          }
-        );
+      it('chatConfig is not retrieved if security is not enabled', async () => {
+        const { coreSetup } = await setupPlugin({ securityEnabled: false });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
       });
 
-      it('calls FS.setUserVars everytime an app changes', async () => {
-        const currentAppId$ = new Subject<string | undefined>();
-        const { plugin } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
-          currentAppId$,
-        });
-
-        expect(fullStoryApiMock.setUserVars).not.toHaveBeenCalled();
-        currentAppId$.next('App1');
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
-          app_id_str: 'App1',
-        });
-        currentAppId$.next();
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
-          app_id_str: 'unknown',
-        });
-
-        currentAppId$.next('App2');
-        expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
-          app_id_str: 'App2',
-        });
-
-        expect(currentAppId$.observers.length).toBe(1);
-        plugin.stop();
-        expect(currentAppId$.observers.length).toBe(0);
+      it('chatConfig is not retrieved if chat is enabled but url is not provided', async () => {
+        // @ts-expect-error 2741
+        const { coreSetup } = await setupPlugin({ config: { chat: { enabled: true } } });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
       });
 
-      it('does not call FS.identify when security is not available', async () => {
-        await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          securityEnabled: false,
+      it('chatConfig is not retrieved if internal API fails', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { chat: { enabled: true, chatURL: 'http://chat.elastic.co' } },
+          failHttp: true,
         });
-
-        expect(fullStoryApiMock.identify).not.toHaveBeenCalled();
+        expect(coreSetup.http.get).toHaveBeenCalled();
+        expect(consoleMock).toHaveBeenCalled();
       });
 
-      it('calls FS.event when security is available', async () => {
-        const { initContext } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
+      it('chatConfig is retrieved if chat is enabled and url is provided', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { chat: { enabled: true, chatURL: 'http://chat.elastic.co' } },
         });
-
-        expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
-          kibana_version_str: initContext.env.packageInfo.version,
-        });
-      });
-
-      it('calls FS.event when security is not available', async () => {
-        const { initContext } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          securityEnabled: false,
-        });
-
-        expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
-          kibana_version_str: initContext.env.packageInfo.version,
-        });
-      });
-
-      it('calls FS.event when FS.identify throws an error', async () => {
-        fullStoryApiMock.identify.mockImplementationOnce(() => {
-          throw new Error(`identify failed!`);
-        });
-        const { initContext } = await setupPlugin({
-          config: { full_story: { enabled: true, org_id: 'foo' } },
-          currentUserProps: {
-            username: '1234',
-          },
-        });
-
-        expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
-          kibana_version_str: initContext.env.packageInfo.version,
-        });
-      });
-
-      it('does not call initializeFullStory when enabled=false', async () => {
-        await setupPlugin({ config: { full_story: { enabled: false, org_id: 'foo' } } });
-        expect(initializeFullStoryMock).not.toHaveBeenCalled();
-      });
-
-      it('does not call initializeFullStory when org_id is undefined', async () => {
-        await setupPlugin({ config: { full_story: { enabled: true } } });
-        expect(initializeFullStoryMock).not.toHaveBeenCalled();
+        expect(coreSetup.http.get).toHaveBeenCalled();
       });
     });
 
@@ -196,6 +328,12 @@ describe('Cloud Plugin', () => {
           deployment_url: '/abc123',
           profile_url: '/user/settings/',
           organization_url: '/account/',
+          chat: {
+            enabled: false,
+          },
+          full_story: {
+            enabled: false,
+          },
         });
         const plugin = new CloudPlugin(initContext);
 
@@ -259,6 +397,9 @@ describe('Cloud Plugin', () => {
           full_story: {
             enabled: false,
           },
+          chat: {
+            enabled: false,
+          },
         })
       );
       const coreSetup = coreMock.createSetup();
@@ -279,7 +420,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
       expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "https://support.elastic.co/",
+          "https://cloud.elastic.co/support",
         ]
       `);
     });
@@ -323,7 +464,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "euiIconType": "arrowLeft",
+            "euiIconType": "logoCloud",
             "href": "https://cloud.elastic.co/abc123",
             "title": "Manage this deployment",
           },
@@ -345,7 +486,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "euiIconType": "arrowLeft",
+            "euiIconType": "logoCloud",
             "href": "https://cloud.elastic.co/abc123",
             "title": "Manage this deployment",
           },
@@ -453,58 +594,6 @@ describe('Cloud Plugin', () => {
       await nextTick();
 
       expect(securityStart.navControlService.addUserMenuLinks).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('loadFullStoryUserId', () => {
-    let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
-
-    beforeEach(() => {
-      consoleMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
-    });
-    afterEach(() => {
-      consoleMock.mockRestore();
-    });
-
-    it('returns principal ID when username specified', async () => {
-      expect(
-        await loadFullStoryUserId({
-          getCurrentUser: jest.fn().mockResolvedValue({
-            username: '1234',
-          }),
-        })
-      ).toEqual('1234');
-      expect(consoleMock).not.toHaveBeenCalled();
-    });
-
-    it('returns undefined if getCurrentUser throws', async () => {
-      expect(
-        await loadFullStoryUserId({
-          getCurrentUser: jest.fn().mockRejectedValue(new Error(`Oh no!`)),
-        })
-      ).toBeUndefined();
-    });
-
-    it('returns undefined if getCurrentUser returns undefined', async () => {
-      expect(
-        await loadFullStoryUserId({
-          getCurrentUser: jest.fn().mockResolvedValue(undefined),
-        })
-      ).toBeUndefined();
-    });
-
-    it('returns undefined and logs if username undefined', async () => {
-      expect(
-        await loadFullStoryUserId({
-          getCurrentUser: jest.fn().mockResolvedValue({
-            username: undefined,
-            metadata: { foo: 'bar' },
-          }),
-        })
-      ).toBeUndefined();
-      expect(consoleMock).toHaveBeenLastCalledWith(
-        `[cloud.full_story] username not specified. User metadata: {"foo":"bar"}`
-      );
     });
   });
 });

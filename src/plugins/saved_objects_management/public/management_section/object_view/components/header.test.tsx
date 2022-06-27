@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Header } from './header';
 
 describe('Intro component', () => {
@@ -40,7 +40,7 @@ describe('Intro component', () => {
     const mounted = mountHeader({
       ...defaultProps,
     });
-    expect(mounted).toMatchSnapshot();
+    expect(mounted.render()).toMatchSnapshot();
   });
 
   it('displays correct title if one is provided', () => {

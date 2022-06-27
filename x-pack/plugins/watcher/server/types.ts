@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
+import { SemVer } from 'semver';
+import type { IRouter } from '@kbn/core/server';
 
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { License, handleEsError } from './shared_imports';
 
 export interface SetupDependencies {
@@ -33,4 +34,5 @@ export interface RouteDependencies {
   lib: {
     handleEsError: typeof handleEsError;
   };
+  kibanaVersion: SemVer;
 }

@@ -22,15 +22,14 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FilterEditor } from './filter_editor';
 import { JoinEditor, JoinField } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerSettings } from './layer_settings';
 import { StyleSettings } from './style_settings';
-
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { LAYER_TYPE } from '../../../common/constants';
+import { VectorLayerDescriptor } from '../../../common/descriptor_types';
 import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
@@ -41,12 +40,7 @@ const localStorage = new Storage(window.localStorage);
 
 export interface Props {
   selectedLayer?: ILayer;
-  updateSourceProp: (
-    layerId: string,
-    propName: string,
-    value: unknown,
-    newLayerType?: LAYER_TYPE
-  ) => void;
+  updateSourceProps: (layerId: string, sourcePropChanges: OnSourceChangeArgs[]) => Promise<void>;
 }
 
 interface State {
@@ -141,10 +135,7 @@ export class EditLayerPanel extends Component<Props, State> {
   }
 
   _onSourceChange = (...args: OnSourceChangeArgs[]) => {
-    for (let i = 0; i < args.length; i++) {
-      const { propName, value, newLayerType } = args[i];
-      this.props.updateSourceProp(this.props.selectedLayer!.getId(), propName, value, newLayerType);
-    }
+    return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
   };
 
   _renderLayerErrors() {
@@ -232,6 +223,9 @@ export class EditLayerPanel extends Component<Props, State> {
       return null;
     }
 
+    const descriptor = this.props.selectedLayer.getDescriptor() as VectorLayerDescriptor;
+    const numberOfJoins = descriptor.joins ? descriptor.joins.length : 0;
+
     return (
       <KibanaContextProvider
         services={{
@@ -279,6 +273,8 @@ export class EditLayerPanel extends Component<Props, State> {
               />
 
               {this.props.selectedLayer.renderSourceSettingsEditor({
+                currentLayerType: this.props.selectedLayer.getType(),
+                numberOfJoins,
                 onChange: this._onSourceChange,
               })}
 

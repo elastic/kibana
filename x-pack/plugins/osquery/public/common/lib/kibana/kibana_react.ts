@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { FieldIcon } from '@kbn/react-field';
 import {
   KibanaContextProvider,
   KibanaReactContextValue,
@@ -15,8 +16,7 @@ import {
   useUiSetting$,
   withKibana,
   reactRouterNavigate,
-  FieldIcon,
-} from '../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 import { StartServices } from '../../../types';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;
@@ -36,6 +36,7 @@ const useRouterNavigate = (
   onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
 ) => {
   const history = useHistory();
+
   return reactRouterNavigate(history, to, onClickCallback);
 };
 

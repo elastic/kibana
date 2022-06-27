@@ -8,6 +8,7 @@
 import createContainer from 'constate';
 import { useEffect, useMemo, useState } from 'react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   MetricsSourceConfigurationResponse,
   MetricsSourceConfiguration,
@@ -15,7 +16,6 @@ import {
 } from '../../../common/metrics_sources';
 
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const pickIndexPattern = (
   source: MetricsSourceConfiguration | undefined,
@@ -100,10 +100,10 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [fetchService, sourceId]
   );
 
-  const createDerivedIndexPattern = (type: 'metrics') => {
+  const createDerivedIndexPattern = () => {
     return {
       fields: source?.status ? source.status.indexFields : [],
-      title: pickIndexPattern(source, type),
+      title: pickIndexPattern(source, 'metrics'),
     };
   };
 
@@ -145,6 +145,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     isUninitialized,
     hasFailedLoadingSource: loadSourceRequest.state === 'rejected',
     loadSource,
+    loadSourceRequest,
     loadSourceFailureMessage:
       loadSourceRequest.state === 'rejected' ? `${loadSourceRequest.value}` : undefined,
     metricIndicesExist,

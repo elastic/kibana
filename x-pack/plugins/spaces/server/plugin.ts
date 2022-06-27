@@ -13,15 +13,15 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
-import type { HomeServerPluginSetup } from 'src/plugins/home/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
+} from '@kbn/core/server';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup } from '../../licensing/server';
+} from '@kbn/features-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 import { SpacesLicenseService } from '../common/licensing';
 import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';
@@ -57,9 +57,6 @@ export interface PluginsStart {
 export interface SpacesPluginSetup {
   /**
    * Service for interacting with spaces.
-   *
-   * @deprecated Please use the `spacesService` available on this plugin's start contract.
-   * @removeBy 7.16
    */
   spacesService: SpacesServiceSetup;
 
@@ -94,8 +91,6 @@ export class SpacesPlugin
 {
   private readonly config$: Observable<ConfigType>;
 
-  private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
-
   private readonly log: Logger;
 
   private readonly spacesLicenseService = new SpacesLicenseService();
@@ -110,7 +105,6 @@ export class SpacesPlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
-    this.kibanaIndexConfig$ = initializerContext.config.legacy.globalConfig$;
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
     this.spacesClientService = new SpacesClientService((message) => this.log.debug(message));
@@ -180,7 +174,7 @@ export class SpacesPlugin
 
     if (plugins.usageCollection) {
       registerSpacesUsageCollector(plugins.usageCollection, {
-        kibanaIndexConfig$: this.kibanaIndexConfig$,
+        kibanaIndex: core.savedObjects.getKibanaIndex(),
         features: plugins.features,
         licensing: plugins.licensing,
         usageStatsServicePromise,

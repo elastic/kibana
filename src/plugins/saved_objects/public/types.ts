@@ -12,16 +12,15 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
-} from 'kibana/public';
-import {
-  DataPublicPluginStart,
-  IndexPattern,
-  IndexPatternsContract,
-  ISearchSource,
-  SearchSourceFields,
-} from '../../data/public';
+} from '@kbn/core/public';
+import { ISearchSource, ISearchStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-/** @deprecated */
+/**
+ * @deprecated
+ * @removeBy 8.8.0
+ */
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;
@@ -34,7 +33,7 @@ export interface SavedObject {
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;
-  hydrateIndexPattern?: (id?: string) => Promise<null | IndexPattern>;
+  hydrateIndexPattern?: (id?: string) => Promise<null | DataView>;
   id?: string;
   init?: () => Promise<SavedObject>;
   isSaving: boolean;
@@ -43,7 +42,7 @@ export interface SavedObject {
   migrationVersion?: Record<string, any>;
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
   searchSource?: ISearchSource;
-  searchSourceFields?: SearchSourceFields;
+  searchSourceFields?: SerializedSearchSourceFields;
   showInRecentlyAccessed: boolean;
   title: string;
   unresolvedIndexPatternReference?: SavedObjectReference;
@@ -63,8 +62,8 @@ export interface SavedObjectCreationOpts {
 
 export interface SavedObjectKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
-  search: DataPublicPluginStart['search'];
+  dataViews: DataViewsContract;
+  search: ISearchStart;
   chrome: ChromeStart;
   overlays: OverlayStart;
 }
@@ -82,7 +81,7 @@ export interface SavedObjectConfig {
   injectReferences?: <T extends SavedObject>(object: T, references: SavedObjectReference[]) => void;
   id?: string;
   init?: () => void;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   mapping?: Record<string, any>;
   migrationVersion?: Record<string, any>;
   path?: string;

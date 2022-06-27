@@ -4,19 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiEmptyPrompt,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiLoadingContent,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { PolicyResponseWrapper } from '../../../../components/policy_response';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
-import { PreferenceFormattedDateFromPrimitive } from '../../../../../common/components/formatted_date';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import {
@@ -24,13 +16,6 @@ import {
   detailsError,
   getActivityLogData,
   hostStatusInfo,
-  policyResponseActions,
-  policyResponseAppliedRevision,
-  policyResponseConfigurations,
-  policyResponseError,
-  policyResponseFailedOrWarningActionCount,
-  policyResponseLoading,
-  policyResponseTimestamp,
   policyVersionInfo,
   showView,
   uiQueryParams,
@@ -38,17 +23,14 @@ import {
 import { useEndpointSelector } from '../hooks';
 import * as i18 from '../translations';
 import { ActionsMenu } from './components/actions_menu';
-import { BackToEndpointDetailsFlyoutSubHeader } from './components/back_to_endpoint_details_flyout_subheader';
 import {
   EndpointDetailsFlyoutTabs,
   EndpointDetailsTabsTypes,
 } from './components/endpoint_details_tabs';
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
-import { FlyoutBodyNoTopPadding } from './components/flyout_body_no_top_padding';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
 import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsContent } from './endpoint_details_content';
-import { PolicyResponse } from './policy_response';
 
 export const EndpointDetails = memo(() => {
   const toasts = useToasts();
@@ -126,7 +108,11 @@ export const EndpointDetails = memo(() => {
   return (
     <>
       {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
-        <EndpointDetailsFlyoutHeader hostname={hostDetails?.host?.hostname} />
+        <EndpointDetailsFlyoutHeader
+          hasBorder
+          endpointId={hostDetails?.agent.id}
+          hostname={hostDetails?.host?.hostname}
+        />
       )}
       {hostDetails === undefined ? (
         <EuiFlyoutBody>
@@ -164,61 +150,14 @@ EndpointDetails.displayName = 'EndpointDetails';
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
-  const responseConfig = useEndpointSelector(policyResponseConfigurations);
-  const responseActions = useEndpointSelector(policyResponseActions);
-  const responseAttentionCount = useEndpointSelector(policyResponseFailedOrWarningActionCount);
-  const loading = useEndpointSelector(policyResponseLoading);
-  const error = useEndpointSelector(policyResponseError);
-  const responseTimestamp = useEndpointSelector(policyResponseTimestamp);
-  const responsePolicyRevisionNumber = useEndpointSelector(policyResponseAppliedRevision);
-
   return (
     <>
-      <BackToEndpointDetailsFlyoutSubHeader endpointId={hostMeta.agent.id} />
-
-      <FlyoutBodyNoTopPadding
+      <EuiFlyoutBody
         data-test-subj="endpointDetailsPolicyResponseFlyoutBody"
         className="endpointDetailsPolicyResponseFlyoutBody"
       >
-        <EuiText data-test-subj="endpointDetailsPolicyResponseFlyoutTitle">
-          <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyResponse.title"
-              defaultMessage="Policy Response"
-            />
-          </h4>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued" data-test-subj="endpointDetailsPolicyResponseTimestamp">
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyResponse.appliedOn"
-            defaultMessage="Revision {rev} applied on {date}"
-            values={{
-              rev: responsePolicyRevisionNumber,
-              date: <PreferenceFormattedDateFromPrimitive value={responseTimestamp} />,
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-        {error && (
-          <EuiEmptyPrompt
-            title={
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.details.noPolicyResponse"
-                defaultMessage="No policy response available"
-              />
-            }
-          />
-        )}
-        {loading && <EuiLoadingContent lines={3} />}
-        {responseConfig !== undefined && responseActions !== undefined && (
-          <PolicyResponse
-            responseConfig={responseConfig}
-            responseActions={responseActions}
-            responseAttentionCount={responseAttentionCount}
-          />
-        )}
-      </FlyoutBodyNoTopPadding>
+        <PolicyResponseWrapper endpointId={hostMeta.agent.id} />
+      </EuiFlyoutBody>
     </>
   );
 });

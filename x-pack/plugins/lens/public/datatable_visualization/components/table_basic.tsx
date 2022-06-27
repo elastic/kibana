@@ -6,23 +6,26 @@
  */
 
 import './table_basic.scss';
-
-import React, { useCallback, useMemo, useRef, useState, useContext } from 'react';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
+import React, { useCallback, useMemo, useRef, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
   EuiButtonIcon,
   EuiDataGrid,
+  EuiDataGridRefProps,
   EuiDataGridControlColumn,
   EuiDataGridColumn,
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import type { LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { LensTableRowContextMenuEvent } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { LensGridDirection } from '../../../common/expressions';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder, findMinMaxByColumnId } from '../../shared_components';
+import { findMinMaxByColumnId } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import type {
   DataContextType,
@@ -30,6 +33,7 @@ import type {
   LensSortAction,
   LensResizeAction,
   LensToggleAction,
+  LensPagesizeAction,
 } from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
@@ -40,7 +44,6 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { CUSTOM_PALETTE } from '../../shared_components/coloring/constants';
 import { getOriginalId, getFinalSummaryConfiguration } from '../../../common/expressions';
 
 export const DataContext = React.createContext<DataContextType>({});
@@ -50,15 +53,36 @@ const gridStyle: EuiDataGridStyle = {
   header: 'underline',
 };
 
+export const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
+
 export const DatatableComponent = (props: DatatableRenderProps) => {
-  const [firstTable] = Object.values(props.data.tables);
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
+
+  const isInteractive = props.interactive;
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
     sortingColumnId: props.args.sortingColumnId,
     sortingDirection: props.args.sortingDirection,
   });
-  const [firstLocalTable, updateTable] = useState(firstTable);
+  const [firstLocalTable, updateTable] = useState(props.data);
+
+  // ** Pagination config
+  const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number } | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    setPagination(
+      props.args.pageSize
+        ? {
+            pageIndex: 0,
+            pageSize: props.args.pageSize ?? DEFAULT_PAGE_SIZE,
+          }
+        : undefined
+    );
+  }, [props.args.pageSize]);
 
   useDeepCompareEffect(() => {
     setColumnConfig({
@@ -69,8 +93,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   }, [props.args.columns, props.args.sortingColumnId, props.args.sortingDirection]);
 
   useDeepCompareEffect(() => {
-    updateTable(firstTable);
-  }, [firstTable]);
+    updateTable(props.data);
+  }, [props.data]);
 
   const firstTableRef = useRef(firstLocalTable);
   firstTableRef.current = firstLocalTable;
@@ -95,20 +119,42 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onClickValue = useCallback(
-    (data: LensFilterEvent['data']) => {
+    (data: ClickTriggerEvent['data']) => {
       dispatchEvent({ name: 'filter', data });
     },
     [dispatchEvent]
   );
 
   const onEditAction = useCallback(
-    (data: LensSortAction['data'] | LensResizeAction['data'] | LensToggleAction['data']) => {
-      if (renderMode === 'edit') {
-        dispatchEvent({ name: 'edit', data });
-      }
+    (
+      data:
+        | LensSortAction['data']
+        | LensResizeAction['data']
+        | LensToggleAction['data']
+        | LensPagesizeAction['data']
+    ) => {
+      dispatchEvent({ name: 'edit', data });
     },
-    [dispatchEvent, renderMode]
+    [dispatchEvent]
   );
+
+  const onChangeItemsPerPage = useCallback(
+    (pageSize) => onEditAction({ action: 'pagesize', size: pageSize }),
+    [onEditAction]
+  );
+
+  // active page isn't persisted, so we manage this state locally
+  const onChangePage = useCallback(
+    (pageIndex) => {
+      setPagination((_pagination) => {
+        if (_pagination) {
+          return { pageSize: _pagination?.pageSize, pageIndex };
+        }
+      });
+    },
+    [setPagination]
+  );
+
   const onRowContextMenuClick = useCallback(
     (data: LensTableRowContextMenuEvent['data']) => {
       dispatchEvent({ name: 'tableRowContextMenuClick', data });
@@ -117,13 +163,16 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const handleFilterClick = useMemo(
-    () => createGridFilterHandler(firstTableRef, onClickValue),
-    [firstTableRef, onClickValue]
+    () => (isInteractive ? createGridFilterHandler(firstTableRef, onClickValue) : undefined),
+    [firstTableRef, onClickValue, isInteractive]
   );
 
   const handleTransposedColumnClick = useMemo(
-    () => createTransposeColumnFilterHandler(onClickValue, untransposedDataRef),
-    [onClickValue, untransposedDataRef]
+    () =>
+      isInteractive
+        ? createTransposeColumnFilterHandler(onClickValue, untransposedDataRef)
+        : undefined,
+    [onClickValue, untransposedDataRef, isInteractive]
   );
 
   const bucketColumns = useMemo(
@@ -143,7 +192,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const isEmpty =
     firstLocalTable.rows.length === 0 ||
     (bucketColumns.length &&
-      firstTable.rows.every((row) => bucketColumns.every((col) => row[col] == null)));
+      props.data.rows.every((row) => bucketColumns.every((col) => row[col] == null)));
 
   const visibleColumns = useMemo(
     () =>
@@ -163,14 +212,24 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onColumnHide = useMemo(
-    () => createGridHideHandler(columnConfig, setColumnConfig, onEditAction),
-    [onEditAction, setColumnConfig, columnConfig]
+    () =>
+      isInteractive
+        ? createGridHideHandler(columnConfig, setColumnConfig, onEditAction)
+        : undefined,
+    [onEditAction, setColumnConfig, columnConfig, isInteractive]
   );
 
   const isNumericMap: Record<string, boolean> = useMemo(() => {
     const numericMap: Record<string, boolean> = {};
     for (const column of firstLocalTable.columns) {
-      numericMap[column.id] = column.meta.type === 'number';
+      // filtered metrics result as "number" type, but have no field
+      numericMap[column.id] =
+        (column.meta.type === 'number' && column.meta.field != null) ||
+        // as fallback check the first available value type
+        // mind here: date can be seen as numbers, to carefully check that is a filtered metric
+        (column.meta.field == null &&
+          typeof firstLocalTable.rows.find((row) => row[column.id] != null)?.[column.id] ===
+            'number');
     }
     return numericMap;
   }, [firstLocalTable]);
@@ -192,10 +251,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       columnConfig.columns
         .filter(({ columnId }) => isNumericMap[columnId])
         .map(({ columnId }) => columnId),
-      firstTable,
+      props.data,
       getOriginalId
     );
-  }, [firstTable, isNumericMap, columnConfig]);
+  }, [props.data, isNumericMap, columnConfig]);
+
+  const headerRowHeight = props.args.headerRowHeight ?? 'single';
+  const headerRowLines = props.args.headerRowHeightLines ?? 1;
 
   const columns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -210,7 +272,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         formatFactory,
         onColumnResize,
         onColumnHide,
-        alignments
+        alignments,
+        headerRowHeight,
+        headerRowLines,
+        dataGridRef.current?.closeCellPopover
       ),
     [
       bucketColumns,
@@ -224,11 +289,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       onColumnResize,
       onColumnHide,
       alignments,
+      headerRowHeight,
+      headerRowLines,
     ]
   );
 
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {
+    if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick || !isInteractive) {
       return [];
     }
     return [
@@ -261,11 +328,24 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         },
       },
     ];
-  }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
+  }, [
+    firstTableRef,
+    onRowContextMenuClick,
+    columnConfig,
+    hasAtLeastOneRowClickAction,
+    isInteractive,
+  ]);
 
   const renderCellValue = useMemo(
-    () => createGridCell(formatters, columnConfig, DataContext, props.uiSettings),
-    [formatters, columnConfig, props.uiSettings]
+    () =>
+      createGridCell(
+        formatters,
+        columnConfig,
+        DataContext,
+        props.uiSettings,
+        props.args.fitRowToContent
+      ),
+    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
   );
 
   const columnVisibility = useMemo(
@@ -276,7 +356,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [visibleColumns]
   );
 
-  const sorting = useMemo<EuiDataGridSorting>(
+  const sorting = useMemo<EuiDataGridSorting | undefined>(
     () => createGridSortingConfig(sortBy, sortDirection as LensGridDirection, onEditAction),
     [onEditAction, sortBy, sortDirection]
   );
@@ -287,7 +367,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       .map((config) => ({
         columnId: config.columnId,
         summaryRowValue: config.summaryRowValue,
-        ...getFinalSummaryConfiguration(config.columnId, config, firstTable),
+        ...getFinalSummaryConfiguration(config.columnId, config, props.data),
       }))
       .filter(({ summaryRow }) => summaryRow !== 'none');
 
@@ -313,15 +393,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         ) : null;
       };
     }
-  }, [columnConfig.columns, alignments, firstTable, columns]);
+  }, [columnConfig.columns, alignments, props.data, columns]);
 
   if (isEmpty) {
     return (
-      <VisualizationContainer
-        className="lnsDataTableContainer"
-        reportTitle={props.args.title}
-        reportDescription={props.args.description}
-      >
+      <VisualizationContainer className="lnsDataTableContainer">
         <EmptyPlaceholder icon={LensIconChartDatatable} />
       </VisualizationContainer>
     );
@@ -334,11 +410,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <VisualizationContainer
-      className="lnsDataTableContainer"
-      reportTitle={props.args.title}
-      reportDescription={props.args.description}
-    >
+    <VisualizationContainer className="lnsDataTableContainer">
       <DataContext.Provider
         value={{
           table: firstLocalTable,
@@ -351,6 +423,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         <EuiDataGrid
           aria-label={dataGridAriaLabel}
           data-test-subj="lnsDataTable"
+          rowHeightsOptions={{
+            defaultHeight: props.args.fitRowToContent
+              ? 'auto'
+              : props.args.rowHeightLines
+              ? {
+                  lineCount: props.args.rowHeightLines,
+                }
+              : undefined,
+          }}
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}
@@ -358,9 +439,18 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           renderCellValue={renderCellValue}
           gridStyle={gridStyle}
           sorting={sorting}
+          pagination={
+            pagination && {
+              ...pagination,
+              pageSizeOptions: PAGE_SIZE_OPTIONS,
+              onChangeItemsPerPage,
+              onChangePage,
+            }
+          }
           onColumnResize={onColumnResize}
           toolbarVisibility={false}
           renderFooterCellValue={renderSummaryRow}
+          ref={dataGridRef}
         />
       </DataContext.Provider>
     </VisualizationContainer>

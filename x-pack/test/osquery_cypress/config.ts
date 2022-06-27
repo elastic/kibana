@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../test/common/config.js')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
+    require.resolve('../functional/config.base.js')
   );
 
   return {
@@ -27,6 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // define custom es server here
         // API Keys is enabled at the top level
         'xpack.security.enabled=true',
+        'http.host=0.0.0.0',
       ],
     },
 
@@ -37,6 +38,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        `--xpack.fleet.agents.elasticsearch.host=http://host.docker.internal:${kibanaCommonTestsConfig.get(
+          'servers.elasticsearch.port'
+        )}`,
       ],
     },
   };

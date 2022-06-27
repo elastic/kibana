@@ -7,25 +7,25 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import TelemetryManagementSection from './telemetry_management_section';
-import { TelemetryService } from '../../../telemetry/public/services';
-import { coreMock } from '../../../../core/public/mocks';
+import { TelemetryService } from '@kbn/telemetry-plugin/public/services';
+import { coreMock } from '@kbn/core/public/mocks';
 import { render } from '@testing-library/react';
-import type { DocLinksStart } from 'src/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
-  const docLinks = {} as DocLinksStart['links'];
+  const docLinks = {
+    legal: { privacyStatement: 'https://some-host/some-url' },
+  } as unknown as DocLinksStart['links'];
   const coreSetup = coreMock.createSetup();
 
   it('renders as expected', () => {
     const onQueryMatchChange = jest.fn();
-    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
         sendUsageTo: 'staging',
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: true,
@@ -45,7 +45,6 @@ describe('TelemetryManagementSectionComponent', () => {
           onQueryMatchChange={onQueryMatchChange}
           showAppliesSettingMessage={true}
           enableSaving={true}
-          isSecurityExampleEnabled={isSecurityExampleEnabled}
           toasts={coreStart.notifications.toasts}
           docLinks={docLinks}
         />
@@ -55,10 +54,8 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('renders null because query does not match the SEARCH_TERMS', () => {
     const onQueryMatchChange = jest.fn();
-    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -79,7 +76,6 @@ describe('TelemetryManagementSectionComponent', () => {
           onQueryMatchChange={onQueryMatchChange}
           showAppliesSettingMessage={false}
           enableSaving={true}
-          isSecurityExampleEnabled={isSecurityExampleEnabled}
           toasts={coreStart.notifications.toasts}
           docLinks={docLinks}
         />
@@ -96,7 +92,6 @@ describe('TelemetryManagementSectionComponent', () => {
             showAppliesSettingMessage={false}
             enableSaving={true}
             toasts={coreStart.notifications.toasts}
-            isSecurityExampleEnabled={isSecurityExampleEnabled}
             docLinks={docLinks}
           />
         </React.Suspense>
@@ -110,10 +105,8 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('renders because query matches the SEARCH_TERMS', () => {
     const onQueryMatchChange = jest.fn();
-    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -132,7 +125,6 @@ describe('TelemetryManagementSectionComponent', () => {
         telemetryService={telemetryService}
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
-        isSecurityExampleEnabled={isSecurityExampleEnabled}
         enableSaving={true}
         toasts={coreStart.notifications.toasts}
         docLinks={docLinks}
@@ -158,10 +150,8 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('renders null because allowChangingOptInStatus is false', () => {
     const onQueryMatchChange = jest.fn();
-    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: true,
@@ -181,7 +171,6 @@ describe('TelemetryManagementSectionComponent', () => {
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={true}
         enableSaving={true}
-        isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
         docLinks={docLinks}
       />
@@ -197,10 +186,8 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('shows the OptInExampleFlyout', () => {
     const onQueryMatchChange = jest.fn();
-    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -220,13 +207,15 @@ describe('TelemetryManagementSectionComponent', () => {
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
         enableSaving={true}
-        isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
         docLinks={docLinks}
       />
     );
     try {
-      const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(0);
+      const toggleExampleComponent = component
+        .find('FormattedMessage > EuiLink')
+        .find('button')
+        .at(0);
       const updatedView = toggleExampleComponent.simulate('click');
       updatedView.find('OptInExampleFlyout');
       updatedView.simulate('close');
@@ -235,92 +224,10 @@ describe('TelemetryManagementSectionComponent', () => {
     }
   });
 
-  it('shows the OptInSecurityExampleFlyout', () => {
-    const onQueryMatchChange = jest.fn();
-    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
-    const telemetryService = new TelemetryService({
-      config: {
-        enabled: true,
-        banner: true,
-        allowChangingOptInStatus: true,
-        optIn: false,
-        sendUsageTo: 'staging',
-        sendUsageFrom: 'browser',
-      },
-      isScreenshotMode: false,
-      reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
-      currentKibanaVersion: 'mock_kibana_version',
-      http: coreSetup.http,
-    });
-
-    const component = mountWithIntl(
-      <TelemetryManagementSection
-        telemetryService={telemetryService}
-        onQueryMatchChange={onQueryMatchChange}
-        showAppliesSettingMessage={false}
-        isSecurityExampleEnabled={isSecurityExampleEnabled}
-        enableSaving={true}
-        toasts={coreStart.notifications.toasts}
-        docLinks={docLinks}
-      />
-    );
-    try {
-      const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(1);
-      const updatedView = toggleExampleComponent.simulate('click');
-      updatedView.find('OptInSecurityExampleFlyout');
-      updatedView.simulate('close');
-    } finally {
-      component.unmount();
-    }
-  });
-
-  it('does not show the endpoint link when isSecurityExampleEnabled returns false', () => {
-    const onQueryMatchChange = jest.fn();
-    const isSecurityExampleEnabled = jest.fn().mockReturnValue(false);
-    const telemetryService = new TelemetryService({
-      config: {
-        enabled: true,
-        banner: true,
-        allowChangingOptInStatus: true,
-        optIn: false,
-        sendUsageTo: 'staging',
-        sendUsageFrom: 'browser',
-      },
-      isScreenshotMode: false,
-      reportOptInStatusChange: false,
-      currentKibanaVersion: 'mock_kibana_version',
-      notifications: coreStart.notifications,
-      http: coreSetup.http,
-    });
-
-    const component = mountWithIntl(
-      <TelemetryManagementSection
-        telemetryService={telemetryService}
-        onQueryMatchChange={onQueryMatchChange}
-        showAppliesSettingMessage={false}
-        isSecurityExampleEnabled={isSecurityExampleEnabled}
-        enableSaving={true}
-        toasts={coreStart.notifications.toasts}
-        docLinks={docLinks}
-      />
-    );
-
-    try {
-      const description = (component.instance() as TelemetryManagementSection).renderDescription();
-      expect(isSecurityExampleEnabled).toBeCalled();
-      expect(description).toMatchSnapshot();
-    } finally {
-      component.unmount();
-    }
-  });
-
   it('toggles the OptIn button', async () => {
     const onQueryMatchChange = jest.fn();
-    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -340,7 +247,6 @@ describe('TelemetryManagementSectionComponent', () => {
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
         enableSaving={true}
-        isSecurityExampleEnabled={isSecurityExampleEnabled}
         toasts={coreStart.notifications.toasts}
         docLinks={docLinks}
       />
@@ -350,7 +256,7 @@ describe('TelemetryManagementSectionComponent', () => {
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
       ).resolves.toBe(true);
-      // TODO: Fix `mountWithIntl` types in @kbn/test/jest to make testing easier
+      // TODO: Fix `mountWithIntl` types in @kbn/test-jest-helpers to make testing easier
       expect((component.state() as { enabled: boolean }).enabled).toBe(true);
       await expect(
         toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
@@ -367,10 +273,8 @@ describe('TelemetryManagementSectionComponent', () => {
 
   it('test the wrapper (for coverage purposes)', () => {
     const onQueryMatchChange = jest.fn();
-    const isSecurityExampleEnabled = jest.fn().mockReturnValue(true);
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: false,
@@ -392,7 +296,6 @@ describe('TelemetryManagementSectionComponent', () => {
           onQueryMatchChange={onQueryMatchChange}
           enableSaving={true}
           toasts={coreStart.notifications.toasts}
-          isSecurityExampleEnabled={isSecurityExampleEnabled}
           docLinks={docLinks}
         />
       ).html()

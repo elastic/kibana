@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const path = require('path');
@@ -6,12 +14,14 @@ const path = require('path');
 const STORYBOOKS = [
   'apm',
   'canvas',
-  'codeeditor',
   'ci_composite',
-  'url_template_editor',
-  'dashboard',
+  'cloud',
+  'coloring',
+  'controls',
+  'custom_integrations',
   'dashboard_enhanced',
-  'data_enhanced',
+  'dashboard',
+  'data',
   'embeddable',
   'expression_error',
   'expression_image',
@@ -22,11 +32,14 @@ const STORYBOOKS = [
   'expression_tagcloud',
   'fleet',
   'infra',
-  'security_solution',
-  'ui_actions_enhanced',
+  'kibana_react',
+  'lists',
   'observability',
   'presentation',
-  'lists',
+  'security_solution',
+  'shared_ux',
+  'ui_actions_enhanced',
+  'unified_search',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
@@ -72,7 +85,7 @@ const upload = () => {
       .trim()
       .split('\n')
       .map((path) => path.replace('/', ''))
-      .filter((path) => path != 'composite');
+      .filter((path) => path !== 'composite');
 
     const listHtml = storybooks
       .map((storybook) => `<li><a href="${STORYBOOK_BASE_URL}/${storybook}">${storybook}</a></li>`)
@@ -98,6 +111,12 @@ const upload = () => {
       gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);
+
+    if (process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false') {
+      exec(
+        `buildkite-agent meta-data set pr_comment:storybooks:head '* [Storybooks Preview](${STORYBOOK_BASE_URL})'`
+      );
+    }
   } finally {
     process.chdir(originalDirectory);
   }

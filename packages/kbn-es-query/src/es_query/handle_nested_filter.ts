@@ -7,10 +7,15 @@
  */
 
 import { getFilterField, cleanFilter, Filter } from '../filters';
-import { IndexPatternBase } from './types';
+import { DataViewBase } from './types';
+import { getDataViewFieldSubtypeNested } from '../utils';
 
 /** @internal */
-export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternBase) => {
+export const handleNestedFilter = (
+  filter: Filter,
+  indexPattern?: DataViewBase,
+  config: { ignoreUnmapped?: boolean } = {}
+) => {
   if (!indexPattern) return filter;
 
   const fieldName = getFilterField(filter);
@@ -21,7 +26,9 @@ export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternBa
   const field = indexPattern.fields.find(
     (indexPatternField) => indexPatternField.name === fieldName
   );
-  if (!field || !field.subType || !field.subType.nested || !field.subType.nested.path) {
+
+  const subTypeNested = field && getDataViewFieldSubtypeNested(field);
+  if (!subTypeNested) {
     return filter;
   }
 
@@ -29,9 +36,14 @@ export const handleNestedFilter = (filter: Filter, indexPattern?: IndexPatternBa
 
   return {
     meta: filter.meta,
-    nested: {
-      path: field.subType.nested.path,
-      query: query.query || query,
+    query: {
+      nested: {
+        path: subTypeNested.nested.path,
+        query: query.query || query,
+        ...(typeof config.ignoreUnmapped === 'boolean' && {
+          ignore_unmapped: config.ignoreUnmapped,
+        }),
+      },
     },
   };
 };

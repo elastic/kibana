@@ -5,20 +5,54 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import React from 'react';
+import {
+  noMetricIndicesPromptDescription,
+  noMetricIndicesPromptPrimaryActionTitle,
+} from '../../components/empty_states';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import type { LazyObservabilityPageTemplateProps } from '../../../../observability/public';
 
-export const MetricsPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (
-  pageTemplateProps
-) => {
+interface MetricsPageTemplateProps extends LazyObservabilityPageTemplateProps {
+  hasData?: boolean;
+}
+
+export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
+  hasData = true,
+  'data-test-subj': _dataTestSubj,
+  ...pageTemplateProps
+}) => {
   const {
     services: {
       observability: {
         navigation: { PageTemplate },
       },
+      docLinks,
     },
   } = useKibanaContextForPlugin();
 
-  return <PageTemplate {...pageTemplateProps} />;
+  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = hasData
+    ? undefined
+    : {
+        solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {
+          defaultMessage: 'Observability',
+        }),
+        action: {
+          beats: {
+            title: noMetricIndicesPromptPrimaryActionTitle,
+            description: noMetricIndicesPromptDescription,
+          },
+        },
+        docsLink: docLinks.links.observability.guide,
+      };
+
+  return (
+    <PageTemplate
+      data-test-subj={hasData ? _dataTestSubj : 'noDataPage'}
+      noDataConfig={noDataConfig}
+      {...pageTemplateProps}
+    />
+  );
 };

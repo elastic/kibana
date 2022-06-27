@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
         {
           from: 'Aug 29, 2017 @ 17:24:14.254',
           to: 'Aug 29, 2017 @ 17:25:44.142',
+          useCreate: true,
         }
       );
 
@@ -44,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
         requests: 'Requests\n174',
         connections: 'Connections\n174',
         maxResponseTime: 'Max. Response Time\n2203 ms',
-        health: 'Health: green',
+        health: 'Status\nStale',
       });
     });
   });

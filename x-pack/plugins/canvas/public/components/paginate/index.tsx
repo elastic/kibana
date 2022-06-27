@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Paginate as Component, PaginateProps, PaginateChildProps } from './paginate';
 
-export { PaginateProps, PaginateChildProps };
+export type { PaginateProps, PaginateChildProps };
 export interface InPaginateProps {
   perPage?: number;
   startPage?: number;
@@ -27,7 +27,7 @@ export const Paginate: React.FunctionComponent<InPaginateProps> = ({
   const initialCurrentPage = totalPages > 0 ? Math.min(startPage, totalPages - 1) : 0;
   const [currentPage, setPage] = useState(initialCurrentPage);
   const hasRenderedRef = useRef<boolean>(false);
-  const maxPage = totalPages - 1;
+  const maxPage = Math.min(totalPages - 1, 0);
   const start = currentPage * perPage;
   const end = currentPage === 0 ? perPage : perPage * (currentPage + 1);
   const nextPageEnabled = currentPage < maxPage;
@@ -53,6 +53,12 @@ export const Paginate: React.FunctionComponent<InPaginateProps> = ({
       setPage(0);
     }
   }, [perPage, hasRenderedRef]);
+
+  useEffect(() => {
+    if (currentPage > maxPage) {
+      setPage(maxPage);
+    }
+  }, [currentPage, maxPage]);
 
   return (
     <Component

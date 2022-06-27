@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
@@ -27,6 +27,10 @@ export function createSavedDashboardLoader({
   savedObjectsClient,
   embeddableStart,
 }: Services) {
-  const SavedDashboard = createSavedDashboardClass(savedObjects, embeddableStart);
+  const SavedDashboard = createSavedDashboardClass(
+    savedObjects,
+    embeddableStart,
+    savedObjectsClient
+  );
   return new SavedObjectLoader(SavedDashboard, savedObjectsClient);
 }

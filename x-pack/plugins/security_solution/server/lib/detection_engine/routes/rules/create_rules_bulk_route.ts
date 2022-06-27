@@ -6,18 +6,18 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { getIndexExists } from '@kbn/securitysolution-es-utils';
+import { Logger } from '@kbn/core/server';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
-  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_RULES_BULK_CREATE,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
 } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { readRules } from '../../rules/read_rules';
 import { getDuplicates } from './utils';
 import { transformValidateBulkError } from './validate';
@@ -25,15 +25,19 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
 
+/**
+ * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ */
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ) => {
   router.post(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      path: DETECTION_ENGINE_RULES_BULK_CREATE,
       validate: {
         body: buildRouteValidation(createRulesBulkSchema),
       },
@@ -42,18 +46,18 @@ export const createRulesBulkRoute = (
       },
     },
     async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
-      const esClient = context.core.elasticsearch.client;
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution?.getAppClient();
+      logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_CREATE);
 
-      if (!siemClient || !rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
+      const siemResponse = buildSiemResponse(response);
+
+      const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
+
+      const rulesClient = ctx.alerting.getRulesClient();
+      const savedObjectsClient = ctx.core.savedObjects.client;
+      const siemClient = ctx.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
+        license: ctx.licensing.license,
         ml,
         request,
         savedObjectsClient,
@@ -69,7 +73,6 @@ export const createRulesBulkRoute = (
             if (payloadRule.rule_id != null) {
               const rule = await readRules({
                 id: undefined,
-                isRuleRegistryEnabled,
                 rulesClient,
                 ruleId: payloadRule.rule_id,
               });
@@ -81,11 +84,7 @@ export const createRulesBulkRoute = (
                 });
               }
             }
-            const internalRule = convertCreateAPIToInternalSchema(
-              payloadRule,
-              siemClient,
-              isRuleRegistryEnabled
-            );
+            const internalRule = convertCreateAPIToInternalSchema(payloadRule, siemClient);
             try {
               const validationErrors = createRuleValidateTypeDependents(payloadRule);
               if (validationErrors.length) {
@@ -96,16 +95,7 @@ export const createRulesBulkRoute = (
                 });
               }
 
-              throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
-              const finalIndex = internalRule.params.outputIndex;
-              const indexExists = await getIndexExists(esClient.asCurrentUser, finalIndex);
-              if (!isRuleRegistryEnabled && !indexExists) {
-                return createBulkErrorObject({
-                  ruleId: internalRule.params.ruleId,
-                  statusCode: 400,
-                  message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-                });
-              }
+              throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
 
               const createdRule = await rulesClient.create({
                 data: internalRule,
@@ -116,11 +106,11 @@ export const createRulesBulkRoute = (
                 await rulesClient.muteAll({ id: createdRule.id });
               }
 
-              return transformValidateBulkError(internalRule.params.ruleId, createdRule, undefined);
+              return transformValidateBulkError(internalRule.params.ruleId, createdRule, null);
             } catch (err) {
               return transformBulkError(
                 internalRule.params.ruleId,
-                err as Error & { statusCode?: number | undefined }
+                err as Error & { statusCode?: number }
               );
             }
           })
@@ -137,9 +127,16 @@ export const createRulesBulkRoute = (
       ];
       const [validated, errors] = validate(rulesBulk, rulesBulkSchema);
       if (errors != null) {
-        return siemResponse.error({ statusCode: 500, body: errors });
+        return siemResponse.error({
+          statusCode: 500,
+          body: errors,
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
+        });
       } else {
-        return response.ok({ body: validated ?? {} });
+        return response.ok({
+          body: validated ?? {},
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
+        });
       }
     }
   );

@@ -6,18 +6,26 @@
  */
 
 import expect from '@kbn/expect';
-import { HostsKpiQueries } from '../../../../plugins/security_solution/common/search_strategy';
+import {
+  HostsKpiHostsStrategyResponse,
+  HostsKpiQueries,
+  HostsKpiUniqueIpsStrategyResponse,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Kpi Hosts', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/kpi_hosts'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/kpi_hosts'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/kpi_hosts')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/kpi_hosts')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -29,10 +37,6 @@ export default function ({ getService }: FtrProviderContext) {
             y: 1,
           },
         ],
-        authSuccess: 0,
-        authSuccessHistogram: null,
-        authFailure: 0,
-        authFailureHistogram: null,
         uniqueSourceIps: 1,
         uniqueSourceIpsHistogram: [
           {
@@ -50,88 +54,58 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get KpiHosts data', async () => {
-        await retry.try(async () => {
-          const { body: kpiHosts } = await supertest
-            .post('/internal/search/securitySolutionSearchStrategy/')
-            .set('kbn-xsrf', 'true')
-            .send({
-              factoryQueryType: HostsKpiQueries.kpiHosts,
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['filebeat-*'],
-              docValueFields: [],
-              inspect: false,
-              wait_for_completion_timeout: '10s',
-            })
-            .expect(200);
-
-          expect(kpiHosts.hostsHistogram!).to.eql(expectedResult.hostsHistogram);
-          expect(kpiHosts.hosts!).to.eql(expectedResult.hosts);
+        const kpiHosts = await bsearch.send<HostsKpiHostsStrategyResponse>({
+          supertest,
+          options: {
+            factoryQueryType: HostsKpiQueries.kpiHosts,
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
+            },
+            defaultIndex: ['filebeat-*'],
+            docValueFields: [],
+            inspect: false,
+          },
+          strategy: 'securitySolutionSearchStrategy',
         });
-      });
-
-      it('Make sure that we get KpiAuthentications data', async () => {
-        await retry.try(async () => {
-          const { body } = await supertest
-            .post('/internal/search/securitySolutionSearchStrategy/')
-            .set('kbn-xsrf', 'true')
-            .send({
-              factoryQueryType: HostsKpiQueries.kpiAuthentications,
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['filebeat-*'],
-              docValueFields: [],
-              inspect: false,
-              /* We need a very long timeout to avoid returning just partial data.
-               ** https://github.com/elastic/kibana/blob/master/x-pack/test/api_integration/apis/search/search.ts#L18
-               */
-              wait_for_completion_timeout: '10s',
-            })
-            .expect(200);
-          expect(body.authenticationsSuccess!).to.eql(expectedResult.authSuccess);
-          expect(body.authenticationsSuccessHistogram!).to.eql(expectedResult.authSuccessHistogram);
-          expect(body.authenticationsFailure!).to.eql(expectedResult.authFailure);
-          expect(body.authenticationsFailureHistogram!).to.eql(expectedResult.authFailureHistogram);
-        });
+        expect(kpiHosts.hostsHistogram).to.eql(expectedResult.hostsHistogram);
+        expect(kpiHosts.hosts).to.eql(expectedResult.hosts);
       });
 
       it('Make sure that we get KpiUniqueIps data', async () => {
-        await retry.try(async () => {
-          const { body } = await supertest
-            .post('/internal/search/securitySolutionSearchStrategy/')
-            .set('kbn-xsrf', 'true')
-            .send({
-              factoryQueryType: HostsKpiQueries.kpiUniqueIps,
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['filebeat-*'],
-              docValueFields: [],
-              inspect: false,
-              wait_for_completion_timeout: '10s',
-            })
-            .expect(200);
-          expect(body.uniqueDestinationIps!).to.eql(expectedResult.uniqueDestinationIps);
-          expect(body.uniqueDestinationIpsHistogram!).to.eql(
-            expectedResult.uniqueDestinationIpsHistogram
-          );
-          expect(body.uniqueSourceIps!).to.eql(expectedResult.uniqueSourceIps);
-          expect(body.uniqueSourceIpsHistogram!).to.eql(expectedResult.uniqueSourceIpsHistogram);
+        const body = await bsearch.send<HostsKpiUniqueIpsStrategyResponse>({
+          supertest,
+          options: {
+            factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
+            },
+            defaultIndex: ['filebeat-*'],
+            docValueFields: [],
+            inspect: false,
+          },
+          strategy: 'securitySolutionSearchStrategy',
         });
+        expect(body.uniqueDestinationIps).to.eql(expectedResult.uniqueDestinationIps);
+        expect(body.uniqueDestinationIpsHistogram).to.eql(
+          expectedResult.uniqueDestinationIpsHistogram
+        );
+        expect(body.uniqueSourceIps).to.eql(expectedResult.uniqueSourceIps);
+        expect(body.uniqueSourceIpsHistogram).to.eql(expectedResult.uniqueSourceIpsHistogram);
       });
     });
 
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/kpi_hosts'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/kpi_hosts'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/kpi_hosts')
+      );
+      after(
+        async () =>
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/kpi_hosts')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -163,10 +137,6 @@ export default function ({ getService }: FtrProviderContext) {
             y: 1,
           },
         ],
-        authSuccess: 0,
-        authSuccessHistogram: null,
-        authFailure: 0,
-        authFailureHistogram: null,
         uniqueSourceIps: 3,
         uniqueSourceIpsHistogram: [
           { x: 1543276800000, y: 1 },
@@ -188,79 +158,47 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       it('Make sure that we get KpiHosts data', async () => {
-        await retry.try(async () => {
-          const { body: kpiHosts } = await supertest
-            .post('/internal/search/securitySolutionSearchStrategy/')
-            .set('kbn-xsrf', 'true')
-            .send({
-              factoryQueryType: HostsKpiQueries.kpiHosts,
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['auditbeat-*'],
-              docValueFields: [],
-              inspect: false,
-              wait_for_completion_timeout: '10s',
-            })
-            .expect(200);
-
-          expect(kpiHosts.hostsHistogram!).to.eql(expectedResult.hostsHistogram);
-          expect(kpiHosts.hosts!).to.eql(expectedResult.hosts);
+        const kpiHosts = await bsearch.send<HostsKpiHostsStrategyResponse>({
+          supertest,
+          options: {
+            factoryQueryType: HostsKpiQueries.kpiHosts,
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
+            },
+            defaultIndex: ['auditbeat-*'],
+            docValueFields: [],
+            inspect: false,
+          },
+          strategy: 'securitySolutionSearchStrategy',
         });
-      });
-
-      it('Make sure that we get KpiAuthentications data', async () => {
-        await retry.try(async () => {
-          const { body } = await supertest
-            .post('/internal/search/securitySolutionSearchStrategy/')
-            .set('kbn-xsrf', 'true')
-            .send({
-              factoryQueryType: HostsKpiQueries.kpiAuthentications,
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['auditbeat-*'],
-              docValueFields: [],
-              inspect: false,
-              wait_for_completion_timeout: '10s',
-            })
-            .expect(200);
-          expect(body.authenticationsSuccess!).to.eql(expectedResult.authSuccess);
-          expect(body.authenticationsSuccessHistogram!).to.eql(expectedResult.authSuccessHistogram);
-          expect(body.authenticationsFailure!).to.eql(expectedResult.authFailure);
-          expect(body.authenticationsFailureHistogram!).to.eql(expectedResult.authFailureHistogram);
-        });
+        expect(kpiHosts.hostsHistogram).to.eql(expectedResult.hostsHistogram);
+        expect(kpiHosts.hosts).to.eql(expectedResult.hosts);
       });
 
       it('Make sure that we get KpiUniqueIps data', async () => {
-        await retry.try(async () => {
-          const { body } = await supertest
-            .post('/internal/search/securitySolutionSearchStrategy/')
-            .set('kbn-xsrf', 'true')
-            .send({
-              factoryQueryType: HostsKpiQueries.kpiUniqueIps,
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
-              defaultIndex: ['auditbeat-*'],
-              docValueFields: [],
-              inspect: false,
-              wait_for_completion_timeout: '10s',
-            })
-            .expect(200);
-          expect(body.uniqueDestinationIps!).to.eql(expectedResult.uniqueDestinationIps);
-          expect(body.uniqueDestinationIpsHistogram!).to.eql(
-            expectedResult.uniqueDestinationIpsHistogram
-          );
-          expect(body.uniqueSourceIps!).to.eql(expectedResult.uniqueSourceIps);
-          expect(body.uniqueSourceIpsHistogram!).to.eql(expectedResult.uniqueSourceIpsHistogram);
+        const body = await bsearch.send<HostsKpiUniqueIpsStrategyResponse>({
+          supertest,
+          options: {
+            factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+            timerange: {
+              interval: '12h',
+              to: TO,
+              from: FROM,
+            },
+            defaultIndex: ['auditbeat-*'],
+            docValueFields: [],
+            inspect: false,
+          },
+          strategy: 'securitySolutionSearchStrategy',
         });
+        expect(body.uniqueDestinationIps!).to.eql(expectedResult.uniqueDestinationIps);
+        expect(body.uniqueDestinationIpsHistogram!).to.eql(
+          expectedResult.uniqueDestinationIpsHistogram
+        );
+        expect(body.uniqueSourceIps!).to.eql(expectedResult.uniqueSourceIps);
+        expect(body.uniqueSourceIpsHistogram!).to.eql(expectedResult.uniqueSourceIpsHistogram);
       });
     });
   });

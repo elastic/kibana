@@ -6,35 +6,20 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
+import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { PersistenceServices } from '../../../../../../rule_registry/server';
-import { THRESHOLD_RULE_TYPE_ID } from '../../../../../common/constants';
 import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';
-import { createSecurityRuleTypeFactory } from '../create_security_rule_type_factory';
-import { CreateRuleOptions } from '../types';
+import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateImmutable, validateIndexPatterns } from '../utils';
 
-export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
-  const {
-    experimentalFeatures,
-    lists,
-    logger,
-    mergeStrategy,
-    ignoreFields,
-    ruleDataClient,
-    version,
-    ruleDataService,
-  } = createOptions;
-  const createSecurityRuleType = createSecurityRuleTypeFactory({
-    lists,
-    logger,
-    mergeStrategy,
-    ignoreFields,
-    ruleDataClient,
-    ruleDataService,
-  });
-  return createSecurityRuleType<ThresholdRuleParams, {}, PersistenceServices, ThresholdAlertState>({
+export const createThresholdAlertType = (
+  createOptions: CreateRuleOptions
+): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
+  const { experimentalFeatures, logger, version } = createOptions;
+  return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
     validate: {
@@ -48,6 +33,18 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -63,16 +60,24 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
-        runOpts: { buildRuleMessage, bulkCreate, exceptionItems, rule, tuple, wrapHits },
+        runOpts: {
+          buildRuleMessage,
+          bulkCreate,
+          exceptionItems,
+          completeRule,
+          tuple,
+          wrapHits,
+          ruleDataReader,
+          inputIndex,
+          runtimeMappings,
+        },
         services,
         startedAt,
         state,
       } = execOptions;
-
-      // console.log(JSON.stringify(state));
 
       const result = await thresholdExecutor({
         buildRuleMessage,
@@ -80,16 +85,19 @@ export const createThresholdAlertType = (createOptions: CreateRuleOptions) => {
         exceptionItems,
         experimentalFeatures,
         logger,
-        rule,
+        completeRule,
         services,
         startedAt,
         state,
         tuple,
         version,
         wrapHits,
+        ruleDataReader,
+        inputIndex,
+        runtimeMappings,
       });
 
       return result;
     },
-  });
+  };
 };

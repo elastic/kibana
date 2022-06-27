@@ -13,7 +13,9 @@ import { EuiModal, EuiConfirmModal, EuiConfirmModalProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
-import { I18nStart } from '../../i18n';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
 import { MountWrapper } from '../../utils';
@@ -84,6 +86,7 @@ export interface OverlayModalStart {
    * @return {@link OverlayRef} A reference to the opened modal.
    */
   open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
+
   /**
    * Opens a confirmation modal with the given text or mountpoint as a message.
    * Returns a Promise resolving to `true` if user confirmed or `false` otherwise.
@@ -106,6 +109,7 @@ export interface OverlayModalOpenOptions {
 
 interface StartDeps {
   i18n: I18nStart;
+  theme: ThemeServiceStart;
   targetDomElement: Element;
 }
 
@@ -114,7 +118,7 @@ export class ModalService {
   private activeModal: ModalRef | null = null;
   private targetDomElement: Element | null = null;
 
-  public start({ i18n, targetDomElement }: StartDeps): OverlayModalStart {
+  public start({ i18n, theme, targetDomElement }: StartDeps): OverlayModalStart {
     this.targetDomElement = targetDomElement;
 
     return {
@@ -137,11 +141,11 @@ export class ModalService {
         this.activeModal = modal;
 
         render(
-          <i18n.Context>
+          <CoreContextProvider i18n={i18n} theme={theme}>
             <EuiModal {...options} onClose={() => modal.close()}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiModal>
-          </i18n.Context>,
+          </CoreContextProvider>,
           targetDomElement
         );
 
@@ -197,9 +201,9 @@ export class ModalService {
           };
 
           render(
-            <i18n.Context>
+            <CoreContextProvider i18n={i18n} theme={theme}>
               <EuiConfirmModal {...props} />
-            </i18n.Context>,
+            </CoreContextProvider>,
             targetDomElement
           );
         });

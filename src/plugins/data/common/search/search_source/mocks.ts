@@ -7,14 +7,14 @@
  */
 
 import { of } from 'rxjs';
-import type { MockedKeys } from '@kbn/utility-types/jest';
-import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
-import { SearchSource } from './search_source';
+import { SearchSource, SearchSourceDependencies } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
-  setPreferredSearchStrategyId: jest.fn(),
+  setOverwriteDataViewType: jest.fn(),
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
   removeField: jest.fn().mockReturnThis(),
@@ -35,15 +35,23 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   history: [],
   getSerializedFields: jest.fn(),
   serialize: jest.fn(),
+  toExpressionAst: jest.fn(),
 };
 
 export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceInstanceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceInstanceMock),
+  telemetry: jest.fn(),
+  getAllMigrations: jest.fn(),
+  inject: jest.fn(),
+  extract: jest.fn(),
 };
 
 export const createSearchSourceMock = (fields?: SearchSourceFields, response?: any) =>
   new SearchSource(fields, {
+    aggs: {
+      createAggConfigs: jest.fn(),
+    } as unknown as SearchSourceDependencies['aggs'],
     getConfig: uiSettingsServiceMock.createStartContract().get,
     search: jest.fn().mockReturnValue(
       of(

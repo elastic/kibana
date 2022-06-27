@@ -23,7 +23,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -101,9 +100,6 @@ describe('DraggableWrapper', () => {
 
       await waitFor(() => {
         wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
-        wrapper.update();
-        jest.runAllTimers();
-        wrapper.update();
         expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(true);
       });
     });

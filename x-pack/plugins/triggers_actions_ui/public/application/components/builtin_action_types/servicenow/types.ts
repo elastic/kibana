@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { UserConfiguredActionConnector } from '../../../../types';
 import {
   ExecutorSubActionPushParamsITSM,
   ExecutorSubActionPushParamsSIR,
+  ExecutorSubActionAddEventParams,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../actions/server/builtin_action_types/servicenow/types';
+} from '@kbn/actions-plugin/server/builtin_action_types/servicenow/types';
+import { UserConfiguredActionConnector } from '../../../../types';
 
 export type ServiceNowActionConnector = UserConfiguredActionConnector<
   ServiceNowConfig,
@@ -27,14 +28,41 @@ export interface ServiceNowSIRActionParams {
   subActionParams: ExecutorSubActionPushParamsSIR;
 }
 
-export interface ServiceNowConfig {
-  apiUrl: string;
+export interface ServiceNowITOMActionParams {
+  subAction: string;
+  subActionParams: ExecutorSubActionAddEventParams;
 }
 
-export interface ServiceNowSecrets {
-  username: string;
-  password: string;
+// Config
+export interface ServiceNowCommonConfig {
+  isOAuth: boolean;
+  apiUrl: string;
+  usesTableApi: boolean;
 }
+
+export type ServiceNowBasicAuthConfig = ServiceNowCommonConfig;
+
+export interface ServiceNowOAuthConfig {
+  clientId?: string;
+  userIdentifierValue?: string;
+  jwtKeyId?: string;
+}
+
+export type ServiceNowConfig = ServiceNowBasicAuthConfig & ServiceNowOAuthConfig;
+
+// Secrets
+export interface ServiceNowBasicAuthSecrets {
+  username?: string;
+  password?: string;
+}
+
+export interface ServiceNowOAuthSecrets {
+  clientSecret?: string;
+  privateKey?: string;
+  privateKeyPassword?: string;
+}
+
+export type ServiceNowSecrets = ServiceNowBasicAuthSecrets & ServiceNowOAuthSecrets;
 
 export interface Choice {
   value: string;
@@ -44,3 +72,17 @@ export interface Choice {
 }
 
 export type Fields = Record<string, Choice[]>;
+export interface AppInfo {
+  id: string;
+  name: string;
+  scope: string;
+  version: string;
+}
+
+export interface RESTApiError {
+  error: {
+    message: string;
+    detail: string;
+  };
+  status: string;
+}

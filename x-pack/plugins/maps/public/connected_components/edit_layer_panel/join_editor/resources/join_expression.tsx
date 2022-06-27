@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPatternField } from 'src/plugins/data/public';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../common/constants';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { ValidatedNumberInput } from '../../../../components/validated_number_input';
@@ -54,7 +55,7 @@ interface Props {
   // Right field props
   rightValue: string;
   rightSize?: number;
-  rightFields: IndexPatternField[];
+  rightFields: DataViewField[];
   onRightFieldChange: (term?: string) => void;
   onRightSizeChange: (size: number) => void;
 }
@@ -157,12 +158,7 @@ export class JoinExpression extends Component<Props, State> {
         })}
       >
         <IndexPatternSelect
-          placeholder={i18n.translate(
-            'xpack.maps.layerPanel.joinExpression.selectIndexPatternPlaceholder',
-            {
-              defaultMessage: 'Select index pattern',
-            }
-          )}
+          placeholder={getDataViewSelectPlaceholder()}
           indexPatternId={this.props.rightSourceIndexPatternId}
           onChange={this._onRightSourceChange}
           isClearable={false}

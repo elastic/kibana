@@ -8,13 +8,12 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { formatErrors } from '../../../common/format_errors';
-import { exactCheck } from '../../../common/exact_check';
+import { formatErrors, exactCheck } from '@kbn/securitysolution-io-ts-utils';
 import {
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationError,
-} from '../../../../../../src/core/server';
+} from '@kbn/core/server';
 import { excess, GenericIntersectionC } from '../runtime_types';
 
 type RequestValidationResult<T> =

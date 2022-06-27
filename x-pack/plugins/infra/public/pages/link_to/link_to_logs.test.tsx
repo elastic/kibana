@@ -9,24 +9,25 @@ import { render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
-import { httpServiceMock } from 'src/core/public/mocks';
-import { KibanaContextProvider, KibanaPageTemplate } from 'src/plugins/kibana_react/public';
-import { useLogSource } from '../../containers/logs/log_source';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { useLogView } from '../../hooks/use_log_view';
 import {
-  createLoadedUseLogSourceMock,
-  createLoadingUseLogSourceMock,
-} from '../../containers/logs/log_source/log_source.mock';
+  createLoadedUseLogViewMock,
+  createLoadingUseLogViewMock,
+} from '../../hooks/use_log_view.mock';
 import { LinkToLogsPage } from './link_to_logs';
 
-jest.mock('../../containers/logs/log_source');
-const useLogSourceMock = useLogSource as jest.MockedFunction<typeof useLogSource>;
+jest.mock('../../hooks/use_log_view');
+const useLogViewMock = useLogView as jest.MockedFunction<typeof useLogView>;
 
 const renderRoutes = (routes: React.ReactElement) => {
   const history = createMemoryHistory();
   const services = {
     http: httpServiceMock.createStartContract(),
-    data: {
-      indexPatterns: {},
+    logViews: {
+      client: {},
     },
     observability: {
       navigation: {
@@ -48,12 +49,12 @@ const renderRoutes = (routes: React.ReactElement) => {
 };
 
 describe('LinkToLogsPage component', () => {
-  beforeEach(() => {
-    useLogSourceMock.mockImplementation(createLoadedUseLogSourceMock());
+  beforeEach(async () => {
+    useLogViewMock.mockImplementation(await createLoadedUseLogViewMock());
   });
 
   afterEach(() => {
-    useLogSourceMock.mockRestore();
+    useLogViewMock.mockRestore();
   });
 
   describe('default route', () => {
@@ -151,7 +152,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(language:kuery,query:'HOST_FIELD: HOST_NAME')"`
+        `"(language:kuery,query:'host.name: HOST_NAME')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -172,7 +173,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(language:kuery,query:'(HOST_FIELD: HOST_NAME) and (FILTER_FIELD:FILTER_VALUE)')"`
+        `"(language:kuery,query:'(host.name: HOST_NAME) and (FILTER_FIELD:FILTER_VALUE)')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -193,13 +194,13 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('OTHER_SOURCE');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(language:kuery,query:'HOST_FIELD: HOST_NAME')"`
+        `"(language:kuery,query:'host.name: HOST_NAME')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
 
     it('renders a loading page while loading the source configuration', async () => {
-      useLogSourceMock.mockImplementation(createLoadingUseLogSourceMock());
+      useLogViewMock.mockImplementation(createLoadingUseLogViewMock());
 
       const { history, queryByTestId } = renderRoutes(
         <Switch>
@@ -209,7 +210,7 @@ describe('LinkToLogsPage component', () => {
 
       history.push('/link-to/host-logs/HOST_NAME');
       await waitFor(() => {
-        expect(queryByTestId('nodeLoadingPage-host')).not.toBeEmpty();
+        expect(queryByTestId('nodeLoadingPage-host')).not.toBeEmptyDOMElement();
       });
     });
   });
@@ -229,7 +230,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(language:kuery,query:'CONTAINER_FIELD: CONTAINER_ID')"`
+        `"(language:kuery,query:'container.id: CONTAINER_ID')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -250,7 +251,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(language:kuery,query:'(CONTAINER_FIELD: CONTAINER_ID) and (FILTER_FIELD:FILTER_VALUE)')"`
+        `"(language:kuery,query:'(container.id: CONTAINER_ID) and (FILTER_FIELD:FILTER_VALUE)')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -258,7 +259,7 @@ describe('LinkToLogsPage component', () => {
     });
 
     it('renders a loading page while loading the source configuration', () => {
-      useLogSourceMock.mockImplementation(createLoadingUseLogSourceMock());
+      useLogViewMock.mockImplementation(createLoadingUseLogViewMock());
 
       const { history, queryByTestId } = renderRoutes(
         <Switch>
@@ -268,7 +269,7 @@ describe('LinkToLogsPage component', () => {
 
       history.push('/link-to/container-logs/CONTAINER_ID');
 
-      expect(queryByTestId('nodeLoadingPage-container')).not.toBeEmpty();
+      expect(queryByTestId('nodeLoadingPage-container')).not.toBeEmptyDOMElement();
     });
   });
 
@@ -287,7 +288,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(language:kuery,query:'POD_FIELD: POD_UID')"`
+        `"(language:kuery,query:'kubernetes.pod.uid: POD_UID')"`
       );
       expect(searchParams.get('logPosition')).toEqual(null);
     });
@@ -306,7 +307,7 @@ describe('LinkToLogsPage component', () => {
       const searchParams = new URLSearchParams(history.location.search);
       expect(searchParams.get('sourceId')).toEqual('default');
       expect(searchParams.get('logFilter')).toMatchInlineSnapshot(
-        `"(language:kuery,query:'(POD_FIELD: POD_UID) and (FILTER_FIELD:FILTER_VALUE)')"`
+        `"(language:kuery,query:'(kubernetes.pod.uid: POD_UID) and (FILTER_FIELD:FILTER_VALUE)')"`
       );
       expect(searchParams.get('logPosition')).toMatchInlineSnapshot(
         `"(end:'2019-02-20T14:58:09.404Z',position:(tiebreaker:0,time:1550671089404),start:'2019-02-20T12:58:09.404Z',streamLive:!f)"`
@@ -314,7 +315,7 @@ describe('LinkToLogsPage component', () => {
     });
 
     it('renders a loading page while loading the source configuration', () => {
-      useLogSourceMock.mockImplementation(createLoadingUseLogSourceMock());
+      useLogViewMock.mockImplementation(createLoadingUseLogViewMock());
 
       const { history, queryByTestId } = renderRoutes(
         <Switch>
@@ -324,7 +325,7 @@ describe('LinkToLogsPage component', () => {
 
       history.push('/link-to/pod-logs/POD_UID');
 
-      expect(queryByTestId('nodeLoadingPage-pod')).not.toBeEmpty();
+      expect(queryByTestId('nodeLoadingPage-pod')).not.toBeEmptyDOMElement();
     });
   });
 });

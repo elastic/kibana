@@ -12,41 +12,49 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
+  EuiBasicTableColumn,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
-import { SavedObject } from 'kibana/public';
+import { SavedObject } from '@kbn/core/public';
+import { ECSMapping } from '../../../../common/schemas/common';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { useSavedQueries } from '../../../saved_queries/use_saved_queries';
+
+type SavedQuerySO = SavedObject<{
+  name: string;
+  id: string;
+  query: string;
+  ecs_mapping: ECSMapping;
+  updated_at: string;
+}>;
 
 interface PlayButtonProps {
   disabled: boolean;
-  savedQueryId: string;
-  savedQueryName: string;
+  savedQuery: SavedQuerySO;
 }
 
-const PlayButtonComponent: React.FC<PlayButtonProps> = ({
-  disabled = false,
-  savedQueryId,
-  savedQueryName,
-}) => {
+const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, savedQuery }) => {
   const { push } = useHistory();
 
-  // TODO: Fix href
+  // TODO: Add href
   const handlePlayClick = useCallback(
     () =>
       push('/live_queries/new', {
         form: {
-          savedQueryId,
+          savedQueryId: savedQuery.id,
+          query: savedQuery.attributes.query,
+          ecs_mapping: savedQuery.attributes.ecs_mapping,
         },
       }),
-    [push, savedQueryId]
+    [push, savedQuery]
   );
 
   return (
@@ -58,7 +66,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({
       aria-label={i18n.translate('xpack.osquery.savedQueryList.queriesTable.runActionAriaLabel', {
         defaultMessage: 'Run {savedQueryName}',
         values: {
-          savedQueryName,
+          savedQueryName: savedQuery.attributes.name,
         },
       })}
     />
@@ -111,20 +119,19 @@ const SavedQueriesPageComponent = () => {
   const { data } = useSavedQueries({ isLive: true });
 
   const renderEditAction = useCallback(
-    (item: SavedObject<{ name: string }>) => (
+    (item: SavedQuerySO) => (
       <EditButton savedQueryId={item.id} savedQueryName={item.attributes.name} />
     ),
     []
   );
 
   const renderPlayAction = useCallback(
-    (item: SavedObject<{ name: string }>) => (
-      <PlayButton
-        savedQueryId={item.id}
-        savedQueryName={item.attributes.name}
-        disabled={!(permissions.runSavedQueries || permissions.writeLiveQueries)}
-      />
-    ),
+    (item: SavedQuerySO) =>
+      permissions.runSavedQueries || permissions.writeLiveQueries ? (
+        <PlayButton savedQuery={item} disabled={false} />
+      ) : (
+        <></>
+      ),
     [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
@@ -135,32 +142,45 @@ const SavedQueriesPageComponent = () => {
       item.attributes.updated_by !== item.attributes.created_by
         ? ` @ ${item.attributes.updated_by}`
         : '';
+
     return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
   }, []);
 
-  const columns = useMemo(
+  const renderDescriptionColumn = useCallback((description?: string) => {
+    const content =
+      description && description.length > 80 ? `${description?.substring(0, 80)}...` : description;
+
+    return (
+      <EuiToolTip content={<EuiFlexItem>{description}</EuiFlexItem>}>
+        <EuiFlexItem grow={false}>{content}</EuiFlexItem>
+      </EuiToolTip>
+    );
+  }, []);
+  const columns: Array<EuiBasicTableColumn<SavedQuerySO>> = useMemo(
     () => [
       {
         field: 'attributes.id',
         name: i18n.translate('xpack.osquery.savedQueries.table.queryIdColumnTitle', {
           defaultMessage: 'Query ID',
         }),
-        sortable: true,
+        sortable: (item) => item.attributes.id.toLowerCase(),
         truncateText: true,
+        width: '15%',
       },
       {
         field: 'attributes.description',
         name: i18n.translate('xpack.osquery.savedQueries.table.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
-        sortable: true,
-        truncateText: true,
+        render: renderDescriptionColumn,
+        width: '50%',
       },
       {
         field: 'attributes.created_by',
         name: i18n.translate('xpack.osquery.savedQueries.table.createdByColumnTitle', {
           defaultMessage: 'Created by',
         }),
+        width: '15%',
         sortable: true,
         truncateText: true,
       },
@@ -169,7 +189,8 @@ const SavedQueriesPageComponent = () => {
         name: i18n.translate('xpack.osquery.savedQueries.table.updatedAtColumnTitle', {
           defaultMessage: 'Last updated at',
         }),
-        sortable: (item: SavedObject<{ updated_at: string }>) =>
+        width: '10%',
+        sortable: (item) =>
           item.attributes.updated_at ? Date.parse(item.attributes.updated_at) : 0,
         truncateText: true,
         render: renderUpdatedAt,
@@ -181,7 +202,7 @@ const SavedQueriesPageComponent = () => {
         actions: [{ render: renderPlayAction }, { render: renderEditAction }],
       },
     ],
-    [renderEditAction, renderPlayAction, renderUpdatedAt]
+    [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }) => {
@@ -215,15 +236,14 @@ const SavedQueriesPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.savedQueryList.pageTitle"
                 defaultMessage="Saved queries"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
@@ -249,11 +269,10 @@ const SavedQueriesPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {data?.savedObjects && (
+      {data?.saved_objects && (
         <EuiInMemoryTable
-          items={data?.savedObjects}
+          items={data?.saved_objects}
           itemId="id"
-          // @ts-expect-error update types
           columns={columns}
           pagination={pagination}
           // @ts-expect-error update types

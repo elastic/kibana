@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ConfigDeprecationProvider } from 'src/core/server';
+import type { ConfigDeprecationProvider } from '@kbn/core/server';
 
-export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = ({
-  renameFromRoot,
-}) => [
-  renameFromRoot(
-    'kibana.autocompleteTerminateAfter',
-    'data.autocomplete.valueSuggestions.terminateAfter'
-  ),
-  renameFromRoot('kibana.autocompleteTimeout', 'data.autocomplete.valueSuggestions.timeout'),
+export const configDeprecationProvider: ConfigDeprecationProvider = ({ renameFromRoot }) => [
+  renameFromRoot('xpack.data_enhanced.search.sessions', 'data.search.sessions', {
+    level: 'warning',
+  }),
 ];

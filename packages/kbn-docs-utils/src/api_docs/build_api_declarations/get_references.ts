@@ -7,15 +7,15 @@
  */
 
 import { Node, ReferenceFindableNode } from 'ts-morph';
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getPluginForPath } from '../utils';
 import { getSourceForNode } from './utils';
-import { ApiDeclaration, ApiReference } from '../types';
+import { ApiDeclaration, ApiReference, PluginOrPackage } from '../types';
 import { isNamedNode } from '../tsmorph_utils';
 
 interface Opts {
   node: ReferenceFindableNode;
-  plugins: KibanaPlatformPlugin[];
+  plugins: PluginOrPackage[];
   /**
    * The name of the plugin the node belongs in. This is used to filter out internal plugin
    * references.
@@ -53,7 +53,7 @@ export function getReferences({ node, plugins, currentPluginId, log }: Opts): Ap
 }
 
 interface MaybeCollectReferencesOpt {
-  plugins: KibanaPlatformPlugin[];
+  plugins: PluginOrPackage[];
   /**
    * The name of the plugin the node belongs in. This is used to filter out internal plugin
    * references.
@@ -73,7 +73,7 @@ export function maybeCollectReferences({
   apiDec,
   captureReferences,
 }: MaybeCollectReferencesOpt): ApiReference[] | undefined {
-  if (Node.isReferenceFindableNode(node)) {
+  if (Node.isReferenceFindable(node)) {
     return captureReferences || apiDec.deprecated
       ? getReferences({ node, plugins, currentPluginId, log })
       : undefined;

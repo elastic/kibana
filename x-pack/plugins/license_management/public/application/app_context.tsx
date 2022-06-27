@@ -6,11 +6,11 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { ScopedHistory } from 'kibana/public';
+import { Observable } from 'rxjs';
 
-import { CoreStart } from '../../../../../src/core/public';
-import { LicensingPluginSetup, ILicense } from '../../../licensing/public';
-import { TelemetryPluginStart } from '../../../../../src/plugins/telemetry/public';
+import { CoreStart, ScopedHistory, CoreTheme } from '@kbn/core/public';
+import { LicensingPluginSetup, ILicense } from '@kbn/licensing-plugin/public';
+import { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import { ClientConfigType } from '../types';
 import { BreadcrumbService } from './breadcrumbs';
 
@@ -33,6 +33,7 @@ export interface AppDependencies {
     initialLicense: ILicense;
   };
   config: ClientConfigType;
+  theme$: Observable<CoreTheme>;
 }
 
 export const AppContextProvider = ({

@@ -5,24 +5,33 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "dataViews",
     "home",
     "licensing",
     "management",
     "features",
     "savedObjects",
-    "share"
+    "share",
+    "triggersActionsUi",
+    "fieldFormats"
   ],
   "optionalPlugins": [
     "security",
-    "usageCollection"
+    "usageCollection",
+    "spaces",
+    "alerting"
   ],
   "configPath": ["xpack", "transform"],
   "requiredBundles": [
+    "unifiedSearch",
     "esUiShared",
     "discover",
     "kibanaUtils",
     "kibanaReact",
     "ml"
+  ],
+  "extraPublicDirs": [
+    "common"
   ],
   "owner": {
     "name": "Machine Learning UI",

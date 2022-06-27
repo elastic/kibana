@@ -7,13 +7,13 @@
 
 import { combineLatest, Observable, timer } from 'rxjs';
 import { mergeMap, map, filter, switchMap, catchError } from 'rxjs/operators';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { keyBy, mapValues } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AggregationResultOf } from '@kbn/core/types/elasticsearch';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { parseIntervalAsSecond, asInterval, parseIntervalAsMillisecond } from '../lib/intervals';
-import { AggregationResultOf } from '../../../../../src/core/types/elasticsearch';
 import { HealthStatus } from './monitoring_stats_stream';
 import { TaskStore } from '../task_store';
 import { createRunningAveragedStat } from './task_run_calcultors';
@@ -147,8 +147,19 @@ export function createWorkloadAggregator(
             missing: { field: 'task.schedule' },
           },
           ownerIds: {
-            cardinality: {
-              field: 'task.ownerId',
+            filter: {
+              range: {
+                'task.startedAt': {
+                  gte: 'now-1w/w',
+                },
+              },
+            },
+            aggs: {
+              ownerIds: {
+                cardinality: {
+                  field: 'task.ownerId',
+                },
+              },
             },
           },
           idleTasks: {
@@ -205,7 +216,7 @@ export function createWorkloadAggregator(
         aggregations,
         hits: { total },
       } = result;
-      const count = typeof total === 'number' ? total : total.value;
+      const count = typeof total === 'number' ? total : total?.value ?? 0;
 
       if (!hasAggregations(aggregations)) {
         throw new Error(`Invalid workload: ${JSON.stringify(result)}`);
@@ -213,7 +224,7 @@ export function createWorkloadAggregator(
 
       const taskTypes = aggregations.taskType.buckets;
       const nonRecurring = aggregations.nonRecurringTasks.doc_count;
-      const ownerIds = aggregations.ownerIds.value;
+      const ownerIds = aggregations.ownerIds.ownerIds.value;
 
       const {
         overdue: {
@@ -448,10 +459,13 @@ export interface WorkloadAggregationResponse {
     doc_count: number;
   };
   ownerIds: {
-    value: number;
+    ownerIds: {
+      value: number;
+    };
   };
   [otherAggs: string]: estypes.AggregationsAggregate;
 }
+// @ts-expect-error key doesn't accept a string
 export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;
@@ -468,6 +482,8 @@ export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregat
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }
+
+// @ts-expect-error key doesn't accept a string
 export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
   buckets: Array<{
     doc_count: number;

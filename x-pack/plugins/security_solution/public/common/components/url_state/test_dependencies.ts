@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Query } from '@kbn/es-query';
 import { navTabs } from '../../../app/home/home_navigations';
 import { SecurityPageName } from '../../../app/types';
 import { inputsActions } from '../../store/actions';
 
 import { CONSTANTS } from './constants';
 import { UrlStateContainerPropTypes, LocationTypes } from './types';
-import { Query } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../../network/store';
 import { hostsModel } from '../../../hosts/store';
 import { HostsTableType } from '../../../hosts/store/model';
@@ -84,9 +84,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
   indexPattern: {
     fields: [
       {
-        aggregatable: true,
         name: '@timestamp',
-        searchable: true,
         type: 'date',
       },
     ],
@@ -122,7 +120,6 @@ export const defaultProps: UrlStateContainerPropTypes = {
       id: '',
       isOpen: false,
     },
-    [CONSTANTS.sourcerer]: {},
   },
   history: {
     ...mockHistory,
@@ -134,7 +131,7 @@ export const getMockProps = (
   location = defaultLocation,
   kqlQueryKey = CONSTANTS.networkPage,
   kqlQueryValue: Query | null,
-  pageName: string,
+  pageName: SecurityPageName,
   detailName: string | undefined
 ): UrlStateContainerPropTypes => ({
   ...defaultProps,
@@ -156,7 +153,7 @@ interface GetMockPropsObj {
   examplePath: string;
   namespaceLower: string;
   page: LocationTypes;
-  pageName: string;
+  pageName: SecurityPageName;
   detailName: string | undefined;
 }
 
@@ -272,7 +269,7 @@ export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: Get
 // silly that this needs to be an array and not an object
 // https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
 export const testCases: Array<
-  [LocationTypes, string, string, string, string | null, string, undefined | string]
+  [LocationTypes, string, string, string, string | null, SecurityPageName, undefined | string]
 > = [
   [
     /* page */ CONSTANTS.networkPage,
@@ -326,6 +323,15 @@ export const testCases: Array<
     /* pathName */ '/timeline',
     /* type */ null,
     /* pageName */ SecurityPageName.timelines,
+    /* detailName */ undefined,
+  ],
+  [
+    /* page */ CONSTANTS.kubernetesPage,
+    /* namespaceLower */ 'kubernetes',
+    /* namespaceUpper */ 'Kubernetes',
+    /* pathName */ '/kubernetes',
+    /* type */ null,
+    /* pageName */ SecurityPageName.kubernetes,
     /* detailName */ undefined,
   ],
 ];

@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 import { componentTemplateSchema } from './schema_validation';
 
 const paramsSchema = schema.object({
@@ -29,7 +29,7 @@ export const registerUpdateRoute = ({
       },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { name } = request.params;
       const { template, version, _meta } = request.body;
 
@@ -37,7 +37,7 @@ export const registerUpdateRoute = ({
         // Verify component exists; ES will throw 404 if not
         await client.asCurrentUser.cluster.getComponentTemplate({ name });
 
-        const { body: responseBody } = await client.asCurrentUser.cluster.putComponentTemplate({
+        const responseBody = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
           body: {
             template: template as estypes.IndicesIndexState,

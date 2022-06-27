@@ -9,20 +9,19 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import type { Capabilities } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import type { Capabilities } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/public';
+import type { Space } from '@kbn/spaces-plugin/public';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import { KibanaFeature } from '../../../../../features/public';
-import type { Space } from '../../../../../spaces/public';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import type { Role } from '../../../../common/model';
 import { userAPIClientMock } from '../../users/index.mock';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
 import { EditRolePage } from './edit_role_page';
-import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
 
@@ -132,19 +131,17 @@ function getProps({
   action,
   role,
   canManageSpaces = true,
-  spacesEnabled = true,
 }: {
   action: 'edit' | 'clone';
   role?: Role;
   canManageSpaces?: boolean;
-  spacesEnabled?: boolean;
 }) {
   const rolesAPIClient = rolesAPIClientMock.create();
   rolesAPIClient.getRole.mockResolvedValue(role);
 
-  const indexPatterns = dataPluginMock.createStartContract().indexPatterns;
+  const dataViews = dataViewPluginMocks.createStartContract();
   // `undefined` titles can technically happen via import/export or other manual manipulation
-  indexPatterns.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
+  dataViews.getTitles = jest.fn().mockResolvedValue(['foo*', 'bar*', undefined]);
 
   const indicesAPIClient = indicesAPIClientMock.create();
 
@@ -165,12 +162,7 @@ function getProps({
   const { http, docLinks, notifications } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
     if (path === '/api/spaces/space') {
-      if (spacesEnabled) {
-        return buildSpaces();
-      }
-
-      const notFoundError = { response: { status: 404 } };
-      throw notFoundError;
+      return buildSpaces();
     }
   });
 
@@ -179,7 +171,7 @@ function getProps({
     roleName: role?.name,
     license,
     http,
-    indexPatterns,
+    dataViews,
     indicesAPIClient,
     privilegesAPIClient,
     rolesAPIClient,
@@ -335,152 +327,6 @@ describe('<EditRolePage />', () => {
     });
   });
 
-  describe('with spaces disabled', () => {
-    it('can render a reserved role', async () => {
-      const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            spacesEnabled: false,
-            role: {
-              name: 'superuser',
-              metadata: { _reserved: true },
-              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-            },
-          })}
-        />
-      );
-
-      await waitForRender(wrapper);
-
-      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
-      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expectReadOnlyFormButtons(wrapper);
-    });
-
-    it('can render a user defined role', async () => {
-      const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            spacesEnabled: false,
-            role: {
-              name: 'my custom role',
-              metadata: {},
-              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-            },
-          })}
-        />
-      );
-
-      await waitForRender(wrapper);
-
-      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
-      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-      expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
-      expectSaveFormButtons(wrapper);
-    });
-
-    it('can render when creating a new role', async () => {
-      const wrapper = mountWithIntl(
-        <EditRolePage {...getProps({ action: 'edit', spacesEnabled: false })} />
-      );
-
-      await waitForRender(wrapper);
-
-      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-      expectSaveFormButtons(wrapper);
-    });
-
-    it('can render when cloning an existing role', async () => {
-      const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            spacesEnabled: false,
-            role: {
-              metadata: { _reserved: false },
-              name: '',
-              elasticsearch: {
-                cluster: ['all', 'manage'],
-                indices: [
-                  {
-                    names: ['foo*'],
-                    privileges: ['all'],
-                    field_security: { except: ['f'], grant: ['b*'] },
-                  },
-                ],
-                run_as: ['elastic'],
-              },
-              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-            },
-          })}
-        />
-      );
-
-      await waitForRender(wrapper);
-
-      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-      expectSaveFormButtons(wrapper);
-    });
-
-    it('does not care if user cannot manage spaces', async () => {
-      const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            spacesEnabled: false,
-            canManageSpaces: false,
-            role: {
-              name: 'my custom role',
-              metadata: {},
-              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-              kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
-            },
-          })}
-        />
-      );
-
-      await waitForRender(wrapper);
-
-      expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
-
-      expect(
-        wrapper.find('EuiCallOut[data-test-subj="userCannotManageSpacesCallout"]')
-      ).toHaveLength(0);
-
-      expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
-      expectSaveFormButtons(wrapper);
-    });
-
-    it('renders a partial read-only view when there is a transform error', async () => {
-      const wrapper = mountWithIntl(
-        <EditRolePage
-          {...getProps({
-            action: 'edit',
-            spacesEnabled: false,
-            canManageSpaces: false,
-            role: {
-              name: 'my custom role',
-              metadata: {},
-              elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
-              kibana: [],
-              _transform_error: ['kibana'],
-            },
-          })}
-        />
-      );
-
-      await waitForRender(wrapper);
-
-      expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
-      expectReadOnlyFormButtons(wrapper);
-    });
-  });
-
   it('registers fatal error if features endpoint fails unexpectedly', async () => {
     const error = { response: { status: 500 } };
     const getFeatures = jest.fn().mockRejectedValue(error);
@@ -506,11 +352,11 @@ describe('<EditRolePage />', () => {
   });
 
   it('can render if index patterns are not available', async () => {
-    const indexPatterns = dataPluginMock.createStartContract().indexPatterns;
-    indexPatterns.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
+    const dataViews = dataViewPluginMocks.createStartContract();
+    dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
 
     const wrapper = mountWithIntl(
-      <EditRolePage {...{ ...getProps({ action: 'edit' }), indexPatterns }} />
+      <EditRolePage {...{ ...getProps({ action: 'edit' }), dataViews }} />
     );
 
     await waitForRender(wrapper);
@@ -518,6 +364,102 @@ describe('<EditRolePage />', () => {
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
     expectSaveFormButtons(wrapper);
+  });
+
+  describe('in create mode', () => {
+    it('renders an error for existing role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      nameInput.simulate('blur');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        error: 'A role with this name already exists.',
+        isInvalid: true,
+      });
+      expectSaveFormButtons(wrapper);
+      expect(wrapper.find('EuiButton[data-test-subj="roleFormSaveButton"]').props().disabled);
+    });
+
+    it('renders an error on save of existing role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+      props.rolesAPIClient.saveRole.mockRejectedValue({
+        body: {
+          statusCode: 409,
+          message: 'Role already exists and cannot be created: system_indices_superuser',
+        },
+      });
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      saveButton.simulate('click');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        error: 'A role with this name already exists.',
+        isInvalid: true,
+      });
+      // A usual toast notification is not expected with this specific error
+      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expectSaveFormButtons(wrapper);
+      expect(wrapper.find('EuiButton[data-test-subj="roleFormSaveButton"]').props().disabled);
+    });
+
+    it('does not render an error for new role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      nameInput.simulate('blur');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        isInvalid: false,
+      });
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('does not render a notification on save of new role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      saveButton.simulate('click');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        isInvalid: false,
+      });
+      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expectSaveFormButtons(wrapper);
+    });
   });
 });
 

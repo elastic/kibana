@@ -6,84 +6,26 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { errors } from '@elastic/elasticsearch';
+
 import { API_BASE_PATH } from '../../../common/constants';
-import {
-  ElasticsearchServiceStart,
-  kibanaResponseFactory,
-  Logger,
-  SavedObjectsClient,
-} from '../../../../../../src/core/server';
-
-import { LicensingPluginSetup } from '../../../../licensing/server';
-
-import { ReindexStatus } from '../../../common/types';
-
+import type { ReindexStatusResponse } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
-import { reindexServiceFactory, ReindexWorker } from '../../lib/reindexing';
-import { CredentialStore } from '../../lib/reindexing/credential_store';
+import { reindexServiceFactory, ReindexWorker, generateNewIndexName } from '../../lib/reindexing';
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
-import { sortAndOrderReindexOperations } from '../../lib/reindexing/op_utils';
-import { ReindexError } from '../../lib/reindexing/error';
 import { RouteDependencies } from '../../types';
-import {
-  AccessForbidden,
-  CannotCreateIndex,
-  IndexNotFound,
-  MultipleReindexJobsFound,
-  ReindexAlreadyInProgress,
-  ReindexCannotBeCancelled,
-  ReindexTaskCannotBeDeleted,
-  ReindexTaskFailed,
-} from '../../lib/reindexing/error_symbols';
-
+import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 import { reindexHandler } from './reindex_handler';
-import { GetBatchQueueResponse, PostBatchResponse } from './types';
-
-interface CreateReindexWorker {
-  logger: Logger;
-  elasticsearchService: ElasticsearchServiceStart;
-  credentialStore: CredentialStore;
-  savedObjects: SavedObjectsClient;
-  licensing: LicensingPluginSetup;
-}
-
-export function createReindexWorker({
-  logger,
-  elasticsearchService,
-  credentialStore,
-  savedObjects,
-  licensing,
-}: CreateReindexWorker) {
-  const esClient = elasticsearchService.client;
-  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing);
-}
-
-const mapAnyErrorToKibanaHttpResponse = (e: any) => {
-  if (e instanceof ReindexError) {
-    switch (e.symbol) {
-      case AccessForbidden:
-        return kibanaResponseFactory.forbidden({ body: e.message });
-      case IndexNotFound:
-        return kibanaResponseFactory.notFound({ body: e.message });
-      case CannotCreateIndex:
-      case ReindexTaskCannotBeDeleted:
-        throw e;
-      case ReindexTaskFailed:
-        // Bad data
-        return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
-      case ReindexAlreadyInProgress:
-      case MultipleReindexJobsFound:
-      case ReindexCannotBeCancelled:
-        return kibanaResponseFactory.badRequest({ body: e.message });
-      default:
-      // nothing matched
-    }
-  }
-  throw e;
-};
 
 export function registerReindexIndicesRoutes(
-  { credentialStore, router, licensing, log }: RouteDependencies,
+  {
+    credentialStore,
+    router,
+    licensing,
+    log,
+    getSecurityPlugin,
+    lib: { handleEsError },
+  }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
   const BASE_PATH = `${API_BASE_PATH}/reindex`;
@@ -98,133 +40,37 @@ export function registerReindexIndicesRoutes(
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            savedObjects: { client: savedObjectsClient },
-            elasticsearch: { client: esClient },
-          },
-        },
-        request,
-        response
-      ) => {
-        const { indexName } = request.params;
-        try {
-          const result = await reindexHandler({
-            savedObjects: savedObjectsClient,
-            dataClient: esClient,
-            indexName,
-            log,
-            licensing,
-            headers: request.headers,
-            credentialStore,
-          });
-
-          // Kick the worker on this node to immediately pickup the new reindex operation.
-          getWorker().forceRefresh();
-
-          return response.ok({
-            body: result,
-          });
-        } catch (e) {
-          return mapAnyErrorToKibanaHttpResponse(e);
-        }
-      }
-    )
-  );
-
-  // Get the current batch queue
-  router.get(
-    {
-      path: `${BASE_PATH}/batch/queue`,
-      validate: {},
-    },
-    async (
-      {
-        core: {
-          elasticsearch: { client: esClient },
-          savedObjects,
-        },
-      },
-      request,
-      response
-    ) => {
-      const { client } = savedObjects;
-      const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      const {
+        savedObjects: { client: savedObjectsClient },
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { indexName } = request.params;
       try {
-        const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
-        const { queue } = sortAndOrderReindexOperations(inProgressOps);
-        const result: GetBatchQueueResponse = {
-          queue: queue.map((savedObject) => savedObject.attributes),
-        };
+        const result = await reindexHandler({
+          savedObjects: savedObjectsClient,
+          dataClient: esClient,
+          indexName,
+          log,
+          licensing,
+          request,
+          credentialStore,
+          security: getSecurityPlugin(),
+        });
+
+        // Kick the worker on this node to immediately pickup the new reindex operation.
+        getWorker().forceRefresh();
+
         return response.ok({
           body: result,
         });
-      } catch (e) {
-        return mapAnyErrorToKibanaHttpResponse(e);
-      }
-    }
-  );
-
-  // Add indices for reindexing to the worker's batch
-  router.post(
-    {
-      path: `${BASE_PATH}/batch`,
-      validate: {
-        body: schema.object({
-          indexNames: schema.arrayOf(schema.string()),
-        }),
-      },
-    },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            savedObjects: { client: savedObjectsClient },
-            elasticsearch: { client: esClient },
-          },
-        },
-        request,
-        response
-      ) => {
-        const { indexNames } = request.body;
-        const results: PostBatchResponse = {
-          enqueued: [],
-          errors: [],
-        };
-        for (const indexName of indexNames) {
-          try {
-            const result = await reindexHandler({
-              savedObjects: savedObjectsClient,
-              dataClient: esClient,
-              indexName,
-              log,
-              licensing,
-              headers: request.headers,
-              credentialStore,
-              reindexOptions: {
-                enqueue: true,
-              },
-            });
-            results.enqueued.push(result);
-          } catch (e) {
-            results.errors.push({
-              indexName,
-              message: e.message,
-            });
-          }
+      } catch (error) {
+        if (error instanceof errors.ResponseError) {
+          return handleEsError({ error, response });
         }
-
-        if (results.errors.length < indexNames.length) {
-          // Kick the worker on this node to immediately pickup the batch.
-          getWorker().forceRefresh();
-        }
-
-        return response.ok({ body: results });
+        return mapAnyErrorToKibanaHttpResponse(error);
       }
-    )
+    })
   );
 
   // Get status
@@ -237,45 +83,48 @@ export function registerReindexIndicesRoutes(
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            savedObjects,
-            elasticsearch: { client: esClient },
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      const {
+        savedObjects,
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { client } = savedObjects;
+      const { indexName } = request.params;
+      const asCurrentUser = esClient.asCurrentUser;
+      const reindexActions = reindexActionsFactory(client, asCurrentUser);
+      const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
+
+      try {
+        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
+        const reindexOp = await reindexService.findReindexOperation(indexName);
+        // If the user doesn't have privileges than querying for warnings is going to fail.
+        const warnings = hasRequiredPrivileges
+          ? await reindexService.detectReindexWarnings(indexName)
+          : [];
+
+        const indexAliases = await reindexService.getIndexAliases(indexName);
+
+        const body: ReindexStatusResponse = {
+          reindexOp: reindexOp ? reindexOp.attributes : undefined,
+          warnings,
+          hasRequiredPrivileges,
+          meta: {
+            indexName,
+            reindexName: generateNewIndexName(indexName),
+            aliases: Object.keys(indexAliases),
           },
-        },
-        request,
-        response
-      ) => {
-        const { client } = savedObjects;
-        const { indexName } = request.params;
-        const asCurrentUser = esClient.asCurrentUser;
-        const reindexActions = reindexActionsFactory(client, asCurrentUser);
-        const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
+        };
 
-        try {
-          const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
-          const reindexOp = await reindexService.findReindexOperation(indexName);
-          // If the user doesn't have privileges than querying for warnings is going to fail.
-          const warnings = hasRequiredPrivileges
-            ? await reindexService.detectReindexWarnings(indexName)
-            : [];
-          const indexGroup = reindexService.getIndexGroup(indexName);
-
-          return response.ok({
-            body: {
-              reindexOp: reindexOp ? reindexOp.attributes : null,
-              warnings,
-              indexGroup,
-              hasRequiredPrivileges,
-            },
-          });
-        } catch (e) {
-          return mapAnyErrorToKibanaHttpResponse(e);
+        return response.ok({
+          body,
+        });
+      } catch (error) {
+        if (error instanceof errors.ResponseError) {
+          return handleEsError({ error, response });
         }
+        return mapAnyErrorToKibanaHttpResponse(error);
       }
-    )
+    })
   );
 
   // Cancel reindex
@@ -288,36 +137,33 @@ export function registerReindexIndicesRoutes(
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            savedObjects,
-            elasticsearch: { client: esClient },
-          },
-        },
-        request,
-        response
-      ) => {
-        const { indexName } = request.params;
-        const { client } = savedObjects;
-        const callAsCurrentUser = esClient.asCurrentUser;
-        const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
-        const reindexService = reindexServiceFactory(
-          callAsCurrentUser,
-          reindexActions,
-          log,
-          licensing
-        );
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      const {
+        savedObjects,
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { indexName } = request.params;
+      const { client } = savedObjects;
+      const callAsCurrentUser = esClient.asCurrentUser;
+      const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
+      const reindexService = reindexServiceFactory(
+        callAsCurrentUser,
+        reindexActions,
+        log,
+        licensing
+      );
 
-        try {
-          await reindexService.cancelReindexing(indexName);
+      try {
+        await reindexService.cancelReindexing(indexName);
 
-          return response.ok({ body: { acknowledged: true } });
-        } catch (e) {
-          return mapAnyErrorToKibanaHttpResponse(e);
+        return response.ok({ body: { acknowledged: true } });
+      } catch (error) {
+        if (error instanceof errors.ResponseError) {
+          return handleEsError({ error, response });
         }
+
+        return mapAnyErrorToKibanaHttpResponse(error);
       }
-    )
+    })
   );
 }

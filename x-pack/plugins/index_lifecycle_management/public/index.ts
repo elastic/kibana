@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 
 import { IndexLifecycleManagementPlugin } from './plugin';
 
@@ -14,4 +14,5 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IndexLifecycleManagementPlugin(initializerContext);
 };
 
-export { ILM_LOCATOR_ID, IlmLocatorParams } from './locator';
+export type { IlmLocatorParams } from './locator';
+export { ILM_LOCATOR_ID } from './locator';

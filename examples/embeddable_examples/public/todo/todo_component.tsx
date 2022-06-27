@@ -13,10 +13,7 @@ import { EuiText } from '@elastic/eui';
 import { EuiAvatar } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { EuiFlexGrid } from '@elastic/eui';
-import {
-  withEmbeddableSubscription,
-  EmbeddableOutput,
-} from '../../../../src/plugins/embeddable/public';
+import { withEmbeddableSubscription, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { TodoEmbeddable, TodoInput } from './todo_embeddable';
 
 interface Props {
@@ -41,7 +38,7 @@ function wrapSearchTerms(task: string, search?: string) {
 
 export function TodoEmbeddableComponentInner({ input: { icon, title, task, search } }: Props) {
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup gutterSize="none" data-render-complete="true">
       <EuiFlexItem grow={false}>
         {icon ? <EuiIcon type={icon} size="l" /> : <EuiAvatar name={title || task} size="l" />}
       </EuiFlexItem>

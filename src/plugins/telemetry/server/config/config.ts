@@ -8,9 +8,7 @@
 
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
-import { PluginConfigDescriptor } from 'kibana/server';
-import { TELEMETRY_ENDPOINT } from '../../common/constants';
-import { deprecateEndpointConfigs } from './deprecations';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
   schema.literal('prod'),
@@ -20,13 +18,8 @@ const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   allowChangingOptInStatus: schema.boolean({ defaultValue: true }),
-  optIn: schema.conditional(
-    schema.siblingRef('allowChangingOptInStatus'),
-    schema.literal(false),
-    schema.maybe(schema.literal(true)),
-    schema.boolean({ defaultValue: true }),
-    { defaultValue: true }
-  ),
+  hidePrivacyStatement: schema.boolean({ defaultValue: false }),
+  optIn: schema.boolean({ defaultValue: true }),
   // `config` is used internally and not intended to be set
   config: schema.string({ defaultValue: getConfigPath() }),
   banner: schema.boolean({ defaultValue: true }),
@@ -35,34 +28,6 @@ const configSchema = schema.object({
     schema.literal(false), // Point to staging if it's not a distributable release
     schema.oneOf(clusterEnvSchema, { defaultValue: 'staging' }),
     schema.oneOf(clusterEnvSchema, { defaultValue: 'prod' })
-  ),
-  /**
-   * REMOVE IN 8.0 - INTERNAL CONFIG DEPRECATED IN 7.15
-   * REPLACED WITH `telemetry.sendUsageTo: staging | prod`
-   */
-  url: schema.conditional(
-    schema.contextRef('dist'),
-    schema.literal(false), // Point to staging if it's not a distributable release
-    schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.MAIN_CHANNEL.STAGING,
-    }),
-    schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.MAIN_CHANNEL.PROD,
-    })
-  ),
-  /**
-   * REMOVE IN 8.0 - INTERNAL CONFIG DEPRECATED IN 7.15
-   * REPLACED WITH `telemetry.sendUsageTo: staging | prod`
-   */
-  optInStatusUrl: schema.conditional(
-    schema.contextRef('dist'),
-    schema.literal(false), // Point to staging if it's not a distributable release
-    schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.STAGING,
-    }),
-    schema.string({
-      defaultValue: TELEMETRY_ENDPOINT.OPT_IN_STATUS_CHANNEL.PROD,
-    })
   ),
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
     defaultValue: 'server',
@@ -74,12 +39,24 @@ export type TelemetryConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   schema: configSchema,
   exposeToBrowser: {
-    enabled: true,
     banner: true,
     allowChangingOptInStatus: true,
     optIn: true,
     sendUsageFrom: true,
     sendUsageTo: true,
+    hidePrivacyStatement: true,
   },
-  deprecations: () => [deprecateEndpointConfigs],
+  deprecations: () => [
+    (cfg) => {
+      if (cfg.telemetry?.enabled === false) {
+        return {
+          set: [
+            { path: 'telemetry.optIn', value: false },
+            { path: 'telemetry.allowChangingOptInStatus', value: false },
+          ],
+          unset: [{ path: 'telemetry.enabled' }],
+        };
+      }
+    },
+  ],
 };

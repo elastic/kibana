@@ -10,8 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiPopover, EuiBadge, EuiSwitch } from '@elastic/eui';
 import { AlertState, CommonAlertStatus } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
-// @ts-ignore
-import { formatDateTimeLocal } from '../../common/formatting';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 import { getAlertPanelsByCategory } from './lib/get_alert_panels_by_category';
@@ -73,7 +71,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const groupByType = GROUP_BY_NODE;
   const panels = showByNode
     ? getAlertPanelsByNode(PANEL_TITLE, alerts, stateFilter)
-    : getAlertPanelsByCategory(PANEL_TITLE, inSetupMode, alerts, stateFilter);
+    : getAlertPanelsByCategory(PANEL_TITLE, !!inSetupMode, alerts, stateFilter);
   if (panels.length && !inSetupMode && panels[0].items) {
     panels[0].items.push(
       ...[
@@ -97,6 +95,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     <EuiBadge
       iconType="bell"
       color={inSetupMode ? 'default' : 'danger'}
+      data-test-subj="alertsBadge"
       onClickAriaLabel={
         inSetupMode ? numberOfRulesLabel(alertCount) : numberOfAlertsLabel(alertCount)
       }

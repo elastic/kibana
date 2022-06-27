@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 /**
  * Get the cluster info from the connected cluster.
@@ -16,6 +16,5 @@ import { ElasticsearchClient } from 'src/core/server';
  * @param {function} esClient The asInternalUser handler (exposed for testing)
  */
 export async function getClusterInfo(esClient: ElasticsearchClient) {
-  const { body } = await esClient.info();
-  return body;
+  return await esClient.info();
 }

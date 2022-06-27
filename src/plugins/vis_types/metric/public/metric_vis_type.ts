@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MetricVisOptions } from './components/metric_vis_options';
-import { ColorSchemas, ColorMode } from '../../../charts/public';
-import { VisTypeDefinition } from '../../../visualizations/public';
-import { AggGroupNames } from '../../../data/public';
+import { ColorSchemas, ColorMode } from '@kbn/charts-plugin/public';
+import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { MetricVisOptions } from './components';
 import { toExpressionAst } from './to_ast';
 import { VisParams } from './types';
 
@@ -21,6 +21,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
   description: i18n.translate('visTypeMetric.metricDescription', {
     defaultMessage: 'Show a calculation as a single number.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   visConfig: {
     defaults: {
@@ -48,6 +49,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: MetricVisOptions,
     schemas: [
       {
@@ -65,6 +67,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
           '!geo_bounds',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         aggSettings: {
           top_hits: {
@@ -86,7 +89,16 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
     ],
   },

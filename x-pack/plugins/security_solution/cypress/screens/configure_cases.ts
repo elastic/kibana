@@ -18,15 +18,13 @@ export const CONNECTORS_DROPDOWN = '[data-test-subj="dropdown-connectors"]';
 
 export const PASSWORD = '[data-test-subj="connector-servicenow-password-form-input"]';
 
-export const SAVE_BTN = '[data-test-subj="saveNewActionButton"]';
-
-export const SAVE_CHANGES_BTN = '[data-test-subj="case-configure-action-bottom-bar-save-button"]';
+export const SAVE_BTN = '[data-test-subj="create-connector-flyout-save-btn"]';
 
 export const SERVICE_NOW_CONNECTOR_CARD = '[data-test-subj=".servicenow-card"]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
-export const URL = '[data-test-subj="apiUrlFromInput"]';
+export const URL = '[data-test-subj="credentialsApiUrlFromInput"]';
 
 export const USERNAME = '[data-test-subj="connector-servicenow-username-form-input"]';
 

@@ -28,20 +28,22 @@ export function ServiceDependenciesBreakdownChart({
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies/breakdown',
-        params: {
-          path: {
-            serviceName,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/dependencies/breakdown',
+        {
+          params: {
+            path: {
+              serviceName,
+            },
+            query: {
+              start,
+              end,
+              kuery,
+              environment,
+            },
           },
-          query: {
-            start,
-            end,
-            kuery,
-            environment,
-          },
-        },
-      });
+        }
+      );
     },
     [serviceName, start, end, kuery, environment]
   );

@@ -6,8 +6,8 @@
  */
 
 import { configSchema, ActionsConfig, getValidatedConfig } from './config';
-import { Logger } from '../../../..//src/core/server';
-import { loggingSystemMock } from '../../../..//src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -29,7 +29,6 @@ describe('config validation', () => {
           "idleInterval": "PT1H",
           "pageSize": 100,
         },
-        "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -70,7 +69,6 @@ describe('config validation', () => {
           "idleInterval": "PT1H",
           "pageSize": 100,
         },
-        "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -196,7 +194,6 @@ describe('config validation', () => {
           "idleInterval": "PT1H",
           "pageSize": 100,
         },
-        "enabled": true,
         "enabledActionTypes": Array [
           "*",
         ],
@@ -214,6 +211,25 @@ describe('config validation', () => {
         },
       }
     `);
+  });
+
+  test('validates email.domain_allowlist', () => {
+    const config: Record<string, unknown> = {};
+    let result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {};
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email.domain_allowlist]: expected value of type [array] but got [undefined]"`
+    );
+
+    config.email = { domain_allowlist: [] };
+    result = configSchema.validate(config);
+    expect(result.email?.domain_allowlist).toEqual([]);
+
+    config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
+    result = configSchema.validate(config);
+    expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
   });
 });
 

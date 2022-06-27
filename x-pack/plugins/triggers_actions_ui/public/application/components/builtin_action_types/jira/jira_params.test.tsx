@@ -44,6 +44,7 @@ const connector: ActionConnector = {
   actionTypeId: '.test',
   name: 'Test',
   isPreconfigured: false,
+  isDeprecated: false,
 };
 const editAction = jest.fn();
 const defaultProps = {
@@ -94,6 +95,10 @@ describe('JiraParamsFields renders', () => {
       labels: { allowedValues: [], defaultValue: {} },
       description: { allowedValues: [], defaultValue: {} },
     },
+  };
+  const useGetFieldsByIssueTypeResponseLoading = {
+    isLoading: true,
+    fields: {},
   };
 
   beforeEach(() => {
@@ -396,14 +401,7 @@ describe('JiraParamsFields renders', () => {
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[1][1].comments.length).toEqual(1);
     });
-    test('An empty comment does not trigger editAction', () => {
-      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
-      const emptyComment = { target: { value: '' } };
-      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
-      expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
-      expect(comments.simulate('change', emptyComment));
-      expect(editAction.mock.calls.length).toEqual(1);
-    });
+
     test('Clears any left behind priority when issueType changes and hasPriority becomes false', () => {
       useGetFieldsByIssueTypeMock
         .mockReturnValueOnce(useGetFieldsByIssueTypeResponse)
@@ -420,6 +418,20 @@ describe('JiraParamsFields renders', () => {
       });
       expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
       expect(editAction.mock.calls[1][1].incident.priority).toEqual(null);
+    });
+
+    test('Preserve priority when the issue type fields are loading and hasPriority becomes stale', () => {
+      useGetFieldsByIssueTypeMock
+        .mockReturnValueOnce(useGetFieldsByIssueTypeResponseLoading)
+        .mockReturnValue(useGetFieldsByIssueTypeResponse);
+      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+
+      expect(editAction).not.toBeCalled();
+
+      wrapper.setProps({ ...defaultProps }); // just to force component call useGetFieldsByIssueType again
+
+      expect(editAction).toBeCalledTimes(1);
+      expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
     });
   });
 });

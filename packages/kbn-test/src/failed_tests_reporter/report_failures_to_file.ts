@@ -10,10 +10,11 @@ import { createHash } from 'crypto';
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
 import { join, basename, resolve } from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import { escape } from 'he';
 
+import { BuildkiteMetadata } from './buildkite_metadata';
 import { TestFailure } from './get_failures';
 
 const findScreenshots = (dirPath: string, allScreenshots: string[] = []) => {
@@ -37,7 +38,11 @@ const findScreenshots = (dirPath: string, allScreenshots: string[] = []) => {
   return allScreenshots;
 };
 
-export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
+export function reportFailuresToFile(
+  log: ToolingLog,
+  failures: TestFailure[],
+  bkMeta: BuildkiteMetadata
+) {
   if (!failures?.length) {
     return;
   }
@@ -80,21 +85,21 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
       {
         ...failure,
         hash,
-        buildId: process.env.BUJILDKITE_BUILD_ID || '',
-        jobId: process.env.BUILDKITE_JOB_ID || '',
-        url: process.env.BUILDKITE_BUILD_URL || '',
-        jobName: process.env.BUILDKITE_LABEL
-          ? `${process.env.BUILDKITE_LABEL}${
-              process.env.BUILDKITE_PARALLEL_JOB ? ` #${process.env.BUILDKITE_PARALLEL_JOB}` : ''
-            }`
-          : '',
+        buildId: bkMeta.buildId,
+        jobId: bkMeta.jobId,
+        url: bkMeta.url,
+        jobUrl: bkMeta.jobUrl,
+        jobName: bkMeta.jobName,
       },
       null,
       2
     );
 
     let screenshot = '';
-    const screenshotName = `${failure.name.replace(/([^ a-zA-Z0-9-]+)/g, '_')}`;
+    const truncatedName = failure.name.replace(/([^ a-zA-Z0-9-]+)/g, '_').slice(0, 80);
+    const failureNameHash = createHash('sha256').update(failure.name).digest('hex');
+    const screenshotName = `${truncatedName}-${failureNameHash}`;
+
     if (screenshotsByName[screenshotName]) {
       try {
         screenshot = readFileSync(screenshotsByName[screenshotName]).toString('base64');
@@ -124,6 +129,30 @@ export function reportFailuresToFile(log: ToolingLog, failures: TestFailure[]) {
           .join('')}
         <hr />
         <p><strong>${escape(failure.name)}</strong></p>
+        <p>
+          <small>
+            <strong>Failures in tracked branches</strong>: <span class="badge rounded-pill bg-danger">${
+              failure.failureCount || 0
+            }</span>
+            ${
+              failure.githubIssue
+                ? `<br /><a href="${escape(failure.githubIssue)}">${escape(
+                    failure.githubIssue
+                  )}</a>`
+                : ''
+            }
+          </small>
+        </p>
+        ${
+          bkMeta.jobUrl
+            ? `<p>
+              <small>
+                <strong>Buildkite Job</strong><br />
+                <a href="${escape(bkMeta.jobUrl)}">${escape(bkMeta.jobUrl)}</a>
+              </small>
+            </p>`
+            : ''
+        }
         <pre>${escape(failure.failure)}</pre>
         ${screenshotHtml}
         <pre>${escape(failure['system-out'] || '')}</pre>

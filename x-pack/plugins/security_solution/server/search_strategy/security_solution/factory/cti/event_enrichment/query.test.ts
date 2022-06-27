@@ -16,14 +16,14 @@ describe('buildEventEnrichmentQuery', () => {
       expect.arrayContaining([
         {
           match: {
-            'threatintel.indicator.file.hash.md5': {
+            'threat.indicator.file.hash.md5': {
               _name: 'file.hash.md5',
               query: '1eee2bf3f56d8abed72da2bc523e7431',
             },
           },
         },
-        { match: { 'threatintel.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
-        { match: { 'threatintel.indicator.url.full': { _name: 'url.full', query: 'elastic.co' } } },
+        { match: { 'threat.indicator.ip': { _name: 'source.ip', query: '127.0.0.1' } } },
+        { match: { 'threat.indicator.url.full': { _name: 'url.full', query: 'elastic.co' } } },
       ])
     );
   });
@@ -54,21 +54,16 @@ describe('buildEventEnrichmentQuery', () => {
     );
   });
 
-  it('includes specified docvalue_fields', () => {
-    const docValueFields = [
-      { field: '@timestamp', format: 'date_time' },
-      { field: 'event.created', format: 'date_time' },
-      { field: 'event.end', format: 'date_time' },
-    ];
-    const options = buildEventEnrichmentRequestOptionsMock({ docValueFields });
-    const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.docvalue_fields).toEqual(expect.arrayContaining(docValueFields));
-  });
-
   it('requests all fields', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
-    expect(query.body?.fields).toEqual(['*']);
+    expect(query.body?.fields).toEqual([
+      '*',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ]);
   });
 
   it('excludes _source', () => {

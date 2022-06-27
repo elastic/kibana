@@ -5,6 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { LegendSize } from '@kbn/visualizations-plugin/common';
+
 export const sampleAreaVis = {
   type: {
     name: 'area',
@@ -105,6 +108,7 @@ export const sampleAreaVis = {
       },
     },
     editorConfig: {
+      enableDataViewChange: true,
       optionTabs: [
         {
           name: 'advanced',
@@ -149,7 +153,16 @@ export const sampleAreaVis = {
             title: 'X-axis',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: [
+              '!geohash_grid',
+              '!geotile_grid',
+              '!filter',
+              '!sampler',
+              '!diversified_sampler',
+              '!rare_terms',
+              '!multi_terms',
+              '!significant_text',
+            ],
             editor: false,
             params: [],
           },
@@ -159,7 +172,16 @@ export const sampleAreaVis = {
             title: 'Split series',
             min: 0,
             max: 3,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: [
+              '!geohash_grid',
+              '!geotile_grid',
+              '!filter',
+              '!sampler',
+              '!diversified_sampler',
+              '!rare_terms',
+              '!multi_terms',
+              '!significant_text',
+            ],
             editor: false,
             params: [],
           },
@@ -169,7 +191,16 @@ export const sampleAreaVis = {
             title: 'Split chart',
             min: 0,
             max: 1,
-            aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+            aggFilter: [
+              '!geohash_grid',
+              '!geotile_grid',
+              '!filter',
+              '!sampler',
+              '!diversified_sampler',
+              '!rare_terms',
+              '!multi_terms',
+              '!significant_text',
+            ],
             params: [
               {
                 name: 'row',
@@ -255,6 +286,7 @@ export const sampleAreaVis = {
     addTooltip: true,
     addLegend: true,
     legendPosition: 'top',
+    legendSize: LegendSize.SMALL,
     times: [],
     addTimeMarker: false,
     truncateLegend: true,
@@ -1780,6 +1812,28 @@ export const sampleAreaVis = {
     },
     aggs: {
       typesRegistry: {},
+      bySchemaName: () => [
+        {
+          id: '1',
+          enabled: true,
+          type: 'sum',
+          params: {
+            field: 'total_quantity',
+          },
+          schema: 'metric',
+          makeLabel: () => 'Total quantity',
+          toSerializedFieldFormat: () => ({
+            id: 'number',
+            params: {
+              parsedUrl: {
+                origin: 'http://localhost:5801',
+                pathname: '/app/visualize',
+                basePath: '',
+              },
+            },
+          }),
+        },
+      ],
       getResponseAggs: () => [
         {
           id: '1',

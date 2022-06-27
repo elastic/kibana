@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IUiSettingsClient } from 'kibana/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import type { EsQueryConfig } from '@kbn/es-query';
 import type { VisTypeTimeseriesVisDataRequest } from '../../../../types';
 import type { Annotation, FetchedIndexPattern, Panel } from '../../../../../common/types';
@@ -22,6 +22,11 @@ export interface AnnotationsRequestProcessorsParams {
   annotationIndex: FetchedIndexPattern;
   capabilities: SearchCapabilities;
   uiSettings: IUiSettingsClient;
+  getMetaParams: () => Promise<{
+    maxBars: number;
+    timeField?: string | undefined;
+    interval: string;
+  }>;
 }
 
 export type AnnotationSearchRequest = Record<string, unknown>;

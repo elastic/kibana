@@ -25,7 +25,7 @@ apm = ElasticAPM(app)
   }
 )}
 from elasticapm.contrib.flask import ElasticAPM
-app.config['ELASTIC_APM'] = {curlyOpen}
+app.config['ELASTIC_APM'] = {
 # ${i18n.translate(
   'xpack.apm.tutorial.flaskClient.configure.commands.setRequiredServiceNameComment',
   {
@@ -38,7 +38,7 @@ app.config['ELASTIC_APM'] = {curlyOpen}
     defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
   }
 )}
-'SERVICE_NAME': '',
+#'SERVICE_NAME': 'unknown-python-service',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.flaskClient.configure.commands.useIfApmServerRequiresTokenComment',
@@ -65,6 +65,6 @@ app.config['ELASTIC_APM'] = {curlyOpen}
   }
 )}
 'ENVIRONMENT': 'production',
-{curlyClose}
+}
 
 apm = ElasticAPM(app)`;

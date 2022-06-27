@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'header',
   ]);
-  const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
+  const defaultSettings = { defaultIndex: 'logstash-*' };
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should open the context view with the same columns', async () => {
       const columnNames = await dataGrid.getHeaderFields();
-      expect(columnNames).to.eql(['Time (@timestamp)', ...TEST_COLUMN_NAMES]);
+      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {

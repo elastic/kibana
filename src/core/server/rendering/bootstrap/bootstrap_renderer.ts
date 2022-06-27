@@ -8,6 +8,7 @@
 
 import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
+import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
 import { HttpAuth, KibanaRequest } from '../../http';
@@ -29,6 +30,7 @@ interface FactoryOptions {
 interface RenderedOptions {
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
+  isAnonymousPage?: boolean;
 }
 
 interface RendererResult {
@@ -48,14 +50,13 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     return authStatus !== 'unauthenticated';
   };
 
-  return async function bootstrapRenderer({ uiSettingsClient, request }) {
+  return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode = false;
-    let themeVersion = 'v8';
+    const themeVersion: ThemeVersion = 'v8';
 
     try {
       const authenticated = isAuthenticated(request);
       darkMode = authenticated ? await uiSettingsClient.get('theme:darkMode') : false;
-      themeVersion = authenticated ? await uiSettingsClient.get('theme:version') : 'v8';
     } catch (e) {
       // just use the default values in case of connectivity issues with ES
     }
@@ -70,6 +71,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,
       regularBundlePath,
+      isAnonymousPage,
     });
 
     const jsDependencyPaths = getJsDependencyPaths(regularBundlePath, bundlePaths);

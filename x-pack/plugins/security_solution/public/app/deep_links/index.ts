@@ -6,18 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
 
-import { LicenseType } from '../../../../licensing/common/types';
+import { get } from 'lodash';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import { AppDeepLink, AppNavLinkStatus, AppUpdater, Capabilities } from '@kbn/core/public';
+import { Subject, Subscription } from 'rxjs';
 import { SecurityPageName } from '../types';
 import {
-  AppDeepLink,
-  ApplicationStart,
-  AppNavLinkStatus,
-  AppUpdater,
-} from '../../../../../../src/core/public';
-import {
   OVERVIEW,
+  DETECTION_RESPONSE,
   DETECT,
   ALERTS,
   RULES,
@@ -27,16 +25,23 @@ import {
   INVESTIGATE,
   NETWORK,
   TIMELINES,
-  CASE,
   MANAGE,
-  UEBA,
+  USERS,
+  KUBERNETES,
   HOST_ISOLATION_EXCEPTIONS,
   EVENT_FILTERS,
+  BLOCKLIST,
   TRUSTED_APPLICATIONS,
+  POLICIES,
   ENDPOINTS,
+  GETTING_STARTED,
+  DASHBOARDS,
+  CREATE_NEW_RULE,
 } from '../translations';
 import {
   OVERVIEW_PATH,
+  LANDING_PATH,
+  DETECTION_RESPONSE_PATH,
   ALERTS_PATH,
   RULES_PATH,
   EXCEPTIONS_PATH,
@@ -45,38 +50,99 @@ import {
   TIMELINES_PATH,
   CASES_PATH,
   ENDPOINTS_PATH,
+  POLICIES_PATH,
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
-  UEBA_PATH,
+  BLOCKLIST_PATH,
   CASES_FEATURE_ID,
   HOST_ISOLATION_EXCEPTIONS_PATH,
+  SERVER_APP_ID,
+  USERS_PATH,
+  KUBERNETES_PATH,
+  RULES_CREATE_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
+import { subscribeAppLinks } from '../../common/links';
+import { AppLinkItems } from '../../common/links/types';
 
-export const PREMIUM_DEEP_LINK_IDS: Set<string> = new Set([
-  SecurityPageName.hostsAnomalies,
-  SecurityPageName.networkAnomalies,
-  SecurityPageName.caseConfigure,
-]);
+const FEATURE = {
+  general: `${SERVER_APP_ID}.show`,
+  casesRead: `${CASES_FEATURE_ID}.read_cases`,
+  casesCrud: `${CASES_FEATURE_ID}.crud_cases`,
+} as const;
 
-export const securitySolutionsDeepLinks: AppDeepLink[] = [
+type Feature = typeof FEATURE[keyof typeof FEATURE];
+
+type SecuritySolutionDeepLink = AppDeepLink & {
+  isPremium?: boolean;
+  features?: Feature[];
+  /**
+   * Displays deep link when feature flag is enabled.
+   */
+  experimentalKey?: keyof ExperimentalFeatures;
+  /**
+   * Hides deep link when feature flag is enabled.
+   */
+  hideWhenExperimentalKey?: keyof ExperimentalFeatures;
+  deepLinks?: SecuritySolutionDeepLink[];
+};
+
+export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
   {
-    id: SecurityPageName.overview,
-    title: OVERVIEW,
-    path: OVERVIEW_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
+    id: SecurityPageName.landing,
+    title: GETTING_STARTED,
+    path: LANDING_PATH,
+    features: [FEATURE.general],
     keywords: [
-      i18n.translate('xpack.securitySolution.search.overview', {
-        defaultMessage: 'Overview',
+      i18n.translate('xpack.securitySolution.search.getStarted', {
+        defaultMessage: 'Getting started',
       }),
     ],
+  },
+  {
+    id: SecurityPageName.dashboardsLanding,
+    title: DASHBOARDS,
+    path: OVERVIEW_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    searchable: false,
     order: 9000,
+    features: [FEATURE.general],
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.dashboards', {
+        defaultMessage: 'Dashboards',
+      }),
+    ],
+    deepLinks: [
+      {
+        id: SecurityPageName.overview,
+        title: OVERVIEW,
+        path: OVERVIEW_PATH,
+        features: [FEATURE.general],
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.overview', {
+            defaultMessage: 'Overview',
+          }),
+        ],
+      },
+      {
+        id: SecurityPageName.detectionAndResponse,
+        title: DETECTION_RESPONSE,
+        path: DETECTION_RESPONSE_PATH,
+        features: [FEATURE.general],
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.detectionAndResponse', {
+            defaultMessage: 'Detection & Response',
+          }),
+        ],
+      },
+    ],
   },
   {
     id: SecurityPageName.detections,
     title: DETECT,
     path: ALERTS_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
+    features: [FEATURE.general],
     keywords: [
       i18n.translate('xpack.securitySolution.search.detect', {
         defaultMessage: 'Detect',
@@ -88,44 +154,52 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
         title: ALERTS,
         path: ALERTS_PATH,
         navLinkStatus: AppNavLinkStatus.visible,
+        order: 9001,
         keywords: [
           i18n.translate('xpack.securitySolution.search.alerts', {
             defaultMessage: 'Alerts',
           }),
         ],
-        searchable: true,
-        order: 9001,
       },
       {
         id: SecurityPageName.rules,
         title: RULES,
         path: RULES_PATH,
-        navLinkStatus: AppNavLinkStatus.hidden,
         keywords: [
           i18n.translate('xpack.securitySolution.search.rules', {
             defaultMessage: 'Rules',
           }),
         ],
-        searchable: true,
+        deepLinks: [
+          {
+            id: SecurityPageName.rulesCreate,
+            title: CREATE_NEW_RULE,
+            path: RULES_CREATE_PATH,
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: false,
+          },
+        ],
       },
       {
         id: SecurityPageName.exceptions,
         title: EXCEPTIONS,
         path: EXCEPTIONS_PATH,
-        navLinkStatus: AppNavLinkStatus.hidden,
         keywords: [
           i18n.translate('xpack.securitySolution.search.exceptions', {
-            defaultMessage: 'Exceptions',
+            defaultMessage: 'Exception lists',
           }),
         ],
-        searchable: true,
       },
     ],
   },
   {
-    id: SecurityPageName.explore,
+    id: SecurityPageName.exploreLanding,
     title: EXPLORE,
-    navLinkStatus: AppNavLinkStatus.hidden,
+    path: HOSTS_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    order: 9004,
+    searchable: false,
+    features: [FEATURE.general],
     keywords: [
       i18n.translate('xpack.securitySolution.search.explore', {
         defaultMessage: 'Explore',
@@ -136,21 +210,12 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
         id: SecurityPageName.hosts,
         title: HOSTS,
         path: HOSTS_PATH,
-        navLinkStatus: AppNavLinkStatus.visible,
         keywords: [
           i18n.translate('xpack.securitySolution.search.hosts', {
             defaultMessage: 'Hosts',
           }),
         ],
-        order: 9002,
         deepLinks: [
-          {
-            id: SecurityPageName.authentications,
-            title: i18n.translate('xpack.securitySolution.search.hosts.authentications', {
-              defaultMessage: 'Authentications',
-            }),
-            path: `${HOSTS_PATH}/authentications`,
-          },
           {
             id: SecurityPageName.uncommonProcesses,
             title: i18n.translate('xpack.securitySolution.search.hosts.uncommonProcesses', {
@@ -159,7 +224,15 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
             path: `${HOSTS_PATH}/uncommonProcesses`,
           },
           {
-            id: SecurityPageName.events,
+            id: SecurityPageName.hostsAnomalies,
+            title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: `${HOSTS_PATH}/anomalies`,
+            isPremium: true,
+          },
+          {
+            id: SecurityPageName.hostsEvents,
             title: i18n.translate('xpack.securitySolution.search.hosts.events', {
               defaultMessage: 'Events',
             }),
@@ -173,11 +246,19 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
             path: `${HOSTS_PATH}/externalAlerts`,
           },
           {
-            id: SecurityPageName.hostsAnomalies,
-            title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
-              defaultMessage: 'Anomalies',
+            id: SecurityPageName.hostsRisk,
+            title: i18n.translate('xpack.securitySolution.search.hosts.risk', {
+              defaultMessage: 'Host risk',
             }),
-            path: `${HOSTS_PATH}/anomalies`,
+            path: `${HOSTS_PATH}/hostRisk`,
+            experimentalKey: 'riskyHostsEnabled',
+          },
+          {
+            id: SecurityPageName.sessions,
+            title: i18n.translate('xpack.securitySolution.search.hosts.sessions', {
+              defaultMessage: 'Sessions',
+            }),
+            path: `${HOSTS_PATH}/sessions`,
           },
         ],
       },
@@ -185,13 +266,11 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
         id: SecurityPageName.network,
         title: NETWORK,
         path: NETWORK_PATH,
-        navLinkStatus: AppNavLinkStatus.visible,
         keywords: [
           i18n.translate('xpack.securitySolution.search.network', {
             defaultMessage: 'Network',
           }),
         ],
-        order: 9003,
         deepLinks: [
           {
             id: SecurityPageName.networkDns,
@@ -227,27 +306,77 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
               defaultMessage: 'Anomalies',
             }),
             path: `${NETWORK_PATH}/anomalies`,
+            isPremium: true,
           },
+        ],
+      },
+      {
+        id: SecurityPageName.users,
+        title: USERS,
+        path: USERS_PATH,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.users', {
+            defaultMessage: 'Users',
+          }),
+        ],
+        deepLinks: [
+          {
+            id: SecurityPageName.usersAuthentications,
+            title: i18n.translate('xpack.securitySolution.search.users.authentications', {
+              defaultMessage: 'Authentications',
+            }),
+            path: `${USERS_PATH}/authentications`,
+          },
+          {
+            id: SecurityPageName.usersAnomalies,
+            title: i18n.translate('xpack.securitySolution.search.users.anomalies', {
+              defaultMessage: 'Anomalies',
+            }),
+            path: `${USERS_PATH}/anomalies`,
+            isPremium: true,
+          },
+          {
+            id: SecurityPageName.usersRisk,
+            title: i18n.translate('xpack.securitySolution.search.users.risk', {
+              defaultMessage: 'User risk',
+            }),
+            path: `${USERS_PATH}/userRisk`,
+            experimentalKey: 'riskyUsersEnabled',
+          },
+          {
+            id: SecurityPageName.usersEvents,
+            title: i18n.translate('xpack.securitySolution.search.users.events', {
+              defaultMessage: 'Events',
+            }),
+            path: `${USERS_PATH}/events`,
+          },
+          {
+            id: SecurityPageName.usersExternalAlerts,
+            title: i18n.translate('xpack.securitySolution.search.users.externalAlerts', {
+              defaultMessage: 'External Alerts',
+            }),
+            path: `${USERS_PATH}/externalAlerts`,
+          },
+        ],
+      },
+      {
+        id: SecurityPageName.kubernetes,
+        title: KUBERNETES,
+        path: KUBERNETES_PATH,
+        experimentalKey: 'kubernetesEnabled',
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.kubernetes', {
+            defaultMessage: 'Kubernetes',
+          }),
         ],
       },
     ],
   },
   {
-    id: SecurityPageName.ueba,
-    title: UEBA,
-    path: UEBA_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
-    keywords: [
-      i18n.translate('xpack.securitySolution.search.ueba', {
-        defaultMessage: 'Users & Entities',
-      }),
-    ],
-    order: 9004,
-  },
-  {
     id: SecurityPageName.investigate,
     title: INVESTIGATE,
     navLinkStatus: AppNavLinkStatus.hidden,
+    features: [FEATURE.general, FEATURE.casesRead],
     keywords: [
       i18n.translate('xpack.securitySolution.search.investigate', {
         defaultMessage: 'Investigate',
@@ -259,12 +388,13 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
         title: TIMELINES,
         path: TIMELINES_PATH,
         navLinkStatus: AppNavLinkStatus.visible,
+        order: 9002,
+        features: [FEATURE.general],
         keywords: [
           i18n.translate('xpack.securitySolution.search.timelines', {
             defaultMessage: 'Timelines',
           }),
         ],
-        order: 9005,
         deepLinks: [
           {
             id: SecurityPageName.timelinesTemplates,
@@ -275,41 +405,33 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
           },
         ],
       },
-      {
-        id: SecurityPageName.case,
-        title: CASE,
-        path: CASES_PATH,
-        navLinkStatus: AppNavLinkStatus.visible,
-        keywords: [
-          i18n.translate('xpack.securitySolution.search.cases', {
-            defaultMessage: 'Cases',
-          }),
-        ],
-        order: 9006,
-        deepLinks: [
-          {
-            id: SecurityPageName.caseCreate,
-            title: i18n.translate('xpack.securitySolution.search.cases.create', {
-              defaultMessage: 'Create New Case',
-            }),
-            path: `${CASES_PATH}/create`,
+      getCasesDeepLinks<SecuritySolutionDeepLink>({
+        basePath: CASES_PATH,
+        extend: {
+          [SecurityPageName.case]: {
+            navLinkStatus: AppNavLinkStatus.visible,
+            order: 9003,
+            features: [FEATURE.casesRead],
           },
-          {
-            id: SecurityPageName.caseConfigure,
-            title: i18n.translate('xpack.securitySolution.search.cases.configure', {
-              defaultMessage: 'Configure Cases',
-            }),
-            path: `${CASES_PATH}/configure`,
+          [SecurityPageName.caseConfigure]: {
+            features: [FEATURE.casesCrud],
+            isPremium: true,
           },
-        ],
-      },
+          [SecurityPageName.caseCreate]: {
+            features: [FEATURE.casesCrud],
+          },
+        },
+      }),
     ],
   },
   {
     id: SecurityPageName.administration,
     title: MANAGE,
     path: ENDPOINTS_PATH,
-    navLinkStatus: AppNavLinkStatus.hidden,
+    features: [FEATURE.general],
+    navLinkStatus: AppNavLinkStatus.visible,
+    order: 9005,
+    searchable: false,
     keywords: [
       i18n.translate('xpack.securitySolution.search.manage', {
         defaultMessage: 'Manage',
@@ -318,10 +440,14 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
     deepLinks: [
       {
         id: SecurityPageName.endpoints,
-        navLinkStatus: AppNavLinkStatus.visible,
         title: ENDPOINTS,
-        order: 9006,
         path: ENDPOINTS_PATH,
+      },
+      {
+        id: SecurityPageName.policies,
+        title: POLICIES,
+        path: POLICIES_PATH,
+        experimentalKey: 'policyListEnabled',
       },
       {
         id: SecurityPageName.trustedApps,
@@ -338,6 +464,11 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
         title: HOST_ISOLATION_EXCEPTIONS,
         path: HOST_ISOLATION_EXCEPTIONS_PATH,
       },
+      {
+        id: SecurityPageName.blocklist,
+        title: BLOCKLIST,
+        path: BLOCKLIST_PATH,
+      },
     ],
   },
 ];
@@ -352,46 +483,48 @@ export const securitySolutionsDeepLinks: AppDeepLink[] = [
 export function getDeepLinks(
   enableExperimental: ExperimentalFeatures,
   licenseType?: LicenseType,
-  capabilities?: ApplicationStart['capabilities']
+  capabilities?: Capabilities
 ): AppDeepLink[] {
-  const isPremium = isPremiumLicense(licenseType);
+  const filterDeepLinks = (securityDeepLinks: SecuritySolutionDeepLink[]): AppDeepLink[] =>
+    securityDeepLinks.reduce(
+      (
+        deepLinks: AppDeepLink[],
+        { isPremium, features, experimentalKey, hideWhenExperimentalKey, ...deepLink }
+      ) => {
+        if (licenseType && isPremium && !isPremiumLicense(licenseType)) {
+          return deepLinks;
+        }
+        if (experimentalKey && !enableExperimental[experimentalKey]) {
+          return deepLinks;
+        }
 
-  const filterDeepLinks = (deepLinks: AppDeepLink[]): AppDeepLink[] => {
-    return deepLinks
-      .filter((deepLink) => {
-        if (!isPremium && PREMIUM_DEEP_LINK_IDS.has(deepLink.id)) {
-          return false;
+        if (hideWhenExperimentalKey && enableExperimental[hideWhenExperimentalKey]) {
+          return deepLinks;
         }
-        if (deepLink.id === SecurityPageName.case) {
-          return capabilities == null || capabilities[CASES_FEATURE_ID].read_cases === true;
-        }
-        if (deepLink.id === SecurityPageName.ueba) {
-          return enableExperimental.uebaEnabled;
-        }
-        return true;
-      })
-      .map((deepLink) => {
-        if (
-          deepLink.id === SecurityPageName.case &&
-          capabilities != null &&
-          capabilities[CASES_FEATURE_ID].crud_cases === false
-        ) {
-          return {
-            ...deepLink,
-            deepLinks: [],
-          };
+
+        if (capabilities != null && !hasFeaturesCapability(features, capabilities)) {
+          return deepLinks;
         }
         if (deepLink.deepLinks) {
-          return {
-            ...deepLink,
-            deepLinks: filterDeepLinks(deepLink.deepLinks),
-          };
+          deepLinks.push({ ...deepLink, deepLinks: filterDeepLinks(deepLink.deepLinks) });
+        } else {
+          deepLinks.push(deepLink);
         }
-        return deepLink;
-      });
-  };
-
+        return deepLinks;
+      },
+      []
+    );
   return filterDeepLinks(securitySolutionsDeepLinks);
+}
+
+function hasFeaturesCapability(
+  features: Feature[] | undefined,
+  capabilities: Capabilities
+): boolean {
+  if (!features) {
+    return true;
+  }
+  return features.some((featureKey) => get(capabilities, featureKey, false));
 }
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {
@@ -403,17 +536,36 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
   );
 }
 
-export function updateGlobalNavigation({
-  capabilities,
-  updater$,
-  enableExperimental,
-}: {
-  capabilities: ApplicationStart['capabilities'];
-  updater$: Subject<AppUpdater>;
-  enableExperimental: ExperimentalFeatures;
-}) {
-  updater$.next(() => ({
-    navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent showing main nav link
-    deepLinks: getDeepLinks(enableExperimental, undefined, capabilities),
+/**
+ * New deep links code starts here.
+ * All the code above will be removed once the appLinks migration is over.
+ * The code below manages the new implementation using the unified appLinks.
+ */
+
+const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
+  appLinks.map((appLink) => ({
+    id: appLink.id,
+    path: appLink.path,
+    title: appLink.title,
+    navLinkStatus: appLink.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    searchable: !appLink.globalSearchDisabled,
+    ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
+    ...(appLink.globalNavOrder != null ? { order: appLink.globalNavOrder } : {}),
+    ...(appLink.links && appLink.links?.length
+      ? {
+          deepLinks: formatDeepLinks(appLink.links),
+        }
+      : {}),
   }));
-}
+
+/**
+ * Registers any change in appLinks to be updated in app deepLinks
+ */
+export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>): Subscription => {
+  return subscribeAppLinks((appLinks) => {
+    appUpdater$.next(() => ({
+      navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
+      deepLinks: formatDeepLinks(appLinks),
+    }));
+  });
+};

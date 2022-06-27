@@ -17,17 +17,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Filter panel', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
+      await PageObjects.discover.selectIndexPattern('Kibana Sample Data Flights');
     });
 
     it('a11y test on add filter panel', async () => {
       await PageObjects.discover.openAddFilterPanel();
       await a11y.testAppSnapshot();
+      await PageObjects.discover.closeAddFilterPanel();
       await filterBar.addFilter('OriginCityName', 'is', 'Rome');
     });
 
@@ -46,38 +43,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // the following tests filter panel options which changes UI
     it('a11y test on filter panel options panel', async () => {
       await filterBar.addFilter('DestCountry', 'is', 'AU');
-      await testSubjects.click('showFilterActions');
+      await testSubjects.click('showQueryBarMenu');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on disable all filter options view', async () => {
-      await testSubjects.click('disableAllFilters');
+      await testSubjects.click('filter-sets-applyToAllFilters');
+      await testSubjects.click('filter-sets-disableAllFilters');
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test on pin filters view', async () => {
-      await testSubjects.click('showFilterActions');
-      await testSubjects.click('enableAllFilters');
-      await testSubjects.click('showFilterActions');
-      await testSubjects.click('pinAllFilters');
+    it('a11y test on enable all filters view', async () => {
+      await testSubjects.click('showQueryBarMenu');
+      await testSubjects.click('filter-sets-applyToAllFilters');
+      await testSubjects.click('filter-sets-enableAllFilters');
+      await a11y.testAppSnapshot();
+    });
+
+    it('a11y test on pin all filters view', async () => {
+      await testSubjects.click('showQueryBarMenu');
+      await testSubjects.click('filter-sets-applyToAllFilters');
+      await testSubjects.click('filter-sets-pinAllFilters');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on unpin all filters view', async () => {
-      await testSubjects.click('showFilterActions');
-      await testSubjects.click('unpinAllFilters');
+      await testSubjects.click('showQueryBarMenu');
+      await testSubjects.click('filter-sets-applyToAllFilters');
+      await testSubjects.click('filter-sets-unpinAllFilters');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on invert inclusion of all filters view', async () => {
-      await testSubjects.click('showFilterActions');
-      await testSubjects.click('invertInclusionAllFilters');
+      await testSubjects.click('showQueryBarMenu');
+      await testSubjects.click('filter-sets-applyToAllFilters');
+      await testSubjects.click('filter-sets-invertAllFilters');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on remove all filtes view', async () => {
-      await testSubjects.click('showFilterActions');
-      await testSubjects.click('removeAllFilters');
+      await testSubjects.click('showQueryBarMenu');
+      await testSubjects.click('filter-sets-removeAllFilters');
       await a11y.testAppSnapshot();
     });
   });

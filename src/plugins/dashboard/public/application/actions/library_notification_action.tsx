@@ -8,8 +8,9 @@
 
 import React from 'react';
 
+import { CoreStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { reactToUiComponent } from '../../services/kibana_react';
+import { KibanaThemeProvider, reactToUiComponent } from '../../services/kibana_react';
 import {
   IEmbeddable,
   ViewMode,
@@ -32,7 +33,7 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
-  constructor(private unlinkAction: UnlinkFromLibraryAction) {}
+  constructor(private theme: CoreStart['theme'], private unlinkAction: UnlinkFromLibraryAction) {}
 
   private displayName = dashboardLibraryNotification.getDisplayName();
 
@@ -45,13 +46,15 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   }) => {
     const { embeddable } = context;
     return (
-      <LibraryNotificationPopover
-        unlinkAction={this.unlinkAction}
-        displayName={this.displayName}
-        context={context}
-        icon={this.getIconType({ embeddable })}
-        id={this.id}
-      />
+      <KibanaThemeProvider theme$={this.theme.theme$}>
+        <LibraryNotificationPopover
+          unlinkAction={this.unlinkAction}
+          displayName={this.displayName}
+          context={context}
+          icon={this.getIconType({ embeddable })}
+          id={this.id}
+        />
+      </KibanaThemeProvider>
     );
   };
 

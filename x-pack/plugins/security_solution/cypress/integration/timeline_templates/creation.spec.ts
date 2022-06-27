@@ -26,9 +26,9 @@ import {
   TIMELINES_FAVORITE,
 } from '../../screens/timelines';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteTimelines } from '../../tasks/common';
 
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import {
   addDescriptionToTimeline,
@@ -49,14 +49,17 @@ import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../tasks/timel
 import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline Templates', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
-
+    login();
+  });
+  beforeEach(() => {
+    deleteTimelines();
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
   it('Creates a timeline template', async () => {
+    visitWithoutDateRange(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();
     populateTimeline();
@@ -71,7 +74,7 @@ describe('Timeline Templates', () => {
     addNameToTimeline(getTimeline().title);
 
     cy.wait('@timeline').then(({ response }) => {
-      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
 
       addDescriptionToTimeline(getTimeline().description);
       addNotesToTimeline(getTimeline().notes);
@@ -103,20 +106,15 @@ describe('Timeline Templates', () => {
   });
 
   it('Create template from timeline', () => {
+    createTimeline(getTimeline());
+    visitWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
+    expandEventAction();
+    clickingOnCreateTemplateFromTimelineBtn();
 
-    createTimeline(getTimeline()).then(() => {
-      expandEventAction();
-      clickingOnCreateTemplateFromTimelineBtn();
-      cy.wait('@timeline', { timeout: 100000 }).then(({ request }) => {
-        expect(request.body.timeline).to.haveOwnProperty('templateTimelineId');
-        expect(request.body.timeline).to.haveOwnProperty('description', getTimeline().description);
-        expect(request.body.timeline.kqlQuery.filterQuery.kuery).to.haveOwnProperty(
-          'expression',
-          getTimeline().query
-        );
-        cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
-      });
-    });
+    cy.wait('@timeline', { timeout: 100000 });
+    cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+    cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
+    cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
   });
 });

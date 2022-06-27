@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AggFunctionsMapping } from 'src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
+import { AggFunctionsMapping, METRIC_TYPES } from '@kbn/data-plugin/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionAstExpressionBuilder,
+} from '@kbn/expressions-plugin/public';
+import { AggExpressionFunctionArgs } from '@kbn/data-plugin/common';
+import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
   getFilter,
+  isColumnOfType,
+  combineErrorMessages,
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { useDebounceWithOptions } from '../../../shared_components';
+import { useDebouncedValue } from '../../../shared_components';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -53,7 +61,11 @@ const DEFAULT_PERCENTILE_VALUE = 95;
 
 const supportedFieldTypes = ['number', 'histogram'];
 
-export const percentileOperation: OperationDefinition<PercentileIndexPatternColumn, 'field'> = {
+export const percentileOperation: OperationDefinition<
+  PercentileIndexPatternColumn,
+  'field',
+  { percentile: number }
+> = {
   type: 'percentile',
   displayName: i18n.translate('xpack.lens.indexPattern.percentile', {
     defaultMessage: 'Percentile',
@@ -91,9 +103,8 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileParam =
-      previousColumn?.operationType === 'percentile' &&
-      previousColumn.params &&
-      'percentile' in previousColumn.params &&
+      previousColumn &&
+      isColumnOfType<PercentileIndexPatternColumn>('percentile', previousColumn) &&
       previousColumn.params.percentile;
     const newPercentileParam =
       columnParams?.percentile ?? (existingPercentileParam || DEFAULT_PERCENTILE_VALUE);
@@ -137,8 +148,125 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       }
     ).toAst();
   },
+  optimizeEsAggs: (_aggs, _esAggsIdMap, aggExpressionToEsAggsIdMap) => {
+    let aggs = [..._aggs];
+    const esAggsIdMap = { ..._esAggsIdMap };
+
+    const percentileExpressionsByArgs: Record<string, ExpressionAstExpressionBuilder[]> = {};
+
+    // group percentile dimensions by differentiating parameters
+    aggs.forEach((expressionBuilder) => {
+      const {
+        functions: [fnBuilder],
+      } = expressionBuilder;
+      if (fnBuilder.name === 'aggSinglePercentile') {
+        const groupByKey = `${fnBuilder.getArgument('field')?.[0]}-${
+          fnBuilder.getArgument('timeShift')?.[0]
+        }`;
+        if (!(groupByKey in percentileExpressionsByArgs)) {
+          percentileExpressionsByArgs[groupByKey] = [];
+        }
+
+        percentileExpressionsByArgs[groupByKey].push(expressionBuilder);
+      }
+    });
+
+    // collapse them into a single esAggs expression builder
+    Object.values(percentileExpressionsByArgs).forEach((expressionBuilders) => {
+      if (expressionBuilders.length <= 1) {
+        // don't need to optimize if there aren't more than one
+        return;
+      }
+
+      // we're going to merge these percentile builders into a single builder, so
+      // remove them from the aggs array
+      aggs = aggs.filter((aggBuilder) => !expressionBuilders.includes(aggBuilder));
+
+      const {
+        functions: [firstFnBuilder],
+      } = expressionBuilders[0];
+
+      const esAggsColumnId = firstFnBuilder.getArgument('id')![0];
+      const aggPercentilesConfig: AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES> = {
+        id: esAggsColumnId,
+        enabled: firstFnBuilder.getArgument('enabled')?.[0],
+        schema: firstFnBuilder.getArgument('schema')?.[0],
+        field: firstFnBuilder.getArgument('field')?.[0],
+        percents: [],
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: firstFnBuilder.getArgument('timeShift')?.[0],
+      };
+
+      const percentileToBuilder: Record<number, ExpressionAstExpressionBuilder> = {};
+      for (const builder of expressionBuilders) {
+        const percentile = builder.functions[0].getArgument('percentile')![0] as number;
+        if (percentile in percentileToBuilder) {
+          // found a duplicate percentile so let's optimize
+
+          const duplicateExpressionBuilder = percentileToBuilder[percentile];
+
+          const idForDuplicate = aggExpressionToEsAggsIdMap.get(duplicateExpressionBuilder);
+          const idForThisOne = aggExpressionToEsAggsIdMap.get(builder);
+
+          if (!idForDuplicate || !idForThisOne) {
+            throw new Error(
+              "Couldn't find esAggs ID for percentile expression builder... this should never happen."
+            );
+          }
+
+          esAggsIdMap[idForDuplicate].push(...esAggsIdMap[idForThisOne]);
+
+          delete esAggsIdMap[idForThisOne];
+
+          // remove current builder
+          expressionBuilders = expressionBuilders.filter((b) => b !== builder);
+        } else {
+          percentileToBuilder[percentile] = builder;
+          aggPercentilesConfig.percents!.push(percentile);
+        }
+      }
+
+      const multiPercentilesAst = buildExpressionFunction<AggFunctionsMapping['aggPercentiles']>(
+        'aggPercentiles',
+        aggPercentilesConfig
+      ).toAst();
+
+      aggs.push(
+        buildExpression({
+          type: 'expression',
+          chain: [multiPercentilesAst],
+        })
+      );
+
+      expressionBuilders.forEach((expressionBuilder) => {
+        const currentEsAggsId = aggExpressionToEsAggsIdMap.get(expressionBuilder);
+        if (currentEsAggsId === undefined) {
+          throw new Error('Could not find current column ID for percentile agg expression builder');
+        }
+        // esAggs appends the percent number to the agg id to make distinct column IDs in the resulting datatable.
+        // We're anticipating that here by adding the `.<percentile>`.
+        // The agg index will be assigned when we update all the indices in the ID map based on the agg order in the
+        // datasource's toExpression fn so we mark it as '?' for now.
+        const newEsAggsId = `col-?-${esAggsColumnId}.${
+          expressionBuilder.functions[0].getArgument('percentile')![0]
+        }`;
+
+        esAggsIdMap[newEsAggsId] = esAggsIdMap[currentEsAggsId];
+
+        delete esAggsIdMap[currentEsAggsId];
+      });
+    });
+
+    return {
+      esAggsIdMap,
+      aggs,
+    };
+  },
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    combineErrorMessages([
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]),
   paramEditor: function PercentileParamEditor({
     layer,
     updateLayer,
@@ -146,16 +274,14 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     columnId,
     indexPattern,
   }) {
-    const [inputValue, setInputValue] = useState(String(currentColumn.params.percentile));
-
-    const inputValueAsNumber = Number(inputValue);
-    // an input is value if it's not an empty string, parses to a valid number, is between 0 and 100 (exclusive)
-    // and is an integer
-    const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
-
-    useDebounceWithOptions(
-      () => {
-        if (!inputValueIsValid) return;
+    const onChange = useCallback(
+      (value) => {
+        if (
+          !isValidNumber(value, true, 99, 1) ||
+          Number(value) === currentColumn.params.percentile
+        ) {
+          return;
+        }
         updateLayer({
           ...layer,
           columns: {
@@ -167,33 +293,39 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
                 : ofName(
                     indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
                       currentColumn.sourceField,
-                    inputValueAsNumber,
+                    Number(value),
                     currentColumn.timeShift
                   ),
               params: {
                 ...currentColumn.params,
-                percentile: inputValueAsNumber,
+                percentile: Number(value),
               },
-            },
+            } as PercentileIndexPatternColumn,
           },
         });
       },
-      { skipFirstRender: true },
-      256,
-      [inputValue]
+      [updateLayer, layer, columnId, currentColumn, indexPattern]
+    );
+    const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
+      string | undefined
+    >({
+      onChange,
+      value: String(currentColumn.params.percentile),
+    });
+    const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
+
+    const handleInputChange: EuiRangeProps['onChange'] = useCallback(
+      (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
+      [handleInputChangeWithoutValidation]
     );
 
-    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = String(e.target.value);
-      setInputValue(val);
-    }, []);
     return (
       <EuiFormRow
         label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
           defaultMessage: 'Percentile',
         })}
         data-test-subj="lns-indexPattern-percentile-form"
-        display="columnCompressed"
+        display="rowCompressed"
         fullWidth
         isInvalid={!inputValueIsValid}
         error={
@@ -203,14 +335,18 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
           })
         }
       >
-        <EuiFieldNumber
+        <EuiRange
           data-test-subj="lns-indexPattern-percentile-input"
           compressed
-          value={inputValue}
+          value={inputValue ?? ''}
           min={1}
           max={99}
           step={1}
           onChange={handleInputChange}
+          showInput
+          aria-label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
+            defaultMessage: 'Percentile',
+          })}
         />
       </EuiFormRow>
     );

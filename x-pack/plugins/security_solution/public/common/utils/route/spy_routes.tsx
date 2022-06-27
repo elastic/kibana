@@ -15,7 +15,7 @@ import { useRouteSpy } from './use_route_spy';
 import { SecurityPageName } from '../../../../common/constants';
 
 export const SpyRouteComponent = memo<
-  SpyRouteProps & { location: H.Location; pageName: string | undefined }
+  SpyRouteProps & { location: H.Location; pageName: SecurityPageName | undefined }
 >(
   ({
     location: { pathname, search },
@@ -98,5 +98,7 @@ export const SpyRouteComponent = memo<
     return null;
   }
 );
+
+SpyRouteComponent.displayName = 'SpyRouteComponent';
 
 export const SpyRoute = withRouter(SpyRouteComponent);

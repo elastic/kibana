@@ -17,16 +17,16 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 
+import { ApiLogsLogic } from '..';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 
 import { ApiLogLogic } from '../api_log';
-import { ApiLogsLogic } from '../index';
 import { ApiLog } from '../types';
 import { getStatusColor } from '../utils';
 
-import { EmptyState } from './';
+import { EmptyState } from '.';
 
 import './api_logs_table.scss';
 
@@ -98,7 +98,7 @@ export const ApiLogsTable: React.FC<Props> = ({ hasPagination }) => {
     ? {
         pagination: {
           ...convertMetaToPagination(meta),
-          hidePerPageOptions: true,
+          showPerPageOptions: false,
         },
         onChange: handlePageChange(onPaginate),
       }

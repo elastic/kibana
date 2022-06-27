@@ -10,8 +10,12 @@ import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
-import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
+import {
+  BoundsRequestMeta,
+  GetFeatureActionsArgs,
+  GeoJsonWithMeta,
+  IMvtVectorSource,
+} from '../vector_source';
 import {
   FIELD_ORIGIN,
   MAX_ZOOM,
@@ -25,12 +29,11 @@ import {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
+  TooltipFeatureAction,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -39,10 +42,7 @@ export const sourceTitle = i18n.translate(
   }
 );
 
-export class MVTSingleLayerVectorSource
-  extends AbstractSource
-  implements ITiledSingleLayerVectorSource
-{
+export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVectorSource {
   static createDescriptor({
     urlTemplate,
     layerName,
@@ -68,11 +68,8 @@ export class MVTSingleLayerVectorSource
   readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
   readonly _tooltipFields: MVTField[];
 
-  constructor(
-    sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
-    inspectorAdapters?: Adapters
-  ) {
-    super(sourceDescriptor, inspectorAdapters);
+  constructor(sourceDescriptor: TiledSingleLayerVectorSourceDescriptor) {
+    super(sourceDescriptor);
     this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);
 
     this._tooltipFields = this._descriptor.tooltipProperties
@@ -80,6 +77,10 @@ export class MVTSingleLayerVectorSource
         return this.getFieldByName(fieldName);
       })
       .filter((f) => f !== null) as MVTField[];
+  }
+
+  isMvt() {
+    return true;
   }
 
   async supportsFitToBounds() {
@@ -141,7 +142,7 @@ export class MVTSingleLayerVectorSource
   }
 
   getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
-    // Having this method here is a consequence of ITiledSingleLayerVectorSource extending IVectorSource.
+    // Having this method here is a consequence of IMvtVectorSource extending IVectorSource.
     throw new Error('Does not implement getGeoJsonWithMeta');
   }
 
@@ -149,7 +150,7 @@ export class MVTSingleLayerVectorSource
     return this.getMVTFields();
   }
 
-  getLayerName(): string {
+  getTileSourceLayer(): string {
     return this._descriptor.layerName;
   }
 
@@ -161,16 +162,11 @@ export class MVTSingleLayerVectorSource
   }
 
   async getDisplayName(): Promise<string> {
-    return this.getLayerName();
+    return this.getTileSourceLayer();
   }
 
-  async getUrlTemplateWithMeta(): Promise<ITiledSingleLayerMvtParams> {
-    return {
-      urlTemplate: this._descriptor.urlTemplate,
-      layerName: this._descriptor.layerName,
-      minSourceZoom: this._descriptor.minSourceZoom,
-      maxSourceZoom: this._descriptor.maxSourceZoom,
-    };
+  async getTileUrl(): Promise<string> {
+    return this._descriptor.urlTemplate;
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
@@ -204,7 +200,7 @@ export class MVTSingleLayerVectorSource
     return false;
   }
 
-  getSourceTooltipContent() {
+  getSourceStatus() {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 
@@ -250,6 +246,11 @@ export class MVTSingleLayerVectorSource
 
   getJoinsDisabledReason(): string | null {
     return null;
+  }
+
+  getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    // Its not possible to filter by geometry for vector tile sources since there is no way to get original geometry
+    return [];
   }
 }
 

@@ -6,15 +6,19 @@
  */
 
 import expect from '@kbn/expect';
+import path from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
+  const config = getService('config');
   const kibanaServer = getService('kibanaServer');
-  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const reporting = getService('reporting');
 
   const PageObjects = getPageObjects([
     'reporting',
@@ -25,16 +29,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visEditor',
   ]);
 
-  describe('Visualize Reporting Screenshots', () => {
-    before('initialize tests', async () => {
-      log.debug('ReportingPage:initTests');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.load(ecommerceSOPath);
+  describe('Visualize Reporting Screenshots', function () {
+    this.tags(['smoke']);
+    before(async () => {
       await browser.setWindowSize(1600, 850);
     });
-    after('clean up archives', async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.unload(ecommerceSOPath);
+    after(async () => {
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -42,8 +42,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/113496
-    describe.skip('Print PDF button', () => {
+    describe('Print PDF button', () => {
+      const ecommerceSOPath =
+        'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+
+      before('initialize tests', async () => {
+        log.debug('ReportingPage:initTests');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await kibanaServer.importExport.load(ecommerceSOPath);
+        await kibanaServer.uiSettings.replace({
+          'timepicker:timeDefaults':
+            '{ "from": "2019-04-27T23:56:51.374Z", "to": "2019-08-23T16:18:51.821Z"}',
+          defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
+        });
+      });
+      after('clean up archives', async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await kibanaServer.importExport.unload(ecommerceSOPath);
+        await es.deleteByQuery({
+          index: '.reporting-*',
+          refresh: true,
+          body: { query: { match_all: {} } },
+        });
+        await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+      });
+
       it('is available if new', async () => {
         await PageObjects.common.navigateToUrl('visualize', 'new', { useActualUrl: true });
         await PageObjects.visualize.clickAggBasedVisualizations();
@@ -54,10 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('becomes available when saved', async () => {
-        const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
-        const toTime = 'Aug 23, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-
         await PageObjects.visEditor.clickBucket('X-axis');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.clickGo();
@@ -65,21 +84,69 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.reporting.openPdfReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
+    });
 
-      it('downloaded PDF has OK status', async function () {
-        // Generating and then comparing reports can take longer than the default 60s timeout
-        this.timeout(180000);
+    describe('PNG reports: sample data created in 7.6', () => {
+      const reportFileName = 'tsvb';
 
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
+      before(async () => {
+        await kibanaServer.uiSettings.replace({
+          defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        });
+
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+        );
+
+        log.debug('navigate to visualize');
+        await PageObjects.common.navigateToApp('visualize');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+        );
+      });
+
+      it('TSVB Gauge: PNG file matches the baseline image', async function () {
+        log.debug('load saved visualization');
+        await PageObjects.visualize.loadSavedVisualization(
+          '[K7.6-eCommerce] Sold Products per Day',
+          { navigateToVisualize: false }
+        );
+        log.debug('set time range');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Apr 15, 2022 @ 00:00:00.000',
+          'May 22, 2022 @ 00:00:00.000'
+        );
+
+        log.debug('open png reporting panel');
+        await PageObjects.reporting.openPngReportingPanel();
+        log.debug('click generate report button');
         await PageObjects.reporting.clickGenerateReportButton();
 
+        log.debug('get the report download URL');
         const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
+        log.debug('download the report');
+        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+        const sessionReportPath = await PageObjects.reporting.writeSessionReport(
+          reportFileName,
+          'png',
+          reportData,
+          REPORTS_FOLDER
+        );
 
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('application/pdf');
+        // check the file
+        const percentDiff = await reporting.checkIfPngsMatch(
+          sessionReportPath,
+          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+          config.get('screenshots.directory'),
+          log
+        );
+
+        expect(percentDiff).to.be.lessThan(0.09);
       });
     });
   });

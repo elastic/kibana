@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import {
   EuiIcon,
   EuiSpacer,
@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { IUiSettingsClient, HttpStart } from 'kibana/public';
+import { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import { emptyScreenStrings } from '../../../dashboard_strings';
 
 export interface DashboardEmptyScreenProps {

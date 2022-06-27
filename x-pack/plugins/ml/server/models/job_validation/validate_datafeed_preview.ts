@@ -9,30 +9,60 @@ import type { MlClient } from '../../lib/ml_client';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { JobValidationMessage } from '../../../common/constants/messages';
+import type { DatafeedValidationResponse } from '../../../common/types/job_validation';
+
+export async function validateDatafeedPreviewWithMessages(
+  mlClient: MlClient,
+  authHeader: AuthorizationHeader,
+  job: CombinedJob,
+  start: number | undefined,
+  end: number | undefined
+): Promise<JobValidationMessage[]> {
+  const { valid, documentsFound } = await validateDatafeedPreview(
+    mlClient,
+    authHeader,
+    job,
+    start,
+    end
+  );
+  if (valid) {
+    return documentsFound ? [] : [{ id: 'datafeed_preview_no_documents' }];
+  }
+  return [{ id: 'datafeed_preview_failed' }];
+}
 
 export async function validateDatafeedPreview(
   mlClient: MlClient,
   authHeader: AuthorizationHeader,
-  job: CombinedJob
-): Promise<JobValidationMessage[]> {
+  job: CombinedJob,
+  start: number | undefined,
+  end: number | undefined
+): Promise<DatafeedValidationResponse> {
   const { datafeed_config: datafeed, ...tempJob } = job;
   try {
-    const { body } = (await mlClient.previewDatafeed(
+    const body = (await mlClient.previewDatafeed(
       {
         body: {
           job_config: tempJob,
           datafeed_config: datafeed,
         },
+        // @ts-expect-error es client types are wrong
+        start,
+        end,
       },
-      authHeader
+      { ...authHeader, maxRetries: 0 }
       // previewDatafeed response type is incorrect
     )) as unknown as { body: unknown[] };
 
-    if (Array.isArray(body) === false || body.length === 0) {
-      return [{ id: 'datafeed_preview_no_documents' }];
-    }
-    return [];
+    return {
+      valid: true,
+      documentsFound: Array.isArray(body) && body.length > 0,
+    };
   } catch (error) {
-    return [{ id: 'datafeed_preview_failed' }];
+    return {
+      valid: false,
+      documentsFound: false,
+      error: error.body ?? error,
+    };
   }
 }

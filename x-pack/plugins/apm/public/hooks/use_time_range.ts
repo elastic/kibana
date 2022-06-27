@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { useRef } from 'react';
+import { useMemo } from 'react';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import { getDateRange } from '../context/url_params_context/helpers';
 
 interface TimeRange {
   start: string;
   end: string;
-  exactStart: string;
-  exactEnd: string;
   refreshTimeRange: () => void;
   timeRangeId: number;
 }
 
 type PartialTimeRange = Pick<TimeRange, 'refreshTimeRange' | 'timeRangeId'> &
-  Pick<Partial<TimeRange>, 'start' | 'end' | 'exactStart' | 'exactEnd'>;
+  Pick<Partial<TimeRange>, 'start' | 'end'>;
 
 export function useTimeRange(range: {
   rangeFrom?: string;
@@ -41,39 +39,24 @@ export function useTimeRange({
   rangeTo?: string;
   optional?: boolean;
 }): TimeRange | PartialTimeRange {
-  const rangeRef = useRef({ rangeFrom, rangeTo });
+  const { incrementTimeRangeId, timeRangeId } = useTimeRangeId();
 
-  const { timeRangeId, incrementTimeRangeId } = useTimeRangeId();
+  const { start, end } = useMemo(() => {
+    return getDateRange({
+      state: {},
+      rangeFrom,
+      rangeTo,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rangeFrom, rangeTo, timeRangeId]);
 
-  const timeRangeIdRef = useRef(timeRangeId);
-
-  const stateRef = useRef(getDateRange({ state: {}, rangeFrom, rangeTo }));
-
-  const updateParsedTime = () => {
-    stateRef.current = getDateRange({ state: {}, rangeFrom, rangeTo });
-  };
-
-  if (
-    timeRangeIdRef.current !== timeRangeId ||
-    rangeRef.current.rangeFrom !== rangeFrom ||
-    rangeRef.current.rangeTo !== rangeTo
-  ) {
-    updateParsedTime();
-  }
-
-  rangeRef.current = { rangeFrom, rangeTo };
-
-  const { start, end, exactStart, exactEnd } = stateRef.current;
-
-  if ((!start || !end || !exactStart || !exactEnd) && !optional) {
+  if ((!start || !end) && !optional) {
     throw new Error('start and/or end were unexpectedly not set');
   }
 
   return {
     start,
     end,
-    exactStart,
-    exactEnd,
     refreshTimeRange: incrementTimeRangeId,
     timeRangeId,
   };

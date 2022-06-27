@@ -11,13 +11,16 @@ import { isEmpty, isString, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
-import { tGridActions } from '..';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../src/plugins/data/public';
+  clearEventsLoading,
+  clearEventsDeleted,
+  setTimelineUpdatedAt,
+} from '../store/t_grid/actions';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -69,22 +72,24 @@ type TimelineRequest<T extends KueryFilterQueryKind> = TimelineEventsAllRequestO
 type TimelineResponse<T extends KueryFilterQueryKind> = TimelineEventsAllStrategyResponse;
 
 export interface UseTimelineEventsProps {
+  alertConsumers?: AlertConsumers[];
+  data?: DataPublicPluginStart;
+  dataViewId: string | null;
   docValueFields?: DocValueFields[];
-  filterQuery?: ESQuery | string;
-  skip?: boolean;
   endDate: string;
   entityType: EntityType;
   excludeEcsData?: boolean;
-  id: string;
   fields: string[];
+  filterQuery?: ESQuery | string;
+  id: string;
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
+  runtimeMappings: MappingRuntimeFields;
+  skip?: boolean;
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
-  data?: DataPublicPluginStart;
-  alertConsumers?: AlertConsumers[];
 }
 
 const createFilter = (filterQuery: ESQuery | string | undefined) =>
@@ -105,15 +110,17 @@ const getInspectResponse = <T extends TimelineFactoryQueryTypes>(
 const ID = 'timelineEventsQuery';
 export const initSortDefault = [
   {
+    direction: Direction.desc,
+    esTypes: ['date'],
     field: '@timestamp',
-    direction: Direction.asc,
-    type: 'number',
+    type: 'date',
   },
 ];
 
 const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
+  dataViewId,
   docValueFields,
   endDate,
   entityType,
@@ -125,6 +132,7 @@ export const useTimelineEvents = ({
   startDate,
   language = 'kuery',
   limit,
+  runtimeMappings,
   sort = initSortDefault,
   skip = false,
   timerangeKind,
@@ -143,8 +151,8 @@ export const useTimelineEvents = ({
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
-      dispatch(tGridActions.clearEventsLoading({ id }));
-      dispatch(tGridActions.clearEventsDeleted({ id }));
+      dispatch(clearEventsLoading({ id }));
+      dispatch(clearEventsDeleted({ id }));
     }
   }, [dispatch, id]);
 
@@ -165,7 +173,7 @@ export const useTimelineEvents = ({
 
   const setUpdated = useCallback(
     (updatedAt: number) => {
-      dispatch(tGridActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
+      dispatch(setTimelineUpdatedAt({ id, updated: updatedAt }));
     },
     [dispatch, id]
   );
@@ -187,7 +195,7 @@ export const useTimelineEvents = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addError, addWarning } = useAppToasts();
+  const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
@@ -209,6 +217,8 @@ export const useTimelineEvents = ({
                     ? 'timelineEqlSearchStrategy'
                     : 'timelineSearchStrategy',
                 abortSignal: abortCtrl.current.signal,
+                // we only need the id to throw better errors
+                indexPattern: { id: dataViewId } as unknown as DataView,
               }
             )
             .subscribe({
@@ -238,9 +248,7 @@ export const useTimelineEvents = ({
               },
               error: (msg) => {
                 setLoading(false);
-                addError(msg, {
-                  title: i18n.FAIL_TIMELINE_EVENTS,
-                });
+                data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
               },
             });
@@ -252,7 +260,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, setUpdated, addWarning, addError]
+    [skip, data, entityType, dataViewId, setUpdated, addWarning]
   );
 
   useEffect(() => {
@@ -267,6 +275,7 @@ export const useTimelineEvents = ({
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
+        runtimeMappings: prevRequest?.runtimeMappings ?? {},
       };
 
       const currentSearchParameters = {
@@ -274,6 +283,7 @@ export const useTimelineEvents = ({
         filterQuery: createFilter(filterQuery),
         querySize: limit,
         sort,
+        runtimeMappings,
         timerange: {
           interval: '12h',
           from: startDate,
@@ -299,6 +309,7 @@ export const useTimelineEvents = ({
           querySize: limit,
         },
         language,
+        runtimeMappings,
         sort,
         timerange: {
           interval: '12h',
@@ -330,6 +341,7 @@ export const useTimelineEvents = ({
     startDate,
     sort,
     fields,
+    runtimeMappings,
   ]);
 
   useEffect(() => {

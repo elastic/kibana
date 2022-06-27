@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense } from '../../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { isAtLeast } from './license';
 import { PolicyConfig } from '../endpoint/types';
 import {
@@ -87,7 +87,9 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
     const defaults = policyFactoryWithSupportedFeatures();
     // only platinum or higher may enable memory protection
     if (
-      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported
+      policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported ||
+      policy.mac.memory_protection.supported !== defaults.mac.memory_protection.supported ||
+      policy.linux.memory_protection.supported !== defaults.linux.memory_protection.supported
     ) {
       return false;
     }
@@ -101,25 +103,39 @@ function isEndpointMemoryPolicyValidForLicense(policy: PolicyConfig, license: IL
   // only platinum or higher may enable memory_protection
   const defaults = policyFactoryWithoutPaidFeatures();
 
-  if (policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode) {
+  if (
+    policy.windows.memory_protection.mode !== defaults.windows.memory_protection.mode ||
+    policy.mac.memory_protection.mode !== defaults.mac.memory_protection.mode ||
+    policy.linux.memory_protection.mode !== defaults.linux.memory_protection.mode
+  ) {
     return false;
   }
 
   if (
     policy.windows.popup.memory_protection.enabled !==
-    defaults.windows.popup.memory_protection.enabled
+      defaults.windows.popup.memory_protection.enabled ||
+    policy.mac.popup.memory_protection.enabled !== defaults.mac.popup.memory_protection.enabled ||
+    policy.linux.popup.memory_protection.enabled !== defaults.linux.popup.memory_protection.enabled
   ) {
     return false;
   }
 
   if (
-    policy.windows.popup.memory_protection.message !== '' &&
-    policy.windows.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage
+    (policy.windows.popup.memory_protection.message !== '' &&
+      policy.windows.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage) ||
+    (policy.mac.popup.memory_protection.message !== '' &&
+      policy.mac.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage) ||
+    (policy.linux.popup.memory_protection.message !== '' &&
+      policy.linux.popup.memory_protection.message !== DefaultPolicyRuleNotificationMessage)
   ) {
     return false;
   }
 
-  if (policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported) {
+  if (
+    policy.windows.memory_protection.supported !== defaults.windows.memory_protection.supported ||
+    policy.mac.memory_protection.supported !== defaults.mac.memory_protection.supported ||
+    policy.linux.memory_protection.supported !== defaults.linux.memory_protection.supported
+  ) {
     return false;
   }
   return true;
@@ -186,6 +202,22 @@ function isEndpointBehaviorPolicyValidForLicense(policy: PolicyConfig, license: 
   return true;
 }
 
+function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  if (isAtLeast(license, 'platinum')) {
+    // platinum allows all advanced features
+    return true;
+  }
+
+  const defaults = policyFactoryWithoutPaidFeatures();
+
+  // only platinum or higher may use rollback
+  if (policy.windows.advanced?.rollback !== defaults.windows.advanced?.rollback) {
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Given an endpoint package policy, verifies that all enabled features that
  * require a certain license level have a valid license for them.
@@ -198,7 +230,8 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointMalwarePolicyValidForLicense(policy, license) &&
     isEndpointRansomwarePolicyValidForLicense(policy, license) &&
     isEndpointMemoryPolicyValidForLicense(policy, license) &&
-    isEndpointBehaviorPolicyValidForLicense(policy, license)
+    isEndpointBehaviorPolicyValidForLicense(policy, license) &&
+    isEndpointAdvancedPolicyValidForLicense(policy, license)
   );
 };
 

@@ -8,18 +8,29 @@
   "version": "kibana",
   "requiredPlugins": [
     "data",
+    "dataViews",
+    "dataViewEditor",
     "embeddable",
+    "controls",
     "inspector",
     "navigation",
     "savedObjects",
     "share",
+    "screenshotMode",
     "uiActions",
     "urlForwarding",
     "presentationUtil",
     "visualizations"
   ],
-  "optionalPlugins": ["home", "spaces", "savedObjectsTaggingOss", "usageCollection"],
+  "optionalPlugins": [
+    "home",
+    "spaces",
+    "savedObjectsTaggingOss",
+    "screenshotMode",
+    "usageCollection",
+    "taskManager"
+  ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["home", "kibanaReact", "kibanaUtils", "presentationUtil"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
 }

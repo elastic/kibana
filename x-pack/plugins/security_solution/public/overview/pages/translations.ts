@@ -18,10 +18,6 @@ export const NEWS_FEED_TITLE = i18n.translate(
   }
 );
 
-export const PAGE_TITLE = i18n.translate('xpack.securitySolution.overview.pageTitle', {
-  defaultMessage: 'Security',
-});
-
 export const PAGE_SUBTITLE = i18n.translate('xpack.securitySolution.overview.pageSubtitle', {
   defaultMessage: 'Security Information & Event Management with the Elastic Stack',
 });
@@ -57,3 +53,29 @@ export const VIEW_ALERTS = i18n.translate('xpack.securitySolution.overview.viewA
 export const VIEW_EVENTS = i18n.translate('xpack.securitySolution.overview.viewEventsButtonLabel', {
   defaultMessage: 'View events',
 });
+
+export const DETECTION_RESPONSE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.pageTitle',
+  {
+    defaultMessage: 'Detection & Response',
+  }
+);
+export const NO_PERMISSIONS_MSG = i18n.translate(
+  'xpack.securitySolution.detectionResponse.noPagePermissionsMessage',
+  {
+    defaultMessage:
+      'To view this page you must update privileges. For more information, contact your Kibana administrator.',
+  }
+);
+export const NO_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.noPermissionsTitle',
+  {
+    defaultMessage: 'Privileges required',
+  }
+);
+export const GO_TO_DOCUMENTATION = i18n.translate(
+  'xpack.securitySolution.detectionResponse.goToDocumentationButton',
+  {
+    defaultMessage: 'View documentation',
+  }
+);

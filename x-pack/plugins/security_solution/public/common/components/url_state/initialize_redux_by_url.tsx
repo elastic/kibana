@@ -10,8 +10,8 @@ import { Dispatch } from 'redux';
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
-import { inputsActions, sourcererActions } from '../../store/actions';
+import type { Filter, Query } from '@kbn/es-query';
+import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
   UrlInputsModel,
@@ -21,14 +21,13 @@ import {
 } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
-import { decodeRisonUrlState, isDetectionsPages } from './helpers';
+import { decodeRisonUrlState } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
 import { SetInitialStateFromUrl } from './types';
 import {
   queryTimelineById,
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
-import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 
 export const useSetInitialStateFromUrl = () => {
@@ -53,22 +52,6 @@ export const useSetInitialStateFromUrl = () => {
       urlStateToUpdate.forEach(({ urlKey, newUrlStateString }) => {
         if (urlKey === CONSTANTS.timerange) {
           updateTimerange(newUrlStateString, dispatch);
-        }
-        if (urlKey === CONSTANTS.sourcerer) {
-          const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
-          if (sourcererState != null) {
-            const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
-              (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
-            ) as SourcererScopeName[];
-            activeScopes.forEach((scope) =>
-              dispatch(
-                sourcererActions.setSelectedIndexPatterns({
-                  id: scope,
-                  selectedPatterns: sourcererState[scope] ?? [],
-                })
-              )
-            );
-          }
         }
 
         if (urlKey === CONSTANTS.appQuery && indexPattern != null) {
@@ -124,7 +107,7 @@ export const useSetInitialStateFromUrl = () => {
     [dispatch, updateTimeline, updateTimelineIsLoading]
   );
 
-  return setInitialStateFromUrl;
+  return Object.freeze({ setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading });
 };
 
 const updateTimerange = (newUrlStateString: string, dispatch: Dispatch) => {

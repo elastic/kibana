@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { TableVisBasic } from './table_vis_basic';
 import { FormattedColumn, TableVisConfig, TableVisUiState } from '../types';
-import { DatatableColumn } from 'src/plugins/expressions';
+import { DatatableColumn } from '@kbn/expressions-plugin';
 import { createTableVisCell } from './table_vis_cell';
 import { createGridColumns } from './table_vis_columns';
 
@@ -67,6 +67,7 @@ describe('TableVisBasic', () => {
   });
 
   it('should sort rows by column and pass the sorted rows for consumers', () => {
+    (createTableVisCell as jest.Mock).mockClear();
     const uiStateProps = {
       ...props.uiStateProps,
       sort: {
@@ -96,13 +97,14 @@ describe('TableVisBasic', () => {
         visConfig={{ ...props.visConfig, showToolbar: true }}
       />
     );
-    expect(createTableVisCell).toHaveBeenCalledWith(sortedRows, table.formattedColumns);
+    expect(createTableVisCell).toHaveBeenCalledWith(sortedRows, table.formattedColumns, undefined);
     expect(createGridColumns).toHaveBeenCalledWith(
       table.columns,
       sortedRows,
       table.formattedColumns,
       uiStateProps.columnsWidth,
-      props.fireEvent
+      props.fireEvent,
+      undefined
     );
 
     const { onSort } = comp.find('EuiDataGrid').prop('sorting');

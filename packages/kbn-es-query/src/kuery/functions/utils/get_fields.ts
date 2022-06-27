@@ -8,13 +8,12 @@
 
 import * as literal from '../../node_types/literal';
 import * as wildcard from '../../node_types/wildcard';
-import { KueryNode, IndexPatternBase } from '../../..';
-import { LiteralTypeBuildNode } from '../../node_types/types';
+import { DataViewBase, KueryNode } from '../../..';
 
-export function getFields(node: KueryNode, indexPattern?: IndexPatternBase) {
+export function getFields(node: KueryNode, indexPattern?: DataViewBase) {
   if (!indexPattern) return [];
-  if (node.type === 'literal') {
-    const fieldName = literal.toElasticsearchQuery(node as LiteralTypeBuildNode);
+  if (literal.isNode(node)) {
+    const fieldName = literal.toElasticsearchQuery(node);
     const field = indexPattern.fields.find((fld) => fld.name === fieldName);
     if (!field) {
       return [];

@@ -8,7 +8,7 @@
 
 import React, { useEffect, useMemo, useCallback, useState, ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   htmlIdGenerator,
@@ -46,7 +46,7 @@ const getDataFormatPickerOptions = (
         <>
           <span>{defaultOptionLabel}</span>
           <EuiText size="s" color="subdued">
-            <p className="euiTextColor--subdued">
+            <p>
               {i18n.translate('visTypeTimeseries.dataFormatPicker.defaultLabelDescription', {
                 defaultMessage: 'Applies common formatting',
               })}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { RegistryAlertTypeWithAuth } from '../authorization';
 import { RewriteResponseCase, verifyAccessAndContext } from './lib';
@@ -20,8 +20,11 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       defaultActionGroupId,
       minimumLicenseRequired,
       isExportable,
+      ruleTaskTimeout,
       actionVariables,
       authorizedConsumers,
+      defaultScheduleInterval,
+      doesSetRecoveryContext,
       ...rest
     }) => ({
       ...rest,
@@ -31,8 +34,11 @@ const rewriteBodyRes: RewriteResponseCase<RegistryAlertTypeWithAuth[]> = (result
       default_action_group_id: defaultActionGroupId,
       minimum_license_required: minimumLicenseRequired,
       is_exportable: isExportable,
+      rule_task_timeout: ruleTaskTimeout,
       action_variables: actionVariables,
       authorized_consumers: authorizedConsumers,
+      default_schedule_interval: defaultScheduleInterval,
+      does_set_recovery_context: doesSetRecoveryContext,
     })
   );
 };
@@ -48,7 +54,8 @@ export const ruleTypesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
+        const rulesClient = (await context.alerting).getRulesClient();
+        const ruleTypes = Array.from(await rulesClient.listAlertTypes());
         return res.ok({
           body: rewriteBodyRes(ruleTypes),
         });

@@ -7,7 +7,7 @@
  */
 
 import { RangeFilter } from '@kbn/es-query';
-import type { IIndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import moment from 'moment';
 import sinon from 'sinon';
 import { getTime, getRelativeTime, getAbsoluteTimeRange } from './get_time';
@@ -32,10 +32,10 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown as IIndexPattern,
+        } as unknown as DataView,
         { from: 'now-60y', to: 'now' }
       ) as RangeFilter;
-      expect(filter.range.date).toEqual({
+      expect(filter.query.range.date).toEqual({
         gte: '1940-02-01T00:00:00.000Z',
         lte: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',
@@ -69,16 +69,33 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown as IIndexPattern,
+        } as unknown as DataView,
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
-      expect(filter.range.myCustomDate).toEqual({
+      expect(filter.query.range.myCustomDate).toEqual({
         gte: '1940-02-01T00:00:00.000Z',
         lte: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',
       });
       clock.restore();
+    });
+
+    test('build range filter when a data view is omitted', () => {
+      const filter = getTime(
+        undefined,
+        { from: 'now-60y', to: 'now' },
+        { fieldName: 'something' }
+      ) as RangeFilter;
+
+      expect(filter).toHaveProperty(
+        'query.range.something',
+        expect.objectContaining({
+          gte: expect.any(String),
+          lte: expect.any(String),
+          format: 'strict_date_optional_time',
+        })
+      );
     });
   });
   describe('getRelativeTime', () => {
@@ -106,12 +123,12 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown as IIndexPattern,
+        } as unknown as DataView,
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
 
-      expect(filter.range.myCustomDate).toEqual({
+      expect(filter.query.range.myCustomDate).toEqual({
         gte: 'now-60y',
         lte: 'now',
         format: 'strict_date_optional_time',
@@ -142,7 +159,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown as IIndexPattern,
+        } as unknown as DataView,
         {
           from: '2020-09-01T08:30:00.000Z',
           to: 'now',
@@ -150,7 +167,7 @@ describe('get_time', () => {
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
 
-      expect(filter.range.myCustomDate).toEqual({
+      expect(filter.query.range.myCustomDate).toEqual({
         gte: '2020-09-01T08:30:00.000Z',
         lte: 'now',
         format: 'strict_date_optional_time',

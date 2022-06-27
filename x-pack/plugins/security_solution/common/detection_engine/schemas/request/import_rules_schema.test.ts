@@ -9,13 +9,11 @@ import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import {
+  importRulesPayloadSchema,
+  ImportRulesPayloadSchema,
   ImportRulesSchema,
   importRulesSchema,
   ImportRulesSchemaDecoded,
-  importRulesQuerySchema,
-  ImportRulesQuerySchema,
-  importRulesPayloadSchema,
-  ImportRulesPayloadSchema,
 } from './import_rules_schema';
 import {
   getImportRulesSchemaMock,
@@ -1254,46 +1252,6 @@ describe('import rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  describe('importRulesQuerySchema', () => {
-    test('overwrite gets a default value of false', () => {
-      const payload: ImportRulesQuerySchema = {};
-
-      const decoded = importRulesQuerySchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual({
-        overwrite: false,
-      });
-    });
-
-    test('overwrite validates with a boolean true', () => {
-      const payload: ImportRulesQuerySchema = { overwrite: true };
-
-      const decoded = importRulesQuerySchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual({
-        overwrite: true,
-      });
-    });
-
-    test('overwrite does not validate with a weird string', () => {
-      const payload: Omit<ImportRulesQuerySchema, 'overwrite'> & { overwrite: string } = {
-        overwrite: 'invalid-string',
-      };
-
-      const decoded = importRulesQuerySchema.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "invalid-string" supplied to "overwrite"',
-      ]);
-      expect(message.schema).toEqual({});
-    });
-  });
-
   describe('importRulesPayloadSchema', () => {
     test('does not validate with an empty object', () => {
       const payload = {};
@@ -1813,6 +1771,126 @@ describe('import rules schema', () => {
       const expected = getImportThreatMatchRulesSchemaDecodedMock();
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
+    });
+  });
+
+  describe('data_view_id', () => {
+    test('Defined data_view_id and empty index does validate', () => {
+      const payload: ImportRulesSchema = {
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        data_view_id: 'logs-*',
+        index: [],
+        interval: '5m',
+      };
+
+      const decoded = importRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: ImportRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        index: [],
+        data_view_id: 'logs-*',
+        interval: '5m',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+        immutable: false,
+      };
+      expect(message.schema).toEqual(expected);
+    });
+
+    // Both can be defined, but if a data_view_id is defined, rule will use that one
+    test('Defined data_view_id and index does validate', () => {
+      const payload: ImportRulesSchema = {
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        data_view_id: 'logs-*',
+        index: ['auditbeat-*'],
+        interval: '5m',
+      };
+
+      const decoded = importRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      const expected: ImportRulesSchemaDecoded = {
+        author: [],
+        severity_mapping: [],
+        risk_score_mapping: [],
+        rule_id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        name: 'some-name',
+        severity: 'low',
+        type: 'query',
+        query: 'some query',
+        index: ['auditbeat-*'],
+        data_view_id: 'logs-*',
+        interval: '5m',
+        references: [],
+        actions: [],
+        enabled: true,
+        false_positives: [],
+        max_signals: DEFAULT_MAX_SIGNALS,
+        tags: [],
+        threat: [],
+        throttle: null,
+        version: 1,
+        exceptions_list: [],
+        immutable: false,
+      };
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('data_view_id cannot be a number', () => {
+      const payload: Omit<ImportRulesSchema, 'data_view_id'> & { data_view_id: number } = {
+        ...getImportRulesSchemaMock(),
+        data_view_id: 5,
+      };
+
+      const decoded = importRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "5" supplied to "data_view_id"',
+      ]);
+      expect(message.schema).toEqual({});
     });
   });
 });

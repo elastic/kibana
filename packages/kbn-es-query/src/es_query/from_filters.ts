@@ -7,11 +7,11 @@
  */
 
 import { isUndefined } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
-import { BoolQuery, IndexPatternBase } from './types';
+import { BoolQuery, DataViewBase } from './types';
 import { handleNestedFilter } from './handle_nested_filter';
 
 /**
@@ -35,13 +35,25 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
  * @return {Object} the query version of that filter
  */
 const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
-  if (filter.query) {
-    return filter.query as estypes.QueryDslQueryContainer;
-  }
-
-  // TODO: investigate what's going on here! What does this mean for filters that don't have a query!
-  return filter as estypes.QueryDslQueryContainer;
+  return filter.query || filter;
 };
+
+/**
+ * Options for building query for filters
+ */
+export interface EsQueryFiltersConfig {
+  /**
+   * by default filters that use fields that can't be found in the specified index pattern are not applied. Set this to true if you want to apply them anyway.
+   */
+  ignoreFilterIfFieldNotInIndex?: boolean;
+
+  /**
+   * the nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.
+   * The optional ignore_unmapped parameter defaults to false.
+   * This `nestedIgnoreUnmapped` param allows creating queries with "ignore_unmapped": true
+   */
+  nestedIgnoreUnmapped?: boolean;
+}
 
 /**
  * @param filters
@@ -53,8 +65,10 @@ const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContain
  */
 export const buildQueryFromFilters = (
   filters: Filter[] = [],
-  indexPattern: IndexPatternBase | undefined,
-  ignoreFilterIfFieldNotInIndex: boolean = false
+  indexPattern: DataViewBase | undefined,
+  { ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped }: EsQueryFiltersConfig = {
+    ignoreFilterIfFieldNotInIndex: false,
+  }
 ): BoolQuery => {
   filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
 
@@ -68,7 +82,9 @@ export const buildQueryFromFilters = (
       .map((filter) => {
         return migrateFilter(filter, indexPattern);
       })
-      .map((filter) => handleNestedFilter(filter, indexPattern))
+      .map((filter) =>
+        handleNestedFilter(filter, indexPattern, { ignoreUnmapped: nestedIgnoreUnmapped })
+      )
       .map(cleanFilter)
       .map(translateToQuery);
   };

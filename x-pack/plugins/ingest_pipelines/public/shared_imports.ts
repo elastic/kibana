@@ -5,61 +5,65 @@
  * 2.0.
  */
 
-import { useKibana as _useKibana, CodeEditor } from '../../../../src/plugins/kibana_react/public';
+import { useKibana as _useKibana, CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { AppServices } from './application';
 
 export { CodeEditor };
 
+export type {
+  Error,
+  SendRequestConfig,
+  SendRequestResponse,
+  UseRequestConfig,
+  OnJsonEditorUpdateHandler,
+} from '@kbn/es-ui-shared-plugin/public';
+
 export {
   AuthorizationProvider,
-  Error,
   NotAuthorizedSection,
   SectionError,
   SectionLoading,
   sendRequest,
-  SendRequestConfig,
-  SendRequestResponse,
   useAuthorizationContext,
   useRequest,
-  UseRequestConfig,
   WithPrivileges,
   XJson,
   JsonEditor,
-  OnJsonEditorUpdateHandler,
   attemptToURIDecode,
-} from '../../../../src/plugins/es_ui_shared/public/';
+  ViewApiRequestFlyout,
+} from '@kbn/es-ui-shared-plugin/public';
 
-export {
+export type {
   FormSchema,
-  FIELD_TYPES,
   FormConfig,
-  useForm,
-  Form,
-  getUseField,
   ValidationFuncArg,
   FormData,
-  UseField,
-  UseArray,
   ArrayItem,
   FormHook,
-  useFormContext,
-  UseMultiFields,
-  FormDataProvider,
   OnFormUpdateArg,
   FieldConfig,
   FieldHook,
-  getFieldValidityAndErrorMessage,
   ValidationFunc,
   ValidationConfig,
-  useFormData,
   FormOptions,
   SerializerFunc,
-} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
-  fieldFormatters,
-  fieldValidators,
-} from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
+  FIELD_TYPES,
+  useForm,
+  Form,
+  getUseField,
+  UseField,
+  UseArray,
+  useFormContext,
+  UseMultiFields,
+  FormDataProvider,
+  getFieldValidityAndErrorMessage,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+
+export { fieldFormatters, fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export {
   getFormRow,
@@ -73,13 +77,14 @@ export {
   SelectField,
   CheckBoxField,
   TextField,
-} from '../../../../src/plugins/es_ui_shared/static/forms/components';
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+
+export { isJSON, isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 
 export {
-  isJSON,
-  isEmptyString,
-} from '../../../../src/plugins/es_ui_shared/static/validators/string';
-
-export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  useExecutionContext,
+} from '@kbn/kibana-react-plugin/public';
 
 export const useKibana = () => _useKibana<AppServices>();

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,31 +18,35 @@ import {
   EuiConfirmModal,
   EuiSpacer,
 } from '@elastic/eui';
-import { sumBy } from 'lodash';
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from '@kbn/core/public';
+
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type {
   GetAgentPoliciesResponse,
   PackageInfo,
   UpgradePackagePolicyDryRunResponse,
+  PackagePolicy,
 } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 import {
   sendGetAgentPolicies,
   useInstallPackage,
   useGetPackageInstallStatus,
   sendUpgradePackagePolicy,
   useStartServices,
-  useCapabilities,
+  useAuthz,
   useLink,
 } from '../../../../../hooks';
-import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 
 interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
   packagePolicyIds?: string[];
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
+  theme$: Observable<CoreTheme>;
 }
 
 /*
@@ -73,12 +77,13 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   setIsUpgradingPackagePolicies = () => {},
   title,
   version,
+  theme$,
 }) => {
   const history = useHistory();
   const { getPath } = useLink();
 
   const { notifications } = useStartServices();
-  const hasWriteCapabilites = useCapabilities().write;
+  const canUpgradePackages = useAuthz().integrations.upgradePackages;
 
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -93,7 +98,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     const fetchAgentPolicyData = async () => {
       if (packagePolicyIds && packagePolicyIds.length > 0) {
         const { data } = await sendGetAgentPolicies({
-          perPage: 1000,
+          perPage: SO_SEARCH_LIMIT,
           page: 1,
           // Fetch all agent policies that include one of the eligible package policies
           kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
@@ -109,10 +114,26 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, [packagePolicyIds]);
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
-  const agentCount = useMemo(
-    () => sumBy(agentPolicyData?.items, ({ agents }) => agents ?? 0),
-    [agentPolicyData]
-  );
+
+  function isStringArray(arr: unknown | string[]): arr is string[] {
+    return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
+  }
+
+  const agentCount = useMemo(() => {
+    if (!agentPolicyData?.items) return 0;
+
+    return agentPolicyData.items.reduce((acc, item) => {
+      const existingPolicies = item?.package_policies
+        ? isStringArray(item.package_policies)
+          ? (item.package_policies as string[]).filter((p) => packagePolicyIds.includes(p))
+          : (item.package_policies as PackagePolicy[]).filter((p) =>
+              packagePolicyIds.includes(p.id)
+            )
+        : [];
+      return (acc += existingPolicies.length > 0 && item?.agents ? item?.agents : 0);
+    }, 0);
+  }, [agentPolicyData, packagePolicyIds]);
+
   const conflictCount = useMemo(
     () => dryRunData?.filter((item) => item.hasErrors).length,
     [dryRunData]
@@ -123,6 +144,16 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, []);
 
   const navigateToNewSettingsPage = useCallback(() => {
+    // only navigate if still on old settings page (user has not navigated away)
+    if (
+      !history.location.pathname.match(
+        getPath('integration_details_settings', {
+          pkgkey: `${name}-.*`,
+        })
+      )
+    ) {
+      return;
+    }
     const settingsPath = getPath('integration_details_settings', {
       pkgkey: `${name}-${version}`,
     });
@@ -138,6 +169,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       return;
     }
 
+    setIsUpdateModalVisible(false);
     setIsUpgradingPackagePolicies(true);
 
     await installPackage({ name, version, title });
@@ -150,7 +182,6 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     );
 
     setIsUpgradingPackagePolicies(false);
-    setIsUpdateModalVisible(false);
 
     notifications.toasts.addSuccess({
       title: toMountPoint(
@@ -158,14 +189,16 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           id="xpack.fleet.integrations.packageUpdateSuccessTitle"
           defaultMessage="Updated {title} and upgraded policies"
           values={{ title }}
-        />
+        />,
+        { theme$ }
       ),
       text: toMountPoint(
         <FormattedMessage
           id="xpack.fleet.integrations.packageUpdateSuccessDescription"
           defaultMessage="Successfully updated {title} and upgraded policies"
           values={{ title }}
-        />
+        />,
+        { theme$ }
       ),
     });
 
@@ -181,6 +214,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     setIsUpgradingPackagePolicies,
     title,
     version,
+    theme$,
   ]);
 
   const updateModal = (
@@ -264,20 +298,21 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     </EuiConfirmModal>
   );
 
-  return hasWriteCapabilites ? (
+  return (
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType={'refresh'}
-            isLoading={isInstalling}
+            isLoading={isInstalling || isUpgradingPackagePolicies}
             onClick={
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
+            data-test-subj="updatePackageBtn"
+            isDisabled={!canUpgradePackages}
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"
-              defaultMessage="Update to latest version"
+              defaultMessage="Upgrade to latest version"
             />
           </EuiButton>
         </EuiFlexItem>
@@ -291,6 +326,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
                 },
               }}
               id="upgradePoliciesCheckbox"
+              disabled={!canUpgradePackages}
               checked={upgradePackagePolicies}
               onChange={handleUpgradePackagePoliciesChange}
               label={i18n.translate(
@@ -306,5 +342,5 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
 
       {isUpdateModalVisible && updateModal}
     </>
-  ) : null;
+  );
 };

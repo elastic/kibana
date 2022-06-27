@@ -6,10 +6,11 @@
  */
 
 import sinon from 'sinon';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
+import { AwaitedProperties } from '@kbn/utility-types';
 import { createWorkpadRouteContext } from './workpad_route_context';
-import { RequestHandlerContext, SavedObjectReference } from 'src/core/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { RequestHandlerContext, SavedObjectReference } from '@kbn/core/server';
+import { savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
 import { CanvasWorkpad } from '../types';
 import { CANVAS_TYPE } from '../common/lib/constants';
 
@@ -26,7 +27,7 @@ const mockContext = {
       client: savedObjectsClient,
     },
   },
-} as unknown as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 const workpadRouteContext = createWorkpadRouteContext({
   expressions: mockedExpressionService as any,
@@ -86,7 +87,7 @@ describe('workpad route context', () => {
       };
 
       const canvasContext = await workpadRouteContext(
-        mockContext,
+        coreMock.createCustomRequestHandlerContext(mockContext),
         undefined as any,
         undefined as any
       );
@@ -120,7 +121,7 @@ describe('workpad route context', () => {
     it('injects references to the saved object', async () => {
       const id = 'so-id';
       const canvasContext = await workpadRouteContext(
-        mockContext,
+        coreMock.createCustomRequestHandlerContext(mockContext),
         undefined as any,
         undefined as any
       );
@@ -141,13 +142,38 @@ describe('workpad route context', () => {
     });
   });
 
+  describe('RESOLVE', () => {
+    it('injects references to the saved object', async () => {
+      const id = 'so-id';
+      const canvasContext = await workpadRouteContext(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        undefined as any,
+        undefined as any
+      );
+
+      (mockContext.core.savedObjects.client.resolve as jest.Mock).mockResolvedValue({
+        saved_object: { attributes: extractedWorkpad, references },
+        outcome: 'exactMatch',
+      });
+
+      mockedExpressionService.inject.mockReturnValue(fromExpression(injectedExpression));
+
+      const result = await canvasContext.workpad.resolve(id);
+      const { id: ingnoredId, ...expectedAttributes } = injectedWorkpad;
+
+      expect(mockContext.core.savedObjects.client.resolve).toBeCalledWith(CANVAS_TYPE, id);
+
+      expect(result.saved_object.attributes).toEqual(expectedAttributes);
+    });
+  });
+
   describe('UPDATE', () => {
     it('extracts from the given attributes', async () => {
       const id = 'workpad-id';
       const createdDate = new Date(2020, 1, 1).toISOString();
 
       const canvasContext = await workpadRouteContext(
-        mockContext,
+        coreMock.createCustomRequestHandlerContext(mockContext),
         undefined as any,
         undefined as any
       );

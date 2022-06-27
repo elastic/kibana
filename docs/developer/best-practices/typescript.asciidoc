@@ -47,11 +47,11 @@ Additionally, in order to migrate into project refs, you also need to make sure 
     "declarationMap": true
   },
   "include": [
-    // add all the folders containg files to be compiled
+    // add all the folders containing files to be compiled
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    // add references to other TypeScript projects your plugin dependes on
+    // add references to other TypeScript projects your plugin depends on
   ]
 }
 ----

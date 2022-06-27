@@ -7,4 +7,11 @@
  */
 
 export { RenderingService } from './rendering_service';
-export * from './types';
+export type {
+  InternalRenderingServicePreboot,
+  InternalRenderingServiceSetup,
+  IRenderOptions,
+  RenderingMetadata,
+  RenderingPrebootDeps,
+  RenderingSetupDeps,
+} from './types';

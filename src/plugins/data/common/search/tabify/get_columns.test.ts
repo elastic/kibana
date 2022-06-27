@@ -7,7 +7,7 @@
  */
 
 import { tabifyGetColumns } from './get_columns';
-import { TabbedAggColumn } from './types';
+import type { TabbedAggColumn } from './types';
 import { AggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 
@@ -33,7 +33,7 @@ describe('get columns', () => {
       },
     } as any;
 
-    return new AggConfigs(indexPattern, aggs, { typesRegistry });
+    return new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn());
   };
 
   test('should inject the metric after each bucket if the vis is hierarchical', () => {

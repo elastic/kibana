@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/public';
-import type { ChartsPluginSetup } from 'src/plugins/charts/public';
-import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EditorFrameSetup } from '../types';
-import type { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import type { FormatFactory } from '../../common';
 
 interface DatatableVisualizationPluginStartPlugins {
@@ -34,6 +34,7 @@ export class DatatableVisualization {
       expressions.registerRenderer(() =>
         getDatatableRenderer({
           formatFactory,
+          theme: core.theme,
           getType: core
             .getStartServices()
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
@@ -42,7 +43,7 @@ export class DatatableVisualization {
         })
       );
 
-      return getDatatableVisualization({ paletteService: palettes });
+      return getDatatableVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }

@@ -9,6 +9,7 @@ import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { Ecs } from '../../../../common/ecs';
 import type {
   BrowserField,
@@ -19,16 +20,7 @@ import type {
   ColumnHeaderOptions,
   SortColumnTimeline,
   SortDirection,
-  TimelineEventsType,
 } from '../../../../common/types/timeline';
-
-import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
-  k !== '__typename' && v != null ? v : undefined;
-
-export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitTypenameAndEmpty, 2);
 
 /**
  * Creates mapping of eventID -> fieldData for given fieldsToKeep. Used to store additional field
@@ -75,28 +67,7 @@ export const getEventIdToDataMapping = (
   }, {});
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
-  !isEmpty(event.signal?.rule?.building_block_type);
-
-export const isEvenEqlSequence = (event: Ecs): boolean => {
-  if (!isEmpty(event.eql?.sequenceNumber)) {
-    try {
-      const sequenceNumber = (event.eql?.sequenceNumber ?? '').split('-')[0];
-      return parseInt(sequenceNumber, 10) % 2 === 0;
-    } catch {
-      return false;
-    }
-  }
-  return false;
-};
-/** Return eventType raw or signal or eql */
-export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event.signal?.rule?.id)) {
-    return 'signal';
-  } else if (!isEmpty(event.eql?.parentId)) {
-    return 'eql';
-  }
-  return 'raw';
-};
+  !isEmpty(event.kibana?.alert?.building_block_type);
 
 /** Maps (Redux) `SortDirection` to the `direction` values used by `EuiDataGrid` */
 export const mapSortDirectionToDirection = (sortDirection: SortDirection): 'asc' | 'desc' => {
@@ -123,11 +94,18 @@ export const mapSortingColumns = ({
     direction: 'asc' | 'desc';
   }>;
 }): SortColumnTimeline[] =>
-  columns.map(({ id, direction }) => ({
-    columnId: id,
-    columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
-    sortDirection: direction,
-  }));
+  columns.map(({ id, direction }) => {
+    const columnHeader = columnHeaders.find((ch) => ch.id === id);
+    const columnType = columnHeader?.type ?? '';
+    const esTypes = columnHeader?.esTypes ?? [];
+
+    return {
+      columnId: id,
+      columnType,
+      esTypes,
+      sortDirection: direction,
+    };
+  });
 
 export const allowSorting = ({
   browserField,
@@ -139,75 +117,64 @@ export const allowSorting = ({
   const isAggregatable = browserField?.aggregatable ?? false;
 
   const isAllowlistedNonBrowserField = [
-    'signal.ancestors.depth',
-    'signal.ancestors.id',
-    'signal.ancestors.rule',
-    'signal.ancestors.type',
-    'signal.original_event.action',
-    'signal.original_event.category',
-    'signal.original_event.code',
-    'signal.original_event.created',
-    'signal.original_event.dataset',
-    'signal.original_event.duration',
-    'signal.original_event.end',
-    'signal.original_event.hash',
-    'signal.original_event.id',
-    'signal.original_event.kind',
-    'signal.original_event.module',
-    'signal.original_event.original',
-    'signal.original_event.outcome',
-    'signal.original_event.provider',
-    'signal.original_event.risk_score',
-    'signal.original_event.risk_score_norm',
-    'signal.original_event.sequence',
-    'signal.original_event.severity',
-    'signal.original_event.start',
-    'signal.original_event.timezone',
-    'signal.original_event.type',
-    'signal.original_time',
-    'signal.parent.depth',
-    'signal.parent.id',
-    'signal.parent.index',
-    'signal.parent.rule',
-    'signal.parent.type',
-    'signal.reason',
-    'signal.rule.created_by',
-    'signal.rule.description',
-    'signal.rule.enabled',
-    'signal.rule.false_positives',
-    'signal.rule.filters',
-    'signal.rule.from',
-    'signal.rule.id',
-    'signal.rule.immutable',
-    'signal.rule.index',
-    'signal.rule.interval',
-    'signal.rule.language',
-    'signal.rule.max_signals',
-    'signal.rule.name',
-    'signal.rule.note',
-    'signal.rule.output_index',
-    'signal.rule.query',
-    'signal.rule.references',
-    'signal.rule.risk_score',
-    'signal.rule.rule_id',
-    'signal.rule.saved_id',
-    'signal.rule.severity',
-    'signal.rule.size',
-    'signal.rule.tags',
-    'signal.rule.threat',
-    'signal.rule.threat.tactic.id',
-    'signal.rule.threat.tactic.name',
-    'signal.rule.threat.tactic.reference',
-    'signal.rule.threat.technique.id',
-    'signal.rule.threat.technique.name',
-    'signal.rule.threat.technique.reference',
-    'signal.rule.timeline_id',
-    'signal.rule.timeline_title',
-    'signal.rule.to',
-    'signal.rule.type',
-    'signal.rule.updated_by',
-    'signal.rule.version',
-    'signal.status',
+    'kibana.alert.ancestors.depth',
+    'kibana.alert.ancestors.id',
+    'kibana.alert.ancestors.rule',
+    'kibana.alert.ancestors.type',
+    'kibana.alert.original_event.action',
+    'kibana.alert.original_event.category',
+    'kibana.alert.original_event.code',
+    'kibana.alert.original_event.created',
+    'kibana.alert.original_event.dataset',
+    'kibana.alert.original_event.duration',
+    'kibana.alert.original_event.end',
+    'kibana.alert.original_event.hash',
+    'kibana.alert.original_event.id',
+    'kibana.alert.original_event.kind',
+    'kibana.alert.original_event.module',
+    'kibana.alert.original_event.original',
+    'kibana.alert.original_event.outcome',
+    'kibana.alert.original_event.provider',
+    'kibana.alert.original_event.risk_score',
+    'kibana.alert.original_event.risk_score_norm',
+    'kibana.alert.original_event.sequence',
+    'kibana.alert.original_event.severity',
+    'kibana.alert.original_event.start',
+    'kibana.alert.original_event.timezone',
+    'kibana.alert.original_event.type',
+    'kibana.alert.original_time',
+    'kibana.alert.reason',
+    'kibana.alert.rule.created_by',
+    'kibana.alert.rule.description',
+    'kibana.alert.rule.enabled',
+    'kibana.alert.rule.false_positives',
+    'kibana.alert.rule.from',
+    'kibana.alert.rule.uuid',
+    'kibana.alert.rule.immutable',
+    'kibana.alert.rule.interval',
+    'kibana.alert.rule.max_signals',
+    'kibana.alert.rule.name',
+    'kibana.alert.rule.note',
+    'kibana.alert.rule.references',
+    'kibana.alert.risk_score',
+    'kibana.alert.rule.rule_id',
+    'kibana.alert.severity',
+    'kibana.alert.rule.size',
+    'kibana.alert.rule.tags',
+    'kibana.alert.rule.threat',
+    'kibana.alert.rule.threat.tactic.id',
+    'kibana.alert.rule.threat.tactic.name',
+    'kibana.alert.rule.threat.tactic.reference',
+    'kibana.alert.rule.threat.technique.id',
+    'kibana.alert.rule.threat.technique.name',
+    'kibana.alert.rule.threat.technique.reference',
+    'kibana.alert.rule.timeline_id',
+    'kibana.alert.rule.timeline_title',
+    'kibana.alert.rule.to',
+    'kibana.alert.rule.type',
+    'kibana.alert.rule.updated_by',
+    'kibana.alert.rule.version',
+    'kibana.alert.workflow_status',
   ].includes(fieldName);
 
   return isAllowlistedNonBrowserField || isAggregatable;
@@ -236,3 +203,12 @@ export const addBuildingBlockStyle = (
     });
   }
 };
+
+/** Returns true when the specified column has cell actions */
+export const hasCellActions = ({
+  columnId,
+  disabledCellActions,
+}: {
+  columnId: string;
+  disabledCellActions: string[];
+}) => !disabledCellActions.includes(columnId);

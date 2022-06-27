@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, Logger, CoreSetup } from 'kibana/server';
+import { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import Bluebird from 'bluebird';
 import _ from 'lodash';
 // @ts-ignore
-import chainRunnerFn from '../handlers/chain_runner.js';
+import chainRunnerFn from '../handlers/chain_runner';
 // @ts-ignore
 import getNamespacesSettings from '../lib/get_namespaced_settings';
 // @ts-ignore
@@ -77,11 +76,12 @@ export function runRoute(
       },
     },
     router.handleLegacyErrors(async (context, request, response) => {
-      const [, { data }] = await core.getStartServices();
-      const uiSettings = await context.core.uiSettings.client.getAll();
-      const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
-        context.core.savedObjects.client,
-        context.core.elasticsearch.client.asCurrentUser
+      const [, { dataViews }] = await core.getStartServices();
+      const coreCtx = await context.core;
+      const uiSettings = await coreCtx.uiSettings.client.getAll();
+      const indexPatternsService = await dataViews.dataViewsServiceFactory(
+        coreCtx.savedObjects.client,
+        coreCtx.elasticsearch.client.asCurrentUser
       );
 
       const tlConfig = getTlConfig({
@@ -91,12 +91,11 @@ export function runRoute(
         getFunction,
         getIndexPatternsService: () => indexPatternsService,
         getStartServices: core.getStartServices,
-        allowedGraphiteUrls: configManager.getGraphiteUrls(),
         esShardTimeout: configManager.getEsShardTimeout(),
       });
       try {
         const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
+        const sheet = await Promise.all(await chainRunner.processRequest(request.body));
         return response.ok({
           body: {
             sheet,

@@ -13,17 +13,32 @@ import { ChartsPlugin } from './plugin';
 
 export const plugin = () => new ChartsPlugin();
 
-export { ChartsPluginSetup, ChartsPluginStart } from './plugin';
+export type { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
 export * from './static';
-export * from './services/palettes/types';
 export { lightenColor } from './services/palettes/lighten_color';
 export { useActiveCursor } from './services/active_cursor';
 
-export {
-  PaletteOutput,
+export type {
   CustomPaletteArguments,
   CustomPaletteState,
   SystemPaletteArguments,
+  ColorSchema,
+  RawColorSchema,
+  ColorMap,
+  ColorSchemaParams,
+  Labels,
+  Style,
+} from '../common';
+export {
   paletteIds,
+  ColorSchemas,
+  vislibColorMaps,
+  colorSchemas,
+  getHeatmapColors,
+  truncatedColorMaps,
+  truncatedColorSchemas,
+  ColorMode,
+  LabelRotation,
+  defaultCountLabel,
 } from '../common';

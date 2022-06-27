@@ -11,20 +11,28 @@ import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
-import { LicensingLogic } from '../../../shared/licensing';
 import { AppLogic } from '../../app_logic';
+import {
+  GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+  GITHUB_VIA_APP_SERVICE_TYPE,
+} from '../../constants';
 import {
   ADD_SOURCE_PATH,
   SOURCE_DETAILS_PATH,
   PRIVATE_SOURCES_PATH,
   SOURCES_PATH,
   getSourcesPath,
+  getAddPath,
 } from '../../routes';
 
-import { AddSource, AddSourceList } from './components/add_source';
+import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
+import { AddCustomSource } from './components/add_source/add_custom_source';
+import { ExternalConnectorConfig } from './components/add_source/add_external_connector';
+import { AddSourceBYOIntro } from './components/add_source/add_source_byo_intro';
+import { AddSourceChoice } from './components/add_source/add_source_choice';
+import { AddSourceIntro } from './components/add_source/add_source_intro';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import { staticSourceData } from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -32,7 +40,6 @@ import './sources.scss';
 
 export const SourcesRouter: React.FC = () => {
   const { pathname } = useLocation() as Location;
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { resetSourcesState } = useActions(SourcesLogic);
   const {
     account: { canCreatePrivateSources },
@@ -66,33 +73,71 @@ export const SourcesRouter: React.FC = () => {
       <Route exact path={SOURCES_PATH}>
         <OrganizationSources />
       </Route>
-      {staticSourceData.map(({ addPath, accountContextOnly }, i) => (
-        <Route key={i} exact path={getSourcesPath(addPath, isOrganization)}>
-          {!hasPlatinumLicense && accountContextOnly ? (
-            <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-          ) : (
-            <AddSource sourceIndex={i} />
-          )}
-        </Route>
-      ))}
-      {staticSourceData.map(({ addPath }, i) => (
-        <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-          <AddSource connect sourceIndex={i} />
-        </Route>
-      ))}
-      {staticSourceData.map(({ addPath }, i) => (
-        <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/reauthenticate`}>
-          <AddSource reAuthenticate sourceIndex={i} />
-        </Route>
-      ))}
-      {staticSourceData.map(({ addPath, configuration: { needsConfiguration } }, i) => {
-        if (needsConfiguration)
-          return (
-            <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/configure`}>
-              <AddSource configure sourceIndex={i} />
-            </Route>
-          );
-      })}
+      <Route exact path={getAddPath(GITHUB_VIA_APP_SERVICE_TYPE)}>
+        <GitHubViaApp isGithubEnterpriseServer={false} />
+      </Route>
+      <Route exact path={getAddPath(GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE)}>
+        <GitHubViaApp isGithubEnterpriseServer />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('external'), isOrganization)}/intro`}
+        data-test-subj="ConnectorBYOIntroRoute"
+      >
+        <AddSourceBYOIntro />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/intro`}
+        data-test-subj="ConnectorIntroRoute"
+      >
+        <AddSourceIntro />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/choice`}
+        data-test-subj="ConnectorChoiceRoute"
+      >
+        <AddSourceChoice />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('external'), isOrganization)}/connector_registration`}
+        data-test-subj="ExternalConnectorConfigRoute"
+      >
+        <ExternalConnectorConfig />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(
+          getAddPath('external', ':baseServiceType'),
+          isOrganization
+        )}/connector_registration`}
+        data-test-subj="ExternalConnectorConfigRoute"
+      >
+        <ExternalConnectorConfig />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('custom'), isOrganization)}/`}
+        data-test-subj="AddCustomSourceRoute"
+      >
+        <AddCustomSource />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('custom', ':baseServiceType'), isOrganization)}/`}
+        data-test-subj="AddCustomSourceRoute"
+      >
+        <AddCustomSource />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/:initialStep?`}
+        data-test-subj="AddSourceRoute"
+      >
+        <AddSource />
+      </Route>
       {canCreatePrivateSources ? (
         <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
           <AddSourceList />

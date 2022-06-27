@@ -9,12 +9,11 @@
 import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { StartServicesAccessor } from 'src/core/public';
+import { StartServicesAccessor } from '@kbn/core/public';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
   getEsaggsMeta,
-  handleEsaggsRequest,
 } from '../../../common/search/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
@@ -44,20 +43,21 @@ export function getFunctionDefinition({
         const indexPattern = await indexPatterns.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
-          args.aggs?.map((agg) => agg.value) ?? []
+          args.aggs?.map((agg) => agg.value) ?? [],
+          { hierarchical: args.metricsAtAllLevels, partialRows: args.partialRows }
         );
-        aggConfigs.hierarchical = args.metricsAtAllLevels;
 
-        return { aggConfigs, indexPattern, searchSource, getNow };
+        const { handleEsaggsRequest } = await import('../../../common/search/expressions');
+
+        return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(
-        switchMap(({ aggConfigs, indexPattern, searchSource, getNow }) =>
-          handleEsaggsRequest({
+        switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
+          return handleEsaggsRequest({
             abortSignal,
             aggs: aggConfigs,
             filters: get(input, 'filters', undefined),
             indexPattern,
             inspectorAdapters,
-            partialRows: args.partialRows,
             query: get(input, 'query', undefined) as any,
             searchSessionId: getSearchSessionId(),
             searchSourceService: searchSource,
@@ -65,8 +65,8 @@ export function getFunctionDefinition({
             timeRange: get(input, 'timeRange', undefined),
             getNow,
             executionContext: getExecutionContext(),
-          })
-        )
+          });
+        })
       );
     },
   });

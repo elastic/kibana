@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { rulesClientMock } from './rules_client.mock';
-import { PluginSetupContract, PluginStartContract } from './plugin';
-import { AlertInstance } from './alert_instance';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { rulesClientMock } from './rules_client.mock';
+import { PluginSetupContract, PluginStartContract } from './plugin';
+import { Alert, AlertFactoryDoneUtils } from './alert';
 import { AlertInstanceContext, AlertInstanceState } from './types';
 
 export { rulesClientMock };
@@ -19,6 +21,8 @@ export { rulesClientMock };
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
+    getSecurityHealth: jest.fn(),
+    getConfig: jest.fn(),
   };
   return mock;
 };
@@ -36,50 +40,86 @@ const createStartMock = () => {
 export type AlertInstanceMock<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext
-> = jest.Mocked<AlertInstance<State, Context>>;
-const createAlertInstanceFactoryMock = <
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
->() => {
+> = jest.Mocked<Alert<State, Context>>;
+
+const createAlertFactoryMock = {
+  create: <
+    InstanceState extends AlertInstanceState = AlertInstanceState,
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  >() => {
+    const mock = {
+      hasScheduledActions: jest.fn(),
+      isThrottled: jest.fn(),
+      getScheduledActionOptions: jest.fn(),
+      unscheduleActions: jest.fn(),
+      getState: jest.fn(),
+      scheduleActions: jest.fn(),
+      replaceState: jest.fn(),
+      updateLastScheduledActions: jest.fn(),
+      toJSON: jest.fn(),
+      toRaw: jest.fn(),
+    };
+
+    // support chaining
+    mock.replaceState.mockReturnValue(mock);
+    mock.unscheduleActions.mockReturnValue(mock);
+    mock.scheduleActions.mockReturnValue(mock);
+
+    return mock as unknown as AlertInstanceMock<InstanceState, InstanceContext>;
+  },
+  done: <
+    InstanceState extends AlertInstanceState = AlertInstanceState,
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+    ActionGroupIds extends string = string
+  >() => {
+    const mock: jest.Mocked<AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>> =
+      {
+        getRecoveredAlerts: jest.fn().mockReturnValue([]),
+      };
+    return mock;
+  },
+};
+
+const createAbortableSearchClientMock = () => {
   const mock = {
-    hasScheduledActions: jest.fn(),
-    isThrottled: jest.fn(),
-    getScheduledActionOptions: jest.fn(),
-    unscheduleActions: jest.fn(),
-    getState: jest.fn(),
-    scheduleActions: jest.fn(),
-    replaceState: jest.fn(),
-    updateLastScheduledActions: jest.fn(),
-    toJSON: jest.fn(),
-    toRaw: jest.fn(),
+    search: jest.fn(),
   };
 
-  // support chaining
-  mock.replaceState.mockReturnValue(mock);
-  mock.unscheduleActions.mockReturnValue(mock);
-  mock.scheduleActions.mockReturnValue(mock);
-
-  return mock as unknown as AlertInstanceMock<InstanceState, InstanceContext>;
+  return mock;
 };
 
-const createAlertServicesMock = <
+const createAbortableSearchServiceMock = () => {
+  return {
+    asInternalUser: createAbortableSearchClientMock(),
+    asCurrentUser: createAbortableSearchClientMock(),
+  };
+};
+
+const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 >() => {
-  const alertInstanceFactoryMock = createAlertInstanceFactoryMock<InstanceState, InstanceContext>();
+  const alertFactoryMockCreate = createAlertFactoryMock.create<InstanceState, InstanceContext>();
+  const alertFactoryMockDone = createAlertFactoryMock.done<InstanceState, InstanceContext, never>();
   return {
-    alertInstanceFactory: jest
-      .fn<jest.Mocked<AlertInstance<InstanceState, InstanceContext>>, [string]>()
-      .mockReturnValue(alertInstanceFactoryMock),
+    alertFactory: {
+      create: jest.fn().mockReturnValue(alertFactoryMockCreate),
+      done: jest.fn().mockReturnValue(alertFactoryMockDone),
+    },
     savedObjectsClient: savedObjectsClientMock.create(),
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    shouldWriteAlerts: () => true,
+    shouldStopExecution: () => true,
+    search: createAbortableSearchServiceMock(),
+    searchSourceClient: searchSourceCommonMock,
   };
 };
-export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
+export type RuleExecutorServicesMock = ReturnType<typeof createRuleExecutorServicesMock>;
 
 export const alertsMock = {
-  createAlertInstanceFactory: createAlertInstanceFactoryMock,
+  createAlertFactory: createAlertFactoryMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
-  createAlertServices: createAlertServicesMock,
+  createRuleExecutorServices: createRuleExecutorServicesMock,
 };

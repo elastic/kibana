@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import url from 'url';
-import { delay } from 'bluebird';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { adminTestUser } from '@kbn/test';
 import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -175,9 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get(`/api/security/oidc/callback?code=thisisthecode&state=${stateAndNonce.state}`)
           .expect(401);
 
-        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
         expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
@@ -187,9 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', handshakeCookie.cookieString())
           .expect(401);
 
-        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
         expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
@@ -229,6 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
           'lookup_realm',
           'authentication_provider',
           'authentication_type',
+          'elastic_cloud_user',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');
@@ -282,6 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
           'lookup_realm',
           'authentication_provider',
           'authentication_type',
+          'elastic_cloud_user',
         ]);
 
         expect(apiResponse.body.username).to.be('user2');
@@ -494,7 +492,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await setTimeoutAsync(20000);
 
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
@@ -540,6 +538,53 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', secondNewCookie.cookieString())
           .expect(200);
       });
+
+      describe('post-authentication stage', () => {
+        for (const client of ['start-contract', 'request-context', 'custom']) {
+          it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
+            this.timeout(60000);
+
+            // Access token expiration is set to 15s for API integration tests.
+            // Let's tell test endpoint to wait 30s after authentication and try to make a request to Elasticsearch
+            // triggering token refresh logic.
+            const response = await supertest
+              .post('/authentication/slow/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', sessionCookie.cookieString())
+              .send({ duration: '30s', client })
+              .expect(200);
+
+            const newSessionCookies = response.headers['set-cookie'];
+            expect(newSessionCookies).to.have.length(1);
+
+            const newSessionCookie = parseCookie(newSessionCookies[0])!;
+            expectNewSessionCookie(newSessionCookie);
+
+            // The second new cookie with fresh pair of access and refresh tokens should work.
+            await supertest
+              .get('/internal/security/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', newSessionCookie.cookieString())
+              .expect(200);
+          });
+
+          it(`expired access token should be automatically refreshed by the ${client} client even for multiple concurrent requests`, async function () {
+            this.timeout(60000);
+
+            // Send 5 concurrent requests with a cookie that contains an expired access token.
+            await Promise.all(
+              Array.from({ length: 5 }).map((value, index) =>
+                supertest
+                  .post(`/authentication/slow/me?a=${index}`)
+                  .set('kbn-xsrf', 'xxx')
+                  .set('Cookie', sessionCookie.cookieString())
+                  .send({ duration: '30s', client })
+                  .expect(200)
+              )
+            );
+          });
+        }
+      });
     });
 
     describe('API access with missing access token document.', () => {
@@ -581,7 +626,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
 
         const handshakeResponse = await supertest
           .get(

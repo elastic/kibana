@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Location } from 'history';
 import { parse } from 'query-string';
 
@@ -30,6 +30,7 @@ import { PipelineTable } from './table';
 import { PipelineDetailsFlyout } from './details_flyout';
 import { PipelineNotFoundFlyout } from './not_found_flyout';
 import { PipelineDeleteModal } from './delete_modal';
+import { useRedirectToPathOrRedirectPath } from '../../hooks';
 
 const getPipelineNameFromLocation = (location: Location) => {
   const { pipeline } = parse(location.search.substring(1));
@@ -49,6 +50,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
 
   const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
+  const redirectToPathOrRedirectPath = useRedirectToPathOrRedirectPath(history);
 
   // Track component loaded
   useEffect(() => {
@@ -74,7 +76,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   const goHome = () => {
     setShowFlyout(false);
-    history.push(getListPath());
+    redirectToPathOrRedirectPath(getListPath());
   };
 
   if (error) {
@@ -153,14 +155,14 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           <span data-test-subj="appTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.list.listTitle"
-              defaultMessage="Ingest Node Pipelines"
+              defaultMessage="Ingest Pipelines"
             />
           </span>
         }
         description={
           <FormattedMessage
             id="xpack.ingestPipelines.list.pipelinesDescription"
-            defaultMessage="Define a pipeline for preprocessing documents before indexing."
+            defaultMessage="Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing."
           />
         }
         rightSideItems={[
@@ -172,7 +174,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           >
             <FormattedMessage
               id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
-              defaultMessage="Ingest Node Pipelines docs"
+              defaultMessage="Ingest Pipelines docs"
             />
           </EuiButtonEmpty>,
         ]}

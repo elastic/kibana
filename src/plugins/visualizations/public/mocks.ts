@@ -6,23 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { Schema, VisualizationsSetup, VisualizationsStart } from './';
-import { Schemas } from './vis_types';
+import { PluginInitializerContext } from '@kbn/core/public';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { coreMock, applicationServiceMock } from '@kbn/core/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
+import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
+import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { VisualizationsPlugin } from './plugin';
-import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
-import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
-import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
-import { dataPluginMock } from '../../../plugins/data/public/mocks';
-import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
-import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
-import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
-import { savedObjectsPluginMock } from '../../../plugins/saved_objects/public/mocks';
+import { Schemas } from './vis_types';
+import { Schema, VisualizationsSetup, VisualizationsStart } from '.';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
   registerAlias: jest.fn(),
   hideTypes: jest.fn(),
+  visEditorsRegistry: { registerDefault: jest.fn(), register: jest.fn(), get: jest.fn() },
 });
 
 const createStartContract = (): VisualizationsStart => ({
@@ -31,16 +41,7 @@ const createStartContract = (): VisualizationsStart => ({
   getAliases: jest.fn(),
   getByGroup: jest.fn(),
   unRegisterAlias: jest.fn(),
-  savedVisualizationsLoader: {
-    get: jest.fn(),
-  } as any,
   showNewVisModal: jest.fn(),
-  createVis: jest.fn(),
-  convertFromSerializedVis: jest.fn(),
-  convertToSerializedVis: jest.fn(),
-  __LEGACY: {
-    createVisEmbeddableFromObject: jest.fn(),
-  },
 });
 
 const createInstance = async () => {
@@ -52,18 +53,30 @@ const createInstance = async () => {
     expressions: expressionsPluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
+    urlForwarding: urlForwardingPluginMock.createSetupContract(),
+    uiActions: uiActionsPluginMock.createSetupContract(),
   });
+
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
+      dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
       inspector: inspectorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
       application: applicationServiceMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
+      spaces: spacesPluginMock.createStartContract(),
       getAttributeService: jest.fn(),
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),
+      savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
+      navigation: navigationPluginMock.createStartContract(),
+      presentationUtil: presentationUtilPluginMock.createStartContract(coreMock.createStart()),
+      urlForwarding: urlForwardingPluginMock.createStartContract(),
+      screenshotMode: screenshotModePluginMock.createStartContract(),
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
     });
 
   return {

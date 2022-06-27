@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 
 export class Plugin {
   constructor() {}
@@ -16,6 +16,23 @@ export class Plugin {
       name: 'sharedtype',
       hidden: false,
       namespaceType: 'multiple',
+      management: {
+        icon: 'beaker',
+        importableAndExportable: true,
+        getTitle(obj) {
+          return obj.attributes.title;
+        },
+      },
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+        },
+      },
+    });
+    core.savedObjects.registerType({
+      name: 'isolatedtype',
+      hidden: false,
+      namespaceType: 'single',
       management: {
         icon: 'beaker',
         importableAndExportable: true,

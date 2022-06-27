@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_CATEGORY,
@@ -31,6 +31,7 @@ describe('createLifecycleExecutor', () => {
   it('wraps and unwraps the original executor state', async () => {
     const logger = loggerMock.create();
     const ruleDataClientMock = createRuleDataClientMock();
+    // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent.ts(2590)
     const executor = createLifecycleExecutor(
       logger,
       ruleDataClientMock
@@ -85,7 +86,7 @@ describe('createLifecycleExecutor', () => {
       })
     );
 
-    expect(ruleDataClientMock.getWriter().bulk).toHaveBeenCalledWith(
+    expect((await ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledWith(
       expect.objectContaining({
         body: [
           // alert documents
@@ -106,7 +107,7 @@ describe('createLifecycleExecutor', () => {
         ],
       })
     );
-    expect(ruleDataClientMock.getWriter().bulk).not.toHaveBeenCalledWith(
+    expect((await ruleDataClientMock.getWriter()).bulk).not.toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.arrayContaining([
           // evaluation documents
@@ -126,7 +127,7 @@ describe('createLifecycleExecutor', () => {
       hits: {
         hits: [
           {
-            fields: {
+            _source: {
               '@timestamp': '',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_UUID]: 'ALERT_0_UUID',
@@ -143,7 +144,7 @@ describe('createLifecycleExecutor', () => {
             },
           },
           {
-            fields: {
+            _source: {
               '@timestamp': '',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_UUID]: 'ALERT_1_UUID',
@@ -200,7 +201,7 @@ describe('createLifecycleExecutor', () => {
       })
     );
 
-    expect(ruleDataClientMock.getWriter().bulk).toHaveBeenCalledWith(
+    expect((await ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledWith(
       expect.objectContaining({
         body: [
           // alert document
@@ -226,7 +227,7 @@ describe('createLifecycleExecutor', () => {
         ],
       })
     );
-    expect(ruleDataClientMock.getWriter().bulk).not.toHaveBeenCalledWith(
+    expect((await ruleDataClientMock.getWriter()).bulk).not.toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.arrayContaining([
           // evaluation documents
@@ -246,7 +247,7 @@ describe('createLifecycleExecutor', () => {
       hits: {
         hits: [
           {
-            fields: {
+            _source: {
               '@timestamp': '',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_UUID]: 'ALERT_0_UUID',
@@ -262,7 +263,7 @@ describe('createLifecycleExecutor', () => {
             },
           },
           {
-            fields: {
+            _source: {
               '@timestamp': '',
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_UUID]: 'ALERT_1_UUID',
@@ -315,7 +316,7 @@ describe('createLifecycleExecutor', () => {
       })
     );
 
-    expect(ruleDataClientMock.getWriter().bulk).toHaveBeenCalledWith(
+    expect((await ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.arrayContaining([
           // alert document
@@ -337,7 +338,7 @@ describe('createLifecycleExecutor', () => {
         ]),
       })
     );
-    expect(ruleDataClientMock.getWriter().bulk).not.toHaveBeenCalledWith(
+    expect((await ruleDataClientMock.getWriter()).bulk).not.toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.arrayContaining([
           // evaluation documents
@@ -348,6 +349,61 @@ describe('createLifecycleExecutor', () => {
         ]),
       })
     );
+  });
+
+  it('does not write alert documents when rule execution is cancelled and feature flags indicate to skip', async () => {
+    const logger = loggerMock.create();
+    const ruleDataClientMock = createRuleDataClientMock();
+    const executor = createLifecycleExecutor(
+      logger,
+      ruleDataClientMock
+    )<{}, TestRuleState, never, never, never>(async (options) => {
+      expect(options.state).toEqual(initialRuleState);
+
+      const nextRuleState: TestRuleState = {
+        aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
+      };
+
+      return nextRuleState;
+    });
+
+    await executor(
+      createDefaultAlertExecutorOptions({
+        params: {},
+        state: { wrapped: initialRuleState, trackedAlerts: {} },
+        shouldWriteAlerts: false,
+      })
+    );
+
+    expect((await ruleDataClientMock.getWriter()).bulk).not.toHaveBeenCalled();
+  });
+
+  it('throws error when writer initialization fails', async () => {
+    const logger = loggerMock.create();
+    const ruleDataClientMock = createRuleDataClientMock();
+    ruleDataClientMock.getWriter = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('error initializing!'));
+    const executor = createLifecycleExecutor(
+      logger,
+      ruleDataClientMock
+    )<{}, TestRuleState, never, never, never>(async (options) => {
+      const nextRuleState: TestRuleState = {
+        aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
+      };
+
+      return nextRuleState;
+    });
+
+    await expect(() =>
+      executor(
+        createDefaultAlertExecutorOptions({
+          params: {},
+          state: { wrapped: initialRuleState, trackedAlerts: {} },
+          shouldWriteAlerts: false,
+        })
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"error initializing!"`);
   });
 });
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
-import type { FieldFormat } from 'src/plugins/field_formats/common';
-import { Datatable } from 'src/plugins/expressions/public';
-import { IUiSettingsClient } from 'kibana/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { DatatableArgs, ColumnConfigArg } from '../../../common/expressions';
 import { DataContextType } from './types';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 describe('datatable cell renderer', () => {
   const table: Datatable = {
@@ -53,6 +53,7 @@ describe('datatable cell renderer', () => {
       >
         <CellRenderer
           rowIndex={0}
+          colIndex={0}
           columnId="a"
           setCellProps={() => {}}
           isExpandable={false}
@@ -76,6 +77,7 @@ describe('datatable cell renderer', () => {
       >
         <CellRenderer
           rowIndex={0}
+          colIndex={0}
           columnId="a"
           setCellProps={() => {}}
           isExpandable={false}
@@ -84,7 +86,64 @@ describe('datatable cell renderer', () => {
         />
       </DataContext.Provider>
     );
-    expect(cell.find('.lnsTableCell').prop('className')).toContain('--right');
+    expect(cell.find('.lnsTableCell--right').exists()).toBeTruthy();
+  });
+
+  it('does not set multiline class for regular height tables', () => {
+    const cell = mountWithIntl(
+      <DataContext.Provider
+        value={{
+          table,
+          alignments: {
+            a: 'right',
+          },
+        }}
+      >
+        <CellRenderer
+          rowIndex={0}
+          colIndex={0}
+          columnId="a"
+          setCellProps={() => {}}
+          isExpandable={false}
+          isDetails={false}
+          isExpanded={false}
+        />
+      </DataContext.Provider>
+    );
+    expect(cell.find('.lnsTableCell--multiline').exists()).toBeFalsy();
+  });
+
+  it('set multiline class for auto height tables', () => {
+    const MultiLineCellRenderer = createGridCell(
+      {
+        a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+      },
+      { columns: [], sortingColumnId: '', sortingDirection: 'none' },
+      DataContext,
+      { get: jest.fn() } as unknown as IUiSettingsClient,
+      true
+    );
+    const cell = mountWithIntl(
+      <DataContext.Provider
+        value={{
+          table,
+          alignments: {
+            a: 'right',
+          },
+        }}
+      >
+        <MultiLineCellRenderer
+          rowIndex={0}
+          colIndex={0}
+          columnId="a"
+          setCellProps={() => {}}
+          isExpandable={false}
+          isDetails={false}
+          isExpanded={false}
+        />
+      </DataContext.Provider>
+    );
+    expect(cell.find('.lnsTableCell--multiline').exists()).toBeTruthy();
   });
 
   describe('dynamic coloring', () => {
@@ -125,6 +184,7 @@ describe('datatable cell renderer', () => {
         ],
         sortingColumnId: '',
         sortingDirection: 'none',
+        rowHeightLines: 1,
       };
     }
 
@@ -154,6 +214,7 @@ describe('datatable cell renderer', () => {
         >
           <CellRendererWithPalette
             rowIndex={0}
+            colIndex={0}
             columnId="a"
             setCellProps={setCellProps}
             isExpandable={false}

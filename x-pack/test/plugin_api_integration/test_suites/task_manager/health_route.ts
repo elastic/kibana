@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import url from 'url';
 import { keyBy, mapValues } from 'lodash';
 import supertest from 'supertest';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
 interface MonitoringStats {
   last_update: string;
@@ -86,6 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const request = supertest(url.format(config.get('servers.kibana')));
 
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   function getHealthRequest() {
     return request.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
   }
@@ -96,6 +98,21 @@ export default function ({ getService }: FtrProviderContext) {
       .then((response) => response.body);
   }
 
+  function getHealthForSampleTask(): Promise<MonitoringStats> {
+    return retry.try(async () => {
+      const health = await getHealth();
+
+      // only return health stats once they contain sampleTask, if requested
+      if (health.stats.runtime.value.drift_by_type.sampleTask) {
+        return health;
+      }
+
+      // if sampleTask is not in the metrics, wait a bit and retry
+      await delay(500);
+      throw new Error('sampleTask has not yet run');
+    });
+  }
+
   function scheduleTask(task: Partial<ConcreteTaskInstance>): Promise<ConcreteTaskInstance> {
     return request
       .post('/api/sample_tasks/schedule')
@@ -104,8 +121,6 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200)
       .then((response: { body: ConcreteTaskInstance }) => response.body);
   }
-
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const monitoredAggregatedStatsRefreshRate = 5000;
 
@@ -164,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
         // workload is configured to refresh every 5s in FTs
         await delay(monitoredAggregatedStatsRefreshRate);
 
-        const workloadAfterScheduling = (await getHealth()).stats.workload.value;
+        const workloadAfterScheduling = (await getHealthForSampleTask()).stats.workload.value;
 
         expect(
           (workloadAfterScheduling.task_types as { sampleTask: { count: number } }).sampleTask.count
@@ -210,7 +225,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof proposed.avg_required_throughput_per_minute_per_kibana).to.eql('number');
     });
 
-    it('should return an estimation of task manager capacity', async () => {
+    it('should return an estimation of task manager capacity as an array', async () => {
       const {
         workload: { value: workload },
       } = (await getHealth()).stats;
@@ -225,10 +240,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof workload.capacity_requirements.per_day).to.eql('number');
 
       expect(Array.isArray(workload.estimated_schedule_density)).to.eql(true);
-
-      // test run with the default poll_interval of 3s and a monitored_aggregated_stats_refresh_rate of 5s,
-      // so we expect the estimated_schedule_density to span a minute (which means 20 buckets, as 60s / 3s = 20)
-      expect(workload.estimated_schedule_density.length).to.eql(20);
     });
 
     it('should return the task manager runtime stats', async () => {
@@ -242,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           value: { drift, drift_by_type, load, polling, execution },
         },
-      } = (await getHealth()).stats;
+      } = (await getHealthForSampleTask()).stats;
 
       expect(isNaN(Date.parse(polling.last_successful_poll as string))).to.eql(false);
       expect(isNaN(Date.parse(polling.last_polling_delay as string))).to.eql(false);

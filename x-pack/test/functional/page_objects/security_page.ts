@@ -6,9 +6,9 @@
  */
 
 import { adminTestUser } from '@kbn/test';
+import { AuthenticatedUser, Role } from '@kbn/security-plugin/common/model';
+import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { FtrService } from '../ftr_provider_context';
-import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
-import type { UserFormValues } from '../../../plugins/security/public/management/users/edit_user/user_form';
 
 interface LoginOptions {
   expectSpaceSelector?: boolean;
@@ -37,6 +37,7 @@ export class SecurityPageObject extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
+  private readonly es = this.ctx.getService('es');
 
   public loginPage = Object.freeze({
     login: async (username?: string, password?: string, options: LoginOptions = {}) => {
@@ -350,13 +351,6 @@ export class SecurityPageObject extends FtrService {
 
     const btn = await this.find.byButtonText(privilege);
     await btn.click();
-
-    // const options = await this.find.byCssSelector(`.euiFilterSelectItem`);
-    // Object.entries(options).forEach(([key, prop]) => {
-    //   console.log({ key, proto: prop.__proto__ });
-    // });
-
-    // await options.click();
   }
 
   async assignRoleToUser(role: string) {
@@ -389,7 +383,7 @@ export class SecurityPageObject extends FtrService {
       // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
       const isUserReserved = (await user.findAllByTestSubject('userReserved', 1)).length > 0;
       const isUserDeprecated = (await user.findAllByTestSubject('userDeprecated', 1)).length > 0;
-
+      const isEnabled = (await user.findAllByTestSubject('userDisabled', 1)).length === 0;
       users.push({
         username: await usernameElement.getVisibleText(),
         fullname: await fullnameElement.getVisibleText(),
@@ -397,6 +391,7 @@ export class SecurityPageObject extends FtrService {
         roles: (await rolesElement.getVisibleText()).split('\n').map((role) => role.trim()),
         reserved: isUserReserved,
         deprecated: isUserDeprecated,
+        enabled: isEnabled,
       });
     }
 
@@ -459,8 +454,21 @@ export class SecurityPageObject extends FtrService {
     }
   }
 
+  async updateUserProfileForm(user: UserFormValues) {
+    if (user.full_name) {
+      await this.find.setValue('[name=full_name]', user.full_name);
+    }
+    if (user.email) {
+      await this.find.setValue('[name=email]', user.email);
+    }
+  }
+
   async submitCreateUserForm() {
     await this.find.clickByButtonText('Create user');
+  }
+
+  async submitUpdateUserForm() {
+    await this.find.clickByButtonText('Update user');
   }
 
   async createUser(user: UserFormValues) {
@@ -470,7 +478,80 @@ export class SecurityPageObject extends FtrService {
     await this.submitCreateUserForm();
   }
 
-  async addRole(roleName: string, roleObj: Role) {
+  async clickUserByUserName(username: string) {
+    await this.find.clickByDisplayedLinkText(username);
+    await this.header.awaitGlobalLoadingIndicatorHidden();
+  }
+
+  async updateUserPassword(user: UserFormValues, isCurrentUser: boolean = false) {
+    await this.clickUserByUserName(user.username ?? '');
+    await this.testSubjects.click('editUserChangePasswordButton');
+    if (isCurrentUser) {
+      await this.testSubjects.setValue(
+        'editUserChangePasswordCurrentPasswordInput',
+        user.current_password ?? ''
+      );
+    }
+    await this.testSubjects.setValue('editUserChangePasswordNewPasswordInput', user.password ?? '');
+    await this.testSubjects.setValue(
+      'editUserChangePasswordConfirmPasswordInput',
+      user.confirm_password ?? ''
+    );
+    await this.testSubjects.click('changePasswordFormSubmitButton');
+  }
+
+  async updateUserProfile(user: UserFormValues) {
+    await this.clickUserByUserName(user.username ?? '');
+    await this.updateUserProfileForm(user);
+    await this.submitUpdateUserForm();
+  }
+
+  async deactivatesUser(user: UserFormValues) {
+    await this.clickUserByUserName(user.username ?? '');
+    await this.testSubjects.click('editUserDisableUserButton');
+    await this.testSubjects.click('confirmModalConfirmButton');
+    await this.testSubjects.missingOrFail('confirmModalConfirmButton');
+    if (user.username) {
+      await this.retry.waitForWithTimeout('ES to acknowledge deactivation', 15000, async () => {
+        const userResponse = await this.es.security.getUser({ username: user.username });
+        return userResponse[user.username!].enabled === false;
+      });
+    }
+    await this.submitUpdateUserForm();
+  }
+
+  async activatesUser(user: UserFormValues) {
+    await this.clickUserByUserName(user.username ?? '');
+    await this.testSubjects.click('editUserEnableUserButton');
+    await this.testSubjects.click('confirmModalConfirmButton');
+    await this.testSubjects.missingOrFail('confirmModalConfirmButton');
+    if (user.username) {
+      await this.retry.waitForWithTimeout('ES to acknowledge activation', 15000, async () => {
+        const userResponse = await this.es.security.getUser({ username: user.username });
+        return userResponse[user.username!].enabled === true;
+      });
+    }
+    await this.submitUpdateUserForm();
+  }
+
+  async deleteUser(username: string) {
+    this.log.debug('Delete user ' + username);
+    await this.clickUserByUserName(username);
+
+    this.log.debug('Find delete button and click');
+    await this.find.clickByButtonText('Delete user');
+    await this.common.sleep(2000);
+
+    const confirmText = await this.testSubjects.getVisibleText('confirmModalBodyText');
+    this.log.debug('Delete user alert text = ' + confirmText);
+    await this.testSubjects.click('confirmModalConfirmButton');
+    return confirmText;
+  }
+
+  async addRole(
+    roleName: string,
+    roleObj: { elasticsearch: Pick<Role['elasticsearch'], 'indices'> }
+  ) {
     const self = this;
 
     await this.clickCreateNewRole();
@@ -488,21 +569,14 @@ export class SecurityPageObject extends FtrService {
       await this.monacoEditor.setCodeEditorValue(roleObj.elasticsearch.indices[0].query);
     }
 
-    const globalPrivileges = (roleObj.kibana as any).global;
-    if (globalPrivileges) {
-      for (const privilegeName of globalPrivileges) {
-        await this.testSubjects.click('addSpacePrivilegeButton');
+    await this.testSubjects.click('addSpacePrivilegeButton');
+    await this.testSubjects.click('spaceSelectorComboBox');
 
-        await this.testSubjects.click('spaceSelectorComboBox');
+    const globalSpaceOption = await this.find.byCssSelector(`#spaceOption_\\*`);
+    await globalSpaceOption.click();
 
-        const globalSpaceOption = await this.find.byCssSelector(`#spaceOption_\\*`);
-        await globalSpaceOption.click();
-
-        await this.testSubjects.click(`basePrivilege_${privilegeName}`);
-
-        await this.testSubjects.click('createSpacePrivilegeButton');
-      }
-    }
+    await this.testSubjects.click('basePrivilege_all');
+    await this.testSubjects.click('createSpacePrivilegeButton');
 
     const addPrivilege = (privileges: string[]) => {
       return privileges.reduce((promise: Promise<any>, privilegeName: string) => {
@@ -547,20 +621,5 @@ export class SecurityPageObject extends FtrService {
     await input.type(role);
     await this.find.clickByCssSelector(`[role=option][title="${role}"]`);
     await this.testSubjects.click('comboBoxToggleListButton');
-  }
-
-  async deleteUser(username: string) {
-    this.log.debug('Delete user ' + username);
-    await this.find.clickByDisplayedLinkText(username);
-    await this.header.awaitGlobalLoadingIndicatorHidden();
-
-    this.log.debug('Find delete button and click');
-    await this.find.clickByButtonText('Delete user');
-    await this.common.sleep(2000);
-
-    const confirmText = await this.testSubjects.getVisibleText('confirmModalBodyText');
-    this.log.debug('Delete user alert text = ' + confirmText);
-    await this.testSubjects.click('confirmModalConfirmButton');
-    return confirmText;
   }
 }

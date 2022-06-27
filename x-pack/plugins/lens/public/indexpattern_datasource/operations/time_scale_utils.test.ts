@@ -7,7 +7,7 @@
 
 import type { IndexPatternLayer } from '../types';
 import type { TimeScaleUnit } from '../../../common/expressions';
-import type { IndexPatternColumn } from './definitions';
+import type { DateHistogramIndexPatternColumn, GenericIndexPatternColumn } from './definitions';
 import { adjustTimeScaleLabelSuffix, adjustTimeScaleOnOtherColumnChange } from './time_scale_utils';
 
 export const DEFAULT_TIME_SCALE = 's' as TimeScaleUnit;
@@ -97,9 +97,9 @@ describe('time scale utils', () => {
   });
 
   describe('adjustTimeScaleOnOtherColumnChange', () => {
-    const baseColumn: IndexPatternColumn = {
+    const baseColumn: GenericIndexPatternColumn = {
       operationType: 'count',
-      sourceField: 'Records',
+      sourceField: '___records___',
       label: 'Count of records per second',
       dataType: 'number',
       isBucketed: false,
@@ -113,11 +113,7 @@ describe('time scale utils', () => {
     it('should keep column if there is no time scale', () => {
       const column = { ...baseColumn, timeScale: undefined };
       expect(
-        adjustTimeScaleOnOtherColumnChange(
-          { ...baseLayer, columns: { col1: column } },
-          'col1',
-          'col2'
-        )
+        adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: column } }, 'col1')
       ).toBe(column);
     });
 
@@ -135,17 +131,16 @@ describe('time scale utils', () => {
                 label: '',
                 sourceField: 'date',
                 params: { interval: 'auto' },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
-          'col1',
-          'col2'
+          'col1'
         )
       ).toBe(baseColumn);
     });
 
     it('should remove time scale if there is no date histogram', () => {
-      expect(adjustTimeScaleOnOtherColumnChange(baseLayer, 'col1', 'col2')).toHaveProperty(
+      expect(adjustTimeScaleOnOtherColumnChange(baseLayer, 'col1')).toHaveProperty(
         'timeScale',
         undefined
       );
@@ -153,22 +148,14 @@ describe('time scale utils', () => {
 
     it('should remove suffix from label', () => {
       expect(
-        adjustTimeScaleOnOtherColumnChange(
-          { ...baseLayer, columns: { col1: baseColumn } },
-          'col1',
-          'col2'
-        )
+        adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: baseColumn } }, 'col1')
       ).toHaveProperty('label', 'Count of records');
     });
 
     it('should keep custom label', () => {
       const column = { ...baseColumn, label: 'abc', customLabel: true };
       expect(
-        adjustTimeScaleOnOtherColumnChange(
-          { ...baseLayer, columns: { col1: column } },
-          'col1',
-          'col2'
-        )
+        adjustTimeScaleOnOtherColumnChange({ ...baseLayer, columns: { col1: column } }, 'col1')
       ).toHaveProperty('label', 'abc');
     });
   });

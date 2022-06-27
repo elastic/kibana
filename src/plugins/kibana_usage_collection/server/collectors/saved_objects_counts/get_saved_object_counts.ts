@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export async function getSavedObjectsCounts(
   esClient: ElasticsearchClient,
@@ -17,15 +17,15 @@ export async function getSavedObjectsCounts(
 
   const savedObjectCountSearchParams = {
     index: kibanaIndex,
-    ignoreUnavailable: true,
-    filterPath: 'aggregations.types.buckets',
+    ignore_unavailable: true,
+    filter_path: 'aggregations.types.buckets',
     body: {
       size: 0,
       query,
       aggs: { types: { terms: { field: 'type' } } },
     },
   };
-  const { body } = await esClient.search(savedObjectCountSearchParams);
+  const body = await esClient.search(savedObjectCountSearchParams);
   // @ts-expect-error declare type for aggregations explicitly
   return body.aggregations?.types?.buckets || [];
 }

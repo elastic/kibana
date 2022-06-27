@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { pluginServices } from '../services';
-import { getDefaultWorkpad } from './defaults';
+import { getDefaultWorkpad, getDefaultSidebar, getDefaultFlyouts } from './defaults';
 
 export const getInitialState = (path) => {
   const platformService = pluginServices.getServices().platform;
@@ -40,6 +40,8 @@ export const getInitialState = (path) => {
       // In there will live an object with a status (string), value (any), and error (Error) property.
       // If the state is 'error', the error property will be the error object, the value will not change
       // See the resolved_args reducer for more information.
+      sidebar: getDefaultSidebar(),
+      flyouts: getDefaultFlyouts(),
     },
     persistent: {
       schemaVersion: 2,

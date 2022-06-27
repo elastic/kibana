@@ -11,9 +11,9 @@ import { unitOfTime } from 'moment';
 
 import { DomainRange } from '@elastic/charts';
 
-import { getAdjustedInterval } from '../../../../charts/public';
-import { Datatable } from '../../../../expressions/public';
-import { DateHistogramParams, HistogramParams } from '../../../../visualizations/public';
+import { getAdjustedInterval } from '@kbn/charts-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
 
 import { Aspect } from '../types';
 
@@ -33,6 +33,8 @@ export const getXDomain = (params: Aspect['params']): DomainRange => {
 
   return {
     minInterval,
+    min: NaN,
+    max: NaN,
   };
 };
 
@@ -74,9 +76,9 @@ export const getAdjustedDomain = (
     };
   }
 
-  return 'interval' in params
-    ? {
-        minInterval: params.interval,
-      }
-    : {};
+  return {
+    minInterval: 'interval' in params ? params.interval : undefined,
+    min: NaN,
+    max: NaN,
+  };
 };

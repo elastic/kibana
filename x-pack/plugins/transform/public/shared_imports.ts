@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-export { createSavedSearchesLoader } from '../../../../src/plugins/discover/public';
 export { XJsonMode } from '@kbn/ace';
-export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shared/public';
+export type { UseRequestConfig } from '@kbn/es-ui-shared-plugin/public';
+export { useRequest } from '@kbn/es-ui-shared-plugin/public';
+export { getSavedSearch, getSavedSearchUrlConflictMessage } from '@kbn/discover-plugin/public';
 
-export {
-  getMlSharedImports,
+export type {
   GetMlSharedImportsReturnType,
   UseIndexDataReturnType,
   EsSorting,
   RenderCellValue,
-  ES_CLIENT_TOTAL_HITS_RELATION,
-} from '../../ml/public';
+} from '@kbn/ml-plugin/public';
+export { getMlSharedImports, ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-plugin/public';
 
-import { XJson } from '../../../../src/plugins/es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 const { expandLiteralStrings, collapseLiteralStrings } = XJson;
 export { expandLiteralStrings, collapseLiteralStrings };

@@ -11,6 +11,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutProps,
   EuiTitle,
   EuiLink,
   EuiFlyoutFooter,
@@ -22,19 +23,20 @@ import {
   EuiHeaderAlert,
   EuiPortal,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { NewsfeedContext } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 
-export const NewsfeedFlyout = () => {
+export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps>) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
 
   return (
     <EuiPortal>
       <EuiFlyout
+        {...props}
         onClose={closeFlyout}
         size="s"
         aria-labelledby="flyoutSmallTitle"

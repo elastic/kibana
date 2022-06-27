@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FieldsEqlOptions } from '../../../../../../common/search_strategy';
-import { useSourcererScope } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { EqlQueryBar } from '../../../../../detections/components/rules/eql_query_bar';
@@ -37,7 +37,7 @@ const defaultValues = {
   eqlQueryBar: {
     query: { query: '', language: 'eql' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
 };
 
@@ -71,7 +71,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     loading: indexPatternsLoading,
     indexPattern,
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.timeline);
+  } = useSourcererDataView(SourcererScopeName.timeline);
 
   const initialState = {
     ...defaultValues,
@@ -90,7 +90,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const { getFields } = form;
 
   const onOptionsChange = useCallback(
-    (field: FieldsEqlOptions, value: string | null) =>
+    (field: FieldsEqlOptions, value: string | undefined) =>
       dispatch(
         timelineActions.updateEqlOptions({
           id: timelineId,
@@ -187,6 +187,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
           idAria: 'timelineEqlQueryBar',
           isDisabled: indexPatternsLoading,
           isLoading: indexPatternsLoading,
+          indexPattern,
           dataTestSubj: 'timelineEqlQueryBar',
         }}
         config={{

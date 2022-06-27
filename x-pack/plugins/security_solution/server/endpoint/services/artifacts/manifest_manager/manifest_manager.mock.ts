@@ -6,12 +6,12 @@
  */
 
 import LRU from 'lru-cache';
-import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
-import { Logger } from 'src/core/server';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
-import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
-import { ExceptionListClient } from '../../../../../../lists/server';
-import { listMock } from '../../../../../../lists/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   createPackagePolicyWithManifestMock,
@@ -42,14 +42,14 @@ export const mockFindExceptionListItemResponses = (
   responses: Record<string, Record<string, ExceptionListItemSchema[]>>
 ) => {
   return jest.fn().mockImplementation((options: FindExceptionListItemOptions) => {
-    const matches = options.filter!.match(FILTER_REGEXP) || [];
+    const matches = options.filter?.match(FILTER_REGEXP) || [];
 
-    if (matches[4] && responses[options.listId]?.[`${matches![1]}-${matches[4]}`]) {
+    if (matches[4] && responses[options.listId]?.[`${matches?.[1]}-${matches[4]}`]) {
       return createExceptionListResponse(
-        responses[options.listId]?.[`${matches![1]}-${matches[4]}`] || []
+        responses[options.listId]?.[`${matches?.[1]}-${matches[4]}`] || []
       );
     } else {
-      return createExceptionListResponse(responses[options.listId]?.[matches![1] || ''] || []);
+      return createExceptionListResponse(responses[options.listId]?.[matches?.[1] || ''] || []);
     }
   });
 };

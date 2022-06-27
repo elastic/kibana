@@ -25,7 +25,9 @@ import {
   removeColumn,
   upsertColumn,
   applyDeltaToColumnWidth,
+  updateColumnOrder,
   updateColumns,
+  updateColumnWidth,
   updateItemsPerPage,
   updateSort,
 } from './actions';
@@ -56,7 +58,8 @@ describe('epicLocalStorage', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ];
@@ -69,7 +72,6 @@ describe('epicLocalStorage', () => {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
-      eventType: 'all',
       expandedDetail: {},
       filters: [],
       isLive: false,
@@ -87,7 +89,6 @@ describe('epicLocalStorage', () => {
       sort,
       timelineId: 'foo',
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.query,
       show: true,
     };
@@ -161,9 +162,41 @@ describe('epicLocalStorage', () => {
           {
             columnId: 'event.severity',
             columnType: 'number',
+            esTypes: ['long'],
             sortDirection: Direction.desc,
           },
         ],
+      })
+    );
+    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+  });
+
+  it('persists updates to the column order to local storage', async () => {
+    shallow(
+      <TestProviders store={store}>
+        <QueryTabContentComponent {...props} />
+      </TestProviders>
+    );
+    store.dispatch(
+      updateColumnOrder({
+        columnIds: ['event.severity', '@timestamp', 'event.category'],
+        id: 'test',
+      })
+    );
+    await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());
+  });
+
+  it('persists updates to the column width to local storage', async () => {
+    shallow(
+      <TestProviders store={store}>
+        <QueryTabContentComponent {...props} />
+      </TestProviders>
+    );
+    store.dispatch(
+      updateColumnWidth({
+        columnId: 'event.severity',
+        id: 'test',
+        width: 123,
       })
     );
     await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());

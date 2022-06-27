@@ -11,15 +11,13 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { SavedObjectFindOptionsKueryNode, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
-import {
-  CASE_CONFIGURE_SAVED_OBJECT,
-  CasesConfigureAttributes,
-  CasesConfigurePatch,
-} from '../../../common';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { CasesConfigureAttributes, CasesConfigurePatch } from '../../../common/api';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
   transformESConnectorToExternalModel,

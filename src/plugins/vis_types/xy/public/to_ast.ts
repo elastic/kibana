@@ -13,11 +13,12 @@ import {
   getVisSchemas,
   DateHistogramParams,
   HistogramParams,
-} from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { BUCKET_TYPES } from '../../../data/public';
-import { Labels } from '../../../charts/public';
+} from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
+import { Labels } from '@kbn/charts-plugin/public';
 
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import {
   Dimensions,
   Dimension,
@@ -31,8 +32,8 @@ import {
 } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './expression_functions/xy_vis_fn';
 import { XyVisType } from '../common';
-import { getEsaggsFn } from './to_ast_esaggs';
-import { TimeRangeBounds } from '../../../data/common';
+import { getSeriesParams } from './utils/get_series_params';
+import { getSafeId } from './utils/accessors';
 
 const prepareLabel = (data: Labels) => {
   const label = buildExpressionFunction('label', {
@@ -145,6 +146,17 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const responseAggs = vis.data.aggs?.getResponseAggs().filter(({ enabled }) => enabled) ?? [];
 
+  const schemaName = vis.type.schemas?.metrics[0].name;
+  const firstValueAxesId = vis.params.valueAxes[0].id;
+  const updatedSeries = getSeriesParams(
+    vis.data.aggs,
+    vis.params.seriesParams,
+    schemaName,
+    firstValueAxesId
+  );
+
+  const finalSeriesParams = updatedSeries ?? vis.params.seriesParams;
+
   if (dimensions.x) {
     const xAgg = responseAggs[dimensions.x.accessor] as any;
     if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
@@ -177,8 +189,9 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs[yDimension.accessor];
+    const aggId = getSafeId(yAgg.id);
     const seriesParam = (vis.params.seriesParams || []).find(
-      (param: any) => param.data.id === yAgg.id
+      (param: any) => param.data.id === aggId
     );
     if (seriesParam) {
       const usedValueAxis = (vis.params.valueAxes || []).find(
@@ -196,13 +209,14 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     addTimeMarker: vis.params.addTimeMarker,
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
+    legendSize: vis.params.legendSize,
     addLegend: vis.params.addLegend,
     addTooltip: vis.params.addTooltip,
     legendPosition: vis.params.legendPosition,
     orderBucketsBySum: vis.params.orderBucketsBySum,
     categoryAxes: vis.params.categoryAxes.map(prepareCategoryAxis),
     valueAxes: vis.params.valueAxes.map(prepareValueAxis),
-    seriesParams: vis.params.seriesParams.map(prepareSeriesParam),
+    seriesParams: finalSeriesParams.map(prepareSeriesParam),
     labels: prepareLabel(vis.params.labels),
     thresholdLine: prepareThresholdLine(vis.params.thresholdLine),
     gridCategoryLines: vis.params.grid.categoryLines,
@@ -223,7 +237,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
     splitColumnDimension: dimensions.splitColumn?.map(prepareXYDimension),
   });
 
-  const ast = buildExpression([getEsaggsFn(vis), visTypeXy]);
+  const ast = buildExpression([visTypeXy]);
 
   return ast.toAst();
 };

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-export { LastEventIndexKey } from '../../../../../../timelines/common';
+export { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 
 export type {
   LastTimeDetails,
   TimelineEventsLastEventTimeStrategyResponse,
+  TimelineKpiStrategyRequest,
   TimelineKpiStrategyResponse,
   TimelineEventsLastEventTimeRequestOptions,
-} from '../../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';

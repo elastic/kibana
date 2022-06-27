@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-import { VisualizeInput } from 'src/plugins/visualizations/public';
+import { omit } from 'lodash';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
+import { VisualizeInput } from '@kbn/visualizations-plugin/public';
+import { SavedObjectReference } from '@kbn/core/types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
@@ -15,7 +17,6 @@ import {
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
-import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
   id: string;
@@ -25,7 +26,7 @@ interface Arguments {
   title: string | null;
 }
 
-type Output = EmbeddableExpression<VisualizeInput>;
+type Output = EmbeddableExpression<VisualizeInput & { savedObjectId: string }>;
 
 const defaultTimeRange = {
   from: 'now-15m',
@@ -94,8 +95,9 @@ export function savedVisualization(): ExpressionFunctionDefinition<
         type: EmbeddableExpressionType,
         input: {
           id,
+          savedObjectId: id,
           disableTriggers: true,
-          timeRange: timerange || defaultTimeRange,
+          timeRange: timerange ? omit(timerange, 'type') : defaultTimeRange,
           filters: getQueryFilters(filters),
           vis: visOptions,
           title: title === null ? undefined : title,

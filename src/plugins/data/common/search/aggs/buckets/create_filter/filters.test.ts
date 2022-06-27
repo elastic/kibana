@@ -44,7 +44,8 @@ describe('AggConfig Filters', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry(),
-        }
+        },
+        jest.fn()
       );
     };
 
@@ -79,7 +80,7 @@ describe('AggConfig Filters', () => {
         }
       `);
 
-      expect(filter.query?.bool.must[0].query_string.query).toBe('type:nginx');
+      expect((filter.query?.bool?.must as any)[0].query_string.query).toBe('type:nginx');
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter.meta).toHaveProperty('alias', 'type:nginx');
     });

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { GetAgentStatusResponse } from '../../../fleet/common';
+import { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
@@ -25,7 +25,7 @@ export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
     ['agentStatus', policyId],
     () =>
       http.get(
-        `/internal/osquery/fleet_wrapper/agent-status`,
+        `/internal/osquery/fleet_wrapper/agent_status`,
         policyId
           ? {
               query: {

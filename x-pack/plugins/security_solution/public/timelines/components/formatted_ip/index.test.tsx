@@ -5,13 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { FormattedIp } from './index';
+import { FormattedIp } from '.';
 import { TestProviders } from '../../../common/mock';
-import { TimelineId, TimelineTabs } from '../../../../common';
-import { StatefulEventContext } from '../../../../../timelines/public';
+import { TimelineId, TimelineTabs } from '../../../../common/types';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { timelineActions } from '../../store/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
 
@@ -40,8 +40,18 @@ jest.mock('../../../common/components/drag_and_drop/draggable_wrapper', () => {
   const original = jest.requireActual('../../../common/components/drag_and_drop/draggable_wrapper');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     DraggableWrapper: () => <div data-test-subj="DraggableWrapper" />,
+  };
+});
+
+jest.mock('../../store/timeline', () => {
+  const original = jest.requireActual('../../store/timeline');
+  return {
+    ...original,
+    timelineActions: {
+      ...original.timelineActions,
+      toggleDetailPanel: jest.fn(),
+    },
   };
 });
 
@@ -50,30 +60,29 @@ describe('FormattedIp', () => {
     value: '192.168.1.1',
     contextId: 'test-context-id',
     eventId: 'test-event-id',
+    isAggregatable: true,
+    fieldType: 'ip',
     isDraggable: false,
     fieldName: 'host.ip',
   };
 
-  let toggleDetailPanel: jest.SpyInstance;
   let toggleExpandedDetail: jest.SpyInstance;
 
   beforeAll(() => {
-    toggleDetailPanel = jest.spyOn(timelineActions, 'toggleDetailPanel');
     toggleExpandedDetail = jest.spyOn(activeTimeline, 'toggleExpandedDetail');
   });
 
   afterEach(() => {
-    toggleDetailPanel.mockClear();
     toggleExpandedDetail.mockClear();
   });
   test('should render ip address', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <FormattedIp {...props} />
       </TestProviders>
     );
 
-    expect(wrapper.text()).toEqual(props.value);
+    expect(screen.getByText(props.value)).toBeInTheDocument();
   });
 
   test('should render DraggableWrapper if isDraggable is true', () => {
@@ -81,37 +90,35 @@ describe('FormattedIp', () => {
       ...props,
       isDraggable: true,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <FormattedIp {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="DraggableWrapper"]').exists()).toEqual(true);
+    expect(screen.getByTestId('DraggableWrapper')).toBeInTheDocument();
   });
 
-  test('if not enableIpDetailsFlyout, should go to network details page', async () => {
-    const wrapper = mount(
+  test('if not enableIpDetailsFlyout, should go to network details page', () => {
+    render(
       <TestProviders>
         <FormattedIp {...props} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
-    await waitFor(() => {
-      expect(toggleDetailPanel).not.toHaveBeenCalled();
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
-    });
+    userEvent.click(screen.getByTestId('network-details'));
+    expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
+    expect(toggleExpandedDetail).not.toHaveBeenCalled();
   });
 
-  test('if enableIpDetailsFlyout, should open NetworkDetailsSidePanel', async () => {
+  test('if enableIpDetailsFlyout, should open NetworkDetailsSidePanel', () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
       timelineID: TimelineId.active,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <FormattedIp {...props} />
@@ -119,17 +126,15 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
-    await waitFor(() => {
-      expect(toggleDetailPanel).toHaveBeenCalledWith({
-        panelView: 'networkDetail',
-        params: {
-          flowTarget: 'source',
-          ip: props.value,
-        },
-        tabType: context.tabType,
-        timelineId: context.timelineID,
-      });
+    userEvent.click(screen.getByTestId('network-details'));
+    expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+      panelView: 'networkDetail',
+      params: {
+        flowTarget: 'source',
+        ip: props.value,
+      },
+      tabType: context.tabType,
+      timelineId: context.timelineID,
     });
   });
 
@@ -140,7 +145,7 @@ describe('FormattedIp', () => {
       timelineID: TimelineId.active,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <FormattedIp {...props} />
@@ -148,15 +153,13 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
-    await waitFor(() => {
-      expect(toggleExpandedDetail).toHaveBeenCalledWith({
-        panelView: 'networkDetail',
-        params: {
-          flowTarget: 'source',
-          ip: props.value,
-        },
-      });
+    userEvent.click(screen.getByTestId('network-details'));
+    expect(toggleExpandedDetail).toHaveBeenCalledWith({
+      panelView: 'networkDetail',
+      params: {
+        flowTarget: 'source',
+        ip: props.value,
+      },
     });
   });
 
@@ -167,7 +170,7 @@ describe('FormattedIp', () => {
       timelineID: 'detection',
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <FormattedIp {...props} />
@@ -175,18 +178,16 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
-    await waitFor(() => {
-      expect(toggleDetailPanel).toHaveBeenCalledWith({
-        panelView: 'networkDetail',
-        params: {
-          flowTarget: 'source',
-          ip: props.value,
-        },
-        tabType: context.tabType,
-        timelineId: context.timelineID,
-      });
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
+    userEvent.click(screen.getByTestId('network-details'));
+    expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+      panelView: 'networkDetail',
+      params: {
+        flowTarget: 'source',
+        ip: props.value,
+      },
+      tabType: context.tabType,
+      timelineId: context.timelineID,
     });
+    expect(toggleExpandedDetail).not.toHaveBeenCalled();
   });
 });

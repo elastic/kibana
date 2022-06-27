@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../../src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectMigration } from './legacy_migrations';
 
@@ -30,10 +30,14 @@ const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     actions: {
       properties: {
+        actionRef: {
+          type: 'keyword',
+        },
         group: {
           type: 'keyword',
         },
         id: {
+          // "actions.id" is no longer used since the saved object references and "actionRef" was introduced. It is still here for legacy reasons such as migrations.
           type: 'keyword',
         },
         action_type_id: {
@@ -55,9 +59,10 @@ const legacyRuleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
  * @deprecated Remove this once we no longer need legacy migrations for rule actions (8.0.0)
  */
 export const legacyType: SavedObjectsType = {
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   name: legacyRuleActionsSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: legacyRuleActionsSavedObjectMappings,
   migrations: legacyRuleActionsSavedObjectMigration,
 };

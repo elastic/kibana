@@ -7,9 +7,10 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ExpressionsService, ExpressionsServiceSetup } from 'src/plugins/expressions';
-import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '../../../src/core/public';
-import type { DeveloperExamplesSetup } from '../../developer_examples/public';
+import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin';
+import { ExpressionsServiceFork } from '@kbn/expressions-plugin/common/service/expressions_fork';
+import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { App, ExpressionsContext } from './app';
 import { countEvent, getEvents, pluck } from './functions';
 
@@ -19,13 +20,15 @@ interface SetupDeps {
 }
 
 export class PartialResultsExamplePlugin implements Plugin<void, void, SetupDeps> {
-  private expressions?: ExpressionsService;
+  private expressions?: ExpressionsServiceFork;
 
   setup({ application }: CoreSetup, { expressions, developerExamples }: SetupDeps) {
-    this.expressions = expressions.fork();
-    this.expressions.registerFunction(countEvent);
-    this.expressions.registerFunction(getEvents);
-    this.expressions.registerFunction(pluck);
+    this.expressions = expressions.fork('test');
+    const expressionsSetup = this.expressions.setup();
+    expressionsSetup.registerFunction(countEvent);
+    expressionsSetup.registerFunction(getEvents);
+    expressionsSetup.registerFunction(pluck);
+    const expressionsStart = this.expressions.start();
 
     application.register({
       id: 'partialResultsExample',
@@ -33,7 +36,7 @@ export class PartialResultsExamplePlugin implements Plugin<void, void, SetupDeps
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async ({ element }: AppMountParameters) => {
         ReactDOM.render(
-          <ExpressionsContext.Provider value={this.expressions}>
+          <ExpressionsContext.Provider value={expressionsStart}>
             <App />
           </ExpressionsContext.Provider>,
           element

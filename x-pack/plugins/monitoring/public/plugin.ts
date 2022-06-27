@@ -13,22 +13,31 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
-import { Legacy } from './legacy_shims';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
-import {
+  RULE_DETAILS,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
   RULE_THREAD_POOL_WRITE_REJECTIONS,
-  RULE_DETAILS,
 } from '../common/constants';
+import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
+import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
+import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
+import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
+import { createLegacyAlertTypes } from './alerts/legacy_alert';
+import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
+import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
+import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { setConfig } from './external_config';
+import { Legacy } from './legacy_shims';
+import {
+  MonitoringConfig,
+  MonitoringStartPluginDependencies,
+  LegacyMonitoringStartPluginDependencies,
+} from './types';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -37,15 +46,13 @@ interface MonitoringSetupPluginDependencies {
   usageCollection: UsageCollectionSetup;
 }
 
-const HASH_CHANGE = 'hashchange';
-
 export class MonitoringPlugin
   implements
     Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
 {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
@@ -57,7 +64,7 @@ export class MonitoringPlugin
     });
     const monitoring = this.initializerContext.config.get();
 
-    if (!monitoring.ui.enabled || !monitoring.enabled) {
+    if (!monitoring.ui.enabled) {
       return false;
     }
 
@@ -70,7 +77,7 @@ export class MonitoringPlugin
         icon,
         path: '/app/monitoring',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         description: i18n.translate('xpack.monitoring.featureCatalogueDescription', {
           defaultMessage: 'Track the real-time health and performance of your deployment.',
         }),
@@ -78,7 +85,7 @@ export class MonitoringPlugin
       });
     }
 
-    await this.registerAlerts(plugins, monitoring);
+    this.registerAlerts(plugins, monitoring);
 
     const app: App = {
       id,
@@ -88,11 +95,9 @@ export class MonitoringPlugin
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
-        const { AngularApp } = await import('./angular');
         const externalConfig = this.getExternalConfig();
-        const deps: MonitoringStartPluginDependencies = {
+        const deps: LegacyMonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
-          kibanaLegacy: pluginsStart.kibanaLegacy,
           element: params.element,
           core: coreStart,
           data: pluginsStart.data,
@@ -102,6 +107,7 @@ export class MonitoringPlugin
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
+          dataViews: pluginsStart.dataViews,
         };
 
         Legacy.init({
@@ -112,34 +118,16 @@ export class MonitoringPlugin
           isCloud: deps.isCloud,
           pluginInitializerContext: deps.pluginInitializerContext,
           externalConfig: deps.externalConfig,
-          kibanaLegacy: deps.kibanaLegacy,
           triggersActionsUi: deps.triggersActionsUi,
           usageCollection: deps.usageCollection,
           appMountParameters: deps.appMountParameters,
+          dataViews: deps.dataViews,
         });
 
         const config = Object.fromEntries(externalConfig);
         setConfig(config);
-        if (config.renderReactApp) {
-          const { renderApp } = await import('./application');
-          return renderApp(coreStart, pluginsStart, params, config);
-        } else {
-          const monitoringApp = new AngularApp(deps);
-          const removeHistoryListener = params.history.listen((location) => {
-            if (location.pathname === '' && location.hash === '') {
-              monitoringApp.applyScope();
-            }
-          });
-
-          const removeHashChange = this.setInitialTimefilter(deps);
-          return () => {
-            if (removeHashChange) {
-              removeHashChange();
-            }
-            removeHistoryListener();
-            monitoringApp.destroy();
-          };
-        }
+        const { renderApp } = await import('./application');
+        return renderApp(coreStart, pluginsStart, params, config);
       },
     };
 
@@ -150,28 +138,6 @@ export class MonitoringPlugin
 
   public stop() {}
 
-  private setInitialTimefilter({ data }: MonitoringStartPluginDependencies) {
-    const { timefilter } = data.query.timefilter;
-    const { pause: pauseByDefault } = timefilter.getRefreshIntervalDefaults();
-    if (pauseByDefault) {
-      return;
-    }
-    /**
-     * We can't use timefilter.getRefreshIntervalUpdate$ last value,
-     * since it's not a BehaviorSubject. This means we need to wait for
-     * hash change because of angular's applyAsync
-     */
-    const onHashChange = () => {
-      const { value, pause } = timefilter.getRefreshInterval();
-      if (!value && pause) {
-        window.removeEventListener(HASH_CHANGE, onHashChange);
-        timefilter.setRefreshInterval({ value: 10000, pause: false });
-      }
-    };
-    window.addEventListener(HASH_CHANGE, onHashChange, false);
-    return () => window.removeEventListener(HASH_CHANGE, onHashChange);
-  }
-
   private getExternalConfig() {
     const monitoring = this.initializerContext.config.get();
     return [
@@ -179,30 +145,17 @@ export class MonitoringPlugin
       ['showLicenseExpiration', monitoring.ui.show_license_expiration],
       ['showCgroupMetricsElasticsearch', monitoring.ui.container.elasticsearch.enabled],
       ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
-      ['renderReactApp', monitoring.ui.render_react_app],
+      [
+        'staleStatusThresholdSeconds',
+        monitoring.ui.kibana.reporting.stale_status_threshold_seconds,
+      ],
     ];
   }
 
-  private async registerAlerts(
-    plugins: MonitoringSetupPluginDependencies,
-    config: MonitoringConfig
-  ) {
+  private registerAlerts(plugins: MonitoringSetupPluginDependencies, config: MonitoringConfig) {
     const {
       triggersActionsUi: { ruleTypeRegistry },
     } = plugins;
-
-    const { createCpuUsageAlertType } = await import('./alerts/cpu_usage_alert');
-    const { createMissingMonitoringDataAlertType } = await import(
-      './alerts/missing_monitoring_data_alert'
-    );
-    const { createLegacyAlertTypes } = await import('./alerts/legacy_alert');
-    const { createDiskUsageAlertType } = await import('./alerts/disk_usage_alert');
-    const { createThreadPoolRejectionsAlertType } = await import(
-      './alerts/thread_pool_rejections_alert'
-    );
-    const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
-    const { createCCRReadExceptionsAlertType } = await import('./alerts/ccr_read_exceptions_alert');
-    const { createLargeShardSizeAlertType } = await import('./alerts/large_shard_size_alert');
 
     ruleTypeRegistry.register(createCpuUsageAlertType(config));
     ruleTypeRegistry.register(createDiskUsageAlertType(config));

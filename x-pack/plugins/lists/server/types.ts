@@ -6,21 +6,25 @@
  */
 
 import {
+  CustomRequestHandlerContext,
   ElasticsearchClient,
   IContextProvider,
   IRouter,
-  RequestHandlerContext,
   SavedObjectsClientContract,
-} from 'kibana/server';
-
-import type { SecurityPluginStart } from '../../security/server';
-import type { SpacesPluginStart } from '../../spaces/server';
+} from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import { ListClient } from './services/lists/list_client';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
+import type {
+  ExtensionPointStorageClientInterface,
+  ListsServerExtensionRegistrar,
+} from './services/extension_points';
 
 export type ContextProvider = IContextProvider<ListsRequestHandlerContext, 'lists'>;
 export type ListsPluginStart = void;
+
 export interface PluginsStart {
   security: SecurityPluginStart | undefined | null;
   spaces: SpacesPluginStart | undefined | null;
@@ -34,12 +38,15 @@ export type GetListClientType = (
 
 export type GetExceptionListClientType = (
   savedObjectsClient: SavedObjectsClientContract,
-  user: string
+  user: string,
+  /** Default is `true` - processing of server extension points are always on by default */
+  enableServerExtensionPoints?: boolean
 ) => ExceptionListClient;
 
 export interface ListPluginSetup {
   getExceptionListClient: GetExceptionListClientType;
   getListClient: GetListClientType;
+  registerExtension: ListsServerExtensionRegistrar;
 }
 
 /**
@@ -48,14 +55,15 @@ export interface ListPluginSetup {
 export interface ListsApiRequestHandlerContext {
   getListClient: () => ListClient;
   getExceptionListClient: () => ExceptionListClient;
+  getExtensionPointClient: () => ExtensionPointStorageClientInterface;
 }
 
 /**
  * @internal
  */
-export interface ListsRequestHandlerContext extends RequestHandlerContext {
+export type ListsRequestHandlerContext = CustomRequestHandlerContext<{
   lists?: ListsApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal
@@ -65,3 +73,17 @@ export type ListsPluginRouter = IRouter<ListsRequestHandlerContext>;
  * @internal
  */
 export type ContextProviderReturn = Promise<ListsApiRequestHandlerContext>;
+
+export type {
+  ExtensionPoint,
+  ExceptionsListPreUpdateItemServerExtension,
+  ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreGetOneItemServerExtension,
+  ExceptionsListPreImportServerExtension,
+  ExceptionsListPreSummaryServerExtension,
+  ExceptionsListPreExportServerExtension,
+  ExceptionsListPreMultiListFindServerExtension,
+  ExceptionsListPreSingleListFindServerExtension,
+  ExceptionsListPreDeleteItemServerExtension,
+  ListsServerExtensionRegistrar,
+} from './services/extension_points';

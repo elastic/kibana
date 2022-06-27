@@ -11,19 +11,10 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const a11y = getService('a11y');
-  const kibanaServer = getService('kibanaServer');
 
   describe('Visualize', () => {
-    before(async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      await PageObjects.common.navigateToApp('visualize');
-    });
-
-    after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-    });
-
     it('visualize', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
       await a11y.testAppSnapshot();
     });
 
@@ -32,8 +23,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it.skip('create visualize button', async () => {
-      await PageObjects.visualize.clickNewVisualization();
+    it('create visualize button', async () => {
+      await PageObjects.visualize.clickAggBasedVisualizations();
+      await PageObjects.visualize.waitForVisualizationSelectPage();
+      await PageObjects.visualize.clickAreaChart();
       await a11y.testAppSnapshot();
     });
   });

@@ -10,6 +10,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { SavedObjectAttributes } from '@kbn/core/types';
 import {
   addPrepackagedRulesSchema,
   AddPrepackagedRulesSchema,
@@ -18,9 +19,8 @@ import {
 
 // TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';
-import { RuleAssetSavedObjectsClient } from './rule_asset_saved_objects_client';
+import { RuleAssetSavedObjectsClient } from './rule_asset/rule_asset_saved_objects_client';
 import { IRuleAssetSOAttributes } from './types';
-import { SavedObjectAttributes } from '../../../../../../../src/core/types';
 import { ConfigType } from '../../../config';
 
 /**

@@ -35,6 +35,7 @@ jest.mock('../../common/lib/kibana', () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
+    remove: jest.fn(),
   }),
   useKibana: jest.fn().mockReturnValue({
     services: {
@@ -105,6 +106,7 @@ describe('useTimelineEvents', () => {
   const startDate: string = '2020-07-07T08:20:18.966Z';
   const endDate: string = '3000-01-01T00:00:00.000Z';
   const props: UseTimelineEventsProps = {
+    dataViewId: 'data-view-id',
     docValueFields: [],
     endDate: '',
     id: TimelineId.active,
@@ -113,6 +115,7 @@ describe('useTimelineEvents', () => {
     filterQuery: '',
     startDate: '',
     limit: 25,
+    runtimeMappings: {},
     sort: initSortDefault,
     skip: false,
   };

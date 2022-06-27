@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../services';
 import { createScenario } from '../scenario';
-import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function (ftrContext: FtrProviderContext) {
@@ -17,7 +17,8 @@ export default function (ftrContext: FtrProviderContext) {
 
   const scenario = createScenario(ftrContext);
 
-  describe('changes in license types', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/110938
+  describe.skip('changes in license types', () => {
     after(async () => {
       await scenario.teardown();
     });

@@ -7,10 +7,14 @@
  */
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { Observable } from 'rxjs';
+import { CoreTheme } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { i18n } from '@kbn/i18n';
-import { withSuspense } from '../../../presentation_util/public';
+import { CoreSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
 import { ShapeRendererConfig } from '../../common/types';
 import { LazyShapeComponent } from '../components/shape';
 
@@ -27,25 +31,31 @@ const strings = {
 
 const ShapeComponent = withSuspense(LazyShapeComponent);
 
-export const shapeRenderer = (): ExpressionRenderDefinition<ShapeRendererConfig> => ({
-  name: 'shape',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render: async (
-    domNode: HTMLElement,
-    config: ShapeRendererConfig,
-    handlers: IInterpreterRenderHandlers
-  ) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+export const getShapeRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$) =>
+  (): ExpressionRenderDefinition<ShapeRendererConfig> => ({
+    name: 'shape',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render: async (
+      domNode: HTMLElement,
+      config: ShapeRendererConfig,
+      handlers: IInterpreterRenderHandlers
+    ) => {
+      handlers.onDestroy(() => {
+        unmountComponentAtNode(domNode);
+      });
 
-    render(
-      <I18nProvider>
-        <ShapeComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
-      </I18nProvider>,
-      domNode
-    );
-  },
-});
+      render(
+        <KibanaThemeProvider theme$={theme$}>
+          <I18nProvider>
+            <ShapeComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domNode
+      );
+    },
+  });
+
+export const shapeRendererFactory = (core: CoreSetup) => getShapeRenderer(core.theme.theme$);

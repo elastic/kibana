@@ -25,51 +25,20 @@ Object {
           "monitor",
         ],
       },
-      "_fallback": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-        "indices": Array [
-          Object {
-            "names": Array [
-              "logs-*",
-              "metrics-*",
-              "traces-*",
-              "synthetics-*",
-              ".logs-endpoint.diagnostic.collection-*",
-            ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
-          },
-        ],
-      },
     },
     "default": Object {
       "_elastic_agent_checks": Object {
         "cluster": Array [
           "monitor",
         ],
+      },
+      "_elastic_agent_monitoring": Object {
         "indices": Array [
           Object {
             "names": Array [
-              "metrics-elastic_agent-default",
-              "metrics-elastic_agent.elastic_agent-default",
-              "metrics-elastic_agent.apm_server-default",
-              "metrics-elastic_agent.filebeat-default",
-              "metrics-elastic_agent.fleet_server-default",
-              "metrics-elastic_agent.metricbeat-default",
-              "metrics-elastic_agent.osquerybeat-default",
-              "metrics-elastic_agent.packetbeat-default",
-              "metrics-elastic_agent.endpoint_security-default",
-              "metrics-elastic_agent.auditbeat-default",
-              "metrics-elastic_agent.heartbeat-default",
+              "metrics-default",
             ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
+            "privileges": Array [],
           },
         ],
       },
@@ -77,16 +46,12 @@ Object {
   },
   "outputs": Object {
     "data-output-id": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-data.co:9201",
       ],
       "type": "elasticsearch",
     },
     "default": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
@@ -122,51 +87,20 @@ Object {
           "monitor",
         ],
       },
-      "_fallback": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-        "indices": Array [
-          Object {
-            "names": Array [
-              "logs-*",
-              "metrics-*",
-              "traces-*",
-              "synthetics-*",
-              ".logs-endpoint.diagnostic.collection-*",
-            ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
-          },
-        ],
-      },
     },
     "monitoring-output-id": Object {
       "_elastic_agent_checks": Object {
         "cluster": Array [
           "monitor",
         ],
+      },
+      "_elastic_agent_monitoring": Object {
         "indices": Array [
           Object {
             "names": Array [
-              "metrics-elastic_agent-default",
-              "metrics-elastic_agent.elastic_agent-default",
-              "metrics-elastic_agent.apm_server-default",
-              "metrics-elastic_agent.filebeat-default",
-              "metrics-elastic_agent.fleet_server-default",
-              "metrics-elastic_agent.metricbeat-default",
-              "metrics-elastic_agent.osquerybeat-default",
-              "metrics-elastic_agent.packetbeat-default",
-              "metrics-elastic_agent.endpoint_security-default",
-              "metrics-elastic_agent.auditbeat-default",
-              "metrics-elastic_agent.heartbeat-default",
+              "metrics-default",
             ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
+            "privileges": Array [],
           },
         ],
       },
@@ -174,16 +108,12 @@ Object {
   },
   "outputs": Object {
     "default": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],
@@ -219,51 +149,20 @@ Object {
           "monitor",
         ],
       },
-      "_fallback": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-        "indices": Array [
-          Object {
-            "names": Array [
-              "logs-*",
-              "metrics-*",
-              "traces-*",
-              "synthetics-*",
-              ".logs-endpoint.diagnostic.collection-*",
-            ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
-          },
-        ],
-      },
     },
     "monitoring-output-id": Object {
       "_elastic_agent_checks": Object {
         "cluster": Array [
           "monitor",
         ],
+      },
+      "_elastic_agent_monitoring": Object {
         "indices": Array [
           Object {
             "names": Array [
-              "metrics-elastic_agent-default",
-              "metrics-elastic_agent.elastic_agent-default",
-              "metrics-elastic_agent.apm_server-default",
-              "metrics-elastic_agent.filebeat-default",
-              "metrics-elastic_agent.fleet_server-default",
-              "metrics-elastic_agent.metricbeat-default",
-              "metrics-elastic_agent.osquerybeat-default",
-              "metrics-elastic_agent.packetbeat-default",
-              "metrics-elastic_agent.endpoint_security-default",
-              "metrics-elastic_agent.auditbeat-default",
-              "metrics-elastic_agent.heartbeat-default",
+              "metrics-default",
             ],
-            "privileges": Array [
-              "auto_configure",
-              "create_doc",
-            ],
+            "privileges": Array [],
           },
         ],
       },
@@ -271,16 +170,12 @@ Object {
   },
   "outputs": Object {
     "data-output-id": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-data.co:9201",
       ],
       "type": "elasticsearch",
     },
     "monitoring-output-id": Object {
-      "api_key": undefined,
-      "ca_sha256": undefined,
       "hosts": Array [
         "http://es-monitoring.co:9201",
       ],

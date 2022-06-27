@@ -10,13 +10,13 @@ import PropTypes from 'prop-types';
 import { cloneDeep, debounce, first, mapValues } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 import {
   EuiCallOut,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
   EuiPageContentBody,
   EuiPageHeader,
@@ -114,7 +114,7 @@ export class JobCreateUi extends Component {
       startJobAfterCreation: false,
     };
 
-    this.lastIndexPatternValidationTime = 0;
+    this.lastIndexPatternValidationIdx = 0;
   }
 
   componentDidMount() {
@@ -159,7 +159,7 @@ export class JobCreateUi extends Component {
   requestIndexPatternValidation = debounce((resetDefaults = true) => {
     const indexPattern = this.getIndexPattern();
 
-    const lastIndexPatternValidationTime = (this.lastIndexPatternValidationTime = Date.now());
+    const lastIndexPatternValidationIdx = ++this.lastIndexPatternValidationIdx;
     validateIndexPattern(indexPattern)
       .then((response) => {
         // We don't need to do anything if this component has been unmounted.
@@ -168,7 +168,7 @@ export class JobCreateUi extends Component {
         }
 
         // Only re-request if the index pattern changed.
-        if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+        if (lastIndexPatternValidationIdx !== this.lastIndexPatternValidationIdx) {
           return;
         }
 
@@ -291,7 +291,7 @@ export class JobCreateUi extends Component {
         }
 
         // Ignore all responses except that to the most recent request.
-        if (lastIndexPatternValidationTime !== this.lastIndexPatternValidationTime) {
+        if (lastIndexPatternValidationIdx !== this.lastIndexPatternValidationIdx) {
           return;
         }
 
@@ -334,10 +334,19 @@ export class JobCreateUi extends Component {
     const { currentStepId, checkpointStepId } = this.state;
     const indexOfCurrentStep = stepIds.indexOf(currentStepId);
 
+    const getStepStatus = (index, indexOfCurrentStep) => {
+      if (index === indexOfCurrentStep) {
+        return 'selected';
+      } else if (index < indexOfCurrentStep) {
+        return 'complete';
+      } else {
+        return 'incomplete';
+      }
+    };
+
     return stepIds.map((stepId, index) => ({
       title: stepIdToTitleMap[stepId],
-      isComplete: index < indexOfCurrentStep,
-      isSelected: index === indexOfCurrentStep,
+      status: getStepStatus(index, indexOfCurrentStep),
       onClick: () => this.goToStep(stepId),
       disabled:
         !this.canGoToStep(stepId) || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId),
@@ -494,7 +503,7 @@ export class JobCreateUi extends Component {
     if (isSaving) {
       savingFeedback = (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

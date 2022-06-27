@@ -3,15 +3,15 @@
 exports[`ExplainExporters should explain about xpack.monitoring.exporters setting 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle css-1bexacr-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="css-xv0fhq-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         To run monitoring please perform the following steps
@@ -19,66 +19,50 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium eui-textLeft"
+    class="euiText eui-textLeft css-1lo1kz-euiText-m"
   >
     <p>
       We checked the 
-      <span>
-        <code>
-          esProd001
-        </code>
-      </span>
+      <code>
+        esProd001
+      </code>
        settings for 
-      <span>
-        <code>
-          xpack.monitoring.exporters
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.exporters
+      </code>
       , and found the reason: 
-      <span>
-        <code>
-          myMonitoringClusterExporter1
-        </code>
-      </span>
+      <code>
+        myMonitoringClusterExporter1
+      </code>
       .
     </p>
     <p>
       Using monitoring exporters to ship the monitoring data to a remote monitoring cluster is highly recommended as it keeps the integrity of the monitoring data safe no matter what the state of the production cluster. However, as this instance of Kibana could not find any monitoring data, there seems to be a problem with the 
-      <span>
-        <code>
-          xpack.monitoring.exporters
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.exporters
+      </code>
        configuration, or the 
-      <span>
-        <code>
-          xpack.monitoring.elasticsearch
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.elasticsearch
+      </code>
        settings in 
-      <span>
-        <code>
-          kibana.yml
-        </code>
-      </span>
+      <code>
+        kibana.yml
+      </code>
       .
     </p>
     <p>
       Check that the intended exporters are enabled for sending statistics to the monitoring cluster, and that the monitoring cluster host matches the 
-      <span>
-        <code>
-          xpack.monitoring.elasticsearch
-        </code>
-      </span>
+      <code>
+        xpack.monitoring.elasticsearch
+      </code>
        setting in 
-      <span>
-        <code>
-          kibana.yml
-        </code>
-      </span>
+      <code>
+        kibana.yml
+      </code>
        to see monitoring data in this instance of Kibana.
     </p>
   </div>,
@@ -88,25 +72,26 @@ Array [
 exports[`ExplainExportersCloud should explain about xpack.monitoring.exporters setting in a cloud environment 1`] = `
 Array [
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="css-xv0fhq-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         Configure monitoring through 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink css-102pf9n-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Elasticsearch Service Console
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >
@@ -115,17 +100,18 @@ Array [
         </a>
          Go to 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink css-102pf9n-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Logs and metrics
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >
@@ -134,17 +120,18 @@ Array [
         </a>
          section for a deployment to configure monitoring. For more information visit 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink css-102pf9n-euiLink-primary"
           href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
           rel="noopener"
           target="_blank"
         >
           the documentation page.
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >
@@ -155,10 +142,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium eui-textLeft"
+    class="euiText eui-textLeft css-1lo1kz-euiText-m"
   >
     <p>
       In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.

@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { map as mapAsync } from 'bluebird';
 import { FtrService } from '../ftr_provider_context';
 
 export class RollupPageObject extends FtrService {
@@ -14,6 +13,7 @@ export class RollupPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly retry = this.ctx.getService('retry');
 
   async createNewRollUpJob(
     jobName: string,
@@ -55,6 +55,13 @@ export class RollupPageObject extends FtrService {
     // Step 6: saveJob and verify the name in the list
     await this.verifyStepIsActive(stepNum);
     await this.saveJob(startImmediately);
+  }
+
+  async clickRollupJobsTab() {
+    await this.testSubjects.click('rollup_jobs');
+    await this.retry.waitFor('create policy button to be visible', async () => {
+      return await this.testSubjects.isDisplayed('createRollupJobButton');
+    });
   }
 
   async verifyStepIsActive(stepNumber = 0) {
@@ -107,30 +114,46 @@ export class RollupPageObject extends FtrService {
     }
     await this.testSubjects.click('rollupJobSaveButton');
     await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor('detail flyout', async () => {
+      return await this.testSubjects.isDisplayed('rollupJobDetailsFlyoutTitle');
+    });
+  }
+
+  async closeFlyout() {
+    await this.testSubjects.click('euiFlyoutCloseButton');
+    await this.retry.waitFor('rollup list table', async () => {
+      return await this.testSubjects.isDisplayed('rollupJobsListTable');
+    });
   }
 
   async getJobList() {
     const jobs = await this.testSubjects.findAll('jobTableRow');
-    return mapAsync(jobs, async (job) => {
-      const jobNameElement = await job.findByTestSubject('jobTableCell-id');
-      const jobStatusElement = await job.findByTestSubject('jobTableCell-status');
-      const jobIndexPatternElement = await job.findByTestSubject('jobTableCell-indexPattern');
-      const jobRollUpIndexPatternElement = await job.findByTestSubject('jobTableCell-rollupIndex');
-      const jobDelayElement = await job.findByTestSubject('jobTableCell-rollupDelay');
-      const jobIntervalElement = await job.findByTestSubject('jobTableCell-dateHistogramInterval');
-      const jobGroupElement = await job.findByTestSubject('jobTableCell-groups');
-      const jobMetricsElement = await job.findByTestSubject('jobTableCell-metrics');
+    return await Promise.all(
+      jobs.map(async (job) => {
+        const jobNameElement = await job.findByTestSubject('jobTableCell-id');
+        const jobStatusElement = await job.findByTestSubject('jobTableCell-status');
+        const jobIndexPatternElement = await job.findByTestSubject('jobTableCell-indexPattern');
+        const jobRollUpIndexPatternElement = await job.findByTestSubject(
+          'jobTableCell-rollupIndex'
+        );
+        const jobDelayElement = await job.findByTestSubject('jobTableCell-rollupDelay');
+        const jobIntervalElement = await job.findByTestSubject(
+          'jobTableCell-dateHistogramInterval'
+        );
+        const jobGroupElement = await job.findByTestSubject('jobTableCell-groups');
+        const jobMetricsElement = await job.findByTestSubject('jobTableCell-metrics');
 
-      return {
-        jobName: await jobNameElement.getVisibleText(),
-        jobStatus: await jobStatusElement.getVisibleText(),
-        jobIndexPattern: await jobIndexPatternElement.getVisibleText(),
-        jobRollUpIndexPattern: await jobRollUpIndexPatternElement.getVisibleText(),
-        jobDelayElement: await jobDelayElement.getVisibleText(),
-        jobInterval: await jobIntervalElement.getVisibleText(),
-        jobGroup: await jobGroupElement.getVisibleText(),
-        jobMetrics: await jobMetricsElement.getVisibleText(),
-      };
-    });
+        return {
+          jobName: await jobNameElement.getVisibleText(),
+          jobStatus: await jobStatusElement.getVisibleText(),
+          jobIndexPattern: await jobIndexPatternElement.getVisibleText(),
+          jobRollUpIndexPattern: await jobRollUpIndexPatternElement.getVisibleText(),
+          jobDelayElement: await jobDelayElement.getVisibleText(),
+          jobInterval: await jobIntervalElement.getVisibleText(),
+          jobGroup: await jobGroupElement.getVisibleText(),
+          jobMetrics: await jobMetricsElement.getVisibleText(),
+        };
+      })
+    );
   }
 }

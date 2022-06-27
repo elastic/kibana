@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { IServiceSettings } from 'src/plugins/maps_ems/public';
+import type { IExternalUrl } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import type { IServiceSettings } from './vega_map_view/service_settings/service_settings_types';
 import { VegaParser } from '../data_model/vega_parser';
 import { createVegaStateRestorer } from '../lib/vega_state_restorer';
 
@@ -20,6 +21,7 @@ interface VegaViewParams {
   filterManager: DataPublicPluginStart['query']['filterManager'];
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
   vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;
+  externalUrl: IExternalUrl;
 }
 
 export class VegaBaseView {
@@ -32,6 +34,7 @@ export class VegaBaseView {
   _addDestroyHandler(handler: Function): void;
 
   destroy(): Promise<void>;
+  resize(dimensions?: { height: number; width: number }): Promise<void>;
 
   _$container: any;
   _$controls: any;

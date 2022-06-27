@@ -17,7 +17,9 @@ import { pageObjects } from './page_objects';
 // that returns an object with the projects config values
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(resolve(__dirname, 'plugins'));
@@ -48,7 +50,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           KIBANA_ROOT,
           'test/plugin_functional/plugins/core_provider_plugin'
         )}`,
-        '--xpack.timelines.enabled=true',
         ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
       ],
     },

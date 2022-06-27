@@ -6,7 +6,7 @@
  */
 
 import { Location } from 'history';
-import { IBasePath } from 'kibana/public';
+import { IBasePath } from '@kbn/core/public';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
 
@@ -67,7 +67,7 @@ describe('Transaction action menu', () => {
           actions: [
             {
               key: 'sampleDocument',
-              label: 'View sample document',
+              label: 'View transaction in Discover',
               href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
@@ -134,7 +134,7 @@ describe('Transaction action menu', () => {
           actions: [
             {
               key: 'sampleDocument',
-              label: 'View sample document',
+              label: 'View transaction in Discover',
               href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
@@ -200,7 +200,7 @@ describe('Transaction action menu', () => {
           actions: [
             {
               key: 'sampleDocument',
-              label: 'View sample document',
+              label: 'View transaction in Discover',
               href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },

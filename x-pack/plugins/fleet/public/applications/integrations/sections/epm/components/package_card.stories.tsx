@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { SavedObject } from 'src/core/public';
+import type { SavedObject } from '@kbn/core/public';
 
 import type { Installation } from '../../../../../../common';
 
@@ -22,16 +22,17 @@ export default {
 type Args = Omit<PackageCardProps, 'status'> & { width: number };
 
 const args: Args = {
-  width: 250,
+  width: 280,
   title: 'Title',
   description: 'Description',
   name: 'beats',
   release: 'ga',
   id: 'id',
   version: '1.0.0',
-  uiInternalPathUrl: '/',
+  url: '/',
   icons: [],
   integration: '',
+  categories: ['foobar'],
 };
 
 const argTypes = {
@@ -62,10 +63,12 @@ export const Installed = ({ width, ...props }: Args) => {
       install_version: props.version,
       es_index_patterns: {},
       installed_kibana: [],
+      installed_kibana_space_id: 'default',
       installed_es: [],
       install_status: 'installed',
       install_source: 'registry',
       install_started_at: '2020-01-01T00:00:00.000Z',
+      keep_policies_up_to_date: false,
     },
     references: [],
   };

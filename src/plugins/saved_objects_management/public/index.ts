@@ -6,21 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { SavedObjectsManagementPlugin } from './plugin';
 
-export { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
-export {
+export type {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+} from './plugin';
+export type {
   SavedObjectsManagementActionServiceSetup,
   SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceSetup,
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementColumn,
   SavedObjectsManagementRecord,
 } from './services';
-export { ProcessedImportResponse, processImportResponse, FailedImport } from './lib';
-export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';
+export { SavedObjectsManagementAction } from './services';
+export type { ProcessedImportResponse, FailedImport } from './lib';
+export { processImportResponse } from './lib';
+export type {
+  SavedObjectRelation,
+  SavedObjectWithMetadata,
+  SavedObjectMetadata,
+  SavedObjectManagementTypeInfo,
+} from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();

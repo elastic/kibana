@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { TimeseriesVisData } from '../../../../common/types';
 import { FormValidationContext } from '../../contexts/form_validation_context';
@@ -20,6 +20,8 @@ import { TopNPanelConfig as topN } from './top_n';
 import { TablePanelConfig as table } from './table';
 import { GaugePanelConfig as gauge } from './gauge';
 import { MarkdownPanelConfig as markdown } from './markdown';
+
+import './_panel_config.scss';
 
 const panelConfigTypes = {
   timeseries,

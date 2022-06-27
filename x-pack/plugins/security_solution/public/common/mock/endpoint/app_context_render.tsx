@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactPortal } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { Action, Reducer, Store } from 'redux';
-import { AppDeepLink } from 'kibana/public';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { StartPlugins, StartServices } from '../../../types';
+import { AppDeepLink } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
+import { coreMock } from '@kbn/core/public/mocks';
+import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import {
+  renderHook as reactRenderHoook,
+  RenderHookOptions,
+  RenderHookResult,
+} from '@testing-library/react-hooks';
+import { ReactHooksRenderer, WrapperComponent } from '@testing-library/react-hooks/src/types/react';
+import type { UseBaseQueryResult } from 'react-query/types/react/types';
+import ReactDOM from 'react-dom';
+import { ConsoleManager } from '../../../management/components/console';
+import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
 import { kibanaObservable } from '../test_providers';
@@ -21,13 +32,94 @@ import { managementMiddlewareFactory } from '../../../management/store/middlewar
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { PLUGIN_ID } from '../../../../../fleet/common';
-import { APP_ID, APP_PATH } from '../../../../common/constants';
+import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
-import { fleetGetPackageListHttpMock } from '../../../management/pages/endpoint_hosts/mocks';
 import { getDeepLinks } from '../../../app/deep_links';
+import { fleetGetPackageListHttpMock } from '../../../management/mocks';
 
-type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
+const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
+
+/**
+ * Resets the mock that is applied to `createPortal()` by default.
+ * **IMPORTANT** : Make sure you call this function from a `before*()` or `after*()` callback
+ *
+ * @example
+ *
+ * // Turn off for test using Enzyme
+ * beforeAll(() => resetReactDomCreatePortalMock());
+ */
+export const resetReactDomCreatePortalMock = () => {
+  ReactDOM.createPortal = REAL_REACT_DOM_CREATE_PORTAL;
+};
+
+beforeAll(() => {
+  // Mocks the React DOM module to ensure compatibility with react-testing-library and avoid
+  // error like:
+  // ```
+  // TypeError: parentInstance.children.indexOf is not a function
+  //       at appendChild (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:7183:39)
+  // ```
+  // @see https://github.com/facebook/react/issues/11565
+  ReactDOM.createPortal = jest.fn((...args) => {
+    REAL_REACT_DOM_CREATE_PORTAL(...args);
+    // Needed for react-Test-library. See:
+    // https://github.com/facebook/react/issues/11565
+    return args[0] as ReactPortal;
+  });
+});
+
+afterAll(() => {
+  resetReactDomCreatePortalMock();
+});
+
+export type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
+
+/**
+ * Have the renderer wait for one of the ReactQuery state flag properties. Default is `isSuccess`.
+ * To disable this `await`, the value `false` can be used.
+ */
+export type WaitForReactHookState =
+  | keyof Pick<
+      UseBaseQueryResult,
+      | 'isSuccess'
+      | 'isLoading'
+      | 'isError'
+      | 'isIdle'
+      | 'isLoadingError'
+      | 'isStale'
+      | 'isFetched'
+      | 'isFetching'
+      | 'isRefetching'
+    >
+  | false;
+
+type HookRendererFunction<TProps, TResult> = (props: TProps) => TResult;
+
+/**
+ * A utility renderer for hooks that return React Query results
+ */
+export type ReactQueryHookRenderer<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TProps = any,
+  TResult extends UseBaseQueryResult = UseBaseQueryResult
+> = (
+  hookFn: HookRendererFunction<TProps, TResult>,
+  /**
+   * If defined (default is `isSuccess`), the renderer will wait for the given react
+   * query response state value to be true
+   */
+  waitForHook?: WaitForReactHookState,
+  options?: RenderHookOptions<TProps>
+) => Promise<TResult>;
+
+// hide react-query output in console
+setLogger({
+  error: () => {},
+  // eslint-disable-next-line no-console
+  log: console.log,
+  // eslint-disable-next-line no-console
+  warn: console.warn,
+});
 
 /**
  * Mocked app root context renderer
@@ -36,7 +128,7 @@ export interface AppContextTestRender {
   store: Store<State>;
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet' | 'unifiedSearch'>;
   startServices: StartServices;
   middlewareSpy: MiddlewareActionSpyHelper;
   /**
@@ -52,15 +144,25 @@ export interface AppContextTestRender {
   render: UiRender;
 
   /**
-   * Set experimental features on/off. Calling this method updates the Store with the new values
+   * Renders a hook within a mocked security solution app context
+   */
+  renderHook: ReactHooksRenderer['renderHook'];
+
+  /**
+   * A helper utility for rendering specifically hooks that wrap ReactQuery
+   */
+  renderReactQueryHook: ReactQueryHookRenderer;
+
+  /**
+   * Set technical preview features on/off. Calling this method updates the Store with the new values
    * for the given feature flags
    * @param flags
    */
   setExperimentalFlag: (flags: Partial<ExperimentalFeatures>) => void;
 }
 
-// Defined a private custom reducer that reacts to an action that enables us to updat the
-// store with new values for experimental features/flags. Because the `action.type` is a `Symbol`,
+// Defined a private custom reducer that reacts to an action that enables us to update the
+// store with new values for technical preview features/flags. Because the `action.type` is a `Symbol`,
 // and its not exported the action can only be `dispatch`'d from this module
 const UpdateExperimentalFeaturesTestActionType = Symbol('updateExperimentalFeaturesTestAction');
 
@@ -78,7 +180,7 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
     return {
       ...state,
       enableExperimental: {
-        ...state.enableExperimental!,
+        ...state.enableExperimental,
         ...action.payload,
       },
     };
@@ -98,10 +200,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const depsStart = depsStartMock();
   const middlewareSpy = createSpyMiddleware();
   const { storage } = createSecuritySolutionStorageMock();
-  const startServices: StartServices = {
-    ...createStartServicesMock(),
-    ...coreStart,
-  };
+  const startServices: StartServices = createStartServicesMock(coreStart);
 
   const storeReducer = {
     ...SUB_PLUGINS_REDUCER,
@@ -115,19 +214,61 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     middlewareSpy.actionSpyMiddleware,
   ]);
 
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        // turns retries off
+        retry: false,
+        // prevent jest did not exit errors
+        cacheTime: Infinity,
+      },
+    },
+  });
+
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-        {children}
+        <QueryClientProvider client={queryClient}>
+          <ConsoleManager>{children}</ConsoleManager>
+        </QueryClientProvider>
       </AppRootProvider>
     </KibanaContextProvider>
   );
 
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {
-      wrapper: AppWrapper as React.ComponentType,
+      wrapper: AppWrapper,
       ...options,
     });
+  };
+
+  const renderHook: ReactHooksRenderer['renderHook'] = <TProps, TResult>(
+    hookFn: HookRendererFunction<TProps, TResult>,
+    options: RenderHookOptions<TProps> = {}
+  ): RenderHookResult<TProps, TResult> => {
+    return reactRenderHoook<TProps, TResult>(hookFn, {
+      wrapper: AppWrapper as WrapperComponent<TProps>,
+      ...options,
+    });
+  };
+
+  const renderReactQueryHook: ReactQueryHookRenderer = async <
+    TProps,
+    TResult extends UseBaseQueryResult = UseBaseQueryResult
+  >(
+    hookFn: HookRendererFunction<TProps, TResult>,
+    waitForHook: WaitForReactHookState = 'isSuccess',
+    options: RenderHookOptions<TProps> = {}
+  ) => {
+    const { result: hookResult, waitFor } = renderHook<TProps, TResult>(hookFn, options);
+
+    if (waitForHook) {
+      await waitFor(() => {
+        return hookResult.current[waitForHook];
+      });
+    }
+
+    return hookResult.current;
   };
 
   const setExperimentalFlag: AppContextTestRender['setExperimentalFlag'] = (flags) => {
@@ -163,6 +304,8 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     middlewareSpy,
     AppWrapper,
     render,
+    renderHook,
+    renderReactQueryHook,
     setExperimentalFlag,
   };
 };
@@ -179,7 +322,7 @@ const createCoreStartMock = (
     switch (appId) {
       case PLUGIN_ID:
         return '/app/fleet';
-      case APP_ID:
+      case APP_UI_ID:
         return `${APP_PATH}${
           deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''
         }${path ?? ''}`;
@@ -189,7 +332,7 @@ const createCoreStartMock = (
   });
 
   coreStart.application.navigateToApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
-    if (appId === APP_ID) {
+    if (appId === APP_UI_ID) {
       history.push(
         `${deepLinkId && deepLinkPaths[deepLinkId] ? deepLinkPaths[deepLinkId] : ''}${path ?? ''}`
       );

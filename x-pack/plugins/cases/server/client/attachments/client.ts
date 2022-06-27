@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { AlertResponse, CommentResponse } from '../../../common';
+import { AlertResponse, CommentResponse } from '../../../common/api';
 import { CasesClient } from '../client';
 
 import { CasesClientInternal } from '../client_internal';
 import { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';
 import { CasesClientArgs } from '../types';
 import { AddArgs, addComment } from './add';
+import { bulkCreate, BulkCreateArgs } from './bulk_create';
 import { DeleteAllArgs, deleteAll, DeleteArgs, deleteComment } from './delete';
 import {
   find,
@@ -33,6 +34,7 @@ export interface AttachmentsSubClient {
    * Adds an attachment to a case.
    */
   add(params: AddArgs): Promise<ICaseResponse>;
+  bulkCreate(params: BulkCreateArgs): Promise<ICaseResponse>;
   /**
    * Deletes all attachments associated with a single case.
    */
@@ -76,7 +78,8 @@ export const createAttachmentsSubClient = (
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
-    add: (params: AddArgs) => addComment(params, clientArgs, casesClientInternal),
+    add: (params: AddArgs) => addComment(params, clientArgs),
+    bulkCreate: (params: BulkCreateArgs) => bulkCreate(params, clientArgs),
     deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, clientArgs),
     delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, clientArgs),
     find: (findArgs: FindArgs) => find(findArgs, clientArgs),

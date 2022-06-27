@@ -15,7 +15,9 @@ type MockInstances<T extends Record<string, any>> = {
 
 type RuleDataClientMock = jest.Mocked<Omit<IRuleDataClient, 'getWriter' | 'getReader'>> & {
   getReader: (...args: Parameters<IRuleDataClient['getReader']>) => MockInstances<IRuleDataReader>;
-  getWriter: (...args: Parameters<IRuleDataClient['getWriter']>) => MockInstances<IRuleDataWriter>;
+  getWriter: (
+    ...args: Parameters<IRuleDataClient['getWriter']>
+  ) => Promise<MockInstances<IRuleDataWriter>>;
 };
 
 export const createRuleDataClientMock = (
@@ -29,14 +31,18 @@ export const createRuleDataClientMock = (
     indexName,
     kibanaVersion: '7.16.0',
     isWriteEnabled: jest.fn(() => true),
+    indexNameWithNamespace: jest.fn((namespace: string) => indexName + namespace),
 
+    // @ts-ignore 4.3.5 upgrade
     getReader: jest.fn((_options?: { namespace?: string }) => ({
       search,
       getDynamicIndexPattern,
     })),
 
-    getWriter: jest.fn(() => ({
-      bulk,
-    })),
+    getWriter: jest.fn(() =>
+      Promise.resolve({
+        bulk,
+      })
+    ),
   };
 };

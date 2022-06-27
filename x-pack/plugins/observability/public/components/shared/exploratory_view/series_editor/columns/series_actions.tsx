@@ -5,99 +5,194 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useState, useCallback } from 'react';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-import { RemoveSeries } from './remove_series';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { SeriesUrl } from '../../types';
+import { SeriesConfig, SeriesUrl } from '../../types';
+import { useDiscoverLink } from '../../hooks/use_discover_link';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 
 interface Props {
-  seriesId: string;
-  editorMode?: boolean;
+  seriesId: number;
+  series: SeriesUrl;
+  seriesConfig?: SeriesConfig;
+  onEditClick?: () => void;
 }
-export function SeriesActions({ seriesId, editorMode = false }: Props) {
-  const { getSeries, setSeries, allSeriesIds, removeSeries } = useSeriesStorage();
-  const series = getSeries(seriesId);
 
-  const onEdit = () => {
-    setSeries(seriesId, { ...series, isNew: true });
-  };
+export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: Props) {
+  const { setSeries, removeSeries, allSeries } = useSeriesStorage();
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const { href: discoverHref } = useDiscoverLink({ series, seriesConfig });
+
+  const { dataViews } = useAppDataViewContext();
+
+  const dataView = dataViews?.[series.dataType];
+  const deleteDisabled = seriesId === 0 && allSeries.length > 1;
 
   const copySeries = () => {
-    let copySeriesId: string = `${seriesId}-copy`;
-    if (allSeriesIds.includes(copySeriesId)) {
-      copySeriesId = copySeriesId + allSeriesIds.length;
+    let copySeriesId: string = `${series.name}-copy`;
+    if (allSeries.find(({ name }) => name === copySeriesId)) {
+      copySeriesId = copySeriesId + allSeries.length;
     }
-    setSeries(copySeriesId, series);
+    setSeries(allSeries.length, { ...series, name: copySeriesId, breakdown: undefined });
+    closePopover();
   };
 
-  const { reportType, reportDefinitions, isNew, ...restSeries } = series;
-  const isSaveAble = reportType && !isEmpty(reportDefinitions);
-
-  const saveSeries = () => {
-    if (isSaveAble) {
-      const reportDefId = Object.values(reportDefinitions ?? {})[0];
-      let newSeriesId = `${reportDefId}-${reportType}`;
-
-      if (allSeriesIds.includes(newSeriesId)) {
-        newSeriesId = `${newSeriesId}-${allSeriesIds.length}`;
-      }
-      const newSeriesN: SeriesUrl = {
-        ...restSeries,
-        reportType,
-        reportDefinitions,
-      };
-
-      setSeries(newSeriesId, newSeriesN);
-      removeSeries(seriesId);
+  const toggleSeries = () => {
+    if (series.hidden) {
+      setSeries(seriesId, { ...series, hidden: undefined });
+    } else {
+      setSeries(seriesId, { ...series, hidden: true });
     }
+    closePopover();
   };
+
+  const closePopover = useCallback(() => {
+    setPopover(false);
+  }, [setPopover]);
+
+  const onRemoveSeriesClick = useCallback(() => {
+    removeSeries(seriesId);
+    closePopover();
+  }, [removeSeries, seriesId, closePopover]);
+
+  const changePopoverVisibility = useCallback(() => {
+    setPopover(!isPopoverOpen);
+  }, [setPopover, isPopoverOpen]);
+
+  const popoverButton = (
+    <EuiButtonIcon
+      iconType="boxesHorizontal"
+      onClick={changePopoverVisibility}
+      color="text"
+      aria-label={POPOVER_BUTTON_LABEL}
+    />
+  );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-      {!editorMode && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="documentEdit"
-            aria-label={i18n.translate('xpack.observability.seriesEditor.edit', {
-              defaultMessage: 'Edit series',
-            })}
-            size="s"
-            onClick={onEdit}
-          />
-        </EuiFlexItem>
-      )}
-      {editorMode && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={'save'}
-            aria-label={i18n.translate('xpack.observability.seriesEditor.save', {
-              defaultMessage: 'Save series',
-            })}
-            size="s"
-            onClick={saveSeries}
-            color="success"
-            isDisabled={!isSaveAble}
-          />
-        </EuiFlexItem>
-      )}
-      {editorMode && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType={'copy'}
-            aria-label={i18n.translate('xpack.observability.seriesEditor.clone', {
-              defaultMessage: 'Copy series',
-            })}
-            size="s"
-            onClick={copySeries}
-          />
-        </EuiFlexItem>
-      )}
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
-        <RemoveSeries seriesId={seriesId} />
+        <EuiToolTip content={EDIT_SERIES_LABEL}>
+          <EuiButtonIcon
+            iconType="pencil"
+            color="text"
+            aria-label={EDIT_SERIES_LABEL}
+            size="s"
+            onClick={onEditClick}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={popoverButton}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenuPanel
+            aria-label={ACTIONS_CONTEXT_MENU_LABEL}
+            items={[
+              <EuiContextMenuItem
+                key="viewSampleDocuments"
+                icon="discoverApp"
+                href={discoverHref}
+                aria-label={VIEW_SAMPLE_DOCUMENTS_LABEL}
+                disabled={!series.dataType || !series.selectedMetricField || !dataView}
+                target="_blank"
+              >
+                {VIEW_SAMPLE_DOCUMENTS_LABEL}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="hideSeries"
+                icon={series.hidden ? 'eye' : 'eyeClosed'}
+                onClick={toggleSeries}
+                aria-label={series.hidden ? SHOW_SERIES_LABEL : HIDE_SERIES_LABEL}
+              >
+                {series.hidden ? SHOW_SERIES_LABEL : HIDE_SERIES_LABEL}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="copySeries"
+                icon="copy"
+                onClick={copySeries}
+                aria-label={COPY_SERIES_LABEL}
+              >
+                {COPY_SERIES_LABEL}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="deleteSeries"
+                icon="trash"
+                onClick={onRemoveSeriesClick}
+                aria-label={DELETE_SERIES_LABEL}
+                disabled={deleteDisabled}
+                toolTipContent={deleteDisabled ? DELETE_SERIES_TOOLTIP_LABEL : ''}
+              >
+                {DELETE_SERIES_LABEL}
+              </EuiContextMenuItem>,
+            ]}
+          />
+        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
+
+const EDIT_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.edit', {
+  defaultMessage: 'Edit series',
+});
+
+const HIDE_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.hide', {
+  defaultMessage: 'Hide series',
+});
+
+const SHOW_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.show', {
+  defaultMessage: 'Show series',
+});
+
+const COPY_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.clone', {
+  defaultMessage: 'Duplicate series',
+});
+
+const DELETE_SERIES_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesEditor.removeSeries',
+  {
+    defaultMessage: 'Remove series',
+  }
+);
+
+const DELETE_SERIES_TOOLTIP_LABEL = i18n.translate(
+  'xpack.observability.expView.seriesEditor.removeSeriesDisabled',
+  {
+    defaultMessage:
+      'Main series cannot be removed. Please remove all series below before you can remove this.',
+  }
+);
+
+const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(
+  'xpack.observability.seriesEditor.sampleDocuments',
+  {
+    defaultMessage: 'View transaction in Discover',
+  }
+);
+
+const POPOVER_BUTTON_LABEL = i18n.translate('xpack.observability.seriesEditor.popoverButtonLabel', {
+  defaultMessage: 'View series actions',
+});
+
+const ACTIONS_CONTEXT_MENU_LABEL = i18n.translate(
+  'xpack.observability.seriesEditor.actionsAriaContextLabel',
+  {
+    defaultMessage: 'Series actions list',
+  }
+);

@@ -19,7 +19,7 @@ export default function ({
     const esArchiver = getService('esArchiver');
     const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
     const kibanaServer = getService('kibanaServer');
-    const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
+    const defaultSettings = { defaultIndex: 'logstash-*' };
     const testSubjects = getService('testSubjects');
 
     before(async function () {
@@ -31,27 +31,23 @@ export default function ({
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    after(async function () {
-      await kibanaServer.uiSettings.replace({ 'doc_table:legacy': true });
-    });
-
     it('can add fields to the table', async function () {
       const getTitles = async () =>
         (await testSubjects.getVisibleText('dataGridHeader')).replace(/\s|\r?\n|\r/g, ' ');
 
-      expect(await getTitles()).to.be('Time (@timestamp) Document');
+      expect(await getTitles()).to.be('@timestamp Document');
 
       await PageObjects.discover.clickFieldListItemAdd('bytes');
-      expect(await getTitles()).to.be('Time (@timestamp) bytes');
+      expect(await getTitles()).to.be('@timestamp bytes');
 
       await PageObjects.discover.clickFieldListItemAdd('agent');
-      expect(await getTitles()).to.be('Time (@timestamp) bytes agent');
+      expect(await getTitles()).to.be('@timestamp bytes agent');
 
       await PageObjects.discover.clickFieldListItemRemove('bytes');
-      expect(await getTitles()).to.be('Time (@timestamp) agent');
+      expect(await getTitles()).to.be('@timestamp agent');
 
       await PageObjects.discover.clickFieldListItemRemove('agent');
-      expect(await getTitles()).to.be('Time (@timestamp) Document');
+      expect(await getTitles()).to.be('@timestamp Document');
     });
   });
 }

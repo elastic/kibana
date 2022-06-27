@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EcsEventOutcome, EcsEventType } from 'src/core/server';
-import { AuditEvent } from '../../../security/server';
+import { EcsEventOutcome, EcsEventType } from '@kbn/core/server';
+import { AuditEvent } from '@kbn/security-plugin/server';
 
 export enum RuleAuditAction {
   CREATE = 'rule_create',
@@ -22,6 +22,11 @@ export enum RuleAuditAction {
   UNMUTE = 'rule_unmute',
   MUTE_ALERT = 'rule_alert_mute',
   UNMUTE_ALERT = 'rule_alert_unmute',
+  AGGREGATE = 'rule_aggregate',
+  BULK_EDIT = 'rule_bulk_edit',
+  GET_EXECUTION_LOG = 'rule_get_execution_log',
+  SNOOZE = 'rule_snooze',
+  UNSNOOZE = 'rule_unsnooze',
 }
 
 type VerbsTuple = [string, string, string];
@@ -31,6 +36,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_get: ['access', 'accessing', 'accessed'],
   rule_resolve: ['access', 'accessing', 'accessed'],
   rule_update: ['update', 'updating', 'updated'],
+  rule_bulk_edit: ['update', 'updating', 'updated'],
   rule_update_api_key: ['update API key of', 'updating API key of', 'updated API key of'],
   rule_enable: ['enable', 'enabling', 'enabled'],
   rule_disable: ['disable', 'disabling', 'disabled'],
@@ -40,6 +46,14 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_unmute: ['unmute', 'unmuting', 'unmuted'],
   rule_alert_mute: ['mute alert of', 'muting alert of', 'muted alert of'],
   rule_alert_unmute: ['unmute alert of', 'unmuting alert of', 'unmuted alert of'],
+  rule_aggregate: ['access', 'accessing', 'accessed'],
+  rule_get_execution_log: [
+    'access execution log for',
+    'accessing execution log for',
+    'accessed execution log for',
+  ],
+  rule_snooze: ['snooze', 'snoozing', 'snoozed'],
+  rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
 };
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
@@ -47,6 +61,7 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_get: 'access',
   rule_resolve: 'access',
   rule_update: 'change',
+  rule_bulk_edit: 'change',
   rule_update_api_key: 'change',
   rule_enable: 'change',
   rule_disable: 'change',
@@ -56,6 +71,10 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_unmute: 'change',
   rule_alert_mute: 'change',
   rule_alert_unmute: 'change',
+  rule_aggregate: 'access',
+  rule_get_execution_log: 'access',
+  rule_snooze: 'change',
+  rule_unsnooze: 'change',
 };
 
 export interface RuleAuditEventParams {

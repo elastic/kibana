@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
+import { Logger, SavedObjectReference } from '@kbn/core/server';
 import { RuleParams } from '../../schemas/rule_schemas';
+import { isMachineLearningParams } from '../utils';
 import { injectExceptionsReferences } from './inject_exceptions_list';
+import { injectDataViewReferences } from './inject_data_view';
 
 /**
  * Injects references and returns the saved object references.
@@ -28,23 +30,36 @@ import { injectExceptionsReferences } from './inject_exceptions_list';
  * @param savedObjectReferences The saved object references to merge with the rule params
  * @returns The rule parameters with the saved object references.
  */
-export const injectReferences = ({
+export const injectReferences = <TParams extends RuleParams>({
   logger,
   params,
   savedObjectReferences,
 }: {
   logger: Logger;
-  params: RuleParams;
+  params: TParams;
   savedObjectReferences: SavedObjectReference[];
-}): RuleParams => {
+}): TParams => {
   const exceptionsList = injectExceptionsReferences({
     logger,
     exceptionsList: params.exceptionsList,
     savedObjectReferences,
   });
-  const ruleParamsWithSavedObjectReferences: RuleParams = {
+
+  let ruleParamsWithSavedObjectReferences: TParams = {
     ...params,
     exceptionsList,
   };
+
+  if (!isMachineLearningParams(params)) {
+    const dataView = injectDataViewReferences({
+      logger,
+      savedObjectReferences,
+    });
+    ruleParamsWithSavedObjectReferences = {
+      ...ruleParamsWithSavedObjectReferences,
+      dataViewId: dataView,
+    };
+  }
+
   return ruleParamsWithSavedObjectReferences;
 };

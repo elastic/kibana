@@ -5,191 +5,216 @@
  * 2.0.
  */
 
-import { CaseConnector, CaseType, ConnectorTypes } from '../../common/api';
-import { newCase } from '../routes/api/__mocks__/request_responses';
-import { transformNewCase } from '../common';
-import { sortToSnake } from './utils';
+import { buildRangeFilter, sortToSnake } from './utils';
+import { toElasticsearchQuery } from '@kbn/es-query';
 
 describe('utils', () => {
   describe('sortToSnake', () => {
-    it('it transforms status correctly', () => {
+    it('transforms status correctly', () => {
       expect(sortToSnake('status')).toBe('status');
     });
 
-    it('it transforms createdAt correctly', () => {
+    it('transforms createdAt correctly', () => {
       expect(sortToSnake('createdAt')).toBe('created_at');
     });
 
-    it('it transforms created_at correctly', () => {
+    it('transforms created_at correctly', () => {
       expect(sortToSnake('created_at')).toBe('created_at');
     });
 
-    it('it transforms closedAt correctly', () => {
+    it('transforms closedAt correctly', () => {
       expect(sortToSnake('closedAt')).toBe('closed_at');
     });
 
-    it('it transforms closed_at correctly', () => {
+    it('transforms closed_at correctly', () => {
       expect(sortToSnake('closed_at')).toBe('closed_at');
     });
 
-    it('it transforms default correctly', () => {
+    it('transforms default correctly', () => {
       expect(sortToSnake('not-exist')).toBe('created_at');
     });
   });
 
-  describe('transformNewCase', () => {
-    const connector: CaseConnector = {
-      id: '123',
-      name: 'My connector',
-      type: ConnectorTypes.jira,
-      fields: { issueType: 'Task', priority: 'High', parent: null },
-    };
-    it('transform correctly', () => {
-      const myCase = {
-        newCase: { ...newCase, type: CaseType.individual },
-        connector,
-        createdDate: '2020-04-09T09:43:51.778Z',
-        email: 'elastic@elastic.co',
-        full_name: 'Elastic',
-        username: 'elastic',
-      };
+  describe('buildRangeFilter', () => {
+    it('returns undefined if both the from and or are undefined', () => {
+      const node = buildRangeFilter({});
+      expect(node).toBeFalsy();
+    });
 
-      const res = transformNewCase(myCase);
+    it('returns undefined if both the from and or are null', () => {
+      // @ts-expect-error
+      const node = buildRangeFilter({ from: null, to: null });
+      expect(node).toBeFalsy();
+    });
 
-      expect(res).toMatchInlineSnapshot(`
+    it('creates a range filter with only the from correctly', () => {
+      const node = buildRangeFilter({ from: 'now-1M' });
+      expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
         Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Object {
-              "issueType": "Task",
-              "parent": null,
-              "priority": "High",
-            },
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "range": Object {
+                  "cases.attributes.created_at": Object {
+                    "gte": "now-1M",
+                  },
+                },
+              },
+            ],
           },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": "elastic@elastic.co",
-            "full_name": "Elastic",
-            "username": "elastic",
-          },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
         }
       `);
     });
 
-    it('transform correctly without optional fields', () => {
-      const myCase = {
-        newCase: { ...newCase, type: CaseType.individual },
-        connector,
-        createdDate: '2020-04-09T09:43:51.778Z',
-      };
-
-      const res = transformNewCase(myCase);
-
-      expect(res).toMatchInlineSnapshot(`
+    it('creates a range filter with only the to correctly', () => {
+      const node = buildRangeFilter({ to: 'now' });
+      expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
         Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Object {
-              "issueType": "Task",
-              "parent": null,
-              "priority": "High",
-            },
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "range": Object {
+                  "cases.attributes.created_at": Object {
+                    "lte": "now",
+                  },
+                },
+              },
+            ],
           },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": undefined,
-            "full_name": undefined,
-            "username": undefined,
-          },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
         }
       `);
     });
 
-    it('transform correctly with optional fields as null', () => {
-      const myCase = {
-        newCase: { ...newCase, type: CaseType.individual },
-        connector,
-        createdDate: '2020-04-09T09:43:51.778Z',
-        email: null,
-        full_name: null,
-        username: null,
-      };
-
-      const res = transformNewCase(myCase);
-
-      expect(res).toMatchInlineSnapshot(`
+    it('creates a range filter correctly', () => {
+      const node = buildRangeFilter({ from: 'now-1M', to: 'now' });
+      expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
         Object {
-          "closed_at": null,
-          "closed_by": null,
-          "connector": Object {
-            "fields": Object {
-              "issueType": "Task",
-              "parent": null,
-              "priority": "High",
-            },
-            "id": "123",
-            "name": "My connector",
-            "type": ".jira",
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        "cases.attributes.created_at": Object {
+                          "gte": "now-1M",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        "cases.attributes.created_at": Object {
+                          "lte": "now",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
           },
-          "created_at": "2020-04-09T09:43:51.778Z",
-          "created_by": Object {
-            "email": null,
-            "full_name": null,
-            "username": null,
+        }
+      `);
+    });
+
+    it('creates a range filter with different field and saved object type provided', () => {
+      const node = buildRangeFilter({
+        from: 'now-1M',
+        to: 'now',
+        field: 'test',
+        savedObjectType: 'test-type',
+      });
+
+      expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        "test-type.attributes.test": Object {
+                          "gte": "now-1M",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        "test-type.attributes.test": Object {
+                          "lte": "now",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
           },
-          "description": "A description",
-          "external_service": null,
-          "owner": "securitySolution",
-          "settings": Object {
-            "syncAlerts": true,
+        }
+      `);
+    });
+
+    it('escapes the query correctly', () => {
+      const node = buildRangeFilter({
+        from: '2022-04-27T12:55:47.576Z',
+        to: '2022-04-27T12:56:47.576Z',
+        field: '<weird field)',
+        savedObjectType: '.weird SO)',
+      });
+
+      expect(toElasticsearchQuery(node!)).toMatchInlineSnapshot(`
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        ".weird SO).attributes.<weird field)": Object {
+                          "gte": "2022-04-27T12:55:47.576Z",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "range": Object {
+                        ".weird SO).attributes.<weird field)": Object {
+                          "lte": "2022-04-27T12:56:47.576Z",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
           },
-          "status": "open",
-          "tags": Array [
-            "new",
-            "case",
-          ],
-          "title": "My new case",
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
         }
       `);
     });

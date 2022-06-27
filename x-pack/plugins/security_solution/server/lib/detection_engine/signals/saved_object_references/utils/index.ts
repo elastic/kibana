@@ -11,4 +11,4 @@ export * from './get_saved_object_name_pattern';
 export * from './get_saved_object_reference_for_exceptions_list';
 export * from './get_saved_object_reference';
 export * from './log_missing_saved_object_error';
-export * from './log_warning_if_different_references_detected';
+export * from './get_saved_object_reference_for_data_view';

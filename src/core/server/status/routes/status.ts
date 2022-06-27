@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest, ReplaySubject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { Observable, combineLatest, ReplaySubject, firstValueFrom } from 'rxjs';
 import { schema } from '@kbn/config-schema';
+import { PackageInfo } from '@kbn/config';
 
+import type { PluginName } from '@kbn/core-base-common';
 import { IRouter } from '../../http';
 import { MetricsServiceSetup } from '../../metrics';
 import type { CoreIncrementUsageCounter } from '../../core_usage_data/types';
 import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';
-import { PluginName } from '../../plugins';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
-import { PackageInfo } from '../../config';
 import { StatusResponse } from '../../../types/status';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
@@ -31,6 +30,7 @@ interface Deps {
   };
   metrics: MetricsServiceSetup;
   status: {
+    coreOverall$: Observable<ServiceStatus>;
     overall$: Observable<ServiceStatus>;
     core$: Observable<CoreStatus>;
     plugins$: Observable<Record<PluginName, ServiceStatus>>;
@@ -59,9 +59,11 @@ export const registerStatusRoute = ({
   // Since the status.plugins$ observable is not subscribed to elsewhere, we need to subscribe it here to eagerly load
   // the plugins status when Kibana starts up so this endpoint responds quickly on first boot.
   const combinedStatus$ = new ReplaySubject<
-    [ServiceStatus<unknown>, CoreStatus, Record<string, ServiceStatus<unknown>>]
+    [ServiceStatus<unknown>, ServiceStatus, CoreStatus, Record<string, ServiceStatus<unknown>>]
   >(1);
-  combineLatest([status.overall$, status.core$, status.plugins$]).subscribe(combinedStatus$);
+  combineLatest([status.overall$, status.coreOverall$, status.core$, status.plugins$]).subscribe(
+    combinedStatus$
+  );
 
   router.get(
     {
@@ -89,7 +91,7 @@ export const registerStatusRoute = ({
     async (context, req, res) => {
       const { version, buildSha, buildNum } = config.packageInfo;
       const versionWithoutSnapshot = version.replace(SNAPSHOT_POSTFIX, '');
-      const [overall, core, plugins] = await combinedStatus$.pipe(first()).toPromise();
+      const [overall, coreOverall, core, plugins] = await firstValueFrom(combinedStatus$);
 
       const { v8format = true, v7format = false } = req.query ?? {};
 
@@ -110,7 +112,7 @@ export const registerStatusRoute = ({
         });
       }
 
-      const lastMetrics = await metrics.getOpsMetrics$().pipe(first()).toPromise();
+      const lastMetrics = await firstValueFrom(metrics.getOpsMetrics$());
 
       const body: StatusHttpBody = {
         name: config.serverName,
@@ -137,7 +139,7 @@ export const registerStatusRoute = ({
         },
       };
 
-      const statusCode = overall.level >= ServiceStatusLevels.unavailable ? 503 : 200;
+      const statusCode = coreOverall.level >= ServiceStatusLevels.unavailable ? 503 : 200;
       return res.custom({ body, statusCode, bypassErrorFormat: true });
     }
   );

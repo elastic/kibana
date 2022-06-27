@@ -21,52 +21,42 @@ export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (forceDisable: boolean, transformNodes: number) => {
   const history = useHistory();
   const appDeps = useAppDependencies();
-  const savedObjectsClient = appDeps.savedObjects.client;
-  const indexPatterns = appDeps.data.indexPatterns;
+  const dataViewsContract = appDeps.data.dataViews;
   const toastNotifications = useToastNotifications();
 
-  const { getIndexPatternIdByTitle, loadIndexPatterns } = useSearchItems(undefined);
+  const { getDataViewIdByTitle, loadDataViews } = useSearchItems(undefined);
 
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        await loadIndexPatterns(savedObjectsClient, indexPatterns);
-        const indexPatternTitle = Array.isArray(item.config.source.index)
+        await loadDataViews(dataViewsContract);
+        const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const indexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
+        const dataViewId = getDataViewIdByTitle(dataViewTitle);
 
-        if (indexPatternId === undefined) {
+        if (dataViewId === undefined) {
           toastNotifications.addDanger(
-            i18n.translate('xpack.transform.clone.noIndexPatternErrorPromptText', {
+            i18n.translate('xpack.transform.clone.noDataViewErrorPromptText', {
               defaultMessage:
-                'Unable to clone the transform {transformId}. No index pattern exists for {indexPattern}.',
-              values: { indexPattern: indexPatternTitle, transformId: item.id },
+                'Unable to clone the transform {transformId}. No data view exists for {dataViewTitle}.',
+              values: { dataViewTitle, transformId: item.id },
             })
           );
         } else {
-          history.push(
-            `/${SECTION_SLUG.CLONE_TRANSFORM}/${item.id}?indexPatternId=${indexPatternId}`
-          );
+          history.push(`/${SECTION_SLUG.CLONE_TRANSFORM}/${item.id}?dataViewId=${dataViewId}`);
         }
       } catch (e) {
         toastNotifications.addError(e, {
           title: i18n.translate('xpack.transform.clone.errorPromptText', {
-            defaultMessage: 'An error occurred checking if source index pattern exists',
+            defaultMessage: 'An error occurred checking if source data view exists',
           }),
         });
       }
     },
-    [
-      history,
-      savedObjectsClient,
-      indexPatterns,
-      toastNotifications,
-      loadIndexPatterns,
-      getIndexPatternIdByTitle,
-    ]
+    [history, dataViewsContract, toastNotifications, loadDataViews, getDataViewIdByTitle]
   );
 
   const action: TransformListAction = useMemo(

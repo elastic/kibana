@@ -7,9 +7,9 @@
  */
 
 import chalk from 'chalk';
-import { CliArgs, Env, RawConfigService } from './config';
+import { CliArgs, Env, RawConfigService } from '@kbn/config';
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
-import { CriticalError } from './errors';
 
 interface BootstrapArgs {
   configs: string[];
@@ -51,7 +51,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // This is only used by the LogRotator service
   // in order to be able to reload the log configuration
   // under the cluster mode
-  process.on('message', (msg) => {
+  process.on('message', (msg: any) => {
     if (!msg || msg.reloadConfiguration !== true) {
       return;
     }

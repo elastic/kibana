@@ -161,7 +161,6 @@ function getSnapshotState(file: string, updateSnapshot: SnapshotUpdateState) {
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
     {
       updateSnapshot,
-      // @ts-expect-error
       getPrettier: () => prettier,
       getBabelTraverse: () => babelTraverse,
     }

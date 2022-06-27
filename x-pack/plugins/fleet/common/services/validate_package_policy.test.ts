@@ -241,6 +241,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
+      vars: {},
     };
 
     const invalidPackagePolicy: NewPackagePolicy = {
@@ -253,7 +254,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           enabled: true,
           vars: {
             'foo-input-var-name': { value: undefined, type: 'text' },
-            'foo-input2-var-name': { value: '', type: 'text' },
+            'foo-input2-var-name': { value: undefined, type: 'text' },
             'foo-input3-var-name': { value: [], type: 'text' },
           },
           streams: [
@@ -332,6 +333,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           ],
         },
       ],
+      vars: {},
     };
 
     const noErrorsValidationResults = {
@@ -370,6 +372,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           vars: { 'var-name': null },
         },
       },
+      vars: {},
     };
 
     it('returns no errors for valid package policy', () => {
@@ -416,6 +419,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: { 'with-no-stream-vars-bar': {} },
           },
         },
+        vars: {},
       });
     });
 
@@ -487,6 +491,7 @@ describe('Fleet - validatePackagePolicy()', () => {
             streams: { 'with-no-stream-vars-bar': {} },
           },
         },
+        vars: {},
       });
     });
 
@@ -505,6 +510,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
       expect(
         validatePackagePolicy(
@@ -520,6 +526,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
     });
 
@@ -538,6 +545,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
       });
       expect(
         validatePackagePolicy(
@@ -553,6 +561,187 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         inputs: null,
+        vars: {},
+      });
+    });
+
+    it('returns no errors when required field is present but empty', () => {
+      expect(
+        validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              {
+                type: 'foo',
+                policy_template: 'pkgPolicy1',
+                enabled: true,
+                vars: {
+                  'foo-input-var-name': { value: '', type: 'text' },
+                  'foo-input2-var-name': { value: '', type: 'text' },
+                  'foo-input3-var-name': { value: ['test'], type: 'text' },
+                },
+                streams: [
+                  {
+                    data_stream: { dataset: 'foo', type: 'logs' },
+                    enabled: true,
+                    vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
+                  },
+                ],
+              },
+            ],
+          },
+          mockPackage,
+          safeLoad
+        )
+      ).toEqual({
+        name: null,
+        description: null,
+        namespace: null,
+        inputs: {
+          foo: {
+            streams: {
+              foo: {
+                vars: {
+                  'var-name': null,
+                },
+              },
+            },
+            vars: {
+              'foo-input-var-name': null,
+              'foo-input2-var-name': null,
+              'foo-input3-var-name': null,
+            },
+          },
+        },
+        vars: {},
+      });
+    });
+
+    // TODO enable when https://github.com/elastic/kibana/issues/125655 is fixed
+    it.skip('returns package policy validation error if input var does not exist', () => {
+      expect(
+        validatePackagePolicy(
+          {
+            description: 'Linux Metrics',
+            enabled: true,
+            inputs: [
+              {
+                enabled: true,
+                streams: [
+                  {
+                    data_stream: {
+                      dataset: 'linux.memory',
+                      type: 'metrics',
+                    },
+                    enabled: true,
+                  },
+                ],
+                type: 'linux/metrics',
+                vars: {
+                  period: {
+                    type: 'string',
+                    value: '1s',
+                  },
+                },
+              },
+            ],
+            name: 'linux-3d13ada6-a9ae-46df-8e57-ff5050f4b671',
+            namespace: 'default',
+            output_id: '',
+            package: {
+              name: 'linux',
+              title: 'Linux Metrics',
+              version: '0.6.2',
+            },
+            policy_id: 'b25cb6e0-8347-11ec-96f9-6590c25bacf9',
+          },
+          {
+            ...mockPackage,
+            name: 'linux',
+            policy_templates: [
+              {
+                name: 'system',
+                title: 'Linux kernel metrics',
+                description: 'Collect system metrics from Linux operating systems',
+                inputs: [
+                  {
+                    title: 'Collect system metrics from Linux instances',
+                    vars: [
+                      {
+                        name: 'system.hostfs',
+                        type: 'text',
+                        title: 'Proc Filesystem Directory',
+                        multi: false,
+                        required: false,
+                        show_user: true,
+                        description: 'The proc filesystem base directory.',
+                      },
+                    ],
+                    type: 'system/metrics',
+                    description:
+                      'Collecting Linux entropy, Network Summary, RAID, service, socket, and users metrics',
+                  },
+                  {
+                    title: 'Collect low-level system metrics from Linux instances',
+                    vars: [],
+                    type: 'linux/metrics',
+                    description: 'Collecting Linux conntrack, ksm, pageinfo metrics.',
+                  },
+                ],
+                multiple: true,
+              },
+            ],
+            data_streams: [
+              {
+                dataset: 'linux.memory',
+                package: 'linux',
+                path: 'memory',
+                streams: [
+                  {
+                    input: 'linux/metrics',
+                    title: 'Linux memory metrics',
+                    vars: [
+                      {
+                        name: 'period',
+                        type: 'text',
+                        title: 'Period',
+                        multi: false,
+                        required: true,
+                        show_user: true,
+                        default: '10s',
+                      },
+                    ],
+                    template_path: 'stream.yml.hbs',
+                    description: 'Linux paging and memory management metrics',
+                  },
+                ],
+                title: 'Linux-only memory metrics',
+                release: 'experimental',
+                type: 'metrics',
+              },
+            ],
+          },
+          safeLoad
+        )
+      ).toEqual({
+        description: null,
+        inputs: {
+          'linux/metrics': {
+            streams: {
+              'linux.memory': {
+                vars: {
+                  period: ['Period is required'],
+                },
+              },
+            },
+            vars: {
+              period: ['period var definition does not exist'],
+            },
+          },
+        },
+        vars: {},
+        name: null,
+        namespace: null,
       });
     });
   });

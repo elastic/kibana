@@ -7,8 +7,8 @@
  */
 
 import { findIndex, isEmpty } from 'lodash';
-import type { IAggConfig } from 'src/plugins/data/public';
-import type { Schema } from 'src/plugins/visualizations/public';
+import type { IAggConfig } from '@kbn/data-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { getSchemaByName } from '../schemas';
 import type { AggsState } from './agg_group_state';

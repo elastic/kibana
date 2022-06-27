@@ -5,29 +5,34 @@
  * 2.0.
  */
 
+import { isOperation, DropType, DragDropOperation } from '../../../types';
 import {
-  DatasourceDimensionDropProps,
-  isDraggedOperation,
-  DraggedOperation,
-  DropType,
-} from '../../../types';
-import { getOperationDisplay } from '../../operations';
-import { hasField, isDraggedField } from '../../utils';
+  getCurrentFieldsForOperation,
+  getOperationDisplay,
+  hasOperationSupportForMultipleFields,
+} from '../../operations';
+import { hasField, isDraggedField } from '../../pure_utils';
 import { DragContextState } from '../../../drag_drop/providers';
 import { OperationMetadata } from '../../../types';
 import { getOperationTypesForField } from '../../operations';
-import { IndexPatternColumn } from '../../indexpattern';
+import { GenericIndexPatternColumn } from '../../indexpattern';
 import {
   IndexPatternPrivateState,
   IndexPattern,
   IndexPatternField,
   DraggedField,
+  DataViewDragDropOperation,
 } from '../../types';
+import {
+  getDropPropsForSameGroup,
+  isOperationFromTheSameGroup,
+} from '../../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 
-type GetDropProps = DatasourceDimensionDropProps<IndexPatternPrivateState> & {
-  dragging?: DragContextState['dragging'];
-  groupId: string;
-};
+interface GetDropPropsArgs {
+  state: IndexPatternPrivateState;
+  source?: DragContextState['dragging'];
+  target: DragDropOperation;
+}
 
 type DropProps = { dropTypes: DropType[]; nextLabel?: string } | undefined;
 
@@ -36,7 +41,8 @@ const operationLabels = getOperationDisplay();
 export function getNewOperation(
   field: IndexPatternField | undefined | false,
   filterOperations: (meta: OperationMetadata) => boolean,
-  targetColumn: IndexPatternColumn
+  targetColumn?: GenericIndexPatternColumn,
+  prioritizedOperation?: GenericIndexPatternColumn['operationType']
 ) {
   if (!field) {
     return;
@@ -47,122 +53,180 @@ export function getNewOperation(
   }
   // Detects if we can change the field only, otherwise change field + operation
   const shouldOperationPersist = targetColumn && newOperations.includes(targetColumn.operationType);
-  return shouldOperationPersist ? targetColumn.operationType : newOperations[0];
+  if (shouldOperationPersist) {
+    return targetColumn.operationType;
+  }
+  const existsPrioritizedOperation =
+    prioritizedOperation && newOperations.includes(prioritizedOperation);
+  return existsPrioritizedOperation ? prioritizedOperation : newOperations[0];
 }
 
-export function getField(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {
+export function getField(column: GenericIndexPatternColumn | undefined, dataView: IndexPattern) {
   if (!column) {
     return;
   }
-  const field = (hasField(column) && indexPattern.getFieldByName(column.sourceField)) || undefined;
+  const field = (hasField(column) && dataView.getFieldByName(column.sourceField)) || undefined;
   return field;
 }
 
-export function getDropProps(props: GetDropProps) {
-  const { state, columnId, layerId, dragging, groupId, filterOperations } = props;
-  if (!dragging) {
+export function getDropProps(props: GetDropPropsArgs) {
+  const { state, source, target } = props;
+  if (!source) {
     return;
   }
+  const targetProps: DataViewDragDropOperation = {
+    ...target,
+    column: state.layers[target.layerId].columns[target.columnId],
+    dataView: state.indexPatterns[state.layers[target.layerId].indexPatternId],
+  };
 
-  if (isDraggedField(dragging)) {
-    return getDropPropsForField({ ...props, dragging });
+  if (isDraggedField(source)) {
+    return getDropPropsForField({ ...props, source, target: targetProps });
   }
 
-  if (
-    isDraggedOperation(dragging) &&
-    dragging.layerId === layerId &&
-    columnId !== dragging.columnId
-  ) {
-    const sourceColumn = state.layers[dragging.layerId].columns[dragging.columnId];
-    const targetColumn = state.layers[layerId].columns[columnId];
-
-    const isSameGroup = groupId === dragging.groupId;
-    if (isSameGroup) {
-      return getDropPropsForSameGroup(targetColumn);
-    } else if (hasTheSameField(sourceColumn, targetColumn)) {
+  if (isOperation(source)) {
+    const sourceProps: DataViewDragDropOperation = {
+      ...source,
+      column: state.layers[source.layerId]?.columns[source.columnId],
+      dataView: state.indexPatterns[state.layers[source.layerId]?.indexPatternId],
+    };
+    if (!sourceProps.column) {
       return;
-    } else if (filterOperations(sourceColumn)) {
-      return getDropPropsForCompatibleGroup(targetColumn);
-    } else {
-      return getDropPropsFromIncompatibleGroup({ ...props, dragging });
+    }
+    if (target.columnId !== source.columnId && targetProps.dataView === sourceProps.dataView) {
+      if (isOperationFromTheSameGroup(source, target)) {
+        return getDropPropsForSameGroup(!targetProps.column);
+      }
+
+      if (targetProps.filterOperations?.(sourceProps?.column)) {
+        return getDropPropsForCompatibleGroup(sourceProps, targetProps);
+      } else if (hasTheSameField(sourceProps.column, targetProps.column)) {
+        return;
+      } else {
+        return getDropPropsFromIncompatibleGroup(sourceProps, targetProps);
+      }
     }
   }
 }
 
-function hasTheSameField(sourceColumn: IndexPatternColumn, targetColumn?: IndexPatternColumn) {
+function hasTheSameField(
+  sourceColumn: GenericIndexPatternColumn,
+  targetColumn?: GenericIndexPatternColumn
+) {
+  const targetFields = targetColumn ? getCurrentFieldsForOperation(targetColumn) : [];
+  const sourceFields = new Set(getCurrentFieldsForOperation(sourceColumn));
+
   return (
-    targetColumn &&
-    hasField(targetColumn) &&
-    hasField(sourceColumn) &&
-    targetColumn.sourceField === sourceColumn.sourceField
+    targetFields.length === sourceFields.size &&
+    targetFields.every((field) => sourceFields.has(field))
   );
 }
 
 function getDropPropsForField({
   state,
-  columnId,
-  layerId,
-  dragging,
-  filterOperations,
-}: GetDropProps & { dragging: DraggedField }): DropProps {
-  const targetColumn = state.layers[layerId].columns[columnId];
-  const isTheSameIndexPattern = state.layers[layerId].indexPatternId === dragging.indexPatternId;
-  const newOperation = getNewOperation(dragging.field, filterOperations, targetColumn);
+  source,
+  target,
+}: GetDropPropsArgs & { source: DraggedField }): DropProps {
+  const targetColumn = state.layers[target.layerId].columns[target.columnId];
+  const isTheSameIndexPattern =
+    state.layers[target.layerId].indexPatternId === source.indexPatternId;
+  const newOperation = getNewOperation(source.field, target.filterOperations, targetColumn);
 
-  if (!!(isTheSameIndexPattern && newOperation)) {
+  if (isTheSameIndexPattern && newOperation) {
     const nextLabel = operationLabels[newOperation].displayName;
 
     if (!targetColumn) {
       return { dropTypes: ['field_add'], nextLabel };
     } else if (
-      (hasField(targetColumn) && targetColumn.sourceField !== dragging.field.name) ||
+      (hasField(targetColumn) && targetColumn.sourceField !== source.field.name) ||
       !hasField(targetColumn)
     ) {
-      return {
-        dropTypes: ['field_replace'],
-        nextLabel,
-      };
+      const layerDataView = state.indexPatterns[state.layers[target.layerId].indexPatternId];
+      return hasField(targetColumn) &&
+        layerDataView &&
+        hasOperationSupportForMultipleFields(layerDataView, targetColumn, undefined, source.field)
+        ? {
+            dropTypes: ['field_replace', 'field_combine'],
+          }
+        : {
+            dropTypes: ['field_replace'],
+            nextLabel,
+          };
     }
   }
   return;
 }
 
-function getDropPropsForSameGroup(targetColumn?: IndexPatternColumn): DropProps {
-  return targetColumn ? { dropTypes: ['reorder'] } : { dropTypes: ['duplicate_compatible'] };
-}
+function getDropPropsForCompatibleGroup(
+  sourceProps: DataViewDragDropOperation,
+  targetProps: DataViewDragDropOperation
+): DropProps {
+  if (!targetProps.column) {
+    return { dropTypes: ['move_compatible', 'duplicate_compatible'] };
+  }
+  const canSwap = sourceProps.filterOperations?.(targetProps.column);
+  const swapType: DropType[] = canSwap ? ['swap_compatible'] : [];
 
-function getDropPropsForCompatibleGroup(targetColumn?: IndexPatternColumn): DropProps {
+  const dropTypes: DropType[] = ['replace_compatible', 'replace_duplicate_compatible', ...swapType];
+  if (!targetProps.dataView || !hasField(targetProps.column)) {
+    return { dropTypes };
+  }
+
+  if (
+    hasOperationSupportForMultipleFields(
+      targetProps.dataView,
+      targetProps.column,
+      sourceProps.column
+    )
+  ) {
+    dropTypes.push('combine_compatible');
+  }
   return {
-    dropTypes: targetColumn
-      ? ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible']
-      : ['move_compatible', 'duplicate_compatible'],
+    dropTypes,
   };
 }
 
-function getDropPropsFromIncompatibleGroup({
-  state,
-  columnId,
-  layerId,
-  dragging,
-  filterOperations,
-}: GetDropProps & { dragging: DraggedOperation }): DropProps {
-  const targetColumn = state.layers[layerId].columns[columnId];
-  const sourceColumn = state.layers[dragging.layerId].columns[dragging.columnId];
-
-  const layerIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-  const sourceField = getField(sourceColumn, layerIndexPattern);
-  const newOperationForSource = getNewOperation(sourceField, filterOperations, targetColumn);
+function getDropPropsFromIncompatibleGroup(
+  sourceProps: DataViewDragDropOperation,
+  targetProps: DataViewDragDropOperation
+): DropProps {
+  if (!targetProps.dataView || !sourceProps.column) {
+    return;
+  }
+  const sourceField = getField(sourceProps.column, sourceProps.dataView);
+  const newOperationForSource = getNewOperation(
+    sourceField,
+    targetProps.filterOperations,
+    targetProps.column
+  );
 
   if (newOperationForSource) {
-    const targetField = getField(targetColumn, layerIndexPattern);
-    const canSwap = !!getNewOperation(targetField, dragging.filterOperations, sourceColumn);
+    const targetField = getField(targetProps.column, targetProps.dataView);
+    const canSwap = Boolean(
+      getNewOperation(targetField, sourceProps.filterOperations, sourceProps.column)
+    );
+
+    const dropTypes: DropType[] = [];
+    if (targetProps.column) {
+      dropTypes.push('replace_incompatible', 'replace_duplicate_incompatible');
+      if (canSwap) {
+        dropTypes.push('swap_incompatible');
+      }
+      if (
+        hasOperationSupportForMultipleFields(
+          targetProps.dataView,
+          targetProps.column,
+          sourceProps.column
+        )
+      ) {
+        dropTypes.push('combine_incompatible');
+      }
+    } else {
+      dropTypes.push('move_incompatible', 'duplicate_incompatible');
+    }
 
     return {
-      dropTypes: targetColumn
-        ? canSwap
-          ? ['replace_incompatible', 'replace_duplicate_incompatible', 'swap_incompatible']
-          : ['replace_incompatible', 'replace_duplicate_incompatible']
-        : ['move_incompatible', 'duplicate_incompatible'],
+      dropTypes,
       nextLabel: operationLabels[newOperationForSource].displayName,
     };
   }

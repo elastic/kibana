@@ -486,7 +486,7 @@ to change the application or the navlink state at runtime.
 
 [source,typescript]
 ----
-// my_plugin has a required dependencie to the `licensing` plugin
+// my_plugin has a required dependency to the `licensing` plugin
 interface MyPluginSetupDeps {
   licensing: LicensingPluginSetup;
 }

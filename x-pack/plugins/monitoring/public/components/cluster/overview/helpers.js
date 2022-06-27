@@ -70,7 +70,7 @@ export function HealthStatusIndicator(props) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiHealth color={statusColor} data-test-subj="statusIcon">
+        <EuiHealth color={statusColor} data-test-subj="status">
           <HealthLabel {...props} />
         </EuiHealth>
       </EuiFlexItem>
@@ -94,6 +94,7 @@ export function ClusterItemContainer(props) {
     logstash: 'logoLogstash',
     beats: 'logoBeats',
     apm: 'apmApp',
+    enterprise_search: 'logoEnterpriseSearch',
   };
   const icon = iconMap[props.url];
 

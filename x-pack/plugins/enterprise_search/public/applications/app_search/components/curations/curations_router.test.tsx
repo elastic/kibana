@@ -12,13 +12,13 @@ import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { CurationsRouter } from './';
+import { CurationsRouter } from '.';
 
 describe('CurationsRouter', () => {
   it('renders', () => {
     const wrapper = shallow(<CurationsRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(3);
+    expect(wrapper.find(Route)).toHaveLength(4);
   });
 });

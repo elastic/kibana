@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
 
 import type { SpacesManager } from '../spaces_manager';
 
@@ -26,15 +26,19 @@ export const spaceSelectorApp = Object.freeze({
       }),
       chromeless: true,
       appRoute: '/spaces/space_selector',
-      mount: async (params: AppMountParameters) => {
+      mount: async ({ element, theme$ }: AppMountParameters) => {
         const [[coreStart], { renderSpaceSelectorApp }] = await Promise.all([
           getStartServices(),
           import('./space_selector'),
         ]);
-        return renderSpaceSelectorApp(coreStart.i18n, params.element, {
-          spacesManager,
-          serverBasePath: coreStart.http.basePath.serverBasePath,
-        });
+        return renderSpaceSelectorApp(
+          coreStart.i18n,
+          { element, theme$ },
+          {
+            spacesManager,
+            serverBasePath: coreStart.http.basePath.serverBasePath,
+          }
+        );
       },
     });
   },

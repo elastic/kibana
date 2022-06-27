@@ -5,36 +5,21 @@
  * 2.0.
  */
 
-import { combineReducers, createStore } from 'redux';
 import type {
   FoundExceptionListItemSchema,
   ExceptionListItemSchema,
+  ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+import { getSummaryExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_summary_schema.mock';
 import { Ecs } from '../../../../../common/ecs';
 
-import {
-  MANAGEMENT_STORE_GLOBAL_NAMESPACE,
-  MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE,
-} from '../../../common/constants';
-
-import { eventFiltersPageReducer } from '../store/reducer';
 import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
 } from '../../../../common/mock/endpoint/http_handler_mock_factory';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-
-export const createGlobalNoMiddlewareStore = () => {
-  return createStore(
-    combineReducers({
-      [MANAGEMENT_STORE_GLOBAL_NAMESPACE]: combineReducers({
-        [MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE]: eventFiltersPageReducer,
-      }),
-    })
-  );
-};
 
 export const ecsEventMock = (): Ecs => ({
   _id: 'unLfz3gB2mJZsMY3ytx3',
@@ -104,6 +89,10 @@ export const createdEventFilterEntryMock = (): ExceptionListItemSchema => ({
 export type EventFiltersListQueryHttpMockProviders = ResponseProvidersInterface<{
   eventFiltersList: () => FoundExceptionListItemSchema;
   eventFiltersCreateList: () => ExceptionListItemSchema;
+  eventFiltersGetOne: () => ExceptionListItemSchema;
+  eventFiltersCreateOne: () => ExceptionListItemSchema;
+  eventFiltersUpdateOne: () => ExceptionListItemSchema;
+  eventFiltersGetSummary: () => ExceptionListSummarySchema;
 }>;
 
 export const esResponseData = () => ({
@@ -200,6 +189,8 @@ export const esResponseData = () => ({
       ],
     },
   },
+  indexFields: [],
+  indicesExist: [],
   isPartial: false,
   isRunning: false,
   total: 1,
@@ -226,6 +217,38 @@ export const eventFiltersListQueryHttpMock =
       path: `${EXCEPTION_LIST_ITEM_URL}/_find`,
       handler: (): FoundExceptionListItemSchema => {
         return getFoundExceptionListItemSchemaMock();
+      },
+    },
+    {
+      id: 'eventFiltersGetOne',
+      method: 'get',
+      path: `${EXCEPTION_LIST_ITEM_URL}`,
+      handler: (): ExceptionListItemSchema => {
+        return getExceptionListItemSchemaMock();
+      },
+    },
+    {
+      id: 'eventFiltersCreateOne',
+      method: 'post',
+      path: `${EXCEPTION_LIST_ITEM_URL}`,
+      handler: (): ExceptionListItemSchema => {
+        return getExceptionListItemSchemaMock();
+      },
+    },
+    {
+      id: 'eventFiltersUpdateOne',
+      method: 'put',
+      path: `${EXCEPTION_LIST_ITEM_URL}`,
+      handler: (): ExceptionListItemSchema => {
+        return getExceptionListItemSchemaMock();
+      },
+    },
+    {
+      id: 'eventFiltersGetSummary',
+      method: 'get',
+      path: `${EXCEPTION_LIST_URL}/summary`,
+      handler: (): ExceptionListSummarySchema => {
+        return getSummaryExceptionListSchemaMock();
       },
     },
   ]);

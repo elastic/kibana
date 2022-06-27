@@ -7,21 +7,23 @@
 
 import React from 'react';
 import type { DateHistogramIndexPatternColumn } from './date_histogram';
-import { dateHistogramOperation } from './index';
-import { shallow } from 'enzyme';
+import { dateHistogramOperation } from '.';
+import { mount, shallow } from 'enzyme';
 import { EuiSwitch } from '@elastic/eui';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
-import {
-  dataPluginMock,
-  getCalculateAutoTimeExpression,
-} from '../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { dataPluginMock, getCalculateAutoTimeExpression } from '@kbn/data-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import type { IndexPatternLayer, IndexPattern } from '../../types';
 import { getFieldByNameFactory } from '../../pure_helpers';
+import { act } from 'react-dom/test-utils';
 
 const dataStart = dataPluginMock.createStartContract();
+const unifiedSearchStart = unifiedSearchPluginMock.createStartContract();
+const dataViewsStart = dataViewPluginMocks.createStartContract();
 dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression(
   (path: string) => {
     if (path === UI_SETTINGS.HISTOGRAM_MAX_BARS) {
@@ -96,6 +98,8 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataStart,
+  unifiedSearch: unifiedSearchStart,
+  dataViews: dataViewsStart,
   http: {} as HttpSetup,
   indexPattern: indexPattern1,
   operationDefinitionMap: {},
@@ -124,7 +128,7 @@ describe('date_histogram', () => {
             interval: '42w',
           },
           sourceField: 'timestamp',
-        },
+        } as DateHistogramIndexPatternColumn,
       },
     };
   });
@@ -194,6 +198,7 @@ describe('date_histogram', () => {
             interval: ['42w'],
             field: ['timestamp'],
             useNormalizedEsInterval: [true],
+            drop_partials: [false],
           }),
         })
       );
@@ -249,6 +254,7 @@ describe('date_histogram', () => {
             field: ['timestamp'],
             time_zone: ['UTC'],
             useNormalizedEsInterval: [false],
+            drop_partials: [false],
           }),
         })
       );
@@ -310,8 +316,9 @@ describe('date_histogram', () => {
         />
       );
 
-      expect(instance.find('[data-test-subj="lensDateHistogramValue"]').prop('value')).toEqual(42);
-      expect(instance.find('[data-test-subj="lensDateHistogramUnit"]').prop('value')).toEqual('w');
+      expect(
+        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('selectedOptions')
+      ).toEqual([expect.objectContaining({ label: '42w' })]);
     });
 
     it('should render current value for other index pattern', () => {
@@ -332,7 +339,7 @@ describe('date_histogram', () => {
               interval: 'd',
             },
             sourceField: 'other_timestamp',
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
       const instance = shallow(
@@ -346,11 +353,12 @@ describe('date_histogram', () => {
         />
       );
 
-      expect(instance.find('[data-test-subj="lensDateHistogramValue"]').prop('value')).toEqual('');
-      expect(instance.find('[data-test-subj="lensDateHistogramUnit"]').prop('value')).toEqual('d');
+      expect(
+        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('selectedOptions')
+      ).toEqual([expect.objectContaining({ key: 'd' })]);
     });
 
-    it('should render disabled switch and no time interval control for auto interval', () => {
+    it('should render time interval control set to auto for auto interval', () => {
       const thirdLayer: IndexPatternLayer = {
         indexPatternId: '1',
         columnOrder: ['col1'],
@@ -366,7 +374,7 @@ describe('date_histogram', () => {
               interval: 'auto',
             },
             sourceField: 'timestamp',
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
 
@@ -380,9 +388,9 @@ describe('date_histogram', () => {
           indexPattern={indexPattern1}
         />
       );
-      expect(instance.find('[data-test-subj="lensDateHistogramValue"]').exists()).toBeFalsy();
-      expect(instance.find('[data-test-subj="lensDateHistogramUnit"]').exists()).toBeFalsy();
-      expect(instance.find(EuiSwitch).prop('checked')).toBe(false);
+      expect(
+        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('selectedOptions')
+      ).toEqual([expect.objectContaining({ key: 'auto' })]);
     });
 
     it('should allow switching to manual interval', () => {
@@ -401,7 +409,7 @@ describe('date_histogram', () => {
               interval: 'auto',
             },
             sourceField: 'timestamp',
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
 
@@ -415,12 +423,134 @@ describe('date_histogram', () => {
           currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find(EuiSwitch).simulate('change', {
-        target: { checked: true },
-      });
+      instance
+        .find(EuiSwitch)
+        .at(1)
+        .simulate('change', {
+          target: { checked: true },
+        });
       expect(updateLayerSpy).toHaveBeenCalled();
       const newLayer = updateLayerSpy.mock.calls[0][0];
       expect(newLayer).toHaveProperty('columns.col1.params.interval', '30d');
+    });
+
+    it('should allow turning off time range sync', () => {
+      const thirdLayer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'Value of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            params: {
+              interval: '1h',
+            },
+            sourceField: 'timestamp',
+          } as DateHistogramIndexPatternColumn,
+        },
+      };
+
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          layer={thirdLayer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
+          indexPattern={{ ...indexPattern1, timeFieldName: undefined }}
+        />
+      );
+      instance
+        .find(EuiSwitch)
+        .at(1)
+        .simulate('change', {
+          target: { checked: false },
+        });
+      expect(updateLayerSpy).toHaveBeenCalled();
+      const newLayer = updateLayerSpy.mock.calls[0][0];
+      expect(newLayer).toHaveProperty('columns.col1.params.ignoreTimeRange', true);
+    });
+
+    it('turns off time range ignore on switching to auto interval', () => {
+      const thirdLayer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'Value of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            params: {
+              interval: '1h',
+              ignoreTimeRange: true,
+            },
+            sourceField: 'timestamp',
+          } as DateHistogramIndexPatternColumn,
+        },
+      };
+
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          layer={thirdLayer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
+          indexPattern={{ ...indexPattern1, timeFieldName: undefined }}
+        />
+      );
+      (
+        instance
+          .find('[data-test-subj="lensDateHistogramInterval"]')
+          .prop('onChange') as unknown as (v: Array<{ key: string }>) => void
+      )([{ key: 'auto' }]);
+      expect(updateLayerSpy).toHaveBeenCalled();
+      const newLayer = updateLayerSpy.mock.calls[0][0];
+      expect(newLayer).toHaveProperty('columns.col1.params.ignoreTimeRange', false);
+    });
+
+    it('turns off drop partial bucket on tuning off time range ignore', () => {
+      const thirdLayer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'Value of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            params: {
+              interval: '1h',
+              ignoreTimeRange: true,
+            },
+            sourceField: 'timestamp',
+          } as DateHistogramIndexPatternColumn,
+        },
+      };
+
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          layer={thirdLayer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
+          indexPattern={{ ...indexPattern1, timeFieldName: 'other_timestamp' }}
+        />
+      );
+      expect(instance.find(EuiSwitch).first().prop('disabled')).toBeTruthy();
     });
 
     it('should force calendar values to 1', () => {
@@ -434,12 +564,14 @@ describe('date_histogram', () => {
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDateHistogramValue"]').simulate('change', {
-        target: {
-          value: '2',
-        },
-      });
-      expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('1w'));
+      (
+        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('onCreateOption') as (
+          s: string
+        ) => void
+      )('2w');
+      expect(
+        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('isInvalid')
+      ).toBeTruthy();
     });
 
     it('should display error if an invalid interval is specified', () => {
@@ -454,7 +586,9 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeTruthy();
+      expect(
+        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('isInvalid')
+      ).toBeTruthy();
     });
 
     it('should not display error if interval value is blank', () => {
@@ -469,7 +603,9 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeFalsy();
+      expect(
+        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('isInvalid')
+      ).toBeFalsy();
     });
 
     it('should display error if interval value is 0', () => {
@@ -484,12 +620,14 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      expect(instance.find('[data-test-subj="lensDateHistogramError"]').exists()).toBeTruthy();
+      expect(
+        instance.find('[data-test-subj="lensDateHistogramInterval"]').prop('isInvalid')
+      ).toBeTruthy();
     });
 
-    it('should update the unit', () => {
+    it('should update the unit', async () => {
       const updateLayerSpy = jest.fn();
-      const instance = shallow(
+      const instance = mount(
         <InlineOptions
           {...defaultOptions}
           layer={layer}
@@ -498,19 +636,22 @@ describe('date_histogram', () => {
           currentColumn={layer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDateHistogramUnit"]').simulate('change', {
-        target: {
-          value: 'd',
-        },
+      act(() => {
+        (
+          instance
+            .find('[data-test-subj="lensDateHistogramInterval"]')
+            .at(0)
+            .prop('onCreateOption') as (s: string) => void
+        )('42d');
       });
-      expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('42d'));
+      expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual(layerWithInterval('42d'));
     });
 
     it('should update the value', () => {
       const updateLayerSpy = jest.fn();
       const testLayer = layerWithInterval('42d');
 
-      const instance = shallow(
+      const instance = mount(
         <InlineOptions
           {...defaultOptions}
           layer={testLayer}
@@ -519,12 +660,15 @@ describe('date_histogram', () => {
           currentColumn={testLayer.columns.col1 as DateHistogramIndexPatternColumn}
         />
       );
-      instance.find('[data-test-subj="lensDateHistogramValue"]').simulate('change', {
-        target: {
-          value: '9',
-        },
-      });
-      expect(updateLayerSpy).toHaveBeenCalledWith(layerWithInterval('9d'));
+      act(() =>
+        (
+          instance
+            .find('[data-test-subj="lensDateHistogramInterval"]')
+            .at(0)
+            .prop('onCreateOption') as (s: string) => void
+        )('9d')
+      );
+      expect(updateLayerSpy.mock.calls[0][0](layer)).toEqual(layerWithInterval('9d'));
     });
 
     it('should not render options if they are restricted', () => {
@@ -569,7 +713,48 @@ describe('date_histogram', () => {
         />
       );
 
-      expect(instance.find('[data-test-subj="lensDateHistogramValue"]').exists()).toBeFalsy();
+      expect(instance.find('[data-test-subj="lensDateHistogramInterval"]').exists()).toBeFalsy();
+    });
+
+    it('should allow the drop of partial buckets', () => {
+      const thirdLayer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'Value of timestamp',
+            dataType: 'date',
+            isBucketed: true,
+
+            // Private
+            operationType: 'date_histogram',
+            params: {
+              interval: 'auto',
+            },
+            sourceField: 'timestamp',
+          } as DateHistogramIndexPatternColumn,
+        },
+      };
+
+      const updateLayerSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultOptions}
+          layer={thirdLayer}
+          updateLayer={updateLayerSpy}
+          columnId="col1"
+          currentColumn={thirdLayer.columns.col1 as DateHistogramIndexPatternColumn}
+        />
+      );
+      instance
+        .find(EuiSwitch)
+        .first()
+        .simulate('change', {
+          target: { checked: true },
+        });
+      expect(updateLayerSpy).toHaveBeenCalled();
+      const newLayer = updateLayerSpy.mock.calls[0][0](layer);
+      expect(newLayer).toHaveProperty('columns.col1.params.dropPartials', true);
     });
   });
 
@@ -594,7 +779,7 @@ describe('date_histogram', () => {
               operationType: 'date_histogram',
               sourceField: 'missing',
               params: { interval: 'auto' },
-            },
+            } as DateHistogramIndexPatternColumn,
           }
         )
       ).toEqual('Missing field');

@@ -6,26 +6,54 @@
  */
 
 import { cloneDeep } from 'lodash';
-import axios from 'axios';
 import { URL } from 'url';
-import { Logger } from 'src/core/server';
-import { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
+import { transformDataToNdjson } from '@kbn/securitysolution-utils';
+
+import { Logger } from '@kbn/core/server';
+import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import axios, { AxiosInstance } from 'axios';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../task_manager/server';
-import { TelemetryReceiver } from './receiver';
-import { allowlistEventFields, copyAllowlistedFields } from './filters';
-import { DiagnosticTask, EndpointTask, ExceptionListsTask } from './tasks';
+} from '@kbn/task-manager-plugin/server';
+import { ITelemetryReceiver } from './receiver';
+import { copyAllowlistedFields, endpointAllowlistFields } from './filterlists';
+import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
-import { TelemetryEvent } from './types';
+import type { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
+import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
-export class TelemetryEventsSender {
+export interface ITelemetryEventsSender {
+  setup(
+    telemetryReceiver: ITelemetryReceiver,
+    telemetrySetup?: TelemetryPluginSetup,
+    taskManager?: TaskManagerSetupContract,
+    telemetryUsageCounter?: UsageCounter
+  ): void;
+
+  getClusterID(): string | undefined;
+
+  start(
+    telemetryStart?: TelemetryPluginStart,
+    taskManager?: TaskManagerStartContract,
+    receiver?: ITelemetryReceiver
+  ): void;
+
+  stop(): void;
+  queueTelemetryEvents(events: TelemetryEvent[]): void;
+  isTelemetryOptedIn(): Promise<boolean>;
+  isTelemetryServicesReachable(): Promise<boolean>;
+  sendIfDue(axiosInstance?: AxiosInstance): Promise<void>;
+  processEvents(events: TelemetryEvent[]): TelemetryEvent[];
+  sendOnDemand(channel: string, toSend: unknown[], axiosInstance?: AxiosInstance): Promise<void>;
+  getV3UrlFromV2(v2url: string, channel: string): string;
+}
+
+export class TelemetryEventsSender implements ITelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 60 * 1000;
   private readonly logger: Logger;
@@ -34,21 +62,22 @@ export class TelemetryEventsSender {
   private telemetrySetup?: TelemetryPluginSetup;
   private intervalId?: NodeJS.Timeout;
   private isSending = false;
-  private receiver: TelemetryReceiver | undefined;
+  private receiver: ITelemetryReceiver | undefined;
   private queue: TelemetryEvent[] = [];
-  private isOptedIn?: boolean = true; // Assume true until the first check
+
+  // Assume both true until the first check
+  private isOptedIn?: boolean = true;
+  private isElasticTelemetryReachable?: boolean = true;
 
   private telemetryUsageCounter?: UsageCounter;
-  private diagnosticTask?: DiagnosticTask;
-  private endpointTask?: EndpointTask;
-  private exceptionListsTask?: ExceptionListsTask;
+  private telemetryTasks?: SecurityTelemetryTask[];
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
   }
 
   public setup(
-    telemetryReceiver: TelemetryReceiver,
+    telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
     telemetryUsageCounter?: UsageCounter
@@ -57,30 +86,31 @@ export class TelemetryEventsSender {
     this.telemetryUsageCounter = telemetryUsageCounter;
 
     if (taskManager) {
-      this.diagnosticTask = new DiagnosticTask(this.logger, taskManager, this, telemetryReceiver);
-      this.endpointTask = new EndpointTask(this.logger, taskManager, this, telemetryReceiver);
-      this.exceptionListsTask = new ExceptionListsTask(
-        this.logger,
-        taskManager,
-        this,
-        telemetryReceiver
+      this.telemetryTasks = createTelemetryTaskConfigs().map(
+        (config: SecurityTelemetryTaskConfig) => {
+          const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
+          task.register(taskManager);
+          return task;
+        }
       );
     }
+  }
+
+  public getClusterID(): string | undefined {
+    return this.receiver?.getClusterInfo()?.cluster_uuid;
   }
 
   public start(
     telemetryStart?: TelemetryPluginStart,
     taskManager?: TaskManagerStartContract,
-    receiver?: TelemetryReceiver
+    receiver?: ITelemetryReceiver
   ) {
     this.telemetryStart = telemetryStart;
     this.receiver = receiver;
 
-    if (taskManager && this.diagnosticTask && this.endpointTask && this.exceptionListsTask) {
-      this.logger.debug(`starting security telemetry tasks`);
-      this.diagnosticTask.start(taskManager);
-      this.endpointTask.start(taskManager);
-      this.exceptionListsTask?.start(taskManager);
+    if (taskManager && this.telemetryTasks) {
+      this.logger.debug(`Starting security telemetry tasks`);
+      this.telemetryTasks.forEach((task) => task.start(taskManager));
     }
 
     this.logger.debug(`Starting local task`);
@@ -132,7 +162,68 @@ export class TelemetryEventsSender {
     return this.isOptedIn === true;
   }
 
-  private async sendIfDue() {
+  /**
+   * Issue: https://github.com/elastic/kibana/issues/133321
+   *
+   * As of 8.3 - Telemetry is opted in by default, but the Kibana instance may
+   * be deployed in a network where outbound connections are restricted. This
+   * causes hanging connections in backend telemetry code. A previous bugfix
+   * included a default timeout for the client, but this code shouldn't be
+   * reachable if we cannot connect to Elastic Telemetry Services. This
+   * function call can be utilized to check if the Kibana instance can
+   * call out.
+   *
+   * Please note that this function should be used with care. DO NOT call this
+   * function in a way that does not take into consideration if the deployment
+   * opted out of telemetry. For example,
+   *
+   * DO NOT
+   * --------
+   *
+   * if (isTelemetryServicesReachable() && isTelemetryOptedIn()) {
+   *   ...
+   * }
+   *
+   * DO
+   * --------
+   *
+   * if (isTelemetryOptedIn() && isTelemetryServicesReachable()) {
+   *   ...
+   * }
+   *
+   * Is ok because the call to `isTelemetryServicesReachable()` is never called
+   * because `isTelemetryOptedIn()` short-circuits the conditional.
+   *
+   * DO NOT
+   * --------
+   *
+   * const [optedIn, isReachable] = await Promise.all([
+   *  isTelemetryOptedIn(),
+   *  isTelemetryServicesReachable(),
+   * ]);
+   *
+   * As it does not take into consideration the execution order and makes a redundant
+   * network call to Elastic Telemetry Services.
+   *
+   * Staging URL: https://telemetry-staging.elastic.co/ping
+   * Production URL: https://telemetry.elastic.co/ping
+   */
+  public async isTelemetryServicesReachable() {
+    try {
+      const telemetryUrl = await this.fetchTelemetryPingUrl();
+      const resp = await axios.get(telemetryUrl, { timeout: 3000 });
+      if (resp.status === 200) {
+        this.logger.debug('[Security Telemetry] elastic telemetry services are reachable');
+        return true;
+      }
+
+      return false;
+    } catch (_err) {
+      return false;
+    }
+  }
+
+  public async sendIfDue(axiosInstance: AxiosInstance = axios) {
     if (this.isSending) {
       return;
     }
@@ -152,9 +243,18 @@ export class TelemetryEventsSender {
         return;
       }
 
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+      this.isElasticTelemetryReachable = await this.isTelemetryServicesReachable();
+      if (!this.isElasticTelemetryReachable) {
+        this.logger.debug(`Telemetry Services are not reachable.`);
+        this.queue = [];
+        this.isSending = false;
+        return;
+      }
+
+      const clusterInfo = this.receiver?.getClusterInfo();
+
+      const [telemetryUrl, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl('alerts-endpoint'),
-        this.receiver?.fetchClusterInfo(),
         this.receiver?.fetchLicenseInfo(),
       ]);
 
@@ -176,8 +276,10 @@ export class TelemetryEventsSender {
         telemetryUrl,
         'alerts-endpoint',
         clusterInfo?.cluster_uuid,
+        clusterInfo?.cluster_name,
         clusterInfo?.version?.number,
-        licenseInfo?.uid
+        licenseInfo?.uid,
+        axiosInstance
       );
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
@@ -188,7 +290,7 @@ export class TelemetryEventsSender {
 
   public processEvents(events: TelemetryEvent[]): TelemetryEvent[] {
     return events.map(function (obj: TelemetryEvent): TelemetryEvent {
-      return copyAllowlistedFields(allowlistEventFields, obj);
+      return copyAllowlistedFields(endpointAllowlistFields, obj);
     });
   }
 
@@ -200,11 +302,15 @@ export class TelemetryEventsSender {
    * @param channel the elastic telemetry channel
    * @param toSend telemetry events
    */
-  public async sendOnDemand(channel: string, toSend: unknown[]) {
+  public async sendOnDemand(
+    channel: string,
+    toSend: unknown[],
+    axiosInstance: AxiosInstance = axios
+  ) {
+    const clusterInfo = this.receiver?.getClusterInfo();
     try {
-      const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
+      const [telemetryUrl, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl(channel),
-        this.receiver?.fetchClusterInfo(),
         this.receiver?.fetchLicenseInfo(),
       ]);
 
@@ -218,8 +324,10 @@ export class TelemetryEventsSender {
         telemetryUrl,
         channel,
         clusterInfo?.cluster_uuid,
+        clusterInfo?.cluster_name,
         clusterInfo?.version?.number,
-        licenseInfo?.uid
+        licenseInfo?.uid,
+        axiosInstance
       );
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
@@ -247,24 +355,39 @@ export class TelemetryEventsSender {
     return url.toString();
   }
 
+  private async fetchTelemetryPingUrl(): Promise<string> {
+    const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
+    if (!telemetryUrl) {
+      throw Error("Couldn't get telemetry URL");
+    }
+
+    telemetryUrl.pathname = `/ping`;
+    return telemetryUrl.toString();
+  }
+
   private async sendEvents(
     events: unknown[],
     telemetryUrl: string,
     channel: string,
     clusterUuid: string | undefined,
+    clusterName: string | undefined,
     clusterVersionNumber: string | undefined,
-    licenseId: string | undefined
+    licenseId: string | undefined,
+    axiosInstance: AxiosInstance = axios
   ) {
     const ndjson = transformDataToNdjson(events);
 
     try {
-      const resp = await axios.post(telemetryUrl, ndjson, {
+      this.logger.debug(`Sending ${events.length} telemetry events to ${channel}`);
+      const resp = await axiosInstance.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
-          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.10.0',
+          ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
+          ...(clusterName ? { 'X-Elastic-Cluster-Name': clusterName } : undefined),
+          'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
+        timeout: 5000,
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
@@ -278,9 +401,15 @@ export class TelemetryEventsSender {
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {
-      this.logger.warn(
-        `Error sending events: ${err.response.status} ${JSON.stringify(err.response.data)}`
-      );
+      this.logger.debug(`Error sending events: ${err}`);
+      const errorStatus = err?.response?.status;
+      if (errorStatus !== undefined && errorStatus !== null) {
+        this.telemetryUsageCounter?.incrementCounter({
+          counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
+          counterType: errorStatus.toString(),
+          incrementBy: 1,
+        });
+      }
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
         counterType: 'docs_lost',

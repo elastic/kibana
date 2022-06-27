@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { BroadcastChannel as BroadcastChannelType } from 'broadcast-channel';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { skip, tap, throttleTime } from 'rxjs/operators';
@@ -15,7 +14,7 @@ import type {
   HttpSetup,
   NotificationsSetup,
   Toast,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import {
   SESSION_CHECK_MS,
@@ -24,19 +23,21 @@ import {
   SESSION_GRACE_PERIOD_MS,
   SESSION_ROUTE,
 } from '../../common/constants';
+import { LogoutReason } from '../../common/types';
 import type { SessionInfo } from '../../common/types';
 import { createSessionExpirationToast } from './session_expiration_toast';
-import type { ISessionExpired } from './session_expired';
+import type { SessionExpired } from './session_expired';
 
 export interface SessionState extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended'> {
   lastExtensionTime: number;
 }
 
 export class SessionTimeout {
-  private channel?: BroadcastChannelType<SessionState>;
+  private channel?: BroadcastChannel;
 
   private isVisible = document.visibilityState !== 'hidden';
   private isFetchingSessionInfo = false;
+  private consecutiveErrorCount = 0;
   private snoozedWarningState?: SessionState;
 
   private sessionState$ = new BehaviorSubject<SessionState>({
@@ -58,7 +59,7 @@ export class SessionTimeout {
 
   constructor(
     private notifications: NotificationsSetup,
-    private sessionExpired: ISessionExpired,
+    private sessionExpired: Pick<SessionExpired, 'logout'>,
     private http: HttpSetup,
     private tenant: string
   ) {}
@@ -75,11 +76,8 @@ export class SessionTimeout {
     // Subscribe to a broadcast channel for session timeout messages.
     // This allows us to synchronize the UX across tabs and avoid repetitive API calls.
     try {
-      const { BroadcastChannel } = await import('broadcast-channel');
-      this.channel = new BroadcastChannel(`${this.tenant}/session_timeout`, {
-        webWorkerSupport: false,
-      });
-      this.channel.onmessage = this.handleChannelMessage;
+      this.channel = new BroadcastChannel(`${this.tenant}/session_timeout`);
+      this.channel.onmessage = (event) => this.handleChannelMessage(event);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn(
@@ -106,8 +104,14 @@ export class SessionTimeout {
   /**
    * Event handler that receives session information from other browser tabs.
    */
-  private handleChannelMessage = (message: SessionState) => {
-    this.sessionState$.next(message);
+  private handleChannelMessage = (messageEvent: MessageEvent<any>) => {
+    if (this.isSessionState(messageEvent.data)) {
+      this.sessionState$.next(messageEvent.data);
+    }
+  };
+
+  private isSessionState = (data: unknown): data is SessionState => {
+    return typeof data === 'object' && Object.hasOwn(data ?? {}, 'canBeExtended');
   };
 
   /**
@@ -168,7 +172,10 @@ export class SessionTimeout {
       const fetchSessionInMs = showWarningInMs - SESSION_CHECK_MS;
 
       // Schedule logout when session is about to expire
-      this.stopLogoutTimer = startTimer(() => this.sessionExpired.logout(), logoutInMs);
+      this.stopLogoutTimer = startTimer(
+        () => this.sessionExpired.logout(LogoutReason.SESSION_EXPIRED),
+        logoutInMs
+      );
 
       // Hide warning if session has been extended
       if (showWarningInMs > 0) {
@@ -214,7 +221,8 @@ export class SessionTimeout {
     return (
       !this.isFetchingSessionInfo &&
       !this.warningToast &&
-      Date.now() > lastExtensionTime + SESSION_EXTENSION_THROTTLE_MS
+      Date.now() >
+        lastExtensionTime + SESSION_EXTENSION_THROTTLE_MS * Math.exp(this.consecutiveErrorCount)
     );
   }
 
@@ -225,6 +233,7 @@ export class SessionTimeout {
         method: extend ? 'POST' : 'GET',
         asSystemRequest: !extend,
       });
+      this.consecutiveErrorCount = 0;
       if (sessionInfo) {
         const { expiresInMs, canBeExtended } = sessionInfo;
         const nextState: SessionState = {
@@ -239,7 +248,7 @@ export class SessionTimeout {
         return nextState;
       }
     } catch (error) {
-      // ignore
+      this.consecutiveErrorCount++;
     } finally {
       this.isFetchingSessionInfo = false;
     }

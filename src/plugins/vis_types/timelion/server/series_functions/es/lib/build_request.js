@@ -10,7 +10,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
-import { UI_SETTINGS } from '../../../../../../data/server';
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
 
 export default function buildRequest(config, tlConfig, scriptFields, runtimeFields, timeout) {
   const bool = { must: [] };
@@ -66,9 +66,10 @@ export default function buildRequest(config, tlConfig, scriptFields, runtimeFiel
 
   _.assign(aggCursor, createDateAgg(config, tlConfig, scriptFields));
 
+  const includeFrozen = Boolean(tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN]);
   const request = {
     index: config.index,
-    ignore_throttled: !tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN],
+    ...(includeFrozen ? { ignore_throttled: false } : {}),
     body: {
       query: {
         bool: bool,

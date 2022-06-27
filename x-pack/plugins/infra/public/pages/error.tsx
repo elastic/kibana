@@ -14,10 +14,10 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ColumnarPage, PageContent } from '../components/page';
 
 const DetailPageContent = euiStyled(PageContent)`

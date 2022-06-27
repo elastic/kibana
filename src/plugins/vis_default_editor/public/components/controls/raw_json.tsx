@@ -8,10 +8,11 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 
-import { EuiFormRow, EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import { CodeEditor } from '../../../../kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
@@ -58,7 +59,7 @@ function RawJsonParamEditor({
       let isJsonValid = true;
       try {
         if (newValue) {
-          JSON.parse(newValue);
+          JSON.parse(XJson.collapseLiteralStrings(newValue));
         }
       } catch (e) {
         isJsonValid = false;
@@ -108,9 +109,6 @@ function RawJsonParamEditor({
             automaticLayout: true,
           }}
         />
-        <EuiScreenReaderOnly>
-          <p id="jsonEditorDescription">{editorTooltipText}</p>
-        </EuiScreenReaderOnly>
       </>
     </EuiFormRow>
   );

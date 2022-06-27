@@ -10,11 +10,12 @@ export * from './ui_actions';
 export * from './map_actions';
 export * from './map_action_constants';
 export * from './layer_actions';
+export type { DataRequestContext } from './data_request_actions';
 export {
   cancelAllInFlightRequests,
-  DataRequestContext,
   fitToLayerExtent,
   fitToDataBounds,
+  setLayerDataLoadErrorStatus,
 } from './data_request_actions';
 export {
   closeOnClickTooltip,

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
 import { useActions } from './use_actions';
 
@@ -27,11 +27,13 @@ describe('Transform: Transform List Actions', () => {
     // in the runtime result here anyway.
     expect(actions.map((a: any) => a['data-test-subj'])).toStrictEqual([
       'transformActionDiscover',
+      'transformActionCreateAlertRule',
       'transformActionStart',
       'transformActionStop',
       'transformActionEdit',
       'transformActionClone',
       'transformActionDelete',
+      'transformActionReset',
     ]);
   });
 });

@@ -12,24 +12,44 @@ import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
-import { defaultHeaders, mockTimelineData, mockTimelineModel } from '../../../../common/mock';
+import {
+  createSecuritySolutionStorageMock,
+  defaultHeaders,
+  kibanaObservable,
+  mockGlobalState,
+  mockTimelineData,
+  mockTimelineModel,
+  SUB_PLUGINS_REDUCER,
+} from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
-import { BodyComponent, StatefulBodyProps } from '.';
+import { StatefulBody, Props } from '.';
 import { Sort } from './sort';
-import { defaultControlColumn } from './control_columns';
+import { getDefaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
+import { createStore, State } from '../../../../common/store';
 
 jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/components/user_privileges', () => {
+  return {
+    useUserPrivileges: () => ({
+      listPrivileges: { loading: false, error: undefined, result: undefined },
+      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+      endpointPrivileges: {},
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    }),
+  };
+});
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -40,6 +60,11 @@ jest.mock('../../../../common/lib/kibana', () => {
           capabilities: {
             siem: { crud_alerts: true, read_alerts: true },
           },
+        },
+        cases: mockCasesContract.mockCasesContract(),
+        data: {
+          search: jest.fn(),
+          query: jest.fn(),
         },
         uiSettings: {
           get: jest.fn(),
@@ -56,10 +81,6 @@ jest.mock('../../../../common/lib/kibana', () => {
               onBlur: jest.fn(),
               onKeyDown: jest.fn(),
             }),
-          getAddToCasePopover: jest
-            .fn()
-            .mockReturnValue(<div data-test-subj="add-to-case-action">{'Add to case'}</div>),
-          getAddToCaseAction: jest.fn(),
         },
       },
     }),
@@ -70,7 +91,8 @@ jest.mock('../../../../common/lib/kibana', () => {
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
-    columnType: 'number',
+    columnType: 'date',
+    esTypes: ['date'],
     sortDirection: Direction.desc,
   },
 ];
@@ -109,6 +131,10 @@ jest.mock('../../../../common/lib/helpers/scheduler', () => ({
   maxDelay: () => 3000,
 }));
 
+jest.mock('../../fields_browser/create_field_button', () => ({
+  useCreateFieldButton: () => <></>,
+}));
+
 describe('Body', () => {
   const mount = useMountAppended();
   const mockRefetch = jest.fn();
@@ -119,36 +145,32 @@ describe('Body', () => {
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
 
-  const props: StatefulBodyProps = {
+  const ACTION_BUTTON_COUNT = 4;
+
+  const props: Props = {
     activePage: 0,
     browserFields: mockBrowserFields,
-    clearSelected: jest.fn() as unknown as StatefulBodyProps['clearSelected'],
-    columnHeaders: defaultHeaders,
     data: mockTimelineData,
-    eventIdToNoteIds: {},
-    excludedRowRendererIds: [],
     id: 'timeline-test',
-    isSelectAllChecked: false,
-    loadingEventIds: [],
-    pinnedEventIds: {},
     refetch: mockRefetch,
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
-    selectedEventIds: {},
-    setSelected: jest.fn() as unknown as StatefulBodyProps['setSelected'],
     sort: mockSort,
-    showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,
-    leadingControlColumns: [defaultControlColumn],
+    leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
     trailingControlColumns: [],
   };
 
   describe('rendering', () => {
+    beforeEach(() => {
+      mockDispatch.mockClear();
+    });
+
     test('it renders the column headers', () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} />
+          <StatefulBody {...props} />
         </TestProviders>
       );
 
@@ -158,7 +180,7 @@ describe('Body', () => {
     test('it renders the scroll container', () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} />
+          <StatefulBody {...props} />
         </TestProviders>
       );
 
@@ -168,7 +190,7 @@ describe('Body', () => {
     test('it renders events', () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} />
+          <StatefulBody {...props} />
         </TestProviders>
       );
 
@@ -180,7 +202,7 @@ describe('Body', () => {
       const testProps = { ...props, columnHeaders: headersJustTimestamp };
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...testProps} />
+          <StatefulBody {...testProps} />
         </TestProviders>
       );
       wrapper.update();
@@ -198,7 +220,6 @@ describe('Body', () => {
       });
     }, 20000);
   });
-
   describe('action on event', () => {
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
@@ -215,10 +236,10 @@ describe('Body', () => {
       mockDispatch.mockClear();
     });
 
-    test('Add a Note to an event', () => {
+    test('Add a note to an event', () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} />
+          <StatefulBody {...props} />
         </TestProviders>
       );
       addaNoteToEvent(wrapper, 'hello world');
@@ -247,18 +268,34 @@ describe('Body', () => {
       );
     });
 
-    test('Add two Note to an event', () => {
-      const Proxy = (proxyProps: StatefulBodyProps) => (
-        <TestProviders>
-          <BodyComponent {...proxyProps} />
+    test('Add two notes to an event', () => {
+      const { storage } = createSecuritySolutionStorageMock();
+      const state: State = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            'timeline-test': {
+              ...mockGlobalState.timeline.timelineById.test,
+              id: 'timeline-test',
+              pinnedEventIds: { 1: true }, // we should NOT dispatch a pin event, because it's already pinned
+            },
+          },
+        },
+      };
+
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+      const Proxy = (proxyProps: Props) => (
+        <TestProviders store={store}>
+          <StatefulBody {...proxyProps} />
         </TestProviders>
       );
 
       const wrapper = mount(<Proxy {...props} />);
       addaNoteToEvent(wrapper, 'hello world');
       mockDispatch.mockClear();
-      wrapper.setProps({ pinnedEventIds: { 1: true } });
-      wrapper.update();
       addaNoteToEvent(wrapper, 'new hello world');
       expect(mockDispatch).toHaveBeenNthCalledWith(
         2,
@@ -275,6 +312,7 @@ describe('Body', () => {
           }).type,
         })
       );
+
       expect(mockDispatch).not.toHaveBeenCalledWith(
         timelineActions.pinEvent({
           eventId: '1',
@@ -291,7 +329,7 @@ describe('Body', () => {
     test('call the right reduce action to show event details for query tab', async () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} />
+          <StatefulBody {...props} />
         </TestProviders>
       );
 
@@ -316,7 +354,7 @@ describe('Body', () => {
     test('call the right reduce action to show event details for pinned tab', async () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} tabType={TimelineTabs.pinned} />
+          <StatefulBody {...props} tabType={TimelineTabs.pinned} />
         </TestProviders>
       );
 
@@ -341,7 +379,7 @@ describe('Body', () => {
     test('call the right reduce action to show event details for notes tab', async () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} tabType={TimelineTabs.notes} />
+          <StatefulBody {...props} tabType={TimelineTabs.notes} />
         </TestProviders>
       );
 

@@ -5,33 +5,14 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import {
-  TimeRangeType,
-  TIME_RANGE_TYPE,
-} from '../../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
-
-interface DiscoverUrlConfig {
-  label: string;
-  indexPattern: string;
-  queryEntityFieldNames: string[];
-  timeRange: TimeRangeType;
-  timeRangeInterval?: string;
-}
-
-interface DashboardUrlConfig {
-  label: string;
-  dashboardName: string;
-  queryEntityFieldNames: string[];
-  timeRange: TimeRangeType;
-  timeRangeInterval?: string;
-}
-
-interface OtherUrlConfig {
-  label: string;
-  url: string;
-}
+import type {
+  DiscoverUrlConfig,
+  DashboardUrlConfig,
+  OtherUrlConfig,
+} from '../../../services/ml/job_table';
 
 // @ts-expect-error doesn't implement the full interface
 const JOB_CONFIG: Job = {
@@ -66,7 +47,7 @@ const testDiscoverCustomUrl: DiscoverUrlConfig = {
 const testDashboardCustomUrl: DashboardUrlConfig = {
   label: 'Show dashboard',
   dashboardName: 'ML Test',
-  queryEntityFieldNames: [],
+  queryEntityFieldNames: ['airline'],
   timeRange: TIME_RANGE_TYPE.INTERVAL,
   timeRangeInterval: '1h',
 };
@@ -82,11 +63,14 @@ export default function ({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('custom urls', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
+
+    let testDashboardId: string | null = null;
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
-      await ml.testResources.createMLTestDashboardIfNeeded();
+      testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
@@ -96,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.testResources.deleteMLTestDashboard();
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     it('opens the custom URLs tab in the edit job flyout', async () => {
@@ -113,7 +98,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('adds a custom URL to Dashboard in the edit job flyout', async () => {
-      await ml.jobTable.addDashboardCustomUrl(JOB_CONFIG.job_id, testDashboardCustomUrl);
+      await ml.jobTable.addDashboardCustomUrl(JOB_CONFIG.job_id, testDashboardCustomUrl, {
+        index: 1,
+        url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'airline:\"$airline$\"'))`,
+      });
     });
 
     it('adds a custom URL to an external page in the edit job flyout', async () => {

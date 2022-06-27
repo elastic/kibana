@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../../src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { notesMigrations } from './migrations/notes';
 
 export const noteSavedObjectType = 'siem-ui-timeline-note';
@@ -36,7 +36,8 @@ export const noteSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const noteType: SavedObjectsType = {
   name: noteSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: noteSavedObjectMappings,
   migrations: notesMigrations,
 };

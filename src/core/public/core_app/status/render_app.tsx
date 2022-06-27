@@ -8,7 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { AppMountParameters } from '../../application';
 import type { HttpSetup } from '../../http';
 import type { NotificationsSetup } from '../../notifications';
@@ -19,10 +20,15 @@ interface Deps {
   notifications: NotificationsSetup;
 }
 
-export const renderApp = ({ element }: AppMountParameters, { http, notifications }: Deps) => {
+export const renderApp = (
+  { element, theme$ }: AppMountParameters,
+  { http, notifications }: Deps
+) => {
   ReactDOM.render(
     <I18nProvider>
-      <StatusApp http={http} notifications={notifications} />
+      <CoreThemeProvider theme$={theme$}>
+        <StatusApp http={http} notifications={notifications} />
+      </CoreThemeProvider>
     </I18nProvider>,
     element
   );

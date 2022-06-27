@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import React, { createContext, useContext } from 'react';
 
 import { useRequest } from '../../../public/request';
 
 import { Privileges, Error as CustomError } from '../types';
 
-interface Authorization {
+export interface Authorization {
   isLoading: boolean;
   apiError: CustomError | null;
   privileges: Privileges;

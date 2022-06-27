@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
 
 import type { AuthenticationServiceSetup } from '../authentication_service';
 
@@ -26,15 +26,19 @@ export const overwrittenSessionApp = Object.freeze({
       }),
       chromeless: true,
       appRoute: '/security/overwritten_session',
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, theme$ }: AppMountParameters) {
         const [[coreStart], { renderOverwrittenSessionPage }] = await Promise.all([
           getStartServices(),
           import('./overwritten_session_page'),
         ]);
-        return renderOverwrittenSessionPage(coreStart.i18n, element, {
-          authc,
-          basePath: coreStart.http.basePath,
-        });
+        return renderOverwrittenSessionPage(
+          coreStart.i18n,
+          { element, theme$ },
+          {
+            authc,
+            basePath: coreStart.http.basePath,
+          }
+        );
       },
     });
   },

@@ -9,18 +9,18 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { Feature, Polygon } from 'geojson';
 import { DRAW_SHAPE, ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
 import { DrawState } from '../../../../../common/descriptor_types';
 import {
   createDistanceFilterWithMeta,
-  createSpatialFilterWithGeometry,
+  buildGeoShapeFilter,
   getBoundingBoxGeometry,
   roundCoordinates,
 } from '../../../../../common/elasticsearch_util';
 import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../';
+import { DrawControl } from '../draw_control';
 import { DrawCircleProperties } from '../draw_circle';
 
 export interface Props {
@@ -68,7 +68,7 @@ export class DrawFilterControl extends Component<Props, {}> {
       // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
       roundCoordinates(geometry.coordinates);
 
-      filter = createSpatialFilterWithGeometry({
+      filter = buildGeoShapeFilter({
         geometry:
           this.props.drawState.drawShape === DRAW_SHAPE.BOUNDS
             ? getBoundingBoxGeometry(geometry)

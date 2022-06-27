@@ -6,3 +6,6 @@
  */
 
 export { mapSortField } from './map_sort_field';
+export { validateOperationOnAttributes } from './validate_attributes';
+export { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
+export { applyBulkEditOperation } from './apply_bulk_edit_operation';

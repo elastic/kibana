@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { AGENTS_INDEX } from '../../../../plugins/fleet/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: AGENTS_INDEX,
         body: {
           doc: {
-            last_checkin: new Date().toISOString(),
+            last_checkin: new Date(Date.now() - 1000 * 60 * 3).toISOString(), // 2m online
           },
         },
       });
@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: AGENTS_INDEX,
         body: {
           doc: {
-            last_checkin: new Date(Date.now() - 1000 * 60 * 60 * 60 * 10).toISOString(),
+            last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(), // 6m offline
           },
         },
       });
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return the status of agents', async () => {
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agent-status`).expect(200);
+      const { body: apiResponse } = await supertest.get(`/api/fleet/agent_status`).expect(200);
 
       expect(apiResponse).to.eql({
         results: {
@@ -82,6 +82,10 @@ export default function ({ getService }: FtrProviderContext) {
           inactive: 0,
         },
       });
+    });
+
+    it('should work with deprecated api', async () => {
+      await supertest.get(`/api/fleet/agent-status`).expect(200);
     });
   });
 }

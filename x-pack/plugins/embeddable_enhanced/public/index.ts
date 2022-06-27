@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddableEnhancedPlugin } from './plugin';
 
-export {
+export type {
   SetupContract as EmbeddableEnhancedSetupContract,
   SetupDependencies as EmbeddableEnhancedSetupDependencies,
   StartContract as EmbeddableEnhancedStartContract,
@@ -19,6 +19,6 @@ export function plugin(context: PluginInitializerContext) {
   return new EmbeddableEnhancedPlugin(context);
 }
 
-export { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
+export type { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
 export { isEnhancedEmbeddable } from './embeddables';
 export { drilldownGrouping as embeddableEnhancedDrilldownGrouping } from './actions';

@@ -7,10 +7,14 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
-import { ALERT_INSTANCE_ID, ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
+import { ALERT_UUID, ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 
+import { TimelineEdges, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import {
+  Direction,
+  TimelineEventsQueries,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import { User } from '../../../../rule_registry/common/lib/authentication/types';
-import { TimelineEdges, TimelineNonEcsData } from '../../../../../plugins/timelines/common/';
 import { getSpaceUrlPrefix } from '../../../../rule_registry/common/lib/authentication/spaces';
 
 import {
@@ -33,10 +37,6 @@ import {
   secOnlySpacesAll,
   noKibanaPrivileges,
 } from '../../../../rule_registry/common/lib/authentication/users';
-import {
-  Direction,
-  TimelineEventsQueries,
-} from '../../../../../plugins/security_solution/common/search_strategy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 interface TestCase {
@@ -77,14 +77,14 @@ export default ({ getService }: FtrProviderContext) => {
         field: ALERT_RULE_CONSUMER,
       },
       {
-        field: ALERT_INSTANCE_ID,
+        field: ALERT_UUID,
       },
       {
         field: 'event.kind',
       },
     ],
     factoryQueryType: TimelineEventsQueries.all,
-    fieldRequested: ['@timestamp', 'message', ALERT_RULE_CONSUMER, ALERT_INSTANCE_ID, 'event.kind'],
+    fieldRequested: ['@timestamp', 'message', ALERT_RULE_CONSUMER, ALERT_UUID, 'event.kind'],
     fields: [],
     filterQuery: {
       bool: {
@@ -135,6 +135,8 @@ export default ({ getService }: FtrProviderContext) => {
         it(`${username} should be able to view alerts from "${featureIds.join(',')}" ${
           space != null ? `in space ${space}` : 'when no space specified'
         }`, async () => {
+          // This will be flake until it uses the bsearch service, but these tests aren't operational. Once you do make this operational
+          // use const bsearch = getService('bsearch');
           const resp = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
             .auth(username, password)
@@ -164,6 +166,8 @@ export default ({ getService }: FtrProviderContext) => {
           it(`${username} should NOT be able to view alerts from "${featureIds.join(',')}" ${
             space != null ? `in space ${space}` : 'when no space specified'
           }`, async () => {
+            // This will be flake until it uses the bsearch service, but these tests aren't operational. Once you do make this operational
+            // use const bsearch = getService('bsearch');
             const resp = await supertestWithoutAuth
               .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
               .auth(username, password)
@@ -183,6 +187,8 @@ export default ({ getService }: FtrProviderContext) => {
         it(`${username} should NOT be able to access "${featureIds.join(',')}" ${
           space != null ? `in space ${space}` : 'when no space specified'
         }`, async () => {
+          // This will be flake until it uses the bsearch service, but these tests aren't operational. Once you do make this operational
+          // use const bsearch = getService('bsearch');
           await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}`)
             .auth(username, password)

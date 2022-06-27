@@ -9,12 +9,14 @@
 import fs from 'fs';
 import { join, resolve } from 'path';
 
+import { ToolingLog } from '@kbn/tooling-log';
+
 jest.mock('fs');
 jest.mock('@kbn/utils', () => {
   return { REPO_ROOT: '/dev/null/root' };
 });
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { Lifecycle } from './lifecycle';
 import { SuiteTracker } from './suite_tracker';
 import { Suite } from '../fake_mocha_types';
@@ -60,7 +62,7 @@ describe('SuiteTracker', () => {
   };
 
   const runLifecycleWithMocks = async (mocks: Suite[], fn: (objs: any) => any = () => {}) => {
-    const lifecycle = new Lifecycle();
+    const lifecycle = new Lifecycle(new ToolingLog());
     const suiteTracker = SuiteTracker.startTracking(
       lifecycle,
       resolve(REPO_ROOT, MOCK_CONFIG_PATH)

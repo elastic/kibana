@@ -9,10 +9,10 @@
 import React, { useMemo, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 
-import { SelectOption, SwitchOption } from '../../../../../../../vis_default_editor/public';
+import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
 import { VisParams, ValueAxis } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 

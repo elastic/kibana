@@ -11,7 +11,7 @@ import {
   AggsCommonSetupDependencies,
   AggsCommonStartDependencies,
 } from './aggs_service';
-import { AggTypesDependencies, getAggTypes } from './agg_types';
+import { getAggTypes } from './agg_types';
 import { BucketAggType } from './buckets/bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';
 
@@ -19,12 +19,6 @@ describe('Aggs service', () => {
   let service: AggsCommonService;
   let setupDeps: AggsCommonSetupDependencies;
   let startDeps: AggsCommonStartDependencies;
-  const aggTypesDependencies: AggTypesDependencies = {
-    calculateBounds: jest.fn(),
-    getFieldFormatsStart: jest.fn(),
-    getConfig: jest.fn(),
-    isDefaultTimezone: () => true,
-  };
 
   beforeEach(() => {
     service = new AggsCommonService();
@@ -34,8 +28,7 @@ describe('Aggs service', () => {
     startDeps = {
       getConfig: jest.fn(),
       getIndexPattern: jest.fn(),
-      isDefaultTimezone: jest.fn(),
-    };
+    } as unknown as AggsCommonStartDependencies;
   });
 
   describe('setup()', () => {
@@ -58,8 +51,7 @@ describe('Aggs service', () => {
         () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>)
       );
       const aStart = a.start(startDeps);
-      expect(aStart.types.getAll().buckets.map((t) => t(aggTypesDependencies).name))
-        .toMatchInlineSnapshot(`
+      expect(aStart.types.getAll().buckets.map((t) => t.name)).toMatchInlineSnapshot(`
         Array [
           "date_histogram",
           "histogram",
@@ -67,22 +59,27 @@ describe('Aggs service', () => {
           "date_range",
           "ip_range",
           "terms",
+          "multi_terms",
+          "rare_terms",
           "filter",
           "filters",
           "significant_terms",
+          "significant_text",
           "geohash_grid",
           "geotile_grid",
+          "sampler",
+          "diversified_sampler",
           "foo",
         ]
       `);
-      expect(aStart.types.getAll().metrics.map((t) => t(aggTypesDependencies).name))
-        .toMatchInlineSnapshot(`
+      expect(aStart.types.getAll().metrics.map((t) => t.name)).toMatchInlineSnapshot(`
         Array [
           "count",
           "avg",
           "sum",
           "median",
           "single_percentile",
+          "single_percentile_rank",
           "min",
           "max",
           "std_dev",
@@ -90,6 +87,7 @@ describe('Aggs service', () => {
           "percentiles",
           "percentile_ranks",
           "top_hits",
+          "top_metrics",
           "derivative",
           "cumulative_sum",
           "moving_avg",
@@ -106,8 +104,7 @@ describe('Aggs service', () => {
 
       b.setup(bSetupDeps);
       const bStart = b.start(startDeps);
-      expect(bStart.types.getAll().buckets.map((t) => t(aggTypesDependencies).name))
-        .toMatchInlineSnapshot(`
+      expect(bStart.types.getAll().buckets.map((t) => t.name)).toMatchInlineSnapshot(`
         Array [
           "date_histogram",
           "histogram",
@@ -115,21 +112,26 @@ describe('Aggs service', () => {
           "date_range",
           "ip_range",
           "terms",
+          "multi_terms",
+          "rare_terms",
           "filter",
           "filters",
           "significant_terms",
+          "significant_text",
           "geohash_grid",
           "geotile_grid",
+          "sampler",
+          "diversified_sampler",
         ]
       `);
-      expect(bStart.types.getAll().metrics.map((t) => t(aggTypesDependencies).name))
-        .toMatchInlineSnapshot(`
+      expect(bStart.types.getAll().metrics.map((t) => t.name)).toMatchInlineSnapshot(`
         Array [
           "count",
           "avg",
           "sum",
           "median",
           "single_percentile",
+          "single_percentile_rank",
           "min",
           "max",
           "std_dev",
@@ -137,6 +139,7 @@ describe('Aggs service', () => {
           "percentiles",
           "percentile_ranks",
           "top_hits",
+          "top_metrics",
           "derivative",
           "cumulative_sum",
           "moving_avg",
@@ -175,13 +178,9 @@ describe('Aggs service', () => {
 
       const aggTypes = getAggTypes();
       expect(start.types.getAll().buckets.length).toBe(aggTypes.buckets.length + 1);
-      expect(start.types.getAll().buckets.some((t) => t(aggTypesDependencies).name === 'foo')).toBe(
-        true
-      );
+      expect(start.types.getAll().buckets.some((t) => t.name === 'foo')).toBe(true);
       expect(start.types.getAll().metrics.length).toBe(aggTypes.metrics.length + 1);
-      expect(start.types.getAll().metrics.some((t) => t(aggTypesDependencies).name === 'bar')).toBe(
-        true
-      );
+      expect(start.types.getAll().metrics.some((t) => t.name === 'bar')).toBe(true);
     });
 
     test('registers all agg type expression functions', () => {
@@ -196,18 +195,16 @@ describe('Aggs service', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(4);
+      expect(Object.keys(start).length).toBe(3);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
-      expect(start).toHaveProperty('datatableUtilities');
     });
 
-    test('types registry returns uninitialized type providers', () => {
+    test('types registry returns initialized type providers', () => {
       service.setup(setupDeps);
       const start = service.start(startDeps);
-      expect(typeof start.types.get('terms')).toBe('function');
-      expect(start.types.get('terms')(aggTypesDependencies).name).toBe('terms');
+      expect(start.types.get('terms').name).toBe('terms');
     });
   });
 });

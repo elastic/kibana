@@ -12,13 +12,16 @@ export {
   AGENT_API_ROUTES,
   SO_SEARCH_LIMIT,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_SAVED_OBJECT_TYPE,
-  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  AGENTS_PREFIX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   FLEET_SERVER_PACKAGE,
   // Fleet Server index
   AGENTS_INDEX,
   ENROLLMENT_API_KEYS_INDEX,
+  // Preconfiguration
+  AUTO_UPDATE_PACKAGES,
+  KEEP_POLICIES_UP_TO_DATE_PACKAGES,
+  AUTO_UPGRADE_POLICIES_PACKAGES,
 } from '../../common/constants';
 
 export * from './page_paths';
@@ -26,3 +29,15 @@ export * from './page_paths';
 export const INDEX_NAME = '.kibana';
 
 export const CUSTOM_LOGS_INTEGRATION_NAME = 'log';
+
+export const DURATION_APM_SETTINGS_VARS = {
+  IDLE_TIMEOUT: 'idle_timeout',
+  READ_TIMEOUT: 'read_timeout',
+  SHUTDOWN_TIMEOUT: 'shutdown_timeout',
+  TAIL_SAMPLING_INTERVAL: 'tail_sampling_interval',
+  WRITE_TIMEOUT: 'write_timeout',
+};
+
+export const LOCATORS_IDS = {
+  APM_LOCATOR: 'APM_LOCATOR',
+} as const;

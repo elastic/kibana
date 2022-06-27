@@ -12,8 +12,8 @@ import {
   PluginInitializerContext,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,
@@ -26,7 +26,7 @@ import {
   LazyOsqueryManagedPolicyEditExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
-import { getLazyOsqueryAction } from './shared_components';
+import { getLazyOsqueryAction, useIsOsqueryAvailableSimple } from './shared_components';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -37,18 +37,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public setup(core: CoreSetup): OsqueryPluginSetup {
-    const config = this.initializerContext.config.get<{
-      enabled: boolean;
-      actionEnabled: boolean;
-      scheduledQueries: boolean;
-      savedQueries: boolean;
-      packs: boolean;
-    }>();
-
-    if (!config.enabled) {
-      return {};
-    }
-
     const storage = this.storage;
     const kibanaVersion = this.kibanaVersion;
     // Register an application into the side navigation menu
@@ -57,11 +45,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       title: PLUGIN_NAME,
       order: 9030,
       category: DEFAULT_APP_CATEGORIES.management,
+      euiIconType: 'logoOsquery',
       async mount(params: AppMountParameters) {
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Load application bundle
         const { renderApp } = await import('./application');
+
         // Render the application
         return renderApp(
           coreStart,
@@ -78,18 +68,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
-    const config = this.initializerContext.config.get<{
-      enabled: boolean;
-      actionEnabled: boolean;
-      scheduledQueries: boolean;
-      savedQueries: boolean;
-      packs: boolean;
-    }>();
-
-    if (!config.enabled) {
-      return {};
-    }
-
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
@@ -119,6 +97,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
+      isOsqueryAvailable: useIsOsqueryAvailableSimple,
     };
   }
 

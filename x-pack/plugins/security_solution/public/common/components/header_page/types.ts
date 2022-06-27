@@ -16,7 +16,7 @@ export interface DraggableArguments {
 
 export interface BadgeOptions {
   beta?: boolean;
-  text: string;
-  tooltip?: string;
+  text: React.ReactNode;
+  tooltip?: React.ReactNode;
   color?: EuiBadgeProps['color'];
 }

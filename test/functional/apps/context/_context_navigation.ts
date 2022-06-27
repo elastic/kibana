@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_FILTER_COLUMN_NAMES = [
@@ -19,18 +20,22 @@ const TEST_FILTER_COLUMN_NAMES = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
-  const docTable = getService('docTable');
-  const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
+  const dataGrid = getService('dataGrid');
+  const PageObjects = getPageObjects(['common', 'header', 'context', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
+  const filterBar = getService('filterBar');
+  const find = getService('find');
 
   describe('discover - context - back navigation', function contextSize() {
-    before(async function () {
+    before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+      await kibanaServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
+      });
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+        await filterBar.addFilter(columnName, 'is', value);
       }
     });
 
@@ -42,9 +47,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('user navigating to context and returning to discover', async () => {
         // navigate to the context view
         const initialHitCount = await PageObjects.discover.getHitCount();
-        await docTable.clickRowToggle({ rowIndex: 0 });
-        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
-        await rowActions[0].click();
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+
+        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        await rowActions[1].click();
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         await PageObjects.context.clickSuccessorLoadMoreButton();
         await PageObjects.context.clickSuccessorLoadMoreButton();
@@ -55,6 +61,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const hitCount = await PageObjects.discover.getHitCount();
         return initialHitCount === hitCount;
       });
+    });
+
+    it('should go back via breadcrumbs with preserved state', async function () {
+      await retry.waitFor(
+        'user navigating to context and returning to discover via breadcrumbs',
+        async () => {
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+          await rowActions[1].click();
+          await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+          await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+          await PageObjects.discover.waitForDocTableLoadingComplete();
+
+          for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+            expect(await filterBar.hasFilter(columnName, value)).to.eql(true);
+          }
+          expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
+            start: 'Sep 18, 2015 @ 06:31:44.000',
+            end: 'Sep 23, 2015 @ 18:31:44.000',
+          });
+          return true;
+        }
+      );
     });
   });
 }

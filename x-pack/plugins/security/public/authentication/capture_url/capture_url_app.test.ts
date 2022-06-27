@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { captureURLApp } from './capture_url_app';
 
@@ -59,7 +59,7 @@ describe('captureURLApp', () => {
     captureURLApp.create(coreSetupMock);
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await mount(coreMock.createAppMountParamters());
+    await mount(coreMock.createAppMountParameters());
 
     expect(mockLocationReplace).toHaveBeenCalledTimes(1);
     expect(mockLocationReplace).toHaveBeenCalledWith(
@@ -77,7 +77,7 @@ describe('captureURLApp', () => {
     captureURLApp.create(coreSetupMock);
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await mount(coreMock.createAppMountParamters());
+    await mount(coreMock.createAppMountParameters());
 
     expect(mockLocationReplace).toHaveBeenCalledTimes(1);
     expect(mockLocationReplace).toHaveBeenCalledWith(

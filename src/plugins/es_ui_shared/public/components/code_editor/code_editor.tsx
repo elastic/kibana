@@ -9,9 +9,7 @@
 import React, { Component, AriaAttributes } from 'react';
 import classNames from 'classnames';
 import AceEditor, { IAceEditorProps } from 'react-ace';
-import { EuiI18n } from '@elastic/eui';
-// @ts-ignore
-import { htmlIdGenerator, keys } from '@elastic/eui/lib/services';
+import { EuiI18n, htmlIdGenerator, keys } from '@elastic/eui';
 
 import './_index.scss';
 
@@ -60,6 +58,8 @@ export interface EuiCodeEditorProps extends SupportedAriaAttributes, Omit<IAceEd
    */
   mode?: IAceEditorProps['mode'] | object;
   id?: string;
+
+  onAceEditorRef?: (editor: AceEditor | null) => void;
 }
 
 export interface EuiCodeEditorState {
@@ -100,6 +100,7 @@ class EuiCodeEditor extends Component<EuiCodeEditorProps, EuiCodeEditorState> {
       setOrRemoveAttribute(textbox, 'aria-labelledby', this.props['aria-labelledby']);
       setOrRemoveAttribute(textbox, 'aria-describedby', this.props['aria-describedby']);
     }
+    this.props.onAceEditorRef?.(aceEditor);
   };
 
   onEscToExit = () => {

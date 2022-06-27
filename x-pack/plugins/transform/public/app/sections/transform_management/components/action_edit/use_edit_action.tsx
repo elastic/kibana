@@ -22,45 +22,45 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
 
   const [config, setConfig] = useState<TransformConfigUnion>();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [indexPatternId, setIndexPatternId] = useState<string | undefined>();
+  const [dataViewId, setDataViewId] = useState<string | undefined>();
 
   const closeFlyout = () => setIsFlyoutVisible(false);
 
-  const { getIndexPatternIdByTitle } = useSearchItems(undefined);
+  const { getDataViewIdByTitle } = useSearchItems(undefined);
   const toastNotifications = useToastNotifications();
   const appDeps = useAppDependencies();
-  const indexPatterns = appDeps.data.indexPatterns;
+  const dataViews = appDeps.data.dataViews;
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        const indexPatternTitle = Array.isArray(item.config.source.index)
+        const dataViewTitle = Array.isArray(item.config.source.index)
           ? item.config.source.index.join(',')
           : item.config.source.index;
-        const currentIndexPatternId = getIndexPatternIdByTitle(indexPatternTitle);
+        const currentDataViewId = getDataViewIdByTitle(dataViewTitle);
 
-        if (currentIndexPatternId === undefined) {
+        if (currentDataViewId === undefined) {
           toastNotifications.addWarning(
-            i18n.translate('xpack.transform.edit.noIndexPatternErrorPromptText', {
+            i18n.translate('xpack.transform.edit.noDataViewErrorPromptText', {
               defaultMessage:
-                'Unable to get index pattern the transform {transformId}. No index pattern exists for {indexPattern}.',
-              values: { indexPattern: indexPatternTitle, transformId: item.id },
+                'Unable to get the data view for the transform {transformId}. No data view exists for {dataViewTitle}.',
+              values: { dataViewTitle, transformId: item.id },
             })
           );
         }
-        setIndexPatternId(currentIndexPatternId);
+        setDataViewId(currentDataViewId);
         setConfig(item.config);
         setIsFlyoutVisible(true);
       } catch (e) {
         toastNotifications.addError(e, {
           title: i18n.translate('xpack.transform.edit.errorPromptText', {
-            defaultMessage: 'An error occurred checking if source index pattern exists',
+            defaultMessage: 'An error occurred checking if source data view exists',
           }),
         });
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [indexPatterns, toastNotifications, getIndexPatternIdByTitle]
+    [dataViews, toastNotifications, getDataViewIdByTitle]
   );
 
   const action: TransformListAction = useMemo(
@@ -81,6 +81,6 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
     config,
     closeFlyout,
     isFlyoutVisible,
-    indexPatternId,
+    dataViewId,
   };
 };

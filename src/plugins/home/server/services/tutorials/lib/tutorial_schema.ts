@@ -63,6 +63,7 @@ export type Instruction = TypeOf<typeof instructionSchema>;
 const instructionVariantSchema = schema.object({
   id: schema.string(),
   instructions: schema.arrayOf(instructionSchema),
+  initialSelected: schema.maybe(schema.boolean()),
 });
 
 export type InstructionVariant = TypeOf<typeof instructionVariantSchema>;
@@ -155,7 +156,11 @@ export const tutorialSchema = schema.object({
   savedObjectsInstallMsg: schema.maybe(schema.string()),
   customStatusCheckName: schema.maybe(schema.string()),
 
+  // Category assignment for the integration browser
   integrationBrowserCategories: schema.maybe(schema.arrayOf(schema.string())),
+
+  // Name of an equivalent package in EPR. e.g. this needs to be explicitly defined if it cannot be derived from a heuristic.
+  eprPackageOverlap: schema.maybe(schema.string()),
 });
 
 export type TutorialSchema = TypeOf<typeof tutorialSchema>;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import { EndpointAppContext } from '../../types';
 import { getArtifactId, reportErrors } from './common';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
@@ -18,7 +18,7 @@ import { isEmptyManifestDiff, Manifest } from './manifest';
 import { InvalidInternalManifestError } from '../../services/artifacts/errors';
 import { ManifestManager } from '../../services';
 import { wrapErrorIfNeeded } from '../../utils';
-import { EndpointError } from '../../errors';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 export const ManifestTaskConstants = {
   TIMEOUT: '1m',
@@ -135,6 +135,7 @@ export class ManifestTask {
         }
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       if (oldManifest! == null) {
         this.logger.debug('Last computed manifest not available yet');
         return;

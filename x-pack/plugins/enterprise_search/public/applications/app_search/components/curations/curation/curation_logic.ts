@@ -7,14 +7,22 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
+import {
+  clearFlashMessages,
+  flashAPIErrors,
+  flashSuccessToast,
+} from '../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { ENGINE_CURATIONS_PATH } from '../../../routes';
+import { flattenDocument } from '../../../utils/results';
 import { EngineLogic, generateEnginePath } from '../../engine';
+import { DELETE_SUCCESS_MESSAGE } from '../constants';
 
-import { Curation } from '../types';
+import { Curation, CurationResult } from '../types';
 import { addDocument, removeDocument } from '../utils';
+
+type CurationPageTabs = 'promoted' | 'history' | 'hidden';
 
 interface CurationValues {
   dataLoading: boolean;
@@ -27,9 +35,13 @@ interface CurationValues {
   promotedDocumentsLoading: boolean;
   hiddenIds: string[];
   hiddenDocumentsLoading: boolean;
+  isAutomated: boolean;
+  selectedPageTab: CurationPageTabs;
 }
 
 interface CurationActions {
+  convertToManual(): void;
+  deleteCuration(): void;
   loadCuration(): void;
   onCurationLoad(curation: Curation): { curation: Curation };
   updateCuration(): void;
@@ -43,7 +55,7 @@ interface CurationActions {
   addHiddenId(id: string): { id: string };
   removeHiddenId(id: string): { id: string };
   clearHiddenIds(): void;
-  resetCuration(): void;
+  onSelectPageTab(pageTab: CurationPageTabs): { pageTab: CurationPageTabs };
 }
 
 interface CurationProps {
@@ -53,6 +65,8 @@ interface CurationProps {
 export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, CurationProps>>({
   path: ['enterprise_search', 'app_search', 'curation_logic'],
   actions: () => ({
+    convertToManual: true,
+    deleteCuration: true,
     loadCuration: true,
     onCurationLoad: (curation) => ({ curation }),
     updateCuration: true,
@@ -66,14 +80,13 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     addHiddenId: (id) => ({ id }),
     removeHiddenId: (id) => ({ id }),
     clearHiddenIds: true,
-    resetCuration: true,
+    onSelectPageTab: (pageTab) => ({ pageTab }),
   }),
   reducers: () => ({
     dataLoading: [
       true,
       {
         loadCuration: () => true,
-        resetCuration: () => true,
         onCurationLoad: () => false,
         onCurationError: () => false,
       },
@@ -161,18 +174,74 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         onCurationError: () => false,
       },
     ],
+    selectedPageTab: [
+      'promoted',
+      {
+        onSelectPageTab: (_, { pageTab }) => pageTab,
+      },
+    ],
+  }),
+  selectors: ({ selectors }) => ({
+    isAutomated: [
+      () => [selectors.curation],
+      (curation: CurationValues['curation']) => {
+        return curation.suggestion?.status === 'automated';
+      },
+    ],
   }),
   listeners: ({ actions, values, props }) => ({
+    convertToManual: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      try {
+        await http.put(
+          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`,
+          {
+            body: JSON.stringify([
+              {
+                query: values.activeQuery,
+                type: 'curation',
+                status: 'applied',
+              },
+            ]),
+          }
+        );
+        actions.loadCuration();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    deleteCuration: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+      const { navigateToUrl } = KibanaLogic.values;
+
+      try {
+        await http.delete(
+          `/internal/app_search/engines/${engineName}/curations/${props.curationId}`
+        );
+        navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
+        flashSuccessToast(DELETE_SUCCESS_MESSAGE);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     loadCuration: async () => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(
+        const response = await http.get<Curation>(
           `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           { query: { skip_record_analytics: 'true' } }
         );
-        actions.onCurationLoad(response);
+        const payload = {
+          ...response,
+          hidden: response.hidden.map((x) => flattenDocument(x) as CurationResult),
+          promoted: response.promoted.map((x) => flattenDocument(x) as CurationResult),
+        };
+        actions.onCurationLoad(payload);
       } catch (e) {
         const { navigateToUrl } = KibanaLogic.values;
 
@@ -188,9 +257,10 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       clearFlashMessages();
 
       try {
-        const response = await http.put(
+        const response = await http.put<Curation>(
           `/internal/app_search/engines/${engineName}/curations/${props.curationId}`,
           {
+            query: { skip_record_analytics: 'true' },
             body: JSON.stringify({
               queries: values.queries,
               query: values.activeQuery,
@@ -199,7 +269,12 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
             }),
           }
         );
-        actions.onCurationLoad(response);
+        const payload = {
+          ...response,
+          hidden: response.hidden.map((x) => flattenDocument(x) as CurationResult),
+          promoted: response.promoted.map((x) => flattenDocument(x) as CurationResult),
+        };
+        actions.onCurationLoad(payload);
       } catch (e) {
         flashAPIErrors(e);
         actions.onCurationError();
@@ -211,6 +286,9 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
 
       actions.updateCuration();
     },
+    onSelectPageTab: () => {
+      clearFlashMessages();
+    },
     setActiveQuery: () => actions.updateCuration(),
     setPromotedIds: () => actions.updateCuration(),
     addPromotedId: () => actions.updateCuration(),
@@ -219,9 +297,5 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     addHiddenId: () => actions.updateCuration(),
     removeHiddenId: () => actions.updateCuration(),
     clearHiddenIds: () => actions.updateCuration(),
-    resetCuration: () => {
-      actions.clearPromotedIds();
-      actions.clearHiddenIds();
-    },
   }),
 });

@@ -6,34 +6,38 @@
  */
 
 import { uniq, defaultsDeep, cloneDeep } from 'lodash';
+import { ESSearchRequest, ESFilter } from '@kbn/core/types/elasticsearch';
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
-import {
-  ESSearchRequest,
-  ESFilter,
-} from '../../../../../../../../src/core/types/elasticsearch';
-import { APMEventESSearchRequest, APMEventESTermsEnumRequest } from '.';
-import {
-  ApmIndicesConfig,
-  ApmIndicesName,
-} from '../../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 
-const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
-  [ProcessorEvent.transaction]: 'apm_oss.transactionIndices',
-  [ProcessorEvent.span]: 'apm_oss.spanIndices',
-  [ProcessorEvent.metric]: 'apm_oss.metricsIndices',
-  [ProcessorEvent.error]: 'apm_oss.errorIndices',
+const processorEventIndexMap = {
+  [ProcessorEvent.transaction]: 'transaction',
+  [ProcessorEvent.span]: 'span',
+  [ProcessorEvent.metric]: 'metric',
+  [ProcessorEvent.error]: 'error',
   // TODO: should have its own config setting
-  [ProcessorEvent.profile]: 'apm_oss.transactionIndices',
-};
+  [ProcessorEvent.profile]: 'transaction',
+} as const;
+
+export function processorEventsToIndex(
+  events: ProcessorEvent[],
+  indices: ApmIndicesConfig
+) {
+  return uniq(events.map((event) => indices[processorEventIndexMap[event]]));
+}
 
 export function unpackProcessorEvents(
-  request: APMEventESSearchRequest | APMEventESTermsEnumRequest,
+  request: {
+    apm: {
+      events: ProcessorEvent[];
+    };
+  },
   indices: ApmIndicesConfig
 ) {
   const { apm, ...params } = request;
   const events = uniq(apm.events);
-  const index = events.map((event) => indices[processorEventIndexMap[event]]);
+  const index = processorEventsToIndex(events, indices);
 
   const withFilterForProcessorEvent: ESSearchRequest & {
     body: { query: { bool: { filter: ESFilter[] } } };

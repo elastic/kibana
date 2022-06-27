@@ -15,7 +15,7 @@ const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
@@ -24,6 +24,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos_custom');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/date_nanos_custom'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
@@ -31,9 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('displays predessors - anchor - successors in right order ', async function () {
+    it('displays predecessors - anchor - successors in right order', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, '1');
-      const actualRowsText = await docTable.getRowsText();
+      const actualRowsText = await dataGrid.getRowsText();
+
       const expectedRowsText = [
         'Oct 21, 2019 @ 08:30:04.828733000',
         'Oct 21, 2019 @ 00:30:04.828740000',
@@ -45,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_custom');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
   });
 }

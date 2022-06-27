@@ -11,26 +11,11 @@ import { services } from './services';
 import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
     ...functionalConfig.getAll(),
-
-    testFiles: [
-      // these 5 tests all load addSampleDataSet('flights')
-      // only the last test does removeSampleDataSet('flights')
-      require.resolve('./apps/dashboard'),
-      require.resolve('./apps/dashboard_panel'),
-      require.resolve('./apps/filter_panel'),
-      require.resolve('./apps/home'),
-      require.resolve('./apps/kibana_overview'),
-
-      // next tests don't use sample data
-      require.resolve('./apps/discover'),
-      require.resolve('./apps/visualize'),
-      require.resolve('./apps/management'),
-      require.resolve('./apps/console'),
-    ],
+    testFiles: [require.resolve('./apps')],
     pageObjects,
     services,
 

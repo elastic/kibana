@@ -20,7 +20,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
  */
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const httpConfig = await readConfigFile(require.resolve('../../config'));
+  const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
 
   // Find all folders in __fixtures__/plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, '../../__fixtures__/plugins'));
@@ -51,7 +51,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       runOptions: {
         ...httpConfig.get('kbnTestServer.runOptions'),
         // Don't wait for Kibana to be completely ready so that we can test the status timeouts
-        wait: /\[Kibana\]\[http\] http server running/,
+        wait: /Kibana is now unavailable/,
+        alwaysUseSource: true,
       },
     },
   };

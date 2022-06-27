@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import Path from 'path';
 import { inspect } from 'util';
 
-import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import { run, Flags } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import exitHook from 'exit-hook';
 
 import { FunctionalTestRunner } from './functional_test_runner';
 
-const makeAbsolutePath = (v: string) => resolve(process.cwd(), v);
+const makeAbsolutePath = (v: string) => Path.resolve(process.cwd(), v);
 const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
 const parseInstallDir = (flags: Flags) => {
   const flag = flags['kibana-install-dir'];
@@ -27,14 +30,32 @@ const parseInstallDir = (flags: Flags) => {
 };
 
 export function runFtrCli() {
+  const runStartTime = Date.now();
+  const toolingLog = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+  const reportTime = getTimeReporter(toolingLog, 'scripts/functional_test_runner');
   run(
     async ({ flags, log }) => {
+      const esVersion = flags['es-version'] || undefined; // convert "" to undefined
+      if (esVersion !== undefined && typeof esVersion !== 'string') {
+        throw createFlagError('expected --es-version to be a string');
+      }
+
+      const configRel = flags.config;
+      if (typeof configRel !== 'string' || !configRel) {
+        throw createFlagError('--config is required');
+      }
+      const configPath = makeAbsolutePath(configRel);
+
       const functionalTestRunner = new FunctionalTestRunner(
         log,
-        makeAbsolutePath(flags.config as string),
+        configPath,
         {
           mochaOpts: {
             bail: flags.bail,
+            dryRun: flags['dry-run'],
             grep: flags.grep || undefined,
             invert: flags.invert,
           },
@@ -51,8 +72,11 @@ export function runFtrCli() {
           },
           updateBaselines: flags.updateBaselines || flags.u,
           updateSnapshots: flags.updateSnapshots || flags.u,
-        }
+        },
+        esVersion
       );
+
+      await functionalTestRunner.readConfigFile();
 
       if (flags.throttle) {
         process.env.TEST_THROTTLE_NETWORK = '1';
@@ -68,16 +92,22 @@ export function runFtrCli() {
 
         teardownRun = true;
         if (err) {
-          log.indent(-log.indent());
+          await reportTime(runStartTime, 'total', {
+            success: false,
+            err: err.message,
+            ...flags,
+          });
+          log.indent(-log.getIndent());
           log.error(err);
           process.exitCode = 1;
+        } else {
+          await reportTime(runStartTime, 'total', {
+            success: true,
+            ...flags,
+          });
         }
 
-        try {
-          await functionalTestRunner.close();
-        } finally {
-          process.exit();
-        }
+        process.exit();
       };
 
       process.on('unhandledRejection', (err) =>
@@ -115,6 +145,7 @@ export function runFtrCli() {
           'include-tag',
           'exclude-tag',
           'kibana-install-dir',
+          'es-version',
         ],
         boolean: [
           'bail',
@@ -125,15 +156,14 @@ export function runFtrCli() {
           'u',
           'throttle',
           'headless',
+          'dry-run',
         ],
-        default: {
-          config: 'test/functional/config.js',
-        },
         help: `
           --config=path      path to a config file
           --bail             stop tests after the first failure
           --grep <pattern>   pattern used to select which tests to run
           --invert           invert grep to exclude tests
+          --es-version       the elasticsearch version, formatted as "x.y.z"
           --include=file     a test file to be included, pass multiple times for multiple files
           --exclude=file     a test file to be excluded, pass multiple times for multiple files
           --include-tag=tag  a tag to be included, pass multiple times for multiple tags. Only
@@ -150,6 +180,7 @@ export function runFtrCli() {
           --kibana-install-dir  directory where the Kibana install being tested resides
           --throttle         enable network throttling in Chrome browser
           --headless         run browser in headless mode
+          --dry-run          report tests without executing them
         `,
       },
     }

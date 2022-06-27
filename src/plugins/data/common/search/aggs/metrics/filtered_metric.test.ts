@@ -52,7 +52,8 @@ describe('filtered metric agg type', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
   });
 
@@ -68,5 +69,11 @@ describe('filtered metric agg type', () => {
         },
       })
     ).toEqual(10);
+  });
+
+  it('provides the id of the inner filter bucket to look up the agg config in the response object', () => {
+    const agg = aggConfigs.getResponseAggs()[0];
+
+    expect(agg.getResponseId()).toEqual('filtered_metric-bucket');
   });
 });

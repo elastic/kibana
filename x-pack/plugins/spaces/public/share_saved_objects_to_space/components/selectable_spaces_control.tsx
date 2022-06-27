@@ -22,11 +22,10 @@ import {
 import React, { lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { DocumentationLinksService } from '../../lib';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { useSpaces } from '../../spaces_context';
 import type { SpacesDataEntry } from '../../types';
@@ -44,6 +43,7 @@ interface Props {
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
   enableSpaceAgnosticBehavior: boolean;
+  prohibitedSpaces: Set<string>;
 }
 
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
@@ -51,7 +51,9 @@ type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 const ROW_HEIGHT = 40;
 const APPEND_ACTIVE_SPACE = (
   <EuiBadge color="hollow">
-    {i18n.translate('xpack.spaces.shareToSpace.currentSpaceBadge', { defaultMessage: 'Current' })}
+    {i18n.translate('xpack.spaces.shareToSpace.currentSpaceBadge', {
+      defaultMessage: 'This space',
+    })}
   </EuiBadge>
 );
 const APPEND_CANNOT_SELECT = (
@@ -72,6 +74,18 @@ const APPEND_CANNOT_DESELECT = (
     type="iInCircle"
   />
 );
+const APPEND_PROHIBITED = (
+  <EuiIconTip
+    title={i18n.translate('xpack.spaces.shareToSpace.prohibitedSpaceTooltipTitle', {
+      defaultMessage: 'Cannot share to this space',
+    })}
+    content={i18n.translate('xpack.spaces.shareToSpace.prohibitedSpaceTooltip', {
+      defaultMessage: 'A copy of this saved object exists in this space.',
+    })}
+    position="left"
+    type="iInCircle"
+  />
+);
 const APPEND_FEATURE_IS_DISABLED = (
   <EuiIconTip
     content={i18n.translate('xpack.spaces.shareToSpace.featureIsDisabledTooltip', {
@@ -84,8 +98,14 @@ const APPEND_FEATURE_IS_DISABLED = (
 );
 
 export const SelectableSpacesControl = (props: Props) => {
-  const { spaces, shareOptions, onChange, enableCreateNewSpaceLink, enableSpaceAgnosticBehavior } =
-    props;
+  const {
+    spaces,
+    shareOptions,
+    onChange,
+    enableCreateNewSpaceLink,
+    enableSpaceAgnosticBehavior,
+    prohibitedSpaces,
+  } = props;
   const { services } = useSpaces();
   const { application, docLinks } = services;
   const { selectedSpaceIds, initiallySelectedSpaceIds } = shareOptions;
@@ -93,23 +113,27 @@ export const SelectableSpacesControl = (props: Props) => {
   const activeSpaceId =
     !enableSpaceAgnosticBehavior && spaces.find((space) => space.isActiveSpace)!.id;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
-  const options = spaces
-    .filter(
-      // filter out spaces that are not already selected and have the feature disabled in that space
-      ({ id, isFeatureDisabled }) => !isFeatureDisabled || initiallySelectedSpaceIds.includes(id)
-    )
+  const filteredSpaces = spaces.filter(
+    // filter out spaces that are not already selected and have the feature disabled in that space
+    ({ id, isFeatureDisabled }) =>
+      !isFeatureDisabled || initiallySelectedSpaceIds.includes(id) || isGlobalControlChecked
+  );
+
+  const options = filteredSpaces
     .sort(createSpacesComparator(activeSpaceId))
     .map<SpaceOption>((space) => {
       const checked = selectedSpaceIds.includes(space.id);
       const { isAvatarDisabled, ...additionalProps } = getAdditionalProps(
         space,
         activeSpaceId,
-        checked
+        checked,
+        isGlobalControlChecked,
+        prohibitedSpaces
       );
       return {
         label: space.name,
         prepend: <LazySpaceAvatar space={space} isDisabled={isAvatarDisabled} size={'s'} />, // wrapped in a Suspense below
-        checked: checked ? 'on' : undefined,
+        checked: checked || isGlobalControlChecked ? 'on' : undefined,
         ['data-space-id']: space.id,
         ['data-test-subj']: `sts-space-selector-row-${space.id}`,
         ...(isGlobalControlChecked && { disabled: true }),
@@ -135,18 +159,18 @@ export const SelectableSpacesControl = (props: Props) => {
       return null;
     }
 
-    const kibanaPrivilegesUrl = new DocumentationLinksService(
-      docLinks!
-    ).getKibanaPrivilegesDocUrl();
+    const hiddenCount = selectedSpaceIds.filter((id) => id === UNKNOWN_SPACE).length;
+    const docLink = docLinks?.links.security.kibanaPrivileges;
     return (
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.spaces.shareToSpace.unknownSpacesLabel.text"
-            defaultMessage="To view hidden spaces, you need {additionalPrivilegesLink}."
+            defaultMessage="To view {hiddenCount} hidden spaces, you need {additionalPrivilegesLink}."
             values={{
+              hiddenCount,
               additionalPrivilegesLink: (
-                <EuiLink href={kibanaPrivilegesUrl} target="_blank">
+                <EuiLink href={docLink} target="_blank">
                   <FormattedMessage
                     id="xpack.spaces.shareToSpace.unknownSpacesLabel.additionalPrivilegesLink"
                     defaultMessage="additional privileges"
@@ -172,41 +196,37 @@ export const SelectableSpacesControl = (props: Props) => {
 
   // if space-agnostic behavior is not enabled, the active space is not selected or deselected by the user, so we have to artificially pad the count for this label
   const selectedCountPad = enableSpaceAgnosticBehavior ? 0 : 1;
-  const selectedCount =
-    selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID && id !== UNKNOWN_SPACE).length +
-    selectedCountPad;
-  const hiddenCount = selectedSpaceIds.filter((id) => id === UNKNOWN_SPACE).length;
+  const selectedCount = isGlobalControlChecked
+    ? filteredSpaces.length
+    : selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID && id !== UNKNOWN_SPACE).length +
+      selectedCountPad;
   const selectSpacesLabel = i18n.translate(
     'xpack.spaces.shareToSpace.shareModeControl.selectSpacesLabel',
     { defaultMessage: 'Select spaces' }
   );
   const selectedSpacesLabel = i18n.translate(
     'xpack.spaces.shareToSpace.shareModeControl.selectedCountLabel',
-    { defaultMessage: '{selectedCount} selected', values: { selectedCount } }
+    {
+      defaultMessage: '{selectedCount}/{totalCount} selected',
+      values: { selectedCount, totalCount: filteredSpaces.length },
+    }
   );
-  const hiddenSpacesLabel = i18n.translate(
-    'xpack.spaces.shareToSpace.shareModeControl.hiddenCountLabel',
-    { defaultMessage: '+{hiddenCount} hidden', values: { hiddenCount } }
-  );
-  const hiddenSpaces = hiddenCount ? <EuiText size="xs">{hiddenSpacesLabel}</EuiText> : null;
   return (
     <>
       <EuiFormRow
         label={selectSpacesLabel}
-        labelAppend={
-          <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">{selectedSpacesLabel}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{hiddenSpaces}</EuiFlexItem>
-          </EuiFlexGroup>
-        }
+        labelAppend={<EuiText size="xs">{selectedSpacesLabel}</EuiText>}
         fullWidth
       >
         <></>
       </EuiFormRow>
 
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        style={{ minHeight: 200 }}
+      >
         <EuiFlexItem>
           <Suspense fallback={<EuiLoadingSpinner />}>
             <EuiSelectable
@@ -245,7 +265,9 @@ export const SelectableSpacesControl = (props: Props) => {
 function getAdditionalProps(
   space: SpacesDataEntry,
   activeSpaceId: string | false,
-  checked: boolean
+  checked: boolean,
+  isGlobalControlChecked: boolean,
+  prohibitedSpaces: Set<string>
 ) {
   if (space.id === activeSpaceId) {
     return {
@@ -254,7 +276,7 @@ function getAdditionalProps(
       checked: 'on' as 'on',
     };
   }
-  if (!space.isAuthorizedForPurpose('shareSavedObjectsIntoSpace')) {
+  if (!isGlobalControlChecked && !space.isAuthorizedForPurpose('shareSavedObjectsIntoSpace')) {
     return {
       append: (
         <>
@@ -262,6 +284,19 @@ function getAdditionalProps(
           {space.isFeatureDisabled ? APPEND_FEATURE_IS_DISABLED : null}
         </>
       ),
+      ...(space.isFeatureDisabled && { isAvatarDisabled: true }),
+      disabled: true,
+    };
+  }
+  if (prohibitedSpaces.has(space.id) || prohibitedSpaces.has(ALL_SPACES_ID)) {
+    return {
+      append: (
+        <>
+          {APPEND_PROHIBITED}
+          {space.isFeatureDisabled ? APPEND_FEATURE_IS_DISABLED : null}
+        </>
+      ),
+      ...(space.isFeatureDisabled && { isAvatarDisabled: true }),
       disabled: true,
     };
   }

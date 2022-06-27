@@ -11,8 +11,8 @@ import { schema, ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
 import { ActionsConfig } from '../config';
-import { Logger } from '../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { resolveCustomHosts, getCanonicalCustomHostUrl } from './custom_host_settings';
 
@@ -65,7 +65,6 @@ describe('custom_host_settings', () => {
 
   describe('resolveCustomHosts()', () => {
     const defaultActionsConfig: ActionsConfig = {
-      enabled: true,
       allowedHosts: [],
       enabledActionTypes: [],
       preconfiguredAlertHistoryEsIndex: false,

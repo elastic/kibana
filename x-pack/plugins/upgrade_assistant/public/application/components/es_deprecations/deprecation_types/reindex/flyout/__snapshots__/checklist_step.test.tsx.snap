@@ -3,44 +3,32 @@
 exports[`ChecklistFlyout renders 1`] = `
 <Fragment>
   <EuiFlyoutBody>
-    <EuiCallOut
-      color="warning"
-      iconType="alert"
-      title={
-        <FormattedMessage
-          defaultMessage="Index is unable to ingest, update, or delete documents while reindexing"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle"
-          values={Object {}}
-        />
-      }
-    >
+    <EuiText>
       <p>
         <FormattedMessage
-          defaultMessage="If you can’t stop document updates or need to reindex into a new cluster, consider using a different upgrade strategy."
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail"
-          values={Object {}}
+          defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
+          values={
+            Object {
+              "docsLink": <EuiLink
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/docs-reindex.html#reindex-from-remote"
+                target="_blank"
+              >
+                Learn more
+              </EuiLink>,
+            }
+          }
         />
       </p>
       <p>
         <FormattedMessage
-          defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will need to return to this page to resume reindexing."
+          defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress or resume reindexing after a Kibana restart."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
           values={Object {}}
         />
       </p>
-    </EuiCallOut>
+    </EuiText>
     <EuiSpacer />
-    <EuiTitle
-      size="xs"
-    >
-      <h3>
-        <FormattedMessage
-          defaultMessage="Reindexing process"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
-          values={Object {}}
-        />
-      </h3>
-    </EuiTitle>
     <ReindexProgress
       cancelReindex={[MockFunction]}
       reindexState={
@@ -49,6 +37,11 @@ exports[`ChecklistFlyout renders 1`] = `
           "hasRequiredPrivileges": true,
           "lastCompletedStep": undefined,
           "loadingState": 1,
+          "meta": Object {
+            "aliases": Array [],
+            "indexName": "myIndex",
+            "reindexName": "reindexed-myIndex",
+          },
           "reindexTaskPercComplete": null,
           "reindexWarnings": Array [],
           "status": undefined,
@@ -80,13 +73,14 @@ exports[`ChecklistFlyout renders 1`] = `
       >
         <EuiButton
           color="primary"
+          data-test-subj="startReindexingButton"
           disabled={false}
           fill={true}
           isLoading={false}
           onClick={[MockFunction]}
         >
           <FormattedMessage
-            defaultMessage="Run reindex"
+            defaultMessage="Start reindexing"
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
             values={Object {}}
           />

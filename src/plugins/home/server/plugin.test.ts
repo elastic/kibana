@@ -8,8 +8,8 @@
 
 import { registryForTutorialsMock, registryForSampleDataMock } from './plugin.test.mocks';
 import { HomeServerPlugin, HomeServerPluginSetupDependencies } from './plugin';
-import { coreMock, httpServiceMock } from '../../../core/server/mocks';
-import { customIntegrationsMock } from '../../custom_integrations/server/mocks';
+import { coreMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 
 describe('HomeServerPlugin', () => {
   let homeServerPluginSetupDependenciesMock: HomeServerPluginSetupDependencies;
@@ -77,7 +77,7 @@ describe('HomeServerPlugin', () => {
     test('is defined', () => {
       const plugin = new HomeServerPlugin(initContext);
       plugin.setup(mockCoreSetup, homeServerPluginSetupDependenciesMock); // setup() must always be called before start()
-      const start = plugin.start();
+      const start = plugin.start(coreMock.createStart());
       expect(start).toBeDefined();
       expect(start).toHaveProperty('tutorials');
       expect(start).toHaveProperty('sampleData');

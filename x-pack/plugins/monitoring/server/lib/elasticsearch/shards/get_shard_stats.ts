@@ -6,20 +6,15 @@
  */
 
 import { get } from 'lodash';
-// @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
-import { createQuery } from '../../create_query';
-// @ts-ignore
-import { ElasticsearchMetric } from '../../metrics';
-// @ts-ignore
-import { normalizeIndexShards, normalizeNodeShards } from './normalize_shard_objects';
-// @ts-ignore
-import { getShardAggs } from './get_shard_stat_aggs';
-// @ts-ignore
-import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
+import { ElasticsearchModifiedSource, ElasticsearchResponse } from '../../../../common/types/es';
+import { Globals } from '../../../static_globals';
 import { LegacyRequest } from '../../../types';
-import { ElasticsearchResponse, ElasticsearchModifiedSource } from '../../../../common/types/es';
+import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { createQuery } from '../../create_query';
+import { ElasticsearchMetric } from '../../metrics';
+import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
+import { getShardAggs } from './get_shard_stat_aggs';
+import { normalizeIndexShards, normalizeNodeShards } from './normalize_shard_objects';
 
 export function handleResponse(
   resp: ElasticsearchResponse,
@@ -55,13 +50,30 @@ export function handleResponse(
 
 export function getShardStats(
   req: LegacyRequest,
-  esIndexPattern: string,
   cluster: ElasticsearchModifiedSource,
-  { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {}
+  {
+    includeNodes = false,
+    includeIndices = false,
+    indexName = null,
+    nodeUuid = null,
+  }: {
+    includeNodes?: boolean;
+    includeIndices?: boolean;
+    indexName?: string | null;
+    nodeUuid?: string | null;
+  } = {}
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
+  const dataset = 'shard'; // data_stream.dataset
+  const type = 'shards'; // legacy
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
 
-  const config = req.server.config();
+  const config = req.server.config;
   const metric = ElasticsearchMetric.getMetricFields();
   const filters = [];
   if (cluster.cluster_state?.state_uuid) {
@@ -69,7 +81,8 @@ export function getShardStats(
   } else if (cluster.elasticsearch?.cluster?.stats?.state?.state_uuid) {
     filters.push({
       term: {
-        'elasticsearch.cluster.state.id': cluster.elasticsearch.cluster.stats.state.state_uuid,
+        'elasticsearch.cluster.stats.state.state_uuid':
+          cluster.elasticsearch.cluster.stats.state.state_uuid,
       },
     });
   }
@@ -94,13 +107,15 @@ export function getShardStats(
     });
   }
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        types: ['shard', 'shards'],
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
         filters,
@@ -110,7 +125,6 @@ export function getShardStats(
       },
     },
   };
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return callWithRequest(req, 'search', params).then((resp) => {
     return handleResponse(resp, includeNodes, includeIndices, cluster);

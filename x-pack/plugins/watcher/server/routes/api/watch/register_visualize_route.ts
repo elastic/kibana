@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 
 // @ts-ignore
-import { Watch } from '../../../models/watch/index';
+import { Watch } from '../../../models/watch';
 // @ts-ignore
-import { VisualizeOptions } from '../../../models/visualize_options/index';
+import { VisualizeOptions } from '../../../models/visualize_options';
 
 const bodySchema = schema.object({
   watch: schema.object({}, { unknowns: 'allow' }),
@@ -30,13 +30,14 @@ function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: 
       },
       { ignore: [404] }
     )
-    .then(({ body: result }) => result);
+    .then((result) => result);
 }
 
 export function registerVisualizeRoute({
   router,
   license,
   lib: { handleEsError },
+  kibanaVersion,
 }: RouteDependencies) {
   router.post(
     {
@@ -48,10 +49,11 @@ export function registerVisualizeRoute({
     license.guardApiRoute(async (ctx, request, response) => {
       const watch = Watch.fromDownstreamJson(request.body.watch);
       const options = VisualizeOptions.fromDownstreamJson(request.body.options);
-      const body = watch.getVisualizeQuery(options);
+      const body = watch.getVisualizeQuery(options, kibanaVersion);
 
       try {
-        const hits = await fetchVisualizeData(ctx.core.elasticsearch.client, watch.index, body);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hits = await fetchVisualizeData(esClient, watch.index, body);
         const visualizeData = watch.formatVisualizeData(hits);
 
         return response.ok({

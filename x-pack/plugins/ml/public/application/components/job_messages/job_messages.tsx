@@ -16,18 +16,19 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 
 import { JobMessage } from '../../../../common/types/audit_message';
 import { JobIcon } from '../job_message_icon';
 import { timeFormatter } from '../../../../common/util/date_utils';
+import { blurButtonOnClick } from '../../util/component_utils';
 
 interface JobMessagesProps {
   messages: JobMessage[];
   loading: boolean;
   error: string;
-  refreshMessage?: React.MouseEventHandler<HTMLButtonElement>;
+  refreshMessage?: () => Promise<void>;
   actionHandler?: (message: JobMessage) => void;
 }
 
@@ -51,7 +52,9 @@ export const JobMessages: FC<JobMessagesProps> = ({
           })}
         >
           <EuiButtonIcon
-            onClick={refreshMessage}
+            onClick={blurButtonOnClick(() => {
+              refreshMessage();
+            })}
             iconType="refresh"
             aria-label={i18n.translate('xpack.ml.jobMessages.refreshAriaLabel', {
               defaultMessage: 'Refresh',

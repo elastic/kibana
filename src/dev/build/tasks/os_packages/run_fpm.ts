@@ -8,7 +8,7 @@
 
 import { resolve } from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { exec, Config, Build } from '../../lib';
 
@@ -85,7 +85,7 @@ export async function runFpm(
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
-    `/etc/kibana/kibana.yml`,
+    `/etc/kibana`,
 
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
@@ -113,6 +113,8 @@ export async function runFpm(
     '--exclude',
     `usr/share/kibana/data`,
     '--exclude',
+    `usr/share/kibana/logs`,
+    '--exclude',
     'run/kibana/.gitempty',
 
     // flags specific to the package we are building, supplied by tasks below
@@ -128,6 +130,9 @@ export async function runFpm(
 
     // copy the data directory at /var/lib/kibana
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
+
+    // copy the logs directory at /var/log/kibana
+    `${resolveWithTrailingSlash(fromBuild('logs'))}=/var/log/kibana/`,
 
     // copy package configurations
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,

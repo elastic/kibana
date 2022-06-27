@@ -6,27 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
 import {
   ApiDeclaration,
   MissingApiItemMap,
   PluginApi,
+  PluginOrPackage,
   ReferencedDeprecationsByPlugin,
+  UnreferencedDeprecationsByPlugin,
 } from './types';
 import { removeBrokenLinks } from './utils';
 
 export function getPluginApiMap(
   project: Project,
-  plugins: KibanaPlatformPlugin[],
+  plugins: PluginOrPackage[],
   log: ToolingLog,
   { collectReferences, pluginFilter }: { collectReferences: boolean; pluginFilter?: string[] }
 ): {
   pluginApiMap: { [key: string]: PluginApi };
   missingApiItems: MissingApiItemMap;
   referencedDeprecations: ReferencedDeprecationsByPlugin;
-  unReferencedDeprecations: ApiDeclaration[];
+  unreferencedDeprecations: UnreferencedDeprecationsByPlugin;
 } {
   log.debug('Building plugin API map, getting missing comments, and collecting deprecations...');
   const pluginApiMap: { [key: string]: PluginApi } = {};
@@ -46,21 +48,21 @@ export function getPluginApiMap(
   const missingApiItems: { [key: string]: { [key: string]: string[] } } = {};
   const referencedDeprecations: ReferencedDeprecationsByPlugin = {};
 
-  const unReferencedDeprecations: ApiDeclaration[] = [];
+  const unreferencedDeprecations: UnreferencedDeprecationsByPlugin = {};
 
   plugins.forEach((plugin) => {
     const id = plugin.manifest.id;
     const pluginApi = pluginApiMap[id];
     removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap, log);
-    collectDeprecations(pluginApi, referencedDeprecations, unReferencedDeprecations);
+    collectDeprecations(pluginApi, referencedDeprecations, unreferencedDeprecations);
   });
-  return { pluginApiMap, missingApiItems, referencedDeprecations, unReferencedDeprecations };
+  return { pluginApiMap, missingApiItems, referencedDeprecations, unreferencedDeprecations };
 }
 
 function collectDeprecations(
   pluginApi: PluginApi,
   referencedDeprecations: ReferencedDeprecationsByPlugin,
-  unReferencedDeprecations: ApiDeclaration[]
+  unReferencedDeprecations: UnreferencedDeprecationsByPlugin
 ) {
   (['client', 'common', 'server'] as Array<'client' | 'server' | 'common'>).forEach((scope) => {
     pluginApi[scope].forEach((api) => {
@@ -72,7 +74,7 @@ function collectDeprecations(
 function collectDeprecationsForApi(
   api: ApiDeclaration,
   referencedDeprecations: ReferencedDeprecationsByPlugin,
-  unReferencedDeprecations: ApiDeclaration[]
+  unreferencedDeprecations: UnreferencedDeprecationsByPlugin
 ) {
   if ((api.tags || []).find((tag) => tag === 'deprecated')) {
     if (api.references && api.references.length > 0) {
@@ -86,12 +88,15 @@ function collectDeprecationsForApi(
         });
       });
     } else {
-      unReferencedDeprecations.push(api);
+      if (unreferencedDeprecations[api.parentPluginId] === undefined) {
+        unreferencedDeprecations[api.parentPluginId] = [];
+      }
+      unreferencedDeprecations[api.parentPluginId].push(api);
     }
   }
   if (api.children) {
     api.children.forEach((child) =>
-      collectDeprecationsForApi(child, referencedDeprecations, unReferencedDeprecations)
+      collectDeprecationsForApi(child, referencedDeprecations, unreferencedDeprecations)
     );
   }
 }

@@ -1,0 +1,328 @@
+{
+  "id": "@kbn/analytics-shippers-elastic-v3-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+        "id": "def-common.ElasticV3BrowserShipper",
+        "type": "Class",
+        "tags": [],
+        "label": "ElasticV3BrowserShipper",
+        "description": [
+          "\nElastic V3 shipper to use in the browser."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsShippersElasticV3BrowserPluginApi",
+            "section": "def-common.ElasticV3BrowserShipper",
+            "text": "ElasticV3BrowserShipper"
+          },
+          " implements ",
+          "IShipper"
+        ],
+        "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3BrowserShipper.shipperName",
+            "type": "string",
+            "tags": [],
+            "label": "shipperName",
+            "description": [
+              "Shipper's unique name"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3BrowserShipper.telemetryCounter$",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetryCounter$",
+            "description": [
+              "Observable to emit the stats of the processed events."
+            ],
+            "signature": [
+              "Subject",
+              "<",
+              "TelemetryCounter",
+              ">"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3BrowserShipper.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nCreates a new instance of the {@link ElasticV3BrowserShipper}."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+                "id": "def-common.ElasticV3BrowserShipper.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link ElasticV3ShipperOptions }"
+                ],
+                "signature": [
+                  "ElasticV3ShipperOptions"
+                ],
+                "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+                "id": "def-common.ElasticV3BrowserShipper.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "initContext",
+                "description": [
+                  "{@link AnalyticsClientInitContext }"
+                ],
+                "signature": [
+                  "AnalyticsClientInitContext"
+                ],
+                "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3BrowserShipper.extendContext",
+            "type": "Function",
+            "tags": [],
+            "label": "extendContext",
+            "description": [
+              "\nUses the `cluster_uuid` and `license_id` from the context to hold them in memory for the generation of the headers\nused later on in the HTTP request."
+            ],
+            "signature": [
+              "(newContext: ",
+              "EventContext",
+              ") => void"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+                "id": "def-common.ElasticV3BrowserShipper.extendContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newContext",
+                "description": [
+                  "The full new context to set {@link EventContext }"
+                ],
+                "signature": [
+                  "EventContext"
+                ],
+                "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3BrowserShipper.optIn",
+            "type": "Function",
+            "tags": [],
+            "label": "optIn",
+            "description": [
+              "\nWhen `false`, it flushes the internal queue and stops sending events."
+            ],
+            "signature": [
+              "(isOptedIn: boolean) => void"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+                "id": "def-common.ElasticV3BrowserShipper.optIn.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOptedIn",
+                "description": [
+                  "`true` for resume sending events. `false` to stop."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3BrowserShipper.reportEvents",
+            "type": "Function",
+            "tags": [],
+            "label": "reportEvents",
+            "description": [
+              "\nEnqueues the events to be sent to in a batched approach."
+            ],
+            "signature": [
+              "(events: ",
+              "Event",
+              "[]) => void"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+                "id": "def-common.ElasticV3BrowserShipper.reportEvents.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "events",
+                "description": [
+                  "batched events {@link Event }"
+                ],
+                "signature": [
+                  "Event",
+                  "[]"
+                ],
+                "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3BrowserShipper.shutdown",
+            "type": "Function",
+            "tags": [],
+            "label": "shutdown",
+            "description": [
+              "\nShuts down the shipper.\nTriggers a flush of the internal queue to attempt to send any events held in the queue."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/browser/src/browser_shipper.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+        "id": "def-common.ElasticV3ShipperOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticV3ShipperOptions",
+        "description": [
+          "\r\nOptions for the Elastic V3 shipper"
+        ],
+        "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3ShipperOptions.channelName",
+            "type": "string",
+            "tags": [],
+            "label": "channelName",
+            "description": [
+              "\r\nThe name of the channel to stream all the events to."
+            ],
+            "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3ShipperOptions.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "\r\nThe product's version."
+            ],
+            "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3ShipperOptions.sendTo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sendTo",
+            "description": [
+              "\r\nProvide it to override the Analytics client's default configuration."
+            ],
+            "signature": [
+              "\"staging\" | \"production\" | undefined"
+            ],
+            "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-browser",
+            "id": "def-common.ElasticV3ShipperOptions.debug",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "debug",
+            "description": [
+              "\r\nShould show debug information about the requests it makes to the V3 API."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "node_modules/@types/kbn__analytics-shippers-elastic-v3-common/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
@@ -21,7 +21,7 @@ import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 import { SecuritySolutionFactory } from '../../types';
 import { buildQuery } from './dsl/query.dsl';
-import { formatUncommonProcessesData, getHits, uncommonProcessesFields } from './helpers';
+import { formatUncommonProcessesData, getHits } from './helpers';
 
 export const uncommonProcesses: SecuritySolutionFactory<HostsQueries.uncommonProcesses> = {
   buildDsl: (options: HostsUncommonProcessesRequestOptions) => {
@@ -40,7 +40,7 @@ export const uncommonProcesses: SecuritySolutionFactory<HostsQueries.uncommonPro
     const hits = getHits(buckets);
 
     const uncommonProcessesEdges = hits.map((hit) =>
-      formatUncommonProcessesData(uncommonProcessesFields, hit, {
+      formatUncommonProcessesData(hit, {
         ...processFieldsMap,
         ...userFieldsMap,
       })

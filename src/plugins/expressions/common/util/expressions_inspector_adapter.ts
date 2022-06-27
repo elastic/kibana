@@ -7,16 +7,17 @@
  */
 
 import { EventEmitter } from 'events';
+import { ExpressionAstNode } from '..';
 
 export class ExpressionsInspectorAdapter extends EventEmitter {
-  private _ast: any = {};
+  private _ast = {} as ExpressionAstNode;
 
-  public logAST(ast: any): void {
+  logAST(ast: ExpressionAstNode): void {
     this._ast = ast;
     this.emit('change', this._ast);
   }
 
-  public get ast() {
+  public get ast(): ExpressionAstNode {
     return this._ast;
   }
 }

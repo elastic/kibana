@@ -6,19 +6,19 @@
  */
 
 import { aggregateRulesRoute } from './aggregate_rules';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -49,6 +49,18 @@ describe('aggregateRulesRoute', () => {
         pending: 1,
         unknown: 0,
       },
+      ruleEnabledStatus: {
+        disabled: 1,
+        enabled: 40,
+      },
+      ruleMutedStatus: {
+        muted: 2,
+        unmuted: 39,
+      },
+      ruleSnoozedStatus: {
+        snoozed: 4,
+      },
+      ruleTags: ['a', 'b', 'c'],
     };
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
@@ -65,6 +77,10 @@ describe('aggregateRulesRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
+          "rule_enabled_status": Object {
+            "disabled": 1,
+            "enabled": 40,
+          },
           "rule_execution_status": Object {
             "active": 23,
             "error": 2,
@@ -72,6 +88,18 @@ describe('aggregateRulesRoute', () => {
             "pending": 1,
             "unknown": 0,
           },
+          "rule_muted_status": Object {
+            "muted": 2,
+            "unmuted": 39,
+          },
+          "rule_snoozed_status": Object {
+            "snoozed": 4,
+          },
+          "rule_tags": Array [
+            "a",
+            "b",
+            "c",
+          ],
         },
       }
     `);
@@ -89,6 +117,10 @@ describe('aggregateRulesRoute', () => {
 
     expect(res.ok).toHaveBeenCalledWith({
       body: {
+        rule_enabled_status: {
+          disabled: 1,
+          enabled: 40,
+        },
         rule_execution_status: {
           ok: 15,
           error: 2,
@@ -96,6 +128,14 @@ describe('aggregateRulesRoute', () => {
           pending: 1,
           unknown: 0,
         },
+        rule_muted_status: {
+          muted: 2,
+          unmuted: 39,
+        },
+        rule_snoozed_status: {
+          snoozed: 4,
+        },
+        rule_tags: ['a', 'b', 'c'],
       },
     });
   });

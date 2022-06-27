@@ -9,7 +9,7 @@
 import { last } from 'lodash';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { FORMATS_UI_SETTINGS } from '../../../../../../../plugins/field_formats/common';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 function getMax(handler, config, isGauge) {

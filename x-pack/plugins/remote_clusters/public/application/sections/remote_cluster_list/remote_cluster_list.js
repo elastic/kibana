@@ -7,13 +7,13 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
   EuiPageContent,
   EuiSpacer,
@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { remoteClustersUrl } from '../../services/documentation';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 
@@ -80,7 +80,7 @@ export class RemoteClusterList extends Component {
     if (isCopyingCluster || isRemovingCluster) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

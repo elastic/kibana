@@ -12,7 +12,7 @@ import { DisabledLinkPanel } from '../link_panel/disabled_link_panel';
 import { RiskyHostsPanelView } from './risky_hosts_panel_view';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 
-const RISKY_HOSTS_DOC_LINK =
+export const RISKY_HOSTS_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
 
 export const RiskyHostsDisabledModuleComponent = () => (

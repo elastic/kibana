@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { Form } from '../../../shared_imports';
@@ -36,11 +36,11 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
     defaultValue,
     handleSubmit,
   });
-  const { submit, isSubmitting } = form;
+  const { submit, isSubmitting, isValid } = form;
 
   return (
     <Form form={form}>
-      <SavedQueryForm />
+      <SavedQueryForm hasPlayground isValid={isValid} />
       <EuiBottomBar>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>

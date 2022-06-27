@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
@@ -19,7 +20,6 @@ import {
   DOC_COUNT,
   _DOC_COUNT,
 } from '../../../../../../../common/constants/field_types';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
   EVENT_RATE_FIELD_ID,
   Field,
@@ -27,7 +27,7 @@ import {
   mlCategory,
 } from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import { JobCreatorType } from '../index';
+import { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {
@@ -230,10 +230,11 @@ export function isSparseDataJob(job: Job, datafeed: Datafeed): boolean {
   return false;
 }
 
-function stashJobForCloning(
+export function stashJobForCloning(
   jobCreator: JobCreatorType,
   skipTimeRangeStep: boolean = false,
-  includeTimeRange: boolean = false
+  includeTimeRange: boolean = false,
+  autoSetTimeRange: boolean = false
 ) {
   mlJobService.tempJobCloningObjects.job = jobCreator.jobConfig;
   mlJobService.tempJobCloningObjects.datafeed = jobCreator.datafeedConfig;
@@ -242,10 +243,12 @@ function stashJobForCloning(
   // skip over the time picker step of the wizard
   mlJobService.tempJobCloningObjects.skipTimeRangeStep = skipTimeRangeStep;
 
-  if (includeTimeRange === true) {
+  if (includeTimeRange === true && autoSetTimeRange === false) {
     // auto select the start and end dates of the time picker
     mlJobService.tempJobCloningObjects.start = jobCreator.start;
     mlJobService.tempJobCloningObjects.end = jobCreator.end;
+  } else if (autoSetTimeRange === true) {
+    mlJobService.tempJobCloningObjects.autoSetTimeRange = true;
   }
 
   mlJobService.tempJobCloningObjects.calendars = jobCreator.calendars;
@@ -258,15 +261,19 @@ export function convertToMultiMetricJob(
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
   stashJobForCloning(jobCreator, true, true);
-
   navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashJobForCloning(jobCreator, true, true);
-
   navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
+}
+
+export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+  jobCreator.createdBy = null;
+  stashJobForCloning(jobCreator, true, false);
+  navigateToPath('/jobs/new_job');
 }
 
 export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {

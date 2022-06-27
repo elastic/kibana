@@ -7,12 +7,12 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ConfigDeprecationProvider } from 'src/core/server';
-import { ServiceConfigDescriptor } from '../internal_types';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { ConfigDeprecationProvider } from '@kbn/config';
 
 const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
-  unused('enabled'),
-  renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
+  unused('enabled', { level: 'warning' }),
+  renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute', { level: 'warning' }),
 ];
 
 const configSchema = schema.object({

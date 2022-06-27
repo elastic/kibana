@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import {
   Direction,
@@ -66,7 +64,6 @@ const createIncludePTRFilter = (isPtrIncluded: boolean) =>
 
 export const buildDnsQuery = ({
   defaultIndex,
-  docValueFields,
   filterQuery,
   isPtrIncluded,
   sort,
@@ -88,11 +85,10 @@ export const buildDnsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {
@@ -132,6 +128,14 @@ export const buildDnsQuery = ({
           ...createIncludePTRFilter(isPtrIncluded),
         },
       },
+      _source: false,
+      fields: [
+        'dns.question.registered_domain',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
     size: 0,
     track_total_hits: false,

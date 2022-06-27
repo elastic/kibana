@@ -6,19 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { of, BehaviorSubject } from 'rxjs';
+import { of, BehaviorSubject, firstValueFrom } from 'rxjs';
 
-import { ServiceStatus, ServiceStatusLevels, CoreStatus } from './types';
+import {
+  ServiceStatus,
+  ServiceStatusLevels,
+  CoreStatus,
+  InternalStatusServiceSetup,
+} from './types';
 import { StatusService } from './status_service';
-import { first } from 'rxjs/operators';
-import { mockCoreContext } from '../core_context.mock';
+import { first, take, toArray } from 'rxjs/operators';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 import { environmentServiceMock } from '../environment/environment_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
-import { configServiceMock } from '../config/mocks';
+import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+import { AnalyticsServiceSetup } from '..';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
@@ -30,6 +37,7 @@ describe('StatusService', () => {
   });
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   const available: ServiceStatus<any> = {
     level: ServiceStatusLevels.available,
     summary: 'Available',
@@ -38,10 +46,15 @@ describe('StatusService', () => {
     level: ServiceStatusLevels.degraded,
     summary: 'This is degraded!',
   };
+  const critical: ServiceStatus<any> = {
+    level: ServiceStatusLevels.critical,
+    summary: 'This is critical!',
+  };
 
   type SetupDeps = Parameters<StatusService['setup']>[0];
   const setupDeps = (overrides: Partial<SetupDeps>): SetupDeps => {
     return {
+      analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       elasticsearch: {
         status$: of(available),
       },
@@ -183,7 +196,7 @@ describe('StatusService', () => {
         );
         expect(await setup.overall$.pipe(first()).toPromise()).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '2 services are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -203,15 +216,15 @@ describe('StatusService', () => {
         const subResult3 = await setup.overall$.pipe(first()).toPromise();
         expect(subResult1).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '2 services are degraded: elasticsearch, savedObjects',
         });
         expect(subResult2).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '2 services are degraded: elasticsearch, savedObjects',
         });
         expect(subResult3).toMatchObject({
           level: ServiceStatusLevels.degraded,
-          summary: '[2] services are degraded',
+          summary: '2 services are degraded: elasticsearch, savedObjects',
         });
       });
 
@@ -234,20 +247,20 @@ describe('StatusService', () => {
 
         // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
         elasticsearch$.next(available);
-        await delay(500);
+        await delay(100);
         elasticsearch$.next(available);
-        await delay(500);
+        await delay(100);
         elasticsearch$.next({
           level: ServiceStatusLevels.available,
           summary: `Wow another summary`,
         });
-        await delay(500);
+        await delay(100);
         savedObjects$.next(degraded);
-        await delay(500);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(500);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(500);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -260,7 +273,7 @@ describe('StatusService', () => {
                   "savedObjects",
                 ],
               },
-              "summary": "[savedObjects]: This is degraded!",
+              "summary": "1 service is degraded: savedObjects",
             },
             Object {
               "level": available,
@@ -295,9 +308,9 @@ describe('StatusService', () => {
         savedObjects$.next(available);
         savedObjects$.next(degraded);
         // Waiting for the debounce timeout should cut a new update
-        await delay(500);
+        await delay(100);
         savedObjects$.next(available);
-        await delay(500);
+        await delay(100);
         subscription.unsubscribe();
 
         expect(statusUpdates).toMatchInlineSnapshot(`
@@ -310,7 +323,178 @@ describe('StatusService', () => {
                   "savedObjects",
                 ],
               },
-              "summary": "[savedObjects]: This is degraded!",
+              "summary": "1 service is degraded: savedObjects",
+            },
+            Object {
+              "level": available,
+              "summary": "All services are available",
+            },
+          ]
+        `);
+      });
+    });
+
+    describe('coreOverall$', () => {
+      it('exposes an overall summary of core services', async () => {
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(degraded),
+            },
+            savedObjects: {
+              status$: of(degraded),
+            },
+          })
+        );
+        expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.degraded,
+          summary: '2 services are degraded: elasticsearch, savedObjects',
+        });
+      });
+
+      it('computes the summary depending on the services status', async () => {
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(degraded),
+            },
+            savedObjects: {
+              status$: of(critical),
+            },
+          })
+        );
+        expect(await setup.coreOverall$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.critical,
+          summary: '1 service is critical: savedObjects',
+        });
+      });
+
+      it('replays last event', async () => {
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: of(degraded),
+            },
+            savedObjects: {
+              status$: of(degraded),
+            },
+          })
+        );
+
+        const subResult1 = await setup.coreOverall$.pipe(first()).toPromise();
+        const subResult2 = await setup.coreOverall$.pipe(first()).toPromise();
+        const subResult3 = await setup.coreOverall$.pipe(first()).toPromise();
+
+        expect(subResult1).toMatchObject({
+          level: ServiceStatusLevels.degraded,
+          summary: '2 services are degraded: elasticsearch, savedObjects',
+        });
+        expect(subResult2).toMatchObject({
+          level: ServiceStatusLevels.degraded,
+          summary: '2 services are degraded: elasticsearch, savedObjects',
+        });
+        expect(subResult3).toMatchObject({
+          level: ServiceStatusLevels.degraded,
+          summary: '2 services are degraded: elasticsearch, savedObjects',
+        });
+      });
+
+      it('does not emit duplicate events', async () => {
+        const elasticsearch$ = new BehaviorSubject(available);
+        const savedObjects$ = new BehaviorSubject(degraded);
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: elasticsearch$,
+            },
+            savedObjects: {
+              status$: savedObjects$,
+            },
+          })
+        );
+
+        const statusUpdates: ServiceStatus[] = [];
+        const subscription = setup.coreOverall$.subscribe((status) => statusUpdates.push(status));
+
+        // Wait for timers to ensure that duplicate events are still filtered out regardless of debouncing.
+        elasticsearch$.next(available);
+        await delay(100);
+        elasticsearch$.next(available);
+        await delay(100);
+        elasticsearch$.next({
+          level: ServiceStatusLevels.available,
+          summary: `Wow another summary`,
+        });
+        await delay(100);
+        savedObjects$.next(degraded);
+        await delay(100);
+        savedObjects$.next(available);
+        await delay(100);
+        savedObjects$.next(available);
+        await delay(100);
+        subscription.unsubscribe();
+
+        expect(statusUpdates).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "detail": "See the status page for more information",
+              "level": degraded,
+              "meta": Object {
+                "affectedServices": Array [
+                  "savedObjects",
+                ],
+              },
+              "summary": "1 service is degraded: savedObjects",
+            },
+            Object {
+              "level": available,
+              "summary": "All services are available",
+            },
+          ]
+        `);
+      });
+
+      it('debounces events in quick succession', async () => {
+        const savedObjects$ = new BehaviorSubject(available);
+        const setup = await service.setup(
+          setupDeps({
+            elasticsearch: {
+              status$: new BehaviorSubject(available),
+            },
+            savedObjects: {
+              status$: savedObjects$,
+            },
+          })
+        );
+
+        const statusUpdates: ServiceStatus[] = [];
+        const subscription = setup.coreOverall$.subscribe((status) => statusUpdates.push(status));
+
+        // All of these should debounced into a single `available` status
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        savedObjects$.next(available);
+        savedObjects$.next(degraded);
+        // Waiting for the debounce timeout should cut a new update
+        await delay(100);
+        savedObjects$.next(available);
+        await delay(100);
+        subscription.unsubscribe();
+
+        expect(statusUpdates).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "detail": "See the status page for more information",
+              "level": degraded,
+              "meta": Object {
+                "affectedServices": Array [
+                  "savedObjects",
+                ],
+              },
+              "summary": "1 service is degraded: savedObjects",
             },
             Object {
               "level": available,
@@ -357,6 +541,51 @@ describe('StatusService', () => {
           },
           expect.any(Function)
         );
+      });
+    });
+
+    describe('analytics', () => {
+      let analyticsMock: jest.Mocked<AnalyticsServiceSetup>;
+      let setup: InternalStatusServiceSetup;
+
+      beforeEach(async () => {
+        analyticsMock = analyticsServiceMock.createAnalyticsServiceSetup();
+        setup = await service.setup(setupDeps({ analytics: analyticsMock }));
+      });
+
+      test('registers a context provider', async () => {
+        expect(analyticsMock.registerContextProvider).toHaveBeenCalledTimes(1);
+        const { context$ } = analyticsMock.registerContextProvider.mock.calls[0][0];
+        await expect(firstValueFrom(context$.pipe(take(2), toArray()))).resolves
+          .toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "overall_status_level": "initializing",
+                "overall_status_summary": "Kibana is starting up",
+              },
+              Object {
+                "overall_status_level": "available",
+                "overall_status_summary": "All services are available",
+              },
+            ]
+          `);
+      });
+
+      test('registers and reports an event', async () => {
+        expect(analyticsMock.registerEventType).toHaveBeenCalledTimes(1);
+        expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(0);
+        // wait for an emission of overall$
+        await firstValueFrom(setup.overall$);
+        expect(analyticsMock.reportEvent).toHaveBeenCalledTimes(1);
+        expect(analyticsMock.reportEvent.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            "core-overall_status_changed",
+            Object {
+              "overall_status_level": "available",
+              "overall_status_summary": "All services are available",
+            },
+          ]
+        `);
       });
     });
   });

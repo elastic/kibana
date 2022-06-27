@@ -8,16 +8,14 @@
 
 import { takeUntil, finalize } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import type { Logger } from 'kibana/server';
-import moment from 'moment';
-import type { UsageCounter } from '../../../../usage_collection/server';
+import type { Logger } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { EventLoopDelaysMonitor } from '@kbn/core/server';
 import {
   MONITOR_EVENT_LOOP_THRESHOLD_START,
   MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
   MONITOR_EVENT_LOOP_WARN_THRESHOLD,
-  ONE_MILLISECOND_AS_NANOSECONDS,
 } from './constants';
-import type { EventLoopDelaysMonitor } from '../../../../../core/server';
 
 /**
  * The monitoring of the event loop starts immediately.
@@ -48,14 +46,11 @@ export function startTrackingEventLoopDelaysThreshold(
       finalize(() => eventLoopDelaysMonitor.stop())
     )
     .subscribe(async () => {
-      const { mean } = eventLoopDelaysMonitor.collect();
-      const meanDurationMs = moment
-        .duration(mean / ONE_MILLISECOND_AS_NANOSECONDS)
-        .asMilliseconds();
+      const { mean: meanMS } = eventLoopDelaysMonitor.collect();
 
-      if (meanDurationMs > warnThreshold) {
+      if (meanMS > warnThreshold) {
         logger.warn(
-          `Average event loop delay threshold exceeded ${warnThreshold}ms. Received ${meanDurationMs}ms. ` +
+          `Average event loop delay threshold exceeded ${warnThreshold}ms. Received ${meanMS}ms. ` +
             `See https://ela.st/kibana-scaling-considerations for more information about scaling Kibana.`
         );
 

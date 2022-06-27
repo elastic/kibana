@@ -14,6 +14,8 @@ import { IconMapSelect } from './icon_map_select';
 export function DynamicIconForm({
   fields,
   onDynamicStyleChange,
+  onCustomIconsChange,
+  customIcons,
   staticDynamicSelect,
   styleProperty,
 }) {
@@ -44,8 +46,10 @@ export function DynamicIconForm({
       <IconMapSelect
         {...styleOptions}
         styleProperty={styleProperty}
+        customIcons={customIcons}
         onChange={onIconMapChange}
-        isCustomOnly={!field.supportsAutoDomain()}
+        onCustomIconsChange={onCustomIconsChange}
+        isCustomOnly={!field.supportsFieldMetaFromLocalData() && !field.supportsFieldMetaFromEs()}
       />
     );
   }

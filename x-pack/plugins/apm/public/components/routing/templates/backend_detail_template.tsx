@@ -7,26 +7,96 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { useApmBackendContext } from '../../../context/apm_backend/use_apm_backend_context';
+import { i18n } from '@kbn/i18n';
 import { ApmMainTemplate } from './apm_main_template';
 import { SpanIcon } from '../../shared/span_icon';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
+import { SearchBar } from '../../shared/search_bar';
+import {
+  getKueryBarBoolFilter,
+  kueryBarPlaceholder,
+} from '../../../../common/backends';
+import { useOperationBreakdownEnabledSetting } from '../../../hooks/use_operations_breakdown_enabled_setting';
 
 interface Props {
-  title: string;
   children: React.ReactNode;
 }
 
-export function BackendDetailTemplate({ title, children }: Props) {
+export function BackendDetailTemplate({ children }: Props) {
   const {
-    backendName,
-    metadata: { data },
-  } = useApmBackendContext();
+    query,
+    query: { backendName, rangeFrom, rangeTo, environment },
+  } = useApmParams('/backends');
 
-  const metadata = data?.metadata;
+  const router = useApmRouter();
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const path = useApmRoutePath();
+
+  const isOperationsBreakdownFeatureEnabled =
+    useOperationBreakdownEnabledSetting();
+
+  const kueryBarBoolFilter = getKueryBarBoolFilter({
+    environment,
+    backendName,
+  });
+
+  const backendMetadataFetch = useFetcher(
+    (callApmApi) => {
+      if (!start || !end) {
+        return;
+      }
+
+      return callApmApi('GET /internal/apm/backends/metadata', {
+        params: {
+          query: {
+            backendName,
+            start,
+            end,
+          },
+        },
+      });
+    },
+    [backendName, start, end]
+  );
+
+  const { data: { metadata } = {} } = backendMetadataFetch;
+
+  const tabs = isOperationsBreakdownFeatureEnabled
+    ? [
+        {
+          key: 'overview',
+          href: router.link('/backends/overview', {
+            query,
+          }),
+          label: i18n.translate('xpack.apm.backendDetailOverview.title', {
+            defaultMessage: 'Overview',
+          }),
+          isSelected: path === '/backends/overview',
+        },
+        {
+          key: 'operations',
+          href: router.link('/backends/operations', {
+            query,
+          }),
+          label: i18n.translate('xpack.apm.backendDetailOperations.title', {
+            defaultMessage: 'Operations',
+          }),
+          isSelected:
+            path === '/backends/operations' || path === '/backends/operation',
+        },
+      ]
+    : [];
 
   return (
     <ApmMainTemplate
       pageHeader={{
+        tabs,
         pageTitle: (
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
@@ -44,6 +114,11 @@ export function BackendDetailTemplate({ title, children }: Props) {
         ),
       }}
     >
+      <SearchBar
+        showTimeComparison
+        kueryBarPlaceholder={kueryBarPlaceholder}
+        kueryBarBoolFilter={kueryBarBoolFilter}
+      />
       {children}
     </ApmMainTemplate>
   );

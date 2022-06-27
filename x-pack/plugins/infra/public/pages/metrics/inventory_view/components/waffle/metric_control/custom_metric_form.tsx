@@ -20,16 +20,16 @@ import {
   EuiText,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { IFieldType } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import {
   SnapshotCustomAggregation,
   SnapshotCustomMetricInput,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
   SnapshotCustomAggregationRT,
 } from '../../../../../../../common/http_api/snapshot_api';
-import { EuiTheme, withTheme } from '../../../../../../../../../../src/plugins/kibana_react/common';
+import { DerivedIndexPattern } from '../../../../../../containers/metrics_source';
 
 interface SelectedOption {
   label: string;
@@ -53,7 +53,7 @@ const AGGREGATION_LABELS = {
 interface Props {
   theme: EuiTheme | undefined;
   metric?: SnapshotCustomMetricInput;
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
   customMetrics: SnapshotCustomMetricInput[];
   onChange: (metric: SnapshotCustomMetricInput) => void;
   onCancel: () => void;
@@ -157,7 +157,7 @@ export const CustomMetricForm = withTheme(
           </EuiPopoverTitle>
           <div
             style={{
-              padding: theme?.eui.paddingSizes.m,
+              padding: theme?.eui.euiSizeM,
               borderBottom: `${theme?.eui.euiBorderWidthThin} solid ${theme?.eui.euiBorderColor}`,
             }}
           >
@@ -218,11 +218,11 @@ export const CustomMetricForm = withTheme(
               />
             </EuiFormRow>
           </div>
-          <div style={{ padding: theme?.eui.paddingSizes.m, textAlign: 'right' }}>
+          <div style={{ padding: theme?.eui.euiSizeM, textAlign: 'right' }}>
             <EuiButtonEmpty
               onClick={onCancel}
               size="s"
-              style={{ paddingRight: theme?.eui.paddingSizes.xl }}
+              style={{ paddingRight: theme?.eui.euiSizeXL }}
             >
               <FormattedMessage
                 id="xpack.infra.waffle.customMetrics.cancelLabel"

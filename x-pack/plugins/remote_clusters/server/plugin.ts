@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
-import { ConfigType } from './config';
+import { RemoteClustersConfig, RemoteClustersConfig7x } from './config';
 import {
   registerGetRoute,
   registerAddRoute,
@@ -30,7 +30,7 @@ export class RemoteClustersServerPlugin
 {
   licenseStatus: LicenseStatus;
   log: Logger;
-  config: ConfigType;
+  config: RemoteClustersConfig | RemoteClustersConfig7x;
 
   constructor({ logger, config }: PluginInitializerContext) {
     this.log = logger.get();

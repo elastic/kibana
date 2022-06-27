@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import {
   Direction,
-  FlowTarget,
+  FlowTargetSourceDest,
   NetworkQueries,
   NetworkUsersFields,
   NetworkUsersRequestOptions,
@@ -28,7 +28,7 @@ export const mockOptions: NetworkUsersRequestOptions = {
   ],
   factoryQueryType: NetworkQueries.users,
   filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
-  flowTarget: FlowTarget.source,
+  flowTarget: FlowTargetSourceDest.source,
   ip: '10.142.0.7',
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
   sort: { field: NetworkUsersFields.name, direction: Direction.asc },
@@ -119,7 +119,7 @@ export const formattedSearchStrategyResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
             'traces-apm*',
@@ -130,7 +130,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           track_total_hits: false,
           body: {
             aggs: {
@@ -175,7 +175,7 @@ export const formattedSearchStrategyResponse = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   track_total_hits: false,
   body: {
     aggs: {
@@ -209,7 +209,7 @@ export const expectedDsl = {
     },
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
     'traces-apm*',

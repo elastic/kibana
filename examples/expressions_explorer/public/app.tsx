@@ -18,61 +18,66 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { AppMountParameters } from '../../../src/core/public';
-import { ExpressionsStart } from '../../../src/plugins/expressions/public';
-import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
+import { AppMountParameters, IUiSettingsClient } from '@kbn/core/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RunExpressionsExample } from './run_expressions';
 import { RenderExpressionsExample } from './render_expressions';
 import { ActionsExpressionsExample } from './actions_and_expressions';
-import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { ActionsExpressionsExample2 } from './actions_and_expressions2';
 
 interface Props {
   expressions: ExpressionsStart;
   inspector: InspectorStart;
   actions: UiActionsStart;
+  uiSettings: IUiSettingsClient;
 }
 
-const ExpressionsExplorer = ({ expressions, inspector, actions }: Props) => {
+const ExpressionsExplorer = ({ expressions, inspector, actions, uiSettings }: Props) => {
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>Expressions Explorer</EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <EuiText>
-              <p>
-                There are a couple of ways to run the expressions. Below some of the options are
-                demonstrated. You can read more about it{' '}
-                <EuiLink
-                  href={
-                    'https://github.com/elastic/kibana/blob/master/src/plugins/expressions/README.asciidoc'
-                  }
-                >
-                  here
-                </EuiLink>
-              </p>
-            </EuiText>
+    <KibanaReactContextProvider>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageHeader>Expressions Explorer</EuiPageHeader>
+          <EuiPageContent>
+            <EuiPageContentBody>
+              <EuiText>
+                <p>
+                  There are a couple of ways to run the expressions. Below some of the options are
+                  demonstrated. You can read more about it{' '}
+                  <EuiLink
+                    href={
+                      'https://github.com/elastic/kibana/blob/main/src/plugins/expressions/README.asciidoc'
+                    }
+                  >
+                    here
+                  </EuiLink>
+                </p>
+              </EuiText>
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <RunExpressionsExample expressions={expressions} inspector={inspector} />
+              <RunExpressionsExample expressions={expressions} inspector={inspector} />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <RenderExpressionsExample expressions={expressions} inspector={inspector} />
+              <RenderExpressionsExample expressions={expressions} inspector={inspector} />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <ActionsExpressionsExample expressions={expressions} actions={actions} />
+              <ActionsExpressionsExample expressions={expressions} actions={actions} />
 
-            <EuiSpacer />
+              <EuiSpacer />
 
-            <ActionsExpressionsExample2 expressions={expressions} actions={actions} />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+              <ActionsExpressionsExample2 expressions={expressions} actions={actions} />
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    </KibanaReactContextProvider>
   );
 };
 

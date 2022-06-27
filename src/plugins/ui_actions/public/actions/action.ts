@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UiComponent } from 'src/plugins/kibana_utils/public';
+import { UiComponent } from '@kbn/kibana-utils-plugin/public';
 import { Presentable } from '../util/presentable';
 import { Trigger } from '../triggers';
 
@@ -34,6 +34,10 @@ export type ActionExecutionContext<Context extends object = object> = Context & 
 export type ActionDefinitionContext<Context extends object = object> =
   | Context
   | ActionExecutionContext<Context>;
+
+export interface ActionMenuItemProps<Context extends object> {
+  context: ActionExecutionContext<Context>;
+}
 
 export interface Action<Context extends object = object>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
@@ -68,7 +72,7 @@ export interface Action<Context extends object = object>
    * `UiComponent` to render when displaying this action as a context menu item.
    * If not provided, `getDisplayName` will be used instead.
    */
-  MenuItem?: UiComponent<{ context: ActionExecutionContext<Context> }>;
+  MenuItem?: UiComponent<ActionMenuItemProps<Context>>;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,

@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common';
-import { IndexPattern } from '../../../data/common';
-import { indexPatterns } from '../../../data/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { buildDataViewMock } from './index_pattern';
 
 const fields = [
   {
@@ -51,33 +50,10 @@ const fields = [
     scripted: true,
     filterable: false,
   },
-] as IIndexPatternFieldList;
+] as DataView['fields'];
 
-fields.getByName = (name: string) => {
-  return fields.find((field) => field.name === name);
-};
-fields.getAll = () => {
-  return fields;
-};
-
-const indexPattern = {
-  id: 'index-pattern-with-timefield-id',
-  title: 'index-pattern-with-timefield',
-  metaFields: ['_index', '_score'],
-  flattenHit: undefined,
-  formatHit: jest.fn((hit) => hit._source),
+export const indexPatternWithTimefieldMock = buildDataViewMock({
+  name: 'index-pattern-with-timefield',
   fields,
-  getComputedFields: () => ({}),
-  getSourceFiltering: () => ({}),
-  getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
-  getFormatterForField: () => ({ convert: () => 'formatted' }),
-} as unknown as IndexPattern;
-
-indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
-indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
-indexPattern.formatField = (hit: Record<string, unknown>, fieldName: string) => {
-  return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
-};
-
-export const indexPatternWithTimefieldMock = indexPattern;
+});

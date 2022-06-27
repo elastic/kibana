@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isMetricsTabHidden, isJVMsTabHidden } from './';
+import { isMetricsTabHidden, isJVMsTabHidden } from '.';
 
 describe('APM service template', () => {
   describe('isMetricsTabHidden', () => {
@@ -19,6 +19,7 @@ describe('APM service template', () => {
         { agentName: 'ios/swift' },
         { agentName: 'opentelemetry/swift' },
         { agentName: 'ruby', runtimeName: 'jruby' },
+        { runtimeName: 'aws_lambda' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeTruthy();
@@ -52,6 +53,7 @@ describe('APM service template', () => {
         { agentName: 'nodejs' },
         { agentName: 'php' },
         { agentName: 'python' },
+        { runtimeName: 'aws_lambda' },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isJVMsTabHidden(input)).toBeTruthy();

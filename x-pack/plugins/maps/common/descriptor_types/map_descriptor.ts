@@ -33,19 +33,31 @@ export type Goto = {
   center?: MapCenterAndZoom;
 };
 
-export const GEOMETRY_FILTER_ACTION = 'GEOMETRY_FILTER_ACTION';
-
 export type TooltipFeatureAction = {
   label: string;
-  id: typeof GEOMETRY_FILTER_ACTION;
-  form: ReactNode;
+  id: string;
+  form?: ReactNode;
+  onClick?: () => void;
 };
 
 export type TooltipFeature = {
+  /*
+   * Feature id. Assigned by layer
+   */
   id?: number | string;
+
+  /*
+   * Id of layer that manages feature on the map
+   */
   layerId: string;
+
   geometry?: Geometry;
+
+  /*
+   * Feature properties. Retrieved from the map implemenation
+   */
   mbProperties: GeoJsonProperties;
+
   actions: TooltipFeatureAction[];
 };
 

@@ -26,11 +26,11 @@ export const add: ExpressionFunctionDefinition<
       types: ['null', 'number', 'string'],
     },
   },
-  fn: ({ value: value1 }, { val: input2 }, context) => {
+  fn: ({ value: value1 }, { val: input2 }) => {
     const value2 = !input2
       ? 0
       : typeof input2 === 'object'
-      ? (input2 as any).value
+      ? (input2 as ExpressionValueNum).value
       : Number(input2);
 
     return {

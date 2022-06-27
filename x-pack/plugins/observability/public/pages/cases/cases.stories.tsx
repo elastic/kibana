@@ -5,24 +5,28 @@
  * 2.0.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { casesFeatureId } from '../../../common';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
-import { AllCasesPage } from './all_cases';
+import { CasesPage } from '.';
 
 export default {
   title: 'app/Cases',
-  component: AllCasesPage,
+  component: CasesPage,
   decorators: [
     (Story: ComponentType) => {
       const KibanaReactContext = createKibanaReactContext({
         application: {
           capabilities: { [casesFeatureId]: { read_cases: true } },
           getUrlForApp: () => '',
+        },
+        http: {
+          basePath: { prepend: (link: string) => `http://localhost:5601${link}` },
         },
         cases: { getAllCases: () => <></> },
         chrome: { docTitle: { change: () => {} }, setBadge: () => {} },
@@ -34,7 +38,10 @@ export default {
       } as unknown as Partial<CoreStart>);
 
       const pluginContextValue = {
-        ObservabilityPageTemplate: EuiPageTemplate,
+        ObservabilityPageTemplate: KibanaPageTemplate,
+        appMountParameters: {
+          setHeaderActionMenu: () => {},
+        } as unknown as AppMountParameters,
       } as unknown as PluginContextValue;
 
       return (
@@ -51,5 +58,5 @@ export default {
 };
 
 export function EmptyState() {
-  return <AllCasesPage />;
+  return <CasesPage />;
 }

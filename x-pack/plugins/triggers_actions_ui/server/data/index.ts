@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { Logger, IRouter } from '../../../../../src/core/server';
+import { Logger, IRouter } from '@kbn/core/server';
 import { timeSeriesQuery } from './lib/time_series_query';
 import { registerRoutes } from './routes';
 
+export type { TimeSeriesQuery, CoreQueryParams } from './lib';
 export {
-  TimeSeriesQuery,
-  CoreQueryParams,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,

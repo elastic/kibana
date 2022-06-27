@@ -12,6 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { SuggestedCurationsCallout } from '../../engine_overview/components/suggested_curations_callout';
 import {
   AnalyticsCards,
   AnalyticsChart,
@@ -40,6 +41,7 @@ describe('Analytics overview', () => {
     });
     const wrapper = shallow(<Analytics />);
 
+    expect(wrapper.find(SuggestedCurationsCallout)).toHaveLength(1);
     expect(wrapper.find(AnalyticsCards)).toHaveLength(1);
     expect(wrapper.find(AnalyticsChart)).toHaveLength(1);
     expect(wrapper.find(AnalyticsSection)).toHaveLength(2);

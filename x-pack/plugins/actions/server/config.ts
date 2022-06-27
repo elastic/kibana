@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 
 export enum AllowedHosts {
   Any = '*',
@@ -57,7 +57,6 @@ const customHostSettingsSchema = schema.object({
 export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   allowedHosts: schema.arrayOf(
     schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
     {
@@ -113,6 +112,11 @@ export const configSchema = schema.object({
     pageSize: schema.number({ defaultValue: 100 }),
   }),
   microsoftGraphApiUrl: schema.maybe(schema.string()),
+  email: schema.maybe(
+    schema.object({
+      domain_allowlist: schema.arrayOf(schema.string()),
+    })
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

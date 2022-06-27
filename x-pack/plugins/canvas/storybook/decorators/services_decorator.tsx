@@ -8,9 +8,9 @@
 import React from 'react';
 
 import { DecoratorFn } from '@storybook/react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import { PluginServiceRegistry } from '../../../../../src/plugins/presentation_util/public';
+import { PluginServiceRegistry } from '@kbn/presentation-util-plugin/public';
 import { pluginServices, CanvasPluginServices } from '../../public/services';
 import { pluginServiceProviders, StorybookParams } from '../../public/services/storybook';
 import { LegacyServicesProvider } from '../../public/services/legacy';

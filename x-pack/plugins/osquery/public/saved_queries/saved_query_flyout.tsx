@@ -18,7 +18,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Form } from '../shared_imports';
 import { useSavedQueryForm } from './form/use_saved_query_form';
@@ -28,9 +28,16 @@ import { useCreateSavedQuery } from './use_create_saved_query';
 interface AddQueryFlyoutProps {
   defaultValue: unknown;
   onClose: () => void;
+  isExternal?: boolean;
 }
 
-const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue, onClose }) => {
+const additionalZIndexStyle = { style: 'z-index: 6000' };
+
+const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
+  defaultValue,
+  onClose,
+  isExternal,
+}) => {
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
   const handleSubmit = useCallback(
@@ -46,7 +53,13 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
 
   return (
     <EuiPortal>
-      <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby="flyoutTitle">
+      <EuiFlyout
+        size="m"
+        ownFocus
+        onClose={onClose}
+        aria-labelledby="flyoutTitle"
+        maskProps={isExternal ? additionalZIndexStyle : undefined} // For an edge case to display above the alerts flyout
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
@@ -67,7 +80,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
                 <FormattedMessage
-                  id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.cancelButtonLabel"
+                  id="xpack.osquery.pack.queryFlyoutForm.cancelButtonLabel"
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
@@ -75,7 +88,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
             <EuiFlexItem grow={false}>
               <EuiButton isLoading={isSubmitting} onClick={submit} fill>
                 <FormattedMessage
-                  id="xpack.osquery.scheduledQueryGroup.queryFlyoutForm.saveButtonLabel"
+                  id="xpack.osquery.pack.queryFlyoutForm.saveButtonLabel"
                   defaultMessage="Save"
                 />
               </EuiButton>

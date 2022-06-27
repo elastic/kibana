@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 
 export interface LogInitialization {
   log: Logger;
@@ -25,7 +25,7 @@ export let mlLog: MlLog;
 export function initMlServerLog(logInitialization: LogInitialization) {
   mlLog = {
     fatal: (message: string) => logInitialization.log.fatal(message),
-    error: (message: string) => logInitialization.log.error(message),
+    error: (message: string | Error) => logInitialization.log.error(message),
     warn: (message: string) => logInitialization.log.warn(message),
     info: (message: string) => logInitialization.log.info(message),
     debug: (message: string) => logInitialization.log.debug(message),

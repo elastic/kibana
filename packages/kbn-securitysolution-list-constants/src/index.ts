@@ -73,6 +73,10 @@ export const ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION = 'Endpoint Security Event 
 
 export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID = 'endpoint_host_isolation_exceptions';
 export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME =
-  'Endpoint Security Host Isolation Exceptions List';
+  'Endpoint Security Host isolation exceptions List';
 export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION =
-  'Endpoint Security Host Isolation Exceptions List';
+  'Endpoint Security Host isolation exceptions List';
+
+export const ENDPOINT_BLOCKLISTS_LIST_ID = 'endpoint_blocklists';
+export const ENDPOINT_BLOCKLISTS_LIST_NAME = 'Endpoint Security Blocklists List';
+export const ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION = 'Endpoint Security Blocklists List';

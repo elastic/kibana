@@ -9,7 +9,7 @@
 import React, { Component } from 'react';
 import { memoize } from 'lodash';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -19,11 +19,11 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+import { Datatable } from '@kbn/expressions-plugin';
+import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { CSV_MIME_TYPE, datatableToCSV, tableHasFormulas } from '../../../../common';
-import { Datatable } from '../../../../../expressions';
-import { downloadMultipleAs } from '../../../../../share/public';
-import { FieldFormatsStart } from '../../../../../field_formats/public';
-import { IUiSettingsClient } from '../../../../../../core/public';
 
 interface DataDownloadOptionsState {
   isPopoverOpen: boolean;

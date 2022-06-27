@@ -6,23 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
-// @ts-ignore
-import { RollupIndexPatternCreationConfig } from './index_pattern_creation/rollup_index_pattern_creation_config';
-// @ts-ignore
-import { RollupIndexPatternListConfig } from './index_pattern_list/rollup_index_pattern_list_config';
 import { UIM_APP_NAME } from '../common';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { IndexManagementPluginSetup } from '../../index_management/public';
 // @ts-ignore
-import { setHttp, init as initDocumentation } from './crud_app/services/index';
+import { setHttp, init as initDocumentation } from './crud_app/services';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { ClientConfigType } from './types';
 
 export interface RollupPluginSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -32,10 +26,16 @@ export interface RollupPluginSetupDependencies {
 }
 
 export class RollupPlugin implements Plugin {
+  constructor(private ctx: PluginInitializerContext) {}
+
   setup(
     core: CoreSetup,
     { home, management, indexManagement, usageCollection }: RollupPluginSetupDependencies
   ) {
+    const {
+      ui: { enabled: isRollupUiEnabled },
+    } = this.ctx.config.get<ClientConfigType>();
+
     setFatalErrors(core.fatalErrors);
     if (usageCollection) {
       setUiStatsReporter(usageCollection.reportUiCounter.bind(usageCollection, UIM_APP_NAME));
@@ -46,7 +46,7 @@ export class RollupPlugin implements Plugin {
       indexManagement.extensionsService.addToggle(rollupToggleExtension);
     }
 
-    if (home) {
+    if (home && isRollupUiEnabled) {
       home.featureCatalogue.register({
         id: 'rollup_jobs',
         title: 'Rollups',
@@ -57,37 +57,39 @@ export class RollupPlugin implements Plugin {
         icon: 'indexRollupApp',
         path: `/app/management/data/rollup_jobs/job_list`,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
-    const pluginName = i18n.translate('xpack.rollupJobs.appTitle', {
-      defaultMessage: 'Rollup Jobs',
-    });
+    if (isRollupUiEnabled) {
+      const pluginName = i18n.translate('xpack.rollupJobs.appTitle', {
+        defaultMessage: 'Rollup Jobs',
+      });
 
-    management.sections.section.data.registerApp({
-      id: 'rollup_jobs',
-      title: pluginName,
-      order: 4,
-      async mount(params) {
-        const [coreStart] = await core.getStartServices();
+      management.sections.section.data.registerApp({
+        id: 'rollup_jobs',
+        title: pluginName,
+        order: 4,
+        async mount(params) {
+          const [coreStart] = await core.getStartServices();
 
-        const {
-          chrome: { docTitle },
-        } = coreStart;
+          const {
+            chrome: { docTitle },
+          } = coreStart;
 
-        docTitle.change(pluginName);
-        params.setBreadcrumbs([{ text: pluginName }]);
+          docTitle.change(pluginName);
+          params.setBreadcrumbs([{ text: pluginName }]);
 
-        const { renderApp } = await import('./application');
-        const unmountAppCallback = await renderApp(core, params);
+          const { renderApp } = await import('./application');
+          const unmountAppCallback = await renderApp(core, params);
 
-        return () => {
-          docTitle.reset();
-          unmountAppCallback();
-        };
-      },
-    });
+          return () => {
+            docTitle.reset();
+            unmountAppCallback();
+          };
+        },
+      });
+    }
   }
 
   start(core: CoreStart) {

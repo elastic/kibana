@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { overlayServiceMock } from '../../../core/public/overlays/overlay_service.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServiceMock } from '../../../core/public/http/http_service.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { notificationServiceMock } from '../../../core/public/notifications/notifications_service.mock';
+import {
+  overlayServiceMock,
+  httpServiceMock,
+  notificationServiceMock,
+} from '@kbn/core/public/mocks';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
 import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
+import { TelemetryConstants } from '.';
 
 // The following is to be able to access private methods
 /* eslint-disable dot-notation */
@@ -33,7 +33,6 @@ export function mockTelemetryService({
   config: configOverride = {},
 }: TelemetryServiceMockOptions = {}) {
   const config = {
-    enabled: true,
     sendUsageTo: 'staging' as const,
     sendUsageFrom: 'browser' as const,
     optIn: true,
@@ -61,6 +60,12 @@ export function mockTelemetryService({
   return telemetryService;
 }
 
+export function mockTelemetryConstants(): TelemetryConstants {
+  return {
+    getPrivacyStatementUrl: () => 'https://some-host/some-url',
+  };
+}
+
 export function mockTelemetryNotifications({
   telemetryService,
 }: {
@@ -70,6 +75,7 @@ export function mockTelemetryNotifications({
     http: httpServiceMock.createSetupContract(),
     overlays: overlayServiceMock.createStartContract(),
     telemetryService,
+    telemetryConstants: mockTelemetryConstants(),
   });
 }
 
@@ -94,13 +100,12 @@ function createSetupContract(): Setup {
 function createStartContract(): Start {
   const telemetryService = mockTelemetryService();
   const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+  const telemetryConstants = mockTelemetryConstants();
 
   const startContract: Start = {
     telemetryService,
     telemetryNotifications,
-    telemetryConstants: {
-      getPrivacyStatementUrl: jest.fn(),
-    },
+    telemetryConstants,
   };
 
   return startContract;

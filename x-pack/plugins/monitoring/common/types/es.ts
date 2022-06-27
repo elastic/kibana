@@ -6,6 +6,7 @@
  */
 
 export interface ElasticsearchResponse {
+  timed_out?: boolean;
   hits?: {
     hits: ElasticsearchResponseHit[];
     total: {
@@ -41,6 +42,7 @@ export interface ElasticsearchSourceKibanaStats {
     };
     transport_address?: string;
     host?: string;
+    version?: string;
   };
   os?: {
     memory?: {
@@ -141,6 +143,14 @@ export interface ElasticsearchIndexStats {
   };
 }
 
+export interface ElasticsearchLogstashStatePipeline {
+  representation?: {
+    graph?: {
+      vertices?: ElasticsearchSourceLogstashPipelineVertex[];
+    };
+  };
+}
+
 export interface ElasticsearchLegacySource {
   timestamp: string;
   cluster_uuid: string;
@@ -203,13 +213,7 @@ export interface ElasticsearchLegacySource {
     expiry_date_in_millis?: number;
   };
   logstash_state?: {
-    pipeline?: {
-      representation?: {
-        graph?: {
-          vertices?: ElasticsearchSourceLogstashPipelineVertex[];
-        };
-      };
-    };
+    pipeline?: ElasticsearchLogstashStatePipeline;
   };
   logstash_stats?: {
     timestamp?: string;
@@ -411,12 +415,15 @@ export interface ElasticsearchIndexRecoveryShard {
 export interface ElasticsearchMetricbeatNode {
   name?: string;
   stats?: ElasticsearchNodeStats;
+  master: boolean;
 }
 
 export interface ElasticsearchMetricbeatSource {
   '@timestamp'?: string;
   service?: {
+    id?: string;
     address?: string;
+    version?: string;
   };
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
@@ -534,15 +541,16 @@ export interface ElasticsearchMetricbeatSource {
     };
   };
   kibana?: {
-    kibana?: {
-      transport_address?: string;
-      name?: string;
-      host?: string;
-      uuid?: string;
-      status?: string;
-    };
     stats?: {
+      name?: string;
+      index?: string;
+      status?: string;
+      transport_address?: string;
       concurrent_connections?: number;
+      snapshot?: boolean;
+      host?: {
+        name?: string;
+      };
       process?: {
         uptime?: {
           ms?: number;
@@ -582,6 +590,17 @@ export interface ElasticsearchMetricbeatSource {
   };
   logstash?: {
     node?: {
+      state?: {
+        pipeline?: {
+          id: string;
+          name: string;
+          representation?: {
+            graph?: {
+              vertices: ElasticsearchSourceLogstashPipelineVertex[];
+            };
+          };
+        };
+      };
       stats?: {
         timestamp?: string;
         logstash?: {
@@ -676,6 +695,9 @@ export interface ElasticsearchMetricbeatSource {
         };
       };
     };
+  };
+  enterprisesearch?: {
+    cluster_uuid?: string;
   };
 }
 

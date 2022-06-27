@@ -7,7 +7,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   Chart,
   ElementClickListener,
@@ -19,6 +19,8 @@ import {
   ScaleType,
   AccessorFn,
   Accessor,
+  XYBrushEvent,
+  Placement,
 } from '@elastic/charts';
 
 import { compact } from 'lodash';
@@ -28,11 +30,14 @@ import {
   LegendToggle,
   getBrushFromChartBrushEventFn,
   ClickTriggerEvent,
-  PaletteRegistry,
   useActiveCursor,
-} from '../../../charts/public';
-import { Datatable, IInterpreterRenderHandlers } from '../../../expressions/public';
-import type { PersistedState } from '../../../visualizations/public';
+} from '@kbn/charts-plugin/public';
+import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+  PersistedState,
+} from '@kbn/visualizations-plugin/public';
 import { VisParams } from './types';
 import {
   getAdjustedDomain,
@@ -56,7 +61,7 @@ import {
   getComplexAccessor,
   getSplitSeriesAccessorFnMap,
 } from './utils/accessors';
-import { ChartSplitter } from './chart_splitter';
+import { ChartSplit } from './chart_split';
 
 export interface VisComponentProps {
   visParams: VisParams;
@@ -65,6 +70,8 @@ export interface VisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   syncColors: boolean;
+  syncTooltips: boolean;
+  useLegacyTimeAxis: boolean;
 }
 
 export type VisComponentType = typeof VisComponent;
@@ -131,7 +138,10 @@ const VisComponent = (props: VisComponentProps) => {
     ): BrushEndListener | undefined => {
       if (xAccessor !== null && isInterval) {
         return (brushArea) => {
-          const event = getBrushFromChartBrushEventFn(visData, xAccessor)(brushArea);
+          const event = getBrushFromChartBrushEventFn(
+            visData,
+            xAccessor
+          )(brushArea as XYBrushEvent);
           props.fireEvent(event);
         };
       }
@@ -206,9 +216,10 @@ const VisComponent = (props: VisComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams, syncColors } = props;
+  const { visData, visParams, syncColors, syncTooltips } = props;
+  const isDarkMode = getThemeService().useDarkMode();
 
-  const config = getConfig(visData, visParams);
+  const config = getConfig(visData, visParams, props.useLegacyTimeAxis, isDarkMode);
   const timeZone = getTimeZone();
   const xDomain =
     config.xAxis.scale.type === ScaleType.Ordinal ? undefined : getXDomain(config.aspects.x.params);
@@ -225,7 +236,7 @@ const VisComponent = (props: VisComponentProps) => {
     () => config.legend.position ?? Position.Right,
     [config.legend.position]
   );
-  const isDarkMode = getThemeService().useDarkMode();
+
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
   const splitAccessors = config.aspects.series?.map(({ accessor, formatter }) => {
@@ -332,12 +343,6 @@ const VisComponent = (props: VisComponentProps) => {
     [getSeriesName, legendPosition, props.uiState, setColor, visParams.palette.name]
   );
 
-  const splitChartDimension = visParams.dimensions.splitColumn
-    ? visData.columns[visParams.dimensions.splitColumn[0].accessor]
-    : visParams.dimensions.splitRow
-    ? visData.columns[visParams.dimensions.splitRow[0].accessor]
-    : undefined;
-
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">
       <LegendToggle
@@ -346,10 +351,9 @@ const VisComponent = (props: VisComponentProps) => {
         legendPosition={legendPosition}
       />
       <Chart size="100%" ref={chartRef}>
-        <ChartSplitter
+        <ChartSplit
           splitColumnAccessor={splitChartColumnAccessor}
           splitRowAccessor={splitChartRowAccessor}
-          splitDimension={splitChartDimension}
         />
         <XYSettings
           {...config}
@@ -357,7 +361,11 @@ const VisComponent = (props: VisComponentProps) => {
           maxLegendLines={visParams.maxLegendLines}
           showLegend={showLegend}
           onPointerUpdate={handleCursorUpdate}
+          externalPointerEvents={{
+            tooltip: { visible: syncTooltips, placement: Placement.Right },
+          }}
           legendPosition={legendPosition}
+          legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
           legendColorPicker={legendColorPicker}
@@ -367,6 +375,7 @@ const VisComponent = (props: VisComponentProps) => {
             splitSeriesAccessors,
             splitChartColumnAccessor ?? splitChartRowAccessor
           )}
+          ariaLabel={visParams.ariaLabel}
           onBrushEnd={handleBrush(visData, xAccessor, 'interval' in config.aspects.x.params)}
           onRenderChange={onRenderChange}
           legendAction={

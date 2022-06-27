@@ -6,17 +6,25 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  HostDetailsStrategyResponse,
+  HostsQueries,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { HostsQueries } from '../../../../plugins/security_solution/common/search_strategy';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Host Details', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
+      );
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -190,7 +198,6 @@ export default function ({ getService }: FtrProviderContext) {
             architecture: ['armv7l'],
             id: ['b19a781f683541a7a25ee345133aa399'],
             ip: ['151.205.0.17'],
-            mac: [],
             name: ['raspberrypi'],
             os: {
               family: [''],
@@ -199,26 +206,13 @@ export default function ({ getService }: FtrProviderContext) {
               version: ['9 (stretch)'],
             },
           },
-          cloud: {
-            instance: {
-              id: [],
-            },
-            machine: {
-              type: [],
-            },
-            provider: [],
-            region: [],
-          },
         },
       };
 
       it('Make sure that we get HostDetails data', async () => {
-        const {
-          body: { hostDetails },
-        } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const { hostDetails } = await bsearch.send<HostDetailsStrategyResponse>({
+          supertest,
+          options: {
             factoryQueryType: HostsQueries.details,
             timerange: {
               interval: '12h',
@@ -226,12 +220,11 @@ export default function ({ getService }: FtrProviderContext) {
               from: FROM,
             },
             defaultIndex: ['filebeat-*'],
-            docValueFields: [],
             hostName: 'raspberrypi',
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
         expect(hostDetails).to.eql(expectedResult.hostDetails);
       });
     });

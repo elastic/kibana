@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   ActionDetailsStrategyResponse,
   ActionDetailsRequestOptions,
@@ -17,9 +17,7 @@ import { OsqueryFactory } from '../../types';
 import { buildActionDetailsQuery } from './query.action_details.dsl';
 
 export const actionDetails: OsqueryFactory<OsqueryQueries.actionDetails> = {
-  buildDsl: (options: ActionDetailsRequestOptions) => {
-    return buildActionDetailsQuery(options);
-  },
+  buildDsl: (options: ActionDetailsRequestOptions) => buildActionDetailsQuery(options),
   parse: async (
     options: ActionDetailsRequestOptions,
     response: IEsSearchResponse<unknown>

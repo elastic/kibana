@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import IndexThresholdAlertTypeExpression, { DEFAULT_VALUES } from './expression';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { IndexThresholdAlertParams } from './types';
 import { validateExpression } from './validation';
 import {
@@ -18,10 +19,10 @@ import {
   builtInComparators,
   getTimeUnitLabel,
   TIME_UNITS,
-} from '../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
 
-jest.mock('../../../../triggers_actions_ui/public', () => {
-  const original = jest.requireActual('../../../../triggers_actions_ui/public');
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
     getIndexPatterns: () => {
@@ -68,6 +69,7 @@ jest.mock('../../../../triggers_actions_ui/public', () => {
 });
 
 const dataMock = dataPluginMock.createStartContract();
+const dataViewMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 
 describe('IndexThresholdAlertTypeExpression', () => {
@@ -82,19 +84,20 @@ describe('IndexThresholdAlertTypeExpression', () => {
       ...overrides,
     };
   }
-  async function setup(alertParams: IndexThresholdAlertParams) {
-    const { errors } = validateExpression(alertParams);
+  async function setup(ruleParams: IndexThresholdAlertParams) {
+    const { errors } = validateExpression(ruleParams);
 
     const wrapper = mountWithIntl(
       <IndexThresholdAlertTypeExpression
-        alertInterval="1m"
-        alertThrottle="1m"
+        ruleInterval="1m"
+        ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
-        alertParams={alertParams}
-        setAlertParams={() => {}}
-        setAlertProperty={() => {}}
+        ruleParams={ruleParams}
+        setRuleParams={() => {}}
+        setRuleProperty={() => {}}
         errors={errors}
         data={dataMock}
+        dataViews={dataViewMock}
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}

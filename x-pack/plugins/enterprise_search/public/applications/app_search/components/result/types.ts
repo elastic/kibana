@@ -22,6 +22,7 @@ export interface ResultMeta {
   id: string;
   score?: number;
   engine: string;
+  clicks?: number;
 }
 
 // A search result item
@@ -41,4 +42,5 @@ export interface ResultAction {
   title: string;
   iconType: string;
   iconColor?: EuiButtonIconColor;
+  disabled?: boolean;
 }

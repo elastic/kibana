@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
@@ -29,16 +29,16 @@ export const registerSimulateRoute = ({
       },
     },
     async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const { pipeline, documents, verbose } = req.body;
 
       try {
-        const { body: response } = await clusterClient.asCurrentUser.ingest.simulate({
+        const response = await clusterClient.asCurrentUser.ingest.simulate({
           verbose,
           body: {
             pipeline,
-            docs: documents as estypes.IngestSimulatePipelineDocument[],
+            docs: documents as estypes.IngestSimulateDocument[],
           },
         });
 

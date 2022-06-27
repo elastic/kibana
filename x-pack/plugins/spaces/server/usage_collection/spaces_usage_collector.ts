@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   CollectorFetchContext,
   UsageCollectionSetup,
-} from 'src/plugins/usage_collection/server';
+} from '@kbn/usage-collection-plugin/server';
 
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
@@ -30,7 +29,7 @@ interface SpacesAggregationResponse {
 
 /**
  *
- * @param {CallCluster} callCluster
+ * @param {ElasticsearchClient} esClient
  * @param {string} kibanaIndex
  * @param {PluginsSetup['features']} features
  * @param {boolean} spacesAvailable
@@ -47,7 +46,7 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
-  const { body: resp } = (await esClient.search({
+  const resp = (await esClient.search({
     index: kibanaIndex,
     body: {
       track_total_hits: true,
@@ -69,7 +68,7 @@ async function getSpacesUsage(
       },
       size: 0,
     },
-  })) as { body: SpacesAggregationResponse };
+  })) as SpacesAggregationResponse;
 
   const { hits, aggregations } = resp;
 
@@ -150,7 +149,7 @@ export interface UsageData extends UsageStats {
 }
 
 interface CollectorDeps {
-  kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
+  kibanaIndex: string;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
@@ -426,11 +425,9 @@ export function getSpacesUsageCollector(
       },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
-      const { licensing, kibanaIndexConfig$, features, usageStatsServicePromise } = deps;
-      const license = await licensing.license$.pipe(take(1)).toPromise();
+      const { licensing, kibanaIndex, features, usageStatsServicePromise } = deps;
+      const license = await firstValueFrom(licensing.license$);
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
-
-      const kibanaIndex = (await kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
 
       const usageData = await getSpacesUsage(esClient, kibanaIndex, features, available);
       const usageStats = await getUsageStats(usageStatsServicePromise, available);

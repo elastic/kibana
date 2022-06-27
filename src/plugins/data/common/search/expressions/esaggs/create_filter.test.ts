@@ -7,12 +7,12 @@
  */
 
 import { isRangeFilter } from '@kbn/es-query';
-import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../field_formats/common';
+import { BytesFormat, FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { AggConfigs, IAggConfig } from '../../aggs';
 import { mockAggTypesRegistry } from '../../aggs/test_helpers';
 
 import { createFilter } from './create_filter';
-import { Datatable } from '../../../../../expressions/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('createFilter', () => {
   let table: Datatable;
@@ -50,7 +50,8 @@ describe('createFilter', () => {
           params,
         },
       ],
-      { typesRegistry }
+      { typesRegistry },
+      jest.fn()
     );
   };
 
@@ -93,7 +94,7 @@ describe('createFilter', () => {
 
     if (filters) {
       expect(filters.length).toEqual(1);
-      expect(filters[0].query!.match_phrase.bytes).toEqual('2048');
+      expect(filters[0].query!.match_phrase!.bytes).toEqual('2048');
     }
   });
 
@@ -109,8 +110,8 @@ describe('createFilter', () => {
       const [rangeFilter] = filters;
 
       if (isRangeFilter(rangeFilter)) {
-        expect(rangeFilter.range.bytes.gte).toEqual(2048);
-        expect(rangeFilter.range.bytes.lt).toEqual(2078);
+        expect(rangeFilter.query.range.bytes.gte).toEqual(2048);
+        expect(rangeFilter.query.range.bytes.lt).toEqual(2078);
       }
     }
   });

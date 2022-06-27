@@ -38,7 +38,9 @@ jest.mock('react-router-dom', () => {
 jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
-
+jest.mock('../visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
 const field = 'process.name';
 const value = 'nice';
 
@@ -65,10 +67,9 @@ const state: State = {
             },
           },
           query: {
-            match: {
+            match_phrase: {
               'host.os.name': {
                 query: 'Linux',
-                type: 'phrase',
               },
             },
           },
@@ -121,10 +122,9 @@ const state: State = {
               type: 'phrase',
             },
             query: {
-              match: {
+              match_phrase: {
                 'source.port': {
                   query: '30045',
-                  type: 'phrase',
                 },
               },
             },
@@ -256,7 +256,7 @@ describe('StatefulTopN', () => {
             key: 'host.os.name',
             params: { query: 'Linux' },
           },
-          query: { match: { 'host.os.name': { query: 'Linux', type: 'phrase' } } },
+          query: { match_phrase: { 'host.os.name': { query: 'Linux' } } },
         },
       ]);
     });

@@ -15,33 +15,47 @@ import {
   getSuccessfulSignalUpdateResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { SetupPlugins } from '../../../../plugin';
+import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     server = serverMock.create();
+    logger = loggingSystemMock.createLogger();
     ({ context } = requestContextMock.createTools());
-    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        getSuccessfulSignalUpdateResponse()
-      )
+
+    context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
+      getSuccessfulSignalUpdateResponse()
     );
-    setSignalsStatusRoute(server.router);
+    const telemetrySenderMock = createMockTelemetryEventsSender();
+    const securityMock = {
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
+      },
+    } as unknown as SetupPlugins['security'];
+    setSignalsStatusRoute(server.router, logger, securityMock, telemetrySenderMock);
   });
 
   describe('status on signal', () => {
     test('returns 200 when setting a status on a signal by ids', async () => {
-      const response = await server.inject(getSetSignalStatusByIdsRequest(), context);
+      const response = await server.inject(
+        getSetSignalStatusByIdsRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 when setting a status on a signal by query', async () => {
-      const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
+      const response = await server.inject(
+        getSetSignalStatusByQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -57,10 +71,13 @@ describe('set signal status', () => {
     });
 
     test('catches error if asCurrentUser throws error', async () => {
-      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResolvedValue(
-        elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
+        new Error('Test error')
       );
-      const response = await server.inject(getSetSignalStatusByQueryRequest(), context);
+      const response = await server.inject(
+        getSetSignalStatusByQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -98,7 +115,7 @@ describe('set signal status', () => {
         path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         body: setStatusSignalMissingIdsAndQueryPayload(),
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message: ['either "signal_ids" or "query" must be set'],

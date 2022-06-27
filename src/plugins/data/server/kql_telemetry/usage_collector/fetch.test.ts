@@ -7,9 +7,9 @@
  */
 
 import { fetchProvider } from './fetch';
-import { ElasticsearchClient } from 'kibana/server';
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 jest.mock('../../../common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',
@@ -30,45 +30,41 @@ function setupMockCallCluster(
   function mockedEsGetMethod() {
     if (optCount === null) {
       return Promise.resolve({
-        body: {
-          _index: '.kibana_1',
-          _id: 'kql-telemetry:kql-telemetry',
-          found: false,
-        },
+        _index: '.kibana_1',
+        _id: 'kql-telemetry:kql-telemetry',
+        found: false,
       });
     } else {
       return Promise.resolve({
-        body: {
-          _source: {
-            'kql-telemetry': { ...optCount },
-            type: 'kql-telemetry',
-            updated_at: '2018-10-05T20:20:56.258Z',
-          },
+        _source: {
+          'kql-telemetry': { ...optCount },
+          type: 'kql-telemetry',
+          updated_at: '2018-10-05T20:20:56.258Z',
         },
       });
     }
   }
+
   function mockedEsSearchMethod() {
     if (language === 'missingConfigDoc') {
-      return Promise.resolve({ body: { hits: { hits: [] } } });
+      return Promise.resolve({ hits: { hits: [] } });
     } else {
       return Promise.resolve({
-        body: {
-          hits: {
-            hits: [
-              {
-                _source: {
-                  config: {
-                    'search:queryLanguage': language,
-                  },
+        hits: {
+          hits: [
+            {
+              _source: {
+                config: {
+                  'search:queryLanguage': language,
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       });
     }
   }
+
   const esClientMock = {
     get: jest.fn().mockImplementation(mockedEsGetMethod),
     search: jest.fn().mockImplementation(mockedEsSearchMethod),

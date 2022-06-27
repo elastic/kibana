@@ -221,7 +221,10 @@ export interface SavedObjectsCheckConflictsResponse {
  * @public
  */
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
+  /**
+   * An opaque version number which changes on each successful write operation.
+   * Can be used for implementing optimistic concurrency control.
+   */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
   references?: SavedObjectReference[];
@@ -229,6 +232,11 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
   refresh?: MutatingOperationRefreshSetting;
   /** If specified, will be used to perform an upsert if the document doesn't exist */
   upsert?: Attributes;
+  /**
+   * The Elasticsearch `retry_on_conflict` setting for this operation.
+   * Defaults to `0` when `version` is provided, `3` otherwise.
+   */
+  retryOnConflict?: number;
 }
 
 /**
@@ -354,9 +362,20 @@ export interface SavedObjectsResolveResponse<T = unknown> {
    */
   outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
   /**
-   * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
+   * The ID of the object that the legacy URL alias points to.
+   *
+   * **Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`).
    */
   alias_target_id?: string;
+  /**
+   * The reason this alias was created.
+   *
+   * Currently this is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias
+   * was created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.
+   *
+   * **Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`).
+   */
+  alias_purpose?: 'savedObjectConversion' | 'savedObjectImport';
 }
 
 /**

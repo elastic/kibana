@@ -6,20 +6,18 @@
  */
 
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Ast } from '@kbn/interpreter/common';
-import {
-  ExpressionAstExpression,
-  ExpressionValue,
-} from '../../../../../../src/plugins/expressions';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { Ast } from '@kbn/interpreter';
+import deepEqual from 'react-fast-compare';
+import { ExpressionAstExpression, ExpressionValue } from '@kbn/expressions-plugin';
 import { findExpressionType } from '../../lib/find_expression_type';
-import { getId } from '../../lib/get_id';
+
 // @ts-expect-error unconverted action function
-import { createAsset } from '../../state/actions/assets';
+import { setAsset } from '../../state/actions/assets';
 import {
   fetchContext,
-  setArgumentAtIndex,
-  addArgumentValueAtIndex,
+  setArgument as setArgumentValue,
+  addArgumentValue,
   deleteArgumentAtIndex,
   // @ts-expect-error untyped local
 } from '../../state/actions/elements';
@@ -28,97 +26,103 @@ import {
   getSelectedPage,
   getContextForIndex,
   getGlobalFilterGroups,
+  getFullWorkpadPersisted,
 } from '../../state/selectors/workpad';
 import { getAssets } from '../../state/selectors/assets';
 // @ts-expect-error unconverted lib
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
-import { ArgType, ArgTypeDef } from '../../expression_types/types';
+import { Args, ArgType, ArgTypeDef } from '../../expression_types/types';
 import { State, ExpressionContext, CanvasElement, AssetType } from '../../../types';
+import { useNotifyService, useWorkpadService } from '../../services';
+import { createAsset, notifyError } from '../../lib/assets';
 
 interface FunctionFormProps {
   name: string;
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Record<string, Array<string | Ast>> | null;
+  args: Args;
+  nestedFunctionsArgs: Args;
   argType: ArgType;
   argTypeDef: ArgTypeDef;
   expressionIndex: number;
   nextArgType?: ArgType;
+  path: string;
+  parentPath: string;
+  removable?: boolean;
 }
 
 export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) => {
-  const { expressionIndex, argType, nextArgType } = props;
+  const { expressionIndex, ...restProps } = props;
+  const { nextArgType, path, parentPath, argType } = restProps;
+  const service = useWorkpadService();
+  const notifyService = useNotifyService();
+
   const dispatch = useDispatch();
-  const context = useSelector<State, ExpressionContext>((state) =>
-    getContextForIndex(state, expressionIndex)
+  const context = useSelector<State, ExpressionContext>(
+    (state) => getContextForIndex(state, parentPath, expressionIndex),
+    deepEqual
   );
-  const element = useSelector<State, CanvasElement | undefined>((state) =>
-    getSelectedElement(state)
+  const element = useSelector<State, CanvasElement | undefined>(
+    (state) => getSelectedElement(state),
+    deepEqual
   );
-  const pageId = useSelector<State, string>((state) => getSelectedPage(state));
-  const assets = useSelector<State, State['assets']>((state) => getAssets(state));
-  const filterGroups = useSelector<State, string[]>((state) => getGlobalFilterGroups(state));
+  const pageId = useSelector<State, string>((state) => getSelectedPage(state), shallowEqual);
+  const assets = useSelector<State, State['assets']>((state) => getAssets(state), shallowEqual);
+  const filterGroups = useSelector<State, string[]>(
+    (state) => getGlobalFilterGroups(state),
+    shallowEqual
+  );
+
+  const workpad = useSelector((state: State) => getFullWorkpadPersisted(state));
+
   const addArgument = useCallback(
     (argName: string, argValue: string | Ast | null) => () => {
       dispatch(
-        addArgumentValueAtIndex({
-          index: expressionIndex,
-          element,
-          pageId,
-          argName,
-          value: argValue,
-        })
+        addArgumentValue({ elementId: element?.id, pageId, argName, value: argValue, path })
       );
     },
-    [dispatch, element, expressionIndex, pageId]
+    [dispatch, element?.id, pageId, path]
   );
 
-  const updateContext = useCallback(
-    () => dispatch(fetchContext(expressionIndex, element)),
-    [dispatch, element, expressionIndex]
-  );
+  const updateContext = useCallback(() => {
+    return dispatch(fetchContext(expressionIndex, element, false, parentPath));
+  }, [dispatch, element, expressionIndex, parentPath]);
 
   const setArgument = useCallback(
     (argName: string, valueIndex: number) => (value: string | Ast | null) => {
       dispatch(
-        setArgumentAtIndex({
-          index: expressionIndex,
-          element,
-          pageId,
-          argName,
-          value,
-          valueIndex,
-        })
+        setArgumentValue({ elementId: element?.id, pageId, argName, value, valueIndex, path })
       );
     },
-    [dispatch, element, expressionIndex, pageId]
+    [dispatch, element?.id, pageId, path]
   );
 
   const deleteArgument = useCallback(
     (argName: string, argIndex: number) => () => {
-      dispatch(
-        deleteArgumentAtIndex({
-          index: expressionIndex,
-          element,
-          pageId,
-          argName,
-          argIndex,
-        })
-      );
+      dispatch(deleteArgumentAtIndex({ element, pageId, argName, argIndex, path }));
     },
-    [dispatch, element, expressionIndex, pageId]
+    [dispatch, element, pageId, path]
   );
+
+  const deleteParentArgument = useCallback(() => {
+    dispatch(deleteArgumentAtIndex({ element, pageId, path: parentPath }));
+  }, [dispatch, element, pageId, parentPath]);
 
   const onAssetAddDispatch = useCallback(
     (type: AssetType['type'], content: AssetType['value']) => {
       // make the ID here and pass it into the action
-      const assetId = getId('asset');
-      dispatch(createAsset(type, content, assetId));
+      const asset = createAsset(type, content);
 
-      // then return the id, so the caller knows the id that will be created
-      return assetId;
+      return service
+        .updateAssets(workpad.id, { ...workpad.assets, [asset.id]: asset })
+        .then((res) => {
+          dispatch(setAsset(asset));
+          // then return the id, so the caller knows the id that will be created
+          return asset.id;
+        })
+        .catch((error) => notifyError(error, notifyService.error));
     },
-    [dispatch]
+    [dispatch, notifyService, service, workpad.assets, workpad.id]
   );
 
   const onAssetAdd = useCallback(
@@ -134,7 +138,8 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
 
   return (
     <Component
-      {...props}
+      {...restProps}
+      id={path}
       context={context}
       filterGroups={filterGroups}
       expressionType={findExpressionType(argType)}
@@ -143,6 +148,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
       updateContext={updateContext}
       onValueChange={setArgument}
       onValueRemove={deleteArgument}
+      onContainerRemove={deleteParentArgument}
       onAssetAdd={onAssetAdd}
     />
   );

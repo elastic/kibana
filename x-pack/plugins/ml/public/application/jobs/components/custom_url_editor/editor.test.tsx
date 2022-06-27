@@ -6,19 +6,21 @@
  */
 
 // Mock the mlJobService that is used for testing custom URLs.
-import { UrlConfig } from '../../../../../common/types/custom_urls';
 import { shallow } from 'enzyme';
 
-jest.mock('../../../services/job_service.js', () => 'mlJobService');
+jest.mock('../../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
 
 import { CustomUrlEditor } from './editor';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { CustomUrlSettings } from './utils';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: UrlConfig) => void) {
+function prepareTest(
+  customUrl: CustomUrlSettings,
+  setEditCustomUrlFn: (url: CustomUrlSettings) => void
+) {
   const savedCustomUrls = [
     {
       url_name: 'Show data',
@@ -47,10 +49,10 @@ function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: Url
     { id: 'dash2', title: 'Dashboard 2' },
   ];
 
-  const indexPatterns = [
-    { id: 'pattern1', title: 'Index Pattern 1' },
-    { id: 'pattern2', title: 'Index Pattern 2' },
-  ] as IIndexPattern[];
+  const dataViewListItems = [
+    { id: 'pattern1', title: 'Data view 1' },
+    { id: 'pattern2', title: 'Data view 2' },
+  ] as DataViewListItem[];
 
   const queryEntityFieldNames = ['airline'];
 
@@ -59,7 +61,7 @@ function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: Url
     setEditCustomUrl: setEditCustomUrlFn,
     savedCustomUrls,
     dashboards,
-    indexPatterns,
+    dataViewListItems,
     queryEntityFieldNames,
   };
 

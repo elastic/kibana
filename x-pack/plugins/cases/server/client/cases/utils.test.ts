@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
 import { mockCases } from '../../routes/api/__fixtures__';
 
 import { BasicParams, ExternalServiceParams, Incident } from './types';
@@ -17,7 +17,6 @@ import {
   userActions,
   commentAlert,
   commentAlertMultipleIds,
-  commentGeneratedAlert,
   isolateCommentActions,
   releaseCommentActions,
   isolateCommentActionsMultipleTargets,
@@ -25,14 +24,17 @@ import {
 
 import {
   createIncident,
+  getClosedInfoForUpdate,
+  getDurationForUpdate,
   getLatestPushInfo,
   prepareFieldsForTransformation,
   transformComments,
   transformers,
   transformFields,
 } from './utils';
-import { flattenCaseSavedObject } from '../../common';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { Actions, CaseStatuses } from '../../../common/api';
+import { flattenCaseSavedObject } from '../../common/utils';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 
 const formatComment = {
@@ -519,6 +521,7 @@ describe('utils', () => {
         apiUrl: 'https://elastic.jira.com',
       },
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     it('creates an external incident', async () => {
@@ -640,11 +643,7 @@ describe('utils', () => {
         actionsClient: actionsMock,
         theCase: {
           ...theCase,
-          comments: [
-            { ...commentObj, id: 'comment-user-1' },
-            commentAlertMultipleIds,
-            commentGeneratedAlert,
-          ],
+          comments: [{ ...commentObj, id: 'comment-user-1' }, commentAlertMultipleIds],
         },
         userActions,
         connector,
@@ -660,7 +659,7 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
         {
-          comment: 'Elastic Alerts attached to the case: 4',
+          comment: 'Elastic Alerts attached to the case: 2',
           commentId: 'mock-id-1-total-alerts',
         },
       ]);
@@ -673,7 +672,7 @@ describe('utils', () => {
           ...theCase,
           comments: [
             { ...commentObj, id: 'comment-user-1', pushed_at: '2019-11-25T21:55:00.177Z' },
-            { ...commentGeneratedAlert, pushed_at: '2019-11-25T21:55:00.177Z' },
+            { ...commentAlertMultipleIds, pushed_at: '2019-11-25T21:55:00.177Z' },
           ],
         },
         userActions,
@@ -790,20 +789,30 @@ describe('utils', () => {
         const res = getLatestPushInfo('456', [
           ...userActions.slice(0, 3),
           {
-            action_field: ['pushed'],
-            action: 'push-to-service',
-            action_at: '2021-02-03T17:45:29.400Z',
-            action_by: {
+            type: 'pushed',
+            action: Actions.push_to_service,
+            created_at: '2021-02-03T17:45:29.400Z',
+            created_by: {
               email: 'elastic@elastic.co',
               full_name: 'Elastic',
               username: 'elastic',
             },
-            new_value:
-              // The connector id is 123
-              '{"pushed_at":"2021-02-03T17:45:29.400Z","pushed_by":{"username":"elastic","full_name":"Elastic","email":"elastic@elastic.co"},"connector_name":"ServiceNow SN","external_id":"external-id","external_title":"SIR0010037","external_url":"https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id"}',
-            new_val_connector_id: '123',
-            old_val_connector_id: null,
-            old_value: null,
+            payload: {
+              externalService: {
+                pushed_at: '2021-02-03T17:45:29.400Z',
+                pushed_by: {
+                  username: 'elastic',
+                  full_name: 'Elastic',
+                  email: 'elastic@elastic.co',
+                },
+                connector_id: '123',
+                connector_name: 'ServiceNow SN',
+                external_id: 'external-id',
+                external_title: 'SIR0010037',
+                external_url:
+                  'https://dev92273.service-now.com/nav_to.do?uri=sn_si_incident.do?sys_id=external-id',
+              },
+            },
             action_id: '9b91d8f0-6647-11eb-a291-51bf6b175a53',
             case_id: 'fcdedd20-6646-11eb-a291-51bf6b175a53',
             comment_id: null,
@@ -827,6 +836,120 @@ describe('utils', () => {
               username: 'elastic',
             },
           },
+        });
+      });
+    });
+
+    describe('getClosedInfoForUpdate', () => {
+      const date = '2021-02-03T17:41:26.108Z';
+      const user = { full_name: 'Elastic', username: 'elastic', email: 'elastic@elastic.co' };
+
+      it('returns the correct closed info when the case closes', async () => {
+        expect(
+          getClosedInfoForUpdate({ status: CaseStatuses.closed, closedDate: date, user })
+        ).toEqual({
+          closed_at: date,
+          closed_by: user,
+        });
+      });
+
+      it.each([[CaseStatuses.open], [CaseStatuses['in-progress']]])(
+        'returns the correct closed info when the case %s',
+        async (status) => {
+          expect(getClosedInfoForUpdate({ status, closedDate: date, user })).toEqual({
+            closed_at: null,
+            closed_by: null,
+          });
+        }
+      );
+
+      it('returns undefined if the status is not provided', async () => {
+        expect(getClosedInfoForUpdate({ closedDate: date, user })).toBe(undefined);
+      });
+    });
+
+    describe('getDurationForUpdate', () => {
+      const createdAt = '2021-11-23T19:00:00Z';
+      const closedAt = '2021-11-23T19:02:00Z';
+
+      it('returns the correct duration when the case closes', () => {
+        expect(getDurationForUpdate({ status: CaseStatuses.closed, closedAt, createdAt })).toEqual({
+          duration: 120,
+        });
+      });
+
+      it.each([[CaseStatuses.open], [CaseStatuses['in-progress']]])(
+        'returns the correct duration when the case %s',
+        (status) => {
+          expect(getDurationForUpdate({ status, closedAt, createdAt })).toEqual({
+            duration: null,
+          });
+        }
+      );
+
+      it('returns undefined if the status is not provided', async () => {
+        expect(getDurationForUpdate({ closedAt, createdAt })).toBe(undefined);
+      });
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the createdAt date is %s',
+        (createdAtInvalid) => {
+          expect(
+            getDurationForUpdate({
+              status: CaseStatuses.closed,
+              closedAt,
+              // @ts-expect-error
+              createdAt: createdAtInvalid,
+            })
+          ).toBe(undefined);
+        }
+      );
+
+      it.each([['invalid'], [null]])(
+        'returns undefined if the closedAt date is %s',
+        (closedAtInvalid) => {
+          expect(
+            getDurationForUpdate({
+              status: CaseStatuses.closed,
+              // @ts-expect-error
+              closedAt: closedAtInvalid,
+              createdAt,
+            })
+          ).toBe(undefined);
+        }
+      );
+
+      it('returns undefined if created_at > closed_at', async () => {
+        expect(
+          getDurationForUpdate({
+            status: CaseStatuses.closed,
+            closedAt: '2021-11-23T19:00:00Z',
+            createdAt: '2021-11-23T19:05:00Z',
+          })
+        ).toBe(undefined);
+      });
+
+      it('rounds the seconds correctly', () => {
+        expect(
+          getDurationForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2022-04-11T15:56:00.087Z',
+            closedAt: '2022-04-11T15:58:56.187Z',
+          })
+        ).toEqual({
+          duration: 176,
+        });
+      });
+
+      it('rounds the zero correctly', () => {
+        expect(
+          getDurationForUpdate({
+            status: CaseStatuses.closed,
+            createdAt: '2022-04-11T15:56:00.087Z',
+            closedAt: '2022-04-11T15:56:00.187Z',
+          })
+        ).toEqual({
+          duration: 0,
         });
       });
     });

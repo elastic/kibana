@@ -5,23 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
-import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
-} from '../../common/environment_filter_values';
-
-function getEnvironmentOptions(environments: string[]) {
-  const environmentOptions = environments
-    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
-    .map((environment) => ({
-      value: environment,
-      text: environment,
-    }));
-
-  return [ENVIRONMENT_ALL, ...environmentOptions];
-}
 
 const INITIAL_DATA = { environments: [] };
 
@@ -34,11 +18,10 @@ export function useEnvironmentsFetcher({
   start?: string;
   end?: string;
 }) {
-  const { data = INITIAL_DATA, status = 'loading' } = useFetcher(
+  const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/environments',
+        return callApmApi('GET /internal/apm/environments', {
           params: {
             query: {
               start,
@@ -52,10 +35,5 @@ export function useEnvironmentsFetcher({
     [start, end, serviceName]
   );
 
-  const environmentOptions = useMemo(
-    () => getEnvironmentOptions(data.environments),
-    [data?.environments]
-  );
-
-  return { environments: data.environments, status, environmentOptions };
+  return { environments: data.environments, status };
 }

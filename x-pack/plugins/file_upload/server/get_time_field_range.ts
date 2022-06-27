@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
-import { isPopulatedObject } from './utils/runtime_field_utils';
+import { IScopedClusterClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export async function getTimeFieldRange(
   client: IScopedClusterClient,
   index: string[] | string,
   timeFieldName: string,
-  query: any,
+  query: QueryDslQueryContainer,
   runtimeMappings?: estypes.MappingRuntimeFields
 ): Promise<{
   success: boolean;
@@ -21,9 +22,7 @@ export async function getTimeFieldRange(
 }> {
   const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-  const {
-    body: { aggregations },
-  } = await client.asCurrentUser.search({
+  const { aggregations } = await client.asCurrentUser.search({
     index,
     size: 0,
     body: {

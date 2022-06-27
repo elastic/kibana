@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { I18nStart } from '../../../../core/public';
+import { I18nStart } from '@kbn/core/public';
 
 /**
  * Represents the result of trying to persist the saved object.
@@ -38,6 +38,7 @@ export function showSaveModal(
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
+    saveModal.props.onClose?.();
   };
 
   const onSave = saveModal.props.onSave;

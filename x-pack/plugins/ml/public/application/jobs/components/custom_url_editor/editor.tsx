@@ -23,13 +23,13 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { isValidCustomUrlSettingsTimeRange } from './utils';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 
-import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
+import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 function getLinkToOptions() {
   return [
@@ -55,11 +55,11 @@ function getLinkToOptions() {
 }
 
 interface CustomUrlEditorProps {
-  customUrl: any;
-  setEditCustomUrl: (url: any) => void;
+  customUrl: CustomUrlSettings | undefined;
+  setEditCustomUrl: (url: CustomUrlSettings) => void;
   savedCustomUrls: UrlConfig[];
-  dashboards: any[];
-  indexPatterns: IIndexPattern[];
+  dashboards: Array<{ id: string; title: string }>;
+  dataViewListItems: DataViewListItem[];
   queryEntityFieldNames: string[];
 }
 
@@ -71,7 +71,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   setEditCustomUrl,
   savedCustomUrls,
   dashboards,
-  indexPatterns,
+  dataViewListItems,
   queryEntityFieldNames,
 }) => {
   if (customUrl === undefined) {
@@ -142,7 +142,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
       ...customUrl,
       timeRange: {
         ...timeRange,
-        type: e.target.value,
+        type: e.target.value as TimeRangeType,
       },
     });
   };
@@ -164,8 +164,8 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     return { value: dashboard.id, text: dashboard.title };
   });
 
-  const indexPatternOptions = indexPatterns.map((indexPattern) => {
-    return { value: indexPattern.id, text: indexPattern.title };
+  const dataViewOptions = dataViewListItems.map(({ id, title }) => {
+    return { value: id, text: title };
   });
 
   const entityOptions = queryEntityFieldNames.map((fieldName) => ({ label: fieldName }));
@@ -255,7 +255,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           >
             <EuiSelect
               options={dashboardOptions}
-              value={kibanaSettings.dashboardId}
+              value={kibanaSettings?.dashboardId}
               onChange={onDashboardChange}
               data-test-subj="mlJobCustomUrlDashboardNameInput"
               compressed
@@ -267,15 +267,15 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.customUrlsEditor.indexPatternLabel"
-                defaultMessage="Index pattern"
+                id="xpack.ml.customUrlsEditor.dataViewLabel"
+                defaultMessage="Data view"
               />
             }
             display="rowCompressed"
           >
             <EuiSelect
-              options={indexPatternOptions}
-              value={kibanaSettings.discoverIndexPatternId}
+              options={dataViewOptions}
+              value={kibanaSettings?.discoverIndexPatternId}
               onChange={onDiscoverIndexPatternChange}
               data-test-subj="mlJobCustomUrlDiscoverIndexPatternInput"
               compressed
@@ -369,7 +369,7 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
             <EuiTextArea
               fullWidth={true}
               rows={2}
-              value={otherUrlSettings.urlValue}
+              value={otherUrlSettings?.urlValue}
               onChange={onOtherUrlValueChange}
               data-test-subj="mlJobCustomUrlOtherTypeUrlInput"
               compressed

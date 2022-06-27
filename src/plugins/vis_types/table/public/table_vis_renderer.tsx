@@ -9,9 +9,10 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart } from 'kibana/public';
-import { VisualizationContainer } from '../../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../../expressions/common/expression_renderers';
+import { CoreStart } from '@kbn/core/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { TableVisRenderValue } from './table_vis_fn';
 
 const TableVisualizationComponent = lazy(() => import('./components/table_visualization'));
@@ -30,18 +31,20 @@ export const getTableVisRenderer: (
       visData.table?.rows.length === 0 || (!visData.table && visData.tables.length === 0);
 
     render(
-      <VisualizationContainer
-        data-test-subj="tbvChartContainer"
-        handlers={handlers}
-        showNoResult={showNoResult}
-      >
-        <TableVisualizationComponent
-          core={core}
+      <KibanaThemeProvider theme$={core.theme.theme$}>
+        <VisualizationContainer
+          data-test-subj="tbvChartContainer"
           handlers={handlers}
-          visData={visData}
-          visConfig={visConfig}
-        />
-      </VisualizationContainer>,
+          showNoResult={showNoResult}
+        >
+          <TableVisualizationComponent
+            core={core}
+            handlers={handlers}
+            visData={visData}
+            visConfig={visConfig}
+          />
+        </VisualizationContainer>
+      </KibanaThemeProvider>,
       domNode
     );
   },

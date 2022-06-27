@@ -11,8 +11,8 @@ import {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsType,
-} from 'src/core/server';
-import { CASE_SAVED_OBJECT } from '../../common';
+} from '@kbn/core/server';
+import { CASE_SAVED_OBJECT } from '../../common/constants';
 import { ESCaseAttributes } from '../services/cases/types';
 import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
@@ -23,7 +23,8 @@ export const createCaseSavedObjectType = (
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       closed_at: {
@@ -57,6 +58,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
         },
+      },
+      duration: {
+        type: 'unsigned_long',
       },
       description: {
         type: 'text',
@@ -125,10 +129,6 @@ export const createCaseSavedObjectType = (
       tags: {
         type: 'keyword',
       },
-      // collection or individual
-      type: {
-        type: 'keyword',
-      },
       updated_at: {
         type: 'date',
       },
@@ -152,13 +152,16 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      severity: {
+        type: 'keyword',
+      },
     },
   },
   migrations: caseMigrations,
   management: {
     importableAndExportable: true,
     defaultSearchField: 'title',
-    icon: 'folderExclamation',
+    icon: 'casesApp',
     getTitle: (savedObject: SavedObject<ESCaseAttributes>) => savedObject.attributes.title,
     onExport: async (
       context: SavedObjectsExportTransformContext,

@@ -9,7 +9,7 @@ import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
@@ -41,7 +41,7 @@ import { getFeatureCount, getOutlierScoreFieldName } from './common';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';
 
 export const useOutlierData = (
-  indexPattern: IndexPattern | undefined,
+  indexPattern: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
   searchQuery: SavedSearchQuery
 ): UseIndexDataReturnType => {
@@ -55,7 +55,7 @@ export const useOutlierData = (
       const resultsField = jobConfig.dest.results_field;
       const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
       newColumns.push(
-        ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
+        ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField!).sort((a: any, b: any) =>
           sortExplorationResultsFields(a.id, b.id, jobConfig)
         )
       );
@@ -135,7 +135,9 @@ export const useOutlierData = (
   const colorRange = useColorRange(
     COLOR_RANGE.BLUE,
     COLOR_RANGE_SCALE.INFLUENCER,
-    jobConfig !== undefined ? getFeatureCount(jobConfig.dest.results_field, dataGrid.tableItems) : 1
+    jobConfig !== undefined
+      ? getFeatureCount(jobConfig.dest.results_field!, dataGrid.tableItems)
+      : 1
   );
 
   const renderCellValue = useRenderCellValue(

@@ -5,20 +5,40 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
+import { useAuthz, useStartServices } from '../../hooks';
+
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
+const AgentPolicyFormRow = styled(EuiFormRow)`
+  .euiFormRow__label {
+    width: 100%;
+  }
+`;
+
 type Props = {
-  agentPolicies?: AgentPolicy[];
-  onAgentPolicyChange?: (key?: string) => void;
+  agentPolicies: AgentPolicy[];
+  selectedPolicyId?: string;
+  setSelectedPolicyId: (agentPolicyId?: string) => void;
   excludeFleetServer?: boolean;
+  onClickCreatePolicy: () => void;
+  isFleetServerPolicy?: boolean;
 } & (
   | {
       withKeySelection: true;
@@ -30,87 +50,105 @@ type Props = {
     }
 );
 
-const resolveAgentId = (
-  agentPolicies?: AgentPolicy[],
-  selectedAgentPolicyId?: string
-): undefined | string => {
-  if (agentPolicies && agentPolicies.length && !selectedAgentPolicyId) {
-    if (agentPolicies.length === 1) {
-      return agentPolicies[0].id;
-    }
+export const AgentPolicySelection: React.FC<Props> = (props) => {
+  const { docLinks } = useStartServices();
 
-    const defaultAgentPolicy = agentPolicies.find((agentPolicy) => agentPolicy.is_default);
-    if (defaultAgentPolicy) {
-      return defaultAgentPolicy.id;
-    }
-  }
+  const {
+    agentPolicies,
+    selectedPolicyId,
+    setSelectedPolicyId,
+    excludeFleetServer,
+    onClickCreatePolicy,
+    isFleetServerPolicy,
+  } = props;
 
-  return selectedAgentPolicyId;
-};
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
-export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
-  const { agentPolicies, onAgentPolicyChange, excludeFleetServer } = props;
-
-  const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<undefined | string>(
-    () => resolveAgentId(agentPolicies, undefined) // no agent id selected yet
-  );
-
-  useEffect(
-    function triggerOnAgentPolicyChangeEffect() {
-      if (onAgentPolicyChange) {
-        onAgentPolicyChange(selectedAgentPolicyId);
-      }
-    },
-    [selectedAgentPolicyId, onAgentPolicyChange]
-  );
-
-  useEffect(
-    function useDefaultAgentPolicyEffect() {
-      const resolvedId = resolveAgentId(agentPolicies, selectedAgentPolicyId);
-      if (resolvedId !== selectedAgentPolicyId) {
-        setSelectedAgentPolicyId(resolvedId);
-      }
-    },
-    [agentPolicies, selectedAgentPolicyId]
-  );
+  const onChangeCallback = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = event.target;
+    setSelectedPolicyId(value);
+  };
 
   return (
     <>
-      <EuiSelect
-        fullWidth
-        prepend={
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.enrollmentStepAgentPolicy.policySelectLabel"
-              defaultMessage="Agent policy"
-            />
-          </EuiText>
-        }
-        isLoading={!agentPolicies}
-        options={(agentPolicies || []).map((agentPolicy) => ({
-          value: agentPolicy.id,
-          text: agentPolicy.name,
-        }))}
-        value={selectedAgentPolicyId || undefined}
-        onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
-        aria-label={i18n.translate('xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel', {
-          defaultMessage: 'Agent policy',
-        })}
-      />
+      <EuiText>
+        {isFleetServerPolicy ? (
+          <FormattedMessage
+            id="xpack.fleet.enrollmentStepAgentPolicy.selectAgentPolicyFleetServerText"
+            defaultMessage="Fleet Server runs on Elastic Agent, and agents are enrolled in agent policies which represent hosts. You can select an existing agent policy configured for Fleet Server, or you may choose to create a new one."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.enrollmentStepAgentPolicy.createAgentPolicyText"
+            defaultMessage="Type of hosts are controlled by an {agentPolicy}. Choose an agent policy or create a new one."
+            values={{
+              agentPolicy: (
+                <EuiLink href={docLinks.links.fleet.agentPolicy} target="_blank">
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyForm.createAgentPolicyDocLink"
+                    defaultMessage="agent policy"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        )}
+      </EuiText>
       <EuiSpacer size="m" />
-      {selectedAgentPolicyId && (
-        <AgentPolicyPackageBadges
-          agentPolicyId={selectedAgentPolicyId}
-          excludeFleetServer={excludeFleetServer}
+      <AgentPolicyFormRow
+        fullWidth={true}
+        label={
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <div>
+                <EuiLink disabled={!hasFleetAllPrivileges} onClick={onClickCreatePolicy}>
+                  <FormattedMessage
+                    id="xpack.fleet.enrollmentStepAgentPolicy.addPolicyButton"
+                    defaultMessage="Create new agent policy"
+                  />
+                </EuiLink>
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <EuiSelect
+          fullWidth
+          isLoading={!agentPolicies}
+          options={agentPolicies.map((agentPolicy: AgentPolicy) => ({
+            value: agentPolicy.id,
+            text: agentPolicy.name,
+          }))}
+          value={selectedPolicyId}
+          onChange={onChangeCallback}
+          aria-label={i18n.translate(
+            'xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel',
+            {
+              defaultMessage: 'Agent policy',
+            }
+          )}
+          hasNoInitialSelection={!selectedPolicyId}
+          data-test-subj="agentPolicyDropdown"
+          isInvalid={!selectedPolicyId}
         />
-      )}
-      {props.withKeySelection && props.onKeyChange && (
+      </AgentPolicyFormRow>
+      {selectedPolicyId && !isFleetServerPolicy && (
         <>
-          <EuiSpacer />
+          <EuiSpacer size="m" />
+          <AgentPolicyPackageBadges
+            agentPolicyId={selectedPolicyId}
+            excludeFleetServer={excludeFleetServer}
+          />
+        </>
+      )}
+      {props.withKeySelection && props.onKeyChange && selectedPolicyId && (
+        <>
+          <EuiSpacer size="m" />
           <AdvancedAgentAuthenticationSettings
             selectedApiKeyId={props.selectedApiKeyId}
             onKeyChange={props.onKeyChange}
-            agentPolicyId={selectedAgentPolicyId}
+            initialAuthenticationSettingsOpen={!props.selectedApiKeyId}
+            agentPolicyId={selectedPolicyId}
           />
         </>
       )}

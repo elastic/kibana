@@ -17,6 +17,8 @@ import type {
   GetInfoResponse,
   InstallPackageResponse,
   DeletePackageResponse,
+  UpdatePackageRequest,
+  UpdatePackageResponse,
 } from '../../types';
 import type { GetStatsResponse } from '../../../common';
 
@@ -24,9 +26,14 @@ import { getCustomIntegrations } from '../../services/custom_integrations';
 
 import { useRequest, sendRequest } from './use_request';
 
-export function useGetAddableCustomIntegrations() {
+export function useGetAppendCustomIntegrations() {
   const customIntegrations = getCustomIntegrations();
   return useAsync(customIntegrations.getAppendCustomIntegrations, []);
+}
+
+export function useGetReplacementCustomIntegrations() {
+  const customIntegrations = getCustomIntegrations();
+  return useAsync(customIntegrations.getReplacementCustomIntegrations, []);
 }
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
@@ -60,9 +67,9 @@ export const useGetLimitedPackages = () => {
   });
 };
 
-export const useGetPackageInfoByKey = (pkgkey: string) => {
+export const useGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
   return useRequest<GetInfoResponse>({
-    path: epmRouteService.getInfoPath(pkgkey),
+    path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
   });
 };
@@ -74,9 +81,9 @@ export const useGetPackageStats = (pkgName: string) => {
   });
 };
 
-export const sendGetPackageInfoByKey = (pkgkey: string) => {
+export const sendGetPackageInfoByKey = (pkgName: string, pkgVersion?: string) => {
   return sendRequest<GetInfoResponse>({
-    path: epmRouteService.getInfoPath(pkgkey),
+    path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
   });
 };
@@ -95,16 +102,31 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgkey: string) => {
+export const sendInstallPackage = (pkgName: string, pkgVersion: string) => {
   return sendRequest<InstallPackageResponse>({
-    path: epmRouteService.getInstallPath(pkgkey),
+    path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',
   });
 };
 
-export const sendRemovePackage = (pkgkey: string) => {
+export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
   return sendRequest<DeletePackageResponse>({
-    path: epmRouteService.getRemovePath(pkgkey),
+    path: epmRouteService.getRemovePath(pkgName, pkgVersion),
     method: 'delete',
+    body: {
+      force,
+    },
+  });
+};
+
+export const sendUpdatePackage = (
+  pkgName: string,
+  pkgVersion: string,
+  body: UpdatePackageRequest['body']
+) => {
+  return sendRequest<UpdatePackageResponse>({
+    path: epmRouteService.getUpdatePath(pkgName, pkgVersion),
+    method: 'put',
+    body,
   });
 };

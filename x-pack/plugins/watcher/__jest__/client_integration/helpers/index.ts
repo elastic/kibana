@@ -11,8 +11,8 @@ import { setup as watchCreateJsonSetup } from './watch_create_json.helpers';
 import { setup as watchCreateThresholdSetup } from './watch_create_threshold.helpers';
 import { setup as watchEditSetup } from './watch_edit.helpers';
 
-export { nextTick, getRandomString, findTestSubject, TestBed } from '@kbn/test/jest';
-export { wrapBodyResponse, unwrapBodyResponse } from './body_response';
+export type { TestBed } from '@kbn/test-jest-helpers';
+export { getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {

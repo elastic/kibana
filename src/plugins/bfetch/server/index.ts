@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { BfetchServerPlugin } from './plugin';
 
-export { BfetchServerSetup, BfetchServerStart, BatchProcessingRouteParams } from './plugin';
-export { StreamingRequestHandler } from './types';
+export type { BfetchServerSetup, BfetchServerStart, BatchProcessingRouteParams } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchServerPlugin(initializerContext);

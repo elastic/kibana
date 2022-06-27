@@ -19,6 +19,7 @@ import { Schema } from '../../../shared/schema/types';
 
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
+import { flattenDocument } from '../../utils/results';
 
 import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
@@ -33,6 +34,7 @@ interface Props {
   schemaForTypeHighlights?: Schema;
   actions?: ResultAction[];
   dragHandleProps?: DraggableProvidedDragHandleProps;
+  showClick?: boolean;
 }
 
 const RESULT_CUTOFF = 5;
@@ -46,6 +48,7 @@ export const Result: React.FC<Props> = ({
   actions = [],
   dragHandleProps,
   resultPosition,
+  showClick = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -53,11 +56,10 @@ export const Result: React.FC<Props> = ({
   const META = '_meta';
   const resultMeta = result[META];
   const resultFields = useMemo(
-    () => Object.entries(result).filter(([key]) => key !== META && key !== ID),
+    () => Object.entries(flattenDocument(result)).filter(([key]) => key !== META && key !== ID),
     [result]
   );
   const numResults = resultFields.length;
-
   const typeForField = (fieldName: string) => {
     if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
   };
@@ -103,6 +105,7 @@ export const Result: React.FC<Props> = ({
           documentLink={documentLink}
           actions={actions}
           resultPosition={resultPosition}
+          showClick={showClick}
         />
         {resultFields
           .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)

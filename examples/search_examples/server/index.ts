@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { SearchExamplesPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SearchExamplesPlugin(initializerContext);
 }
 
-export { SearchExamplesPluginSetup, SearchExamplesPluginStart } from './types';
+export type { SearchExamplesPluginSetup, SearchExamplesPluginStart } from './types';

@@ -10,10 +10,12 @@ import { DropType } from '../../types';
 export interface HumanData {
   label: string;
   groupLabel?: string;
+  layerNumber?: number;
   position?: number;
   nextLabel?: string;
   canSwap?: boolean;
   canDuplicate?: boolean;
+  canCombine?: boolean;
 }
 
 export interface Ghost {

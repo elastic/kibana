@@ -9,7 +9,9 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { I18nStart } from '../../i18n';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import { IUiSettingsClient } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi, IToasts } from './toasts_api';
@@ -22,6 +24,7 @@ interface SetupDeps {
 interface StartDeps {
   i18n: I18nStart;
   overlays: OverlayStart;
+  theme: ThemeServiceStart;
   targetDomElement: HTMLElement;
 }
 
@@ -46,17 +49,17 @@ export class ToastsService {
     return this.api!;
   }
 
-  public start({ i18n, overlays, targetDomElement }: StartDeps) {
+  public start({ i18n, overlays, theme, targetDomElement }: StartDeps) {
     this.api!.start({ overlays, i18n });
     this.targetDomElement = targetDomElement;
 
     render(
-      <i18n.Context>
+      <CoreContextProvider i18n={i18n} theme={theme}>
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}
         />
-      </i18n.Context>,
+      </CoreContextProvider>,
       targetDomElement
     );
 

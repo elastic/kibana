@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Ast, AstFunction } from '@kbn/interpreter';
 import { ExpressionValue, ExpressionValueError } from '../expression_types';
 
 export type ExpressionAstNode =
@@ -13,14 +14,11 @@ export type ExpressionAstNode =
   | ExpressionAstFunction
   | ExpressionAstArgument;
 
-export type ExpressionAstExpression = {
-  type: 'expression';
+export type ExpressionAstExpression = Omit<Ast, 'chain'> & {
   chain: ExpressionAstFunction[];
 };
 
-export type ExpressionAstFunction = {
-  type: 'function';
-  function: string;
+export type ExpressionAstFunction = Omit<AstFunction, 'arguments'> & {
   arguments: Record<string, ExpressionAstArgument[]>;
 
   /**
@@ -64,7 +62,7 @@ export type ExpressionAstFunctionDebug = {
   /**
    * Raw error that was thrown by the function, if any.
    */
-  rawError?: any | Error;
+  rawError?: any | Error; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   /**
    * Time in milliseconds it took to execute the function. Duration can be

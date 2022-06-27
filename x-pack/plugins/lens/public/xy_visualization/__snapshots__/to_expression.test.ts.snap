@@ -5,33 +5,14 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "axisTitlesVisibilitySettings": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "x": Array [
-                    true,
-                  ],
-                  "yLeft": Array [
-                    true,
-                  ],
-                  "yRight": Array [
-                    true,
-                  ],
-                },
-                "function": "lens_xy_axisTitlesVisibilityConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
         "curveType": Array [
           "LINEAR",
         ],
-        "description": Array [
-          "",
+        "emphasizeFitting": Array [
+          true,
+        ],
+        "endValue": Array [
+          "Nearest",
         ],
         "fillOpacity": Array [
           0.3,
@@ -39,52 +20,8 @@ Object {
         "fittingFunction": Array [
           "Carry",
         ],
-        "gridlinesVisibilitySettings": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "x": Array [
-                    false,
-                  ],
-                  "yLeft": Array [
-                    true,
-                  ],
-                  "yRight": Array [
-                    true,
-                  ],
-                },
-                "function": "lens_xy_gridlinesConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
         "hideEndzones": Array [
           true,
-        ],
-        "labelsOrientation": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "x": Array [
-                    0,
-                  ],
-                  "yLeft": Array [
-                    -90,
-                  ],
-                  "yRight": Array [
-                    -45,
-                  ],
-                },
-                "function": "lens_xy_labelsOrientationConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
         ],
         "layers": Array [
           Object {
@@ -98,17 +35,34 @@ Object {
                   "columnToLabel": Array [
                     "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
                   ],
+                  "decorations": Array [],
                   "hide": Array [
                     false,
                   ],
                   "isHistogram": Array [
                     false,
                   ],
+                  "isHorizontal": Array [],
+                  "isPercentage": Array [],
+                  "isStacked": Array [],
                   "layerId": Array [
                     "first",
                   ],
-                  "layerType": Array [
-                    "data",
+                  "palette": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "name": Array [
+                              "default",
+                            ],
+                          },
+                          "function": "system_palette",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
                   ],
                   "seriesType": Array [
                     "area",
@@ -116,18 +70,20 @@ Object {
                   "splitAccessor": Array [
                     "d",
                   ],
+                  "table": Array [
+                    Object {
+                      "chain": Array [],
+                      "type": "expression",
+                    },
+                  ],
                   "xAccessor": Array [
                     "a",
                   ],
                   "xScaleType": Array [
                     "linear",
                   ],
-                  "yConfig": Array [],
-                  "yScaleType": Array [
-                    "linear",
-                  ],
                 },
-                "function": "lens_xy_layer",
+                "function": "extendedDataLayer",
                 "type": "function",
               },
             ],
@@ -145,9 +101,10 @@ Object {
                   "isVisible": Array [
                     true,
                   ],
+                  "legendSize": Array [],
                   "maxLines": Array [],
                   "position": Array [
-                    "bottom",
+                    "left",
                   ],
                   "shouldTruncate": Array [
                     true,
@@ -155,37 +112,12 @@ Object {
                   "showSingleSeries": Array [],
                   "verticalAlignment": Array [],
                 },
-                "function": "lens_xy_legendConfig",
+                "function": "legendConfig",
                 "type": "function",
               },
             ],
             "type": "expression",
           },
-        ],
-        "tickLabelsVisibilitySettings": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "x": Array [
-                    false,
-                  ],
-                  "yLeft": Array [
-                    true,
-                  ],
-                  "yRight": Array [
-                    true,
-                  ],
-                },
-                "function": "lens_xy_tickLabelsConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
-        "title": Array [
-          "",
         ],
         "valueLabels": Array [
           "hide",
@@ -193,57 +125,134 @@ Object {
         "valuesInLegend": Array [
           false,
         ],
-        "xTitle": Array [
-          "",
-        ],
-        "yLeftExtent": Array [
+        "xAxisConfig": Array [
           Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "lowerBound": Array [],
-                  "mode": Array [
-                    "full",
+                  "extent": Array [],
+                  "id": Array [
+                    "x",
                   ],
-                  "upperBound": Array [],
+                  "labelsOrientation": Array [
+                    0,
+                  ],
+                  "position": Array [
+                    "bottom",
+                  ],
+                  "showGridLines": Array [
+                    false,
+                  ],
+                  "showLabels": Array [
+                    false,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "",
+                  ],
                 },
-                "function": "lens_xy_axisExtentConfig",
+                "function": "xAxisConfig",
                 "type": "function",
               },
             ],
             "type": "expression",
           },
         ],
-        "yRightExtent": Array [
+        "yAxisConfigs": Array [
           Object {
             "chain": Array [
               Object {
                 "arguments": Object {
-                  "lowerBound": Array [
-                    123,
+                  "extent": Array [],
+                  "id": Array [],
+                  "labelsOrientation": Array [
+                    -90,
                   ],
-                  "mode": Array [
-                    "custom",
+                  "position": Array [
+                    "left",
                   ],
-                  "upperBound": Array [
-                    456,
+                  "scaleType": Array [
+                    "linear",
+                  ],
+                  "showGridLines": Array [
+                    true,
+                  ],
+                  "showLabels": Array [
+                    true,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "",
                   ],
                 },
-                "function": "lens_xy_axisExtentConfig",
+                "function": "yAxisConfig",
                 "type": "function",
               },
             ],
             "type": "expression",
           },
-        ],
-        "yRightTitle": Array [
-          "",
-        ],
-        "yTitle": Array [
-          "",
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "extent": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "lowerBound": Array [
+                              123,
+                            ],
+                            "mode": Array [
+                              "custom",
+                            ],
+                            "upperBound": Array [
+                              456,
+                            ],
+                          },
+                          "function": "axisExtentConfig",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
+                  "id": Array [],
+                  "labelsOrientation": Array [
+                    -45,
+                  ],
+                  "position": Array [
+                    "right",
+                  ],
+                  "scaleType": Array [
+                    "linear",
+                  ],
+                  "showGridLines": Array [
+                    true,
+                  ],
+                  "showLabels": Array [
+                    true,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [
+                    "",
+                  ],
+                },
+                "function": "yAxisConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
       },
-      "function": "lens_xy_chart",
+      "function": "layeredXyVis",
       "type": "function",
     },
   ],

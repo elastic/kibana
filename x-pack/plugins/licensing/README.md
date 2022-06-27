@@ -126,6 +126,7 @@ This change makes NP & LP licensing service not compatible. We have to keep both
 **LP**: `xpack.xpack_main.xpack_api_polling_frequency_millis`
 **NP**: `xpack.licensing.api_polling_frequency`
 
+Support for deprecated `xpack.xpack_main.xpack_api_polling_frequency_millis` is removed in v8.0.0. See https://github.com/elastic/kibana/issues/103915 for more details.
 #### License
 **NP**: `mode` field is provided, but deprecated.
 

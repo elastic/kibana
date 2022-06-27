@@ -8,7 +8,6 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiEmptyPrompt,
   EuiForm,
@@ -19,15 +18,17 @@ import {
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { IHttpFetchError } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { VERIFICATION_CODE_LENGTH } from '../common';
+import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SingleCharsField } from './single_chars_field';
+import { SubmitErrorCallout } from './submit_error_callout';
 import type { ValidationErrors } from './use_form';
 import { useForm } from './use_form';
-import { useHttp } from './use_http';
+import { useKibana } from './use_kibana';
 
 export interface VerificationCodeFormValues {
   code: string;
@@ -44,7 +45,7 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
   },
   onSuccess,
 }) => {
-  const http = useHttp();
+  const { http } = useKibana();
   const [form, eventHandlers] = useForm({
     defaultValues,
     validate: async (values) => {
@@ -52,7 +53,7 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
 
       if (!values.code) {
         errors.code = i18n.translate('interactiveSetup.verificationCodeForm.codeRequiredError', {
-          defaultMessage: 'Enter a verification code.',
+          defaultMessage: 'Enter the verification code from the Kibana server.',
         });
       } else if (values.code.length !== VERIFICATION_CODE_LENGTH) {
         errors.code = i18n.translate('interactiveSetup.verificationCodeForm.codeMinLengthError', {
@@ -71,7 +72,7 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
         });
       } catch (error) {
         if ((error as IHttpFetchError).response?.status === 403) {
-          form.setError('code', (error as IHttpFetchError).body?.message);
+          form.setError('code', (error as IHttpFetchError<ResponseErrorBody>).body?.message || '');
           return;
         } else {
           throw error;
@@ -97,24 +98,30 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
           <>
             {form.submitError && (
               <>
-                <EuiCallOut
-                  color="danger"
-                  title={i18n.translate('interactiveSetup.verificationCodeForm.submitErrorTitle', {
-                    defaultMessage: "Couldn't verify code",
-                  })}
-                >
-                  {(form.submitError as IHttpFetchError).body?.message}
-                </EuiCallOut>
+                <SubmitErrorCallout
+                  error={form.submitError}
+                  defaultTitle={i18n.translate(
+                    'interactiveSetup.verificationCodeForm.submitErrorTitle',
+                    {
+                      defaultMessage: "Couldn't verify code",
+                    }
+                  )}
+                />
                 <EuiSpacer />
               </>
             )}
+
             <EuiText>
               <p>
                 <FormattedMessage
                   id="interactiveSetup.verificationCodeForm.codeDescription"
                   defaultMessage="Copy the code from the Kibana server or run {command} to retrieve it."
                   values={{
-                    command: <EuiCode lang="bash">./bin/kibana-verification-code</EuiCode>,
+                    command: (
+                      <EuiCode language="bash">
+                        {getCommandLineSnippet('kibana-verification-code')}
+                      </EuiCode>
+                    ),
                   }}
                 />
               </p>

@@ -19,19 +19,30 @@ export class LifecyclePhase<Args extends readonly any[]> {
 
   public triggered = false;
 
-  private readonly beforeSubj = new Rx.Subject<void>();
-  public readonly before$ = this.beforeSubj.asObservable();
+  private readonly beforeSubj: Rx.Subject<void>;
+  public readonly before$: Rx.Observable<void>;
 
-  private readonly afterSubj = this.options.singular
-    ? new Rx.ReplaySubject<void>(1)
-    : new Rx.Subject<void>();
-  public readonly after$ = this.afterSubj.asObservable();
+  private readonly afterSubj: Rx.Subject<void>;
+  public readonly after$: Rx.Observable<void>;
 
   constructor(
+    sub: Rx.Subscription,
     private readonly options: {
       singular?: boolean;
     } = {}
-  ) {}
+  ) {
+    this.beforeSubj = new Rx.Subject<void>();
+    this.before$ = this.beforeSubj.asObservable();
+
+    this.afterSubj = this.options.singular ? new Rx.ReplaySubject<void>(1) : new Rx.Subject<void>();
+    this.after$ = this.afterSubj.asObservable();
+
+    sub.add(() => {
+      this.beforeSubj.complete();
+      this.afterSubj.complete();
+      this.handlers.length = 0;
+    });
+  }
 
   public add(fn: (...args: Args) => Promise<void> | void) {
     this.handlers.push(fn);

@@ -8,8 +8,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import '../../../../../../common/mock/match_media';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { mockEndgameCreationEvent } from '../../../../../../common/mock/mock_endgame_ecs_data';
@@ -22,7 +20,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -44,13 +41,10 @@ describe('SystemGenericFileDetails', () => {
 
   describe('rendering', () => {
     test('it renders the default SystemGenericDetails', () => {
-      // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
-      const browserFields: BrowserFields = {};
       const wrapper = shallow(
         <SystemGenericFileDetails
           contextId="[contextid-123]"
           text="[generic-text-123]"
-          browserFields={browserFields}
           data={mockTimelineData[29].ecs}
           timelineId="test"
         />
@@ -64,7 +58,6 @@ describe('SystemGenericFileDetails', () => {
           <SystemGenericFileDetails
             contextId="[contextid-123]"
             text="[generic-text-123]"
-            browserFields={mockBrowserFields}
             data={mockTimelineData[29].ecs}
             timelineId="test"
           />
@@ -81,7 +74,6 @@ describe('SystemGenericFileDetails', () => {
           <SystemGenericFileDetails
             contextId="[contextid-123]"
             text="[generic-text-123]"
-            browserFields={mockBrowserFields}
             data={mockEndgameCreationEvent}
             timelineId="test"
           />

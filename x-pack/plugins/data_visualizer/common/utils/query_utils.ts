@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Query } from '@kbn/es-query';
+
 /*
  * Contains utility functions for building and processing queries.
  */
@@ -16,8 +18,8 @@ export function buildBaseFilterCriteria(
   timeFieldName?: string,
   earliestMs?: number,
   latestMs?: number,
-  query?: object
-) {
+  query?: Query['query']
+): estypes.QueryDslQueryContainer[] {
   const filterCriteria = [];
   if (timeFieldName && earliestMs && latestMs) {
     filterCriteria.push({
@@ -31,40 +33,11 @@ export function buildBaseFilterCriteria(
     });
   }
 
-  if (query) {
+  if (query && typeof query === 'object') {
     filterCriteria.push(query);
   }
 
   return filterCriteria;
-}
-
-// Wraps the supplied aggregations in a sampler aggregation.
-// A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
-// of less than 1 indicates no sampling, and the aggs are returned as-is.
-export function buildSamplerAggregation(
-  aggs: any,
-  samplerShardSize: number
-): Record<string, estypes.AggregationsAggregationContainer> {
-  if (samplerShardSize < 1) {
-    return aggs;
-  }
-
-  return {
-    sample: {
-      sampler: {
-        shard_size: samplerShardSize,
-      },
-      aggs,
-    },
-  };
-}
-
-// Returns the path of aggregations in the elasticsearch response, as an array,
-// depending on whether sampling is being used.
-// A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
-// of less than 1 indicates no sampling, and an empty array is returned.
-export function getSamplerAggregationsResponsePath(samplerShardSize: number): string[] {
-  return samplerShardSize > 0 ? ['sample'] : [];
 }
 
 // Returns a name which is safe to use in elasticsearch aggregations for the supplied

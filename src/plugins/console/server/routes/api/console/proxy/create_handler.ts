@@ -9,9 +9,14 @@
 import { Agent, IncomingMessage } from 'http';
 import * as url from 'url';
 import { pick, trimStart, trimEnd } from 'lodash';
+import { SemVer } from 'semver';
 
-import { KibanaRequest, RequestHandler } from 'kibana/server';
+import { KibanaRequest, RequestHandler } from '@kbn/core/server';
 
+// TODO: find a better way to get information from the request like remoteAddress and remotePort
+// for forwarding.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ensureRawRequest } from '@kbn/core/server/http/router';
 import { ESConfigForProxy } from '../../../../types';
 import {
   getElasticsearchProxyConfig,
@@ -20,16 +25,19 @@ import {
   setHeaders,
 } from '../../../../lib';
 
-// TODO: find a better way to get information from the request like remoteAddress and remotePort
-// for forwarding.
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../../../core/server/http/router';
-
-import { RouteDependencies } from '../../../';
+import { RouteDependencies } from '../../..';
 
 import { Body, Query } from './validation_config';
 
 function toURL(base: string, path: string) {
+  const [p, query = ''] = path.split('?');
+
+  // if there is a '+' sign in query e.g. ?q=create_date:[2020-05-10T08:00:00.000+08:00 TO *]
+  // node url encodes it as a whitespace which results in a faulty request
+  // we need to replace '+' with '%2b' to encode it correctly
+  if (/\+/g.test(query)) {
+    path = `${p}?${query.replace(/\+/g, '%2b')}`;
+  }
   const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
   // Appending pretty here to have Elasticsearch do the JSON formatting, as doing
   // in JS can lead to data loss (7.0 will get munged into 7, thus losing indication of
@@ -58,17 +66,22 @@ function filterHeaders(originalHeaders: object, headersToKeep: string[]): object
 function getRequestConfig(
   headers: object,
   esConfig: ESConfigForProxy,
-  proxyConfigCollection: ProxyConfigCollection,
-  uri: string
+  uri: string,
+  kibanaVersion: SemVer,
+  proxyConfigCollection?: ProxyConfigCollection
 ): { agent: Agent; timeout: number; headers: object; rejectUnauthorized?: boolean } {
   const filteredHeaders = filterHeaders(headers, esConfig.requestHeadersWhitelist);
   const newHeaders = setHeaders(filteredHeaders, esConfig.customHeaders);
 
-  if (proxyConfigCollection.hasConfig()) {
-    return {
-      ...proxyConfigCollection.configForUri(uri),
-      headers: newHeaders,
-    };
+  if (kibanaVersion.major < 8) {
+    // In 7.x we still support the proxyConfig setting defined in kibana.yml
+    // From 8.x we don't support it anymore so we don't try to read it here.
+    if (proxyConfigCollection!.hasConfig()) {
+      return {
+        ...proxyConfigCollection!.configForUri(uri),
+        headers: newHeaders,
+      };
+    }
   }
 
   return {
@@ -106,18 +119,23 @@ export const createHandler =
   ({
     log,
     proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
+    kibanaVersion,
   }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
   async (ctx, request, response) => {
     const { body, query } = request;
-    const { path, method } = query;
+    const { method, path, withProductOrigin } = query;
 
-    if (!pathFilters.some((re) => re.test(path))) {
-      return response.forbidden({
-        body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-      });
+    if (kibanaVersion.major < 8) {
+      // The "console.proxyFilter" setting in kibana.yaml has been deprecated in 8.x
+      // We only read it on the 7.x branch
+      if (!pathFilters!.some((re) => re.test(path))) {
+        return response.forbidden({
+          body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        });
+      }
     }
 
     const legacyConfig = await readLegacyESConfig();
@@ -134,13 +152,19 @@ export const createHandler =
         const { timeout, agent, headers, rejectUnauthorized } = getRequestConfig(
           request.headers,
           legacyConfig,
-          proxyConfigCollection,
-          uri.toString()
+          uri.toString(),
+          kibanaVersion,
+          proxyConfigCollection
         );
 
         const requestHeaders = {
           ...headers,
           ...getProxyHeaders(request),
+          // There are a few internal calls that console UI makes to ES in order to get mappings, aliases and templates
+          // in the autocomplete mechanism from the editor. At this particular time, those requests generate deprecation
+          // logs since they access system indices. With this header we can provide a way to the UI to determine which
+          // requests need to deprecation logs and which ones dont.
+          ...(withProductOrigin && { 'x-elastic-product-origin': 'kibana' }),
         };
 
         esIncomingMessage = await proxyRequest({

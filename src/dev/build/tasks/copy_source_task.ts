@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { discoverBazelPackages } from '@kbn/bazel-packages';
+
 import { copyAll, Task } from '../lib';
 
 export const CopySource: Task = {
@@ -20,16 +22,21 @@ export const CopySource: Task = {
         'src/**',
         '!src/**/*.{test,test.mocks,mock}.{js,ts,tsx}',
         '!src/**/mocks.ts', // special file who imports .mock files
-        '!src/**/{target,__tests__,__snapshots__,__mocks__,integration_tests,__fixtures__}/**',
+        '!src/**/{target,tests,__jest__,test_data,__tests__,__snapshots__,__mocks__,integration_tests,__fixtures__}/**',
         '!src/core/server/core_app/assets/favicons/favicon.distribution.png',
         '!src/core/server/core_app/assets/favicons/favicon.distribution.svg',
         '!src/test_utils/**',
         '!src/fixtures/**',
         '!src/cli/repl/**',
-        '!src/cli/dev.js',
+        '!src/cli*/dev.js',
         '!src/functional_test_runner/**',
         '!src/dev/**',
         '!**/jest.config.js',
+        '!**/jest.integration.config.js',
+        '!**/mocks.js',
+        '!**/test_utils.js',
+        '!**/test_helpers.js',
+        '!**/*.{md,mdx,asciidoc}',
         '!src/plugins/telemetry/schema/**', // Skip telemetry schemas
         // this is the dev-only entry
         '!src/setup_node_env/index.js',
@@ -40,6 +47,8 @@ export const CopySource: Task = {
         'tsconfig*.json',
         '.i18nrc.json',
         'kibana.d.ts',
+        // explicitly ignore all bazel package locations, even if they're not selected by previous patterns
+        ...(await discoverBazelPackages()).map((pkg) => `!${pkg.normalizedRepoRelativeDir}/**`),
       ],
     });
   },

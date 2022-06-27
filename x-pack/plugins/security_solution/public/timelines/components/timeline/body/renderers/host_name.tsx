@@ -6,8 +6,10 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import {
   TimelineId,
@@ -19,21 +21,32 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
+  isButton?: boolean;
+  onClick?: () => void;
   value: string | number | undefined | null;
+  title?: string;
 }
 
 const HostNameComponent: React.FC<Props> = ({
   fieldName,
+  fieldType,
+  isAggregatable,
+  Component,
   contextId,
   eventId,
   isDraggable,
+  isButton,
+  onClick,
+  title,
   value,
 }) => {
   const dispatch = useDispatch();
@@ -44,6 +57,10 @@ const HostNameComponent: React.FC<Props> = ({
   const openHostDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
+
+      if (onClick) {
+        onClick();
+      }
       if (eventContext && isInTimelineContext) {
         const { timelineID, tabType } = eventContext;
         const updatedExpandedDetail: TimelineExpandedDetailType = {
@@ -66,7 +83,7 @@ const HostNameComponent: React.FC<Props> = ({
         }
       }
     },
-    [dispatch, eventContext, isInTimelineContext, hostName]
+    [onClick, eventContext, isInTimelineContext, hostName, dispatch]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -74,20 +91,24 @@ const HostNameComponent: React.FC<Props> = ({
   const content = useMemo(
     () => (
       <HostDetailsLink
+        Component={Component}
         hostName={hostName}
-        isButton={false}
+        isButton={isButton}
         onClick={isInTimelineContext ? openHostDetailsSidePanel : undefined}
+        title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
       </HostDetailsLink>
     ),
-    [hostName, isInTimelineContext, openHostDetailsSidePanel]
+    [Component, hostName, isButton, isInTimelineContext, openHostDetailsSidePanel, title]
   );
 
   return isString(value) && hostName.length > 0 ? (
     isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
         isDraggable={isDraggable}
         tooltipContent={fieldName}

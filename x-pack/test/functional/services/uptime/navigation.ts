@@ -61,7 +61,9 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     goToMonitor: async (monitorId: string) => {
       // only go to monitor page if not already there
       if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
-        await testSubjects.click(`monitor-page-link-${monitorId}`);
+        return retry.try(async () => {
+          await testSubjects.click(`monitor-page-link-${monitorId}`);
+        });
         await testSubjects.existOrFail('uptimeMonitorPage', {
           timeout: 30000,
         });
@@ -81,6 +83,10 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     },
 
     async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
+      const hasTour = await testSubjects.exists('syntheticsManagementTourDismiss');
+      if (hasTour) {
+        await testSubjects.click('syntheticsManagementTourDismiss');
+      }
       await PageObjects.timePicker.setAbsoluteRange(dateStart, dateEnd);
       await this.goToMonitor(monitorId);
     },

@@ -6,55 +6,46 @@
  */
 
 import expect from '@kbn/expect';
-import sinon from 'sinon';
-import { parseCrossClusterPrefix, prefixIndexPattern } from './ccs_utils';
+import { parseCrossClusterPrefix, prefixIndexPatternWithCcs } from './ccs_utils';
 
 // TODO: tests were not running and are not updated.
 // They need to be changed to run.
 describe.skip('ccs_utils', () => {
-  describe('prefixIndexPattern', () => {
+  describe('prefixIndexPatternWithCcs', () => {
     const indexPattern = '.monitoring-xyz-1-*,.monitoring-xyz-2-*';
 
     it('returns the index pattern if ccs is not enabled', () => {
-      const get = sinon.stub();
-      const config = { get };
-
-      get.withArgs('monitoring.ui.ccs.enabled').returns(false);
+      // TODO apply as MonitoringConfig during typescript conversion
+      const config = { ui: { css: { enabled: false } } };
 
       // falsy string values should be ignored
-      const allPattern = prefixIndexPattern(config, indexPattern, '*');
-      const onePattern = prefixIndexPattern(config, indexPattern, 'do_not_use_me');
+      const allPattern = prefixIndexPatternWithCcs(config, indexPattern, '*');
+      const onePattern = prefixIndexPatternWithCcs(config, indexPattern, 'do_not_use_me');
 
       expect(allPattern).to.be(indexPattern);
       expect(onePattern).to.be(indexPattern);
-      expect(get.callCount).to.eql(2);
     });
 
     it('returns the index pattern if ccs is not used', () => {
-      const get = sinon.stub();
-      const config = { get };
-
-      get.withArgs('monitoring.ui.ccs.enabled').returns(true);
+      // TODO apply as MonitoringConfig during typescript conversion
+      const config = { ui: { css: { enabled: true } } };
 
       // falsy string values should be ignored
-      const undefinedPattern = prefixIndexPattern(config, indexPattern);
-      const nullPattern = prefixIndexPattern(config, indexPattern, null);
-      const blankPattern = prefixIndexPattern(config, indexPattern, '');
+      const undefinedPattern = prefixIndexPatternWithCcs(config, indexPattern);
+      const nullPattern = prefixIndexPatternWithCcs(config, indexPattern, null);
+      const blankPattern = prefixIndexPatternWithCcs(config, indexPattern, '');
 
       expect(undefinedPattern).to.be(indexPattern);
       expect(nullPattern).to.be(indexPattern);
       expect(blankPattern).to.be(indexPattern);
-      expect(get.callCount).to.eql(3);
     });
 
     it('returns the ccs-prefixed index pattern', () => {
-      const get = sinon.stub();
-      const config = { get };
+      // TODO apply as MonitoringConfig during typescript conversion
+      const config = { ui: { css: { enabled: true } } };
 
-      get.withArgs('monitoring.ui.ccs.enabled').returns(true);
-
-      const abcPattern = prefixIndexPattern(config, indexPattern, 'aBc');
-      const underscorePattern = prefixIndexPattern(config, indexPattern, 'cluster_one');
+      const abcPattern = prefixIndexPatternWithCcs(config, indexPattern, 'aBc');
+      const underscorePattern = prefixIndexPatternWithCcs(config, indexPattern, 'cluster_one');
 
       expect(abcPattern).to.eql(
         'aBc:.monitoring-xyz-1-*,aBc:.monitoring-xyz-2-*,aBc:monitoring-xyz-1-*,aBc:monitoring-xyz-2-*'
@@ -62,16 +53,13 @@ describe.skip('ccs_utils', () => {
       expect(underscorePattern).to.eql(
         'cluster_one:.monitoring-xyz-1-*,cluster_one:.monitoring-xyz-2-*,cluster_one:monitoring-xyz-1-*,cluster_one:monitoring-xyz-2-*'
       );
-      expect(get.callCount).to.eql(2);
     });
 
     it('returns the ccs-prefixed index pattern when wildcard and the local cluster pattern', () => {
-      const get = sinon.stub();
-      const config = { get };
+      // TODO apply as MonitoringConfig during typescript conversion
+      const config = { ui: { css: { enabled: true } } };
 
-      get.withArgs('monitoring.ui.ccs.enabled').returns(true);
-
-      const pattern = prefixIndexPattern(config, indexPattern, '*');
+      const pattern = prefixIndexPatternWithCcs(config, indexPattern, '*');
 
       // it should have BOTH patterns so that it searches all CCS clusters and the local cluster
       expect(pattern).to.eql(
@@ -79,7 +67,6 @@ describe.skip('ccs_utils', () => {
           ',' +
           indexPattern
       );
-      expect(get.callCount).to.eql(1);
     });
   });
 

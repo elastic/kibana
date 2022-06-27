@@ -9,21 +9,19 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-
-import { XYBrushArea } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 
 import { maybe } from '../../../../common/utils/maybe';
-import { HeightRetainer } from '../../shared/HeightRetainer';
-import { fromQuery, push, toQuery } from '../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';
+import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
 
 const tabs = [
   traceSamplesTab,
@@ -34,7 +32,7 @@ const tabs = [
 export function TransactionDetailsTabs() {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const history = useHistory();
 
   const [currentTab, setCurrentTab] = useState(traceSamplesTab.key);
@@ -42,44 +40,18 @@ export function TransactionDetailsTabs() {
     tabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
 
   const { environment, kuery, transactionName } = query;
-  const { traceSamplesData } = useTransactionTraceSamplesFetcher({
-    transactionName,
-    kuery,
-    environment,
-  });
-
-  const selectSampleFromChartSelection = (selection: XYBrushArea) => {
-    if (selection !== undefined) {
-      const { x } = selection;
-      if (Array.isArray(x)) {
-        history.push({
-          ...history.location,
-          search: fromQuery({
-            ...toQuery(history.location.search),
-            sampleRangeFrom: Math.round(x[0]),
-            sampleRangeTo: Math.round(x[1]),
-          }),
-        });
-      }
-    }
-  };
+  const { traceSamplesData, traceSamplesStatus } =
+    useTransactionTraceSamplesFetcher({
+      transactionName,
+      kuery,
+      environment,
+    });
 
   const { sampleRangeFrom, sampleRangeTo, transactionId, traceId } = urlParams;
   const { traceSamples } = traceSamplesData;
 
-  const clearChartSelection = () => {
-    // enforces a reset of the current sample to be highlighted in the chart
-    // and selected in waterfall section below, otherwise we end up with
-    // stale data for the selected sample
-    push(history, {
-      query: {
-        sampleRangeFrom: '',
-        sampleRangeTo: '',
-        traceId: '',
-        transactionId: '',
-      },
-    });
-  };
+  const { clearChartSelection, selectSampleFromChartSelection } =
+    useSampleChartSelection();
 
   // When filtering in either the latency correlations or failed transactions correlations tab,
   // scroll to the top of the page and switch to the 'Trace samples' tab to trigger a refresh.
@@ -131,20 +103,19 @@ export function TransactionDetailsTabs() {
         ))}
       </EuiTabs>
       <EuiSpacer size="m" />
-      <HeightRetainer>
-        <EuiPanel hasBorder={true}>
-          <TabContent
-            {...{
-              clearChartSelection,
-              onFilter,
-              sampleRangeFrom,
-              sampleRangeTo,
-              selectSampleFromChartSelection,
-              traceSamples,
-            }}
-          />
-        </EuiPanel>
-      </HeightRetainer>
+      <EuiPanel hasBorder={true}>
+        <TabContent
+          {...{
+            clearChartSelection,
+            onFilter,
+            sampleRangeFrom,
+            sampleRangeTo,
+            selectSampleFromChartSelection,
+            traceSamples,
+            traceSamplesStatus,
+          }}
+        />
+      </EuiPanel>
     </>
   );
 }

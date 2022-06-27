@@ -21,13 +21,10 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-// @ts-expect-error
-import less from 'less/lib/less-browser';
-import 'brace/mode/less';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { Writable } from '@kbn/utility-types';
 
+import { CodeEditor, CssLang } from '@kbn/kibana-react-plugin/public';
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
 // @ts-expect-error not typed yet
@@ -41,10 +38,6 @@ import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
-import { TimeseriesVisParams } from '../../../types';
-import { CodeEditor, CssLang } from '../../../../../../kibana_react/public';
-
-const lessC = less(window, { env: 'production' });
 
 export class MarkdownPanelConfig extends Component<
   PanelConfigProps,
@@ -61,21 +54,7 @@ export class MarkdownPanelConfig extends Component<
   }
 
   handleCSSChange(value: string) {
-    const { model } = this.props;
-    const lessSrc = `#markdown-${model.id} {${value}}`;
-    lessC.render(
-      lessSrc,
-      { compress: true, javascriptEnabled: false },
-      (e: unknown, output: any) => {
-        const parts: Writable<Pick<TimeseriesVisParams, 'markdown_less' | 'markdown_css'>> = {
-          markdown_less: value,
-        };
-        if (output) {
-          parts.markdown_css = output.css;
-        }
-        this.props.onChange(parts);
-      }
-    );
+    this.props.onChange({ markdown_css: value });
   }
 
   render() {
@@ -275,17 +254,17 @@ export class MarkdownPanelConfig extends Component<
               <span>
                 <FormattedMessage
                   id="visTypeTimeseries.markdown.optionsTab.customCSSLabel"
-                  defaultMessage="Custom CSS (supports Less)"
-                  description="CSS and Less are names of technologies and should not be translated."
+                  defaultMessage="Custom CSS"
+                  description="CSS is name of technology and should not be translated."
                 />
               </span>
             </EuiTitle>
             <EuiSpacer size="s" />
             <CodeEditor
               height="500px"
-              languageId={CssLang.ID}
+              languageId={CssLang}
               options={{ fontSize: 14 }}
-              value={model.markdown_less ?? ''}
+              value={model.markdown_css ?? ''}
               onChange={this.handleCSSChange}
             />
           </EuiPanel>

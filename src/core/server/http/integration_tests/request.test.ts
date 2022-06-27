@@ -11,12 +11,12 @@ jest.mock('uuid', () => ({
 }));
 
 import supertest from 'supertest';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 import { schema } from '@kbn/config-schema';
 
@@ -198,6 +198,42 @@ describe('KibanaRequest', () => {
         expect(nextSpy).toHaveBeenCalledTimes(1);
       });
 
+      it('emits once and completes when request aborted after the payload has been consumed', async () => {
+        expect.assertions(1);
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        const nextSpy = jest.fn();
+
+        const done = new Promise<void>((resolve) => {
+          router.post(
+            { path: '/', validate: { body: schema.any() } },
+            async (context, request, res) => {
+              request.events.aborted$.subscribe({
+                next: nextSpy,
+                complete: resolve,
+              });
+
+              // prevents the server to respond
+              await delay(30000);
+              return res.ok({ body: 'ok' });
+            }
+          );
+        });
+
+        await server.start();
+
+        const incomingRequest = supertest(innerServer.listener)
+          .post('/')
+          .send({ hello: 'dolly' })
+          // end required to send request
+          .end();
+
+        setTimeout(() => incomingRequest.abort(), 50);
+        await done;
+        expect(nextSpy).toHaveBeenCalledTimes(1);
+      });
+
       it('completes & does not emit when request handled', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -330,6 +366,41 @@ describe('KibanaRequest', () => {
 
         const incomingRequest = supertest(innerServer.listener)
           .get('/')
+          // end required to send request
+          .end();
+        setTimeout(() => incomingRequest.abort(), 50);
+        await done;
+        expect(nextSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('emits once and completes when response is aborted after the payload has been consumed', async () => {
+        expect.assertions(2);
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+
+        const nextSpy = jest.fn();
+
+        const done = new Promise<void>((resolve) => {
+          router.post(
+            { path: '/', validate: { body: schema.any() } },
+            async (context, req, res) => {
+              req.events.completed$.subscribe({
+                next: nextSpy,
+                complete: resolve,
+              });
+
+              expect(nextSpy).not.toHaveBeenCalled();
+              await delay(30000);
+              return res.ok({ body: 'ok' });
+            }
+          );
+        });
+
+        await server.start();
+
+        const incomingRequest = supertest(innerServer.listener)
+          .post('/')
+          .send({ foo: 'bar' })
           // end required to send request
           .end();
         setTimeout(() => incomingRequest.abort(), 50);

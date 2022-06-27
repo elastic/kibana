@@ -7,10 +7,7 @@
 
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
-import {
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-} from '../../../../../../../../../src/core/server';
+import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import {
@@ -22,17 +19,14 @@ import {
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
-import { getHostMetaData } from '../../../../../endpoint/routes/metadata/handlers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
-import { fleetAgentStatusToEndpointHostStatus } from '../../../../../endpoint/utils';
 import { getPendingActionCounts } from '../../../../../endpoint/services';
 
-export const HOST_FIELDS = [
+export const HOST_DETAILS_FIELDS = [
   '_id',
   'host.architecture',
   'host.id',
   'host.ip',
-  'host.id',
   'host.mac',
   'host.name',
   'host.os.family',
@@ -48,6 +42,7 @@ export const HOST_FIELDS = [
   'endpoint.policyStatus',
   'endpoint.sensorVersion',
   'agent.type',
+  'agent.id',
   'endpoint.id',
 ];
 
@@ -111,7 +106,7 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
 };
 
 export const formatHostItem = (bucket: HostAggEsItem): HostItem => {
-  return HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
+  return HOST_DETAILS_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
       if (fieldName === '_id') {
@@ -132,32 +127,10 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
     ? hostFieldsMap[fieldName].replace(/\./g, '_')
     : fieldName.replace(/\./g, '_');
 
-  if (
-    [
-      'host.ip',
-      'host.mac',
-      'cloud.instance.id',
-      'cloud.machine.type',
-      'cloud.provider',
-      'cloud.region',
-    ].includes(fieldName) &&
-    has(aggField, bucket)
-  ) {
-    const data: HostBuckets = get(aggField, bucket);
-    return data.buckets.map((obj) => obj.key);
-  } else if (has(`${aggField}.buckets`, bucket)) {
+  if (has(`${aggField}.buckets`, bucket)) {
     return getFirstItem(get(`${aggField}`, bucket));
-  } else if (['host.name', 'host.os.name', 'host.os.version', 'endpoint.id'].includes(fieldName)) {
-    switch (fieldName) {
-      case 'host.name':
-        return get('key', bucket) || null;
-      case 'host.os.name':
-        return get('os.hits.hits[0]._source.host.os.name', bucket) || null;
-      case 'host.os.version':
-        return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
-      case 'endpoint.id':
-        return get('endpoint_id.value.buckets[0].key', bucket) || null;
-    }
+  } else if (fieldName === 'endpoint.id') {
+    return get('endpoint_id.value.buckets[0].key', bucket) || null;
   } else if (has(aggField, bucket)) {
     const valueObj: HostValue = get(aggField, bucket);
     return valueObj.value_as_string;
@@ -182,52 +155,54 @@ export const getHostEndpoint = async (
     esClient: IScopedClusterClient;
     savedObjectsClient: SavedObjectsClientContract;
     endpointContext: EndpointAppContext;
+    request: KibanaRequest;
   }
 ): Promise<EndpointFields | null> => {
-  const { esClient, endpointContext, savedObjectsClient } = deps;
+  if (!id) {
+    return null;
+  }
+
+  const { esClient, endpointContext } = deps;
   const logger = endpointContext.logFactory.get('metadata');
+
   try {
-    const agentService = endpointContext.service.getAgentService();
-    if (agentService === undefined) {
-      throw new Error('agentService not available');
-    }
-    const metadataRequestContext = {
-      esClient,
-      endpointAppContextService: endpointContext.service,
-      logger,
-      savedObjectsClient,
-    };
-    const endpointData =
-      id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
-        ? await getHostMetaData(metadataRequestContext, id)
-        : null;
+    const fleetServices = endpointContext.service.getInternalFleetServices();
+    const endpointMetadataService = endpointContext.service.getEndpointMetadataService();
 
-    const fleetAgentId = endpointData?.elastic.agent.id;
-    const [fleetAgentStatus, pendingActions] = !fleetAgentId
-      ? [undefined, {}]
-      : await Promise.all([
-          // Get Agent Status
-          agentService.getAgentStatusById(esClient.asCurrentUser, fleetAgentId),
-          // Get a list of pending actions (if any)
-          getPendingActionCounts(
-            esClient.asCurrentUser,
-            endpointContext.service.getEndpointMetadataService(),
-            [fleetAgentId]
-          ).then((results) => {
+    const endpointData = await endpointMetadataService
+      // Using `internalUser` ES client below due to the fact that Fleet data has been moved to
+      // system indices (`.fleet*`). Because this is a readonly action, this should be ok to do
+      // here until proper RBOC controls are implemented
+      .getEnrichedHostMetadata(esClient.asInternalUser, fleetServices, id);
+
+    const fleetAgentId = endpointData.metadata.elastic.agent.id;
+
+    const pendingActions = fleetAgentId
+      ? getPendingActionCounts(
+          esClient.asInternalUser,
+          endpointMetadataService,
+          [fleetAgentId],
+          endpointContext.experimentalFeatures.pendingActionResponsesWithAck
+        )
+          .then((results) => {
             return results[0].pending_actions;
-          }),
-        ]);
+          })
+          .catch((error) => {
+            // Failure in retrieving the number of pending actions should not fail the entire
+            // call to get endpoint details. Log the error and return an empty object
+            logger.warn(error);
+            return {};
+          })
+      : {};
 
-    return endpointData != null && endpointData
-      ? {
-          endpointPolicy: endpointData.Endpoint.policy.applied.name,
-          policyStatus: endpointData.Endpoint.policy.applied.status,
-          sensorVersion: endpointData.agent.version,
-          elasticAgentStatus: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus!),
-          isolation: endpointData.Endpoint.state?.isolation ?? false,
-          pendingActions,
-        }
-      : null;
+    return {
+      endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
+      policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
+      sensorVersion: endpointData.metadata.agent.version,
+      elasticAgentStatus: endpointData.host_status,
+      isolation: endpointData.metadata.Endpoint.state?.isolation ?? false,
+      pendingActions,
+    };
   } catch (err) {
     logger.warn(err);
     return null;

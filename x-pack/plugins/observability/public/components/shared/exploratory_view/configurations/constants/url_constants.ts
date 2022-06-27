@@ -8,10 +8,15 @@
 export enum URL_KEYS {
   DATA_TYPE = 'dt',
   OPERATION_TYPE = 'op',
-  REPORT_TYPE = 'rt',
   SERIES_TYPE = 'st',
   BREAK_DOWN = 'bd',
   FILTERS = 'ft',
   REPORT_DEFINITIONS = 'rdf',
   SELECTED_METRIC = 'mt',
+  HIDDEN = 'h',
+  NAME = 'n',
+  COLOR = 'c',
+  SHOW_PERCENTILE_ANNOTATIONS = 'spa',
 }
+
+export const ALL_VALUES_SELECTED = 'ALL_VALUES';

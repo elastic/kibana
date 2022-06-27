@@ -7,17 +7,17 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 
 import { join } from 'path';
 
+import { ConfigPath, ConfigService, Env } from '@kbn/config';
+import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { PluginsService } from '../plugins_service';
-import { ConfigPath, ConfigService, Env } from '../../config';
-import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 import { BehaviorSubject, from } from 'rxjs';
 import { config } from '../plugins_config';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
 import { AsyncPlugin, PluginType } from '../types';

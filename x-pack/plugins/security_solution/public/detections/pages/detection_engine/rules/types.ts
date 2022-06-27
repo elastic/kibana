@@ -6,6 +6,7 @@
  */
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   RiskScoreMapping,
   ThreatIndex,
@@ -15,20 +16,26 @@ import {
   SeverityMapping,
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Filter } from '@kbn/es-query';
+import { RuleAction } from '@kbn/alerting-plugin/common';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
+
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import { AlertAction } from '../../../../../../alerting/common';
-import { Filter } from '../../../../../../../../src/plugins/data/common';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import { FieldValueThreshold } from '../../../components/rules/threshold_input';
-import {
+import type {
   Author,
   BuildingBlockType,
   License,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
   RuleNameOverride,
   SortOrder,
+  SetupGuide,
   TimestampOverride,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/detection_engine/schemas/common';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -85,6 +92,7 @@ export interface RuleStepProps {
   onSubmit?: () => void;
   resizeParentContainer?: (height: number) => void;
   setForm?: <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => void;
+  kibanaDataViews?: { [x: string]: DataViewListItem };
 }
 
 export interface AboutStepRule {
@@ -109,6 +117,7 @@ export interface AboutStepRule {
 export interface AboutStepRuleDetails {
   note: string;
   description: string;
+  setup: SetupGuide;
 }
 
 export interface AboutStepSeverity {
@@ -123,17 +132,26 @@ export interface AboutStepRiskScore {
   isMappingChecked: boolean;
 }
 
+/**
+ * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
+ * Maybe something with io-ts?
+ */
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
+  dataViewId?: string;
+  dataViewTitle?: string;
+  relatedIntegrations: RelatedIntegrationArray;
+  requiredFields: RequiredFieldArray;
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;
   threatIndex: ThreatIndex;
   threatQueryBar: FieldValueQueryBar;
   threatMapping: ThreatMapping;
+  eqlOptions: EqlOptionsSelected;
 }
 
 export interface ScheduleStepRule {
@@ -143,7 +161,7 @@ export interface ScheduleStepRule {
 }
 
 export interface ActionsStepRule {
-  actions: AlertAction[];
+  actions: RuleAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
   throttle?: string | null;
@@ -156,6 +174,7 @@ export interface DefineStepRuleJson {
   machine_learning_job_id?: string[];
   saved_id?: string;
   query?: string;
+  data_view_id?: string;
   language?: string;
   threshold?: {
     field: string[];
@@ -173,6 +192,9 @@ export interface DefineStepRuleJson {
   timeline_id?: string;
   timeline_title?: string;
   type: Type;
+  timestamp_field?: string;
+  event_category_override?: string;
+  tiebreaker_field?: string;
 }
 
 export interface AboutStepRuleJson {

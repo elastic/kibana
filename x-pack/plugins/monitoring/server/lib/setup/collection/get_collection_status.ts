@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get, uniq } from 'lodash';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
-  METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
-  ELASTICSEARCH_SYSTEM_ID,
   APM_SYSTEM_ID,
-  KIBANA_SYSTEM_ID,
   BEATS_SYSTEM_ID,
-  LOGSTASH_SYSTEM_ID,
+  ELASTICSEARCH_SYSTEM_ID,
   KIBANA_STATS_TYPE_MONITORING,
+  KIBANA_SYSTEM_ID,
+  LOGSTASH_SYSTEM_ID,
+  METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
 } from '../../../../common/constants';
+import { TimeRange } from '../../../../common/http_api/shared';
 import { LegacyRequest } from '../../../types';
 import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_nodes';
 
@@ -31,11 +32,11 @@ interface Bucket {
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 
 const getRecentMonitoringDocuments = async (
-  req: LegacyRequest,
+  req: LegacyRequest<unknown, unknown, { timeRange?: TimeRange }>,
   indexPatterns: Record<string, string>,
   clusterUuid?: string,
   nodeUuid?: string,
-  size?: string
+  size?: number
 ) => {
   const start = get(req.payload, 'timeRange.min') || `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`;
   const end = get(req.payload, 'timeRange.max') || 'now';
@@ -291,16 +292,6 @@ function getUuidBucketName(productName: string) {
   }
 }
 
-function matchesMetricbeatIndex(metricbeatIndex: string, index: string) {
-  if (index.includes(metricbeatIndex)) {
-    return true;
-  }
-  if (metricbeatIndex.includes('*')) {
-    return new RegExp(metricbeatIndex).test(index);
-  }
-  return false;
-}
-
 function isBeatFromAPM(bucket: Bucket) {
   const beatType = get(bucket, 'single_type.beat_type');
   if (!beatType) {
@@ -310,7 +301,7 @@ function isBeatFromAPM(bucket: Bucket) {
   return get(beatType, 'buckets[0].key') === 'apm-server';
 }
 
-async function hasNecessaryPermissions(req: LegacyRequest) {
+async function hasNecessaryPermissions(req: LegacyRequest<unknown, unknown, unknown>) {
   const licenseService = await req.server.plugins.monitoring.info.getLicenseService();
   const securityFeature = licenseService.getSecurityFeature();
   if (!securityFeature.isAvailable || !securityFeature.isEnabled) {
@@ -376,7 +367,7 @@ async function getLiveKibanaInstance(usageCollection?: UsageCollectionSetup) {
   );
 }
 
-async function getLiveElasticsearchClusterUuid(req: LegacyRequest) {
+async function getLiveElasticsearchClusterUuid(req: LegacyRequest<unknown, unknown, unknown>) {
   const params = {
     path: '/_cluster/state/cluster_uuid',
     method: 'GET',
@@ -387,7 +378,9 @@ async function getLiveElasticsearchClusterUuid(req: LegacyRequest) {
   return clusterUuid;
 }
 
-async function getLiveElasticsearchCollectionEnabled(req: LegacyRequest) {
+async function getLiveElasticsearchCollectionEnabled(
+  req: LegacyRequest<unknown, unknown, unknown>
+) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const response = await callWithRequest(req, 'transport.request', {
     method: 'GET',
@@ -435,16 +428,15 @@ async function getLiveElasticsearchCollectionEnabled(req: LegacyRequest) {
  * @param {*} skipLiveData Optional and will not make any live api calls if set to true
  */
 export const getCollectionStatus = async (
-  req: LegacyRequest,
+  req: LegacyRequest<unknown, unknown, { timeRange?: TimeRange }>,
   indexPatterns: Record<string, string>,
   clusterUuid?: string,
   nodeUuid?: string,
   skipLiveData?: boolean
 ) => {
-  const config = req.server.config();
-  const kibanaUuid = config.get('server.uuid');
-  const metricbeatIndex = config.get('monitoring.ui.metricbeat.index')!;
-  const size = config.get('monitoring.ui.max_bucket_size');
+  const config = req.server.config;
+  const kibanaUuid = req.server.instanceUuid;
+  const size = config.ui.max_bucket_size;
   const hasPermissions = await hasNecessaryPermissions(req);
 
   if (!hasPermissions) {
@@ -484,11 +476,6 @@ export const getCollectionStatus = async (
       if (bucket.key.includes(token)) {
         return true;
       }
-      if (matchesMetricbeatIndex(metricbeatIndex, bucket.key)) {
-        if (get(bucket, `${uuidBucketName}.buckets`, []).length) {
-          return true;
-        }
-      }
       return false;
     });
 
@@ -512,9 +499,7 @@ export const getCollectionStatus = async (
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
     else if (indexBuckets.length === 1) {
       const singleIndexBucket = indexBuckets[0];
-      const isFullyMigrated =
-        singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
-        matchesMetricbeatIndex(metricbeatIndex, singleIndexBucket.key);
+      const isFullyMigrated = singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
 
       const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
       const uuidBuckets = get(singleIndexBucket, `${uuidBucketName}.buckets`, []);
@@ -594,8 +579,7 @@ export const getCollectionStatus = async (
       for (const indexBucket of indexBuckets) {
         const isFullyMigrated =
           considerAllInstancesMigrated ||
-          indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
-          matchesMetricbeatIndex(metricbeatIndex, indexBucket.key);
+          indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
         const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
 

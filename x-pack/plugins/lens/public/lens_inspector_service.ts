@@ -8,16 +8,27 @@
 import type {
   Adapters,
   InspectorOptions,
+  InspectorSession,
   Start as InspectorStartContract,
-} from '../../../../src/plugins/inspector/public';
+} from '@kbn/inspector-plugin/public';
 
-import { createDefaultInspectorAdapters } from '../../../../src/plugins/expressions/public';
+import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/public';
 
 export const getLensInspectorService = (inspector: InspectorStartContract) => {
   const adapters: Adapters = createDefaultInspectorAdapters();
+  let overlayRef: InspectorSession | undefined;
   return {
     adapters,
-    inspect: (options?: InspectorOptions) => inspector.open(adapters, options),
+    inspect: (options?: InspectorOptions) => {
+      overlayRef = inspector.open(adapters, options);
+      overlayRef.onClose.then(() => {
+        if (overlayRef) {
+          overlayRef = undefined;
+        }
+      });
+      return overlayRef;
+    },
+    close: () => overlayRef?.close(),
   };
 };
 

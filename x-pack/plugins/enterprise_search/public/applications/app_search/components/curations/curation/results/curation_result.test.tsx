@@ -14,7 +14,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Result } from '../../../result';
 
-import { CurationResult } from './';
+import { CurationResult } from '.';
 
 describe('CurationResult', () => {
   const values = {
@@ -50,5 +50,17 @@ describe('CurationResult', () => {
     expect(wrapper.find(Result).prop('result')).toEqual(mockResult);
     expect(wrapper.find(Result).prop('actions')).toEqual(mockActions);
     expect(wrapper.find(Result).prop('dragHandleProps')).toEqual(mockDragging);
+  });
+
+  it('increments the result index before passing it on', () => {
+    wrapper = shallow(
+      <CurationResult
+        result={mockResult}
+        index={5}
+        actions={mockActions}
+        dragHandleProps={mockDragging}
+      />
+    );
+    expect(wrapper.find(Result).prop('resultPosition')).toEqual(6);
   });
 });

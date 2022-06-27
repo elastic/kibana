@@ -11,13 +11,20 @@ import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('http resources service', () => {
   describe('register', () => {
+    applyTestsWithDisableUnsafeEvalSetTo(true);
+    applyTestsWithDisableUnsafeEvalSetTo(false);
+  });
+});
+
+function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
+  describe(`with disableUnsafeEval=${disableUnsafeEval}`, () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
-    const defaultCspRules = "script-src 'self'";
+    const defaultCspRules = disableUnsafeEval
+      ? `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+      : `script-src 'self' 'unsafe-eval'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`;
     beforeEach(async () => {
       root = kbnTestServer.createRoot({
-        csp: {
-          rules: [defaultCspRules],
-        },
+        csp: { disableUnsafeEval },
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
       });
@@ -44,7 +51,7 @@ describe('http resources service', () => {
         expect(response.text.length).toBeGreaterThan(0);
       });
 
-      it('attaches CSP header', async () => {
+      it('applies default CSP header', async () => {
         const { http, httpResources } = await root.setup();
 
         const router = http.createRouter('');
@@ -193,4 +200,4 @@ describe('http resources service', () => {
       });
     });
   });
-});
+}

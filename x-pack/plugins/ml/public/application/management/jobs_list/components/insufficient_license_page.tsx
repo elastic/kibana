@@ -7,8 +7,8 @@
 
 import React, { FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { CoreStart } from '@kbn/core/public';
 
 import { EuiEmptyPrompt, EuiLink, EuiPageContent } from '@elastic/eui';
 

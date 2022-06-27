@@ -10,8 +10,7 @@ import { AggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { IndexPatternField } from '../../..';
-import { IndexPattern } from '../../..';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
@@ -53,9 +52,9 @@ describe('Terms Agg', () => {
             searchable: true,
           },
         ],
-      } as IndexPattern;
+      } as DataView;
 
-      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       return new AggConfigs(
@@ -67,7 +66,8 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        jest.fn()
       );
     };
 
@@ -114,6 +114,9 @@ describe('Terms Agg', () => {
                     "chain": Array [
                       Object {
                         "arguments": Object {
+                          "emptyAsNull": Array [
+                            false,
+                          ],
                           "enabled": Array [
                             true,
                           ],
@@ -255,9 +258,9 @@ describe('Terms Agg', () => {
             searchable: true,
           },
         ],
-      } as IndexPattern;
+      } as DataView;
 
-      indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
+      indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
       indexPattern.fields.filter = () => indexPattern.fields;
 
       const aggConfigs = new AggConfigs(
@@ -283,10 +286,35 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        jest.fn()
       );
       const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
       expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
+    });
+
+    test('optionally supports shard_size', () => {
+      const aggConfigs = getAggConfigs({
+        field: 'string_field',
+        orderAgg: {
+          type: 'count',
+        },
+        shardSize: 1000,
+      });
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+      expect(params.shard_size).toEqual(1000);
+    });
+
+    test('should override "hasPrecisionError" for the "terms" bucket type', () => {
+      const aggConfigs = getAggConfigs();
+      const { type } = aggConfigs.aggs[0];
+
+      expect(type.hasPrecisionError).toBeInstanceOf(Function);
+
+      expect(type.hasPrecisionError!({})).toBeFalsy();
+      expect(type.hasPrecisionError!({ doc_count_error_upper_bound: 0 })).toBeFalsy();
+      expect(type.hasPrecisionError!({ doc_count_error_upper_bound: -1 })).toBeTruthy();
     });
   });
 });

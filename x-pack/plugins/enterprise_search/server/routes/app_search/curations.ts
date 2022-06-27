@@ -85,6 +85,9 @@ export function registerCurationsRoutes({
     {
       path: '/internal/app_search/engines/{engineName}/curations/{curationId}',
       validate: {
+        query: schema.object({
+          skip_record_analytics: schema.string(),
+        }),
         params: schema.object({
           engineName: schema.string(),
           curationId: schema.string(),
@@ -102,14 +105,14 @@ export function registerCurationsRoutes({
     })
   );
 
-  router.get(
+  router.post(
     {
       path: '/internal/app_search/engines/{engineName}/curations/find_or_create',
       validate: {
         params: schema.object({
           engineName: schema.string(),
         }),
-        query: schema.object({
+        body: schema.object({
           query: schema.string(),
         }),
       },

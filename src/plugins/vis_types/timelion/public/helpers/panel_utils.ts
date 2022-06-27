@@ -8,8 +8,8 @@
 
 import moment from 'moment-timezone';
 import { Position, AxisSpec } from '@elastic/charts';
-import type { TimefilterContract } from 'src/plugins/data/public';
-import type { IUiSettingsClient } from 'kibana/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 import { calculateInterval } from '../../common/lib';
 import { xaxisFormatterProvider } from './xaxis_formatter';
@@ -68,7 +68,7 @@ export const MAIN_GROUP_ID = 1;
 export const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'] =>
   ({
     ...domain,
-    padding: 50,
+    padding: 20,
     paddingUnit: 'pixel',
   } as unknown as AxisSpec['domain']);
 
@@ -88,8 +88,8 @@ const adaptYaxisParams = (yaxis: IAxis) => {
     tickFormat: y.tickFormatter,
     domain: withStaticPadding({
       fit: y.min === undefined && y.max === undefined,
-      min: y.min,
-      max: y.max,
+      min: y.min ?? NaN,
+      max: y.max ?? NaN,
     }),
   };
 };
@@ -118,6 +118,8 @@ export const extractAllYAxis = (series: Series[]) => {
         groupId,
         domain: withStaticPadding({
           fit: false,
+          min: NaN,
+          max: NaN,
         }),
         id: (yaxis?.position || Position.Left) + index,
         position: Position.Left,

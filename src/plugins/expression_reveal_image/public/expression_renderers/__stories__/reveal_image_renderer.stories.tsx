@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { revealImageRenderer } from '../';
-import { getElasticOutline, getElasticLogo } from '../../../../presentation_util/public';
-import { Render, waitFor } from '../../../../presentation_util/public/__stories__';
+import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/public';
+import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getRevealImageRenderer } from '..';
 import { Origin } from '../../../common/types/expression_functions';
 
 const Renderer = ({
@@ -26,7 +26,7 @@ const Renderer = ({
     origin: Origin.LEFT,
     percent: 0.45,
   };
-  return <Render renderer={revealImageRenderer} config={config} />;
+  return <Render renderer={getRevealImageRenderer()} config={config} />;
 };
 
 storiesOf('renderers/revealImage', module).add(

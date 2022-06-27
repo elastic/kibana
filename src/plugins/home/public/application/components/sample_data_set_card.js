@@ -21,7 +21,7 @@ export const INSTALLED_STATUS = 'installed';
 export const UNINSTALLED_STATUS = 'not_installed';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SampleDataViewDataButton } from './sample_data_view_data_button';
 
@@ -181,7 +181,7 @@ export class SampleDataSetCard extends React.Component {
         image={this.props.previewUrl}
         title={this.props.name}
         description={this.props.description}
-        betaBadgeLabel={this.isInstalled() ? 'INSTALLED' : null}
+        betaBadgeProps={{ label: this.isInstalled() ? 'INSTALLED' : null }}
         footer={this.renderBtn()}
         data-test-subj={`sampleDataSetCard${this.props.id}`}
       />
@@ -199,6 +199,7 @@ SampleDataSetCard.propTypes = {
       path: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
       icon: PropTypes.string.isRequired,
+      order: PropTypes.number,
     })
   ).isRequired,
   status: PropTypes.oneOf([INSTALLED_STATUS, UNINSTALLED_STATUS, 'unknown']).isRequired,

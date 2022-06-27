@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import {
@@ -17,7 +18,6 @@ import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 export class PopulationJobCreator extends JobCreator {
   // a population job has one overall over (split) field, which is the same for all detectors
@@ -26,11 +26,7 @@ export class PopulationJobCreator extends JobCreator {
   private _byFields: SplitField[] = [];
   protected _type: JOB_TYPE = JOB_TYPE.POPULATION;
 
-  constructor(
-    indexPattern: IndexPattern,
-    savedSearch: SavedSearchSavedObject | null,
-    query: object
-  ) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
     this._wizardInitialized$.next(true);

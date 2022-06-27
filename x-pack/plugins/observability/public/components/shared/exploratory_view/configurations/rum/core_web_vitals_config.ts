@@ -10,7 +10,9 @@ import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
   FILTER_RECORDS,
+  LABEL_FIELDS_FILTER,
   REPORT_METRIC_FIELD,
+  ReportTypes,
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
 import { buildPhraseFilter } from '../utils';
@@ -33,12 +35,12 @@ import {
 } from '../constants/elasticsearch_fieldnames';
 import { CLS_LABEL, FID_LABEL, LCP_LABEL } from '../constants/labels';
 
-export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig {
   const statusPallete = euiPaletteForStatus(3);
 
   return {
     defaultSeriesType: 'bar_horizontal_percentage_stacked',
-    reportType: 'core-web-vitals',
+    reportType: ReportTypes.CORE_WEB_VITAL,
     seriesTypes: ['bar_horizontal_percentage_stacked'],
     xAxisColumn: {
       sourceField: USE_BREAK_DOWN_COLUMN,
@@ -74,6 +76,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
         field: USER_AGENT_NAME,
         nested: USER_AGENT_VERSION,
       },
+      LABEL_FIELDS_FILTER,
     ],
     breakdownFields: [
       SERVICE_NAME,
@@ -84,8 +87,8 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
       URL_FULL,
     ],
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: { ...FieldLabels, [SERVICE_NAME]: 'Web Application' },
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
@@ -153,5 +156,6 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
       { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
       { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
     ],
+    query: { query: 'transaction.type: "page-load"', language: 'kuery' },
   };
 }

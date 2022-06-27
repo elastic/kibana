@@ -6,19 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import uuid from 'uuid';
 import { EuiCheckbox, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { NumericField } from '../../../../../../shared_imports';
-
+import { NumericField, useKibana } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { UseField } from '../../../form';
 
-import { LearnMoreLink, DescribedFormRow } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../..';
 
 interface Props {
   phase: 'hot' | 'warm';
@@ -30,6 +29,8 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
   const initialToggleValue = useMemo<boolean>(() => {
     return policy.phases[phase]?.actions?.forcemerge != null;
   }, [policy, phase]);
+
+  const { docLinks } = useKibana().services;
 
   return (
     <DescribedFormRow
@@ -47,7 +48,7 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
             id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText"
             defaultMessage="Reduce the number of segments in each index shard and clean up deleted documents."
           />{' '}
-          <LearnMoreLink docPath="ilm-forcemerge.html" />
+          <LearnMoreLink docPath={docLinks.links.elasticsearch.ilmForceMerge} />
         </>
       }
       titleSize="xs"

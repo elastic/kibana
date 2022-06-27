@@ -8,8 +8,10 @@
 import React, { lazy, Suspense } from 'react';
 
 // @ts-expect-error update types
+// eslint-disable-next-line react/display-name
 export const getLazyOsqueryAction = (services) => (props) => {
   const OsqueryAction = lazy(() => import('./osquery_action'));
+
   return (
     <Suspense fallback={null}>
       <OsqueryAction services={services} {...props} />

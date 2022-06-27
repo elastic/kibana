@@ -36,7 +36,7 @@ export const setup = (
 
   const recurse: HtmlContextTypeConvert = (value, options = {}) => {
     if (value == null) {
-      return asPrettyString(value);
+      return asPrettyString(value, options);
     }
 
     if (!value || !isFunction(value.map)) {
@@ -50,7 +50,7 @@ export const setup = (
   };
 
   const wrap: HtmlContextTypeConvert = (value, options) => {
-    return `<span ng-non-bindable>${recurse(value, options)}</span>`;
+    return recurse(value, options);
   };
 
   return wrap;

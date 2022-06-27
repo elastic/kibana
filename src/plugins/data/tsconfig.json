@@ -12,7 +12,8 @@
     "server/**/*",
     "config.ts",
     "common/**/*.json",
-    "public/**/*.json"
+    "public/**/*.json",
+    "../../../typings/index.d.ts"
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
@@ -23,6 +24,10 @@
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../field_formats/tsconfig.json" }
+    { "path": "../field_formats/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
+    { "path": "../screenshot_mode/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/task_manager/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/security/tsconfig.json" }
   ]
 }

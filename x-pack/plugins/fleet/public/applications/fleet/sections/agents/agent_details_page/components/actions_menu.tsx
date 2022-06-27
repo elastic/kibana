@@ -7,10 +7,10 @@
 
 import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Agent, AgentPolicy, PackagePolicy } from '../../../../types';
-import { useCapabilities, useKibanaVersion } from '../../../../hooks';
+import type { Agent, AgentPolicy } from '../../../../types';
+import { useAuthz, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import {
   AgentUnenrollAgentModal,
@@ -18,8 +18,7 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAgentRefresh } from '../hooks';
-import { isAgentUpgradeable } from '../../../../services';
-import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import { isAgentUpgradeable, policyHasFleetServer } from '../../../../services';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
@@ -27,7 +26,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   assignFlyoutOpenByDefault?: boolean;
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign, agentPolicy }) => {
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const kibanaVersion = useKibanaVersion();
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
@@ -35,12 +34,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const isUnenrolling = agent.status === 'unenrolling';
 
-  const hasFleetServer =
-    agentPolicy &&
-    agentPolicy.package_policies.some(
-      (ap: string | PackagePolicy) =>
-        typeof ap !== 'string' && ap.package?.name === FLEET_SERVER_PACKAGE
-    );
+  const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
 
   const onClose = useMemo(() => {
     if (onCancelReassign) {
@@ -76,7 +70,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           <AgentUpgradeAgentModal
             agents={[agent]}
             agentCount={1}
-            version={kibanaVersion}
             onClose={() => {
               setIsUpgradeModalOpen(false);
               refreshAgent();
@@ -109,8 +102,8 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             />
           </EuiContextMenuItem>,
           <EuiContextMenuItem
-            icon="cross"
-            disabled={!hasWriteCapabilites || !agent.active}
+            icon="trash"
+            disabled={!hasFleetAllPrivileges || !agent.active}
             onClick={() => {
               setIsUnenrollModalOpen(true);
             }}

@@ -27,14 +27,14 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   STORAGE_KEY,
   ELASTICSEARCH_SYSTEM_ID,
   KIBANA_SYSTEM_ID,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   INSTRUCTION_STEP_SET_MONITORING_URL,
   INSTRUCTION_STEP_ENABLE_METRICBEAT,

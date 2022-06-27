@@ -7,11 +7,11 @@
 
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
 import moment from 'moment';
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { parseExpression } from '@kbn/expressions-plugin/common';
 import { CANVAS_TYPE } from '../../common/lib/constants';
 import { collectFns } from './collector_helpers';
 import { TelemetryCollector, CanvasWorkpad } from '../../types';
-import { parseExpression } from '../../../../../src/plugins/expressions/common';
 
 interface WorkpadSearch {
   [CANVAS_TYPE]: CanvasWorkpad;
@@ -381,12 +381,12 @@ const workpadCollector: TelemetryCollector = async function (kibanaIndex, esClie
   const searchParams = {
     size: 10000, // elasticsearch index.max_result_window default value
     index: kibanaIndex,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.canvas-workpad', '-hits.hits._source.canvas-workpad.assets'],
+    ignore_unavailable: true,
+    filter_path: ['hits.hits._source.canvas-workpad', '-hits.hits._source.canvas-workpad.assets'],
     body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
   };
 
-  const { body: esResponse } = await esClient.search<WorkpadSearch>(searchParams);
+  const esResponse = await esClient.search<WorkpadSearch>(searchParams);
 
   if (get(esResponse, 'hits.hits.length') > 0) {
     const workpads = esResponse.hits.hits.map((hit) => hit._source![CANVAS_TYPE]);

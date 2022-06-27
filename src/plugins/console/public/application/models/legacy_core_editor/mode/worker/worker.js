@@ -1901,8 +1901,8 @@ ace.define(
         reset(i + upTo.length);
         return text.substring(currentAt, i);
       },
-      peek = function (c) {
-        return text.substr(at, c.length) === c; // nocommit - double check
+      peek = function (offset) {
+        return text.charAt(at + offset);
       },
       number = function () {
         let number,
@@ -1948,7 +1948,8 @@ ace.define(
           uffff;
 
         if (ch === '"') {
-          if (peek('""')) {
+          let c = '""';
+          if (text.substring(at, c.length) === c) {
             // literal
             next('"');
             next('"');
@@ -1984,8 +1985,31 @@ ace.define(
         error('Bad string');
       },
       white = function () {
-        while (ch && ch <= ' ') {
-          next();
+        while (ch) {
+          // Skip whitespace.
+          while (ch && ch <= ' ') {
+            next();
+          }
+          // if the current char in iteration is '#' or the char and the next char is equal to '//'
+          // we are on the single line comment
+          if (ch === '#' || ch === '/' && peek(0) === '/') {
+            // Until we are on the new line, skip to the next char
+            while (ch && ch !== '\n') {
+              next();
+            }
+          } else if (ch === '/' && peek(0) === '*') {
+            // If the chars starts with '/*', we are on the multiline comment
+            next();
+            next();
+            while (ch && !(ch === '*' && peek(0) === '/')) {
+              // Until we have closing tags '*/', skip to the next char
+              next();
+            }
+            if (ch) {
+              next();
+              next();
+            }
+          } else break;
         }
       },
       strictWhite = function () {
@@ -2023,17 +2047,36 @@ ace.define(
       // parses and returns the method
       method = function () {
         switch (ch) {
+          case 'g':
+            next('g');
+            next('e');
+            next('t');
+            return 'get';
           case 'G':
             next('G');
             next('E');
             next('T');
             return 'GET';
+          case 'h':
+            next('h');
+            next('e');
+            next('a');
+            next('d');
+            return 'head';
           case 'H':
             next('H');
             next('E');
             next('A');
             next('D');
             return 'HEAD';
+          case 'd':
+            next('d');
+            next('e');
+            next('l');
+            next('e');
+            next('t');
+            next('e');
+            return 'delete';
           case 'D':
             next('D');
             next('E');
@@ -2042,6 +2085,22 @@ ace.define(
             next('T');
             next('E');
             return 'DELETE';
+          case 'p':
+            next('p');
+            switch (ch) {
+              case 'u':
+                next('u');
+                next('t');
+                return 'put';
+              case 'o':
+                next('o');
+                next('s');
+                next('t');
+                return 'post';
+              default:
+                error('Unexpected \'' + ch + '\'');
+            }
+            break;
           case 'P':
             next('P');
             switch (ch) {

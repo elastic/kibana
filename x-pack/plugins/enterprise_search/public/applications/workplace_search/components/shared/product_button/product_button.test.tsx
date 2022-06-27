@@ -12,9 +12,9 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ProductButton } from './';
+import { ProductButton } from '.';
 
 describe('ProductButton', () => {
   it('renders', () => {

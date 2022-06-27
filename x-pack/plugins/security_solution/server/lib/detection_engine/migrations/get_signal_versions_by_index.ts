@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export interface SignalVersionsAggResponse {
   aggregations: {
@@ -72,7 +72,7 @@ export const getSignalVersionsByIndex = async ({
     },
   });
 
-  const aggs = response.body.aggregations as SignalVersionsAggResponse['aggregations'];
+  const aggs = response.aggregations as SignalVersionsAggResponse['aggregations'];
   const indexBuckets = aggs.signals_indices.buckets;
 
   return index.reduce<SignalVersionsByIndex>((agg, _index) => {

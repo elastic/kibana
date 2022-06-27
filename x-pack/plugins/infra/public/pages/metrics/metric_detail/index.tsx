@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import { EuiTheme, withTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
+import { useLinkProps } from '@kbn/observability-plugin/public';
 import { DocumentTitle } from '../../../components/document_title';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from './hooks/use_metadata';
@@ -19,7 +20,6 @@ import { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
-import { useLinkProps } from '../../../hooks/use_link_props';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 
@@ -38,7 +38,7 @@ export const MetricDetail = withMetricPageProviders(
     const nodeId = match.params.node;
     const nodeType = match.params.type as InventoryItemType;
     const inventoryModel = findInventoryModel(nodeType);
-    const { sourceId } = useContext(Source.Context);
+    const { sourceId, metricIndicesExist } = useContext(Source.Context);
 
     const {
       timeRange,
@@ -86,7 +86,7 @@ export const MetricDetail = withMetricPageProviders(
 
     if (metadataLoading && !filteredRequiredMetrics.length) {
       return (
-        <MetricsPageTemplate>
+        <MetricsPageTemplate hasData={metricIndicesExist}>
           <InfraLoadingPanel
             height="100vh"
             width="100%"

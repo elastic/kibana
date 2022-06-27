@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Range } from '../../../expressions/public';
-import { ExpressionValueVisDimension } from '../../../visualizations/public';
-import { ColorMode, Labels, Style, ColorSchemas } from '../../../charts/public';
+import { Range } from '@kbn/expressions-plugin/public';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { ColorMode, Labels, Style, ColorSchemas } from '@kbn/charts-plugin/public';
 
 export const visType = 'metric';
 
@@ -35,13 +35,4 @@ export interface VisParams {
   dimensions: DimensionsVisParam;
   metric: MetricVisParam;
   type: typeof visType;
-}
-
-export interface MetricVisMetric {
-  value: any;
-  label: string;
-  color?: string;
-  bgColor?: string;
-  lightText: boolean;
-  rowIndex: number;
 }

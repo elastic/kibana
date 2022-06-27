@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import type { LicenseCheck } from '../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineRoleMappingFeatureCheckRoute } from './feature_check';
 
@@ -41,27 +41,31 @@ describe('GET role mappings feature check', () => {
     {
       licenseCheckResult = { state: 'valid' },
       canManageRoleMappings = true,
-      nodeSettingsResponse = async () => ({}),
-      xpackUsageResponse = async () => defaultXpackUsageResponse,
+      nodeSettingsResponse = () => ({}),
+      xpackUsageResponse = () => defaultXpackUsageResponse,
       asserts,
     }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
-      };
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: {
+          check: jest.fn().mockReturnValue(licenseCheckResult),
+        },
+      } as any;
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext,
+      });
 
-      mockContext.core.elasticsearch.client.asInternalUser.nodes.info.mockImplementation(
-        (async () => ({ body: await nodeSettingsResponse() })) as any
+      mockCoreContext.elasticsearch.client.asInternalUser.nodes.info.mockImplementation((async () =>
+        nodeSettingsResponse()) as any);
+      mockCoreContext.elasticsearch.client.asInternalUser.transport.request.mockImplementation(
+        (async () => xpackUsageResponse()) as any
       );
-      mockContext.core.elasticsearch.client.asInternalUser.transport.request.mockImplementation(
-        (async () => ({ body: await xpackUsageResponse() })) as any
-      );
-
-      mockContext.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        body: { has_all_requested: canManageRoleMappings },
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: canManageRoleMappings,
       } as any);
 
       defineRoleMappingFeatureCheckRoute(mockRouteDefinitionParams);
@@ -78,7 +82,7 @@ describe('GET role mappings feature check', () => {
       expect(response.status).toBe(asserts.statusCode);
       expect(response.payload).toEqual(asserts.result);
 
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 
@@ -95,7 +99,7 @@ describe('GET role mappings feature check', () => {
   });
 
   getFeatureCheckTest('allows both script types when explicitly enabled', {
-    nodeSettingsResponse: async () => ({
+    nodeSettingsResponse: () => ({
       nodes: {
         someNodeId: {
           settings: {
@@ -118,7 +122,7 @@ describe('GET role mappings feature check', () => {
   });
 
   getFeatureCheckTest('disallows stored scripts when disabled', {
-    nodeSettingsResponse: async () => ({
+    nodeSettingsResponse: () => ({
       nodes: {
         someNodeId: {
           settings: {
@@ -141,7 +145,7 @@ describe('GET role mappings feature check', () => {
   });
 
   getFeatureCheckTest('disallows inline scripts when disabled', {
-    nodeSettingsResponse: async () => ({
+    nodeSettingsResponse: () => ({
       nodes: {
         someNodeId: {
           settings: {
@@ -164,7 +168,7 @@ describe('GET role mappings feature check', () => {
   });
 
   getFeatureCheckTest('indicates incompatible realms when only native and file are enabled', {
-    xpackUsageResponse: async () => ({
+    xpackUsageResponse: () => ({
       security: {
         realms: {
           native: {
@@ -202,10 +206,10 @@ describe('GET role mappings feature check', () => {
   getFeatureCheckTest(
     'falls back to allowing both script types if there is an error retrieving node settings',
     {
-      nodeSettingsResponse: async () => {
+      nodeSettingsResponse: () => {
         throw new Error('something bad happened');
       },
-      xpackUsageResponse: async () => {
+      xpackUsageResponse: () => {
         throw new Error('something bad happened');
       },
       asserts: {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
 import { TestProviders } from '../../mock';
-import { HeaderPage } from './index';
+import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { SecurityPageName } from '../../../app/types';
 
@@ -136,9 +136,6 @@ describe('HeaderPage', () => {
       'border-bottom',
       euiDarkVars.euiBorderThin
     );
-    expect(securitySolutionHeaderPage).not.toHaveStyleRule(
-      'padding-bottom',
-      euiDarkVars.paddingSizes.l
-    );
+    expect(securitySolutionHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 });

@@ -7,11 +7,13 @@
 
 import expect from '@kbn/expect';
 import { normalizeDataTypeDifferences } from '../normalize_data_type_differences';
-import overviewFixture from './fixtures/overview';
+import { setIndicesFound } from '../set_indices_found';
+import overviewFixture from './fixtures/overview.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('overview mb', () => {
     const archive =
@@ -22,11 +24,11 @@ export default function ({ getService }) {
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize kibana instances with stats', async () => {
@@ -37,6 +39,7 @@ export default function ({ getService }) {
         .expect(200);
 
       body.metrics = normalizeDataTypeDifferences(body.metrics, overviewFixture);
+      overviewFixture.metrics = setIndicesFound(overviewFixture.metrics, true);
       expect(body).to.eql(overviewFixture);
     });
   });

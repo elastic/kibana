@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createMockContext } from '../../../../expressions/common';
+import { createMockContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from './utils';
 import { kibanaFilterFunction } from './kibana_filter';
 
@@ -22,7 +22,9 @@ describe('interpreter/functions#kibanaFilter', () => {
           "disabled": false,
           "negate": false,
         },
-        "name": "test",
+        "query": Object {
+          "name": "test",
+        },
         "type": "kibana_filter",
       }
     `);

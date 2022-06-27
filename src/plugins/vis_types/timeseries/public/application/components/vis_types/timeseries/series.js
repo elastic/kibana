@@ -8,11 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { ColorPicker } from '../../color_picker';
-import { AddDeleteButtons } from '../../add_delete_buttons';
-import { Aggs } from '../../../components/aggs/aggs';
-import { TimeseriesConfig as SeriesConfig } from './config';
-import { SeriesDragHandler } from '../../series_drag_handler';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import {
   EuiTabs,
   EuiTab,
@@ -20,11 +16,16 @@ import {
   EuiFlexItem,
   EuiFieldText,
   EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
+import { ColorPicker } from '../../color_picker';
+import { AddDeleteButtons } from '../../add_delete_buttons';
+import { Aggs } from '../../aggs/aggs';
+import { TimeseriesConfig as SeriesConfig } from './config';
+import { SeriesDragHandler } from '../../series_drag_handler';
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { PANEL_TYPES } from '../../../../../common/enums';
+import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {
@@ -43,9 +44,10 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
     seriesQuantity,
   } = props;
 
+  const { euiTheme } = useEuiTheme();
+
   const defaults = {
     label: '',
-    type: PANEL_TYPES.TIMESERIES,
   };
   const model = { ...defaults, ...props.model };
 
@@ -70,7 +72,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
             uiRestrictions={uiRestrictions}
             dragHandleProps={props.dragHandleProps}
           />
-          <div className="tvbAggRow tvbAggRow--split">
+          <div css={[tsvbEditorRowStyles(euiTheme), aggRowSplitStyles(euiTheme)]}>
             <Split
               onChange={props.onChange}
               fields={fields}

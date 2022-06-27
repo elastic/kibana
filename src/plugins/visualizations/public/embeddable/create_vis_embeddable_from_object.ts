@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { IContainer, ErrorEmbeddable, AttributeService } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { Vis } from '../types';
 import type {
   VisualizeInput,
@@ -14,23 +16,11 @@ import type {
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import {
-  IContainer,
-  ErrorEmbeddable,
-  AttributeService,
-} from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-import {
-  getSavedVisualizationsLoader,
-  getUISettings,
-  getHttp,
-  getTimeFilter,
-  getCapabilities,
-} from '../services';
+import { getUISettings, getHttp, getTimeFilter, getCapabilities } from '../services';
+import { urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { SavedVisualizationsLoader } from '../saved_visualizations';
-import { IndexPattern } from '../../../data/public';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
 export const createVisEmbeddableFromObject =
@@ -38,7 +28,6 @@ export const createVisEmbeddableFromObject =
   async (
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string },
-    savedVisualizationsLoader?: SavedVisualizationsLoader,
     attributeService?: AttributeService<
       VisualizeSavedObjectAttributes,
       VisualizeByValueInput,
@@ -46,26 +35,26 @@ export const createVisEmbeddableFromObject =
     >,
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
-    const savedVisualizations = getSavedVisualizationsLoader();
-
     try {
       const visId = vis.id as string;
 
-      const editPath = visId ? savedVisualizations.urlFor(visId) : '#/edit_by_value';
+      const editPath = visId ? urlFor(visId) : '#/edit_by_value';
 
-      const editUrl = visId
-        ? getHttp().basePath.prepend(`/app/visualize${savedVisualizations.urlFor(visId)}`)
-        : '';
+      const editUrl = visId ? getHttp().basePath.prepend(`/app/visualize${urlFor(visId)}`) : '';
       const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
 
       if (!isLabsEnabled && vis.type.stage === 'experimental') {
         return new DisabledLabEmbeddable(vis.title, input);
       }
 
-      let indexPatterns: IndexPattern[] = [];
+      let indexPatterns: DataView[] = [];
 
       if (vis.type.getUsedIndexPattern) {
-        indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
+        try {
+          indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
+        } catch (e) {
+          // nothing to be here
+        }
       } else if (vis.data.indexPattern) {
         indexPatterns = [vis.data.indexPattern];
       }
@@ -87,7 +76,6 @@ export const createVisEmbeddableFromObject =
         },
         input,
         attributeService,
-        savedVisualizationsLoader,
         parent
       );
     } catch (e) {

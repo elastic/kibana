@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { isArray } from 'lodash';
+import { isArray, isEmpty, map } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
-
 import { useMemo } from 'react';
+
+import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { useForm } from '../../shared_imports';
-import { createFormSchema } from '../../scheduled_query_groups/queries/schema';
-import { ScheduledQueryGroupFormData } from '../../scheduled_query_groups/queries/use_scheduled_query_group_query_form';
+import { createFormSchema } from '../../packs/queries/schema';
+import { PackFormData } from '../../packs/queries/use_pack_query_form';
 import { useSavedQueries } from '../use_saved_queries';
 
 const SAVED_QUERY_FORM_ID = 'savedQueryForm';
@@ -25,40 +26,36 @@ interface UseSavedQueryFormProps {
 export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) => {
   const { data } = useSavedQueries({});
   const ids: string[] = useMemo<string[]>(
-    () => data?.savedObjects.map((obj) => obj.attributes.id) ?? [],
+    () => map(data?.saved_objects, 'attributes.id') ?? [],
     [data]
   );
   const idSet = useMemo<Set<string>>(() => {
     const res = new Set<string>(ids);
     // @ts-expect-error update types
     if (defaultValue && defaultValue.id) res.delete(defaultValue.id);
+
     return res;
   }, [ids, defaultValue]);
   const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
     () => createFormSchema(idSet),
     [idSet]
   );
+
   return useForm({
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
       if (isValid) {
-        return handleSubmit(formData);
+        try {
+          await handleSubmit(formData);
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
       }
-    },
-    options: {
-      stripEmptyFields: false,
     },
     // @ts-expect-error update types
     defaultValue,
     serializer: (payload) =>
       produce(payload, (draft) => {
-        // @ts-expect-error update types
-        if (draft.platform?.split(',').length === 3) {
-          // if all platforms are checked then use undefined
-          // @ts-expect-error update types
-          delete draft.platform;
-        }
         if (isArray(draft.version)) {
           if (!draft.version.length) {
             // @ts-expect-error update types
@@ -67,19 +64,41 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
             draft.version = draft.version[0];
           }
         }
+
+        if (isEmpty(payload.ecs_mapping)) {
+          // @ts-expect-error update types
+          delete draft.ecs_mapping;
+        } else {
+          // @ts-expect-error update types
+          draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
+        }
+
+        // @ts-expect-error update types
+        draft.interval = draft.interval + '';
+
         return draft;
       }),
     // @ts-expect-error update types
     deserializer: (payload) => {
-      if (!payload) return {} as ScheduledQueryGroupFormData;
+      if (!payload) return {} as PackFormData;
 
       return {
         id: payload.id,
         description: payload.description,
         query: payload.query,
-        interval: payload.interval ? parseInt(payload.interval, 10) : undefined,
+        interval: payload.interval ?? 3600,
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
+        ecs_mapping:
+          (!isEmpty(payload.ecs_mapping) &&
+            map(payload.ecs_mapping, (value, key) => ({
+              key,
+              result: {
+                type: Object.keys(value)[0],
+                value: Object.values(value)[0],
+              },
+            }))) ??
+          [],
       };
     },
   });

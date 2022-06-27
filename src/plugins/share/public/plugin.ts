@@ -8,63 +8,47 @@
 
 import './index.scss';
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
-import type { SecurityOssPluginSetup, SecurityOssPluginStart } from '../../security_oss/public';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
-import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
-import {
-  UrlGeneratorsService,
-  UrlGeneratorsSetup,
-  UrlGeneratorsStart,
-} from './url_generators/url_generator_service';
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
+import {
+  BrowserShortUrlClientFactory,
+  BrowserShortUrlClientFactoryCreateParams,
+} from './url_service/short_urls/short_url_client_factory';
+import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
+import { AnonymousAccessServiceContract } from '../common';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
-
-export interface ShareSetupDependencies {
-  securityOss?: SecurityOssPluginSetup;
-}
-
-export interface ShareStartDependencies {
-  securityOss?: SecurityOssPluginStart;
-}
+import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
+import type { BrowserUrlService } from './types';
 
 /** @public */
 export type SharePluginSetup = ShareMenuRegistrySetup & {
   /**
-   * @deprecated
-   *
-   * URL Generators are deprecated use UrlService instead.
-   */
-  urlGenerators: UrlGeneratorsSetup;
-
-  /**
    * Utilities to work with URL locators and short URLs.
    */
-  url: UrlService;
+  url: BrowserUrlService;
 
   /**
    * Accepts serialized values for extracting a locator, migrating state from a provided version against
    * the locator, then using the locator to navigate.
    */
   navigate(options: RedirectOptions): void;
+
+  /**
+   * Sets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency.
+   */
+  setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
 };
 
 /** @public */
 export type SharePluginStart = ShareMenuManagerStart & {
   /**
-   * @deprecated
-   *
-   * URL Generators are deprecated use UrlService instead.
-   */
-  urlGenerators: UrlGeneratorsStart;
-
-  /**
    * Utilities to work with URL locators and short URLs.
    */
-  url: UrlService;
+  url: BrowserUrlService;
 
   /**
    * Accepts serialized values for extracting a locator, migrating state from a provided version against
@@ -76,19 +60,19 @@ export type SharePluginStart = ShareMenuManagerStart & {
 export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly shareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
-  private readonly urlGeneratorsService = new UrlGeneratorsService();
 
   private redirectManager?: RedirectManager;
-  private url?: UrlService;
+  private url?: BrowserUrlService;
+  private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: ShareSetupDependencies): SharePluginSetup {
-    const { application, http } = core;
+  public setup(core: CoreSetup): SharePluginSetup {
+    const { http } = core;
     const { basePath } = http;
 
-    this.url = new UrlService({
-      baseUrl: basePath.publicBaseUrl || basePath.serverBasePath,
+    this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
+      baseUrl: basePath.get(),
       version: this.initializerContext.env.packageInfo.version,
       navigate: async ({ app, path, state }, { replace = false } = {}) => {
         const [start] = await core.getStartServices();
@@ -106,49 +90,45 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         });
         return url;
       },
-      shortUrls: {
-        get: () => ({
-          create: async () => {
-            throw new Error('Not implemented');
-          },
-          get: async () => {
-            throw new Error('Not implemented');
-          },
-          delete: async () => {
-            throw new Error('Not implemented');
-          },
-          resolve: async () => {
-            throw new Error('Not implemented.');
-          },
+      shortUrls: ({ locators }) =>
+        new BrowserShortUrlClientFactory({
+          http,
+          locators,
         }),
-      },
     });
 
     this.url.locators.create(new LegacyShortUrlLocatorDefinition());
-
-    application.register(createShortUrlRedirectApp(core, window.location, this.url));
+    this.url.locators.create(new ShortUrlRedirectLocatorDefinition());
 
     this.redirectManager = new RedirectManager({
       url: this.url,
     });
-    this.redirectManager.registerRedirectApp(core);
+    this.redirectManager.registerLocatorRedirectApp(core);
+    this.redirectManager.registerLegacyShortUrlRedirectApp(core);
 
     return {
       ...this.shareMenuRegistry.setup(),
-      urlGenerators: this.urlGeneratorsService.setup(core),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
+      setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
+        if (this.anonymousAccessServiceProvider) {
+          throw new Error('Anonymous Access service provider is already set.');
+        }
+        this.anonymousAccessServiceProvider = provider;
+      },
     };
   }
 
-  public start(core: CoreStart, plugins: ShareStartDependencies): SharePluginStart {
+  public start(core: CoreStart): SharePluginStart {
+    const sharingContextMenuStart = this.shareContextMenu.start(
+      core,
+      this.url!,
+      this.shareMenuRegistry.start(),
+      this.anonymousAccessServiceProvider
+    );
+
     return {
-      ...this.shareContextMenu.start(
-        core,
-        this.shareMenuRegistry.start(),
-        plugins.securityOss?.anonymousAccess
-      ),
-      urlGenerators: this.urlGeneratorsService.start(core),
+      ...sharingContextMenuStart,
       url: this.url!,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
     };

@@ -7,8 +7,8 @@
  */
 
 import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ExecutionContext } from 'src/plugins/expressions/common';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { KibanaContext } from './kibana_context_type';
 
 import {
@@ -89,16 +89,28 @@ describe('kibanaContextFn', () => {
     } as any);
     const args = {
       ...emptyArgs,
-      q: {
-        type: 'kibana_query' as 'kibana_query',
-        language: 'test',
-        query: {
-          type: 'test',
-          match_phrase: {
-            test: 'something2',
+      q: [
+        {
+          type: 'kibana_query' as 'kibana_query',
+          language: 'test',
+          query: {
+            type: 'test',
+            match_phrase: {
+              test: 'something2',
+            },
           },
         },
-      },
+        {
+          type: 'kibana_query' as 'kibana_query',
+          language: 'test',
+          query: {
+            type: 'test',
+            match_phrase: {
+              test: 'something3',
+            },
+          },
+        },
+      ],
       savedSearchId: 'test',
     };
     const input: KibanaContext = {
@@ -184,6 +196,16 @@ describe('kibanaContextFn', () => {
         },
       },
       {
+        type: 'kibana_query',
+        language: 'test',
+        query: {
+          type: 'test',
+          match_phrase: {
+            test: 'something3',
+          },
+        },
+      },
+      {
         language: 'kuery',
         query: {
           match_phrase: {
@@ -205,7 +227,7 @@ describe('kibanaContextFn', () => {
   it('deduplicates duplicated filters and keeps the first enabled filter', async () => {
     const { fn } = kibanaContextFn;
     const filter1 = buildFilter(
-      { fields: [] },
+      { fields: [], title: 'dataView' },
       { name: 'test', type: 'test' },
       FILTERS.PHRASE,
       false,
@@ -217,7 +239,7 @@ describe('kibanaContextFn', () => {
       FilterStateStore.APP_STATE
     );
     const filter2 = buildFilter(
-      { fields: [] },
+      { fields: [], title: 'dataView' },
       { name: 'test', type: 'test' },
       FILTERS.PHRASE,
       false,
@@ -230,7 +252,7 @@ describe('kibanaContextFn', () => {
     );
 
     const filter3 = buildFilter(
-      { fields: [] },
+      { fields: [], title: 'dataView' },
       { name: 'test', type: 'test' },
       FILTERS.PHRASE,
       false,

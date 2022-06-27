@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { deepFreeze } from '@kbn/std';
-import { PluginName } from '../plugins';
+import type { PluginName } from '@kbn/core-base-common';
 
 /**
  * The current status of a service at a point in time.
@@ -217,7 +217,7 @@ export interface StatusServiceSetup {
    * By default, plugins inherit this derived status from their dependencies.
    * Calling {@link StatusSetup.set} overrides this default status.
    *
-   * This may emit multliple times for a single status change event as propagates
+   * This may emit multiple times for a single status change event as propagates
    * through the dependency tree
    */
   derivedStatus$: Observable<ServiceStatus>;
@@ -232,6 +232,11 @@ export interface StatusServiceSetup {
 /** @internal */
 export interface InternalStatusServiceSetup
   extends Pick<StatusServiceSetup, 'core$' | 'overall$' | 'isStatusPageAnonymous'> {
+  /**
+   * Overall status of core's service.
+   */
+  coreOverall$: Observable<ServiceStatus>;
+
   // Namespaced under `plugins` key to improve clarity that these are APIs for plugins specifically.
   plugins: {
     set(plugin: PluginName, status$: Observable<ServiceStatus>): void;

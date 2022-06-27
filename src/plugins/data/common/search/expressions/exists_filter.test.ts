@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createMockContext } from '../../../../expressions/common';
+import { createMockContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from './utils';
 import { existsFilterFunction } from './exists_filter';
 
@@ -17,14 +17,16 @@ describe('interpreter/functions#existsFilter', () => {
     const actual = fn(null, { field: { spec: { name: 'test' } } }, createMockContext());
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "exists": Object {
-          "field": "test",
-        },
         "meta": Object {
           "alias": null,
           "disabled": false,
           "index": undefined,
           "negate": false,
+        },
+        "query": Object {
+          "exists": Object {
+            "field": "test",
+          },
         },
         "type": "kibana_filter",
       }

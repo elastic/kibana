@@ -8,23 +8,31 @@
 import { cloneDeep } from 'lodash';
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
 import { securityConfigDeprecationProvider } from './config_deprecations';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
+  const configPaths: string[] = [];
   const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
       deprecation,
       path: 'xpack.security',
+      context: deprecationContext,
     })),
     () =>
-      ({ message }) =>
-        deprecationMessages.push(message)
+      ({ message, configPath }) => {
+        deprecationMessages.push(message);
+        configPaths.push(configPath);
+      }
   );
   return {
+    configPaths,
     messages: deprecationMessages,
     migrated,
   };
@@ -167,64 +175,18 @@ describe('Config Deprecations', () => {
     `);
   });
 
-  it('warns when using the legacy audit logger', () => {
+  it('renames security.showInsecureClusterWarning to xpack.security.showInsecureClusterWarning', () => {
     const config = {
-      xpack: {
-        security: {
-          audit: {
-            enabled: true,
-          },
-        },
+      security: {
+        showInsecureClusterWarning: false,
       },
     };
     const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.xpack.security.audit.appender).not.toBeDefined();
+    expect(migrated.security?.showInsecureClusterWarning).not.toBeDefined();
+    expect(migrated.xpack.security.showInsecureClusterWarning).toEqual(false);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "The legacy audit logger is deprecated in favor of the new ECS-compliant audit logger.",
-      ]
-    `);
-  });
-
-  it('does not warn when using the ECS audit logger', () => {
-    const config = {
-      xpack: {
-        security: {
-          audit: {
-            enabled: true,
-            appender: {
-              type: 'file',
-              fileName: './audit.log',
-            },
-          },
-        },
-      },
-    };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
-    expect(messages).toHaveLength(0);
-  });
-
-  it('does not warn about using the legacy logger when using the ECS audit logger, even when using the deprecated ECS appender config', () => {
-    const config = {
-      xpack: {
-        security: {
-          audit: {
-            enabled: true,
-            appender: {
-              type: 'file',
-              path: './audit.log',
-            },
-          },
-        },
-      },
-    };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated.xpack.security.audit.appender.path).not.toBeDefined();
-    expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
-    expect(messages).toMatchInlineSnapshot(`
-      Array [
-        "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
       ]
     `);
   });
@@ -285,12 +247,14 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages } = applyConfigDeprecations(cloneDeep(config));
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\\" is no longer used.",
+        "This setting is no longer used.",
       ]
     `);
+
+    expect(configPaths).toEqual(['xpack.security.authc.providers.saml.saml1.maxRedirectURLSize']);
   });
 
   it(`warns when 'xpack.security.authc.providers' is an array of strings`, () => {
@@ -307,7 +271,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
+        "Use the new object format instead of an array of provider types.",
       ]
     `);
   });
@@ -326,39 +290,97 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.authc.providers\\" accepts an extended \\"object\\" format instead of an array of provider types.",
-        "Enabling both \\"basic\\" and \\"token\\" authentication providers in \\"xpack.security.authc.providers\\" is deprecated. Login page will only use \\"token\\" provider.",
+        "Use the new object format instead of an array of provider types.",
+        "Use only one of these providers. When both providers are set, Kibana only uses the \\"token\\" provider.",
       ]
     `);
   });
 
-  it('warns when the security plugin is disabled', () => {
+  it(`warns that 'xpack.security.authc.providers.anonymous.<provider-name>.credentials.apiKey' is deprecated`, () => {
     const config = {
       xpack: {
         security: {
-          enabled: false,
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  credentials: {
+                    apiKey: 'VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw==',
+                  },
+                },
+              },
+            },
+          },
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Disabling the security plugin \\"xpack.security.enabled\\" will only be supported by disable security in Elasticsearch.",
+        "Support for apiKey is being removed from the 'anonymous' authentication provider. Use username and password credentials.",
       ]
     `);
+
+    expect(configPaths).toEqual([
+      'xpack.security.authc.providers.anonymous.anonymous1.credentials.apiKey',
+    ]);
   });
 
-  it('does not warn when the security plugin is enabled', () => {
+  it(`warns that 'xpack.security.authc.providers.anonymous.<provider-name>.credentials.apiKey' with id and key is deprecated`, () => {
     const config = {
       xpack: {
         security: {
-          enabled: true,
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  credentials: {
+                    apiKey: { id: 'VuaCfGcBCdbkQm-e5aOx', key: 'ui2lp2axTNmsyakw9tvNnw' },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
-    expect(messages).toHaveLength(0);
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Support for apiKey is being removed from the 'anonymous' authentication provider. Use username and password credentials.",
+      ]
+    `);
+
+    expect(configPaths).toEqual([
+      'xpack.security.authc.providers.anonymous.anonymous1.credentials.apiKey',
+    ]);
+  });
+
+  it(`warns that 'xpack.security.authc.providers.anonymous.<provider-name>.credentials' of 'elasticsearch_anonymous_user' is deprecated`, () => {
+    const config = {
+      xpack: {
+        security: {
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  credentials: 'elasticsearch_anonymous_user',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Support for 'elasticsearch_anonymous_user' is being removed from the 'anonymous' authentication provider. Use username and password credentials.",
+      ]
+    `);
+
+    expect(configPaths).toEqual([
+      'xpack.security.authc.providers.anonymous.anonymous1.credentials',
+    ]);
   });
 });

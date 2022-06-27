@@ -11,7 +11,9 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
-import { EmptyState } from './';
+import { docLinks } from '../../../../shared/doc_links';
+
+import { EmptyState } from '.';
 
 describe('EmptyState', () => {
   it('renders', () => {
@@ -21,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Add documents to tune relevance');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining('/relevance-tuning-guide.html')
+      expect.stringContaining(docLinks.appSearchRelevance)
     );
   });
 });

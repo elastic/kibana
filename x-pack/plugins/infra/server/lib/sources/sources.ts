@@ -10,7 +10,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { failure } from 'io-ts/lib/PathReporter';
 import { inRange } from 'lodash';
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   InfraSavedSourceConfiguration,
   InfraSource,
@@ -20,7 +20,7 @@ import {
   sourceConfigurationConfigFilePropertiesRT,
   SourceConfigurationSavedObjectRuntimeType,
 } from '../../../common/source_configuration/source_configuration';
-import { InfraConfig } from '../../../server';
+import { InfraConfig } from '../..';
 import { defaultSourceConfiguration } from './defaults';
 import { AnomalyThresholdRangeError, NotFoundError } from './errors';
 import {
@@ -212,26 +212,7 @@ export class InfraSources {
         fold(constant({}), identity)
       );
 
-    // NOTE: Legacy logAlias needs converting to a logIndices reference until we can remove
-    // config file sources in 8.0.0.
-    if (staticSourceConfiguration && staticSourceConfiguration.logAlias) {
-      const convertedStaticSourceConfiguration: InfraStaticSourceConfiguration & {
-        logAlias?: string;
-      } = {
-        ...staticSourceConfiguration,
-        logIndices: {
-          type: 'index_name',
-          indexName: staticSourceConfiguration.logAlias,
-        },
-      };
-      delete convertedStaticSourceConfiguration.logAlias;
-      return mergeSourceConfiguration(
-        defaultSourceConfiguration,
-        convertedStaticSourceConfiguration
-      );
-    } else {
-      return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
-    }
+    return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
   }
 
   private async getSavedSourceConfiguration(
@@ -255,7 +236,7 @@ export class InfraSources {
   }
 }
 
-const mergeSourceConfiguration = (
+export const mergeSourceConfiguration = (
   first: InfraSourceConfiguration,
   ...others: InfraStaticSourceConfiguration[]
 ) =>

@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiTableActionsColumnType,
@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
+  EuiIcon,
 } from '@elastic/eui';
 
 import {
@@ -33,6 +34,7 @@ import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 // reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 const STATE_COLOR = {
@@ -95,6 +97,7 @@ export const useColumns = (
   const columns: [
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
@@ -142,6 +145,59 @@ export const useColumns = (
       sortable: true,
       truncateText: true,
       scope: 'row',
+      render: (transformId, item) => {
+        if (!isManagedTransform(item)) return transformId;
+        return (
+          <>
+            {transformId}
+            &nbsp;
+            <EuiToolTip
+              content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
+                defaultMessage:
+                  'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+              })}
+            >
+              <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
+                {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
+                  defaultMessage: 'Managed',
+                })}
+              </EuiBadge>
+            </EuiToolTip>
+          </>
+        );
+      },
+    },
+    {
+      id: 'alertRule',
+      name: (
+        <EuiScreenReaderOnly>
+          <p>
+            <FormattedMessage
+              id="xpack.transform.transformList.alertingRules.screenReaderDescription"
+              defaultMessage="This column displays an icon when there are alert rules associated with a transform"
+            />
+          </p>
+        </EuiScreenReaderOnly>
+      ),
+      width: '30px',
+      render: (item) => {
+        return Array.isArray(item.alerting_rules) ? (
+          <EuiToolTip
+            position="bottom"
+            content={
+              <FormattedMessage
+                id="xpack.transform.transformList.alertingRules.tooltipContent"
+                defaultMessage="Transform has {rulesCount} associated alert {rulesCount, plural, one { rule} other { rules}}"
+                values={{ rulesCount: item.alerting_rules.length }}
+              />
+            }
+          >
+            <EuiIcon type="bell" />
+          </EuiToolTip>
+        ) : (
+          <span />
+        );
+      },
     },
     {
       field: TRANSFORM_LIST_COLUMN.DESCRIPTION,

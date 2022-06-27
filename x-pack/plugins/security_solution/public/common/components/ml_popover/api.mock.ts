@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '../../../../../ml/public';
+import { MlSummaryJob } from '@kbn/ml-plugin/public';
 import {
   Group,
   Module,
@@ -49,6 +49,7 @@ export const mockOpenedJob: MlSummaryJob = {
   processed_record_count: 3425264,
   awaitingNodeAssignment: false,
   jobTags: {},
+  bucketSpanSeconds: 900,
 };
 
 export const mockJobsSummaryResponse: MlSummaryJob[] = [
@@ -69,6 +70,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     isSingleMetricViewerJob: true,
     awaitingNodeAssignment: false,
     jobTags: {},
+    bucketSpanSeconds: 900,
   },
   {
     id: 'siem-api-rare_process_linux_ecs',
@@ -86,6 +88,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     isSingleMetricViewerJob: true,
     awaitingNodeAssignment: false,
     jobTags: {},
+    bucketSpanSeconds: 900,
   },
   {
     id: 'siem-api-rare_process_windows_ecs',
@@ -101,6 +104,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     isSingleMetricViewerJob: true,
     awaitingNodeAssignment: false,
     jobTags: {},
+    bucketSpanSeconds: 900,
   },
   {
     id: 'siem-api-suspicious_login_activity_ecs',
@@ -116,12 +120,13 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     isSingleMetricViewerJob: true,
     awaitingNodeAssignment: false,
     jobTags: {},
+    bucketSpanSeconds: 900,
   },
 ];
 
 export const mockGetModuleResponse: Module[] = [
   {
-    id: 'siem_auditbeat',
+    id: 'security_linux_v3',
     title: 'SIEM Auditbeat',
     description:
       'Detect suspicious network activity and unusual processes in Auditbeat data (beta)',
@@ -131,7 +136,7 @@ export const mockGetModuleResponse: Module[] = [
     query: { bool: { filter: [{ term: { 'agent.type': 'auditbeat' } }] } },
     jobs: [
       {
-        id: 'rare_process_by_host_linux_ecs',
+        id: 'rare_process_by_host_linux',
         config: {
           job_type: 'anomaly_detector',
           description: 'SIEM Auditbeat: Detect unusually rare processes on Linux (beta)',
@@ -198,7 +203,7 @@ export const mockGetModuleResponse: Module[] = [
     kibana: {},
   },
   {
-    id: 'siem_winlogbeat',
+    id: 'security_windows_v3',
     title: 'SIEM Winlogbeat',
     description: 'Detect unusual processes and network activity in Winlogbeat data (beta)',
     type: 'Winlogbeat data',
@@ -351,7 +356,7 @@ export const mockGetModuleResponse: Module[] = [
 
 export const checkRecognizerSuccess: RecognizerModule[] = [
   {
-    id: 'siem_auditbeat',
+    id: 'security_linux_v3',
     title: 'SIEM Auditbeat',
     query: { bool: { filter: [{ term: { 'agent.type': 'auditbeat' } }] } },
     description:
@@ -507,13 +512,14 @@ export const mockSecurityJobs: SecurityJob[] = [
     earliestTimestampMs: 1569812391387,
     latestResultsTimestampMs: 1571022900000,
     isSingleMetricViewerJob: true,
-    moduleId: 'siem_auditbeat',
+    moduleId: 'security_linux_v3',
     defaultIndexPattern: 'auditbeat-*',
     isCompatible: true,
     isInstalled: true,
     isElasticJob: true,
     awaitingNodeAssignment: false,
     jobTags: {},
+    bucketSpanSeconds: 900,
   },
   {
     id: 'rare_process_by_host_linux_ecs',
@@ -527,13 +533,14 @@ export const mockSecurityJobs: SecurityJob[] = [
     datafeedIndices: ['auditbeat-*'],
     datafeedState: 'stopped',
     isSingleMetricViewerJob: true,
-    moduleId: 'siem_auditbeat',
+    moduleId: 'security_linux_v3',
     defaultIndexPattern: 'auditbeat-*',
     isCompatible: true,
     isInstalled: true,
     isElasticJob: true,
     awaitingNodeAssignment: false,
     jobTags: {},
+    bucketSpanSeconds: 900,
   },
   {
     datafeedId: '',
@@ -541,18 +548,19 @@ export const mockSecurityJobs: SecurityJob[] = [
     datafeedState: '',
     hasDatafeed: false,
     isSingleMetricViewerJob: false,
-    jobState: '',
+    jobState: 'closed',
     memory_status: '',
     processed_record_count: 0,
     id: 'rare_process_by_host_windows_ecs',
     description: 'SIEM Winlogbeat: Detect unusually rare processes on Windows (beta)',
     groups: ['process', 'siem', 'winlogbeat'],
     defaultIndexPattern: 'winlogbeat-*',
-    moduleId: 'siem_winlogbeat',
+    moduleId: 'security_windows_v3',
     isCompatible: false,
     isInstalled: false,
     isElasticJob: true,
     awaitingNodeAssignment: false,
     jobTags: {},
+    bucketSpanSeconds: 900,
   },
 ];

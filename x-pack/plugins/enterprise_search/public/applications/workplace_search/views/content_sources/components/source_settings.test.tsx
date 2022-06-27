@@ -18,13 +18,14 @@ import { EuiConfirmModal } from '@elastic/eui';
 
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 
+import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 import { SourceSettings } from './source_settings';
 
 describe('SourceSettings', () => {
   const updateContentSource = jest.fn();
   const removeContentSource = jest.fn();
   const getSourceConfigData = jest.fn();
-  const contentSource = fullContentSources[0];
+  const contentSource = fullContentSources[1];
   const buttonLoading = false;
   const isOrganization = true;
 
@@ -36,6 +37,7 @@ describe('SourceSettings', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues({ ...mockValues });
     setMockActions({
       updateContentSource,
@@ -48,6 +50,7 @@ describe('SourceSettings', () => {
     const wrapper = shallow(<SourceSettings />);
 
     expect(wrapper.find('form')).toHaveLength(1);
+    expect(wrapper.find(DownloadDiagnosticsButton)).toHaveLength(1);
   });
 
   it('handles form submission', () => {
@@ -61,7 +64,7 @@ describe('SourceSettings', () => {
     wrapper.find('form').simulate('submit', { preventDefault });
 
     expect(preventDefault).toHaveBeenCalled();
-    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, { name: TEXT });
+    expect(updateContentSource).toHaveBeenCalledWith(contentSource.id, { name: TEXT });
   });
 
   it('handles confirmModal submission', () => {
@@ -93,7 +96,7 @@ describe('SourceSettings', () => {
     setMockValues({
       ...mockValues,
       contentSource: {
-        ...fullContentSources[0],
+        ...contentSource,
         serviceType: 'confluence_server',
       },
     });
@@ -105,113 +108,58 @@ describe('SourceSettings', () => {
     );
   });
 
-  it('handles disabling synchronization', () => {
-    const wrapper = shallow(<SourceSettings />);
-
-    const synchronizeSwitch = wrapper.find('[data-test-subj="SynchronizeToggle"]').first();
-    const event = { target: { checked: false } };
-    synchronizeSwitch.prop('onChange')?.(event as any);
-
-    wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
-
-    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, {
-      indexing: {
-        enabled: false,
-        features: {
-          content_extraction: { enabled: true },
-          thumbnails: { enabled: true },
-        },
-      },
-    });
-  });
-
-  it('handles disabling thumbnails', () => {
-    const wrapper = shallow(<SourceSettings />);
-
-    const thumbnailsSwitch = wrapper.find('[data-test-subj="ThumbnailsToggle"]').first();
-    const event = { target: { checked: false } };
-    thumbnailsSwitch.prop('onChange')?.(event as any);
-
-    wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
-
-    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, {
-      indexing: {
-        enabled: true,
-        features: {
-          content_extraction: { enabled: true },
-          thumbnails: { enabled: false },
-        },
-      },
-    });
-  });
-
-  it('handles disabling content extraction', () => {
-    const wrapper = shallow(<SourceSettings />);
-
-    const contentExtractionSwitch = wrapper
-      .find('[data-test-subj="ContentExtractionToggle"]')
-      .first();
-    const event = { target: { checked: false } };
-    contentExtractionSwitch.prop('onChange')?.(event as any);
-
-    wrapper.find('[data-test-subj="SaveSyncControlsButton"]').simulate('click');
-
-    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, {
-      indexing: {
-        enabled: true,
-        features: {
-          content_extraction: { enabled: false },
-          thumbnails: { enabled: true },
-        },
-      },
-    });
-  });
-
-  it('disables the thumbnails switch when globally disabled', () => {
+  it('hides source config for github apps', () => {
     setMockValues({
       ...mockValues,
       contentSource: {
-        ...fullContentSources[0],
-        areThumbnailsConfigEnabled: false,
+        ...contentSource,
+        serviceType: 'github_via_app',
+        secret: {},
       },
     });
 
     const wrapper = shallow(<SourceSettings />);
 
-    const synchronizeSwitch = wrapper.find('[data-test-subj="ThumbnailsToggle"]');
-
-    expect(synchronizeSwitch.prop('disabled')).toEqual(true);
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
   });
 
-  describe('DownloadDiagnosticsButton', () => {
-    it('renders for org with correct href', () => {
-      const wrapper = shallow(<SourceSettings />);
-
-      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/internal/workplace_search/org/sources/123/download_diagnostics'
-      );
+  it('hides source config for github enterprise apps', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...contentSource,
+        serviceType: 'github_enterprise_server_via_app',
+        secret: {},
+      },
     });
 
-    it('renders for account with correct href', () => {
-      setMockValues({
-        ...mockValues,
-        isOrganization: false,
-      });
-      const wrapper = shallow(<SourceSettings />);
+    const wrapper = shallow(<SourceSettings />);
 
-      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/internal/workplace_search/account/sources/123/download_diagnostics'
-      );
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
+  });
+
+  it('hides source config for custom sources', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...contentSource,
+        serviceType: 'custom',
+      },
     });
 
-    it('renders with the correct download file name', () => {
-      jest.spyOn(global.Date, 'now').mockImplementationOnce(() => new Date('1970-01-01').valueOf());
+    const wrapper = shallow(<SourceSettings />);
 
-      const wrapper = shallow(<SourceSettings />);
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
+  });
 
-      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('download')).toEqual(
-        '123_custom_0_diagnostics.json'
-      );
+  it('hides source config for non-organization sources', () => {
+    setMockValues({
+      ...mockValues,
+      isOrganization: false,
     });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
   });
 });

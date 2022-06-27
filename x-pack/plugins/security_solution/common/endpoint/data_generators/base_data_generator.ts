@@ -7,6 +7,7 @@
 
 import seedrandom from 'seedrandom';
 import uuid from 'uuid';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
 /** Array of 14 day offsets */
@@ -118,7 +119,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   /** generate random OS family value */
-  protected randomOSFamily(): string {
+  public randomOSFamily(): string {
     return this.randomChoice(OS_FAMILY);
   }
 
@@ -127,8 +128,13 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     return uuid.v4();
   }
 
+  /** generate a seeded random UUID v4 */
+  protected seededUUIDv4(): string {
+    return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
+  }
+
   /** Generate a random number up to the max provided */
-  protected randomN(max: number): number {
+  public randomN(max: number): number {
     return Math.floor(this.random() * max);
   }
 
@@ -174,5 +180,46 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
 
   protected randomHostname(): string {
     return `Host-${this.randomString(10)}`;
+  }
+
+  /**
+   * Returns an single search hit (normally found in a `SearchResponse`) for the given document source.
+   * @param hitSource
+   */
+  toEsSearchHit<T extends object = object>(hitSource: T): estypes.SearchHit<T> {
+    return {
+      _index: 'some-index',
+      _id: this.seededUUIDv4(),
+      _score: 1.0,
+      _source: hitSource,
+    };
+  }
+
+  /**
+   * Returns an ES Search Response for the give set of records. Each record will be wrapped with
+   * the `toEsSearchHit()`
+   * @param hitsSource
+   */
+  toEsSearchResponse<T extends object = object>(
+    hitsSource: Array<estypes.SearchHit<T>>
+  ): estypes.SearchResponse<T> {
+    return {
+      took: 3,
+      timed_out: false,
+      _shards: {
+        total: 2,
+        successful: 2,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: hitsSource.length,
+          relation: 'eq',
+        },
+        max_score: 0,
+        hits: hitsSource,
+      },
+    };
   }
 }

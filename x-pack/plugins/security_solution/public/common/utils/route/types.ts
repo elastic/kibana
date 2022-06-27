@@ -15,16 +15,17 @@ import { HostsTableType } from '../../../hosts/store/model';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { AdministrationSubTab as AdministrationType } from '../../../management/types';
 import { FlowTarget } from '../../../../common/search_strategy';
-import { UebaTableType } from '../../../ueba/store/model';
+import { UsersTableType } from '../../../users/store/model';
+import { SecurityPageName } from '../../../app/types';
 
 export type SiemRouteType =
   | HostsTableType
   | NetworkRouteType
   | TimelineType
   | AdministrationType
-  | UebaTableType;
+  | UsersTableType;
 export interface RouteSpyState {
-  pageName: string;
+  pageName: SecurityPageName;
   detailName: string | undefined;
   tabName: SiemRouteType | undefined;
   search: string;
@@ -38,9 +39,10 @@ export interface HostRouteSpyState extends RouteSpyState {
   tabName: HostsTableType | undefined;
 }
 
-export interface UebaRouteSpyState extends RouteSpyState {
-  tabName: UebaTableType | undefined;
+export interface UsersRouteSpyState extends RouteSpyState {
+  tabName: UsersTableType | undefined;
 }
+
 export interface NetworkRouteSpyState extends RouteSpyState {
   tabName: NetworkRouteType | undefined;
 }

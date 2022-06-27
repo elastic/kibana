@@ -20,7 +20,7 @@ import {
   EuiHighlight,
   EuiSpacer,
 } from '@elastic/eui';
-import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
@@ -28,10 +28,10 @@ import { hasFunctionFieldArgument } from '../validation';
 
 import type {
   GenericOperationDefinition,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
   OperationDefinition,
   ParamEditorProps,
-} from '../../index';
+} from '../..';
 import type { FormulaIndexPatternColumn } from '../formula';
 
 function FormulaHelp({
@@ -503,7 +503,7 @@ export function getFunctionSignatureLabel(
 
 function getFunctionArgumentsStringified(
   params: Required<
-    OperationDefinition<IndexPatternColumn, 'field' | 'fullReference'>
+    OperationDefinition<GenericIndexPatternColumn, 'field' | 'fullReference'>
   >['operationParams']
 ) {
   return params

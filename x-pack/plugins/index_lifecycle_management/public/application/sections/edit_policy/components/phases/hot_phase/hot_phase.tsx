@@ -7,11 +7,11 @@
 
 import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiCallOut, EuiTextColor, EuiSwitch, EuiText } from '@elastic/eui';
 
-import { useFormData } from '../../../../../../shared_imports';
+import { useFormData, useKibana } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
@@ -21,7 +21,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { ROLLOVER_FORM_PATHS, isUsingDefaultRolloverPath } from '../../../constants';
 
-import { LearnMoreLink, DescribedFormRow } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../..';
 
 import {
   ForcemergeField,
@@ -51,6 +51,8 @@ export const HotPhase: FunctionComponent = () => {
   const isUsingDefaultRollover: boolean = get(formData, isUsingDefaultRolloverPath);
 
   const showEmptyRolloverFieldsError = useRolloverValueRequiredValidation();
+
+  const { docLinks } = useKibana().services;
 
   return (
     <Phase phase="hot">
@@ -89,7 +91,7 @@ export const HotPhase: FunctionComponent = () => {
                       defaultMessage="Learn more"
                     />
                   }
-                  docPath="ilm-rollover.html"
+                  docPath={docLinks.links.elasticsearch.ilmRollover}
                 />
               </p>
             </EuiTextColor>

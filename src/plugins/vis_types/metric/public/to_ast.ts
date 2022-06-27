@@ -7,14 +7,13 @@
  */
 
 import { get } from 'lodash';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { MetricVisExpressionFunctionDefinition } from './metric_vis_fn';
-import {
-  EsaggsExpressionFunctionDefinition,
-  IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../data/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { inter } from '@kbn/expressions-plugin/common';
+
+import { ColorMode } from '@kbn/charts-plugin/public';
 import { VisParams } from './types';
+import { getStopsWithColorsFromRanges } from './utils';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
@@ -28,23 +27,11 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
-  const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: buildExpression([
-      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
-        id: vis.data.indexPattern!.id!,
-      }),
-    ]),
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: false,
-    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
-  });
-
   const schemas = getVisSchemas(vis, params);
 
   const {
     percentageMode,
     percentageFormatPattern,
-    useRanges,
     colorSchema,
     metricColorMode,
     colorsRange,
@@ -63,29 +50,38 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     });
   }
 
-  // @ts-expect-error
-  const metricVis = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
+  const hasColorRanges = colorsRange && colorsRange.length > 1;
+
+  const metricVis = buildExpressionFunction('metricVis', {
     percentageMode,
-    colorSchema,
-    colorMode: metricColorMode,
-    useRanges,
-    invertColors,
+    colorMode: hasColorRanges ? metricColorMode : ColorMode.None,
     showLabels: labels?.show ?? false,
   });
 
-  if (style) {
-    metricVis.addArgument('bgFill', style.bgFill);
-    metricVis.addArgument('font', buildExpression(`font size=${style.fontSize}`));
-    metricVis.addArgument('subText', style.subText);
-  }
+  // Pt unit is provided to support the previous view of the metricVis at vis_types editor.
+  // Inter font is defined here to override the default `openSans` font, which comes from the expession.
+  metricVis.addArgument(
+    'font',
+    buildExpression(
+      `font family="${inter.value}"
+        weight="bold"
+        align="center"
+        sizeUnit="pt"
+        ${style ? `size=${style.fontSize}` : ''}`
+    )
+  );
 
-  if (colorsRange) {
-    colorsRange.forEach((range: any) => {
-      metricVis.addArgument(
-        'colorRange',
-        buildExpression(`range from=${range.from} to=${range.to}`)
-      );
+  metricVis.addArgument('labelFont', buildExpression(`font size="14" align="center"`));
+
+  if (colorsRange && colorsRange.length) {
+    const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
+    const palette = buildExpressionFunction('palette', {
+      ...stopsWithColors,
+      range: 'number',
+      continuity: 'none',
     });
+
+    metricVis.addArgument('palette', buildExpression([palette]));
   }
 
   if (schemas.group) {
@@ -96,7 +92,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     metricVis.addArgument('metric', prepareDimension(metric));
   });
 
-  const ast = buildExpression([esaggs, metricVis]);
+  const ast = buildExpression([metricVis]);
 
   return ast.toAst();
 };

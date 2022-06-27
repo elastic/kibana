@@ -4,20 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
-import { Logger } from 'src/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Logger } from '@kbn/core/server';
 
 import type { Type, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ListClient } from '../../../../../../lists/server';
+import { ListClient } from '@kbn/lists-plugin/server';
 import { BuildRuleMessage } from '../rule_messages';
 
 export interface FilterEventsAgainstListOptions<T> {
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
-  eventSearchResult: estypes.SearchResponse<T>;
+  events: Array<estypes.SearchHit<T>>;
   buildRuleMessage: BuildRuleMessage;
 }
+
+export type FilterEventsAgainstListReturn<T> = [
+  Array<estypes.SearchHit<T>>,
+  Array<estypes.SearchHit<T>>
+];
 
 export interface CreateSetToFilterAgainstOptions<T> {
   events: Array<estypes.SearchHit<T>>;

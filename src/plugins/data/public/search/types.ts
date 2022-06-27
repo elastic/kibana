@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PackageInfo } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PackageInfo } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
 import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
-import { IndexPatternsContract } from '../../common';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { ISessionsClient, ISessionService } from './session';
 
-export { ISearchStartSearchSource, SearchUsageCollector };
+export type { ISearchStartSearchSource, SearchUsageCollector };
 
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
@@ -82,5 +83,5 @@ export interface SearchServiceSetupDependencies {
 /** @internal */
 export interface SearchServiceStartDependencies {
   fieldFormats: AggsStartDependencies['fieldFormats'];
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
 }

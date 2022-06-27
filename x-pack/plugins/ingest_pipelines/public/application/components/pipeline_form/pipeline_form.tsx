@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useRef } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
@@ -27,6 +27,8 @@ export interface PipelineFormProps {
   saveError: any;
   defaultValue?: Pipeline;
   isEditing?: boolean;
+  // That fields is used to disable the name field when creating a pipeline with the name prepopulated
+  canEditName?: boolean;
 }
 
 const defaultFormValue: Pipeline = Object.freeze({
@@ -43,6 +45,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   saveError,
   isEditing,
   onCancel,
+  canEditName,
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
@@ -129,6 +132,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
           isEditing={isEditing}
+          canEditName={canEditName}
         />
 
         {/* Form submission */}
@@ -138,7 +142,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  color="secondary"
+                  color="success"
                   iconType="check"
                   onClick={form.submit}
                   data-test-subj="submitButton"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from 'src/core/public';
+import { HttpHandler } from '@kbn/core/public';
 import {
   CategorizerStatus,
   getLatestLogEntryCategoryDatasetsStatsRequestPayloadRT,
@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
-export { LogEntryCategoriesDatasetStats };
+export type { LogEntryCategoriesDatasetStats };
 
 export const callGetLatestCategoriesDatasetsStatsAPI = async (
   {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, CoreStart, SavedObjectsClientContract } from 'kibana/server';
+import { IScopedClusterClient, CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { savedObjectClientsFactory } from '../util';
 import { syncSavedObjectsFactory } from '../sync';
-import { jobSavedObjectServiceFactory, JobObject } from '../service';
+import { mlSavedObjectServiceFactory, JobObject } from '../service';
 import { mlLog } from '../../lib/log';
-import { ML_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import { ML_JOB_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { createJobSpaceOverrides } from './space_overrides';
-import type { SecurityPluginSetup } from '../../../../security/server';
 
 /**
  * Creates initializeJobs function which is used to check whether
@@ -47,30 +47,33 @@ export function jobSavedObjectsInitializationFactory(
         return;
       }
 
-      const jobSavedObjectService = jobSavedObjectServiceFactory(
+      const mlSavedObjectService = mlSavedObjectServiceFactory(
         savedObjectsClient,
         savedObjectsClient,
         spacesEnabled,
         security?.authz,
+        client,
         () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
       );
 
-      mlLog.info('Initializing job saved objects');
+      mlLog.info('Initializing ML saved objects');
       // create space overrides for specific jobs
       const jobSpaceOverrides = await createJobSpaceOverrides(client);
       // initialize jobs
-      const { initSavedObjects } = syncSavedObjectsFactory(client, jobSavedObjectService);
-      const { jobs } = await initSavedObjects(false, jobSpaceOverrides);
-      mlLog.info(`${jobs.length} job saved objects initialized`);
+      const { initSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
+      const { jobs, trainedModels } = await initSavedObjects(false, jobSpaceOverrides);
+      mlLog.info(`${jobs.length + trainedModels.length} ML saved objects initialized`);
     } catch (error) {
-      mlLog.error(`Error Initializing jobs ${JSON.stringify(error)}`);
+      mlLog.error(`Error Initializing ML saved objects ${JSON.stringify(error)}`);
     }
   }
 
   async function _needsInitializing(savedObjectsClient: SavedObjectsClientContract) {
-    if (await _jobSavedObjectsExist(savedObjectsClient)) {
+    if (false && (await _jobSavedObjectsExist(savedObjectsClient))) {
       // at least one ml saved object exists
       // this has been initialized before
+      // this check is currently disabled to allow the initialization to run
+      // on every kibana restart
       return false;
     }
 
@@ -86,7 +89,7 @@ export function jobSavedObjectsInitializationFactory(
 
   async function _jobSavedObjectsExist(savedObjectsClient: SavedObjectsClientContract) {
     const options = {
-      type: ML_SAVED_OBJECT_TYPE,
+      type: ML_JOB_SAVED_OBJECT_TYPE,
       perPage: 0,
       namespaces: ['*'],
     };
@@ -104,10 +107,8 @@ export function jobSavedObjectsInitializationFactory(
     // });
     // return body.count > 0;
 
-    const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ count: number }>();
-    const { body: dfaJobs } = await client.asInternalUser.ml.getDataFrameAnalytics<{
-      count: number;
-    }>();
+    const adJobs = await client.asInternalUser.ml.getJobs();
+    const dfaJobs = await client.asInternalUser.ml.getDataFrameAnalytics();
     return adJobs.count > 0 || dfaJobs.count > 0;
   }
 

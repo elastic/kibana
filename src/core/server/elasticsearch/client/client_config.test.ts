@@ -15,6 +15,8 @@ const createConfig = (
 ): ElasticsearchClientConfig => {
   return {
     customHeaders: {},
+    compression: false,
+    maxSockets: Infinity,
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
@@ -32,6 +34,19 @@ describe('parseClientOptions', () => {
       expect.objectContaining({
         headers: {
           ...DEFAULT_HEADERS,
+        },
+      })
+    );
+  });
+
+  it('specifies `headers.maxSockets` Infinity and `keepAlive` true by default', () => {
+    const config = createConfig({});
+
+    expect(parseClientOptions(config, false)).toEqual(
+      expect.objectContaining({
+        agent: {
+          keepAlive: true,
+          maxSockets: Infinity,
         },
       })
     );
@@ -76,11 +91,45 @@ describe('parseClientOptions', () => {
       );
     });
 
-    it('`keepAlive` option', () => {
-      expect(parseClientOptions(createConfig({ keepAlive: true }), false)).toEqual(
-        expect.objectContaining({ agent: { keepAlive: true } })
-      );
-      expect(parseClientOptions(createConfig({ keepAlive: false }), false).agent).toBeUndefined();
+    describe('`keepAlive` option', () => {
+      it('`keepAlive` is true', () => {
+        const options = parseClientOptions(createConfig({ keepAlive: true }), false);
+        expect(options.agent).toHaveProperty('keepAlive', true);
+      });
+
+      it('`keepAlive` is false', () => {
+        const options = parseClientOptions(createConfig({ keepAlive: false }), false);
+        expect(options.agent).toHaveProperty('keepAlive', false);
+      });
+
+      it('`keepAlive` is undefined', () => {
+        const options = parseClientOptions(createConfig({}), false);
+        expect(options.agent).toHaveProperty('keepAlive', true);
+      });
+    });
+
+    describe('`maxSockets` option', () => {
+      it('uses the specified config value', () => {
+        const options = parseClientOptions(createConfig({ maxSockets: 1024 }), false);
+        expect(options.agent).toHaveProperty('maxSockets', 1024);
+      });
+
+      it('defaults to `Infinity` if not specified by the config', () => {
+        const options = parseClientOptions(createConfig({}), false);
+        expect(options.agent).toHaveProperty('maxSockets', Infinity);
+      });
+    });
+
+    describe('`compression` option', () => {
+      it('`compression` is true', () => {
+        const options = parseClientOptions(createConfig({ compression: true }), false);
+        expect(options.compression).toBe(true);
+      });
+
+      it('`compression` is false', () => {
+        const options = parseClientOptions(createConfig({ compression: false }), false);
+        expect(options.compression).toBe(false);
+      });
     });
 
     it('`sniffOnStart` options', () => {
@@ -220,9 +269,9 @@ describe('parseClientOptions', () => {
           )
         ).toEqual(
           expect.objectContaining({
-            headers: expect.objectContaining({
-              authorization: `Bearer ABC123`,
-            }),
+            auth: {
+              bearer: `ABC123`,
+            },
           })
         );
       });
@@ -305,10 +354,10 @@ describe('parseClientOptions', () => {
     });
   });
 
-  describe('ssl config', () => {
-    it('does not generate ssl option is ssl config is not set', () => {
-      expect(parseClientOptions(createConfig({}), false).ssl).toBeUndefined();
-      expect(parseClientOptions(createConfig({}), true).ssl).toBeUndefined();
+  describe('tls config', () => {
+    it('does not generate tls option is ssl config is not set', () => {
+      expect(parseClientOptions(createConfig({}), false).tls).toBeUndefined();
+      expect(parseClientOptions(createConfig({}), true).tls).toBeUndefined();
     });
 
     it('handles the `certificateAuthorities` option', () => {
@@ -318,7 +367,7 @@ describe('parseClientOptions', () => {
             ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
           false
-        ).ssl!.ca
+        ).tls!.ca
       ).toEqual(['content-of-ca-path']);
       expect(
         parseClientOptions(
@@ -326,7 +375,7 @@ describe('parseClientOptions', () => {
             ssl: { verificationMode: 'full', certificateAuthorities: ['content-of-ca-path'] },
           }),
           true
-        ).ssl!.ca
+        ).tls!.ca
       ).toEqual(['content-of-ca-path']);
     });
 
@@ -340,7 +389,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -357,7 +406,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -375,7 +424,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -393,7 +442,7 @@ describe('parseClientOptions', () => {
                 },
               }),
               false
-            ).ssl
+            ).tls
         ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: unknown"`);
       });
       it('throws for undefined values', () => {
@@ -406,7 +455,7 @@ describe('parseClientOptions', () => {
                 },
               }),
               false
-            ).ssl
+            ).tls
         ).toThrowErrorMatchingInlineSnapshot(`"Unknown ssl verificationMode: undefined"`);
       });
     });
@@ -423,7 +472,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -443,7 +492,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -464,7 +513,7 @@ describe('parseClientOptions', () => {
               },
             }),
             false
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -488,7 +537,7 @@ describe('parseClientOptions', () => {
               },
             }),
             true
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,
@@ -508,7 +557,7 @@ describe('parseClientOptions', () => {
               },
             }),
             true
-          ).ssl
+          ).tls
         ).toMatchInlineSnapshot(`
         Object {
           "ca": undefined,

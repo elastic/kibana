@@ -21,7 +21,7 @@ import {
   EuiLink,
   EuiCodeBlock,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { serializers } from '../../../../shared_imports';
 
 import { serializeLegacyTemplate, serializeTemplate } from '../../../../../common/lib';
@@ -268,7 +268,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                     />
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription>
-                    <EuiCodeBlock lang="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
+                    <EuiCodeBlock language="json">{JSON.stringify(_meta, null, 2)}</EuiCodeBlock>
                   </EuiDescriptionListDescription>
                 </>
               )}

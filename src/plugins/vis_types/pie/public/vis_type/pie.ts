@@ -8,10 +8,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
-import { AggGroupNames } from '../../../../data/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import {
+  PartitionVisParams,
+  LabelPositions,
+  ValueFormats,
+  EmptySizeRatios,
+  LegendDisplay,
+} from '@kbn/expression-partition-vis-plugin/common';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common';
-import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../types';
+import { PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
 
@@ -19,26 +26,28 @@ export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
   trackUiMetric,
-}: PieTypeProps): VisTypeDefinition<PieVisParams> => ({
+}: PieTypeProps): VisTypeDefinition<PartitionVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
   description: i18n.translate('visTypePie.pie.pieDescription', {
     defaultMessage: 'Compare data in proportion to a whole.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   visConfig: {
     defaults: {
       type: 'pie',
       addTooltip: true,
-      addLegend: !showElasticChartsOptions,
+      legendDisplay: !showElasticChartsOptions ? LegendDisplay.SHOW : LegendDisplay.HIDE,
       legendPosition: Position.Right,
       nestedLegend: false,
       truncateLegend: true,
       maxLegendLines: 1,
       distinctColors: false,
       isDonut: true,
+      emptySizeRatio: EmptySizeRatios.SMALL,
       palette: {
         type: 'palette',
         name: 'default',
@@ -55,6 +64,7 @@ export const getPieVisTypeDefinition = ({
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getPieOptions({
       showElasticChartsOptions,
       palettes,
@@ -80,7 +90,16 @@ export const getPieVisTypeDefinition = ({
         }),
         min: 0,
         max: Infinity,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -91,7 +110,16 @@ export const getPieVisTypeDefinition = ({
         mustBeFirst: true,
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
     ],
   },

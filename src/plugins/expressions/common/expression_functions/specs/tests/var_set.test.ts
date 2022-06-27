@@ -10,14 +10,14 @@ import { functionWrapper } from './utils';
 import { variableSet } from '../var_set';
 import { ExecutionContext } from '../../../execution/types';
 import { createUnitTestExecutor } from '../../../test_helpers';
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 describe('expression_functions', () => {
   describe('var_set', () => {
     const fn = functionWrapper(variableSet);
     let input: Partial<ReturnType<ExecutionContext['getSearchContext']>>;
     let context: ExecutionContext;
-    let variables: Record<string, any>;
+    let variables: Record<string, unknown>;
 
     beforeEach(() => {
       input = { timeRange: { from: '0', to: '1' } };
@@ -27,9 +27,9 @@ describe('expression_functions', () => {
         getExecutionContext: () => undefined,
         types: {},
         variables: { test: 1 },
-        abortSignal: {} as any,
-        inspectorAdapters: {} as any,
-      };
+        abortSignal: {},
+        inspectorAdapters: {},
+      } as unknown as typeof context;
 
       variables = context.variables;
     });
@@ -66,10 +66,9 @@ describe('expression_functions', () => {
 
       it('sets the variables', async () => {
         const vars = {};
-        const { result } = await executor
-          .run('var_set name=test1 name=test2 value=1', 2, { variables: vars })
-          .pipe(first())
-          .toPromise();
+        const { result } = await firstValueFrom(
+          executor.run('var_set name=test1 name=test2 value=1', 2, { variables: vars })
+        );
 
         expect(result).toEqual(2);
 

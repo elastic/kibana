@@ -10,11 +10,12 @@ import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
-import { Query } from 'src/plugins/data/public';
-import { parseTimeShift } from '../../../../../../src/plugins/data/common';
+
+import type { Query } from '@kbn/es-query';
+import { DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
 import {
   adjustTimeScaleLabelSuffix,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
 import { IndexPattern, IndexPatternLayer } from '../types';
@@ -61,6 +62,7 @@ export function setTimeShift(
 }
 
 export function TimeShift({
+  datatableUtilities,
   selectedColumn,
   columnId,
   layer,
@@ -70,7 +72,8 @@ export function TimeShift({
   activeData,
   layerId,
 }: {
-  selectedColumn: IndexPatternColumn;
+  datatableUtilities: DatatableUtilitiesService;
+  selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
   columnId: string;
   layer: IndexPatternLayer;
@@ -89,16 +92,22 @@ export function TimeShift({
     return null;
   }
 
-  const { isValueTooSmall, isValueNotMultiple, canShift } = getLayerTimeShiftChecks(
-    getDateHistogramInterval(layer, indexPattern, activeData, layerId)
+  const dateHistogramInterval = getDateHistogramInterval(
+    datatableUtilities,
+    layer,
+    indexPattern,
+    activeData,
+    layerId
   );
+  const { isValueTooSmall, isValueNotMultiple, isInvalid, canShift } =
+    getLayerTimeShiftChecks(dateHistogramInterval);
 
   if (!canShift) {
     return null;
   }
 
   const parsedLocalValue = localValue && parseTimeShift(localValue);
-  const isLocalValueInvalid = Boolean(parsedLocalValue === 'invalid');
+  const isLocalValueInvalid = Boolean(parsedLocalValue && isInvalid(parsedLocalValue));
   const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
   const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
 
@@ -127,8 +136,9 @@ export function TimeShift({
       }}
     >
       <EuiFormRow
-        display="columnCompressed"
+        display="rowCompressed"
         fullWidth
+        data-test-subj="indexPattern-dimension-time-shift-row"
         label={i18n.translate('xpack.lens.indexPattern.timeShift.label', {
           defaultMessage: 'Time shift',
         })}
@@ -145,6 +155,10 @@ export function TimeShift({
             i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
               defaultMessage:
                 'Time shift should be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
+            })) ||
+          (isLocalValueInvalid &&
+            i18n.translate('xpack.lens.indexPattern.timeShift.genericInvalidHelp', {
+              defaultMessage: 'Time shift value is not valid.',
             }))
         }
         isInvalid={Boolean(isLocalValueInvalid || localValueTooSmall || localValueNotMultiple)}
@@ -162,7 +176,10 @@ export function TimeShift({
               options={timeShiftOptions.filter(({ value }) => {
                 const parsedValue = parseTimeShift(value);
                 return (
-                  parsedValue && !isValueTooSmall(parsedValue) && !isValueNotMultiple(parsedValue)
+                  parsedValue &&
+                  !isValueTooSmall(parsedValue) &&
+                  !isValueNotMultiple(parsedValue) &&
+                  !(parsedValue === 'previous' && dateHistogramInterval.interval)
                 );
               })}
               selectedOptions={getSelectedOption()}
@@ -170,7 +187,7 @@ export function TimeShift({
               isInvalid={isLocalValueInvalid}
               onCreateOption={(val) => {
                 const parsedVal = parseTimeShift(val);
-                if (parsedVal !== 'invalid') {
+                if (!isInvalid(parsedVal)) {
                   updateLayer(setTimeShift(columnId, layer, val));
                 } else {
                   setLocalValue(val);
@@ -185,7 +202,7 @@ export function TimeShift({
 
                 const choice = choices[0].value as string;
                 const parsedVal = parseTimeShift(choice);
-                if (parsedVal !== 'invalid') {
+                if (!isInvalid(parsedVal)) {
                   updateLayer(setTimeShift(columnId, layer, choice));
                 } else {
                   setLocalValue(choice);

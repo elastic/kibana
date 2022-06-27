@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
-} from 'kibana/server';
+  CustomRequestHandlerContext,
+} from '@kbn/core/server';
 
-import { LicensingPluginSetup, LicenseType } from '../../../licensing/server';
+import { LicensingPluginSetup, LicenseType } from '@kbn/licensing-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -27,6 +28,10 @@ interface SetupSettings {
   minimumLicenseType: LicenseType;
   defaultErrorMessage: string;
 }
+
+type TransformRequestHandlerContext = CustomRequestHandlerContext<{
+  alerting?: AlertingApiRequestHandlerContext;
+}>;
 
 export class License {
   private licenseStatus: LicenseStatus = {
@@ -64,11 +69,13 @@ export class License {
     });
   }
 
-  guardApiRoute<Params, Query, Body>(handler: RequestHandler<Params, Query, Body>) {
+  guardApiRoute<Params, Query, Body>(
+    handler: RequestHandler<Params, Query, Body, TransformRequestHandlerContext>
+  ) {
     const license = this;
 
     return function licenseCheck(
-      ctx: RequestHandlerContext,
+      ctx: TransformRequestHandlerContext,
       request: KibanaRequest<Params, Query, Body>,
       response: KibanaResponseFactory
     ): IKibanaResponse<any> | Promise<IKibanaResponse<any>> {

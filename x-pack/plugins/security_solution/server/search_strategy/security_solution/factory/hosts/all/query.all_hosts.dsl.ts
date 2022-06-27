@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import {
   Direction,
   HostsRequestOptions,
   SortField,
   HostsFields,
 } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
+import { HOSTS_FIELDS } from './helpers';
+import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 
 export const buildHostsQuery = ({
   defaultIndex,
-  docValueFields,
   filterQuery,
   pagination: { querySize },
   sort,
   timerange: { from, to },
 }: HostsRequestOptions): ISearchRequestParams => {
+  const esFields = reduceFields(HOSTS_FIELDS, {
+    ...hostFieldsMap,
+  });
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -40,12 +43,11 @@ export const buildHostsQuery = ({
   const agg = { host_count: { cardinality: { field: 'host.name' } } };
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...agg,
         host_data: {
@@ -62,15 +64,21 @@ export const buildHostsQuery = ({
                     },
                   },
                 ],
-                _source: {
-                  includes: ['host.os.*'],
-                },
+                _source: false,
               },
             },
           },
         },
       },
       query: { bool: { filter } },
+      _source: false,
+      fields: [
+        ...esFields,
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

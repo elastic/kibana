@@ -11,7 +11,6 @@ import { services } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
-  disabledPlugins?: string[];
   ssl?: boolean;
 }
 
@@ -32,8 +31,8 @@ const enabledActionTypes = [
   'test.rate-limit',
 ];
 
-export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [], ssl = false } = options;
+export function createTestConfig(options: CreateTestConfigOptions, testFiles?: string[]) {
+  const { license = 'trial', ssl = false } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -48,7 +47,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles,
       servers,
       services,
       junit: {
@@ -58,10 +57,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
         ssl,
-        serverArgs: [
-          `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security')}`,
-        ],
+        serverArgs: [`xpack.license.self_generated.type=${license}`],
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
@@ -74,7 +70,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'testing_ignored.constant',
             '/testing_regex*/',
           ])}`, // See tests within the file "ignore_fields.ts" which use these values in "alertIgnoreFields"
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          '--xpack.ruleRegistry.write.enabled=true',
+          '--xpack.ruleRegistry.write.cache.enabled=false',
+          '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
+          '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'previewTelemetryUrlEnabled',
+          ])}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

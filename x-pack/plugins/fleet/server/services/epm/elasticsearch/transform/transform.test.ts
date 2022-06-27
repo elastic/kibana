@@ -18,24 +18,29 @@ jest.mock('./common', () => {
   };
 });
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import { errors } from '@elastic/elasticsearch';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 
-import { ElasticsearchAssetType } from '../../../../types';
-import type { Installation, RegistryPackage } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { savedObjectsClientMock } from '@kbn/core/server/saved_objects/service/saved_objects_client.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+
 import { getInstallation, getInstallationObject } from '../../packages';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../../../src/core/server/elasticsearch/client/mocks';
+import type { Installation, RegistryPackage } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
 import { appContextService } from '../../../app_context';
+
+import { getESAssetMetadata } from '../meta';
+
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
 import { getAsset } from './common';
 import { installTransform } from './install';
 
 describe('test transform install', () => {
-  let esClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
@@ -43,6 +48,12 @@ describe('test transform install', () => {
     (getInstallation as jest.MockedFunction<typeof getInstallation>).mockReset();
     (getInstallationObject as jest.MockedFunction<typeof getInstallationObject>).mockReset();
     savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.update.mockImplementation(async (type, id, attributes) => ({
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      id: 'endpoint',
+      attributes,
+      references: [],
+    }));
   });
 
   afterEach(() => {
@@ -101,18 +112,17 @@ describe('test transform install', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        // @ts-expect-error incomplete data
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
       {
@@ -155,7 +165,9 @@ describe('test transform install', () => {
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
       ],
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      loggerMock.create(),
+      previousInstallation.installed_es
     );
 
     expect(esClient.transform.getTransform.mock.calls).toEqual([
@@ -195,19 +207,21 @@ describe('test transform install', () => {
       ],
     ]);
 
+    const meta = getESAssetMetadata({ packageName: 'endpoint' });
+
     expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
           transform_id: 'endpoint.metadata-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
       [
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
     ]);
@@ -250,6 +264,9 @@ describe('test transform install', () => {
             },
           ],
         },
+        {
+          refresh: false,
+        },
       ],
       [
         'epm-packages',
@@ -261,14 +278,17 @@ describe('test transform install', () => {
               type: 'ingest_pipeline',
             },
             {
-              id: 'endpoint.metadata_current-default-0.16.0-dev.0',
-              type: 'transform',
-            },
-            {
               id: 'endpoint.metadata-default-0.16.0-dev.0',
               type: 'transform',
             },
+            {
+              id: 'endpoint.metadata_current-default-0.16.0-dev.0',
+              type: 'transform',
+            },
           ],
+        },
+        {
+          refresh: false,
         },
       ],
     ]);
@@ -325,15 +345,19 @@ describe('test transform install', () => {
       } as unknown as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      loggerMock.create(),
+      previousInstallation.installed_es
     );
+
+    const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
     ]);
@@ -354,6 +378,9 @@ describe('test transform install', () => {
           installed_es: [
             { id: 'endpoint.metadata_current-default-0.16.0-dev.0', type: 'transform' },
           ],
+        },
+        {
+          refresh: false,
         },
       ],
     ]);
@@ -385,18 +412,17 @@ describe('test transform install', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        // @ts-expect-error incomplete data
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
       {
@@ -435,7 +461,9 @@ describe('test transform install', () => {
       } as unknown as RegistryPackage,
       [],
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      loggerMock.create(),
+      previousInstallation.installed_es
     );
 
     expect(esClient.transform.getTransform.mock.calls).toEqual([
@@ -484,6 +512,9 @@ describe('test transform install', () => {
         {
           installed_es: [],
         },
+        {
+          refresh: false,
+        },
       ],
     ]);
   });
@@ -518,7 +549,7 @@ describe('test transform install', () => {
 
     esClient.transport.request.mockImplementationOnce(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(
-        new ResponseError(
+        new errors.ResponseError(
           elasticsearchClientMock.createApiResponse({
             statusCode: 400,
             body: { error: { type: 'resource_already_exists_exception' } },
@@ -550,15 +581,19 @@ describe('test transform install', () => {
       } as unknown as RegistryPackage,
       ['endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json'],
       esClient,
-      savedObjectsClient
+      savedObjectsClient,
+      loggerMock.create(),
+      previousInstallation.installed_es
     );
+
+    const meta = getESAssetMetadata({ packageName: 'endpoint' });
 
     expect(esClient.transform.putTransform.mock.calls).toEqual([
       [
         {
           transform_id: 'endpoint.metadata_current-default-0.16.0-dev.0',
           defer_validation: true,
-          body: '{"content": "data"}',
+          body: { content: 'data', _meta: meta },
         },
       ],
     ]);
@@ -574,6 +609,9 @@ describe('test transform install', () => {
           installed_es: [
             { id: 'endpoint.metadata_current-default-0.16.0-dev.0', type: 'transform' },
           ],
+        },
+        {
+          refresh: false,
         },
       ],
     ]);

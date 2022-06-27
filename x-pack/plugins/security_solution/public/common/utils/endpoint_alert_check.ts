@@ -6,8 +6,18 @@
  */
 
 import { find, getOr, some } from 'lodash/fp';
-import { TimelineEventsDetailsItem } from '../../../../timelines/common';
-import { Ecs } from '../../../common/ecs';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { Ecs } from '../../../common/ecs';
+
+/**
+ * Check to see if a timeline event item is an Alert (vs an event)
+ * @param timelineEventItem
+ */
+export const isTimelineEventItemAnAlert = (
+  timelineEventItem: TimelineEventsDetailsItem[]
+): boolean => {
+  return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, timelineEventItem);
+};
 
 /**
  * Checks to see if the given set of Timeline event detail items includes data that indicates its
@@ -19,9 +29,7 @@ export const isAlertFromEndpointEvent = ({
 }: {
   data: TimelineEventsDetailsItem[];
 }): boolean => {
-  const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, data);
-
-  if (!isAlert) {
+  if (!isTimelineEventItemAnAlert(data)) {
     return false;
   }
 
@@ -38,8 +46,8 @@ export const isAlertFromEndpointAlert = ({
     return false;
   }
 
-  const eventModules = getOr([], 'signal.original_event.module', ecsData);
-  const kinds = getOr([], 'signal.original_event.kind', ecsData);
+  const eventModules = getOr([], 'kibana.alert.original_event.module', ecsData);
+  const kinds = getOr([], 'kibana.alert.original_event.kind', ecsData);
 
   return eventModules.includes('endpoint') && kinds.includes('alert');
 };

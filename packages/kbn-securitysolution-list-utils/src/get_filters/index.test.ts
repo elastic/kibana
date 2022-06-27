@@ -10,319 +10,198 @@ import { getFilters } from '.';
 
 describe('getFilters', () => {
   describe('single', () => {
-    test('it properly formats when no filters passed and "showTrustedApps" is false', () => {
+    test('it properly formats when no filters and hide lists contains few list ids', () => {
       const filter = getFilters({
         filters: {},
         namespaceTypes: ['single'],
-        showTrustedApps: false,
-        showEventFilters: false,
+        hideLists: ['listId-1', 'listId-2', 'listId-3'],
       });
 
       expect(filter).toEqual(
-        '(not exception-list.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters*)'
+        '(not exception-list.attributes.list_id: listId-1*) AND (not exception-list.attributes.list_id: listId-2*) AND (not exception-list.attributes.list_id: listId-3*)'
       );
     });
-
-    test('it properly formats when no filters passed and "showTrustedApps" is true', () => {
+    test('it properly formats when no filters and hide lists contains one list id', () => {
       const filter = getFilters({
         filters: {},
         namespaceTypes: ['single'],
-        showTrustedApps: true,
-        showEventFilters: false,
+        hideLists: ['listId-1'],
       });
 
-      expect(filter).toEqual(
-        '(exception-list.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters*)'
-      );
+      expect(filter).toEqual('(not exception-list.attributes.list_id: listId-1*)');
     });
-
-    test('it properly formats when filters passed and "showTrustedApps" is false', () => {
-      const filter = getFilters({
-        filters: { created_by: 'moi', name: 'Sample' },
-        namespaceTypes: ['single'],
-        showTrustedApps: false,
-        showEventFilters: false,
-      });
-
-      expect(filter).toEqual(
-        '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters*)'
-      );
-    });
-
-    test('it if filters passed and "showTrustedApps" is true', () => {
-      const filter = getFilters({
-        filters: { created_by: 'moi', name: 'Sample' },
-        namespaceTypes: ['single'],
-        showTrustedApps: true,
-        showEventFilters: false,
-      });
-
-      expect(filter).toEqual(
-        '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample) AND (exception-list.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters*)'
-      );
-    });
-
-    test('it properly formats when no filters passed and "showEventFilters" is false', () => {
+    test('it properly formats when no filters and no hide lists', () => {
       const filter = getFilters({
         filters: {},
         namespaceTypes: ['single'],
-        showTrustedApps: false,
-        showEventFilters: false,
+        hideLists: [],
       });
 
-      expect(filter).toEqual(
-        '(not exception-list.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters*)'
-      );
+      expect(filter).toEqual('');
     });
-
-    test('it properly formats when no filters passed and "showEventFilters" is true', () => {
-      const filter = getFilters({
-        filters: {},
-        namespaceTypes: ['single'],
-        showTrustedApps: false,
-        showEventFilters: true,
-      });
-
-      expect(filter).toEqual(
-        '(not exception-list.attributes.list_id: endpoint_trusted_apps*) AND (exception-list.attributes.list_id: endpoint_event_filters*)'
-      );
-    });
-
-    test('it properly formats when filters passed and "showEventFilters" is false', () => {
+    test('it properly formats when filters passed and hide lists contains few list ids', () => {
       const filter = getFilters({
         filters: { created_by: 'moi', name: 'Sample' },
         namespaceTypes: ['single'],
-        showTrustedApps: false,
-        showEventFilters: false,
+        hideLists: ['listId-1', 'listId-2', 'listId-3'],
       });
 
       expect(filter).toEqual(
-        '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters*)'
+        '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: listId-1*) AND (not exception-list.attributes.list_id: listId-2*) AND (not exception-list.attributes.list_id: listId-3*)'
       );
     });
-
-    test('it if filters passed and "showEventFilters" is true', () => {
+    test('it properly formats when filters passed and hide lists contains one list id', () => {
       const filter = getFilters({
         filters: { created_by: 'moi', name: 'Sample' },
         namespaceTypes: ['single'],
-        showTrustedApps: false,
-        showEventFilters: true,
+        hideLists: ['listId-1'],
       });
 
       expect(filter).toEqual(
-        '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps*) AND (exception-list.attributes.list_id: endpoint_event_filters*)'
+        '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: listId-1*)'
+      );
+    });
+    test('it properly formats when filters passed and no hide lists', () => {
+      const filter = getFilters({
+        filters: { created_by: 'moi', name: 'Sample' },
+        namespaceTypes: ['single'],
+        hideLists: [],
+      });
+
+      expect(filter).toEqual(
+        '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample)'
       );
     });
   });
 
   describe('agnostic', () => {
-    test('it properly formats when no filters passed and "showTrustedApps" is false', () => {
+    test('it properly formats when no filters and hide lists contains few list ids', () => {
       const filter = getFilters({
         filters: {},
         namespaceTypes: ['agnostic'],
-        showTrustedApps: false,
-        showEventFilters: false,
+        hideLists: ['listId-1', 'listId-2', 'listId-3'],
       });
 
       expect(filter).toEqual(
-        '(not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
+        '(not exception-list-agnostic.attributes.list_id: listId-1*) AND (not exception-list-agnostic.attributes.list_id: listId-2*) AND (not exception-list-agnostic.attributes.list_id: listId-3*)'
       );
     });
-
-    test('it properly formats when no filters passed and "showTrustedApps" is true', () => {
+    test('it properly formats when no filters and hide lists contains one list id', () => {
       const filter = getFilters({
         filters: {},
         namespaceTypes: ['agnostic'],
-        showTrustedApps: true,
-        showEventFilters: false,
+        hideLists: ['listId-1'],
       });
 
-      expect(filter).toEqual(
-        '(exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
-      );
+      expect(filter).toEqual('(not exception-list-agnostic.attributes.list_id: listId-1*)');
     });
-
-    test('it properly formats when filters passed and "showTrustedApps" is false', () => {
-      const filter = getFilters({
-        filters: { created_by: 'moi', name: 'Sample' },
-        namespaceTypes: ['agnostic'],
-        showTrustedApps: false,
-        showEventFilters: false,
-      });
-
-      expect(filter).toEqual(
-        '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
-      );
-    });
-
-    test('it if filters passed and "showTrustedApps" is true', () => {
-      const filter = getFilters({
-        filters: { created_by: 'moi', name: 'Sample' },
-        namespaceTypes: ['agnostic'],
-        showTrustedApps: true,
-        showEventFilters: false,
-      });
-
-      expect(filter).toEqual(
-        '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name.text:Sample) AND (exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
-      );
-    });
-
-    test('it properly formats when no filters passed and "showEventFilters" is false', () => {
+    test('it properly formats when no filters and no hide lists', () => {
       const filter = getFilters({
         filters: {},
         namespaceTypes: ['agnostic'],
-        showTrustedApps: false,
-        showEventFilters: false,
+        hideLists: [],
       });
 
-      expect(filter).toEqual(
-        '(not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
-      );
+      expect(filter).toEqual('');
     });
-
-    test('it properly formats when no filters passed and "showEventFilters" is true', () => {
-      const filter = getFilters({
-        filters: {},
-        namespaceTypes: ['agnostic'],
-        showTrustedApps: false,
-        showEventFilters: true,
-      });
-
-      expect(filter).toEqual(
-        '(not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
-      );
-    });
-
-    test('it properly formats when filters passed and "showEventFilters" is false', () => {
+    test('it properly formats when filters passed and hide lists contains few list ids', () => {
       const filter = getFilters({
         filters: { created_by: 'moi', name: 'Sample' },
         namespaceTypes: ['agnostic'],
-        showTrustedApps: false,
-        showEventFilters: false,
+        hideLists: ['listId-1', 'listId-2', 'listId-3'],
       });
 
       expect(filter).toEqual(
-        '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
+        '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list-agnostic.attributes.list_id: listId-1*) AND (not exception-list-agnostic.attributes.list_id: listId-2*) AND (not exception-list-agnostic.attributes.list_id: listId-3*)'
       );
     });
-
-    test('it if filters passed and "showEventFilters" is true', () => {
+    test('it properly formats when filters passed and hide lists contains one list id', () => {
       const filter = getFilters({
         filters: { created_by: 'moi', name: 'Sample' },
         namespaceTypes: ['agnostic'],
-        showTrustedApps: false,
-        showEventFilters: true,
+        hideLists: ['listId-1'],
       });
 
       expect(filter).toEqual(
-        '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
+        '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list-agnostic.attributes.list_id: listId-1*)'
+      );
+    });
+    test('it properly formats when filters passed and no hide lists', () => {
+      const filter = getFilters({
+        filters: { created_by: 'moi', name: 'Sample' },
+        namespaceTypes: ['agnostic'],
+        hideLists: [],
+      });
+
+      expect(filter).toEqual(
+        '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name.text:Sample)'
       );
     });
   });
 
   describe('single, agnostic', () => {
-    test('it properly formats when no filters passed and "showTrustedApps" is false', () => {
+    test('it properly formats when no filters and hide lists contains few list ids', () => {
       const filter = getFilters({
         filters: {},
         namespaceTypes: ['single', 'agnostic'],
-        showTrustedApps: false,
-        showEventFilters: false,
+        hideLists: ['listId-1', 'listId-2', 'listId-3'],
       });
 
       expect(filter).toEqual(
-        '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
+        '(not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*) AND (not exception-list.attributes.list_id: listId-2* AND not exception-list-agnostic.attributes.list_id: listId-2*) AND (not exception-list.attributes.list_id: listId-3* AND not exception-list-agnostic.attributes.list_id: listId-3*)'
       );
     });
-
-    test('it properly formats when no filters passed and "showTrustedApps" is true', () => {
+    test('it properly formats when no filters and hide lists contains one list id', () => {
       const filter = getFilters({
         filters: {},
         namespaceTypes: ['single', 'agnostic'],
-        showTrustedApps: true,
-        showEventFilters: false,
+        hideLists: ['listId-1'],
       });
 
       expect(filter).toEqual(
-        '(exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
+        '(not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)'
       );
     });
-
-    test('it properly formats when filters passed and "showTrustedApps" is false', () => {
-      const filter = getFilters({
-        filters: { created_by: 'moi', name: 'Sample' },
-        namespaceTypes: ['single', 'agnostic'],
-        showTrustedApps: false,
-        showEventFilters: false,
-      });
-
-      expect(filter).toEqual(
-        '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample OR exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
-      );
-    });
-
-    test('it properly formats when filters passed and "showTrustedApps" is true', () => {
-      const filter = getFilters({
-        filters: { created_by: 'moi', name: 'Sample' },
-        namespaceTypes: ['single', 'agnostic'],
-        showTrustedApps: true,
-        showEventFilters: false,
-      });
-
-      expect(filter).toEqual(
-        '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample OR exception-list-agnostic.attributes.name.text:Sample) AND (exception-list.attributes.list_id: endpoint_trusted_apps* OR exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
-      );
-    });
-
-    test('it properly formats when no filters passed and "showEventFilters" is false', () => {
+    test('it properly formats when no filters and no hide lists', () => {
       const filter = getFilters({
         filters: {},
         namespaceTypes: ['single', 'agnostic'],
-        showTrustedApps: false,
-        showEventFilters: false,
+        hideLists: [],
       });
 
-      expect(filter).toEqual(
-        '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
-      );
+      expect(filter).toEqual('');
     });
-
-    test('it properly formats when no filters passed and "showEventFilters" is true', () => {
-      const filter = getFilters({
-        filters: {},
-        namespaceTypes: ['single', 'agnostic'],
-        showTrustedApps: false,
-        showEventFilters: true,
-      });
-
-      expect(filter).toEqual(
-        '(not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (exception-list.attributes.list_id: endpoint_event_filters* OR exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
-      );
-    });
-
-    test('it properly formats when filters passed and "showEventFilters" is false', () => {
+    test('it properly formats when filters passed and hide lists contains few list ids', () => {
       const filter = getFilters({
         filters: { created_by: 'moi', name: 'Sample' },
         namespaceTypes: ['single', 'agnostic'],
-        showTrustedApps: false,
-        showEventFilters: false,
+        hideLists: ['listId-1', 'listId-2', 'listId-3'],
       });
 
       expect(filter).toEqual(
-        '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample OR exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (not exception-list.attributes.list_id: endpoint_event_filters* AND not exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
+        '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample OR exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*) AND (not exception-list.attributes.list_id: listId-2* AND not exception-list-agnostic.attributes.list_id: listId-2*) AND (not exception-list.attributes.list_id: listId-3* AND not exception-list-agnostic.attributes.list_id: listId-3*)'
       );
     });
-
-    test('it properly formats when filters passed and "showEventFilters" is true', () => {
+    test('it properly formats when filters passed and hide lists contains one list id', () => {
       const filter = getFilters({
         filters: { created_by: 'moi', name: 'Sample' },
         namespaceTypes: ['single', 'agnostic'],
-        showTrustedApps: false,
-        showEventFilters: true,
+        hideLists: ['listId-1'],
       });
 
       expect(filter).toEqual(
-        '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample OR exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps* AND not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*) AND (exception-list.attributes.list_id: endpoint_event_filters* OR exception-list-agnostic.attributes.list_id: endpoint_event_filters*)'
+        '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample OR exception-list-agnostic.attributes.name.text:Sample) AND (not exception-list.attributes.list_id: listId-1* AND not exception-list-agnostic.attributes.list_id: listId-1*)'
+      );
+    });
+    test('it properly formats when filters passed and no hide lists', () => {
+      const filter = getFilters({
+        filters: { created_by: 'moi', name: 'Sample' },
+        namespaceTypes: ['single', 'agnostic'],
+        hideLists: [],
+      });
+
+      expect(filter).toEqual(
+        '(exception-list.attributes.created_by:moi OR exception-list-agnostic.attributes.created_by:moi) AND (exception-list.attributes.name.text:Sample OR exception-list-agnostic.attributes.name.text:Sample)'
       );
     });
   });

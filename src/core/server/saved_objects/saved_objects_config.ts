@@ -6,44 +6,37 @@
  * Side Public License, v 1.
  */
 
+import { valid } from 'semver';
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { ServiceConfigDescriptor } from '../internal_types';
-import type { ConfigDeprecationProvider } from '../config';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const migrationSchema = schema.object({
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
+  discardUnknownObjects: schema.maybe(
+    schema.string({
+      validate: (value: string) =>
+        valid(value) ? undefined : 'The value is not a valid semantic version',
+    })
+  ),
+  discardCorruptObjects: schema.maybe(
+    schema.string({
+      validate: (value: string) =>
+        valid(value) ? undefined : 'The value is not a valid semantic version',
+    })
+  ),
   scrollDuration: schema.string({ defaultValue: '15m' }),
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
-  enableV2: schema.boolean({ defaultValue: true }),
   retryAttempts: schema.number({ defaultValue: 15 }),
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
 
-const migrationDeprecations: ConfigDeprecationProvider = () => [
-  (settings, fromPath, addDeprecation) => {
-    const migrationsConfig = settings[fromPath];
-    if (migrationsConfig?.enableV2 !== undefined) {
-      addDeprecation({
-        message:
-          '"migrations.enableV2" is deprecated and will be removed in an upcoming release without any further notice.',
-        documentationUrl: 'https://ela.st/kbn-so-migration-v2',
-        correctiveActions: {
-          manualSteps: [`Remove "migrations.enableV2" from your kibana configs.`],
-        },
-      });
-    }
-    return settings;
-  },
-];
-
 export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> =
   {
     path: 'migrations',
     schema: migrationSchema,
-    deprecations: migrationDeprecations,
   };
 
 const soSchema = schema.object({

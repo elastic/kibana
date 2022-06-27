@@ -7,7 +7,8 @@
 
 import { JsonObject } from '@kbn/utility-types';
 
-import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Ecs } from '../../../../ecs';
 import type { CursorType, Inspect, Maybe, PaginationInputPaginated } from '../../../common';
 import type { TimelineRequestOptionsPaginated } from '../..';
@@ -38,9 +39,10 @@ export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
 }
 
 export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsPaginated {
-  fields: string[] | Array<{ field: string; include_unmapped: boolean }>;
-  fieldRequested: string[];
-  language: 'eql' | 'kuery' | 'lucene';
-  excludeEcsData?: boolean;
   authFilter?: JsonObject;
+  excludeEcsData?: boolean;
+  fieldRequested: string[];
+  fields: string[] | Array<{ field: string; include_unmapped: boolean }>;
+  language: 'eql' | 'kuery' | 'lucene';
+  runtimeMappings: MappingRuntimeFields;
 }

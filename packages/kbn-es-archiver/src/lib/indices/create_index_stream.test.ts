@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { mockDeleteKibanaIndices } from './create_index_stream.test.mock';
+
 import sinon from 'sinon';
 import Chance from 'chance';
 import { createPromiseFromStreams, createConcatStream, createListStream } from '@kbn/utils';
@@ -15,6 +17,7 @@ import { createCreateIndexStream } from './create_index_stream';
 import {
   createStubStats,
   createStubIndexRecord,
+  createStubDataStreamRecord,
   createStubDocRecord,
   createStubClient,
   createStubLogger,
@@ -23,6 +26,10 @@ import {
 const chance = new Chance();
 
 const log = createStubLogger();
+
+beforeEach(() => {
+  mockDeleteKibanaIndices.mockClear();
+});
 
 describe('esArchiver: createCreateIndexStream()', () => {
   describe('defaults', () => {
@@ -71,6 +78,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
               "ignore": Array [
                 404,
               ],
+              "meta": true,
             },
           ],
         ]
@@ -163,6 +171,86 @@ describe('esArchiver: createCreateIndexStream()', () => {
       ]);
 
       expect(output).toEqual(nonRecordValues);
+    });
+
+    it('creates data streams', async () => {
+      const client = createStubClient();
+      const stats = createStubStats();
+
+      await createPromiseFromStreams([
+        createListStream([createStubDataStreamRecord('foo-datastream', 'foo-template')]),
+        createCreateIndexStream({ client, stats, log }),
+      ]);
+
+      sinon.assert.calledOnce(client.indices.putIndexTemplate as sinon.SinonSpy);
+      sinon.assert.calledOnce(client.indices.createDataStream as sinon.SinonSpy);
+    });
+  });
+
+  describe('deleteKibanaIndices', () => {
+    function doTest(...indices: string[]) {
+      return createPromiseFromStreams([
+        createListStream(indices.map((index) => createStubIndexRecord(index))),
+        createCreateIndexStream({ client: createStubClient(), stats: createStubStats(), log }),
+        createConcatStream([]),
+      ]);
+    }
+
+    it('does not delete Kibana indices for indexes that do not start with .kibana', async () => {
+      await doTest('.foo');
+
+      expect(mockDeleteKibanaIndices).not.toHaveBeenCalled();
+    });
+
+    it('deletes Kibana indices at most once for indices that start with .kibana', async () => {
+      // If we are loading the main Kibana index, we should delete all Kibana indices for backwards compatibility reasons.
+      await doTest('.kibana_7.16.0_001', '.kibana_task_manager_7.16.0_001');
+
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(1);
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledWith(
+        expect.not.objectContaining({ onlyTaskManager: true })
+      );
+    });
+
+    it('deletes Kibana task manager index at most once, using onlyTaskManager: true', async () => {
+      // If we are loading the Kibana task manager index, we should only delete that index, not any other Kibana indices.
+      await doTest('.kibana_task_manager_7.16.0_001', '.kibana_task_manager_7.16.0_002');
+
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(1);
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledWith(
+        expect.objectContaining({ onlyTaskManager: true })
+      );
+    });
+
+    it('deletes Kibana task manager index AND deletes all Kibana indices', async () => {
+      // Because we are reading from a stream, we can't look ahead to see if we'll eventually wind up deleting all Kibana indices.
+      // So, we first delete only the Kibana task manager indices, then we wind up deleting all Kibana indices.
+      await doTest('.kibana_task_manager_7.16.0_001', '.kibana_7.16.0_001');
+
+      expect(mockDeleteKibanaIndices).toHaveBeenCalledTimes(2);
+      expect(mockDeleteKibanaIndices).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ onlyTaskManager: true })
+      );
+      expect(mockDeleteKibanaIndices).toHaveBeenNthCalledWith(
+        2,
+        expect.not.objectContaining({ onlyTaskManager: true })
+      );
+    });
+  });
+
+  describe('docsOnly = true', () => {
+    it('passes through "hit" records without attempting to create indices', async () => {
+      const client = createStubClient();
+      const stats = createStubStats();
+      const output = await createPromiseFromStreams([
+        createListStream([createStubIndexRecord('index'), createStubDocRecord('index', 1)]),
+        createCreateIndexStream({ client, stats, log, docsOnly: true }),
+        createConcatStream([]),
+      ]);
+
+      sinon.assert.notCalled(client.indices.create as sinon.SinonSpy);
+      expect(output).toEqual([createStubDocRecord('index', 1)]);
     });
   });
 

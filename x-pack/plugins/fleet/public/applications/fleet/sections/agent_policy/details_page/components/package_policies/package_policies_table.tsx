@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiInMemoryTable,
@@ -24,11 +24,16 @@ import {
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
 import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
-import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
 import {
-  useCapabilities,
+  EuiButtonWithTooltip,
+  PackageIcon,
+  PackagePolicyActionsMenu,
+} from '../../../../../components';
+import {
+  useAuthz,
   useLink,
   usePackageInstallations,
+  usePermissionCheck,
   useStartServices,
 } from '../../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
@@ -55,9 +60,14 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { application } = useStartServices();
-  const hasWriteCapabilities = useCapabilities().write;
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const { updatableIntegrations } = usePackageInstallations();
   const { getHref } = useLink();
+
+  const permissionCheck = usePermissionCheck();
+  const missingSecurityConfiguration =
+    !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
 
   // With the package policies provided on input, generate the list of package policies
   // used in the InMemoryTable (flattens some values for search) as well as
@@ -109,7 +119,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
           <EuiLink
             title={value}
-            {...(hasWriteCapabilities
+            {...(canReadIntegrationPolicies
               ? {
                   href: getHref('edit_integration', {
                     policyId: agentPolicy.id,
@@ -144,7 +154,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         render(packageTitle: string, packagePolicy: InMemoryPackagePolicy) {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem data-test-subj="PackagePoliciesTableLink" grow={false}>
                 <EuiLink
                   href={
                     packagePolicy.package &&
@@ -193,8 +203,10 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="PackagePoliciesTableUpgradeButton"
                       size="s"
                       minWidth="0"
+                      isDisabled={!canWriteIntegrationPolicies}
                       href={`${getHref('upgrade_package_policy', {
                         policyId: agentPolicy.id,
                         packagePolicyId: packagePolicy.id,
@@ -231,7 +243,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         actions: [
           {
             render: (packagePolicy: InMemoryPackagePolicy) => {
-              return (
+              return canWriteIntegrationPolicies ? (
                 <PackagePolicyActionsMenu
                   agentPolicy={agentPolicy}
                   packagePolicy={packagePolicy}
@@ -240,13 +252,15 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     packagePolicyId: packagePolicy.id,
                   })}?from=fleet-policy-list`}
                 />
+              ) : (
+                <></>
               );
             },
           },
         ],
       },
     ],
-    [agentPolicy, getHref, hasWriteCapabilities]
+    [agentPolicy, getHref, canWriteIntegrationPolicies, canReadIntegrationPolicies]
   );
 
   return (
@@ -265,10 +279,10 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         toolsRight: agentPolicy.is_managed
           ? []
           : [
-              <EuiButton
+              <EuiButtonWithTooltip
                 key="addPackagePolicyButton"
                 fill
-                isDisabled={!hasWriteCapabilities}
+                isDisabled={!canWriteIntegrationPolicies}
                 iconType="plusInCircle"
                 onClick={() => {
                   application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
@@ -276,12 +290,30 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     state: { forAgentPolicyId: agentPolicy.id },
                   });
                 }}
+                data-test-subj="addPackagePolicyButton"
+                tooltip={
+                  !canWriteIntegrationPolicies
+                    ? {
+                        content: missingSecurityConfiguration ? (
+                          <FormattedMessage
+                            id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
+                            defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the All privilege for Fleet. Contact your administrator."
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
+                            defaultMessage="Elastic Agent Integrations require the All privilege for Fleet and All privilege for Integrations. Contact your administrator."
+                          />
+                        ),
+                      }
+                    : undefined
+                }
               >
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.addPackagePolicyButtonText"
                   defaultMessage="Add integration"
                 />
-              </EuiButton>,
+              </EuiButtonWithTooltip>,
             ],
         box: {
           incremental: true,

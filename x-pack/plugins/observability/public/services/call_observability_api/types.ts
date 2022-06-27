@@ -6,7 +6,7 @@
  */
 
 import type { RouteRepositoryClient } from '@kbn/server-route-repository';
-import { HttpFetchOptions } from 'kibana/public';
+import { HttpFetchOptions } from '@kbn/core/public';
 import type {
   AbstractObservabilityServerRouteRepository,
   ObservabilityServerRouteRepository,
@@ -31,4 +31,4 @@ export type ObservabilityClient = RouteRepositoryClient<
   ObservabilityClientOptions
 >;
 
-export { ObservabilityAPIReturnType };
+export type { ObservabilityAPIReturnType };

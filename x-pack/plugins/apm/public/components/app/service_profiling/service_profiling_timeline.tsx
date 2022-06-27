@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useChartTheme } from '../../../../../observability/public';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 import {
   getValueTypeConfig,
   ProfilingValueType,
@@ -98,6 +98,7 @@ export function ServiceProfilingTimeline({
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
+              yAccessors={['y']}
               stackAccessors={['x']}
             />
           ))}

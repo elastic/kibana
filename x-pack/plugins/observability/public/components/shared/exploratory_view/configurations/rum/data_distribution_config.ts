@@ -6,7 +6,13 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
+import {
+  FieldLabels,
+  REPORT_METRIC_FIELD,
+  RECORDS_PERCENTAGE_FIELD,
+  ReportTypes,
+  LABEL_FIELDS_FILTER,
+} from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -39,9 +45,9 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getRumDistributionConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'data-distribution',
+    reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: 'line',
     seriesTypes: [],
     xAxisColumn: {
@@ -66,11 +72,23 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
         field: USER_AGENT_NAME,
         nested: USER_AGENT_VERSION,
       },
+      LABEL_FIELDS_FILTER,
     ],
-    breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    breakdownFields: [
+      USER_AGENT_NAME,
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
+      SERVICE_NAME,
+    ],
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
     metricOptions: [
-      { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
+      {
+        label: PAGE_LOAD_TIME_LABEL,
+        id: TRANSACTION_DURATION,
+        field: TRANSACTION_DURATION,
+        showPercentileAnnotations: true,
+      },
       {
         label: BACKEND_TIME_LABEL,
         id: TRANSACTION_TIME_TO_FIRST_BYTE,
@@ -83,8 +101,8 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
       { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
     ],
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: {
       ...FieldLabels,

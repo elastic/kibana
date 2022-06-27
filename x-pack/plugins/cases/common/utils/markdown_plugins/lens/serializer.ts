@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { TimeRange } from 'src/plugins/data/common';
+import { Plugin } from 'unified';
+import type { TimeRange } from '@kbn/es-query';
 import { LENS_ID } from './constants';
 
 export interface LensSerializerProps {
@@ -13,8 +14,13 @@ export interface LensSerializerProps {
   timeRange: TimeRange;
 }
 
-export const LensSerializer = ({ timeRange, attributes }: LensSerializerProps) =>
+const serializeLens = ({ timeRange, attributes }: LensSerializerProps) =>
   `!{${LENS_ID}${JSON.stringify({
     timeRange,
     attributes,
   })}}`;
+
+export const LensSerializer: Plugin = function () {
+  const Compiler = this.Compiler;
+  Compiler.prototype.visitors.lens = serializeLens;
+};

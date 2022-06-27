@@ -7,7 +7,7 @@
 
 import React, { useMemo, useEffect, useState, FC } from 'react';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   EuiCallOut,
@@ -24,13 +24,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorMessage } from '../../../../common';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
-import { stringHash } from '../../../../common/util/string_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
 import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
-import { getCombinedRuntimeMappings } from '../../components/data_grid';
+import { getCombinedRuntimeMappings } from '../data_grid';
 
 import { useMlApiContext } from '../../contexts/kibana';
 
@@ -89,7 +89,7 @@ export interface ScatterplotMatrixProps {
   legendType?: LegendType;
   searchQuery?: ResultsSearchQuery;
   runtimeMappings?: RuntimeMappings;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
 }
 
 export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({

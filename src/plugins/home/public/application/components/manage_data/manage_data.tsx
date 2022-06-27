@@ -15,15 +15,15 @@ import {
   EuiTitle,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { FeatureCatalogueEntry } from '../../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 // @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
-import { RedirectAppLinks } from '../../../../../kibana_react/public';
 
 interface Props {
   addBasePath: (path: string) => string;
@@ -61,7 +61,8 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
             {isDevToolsEnabled || isManagementEnabled ? (
               <EuiFlexItem className="homDataManage__actions" grow={false}>
                 <EuiFlexGroup alignItems="center" responsive={false} wrap>
-                  {isDevToolsEnabled ? (
+                  {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
+                  {isDevToolsEnabled && consoleHref !== undefined ? (
                     <EuiFlexItem grow={false}>
                       <RedirectAppLinks application={application}>
                         <EuiButtonEmpty

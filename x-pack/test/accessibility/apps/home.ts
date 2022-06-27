@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
-  describe('Kibana Home', () => {
+  describe('Kibana Home Accessibility', () => {
     before(async () => {
       await common.navigateToApp('home');
     });
@@ -61,33 +61,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Security overview page meets a11y requirements ', async () => {
       await home.clickGoHome();
       await testSubjects.click('homSolutionPanel homSolutionPanel_securitySolution');
-      await a11y.testAppSnapshot();
-    });
-
-    it('Add data page meets a11y requirements ', async () => {
-      await home.clickGoHome();
-      await testSubjects.click('homeAddData');
-      await a11y.testAppSnapshot();
-    });
-
-    it('Sample data page meets a11y requirements ', async () => {
-      await testSubjects.click('homeTab-sampleData');
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on Add logs panel to open all log examples page meets a11y requirements ', async () => {
-      await testSubjects.click('sampleDataSetCardlogs');
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on ActiveMQ logs panel to open tutorial meets a11y requirements', async () => {
-      await testSubjects.click('homeTab-all');
-      await testSubjects.click('homeSynopsisLinkactivemqlogs');
-      await a11y.testAppSnapshot();
-    });
-
-    it('click on cloud tutorial meets a11y requirements', async () => {
-      await testSubjects.click('onCloudTutorial');
       await a11y.testAppSnapshot();
     });
 

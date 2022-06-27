@@ -12,7 +12,7 @@ import {
   LogLevel,
   parseLogLevel,
   ParsedLogLevel,
-} from '@kbn/dev-utils/tooling_log';
+} from '@kbn/tooling-log';
 
 class Log extends ToolingLog {
   private logLevel!: ParsedLogLevel;
@@ -38,4 +38,5 @@ class Log extends ToolingLog {
 }
 
 export const log = new Log();
-export { LogLevel, Log };
+export type { LogLevel };
+export { Log };

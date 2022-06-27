@@ -9,12 +9,11 @@ import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import * as i18n from './translations';
 
 interface BulkActionsProps {
-  timelineId: string;
   totalItems: number;
   selectedCount: number;
   showClearSelection: boolean;
@@ -61,6 +60,12 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
     setIsActionsPopoverOpen(false);
   }, [setIsActionsPopoverOpen]);
 
+  const closeIfPopoverIsOpen = useCallback(() => {
+    if (isActionsPopoverOpen) {
+      setIsActionsPopoverOpen(false);
+    }
+  }, [isActionsPopoverOpen]);
+
   const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
       onSelectAll();
@@ -92,7 +97,10 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   );
 
   return (
-    <BulkActionsContainer data-test-subj="bulk-actions-button-container">
+    <BulkActionsContainer
+      onClick={closeIfPopoverIsOpen}
+      data-test-subj="bulk-actions-button-container"
+    >
       <EuiPopover
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"

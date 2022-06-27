@@ -5,47 +5,43 @@
  * 2.0.
  */
 
-import { Store } from 'redux';
+import { Store, Unsubscribe } from 'redux';
+import { throttle } from 'lodash';
 
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import type {
-  CoreSetup,
-  Plugin,
-  PluginInitializerContext,
-  CoreStart,
-} from '../../../../src/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 import type { LastUpdatedAtProps, LoadingPanelProps, FieldBrowserProps } from './components';
 import {
   getLastUpdatedLazy,
   getLoadingPanelLazy,
   getTGridLazy,
-  getFieldsBrowserLazy,
-  getAddToCaseLazy,
-  getAddToExistingCaseButtonLazy,
-  getAddToNewCaseButtonLazy,
-  getAddToCasePopoverLazy,
+  getFieldBrowserLazy,
 } from './methods';
 import type { TimelinesUIStart, TGridProps, TimelinesStartPlugins } from './types';
 import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
-import { getHoverActions } from './components/hover_actions';
+import { getHoverActions, HoverActionsConfig } from './components/hover_actions';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
   private _store: Store | undefined;
   private _storage = new Storage(localStorage);
+  private _storeUnsubscribe: Unsubscribe | undefined;
+
+  private _hoverActions: HoverActionsConfig | undefined;
 
   public setup(core: CoreSetup) {}
 
   public start(core: CoreStart, { data }: TimelinesStartPlugins): TimelinesUIStart {
-    const config = this.initializerContext.config.get<{ enabled: boolean }>();
-    if (!config.enabled) {
-      return {} as TimelinesUIStart;
-    }
     return {
+      /** `getHoverActions` returns a new reference to `getAddToTimelineButton` each time it is called, but that value is used in dependency arrays and so it should be as stable as possible. Therefore we lazily store the reference to it. Note: this reference is deleted when the store is changed. */
       getHoverActions: () => {
-        return getHoverActions(this._store!);
+        if (this._hoverActions) {
+          return this._hoverActions;
+        } else {
+          this._hoverActions = getHoverActions(this._store);
+          return this._hoverActions;
+        }
       },
       getTGrid: (props: TGridProps) => {
         if (props.type === 'standalone' && this._store) {
@@ -53,6 +49,13 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
           const state = getState();
           if (state && state.app) {
             this._store = undefined;
+          } else {
+            if (props.onStateChange) {
+              this._storeUnsubscribe = this._store.subscribe(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                throttle(() => props.onStateChange!(getState()), 500)
+              );
+            }
           }
         }
         return getTGridLazy(props, {
@@ -72,9 +75,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
         return getLastUpdatedLazy(props);
       },
       getFieldBrowser: (props: FieldBrowserProps) => {
-        return getFieldsBrowserLazy(props, {
-          store: this._store!,
-        });
+        return getFieldBrowserLazy(props);
       },
       getUseAddToTimeline: () => {
         return useAddToTimeline;
@@ -88,40 +89,18 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       setTGridEmbeddedStore: (store: Store) => {
         this.setStore(store);
       },
-      getAddToCaseAction: (props) => {
-        return getAddToCaseLazy(props, {
-          store: this._store!,
-          storage: this._storage,
-          setStore: this.setStore.bind(this),
-        });
-      },
-      getAddToCasePopover: (props) => {
-        return getAddToCasePopoverLazy(props, {
-          store: this._store!,
-          storage: this._storage,
-          setStore: this.setStore.bind(this),
-        });
-      },
-      getAddToExistingCaseButton: (props) => {
-        return getAddToExistingCaseButtonLazy(props, {
-          store: this._store!,
-          storage: this._storage,
-          setStore: this.setStore.bind(this),
-        });
-      },
-      getAddToNewCaseButton: (props) => {
-        return getAddToNewCaseButtonLazy(props, {
-          store: this._store!,
-          storage: this._storage,
-          setStore: this.setStore.bind(this),
-        });
-      },
     };
   }
 
   private setStore(store: Store) {
     this._store = store;
+    // this is lazily calculated and that is dependent on the store
+    delete this._hoverActions;
   }
 
-  public stop() {}
+  public stop() {
+    if (this._storeUnsubscribe) {
+      this._storeUnsubscribe();
+    }
+  }
 }

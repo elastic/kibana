@@ -7,8 +7,8 @@
 
 import { useEffect, useMemo } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityApp } from '../../typings/common';
 
 /**
@@ -32,12 +32,13 @@ interface ServiceDeps {
 
 export type TrackMetricOptions = TrackOptions & { metric: string };
 export type UiTracker = ReturnType<typeof useUiTracker>;
+export type TrackEvent = (options: TrackMetricOptions) => void;
 
 export { METRIC_TYPE };
 
 export function useUiTracker<Services extends ServiceDeps>({
   app: defaultApp,
-}: { app?: ObservabilityApp } = {}) {
+}: { app?: ObservabilityApp } = {}): TrackEvent {
   const reportUiCounter = useKibana<Services>().services?.usageCollection?.reportUiCounter;
   const trackEvent = useMemo(() => {
     return ({ app = defaultApp, metric, metricType = METRIC_TYPE.COUNT }: TrackMetricOptions) => {

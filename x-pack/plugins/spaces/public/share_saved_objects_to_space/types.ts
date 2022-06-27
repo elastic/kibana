@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsImportResponse, SavedObjectsImportRetry } from 'src/core/public';
+import type { SavedObjectsImportResponse, SavedObjectsImportRetry } from '@kbn/core/public';
 
 export interface ShareOptions {
   selectedSpaceIds: string[];
@@ -16,31 +16,6 @@ export type ImportRetry = Omit<SavedObjectsImportRetry, 'replaceReferences'>;
 
 export interface ShareSavedObjectsToSpaceResponse {
   [spaceId: string]: SavedObjectsImportResponse;
-}
-
-/**
- * Properties for the LegacyUrlConflict component.
- */
-export interface LegacyUrlConflictProps {
-  /**
-   * The string that is used to describe the object in the callout, e.g., _There is a legacy URL for this page that points to a different
-   * **object**_.
-   *
-   * Default value is 'object'.
-   */
-  objectNoun?: string;
-  /**
-   * The ID of the object that is currently shown on the page.
-   */
-  currentObjectId: string;
-  /**
-   * The ID of the other object that the legacy URL alias points to.
-   */
-  otherObjectId: string;
-  /**
-   * The path to use for the new URL, optionally including `search` and/or `hash` URL components.
-   */
-  otherObjectPath: string;
 }
 
 /**

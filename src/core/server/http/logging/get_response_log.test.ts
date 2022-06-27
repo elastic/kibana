@@ -8,7 +8,7 @@
 
 import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
-import { loggerMock, MockedLogger } from '../../logging/logger.mock';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import { getEcsResponseLog } from './get_response_log';
 
 jest.mock('./get_payload_size', () => ({
@@ -27,6 +27,7 @@ interface RequestFixtureOptions {
   path?: string;
   query?: Record<string, any>;
   response?: Record<string, any> | Boom.Boom;
+  app?: Record<string, any>;
 }
 
 function createMockHapiRequest({
@@ -39,6 +40,7 @@ function createMockHapiRequest({
   path = '/path',
   query = {},
   response = { headers: {}, statusCode: 200 },
+  app = {},
 }: RequestFixtureOptions = {}): Request {
   return {
     auth,
@@ -50,6 +52,7 @@ function createMockHapiRequest({
     path,
     query,
     response,
+    app,
   } as unknown as Request;
 }
 
@@ -141,6 +144,17 @@ describe('getEcsResponseLog', () => {
     const req = createMockHapiRequest();
     const result = getEcsResponseLog(req, logger);
     expect(result.message).toMatchInlineSnapshot(`"GET /path 200"`);
+  });
+
+  test('set traceId stored in the request app storage', () => {
+    const req = createMockHapiRequest({
+      app: {
+        foo: 'bar',
+        traceId: 'trace_id',
+      },
+    });
+    const result = getEcsResponseLog(req, logger);
+    expect(result.meta?.trace?.id).toBe('trace_id');
   });
 
   test('handles Boom errors in the response', () => {
@@ -280,6 +294,7 @@ describe('getEcsResponseLog', () => {
                 "status_code": 200,
               },
             },
+            "trace": undefined,
             "url": Object {
               "path": "/path",
               "query": "",

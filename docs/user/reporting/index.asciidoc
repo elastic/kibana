@@ -13,9 +13,9 @@
 
 You access the options from the *Share* menu in the toolbar. The sharing options include the following:
 
-* *PDF Reports* &mdash; Generate and download a PDF file of a dashboard, visualization, or *Canvas* workpad.
+* *PDF Reports* &mdash; Generate and download a PDF file of a dashboard, visualization, or *Canvas* workpad. PDF reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
-* *PNG Reports* &mdash; Generate and download a PNG file of a dashboard or visualization.
+* *PNG Reports* &mdash; Generate and download a PNG file of a dashboard or visualization. PNG reports are a link:https://www.elastic.co/subscriptions[subscription feature].
 
 * *CSV Reports* &mdash; Generate and download a CSV file of a *Discover* saved search.
 
@@ -26,6 +26,10 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 * beta[] *Share on a website* &mdash; Download and securely share *Canvas* workpads on any website.
 
 * *Embed code* &mdash; Embed a fully interactive dashboard or visualization as an iframe on a web page.
+
+[[reporting-on-cloud-resource-requirements]]
+NOTE: For Elastic Cloud deployments, Kibana instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
+change Kibana sizing, {ess-console}[edit the deployment].
 
 [float]
 [[manually-generate-reports]]

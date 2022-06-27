@@ -5,26 +5,29 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { HostFirstLastSeenRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 export const buildFirstOrLastSeenHostQuery = ({
   hostName,
   defaultIndex,
-  docValueFields,
   order,
 }: HostFirstLastSeenRequestOptions) => {
   const filter = [{ term: { 'host.name': hostName } }];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       query: { bool: { filter } },
-      _source: ['@timestamp'],
+      _source: false,
+      fields: [
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 1,
       sort: [
         {

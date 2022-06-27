@@ -6,38 +6,39 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import React from 'react';
+import { setTimeout as setTimeoutP } from 'timers/promises';
+import moment from 'moment';
+import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
+import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import { AnalyticsNoDataPageKibanaProvider } from '@kbn/shared-ux-page-analytics-no-data';
+import { hasESData, hasUserDataView } from './overview.test.mocks';
 import { Overview } from './overview';
-import { shallowWithIntl } from '@kbn/test/jest';
-import { FeatureCatalogueCategory } from 'src/plugins/home/public';
 
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => ({
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
-      data: { indexPatterns: {} },
-      share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
-      uiSettings: { get: jest.fn() },
-      docLinks: {
-        links: {
-          kibana: 'kibana_docs_url',
-        },
-      },
+jest.mock('@kbn/shared-ux-components', () => {
+  const MockedComponent: string = 'MockedKibanaPageTemplate';
+  const mockedModule = {
+    ...jest.requireActual('@kbn/shared-ux-components'),
+    KibanaPageTemplate: () => {
+      return <MockedComponent />;
     },
-  }),
-  RedirectAppLinks: jest.fn((element: JSX.Element) => element),
-  overviewPageActions: jest.fn().mockReturnValue([]),
-  OverviewPageFooter: jest.fn().mockReturnValue(<></>),
-  KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
-  KibanaPageTemplateSolutionNavAvatar: jest.fn().mockReturnValue(<></>),
-}));
+  };
+  return mockedModule;
+});
 
-jest.mock('../../lib/ui_metric', () => ({
-  trackUiMetric: jest.fn(),
-}));
-
-afterAll(() => jest.clearAllMocks());
+jest.mock('@kbn/shared-ux-page-analytics-no-data', () => {
+  const MockedComponent: string = 'MockedAnalyticsNoDataPage';
+  return {
+    ...jest.requireActual('@kbn/shared-ux-page-analytics-no-data'),
+    AnalyticsNoDataPageKibanaProvider: () => {
+      return <MockedComponent />;
+    },
+  };
+});
 
 const mockNewsFetchResult = {
   error: null,
@@ -126,7 +127,7 @@ const mockFeatures = [
     icon: 'dashboardApp',
     path: 'dashboard_landing_page',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as FeatureCatalogueCategory,
   },
   {
     id: 'discover',
@@ -135,7 +136,7 @@ const mockFeatures = [
     icon: 'discoverApp',
     path: 'discover_landing_page',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as FeatureCatalogueCategory,
   },
   {
     id: 'canvas',
@@ -144,31 +145,99 @@ const mockFeatures = [
     icon: 'canvasApp',
     path: 'canvas_landing_page',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.DATA,
+    category: 'data' as FeatureCatalogueCategory,
   },
 ];
 
+const flushPromises = async () => await setTimeoutP(10);
+
+const updateComponent = async (component: ReactWrapper) => {
+  await act(async () => {
+    await flushPromises();
+    component.update();
+  });
+};
+
 describe('Overview', () => {
-  test('render', () => {
-    const component = shallowWithIntl(
+  beforeEach(() => {
+    hasESData.mockResolvedValue(true);
+    hasUserDataView.mockResolvedValue(true);
+  });
+
+  afterAll(() => jest.clearAllMocks());
+
+  test('renders correctly', async () => {
+    const component = mountWithIntl(
       <Overview
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
         features={mockFeatures}
       />
     );
+
+    await updateComponent(component);
+
     expect(component).toMatchSnapshot();
+    expect(component.find(KibanaPageTemplate).length).toBe(1);
   });
-  test('without solutions', () => {
-    const component = shallowWithIntl(
+
+  test('renders correctly without solutions', async () => {
+    const component = mountWithIntl(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={[]} features={mockFeatures} />
     );
+
+    await updateComponent(component);
+
     expect(component).toMatchSnapshot();
   });
-  test('without features', () => {
-    const component = shallowWithIntl(
+
+  test('renders correctly without features', async () => {
+    const component = mountWithIntl(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={mockSolutions} features={[]} />
     );
+
+    await updateComponent(component);
+
     expect(component).toMatchSnapshot();
+  });
+
+  test('renders correctly when there is no user data view', async () => {
+    hasESData.mockResolvedValue(true);
+    hasUserDataView.mockResolvedValue(false);
+
+    const component = mountWithIntl(
+      <Overview
+        newsFetchResult={mockNewsFetchResult}
+        solutions={mockSolutions}
+        features={mockFeatures}
+      />
+    );
+
+    await updateComponent(component);
+
+    expect(component).toMatchSnapshot();
+    expect(component.find(AnalyticsNoDataPageKibanaProvider).length).toBe(1);
+    expect(component.find(KibanaPageTemplate).length).toBe(0);
+    expect(component.find(EuiLoadingSpinner).length).toBe(0);
+  });
+
+  test('show loading spinner during loading', async () => {
+    hasESData.mockImplementation(() => new Promise(() => {}));
+    hasUserDataView.mockImplementation(() => new Promise(() => {}));
+
+    const component = mountWithIntl(
+      <Overview
+        newsFetchResult={mockNewsFetchResult}
+        solutions={mockSolutions}
+        features={mockFeatures}
+      />
+    );
+
+    await updateComponent(component);
+
+    expect(component.render()).toMatchSnapshot();
+    expect(component.find(AnalyticsNoDataPageKibanaProvider).length).toBe(0);
+    expect(component.find(KibanaPageTemplate).length).toBe(0);
+    expect(component.find(EuiLoadingSpinner).length).toBe(1);
   });
 });

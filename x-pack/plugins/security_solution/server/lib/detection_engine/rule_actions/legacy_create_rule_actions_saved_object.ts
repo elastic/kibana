@@ -5,46 +5,56 @@
  * 2.0.
  */
 
-import { AlertServices } from '../../../../../alerting/server';
+import { SavedObjectReference } from '@kbn/core/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
-import { legacyGetThrottleOptions, legacyGetRuleActionsFromSavedObject } from './legacy_utils';
-// eslint-disable-next-line no-restricted-imports
-import { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
-import { AlertAction } from '../../../../../alerting/common';
-import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
+import {
+  legacyGetActionReference,
+  legacyGetRuleReference,
+  legacyGetThrottleOptions,
+  legacyTransformActionToReference,
+} from './legacy_utils';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 interface LegacyCreateRuleActionsSavedObject {
   ruleAlertId: string;
-  savedObjectsClient: AlertServices['savedObjectsClient'];
-  actions: AlertAction[] | undefined;
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
+  actions: RuleAction[] | undefined;
   throttle: string | null | undefined;
 }
 
 /**
+ * NOTE: This should _only_ be seen to be used within the legacy route of "legacyCreateLegacyNotificationRoute" and not exposed and not
+ * used anywhere else. If you see it being used anywhere else, that would be a bug.
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * @see legacyCreateLegacyNotificationRoute
  */
 export const legacyCreateRuleActionsSavedObject = async ({
   ruleAlertId,
   savedObjectsClient,
   actions = [],
   throttle,
-}: LegacyCreateRuleActionsSavedObject): Promise<LegacyRulesActionsSavedObject> => {
-  const ruleActionsSavedObject =
-    await savedObjectsClient.create<LegacyIRuleActionsAttributesSavedObjectAttributes>(
-      legacyRuleActionsSavedObjectType,
-      {
-        ruleAlertId,
-        actions: actions.map((action) => transformAlertToRuleAction(action)),
-        ...legacyGetThrottleOptions(throttle),
-      }
-    );
-
-  return legacyGetRuleActionsFromSavedObject(ruleActionsSavedObject);
+}: LegacyCreateRuleActionsSavedObject): Promise<void> => {
+  const referenceWithAlertId: SavedObjectReference[] = [legacyGetRuleReference(ruleAlertId)];
+  const actionReferences: SavedObjectReference[] = actions.map((action, index) =>
+    legacyGetActionReference(action.id, index)
+  );
+  const references: SavedObjectReference[] = [...referenceWithAlertId, ...actionReferences];
+  await savedObjectsClient.create<LegacyIRuleActionsAttributesSavedObjectAttributes>(
+    legacyRuleActionsSavedObjectType,
+    {
+      actions: actions.map((alertAction, index) =>
+        legacyTransformActionToReference(alertAction, index)
+      ),
+      ...legacyGetThrottleOptions(throttle),
+    },
+    { references }
+  );
 };

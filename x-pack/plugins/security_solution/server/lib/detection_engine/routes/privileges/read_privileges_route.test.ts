@@ -9,7 +9,7 @@ import { readPrivilegesRoute } from './read_privileges_route';
 import { serverMock, requestContextMock } from '../__mocks__';
 import { getPrivilegeRequest, getMockPrivilegesResult } from '../__mocks__/request_responses';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 
 describe('read_privileges route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -19,9 +19,9 @@ describe('read_privileges route', () => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
-    context.core.elasticsearch.client.asCurrentUser.transport.request.mockResolvedValue({
-      body: getMockPrivilegesResult(),
-    });
+    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getMockPrivilegesResult())
+    );
 
     readPrivilegesRoute(server.router, true);
   });
@@ -30,7 +30,7 @@ describe('read_privileges route', () => {
     test('returns 200 when doing a normal request', async () => {
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: false } }),
-        context
+        requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
     });
@@ -38,7 +38,7 @@ describe('read_privileges route', () => {
     test('returns the payload when doing a normal request', async () => {
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: false } }),
-        context
+        requestContextMock.convertContext(context)
       );
       const expectedBody = {
         ...getMockPrivilegesResult(),
@@ -58,19 +58,19 @@ describe('read_privileges route', () => {
 
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: true } }),
-        context
+        requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(expectedBody);
     });
 
     test('returns 500 when bad response from cluster', async () => {
-      context.core.elasticsearch.client.asCurrentUser.transport.request.mockResolvedValue(
+      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue(
         elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Test error'))
       );
       const response = await server.inject(
         getPrivilegeRequest({ auth: { isAuthenticated: false } }),
-        context
+        requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({ message: 'Test error', status_code: 500 });

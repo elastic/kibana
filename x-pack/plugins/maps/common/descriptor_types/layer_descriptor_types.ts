@@ -7,24 +7,17 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Query } from 'src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {
-  FieldMeta,
+  EMSVectorTileStyleDescriptor,
   HeatmapStyleDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
-import { VectorShapeTypeCounts } from '../get_geometry_counts';
-import {
-  KBN_FEATURE_COUNT,
-  KBN_IS_TILE_COMPLETE,
-  KBN_METADATA_FEATURE,
-  KBN_VECTOR_SHAPE_TYPE_COUNTS,
-  LAYER_TYPE,
-} from '../constants';
+import { LAYER_TYPE } from '../constants';
 
 export type Attribution = {
   label: string;
@@ -38,11 +31,21 @@ export type JoinDescriptor = {
 
 export type TileMetaFeature = Feature & {
   properties: {
-    [KBN_METADATA_FEATURE]: true;
-    [KBN_IS_TILE_COMPLETE]: boolean;
-    [KBN_FEATURE_COUNT]: number;
-    [KBN_VECTOR_SHAPE_TYPE_COUNTS]: VectorShapeTypeCounts;
-    fieldMeta?: FieldMeta;
+    'hits.total.relation': string;
+    'hits.total.value': number;
+
+    // For _mvt requests with "aggs" property in request: aggregation statistics returned in the pattern outined below
+    // aggregations._count.avg
+    // aggregations._count.count
+    // aggregations._count.min
+    // aggregations._count.max
+    // aggregations._count.sum
+    // aggregations.<agg_name>.avg
+    // aggregations.<agg_name>.count
+    // aggregations.<agg_name>.min
+    // aggregations.<agg_name>.max
+    // aggregations.<agg_name>.sum
+    [key: string]: number | string | boolean;
   };
 };
 
@@ -58,6 +61,7 @@ export type LayerDescriptor = {
   attribution?: Attribution;
   id: string;
   label?: string | null;
+  locale?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;
@@ -70,7 +74,7 @@ export type LayerDescriptor = {
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
-  type: LAYER_TYPE.VECTOR | LAYER_TYPE.TILED_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
+  type: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
   joins?: JoinDescriptor[];
   style: VectorStyleDescriptor;
 };
@@ -78,4 +82,9 @@ export type VectorLayerDescriptor = LayerDescriptor & {
 export type HeatmapLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.HEATMAP;
   style: HeatmapStyleDescriptor;
+};
+
+export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.EMS_VECTOR_TILE;
+  style: EMSVectorTileStyleDescriptor;
 };

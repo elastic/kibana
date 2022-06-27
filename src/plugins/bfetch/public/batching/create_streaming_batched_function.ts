@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, of } from 'rxjs';
-import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
+import { AbortError, abortSignalToPromise, defer } from '@kbn/kibana-utils-plugin/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,
@@ -51,7 +50,7 @@ export interface StreamingBatchedFunctionParams<Payload, Result> {
   /**
    * Disabled zlib compression of response chunks.
    */
-  compressionDisabled$?: Observable<boolean>;
+  getIsCompressionDisabled?: () => boolean;
 }
 
 /**
@@ -69,7 +68,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     fetchStreaming: fetchStreamingInjected = fetchStreaming,
     flushOnMaxItems = 25,
     maxItemAge = 10,
-    compressionDisabled$ = of(false),
+    getIsCompressionDisabled = () => false,
   } = params;
   const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
@@ -88,6 +87,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           if (item.signal?.aborted) item.future.reject(new AbortError());
           return !item.signal?.aborted;
         });
+
+        if (items.length === 0) {
+          return; // all items have been aborted before a request has been sent
+        }
 
         const donePromises: Array<Promise<any>> = items.map((item) => {
           return new Promise<void>((resolve) => {
@@ -125,7 +128,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           body: JSON.stringify({ batch }),
           method: 'POST',
           signal: abortController.signal,
-          compressionDisabled$,
+          getIsCompressionDisabled,
         });
 
         const handleStreamError = (error: any) => {

@@ -7,19 +7,66 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SuggestionRequest, VisualizationSuggestion } from '../types';
-import { layerTypes } from '../../common';
-import type { PieVisualizationState } from '../../common/expressions';
-import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import type { SuggestionRequest, TableSuggestionColumn, VisualizationSuggestion } from '../types';
+import {
+  CategoryDisplay,
+  layerTypes,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+  PieVisualizationState,
+} from '../../common';
+import type { PieChartType } from '../../common/types';
+import { PartitionChartsMeta } from './partition_charts_meta';
+import { isPartitionShape } from './render_helpers';
 
-function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizationState>) {
+function hasIntervalScale(columns: TableSuggestionColumn[]) {
+  return columns.some((col) => col.operation.scale === 'interval');
+}
+
+function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
+  // Histograms are not good for pi. But we should not reject them on switching between partition charts.
+  const shouldRejectIntervals =
+    state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
+
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    table.columns.some((col) => col.operation.scale === 'interval') // Histograms are not good for pie
+    shouldRejectIntervals ||
+    table.columns.some((col) => col.operation.isStaticValue)
   );
 }
+
+function getNewShape(
+  groups: TableSuggestionColumn[],
+  subVisualizationId?: PieVisualizationState['shape']
+) {
+  if (subVisualizationId) {
+    return subVisualizationId;
+  }
+
+  let newShape: PieVisualizationState['shape'] | undefined;
+
+  if (groups.length !== 1 && !subVisualizationId) {
+    newShape = PieChartTypes.PIE;
+  }
+
+  return newShape ?? PieChartTypes.DONUT;
+}
+
+function hasCustomSuggestionsExists(shape: PieChartType | string | undefined) {
+  const shapes: Array<PieChartType | string> = [
+    PieChartTypes.TREEMAP,
+    PieChartTypes.WAFFLE,
+    PieChartTypes.MOSAIC,
+  ];
+  return shape ? shapes.includes(shape) : false;
+}
+
+const maximumGroupLength = Math.max(
+  ...Object.values(PartitionChartsMeta).map(({ maxBuckets }) => maxBuckets)
+);
 
 export function suggestions({
   table,
@@ -34,9 +81,17 @@ export function suggestions({
     return [];
   }
 
-  const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
+  const [groups, metrics] = partition(
+    // filter out all metrics which are not number based
+    table.columns.filter((col) => col.operation.isBucketed || col.operation.dataType === 'number'),
+    (col) => col.operation.isBucketed
+  );
 
-  if (metrics.length > 1 || groups.length > Math.max(MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS)) {
+  if (groups.length === 0 && metrics.length === 0) {
+    return [];
+  }
+
+  if (metrics.length > 1 || groups.length > maximumGroupLength) {
     return [];
   }
 
@@ -52,20 +107,18 @@ export function suggestions({
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
-  if (groups.length <= MAX_PIE_BUCKETS && subVisualizationId !== 'treemap') {
-    let newShape: PieVisualizationState['shape'] =
-      (subVisualizationId as PieVisualizationState['shape']) || 'donut';
-    if (groups.length !== 1 && !subVisualizationId) {
-      newShape = 'pie';
-    }
-
+  if (
+    groups.length <= PartitionChartsMeta.pie.maxBuckets &&
+    !hasCustomSuggestionsExists(subVisualizationId)
+  ) {
+    const newShape = getNewShape(groups, subVisualizationId as PieVisualizationState['shape']);
     const baseSuggestion: VisualizationSuggestion<PieVisualizationState> = {
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: 'As {chartName}',
-        values: { chartName: CHART_NAMES[newShape].label },
+        values: { chartName: PartitionChartsMeta[newShape].label },
         description: 'chartName is already translated',
       }),
-      score: state && state.shape !== 'treemap' ? 0.6 : 0.4,
+      score: state && !hasCustomSuggestionsExists(state.shape) ? 0.6 : 0.4,
       state: {
         shape: newShape,
         palette: mainPalette || state?.palette,
@@ -82,9 +135,9 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.PERCENT,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },
@@ -92,7 +145,10 @@ export function suggestions({
       },
       previewIcon: 'bullseye',
       // dont show suggestions for same type
-      hide: table.changeType === 'reduced' || (state && state.shape !== 'treemap'),
+      hide:
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && !hasCustomSuggestionsExists(state.shape)),
     };
 
     results.push(baseSuggestion);
@@ -100,20 +156,25 @@ export function suggestions({
       ...baseSuggestion,
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: 'As {chartName}',
-        values: { chartName: CHART_NAMES[newShape === 'pie' ? 'donut' : 'pie'].label },
+        values: {
+          chartName:
+            PartitionChartsMeta[
+              newShape === PieChartTypes.PIE ? PieChartTypes.DONUT : PieChartTypes.PIE
+            ].label,
+        },
         description: 'chartName is already translated',
       }),
       score: 0.1,
       state: {
         ...baseSuggestion.state,
-        shape: newShape === 'pie' ? 'donut' : 'pie',
+        shape: newShape === PieChartTypes.PIE ? PieChartTypes.DONUT : PieChartTypes.PIE,
       },
       hide: true,
     });
   }
 
   if (
-    groups.length <= MAX_TREEMAP_BUCKETS &&
+    groups.length <= PartitionChartsMeta.treemap.maxBuckets &&
     (!subVisualizationId || subVisualizationId === 'treemap')
   ) {
     results.push({
@@ -122,9 +183,9 @@ export function suggestions({
       }),
       // Use a higher score when currently active, to prevent chart type switching
       // on the user unintentionally
-      score: state?.shape === 'treemap' ? 0.7 : 0.5,
+      score: state?.shape === PieChartTypes.TREEMAP ? 0.7 : 0.5,
       state: {
-        shape: 'treemap',
+        shape: PieChartTypes.TREEMAP,
         palette: mainPalette || state?.palette,
         layers: [
           state?.layers[0]
@@ -134,8 +195,8 @@ export function suggestions({
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
                 categoryDisplay:
-                  state.layers[0].categoryDisplay === 'inside'
-                    ? 'default'
+                  state.layers[0].categoryDisplay === CategoryDisplay.INSIDE
+                    ? CategoryDisplay.DEFAULT
                     : state.layers[0].categoryDisplay,
                 layerType: layerTypes.DATA,
               }
@@ -143,9 +204,9 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
                 metric: metricColumnId,
-                numberDisplay: 'percent',
-                categoryDisplay: 'default',
-                legendDisplay: 'default',
+                numberDisplay: NumberDisplay.PERCENT,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
               },
@@ -153,7 +214,89 @@ export function suggestions({
       },
       previewIcon: 'bullseye',
       // hide treemap suggestions from bottom bar, but keep them for chart switcher
-      hide: table.changeType === 'reduced' || !state || (state && state.shape === 'treemap'),
+      hide:
+        table.changeType === 'reduced' ||
+        !state ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === PieChartTypes.TREEMAP),
+    });
+  }
+
+  if (
+    groups.length <= PartitionChartsMeta.mosaic.maxBuckets &&
+    (!subVisualizationId || subVisualizationId === PieChartTypes.MOSAIC)
+  ) {
+    results.push({
+      title: i18n.translate('xpack.lens.pie.mosaicSuggestionLabel', {
+        defaultMessage: 'As Mosaic',
+      }),
+      score: state?.shape === PieChartTypes.MOSAIC ? 0.7 : 0.5,
+      state: {
+        shape: PieChartTypes.MOSAIC,
+        palette: mainPalette || state?.palette,
+        layers: [
+          state?.layers[0]
+            ? {
+                ...state.layers[0],
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                layerType: layerTypes.DATA,
+              }
+            : {
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                numberDisplay: NumberDisplay.PERCENT,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
+                nestedLegend: false,
+                layerType: layerTypes.DATA,
+              },
+        ],
+      },
+      previewIcon: 'bullseye',
+      hide: true,
+    });
+  }
+
+  if (
+    groups.length <= PartitionChartsMeta.waffle.maxBuckets &&
+    (!subVisualizationId || subVisualizationId === PieChartTypes.WAFFLE)
+  ) {
+    results.push({
+      title: i18n.translate('xpack.lens.pie.waffleSuggestionLabel', {
+        defaultMessage: 'As Waffle',
+      }),
+      score: state?.shape === PieChartTypes.WAFFLE ? 0.7 : 0.5,
+      state: {
+        shape: PieChartTypes.WAFFLE,
+        palette: mainPalette || state?.palette,
+        layers: [
+          state?.layers[0]
+            ? {
+                ...state.layers[0],
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                layerType: layerTypes.DATA,
+              }
+            : {
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                numberDisplay: NumberDisplay.PERCENT,
+                categoryDisplay: CategoryDisplay.DEFAULT,
+                legendDisplay: LegendDisplay.DEFAULT,
+                nestedLegend: false,
+                layerType: layerTypes.DATA,
+              },
+        ],
+      },
+      previewIcon: 'bullseye',
+      hide: true,
     });
   }
 

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { KibanaContext } from 'src/plugins/data/common';
+import { KibanaContext } from '@kbn/data-plugin/common';
 import {
+  AnyExpressionFunctionDefinition,
   Datatable,
   ExpressionValueFilter,
   ExpressionImage,
-  ExpressionFunction,
   PointSeries,
   Render,
   Style,
   Range,
-} from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin';
 import { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
-import { CanvasWorkpad } from './canvas';
+import { CanvasWorkpad, Sidebar, Flyouts } from './canvas';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',
@@ -34,7 +34,7 @@ export interface AppState {
 
 interface StoreAppState {
   basePath: string;
-  serverFunctions: ExpressionFunction[];
+  serverFunctions: AnyExpressionFunctionDefinition[];
   ready: boolean;
 }
 
@@ -75,7 +75,7 @@ export interface ResolvedArgType {
   expressionContext: ExpressionContext;
 }
 
-interface TransientState {
+export interface TransientState {
   canUserWrite: boolean;
   zoomScale: number;
   elementStats: ElementStatsType;
@@ -90,6 +90,8 @@ interface TransientState {
     interval: number;
   };
   inFlight: boolean;
+  sidebar: Sidebar;
+  flyouts: Flyouts;
 }
 
 interface PersistentState {

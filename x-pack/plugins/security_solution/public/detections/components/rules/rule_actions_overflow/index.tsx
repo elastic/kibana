@@ -12,32 +12,32 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
+import { noop } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-
-import { noop } from 'lodash/fp';
-import { Rule } from '../../../containers/detection_engine/rules';
-import * as i18n from './translations';
-import * as i18nActions from '../../../pages/detection_engine/rules/translations';
-import { useStateToaster } from '../../../../common/components/toasters';
-import {
-  deleteRulesAction,
-  duplicateRulesAction,
-  editRuleAction,
-  exportRulesAction,
-} from '../../../pages/detection_engine/rules/all/actions';
+import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { getToolTipContent } from '../../../../common/utils/privileges';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
-import { APP_ID, SecurityPageName } from '../../../../../common/constants';
+import { getToolTipContent } from '../../../../common/utils/privileges';
+import { Rule } from '../../../containers/detection_engine/rules';
+import {
+  executeRulesBulkAction,
+  goToRuleEditPage,
+} from '../../../pages/detection_engine/rules/all/actions';
+import * as i18nActions from '../../../pages/detection_engine/rules/translations';
+import * as i18n from './translations';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
     svg {
       transform: rotate(90deg);
     }
-    border: 1px solid  ${({ theme }) => theme.euiColorPrimary};
+    border: 1px solid ${({ theme }) => theme.euiColorPrimary};
     width: 40px;
     height: 40px;
   }
@@ -59,10 +59,11 @@ const RuleActionsOverflowComponent = ({
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useAppToasts();
+  const { startTransaction } = useStartTransaction();
 
   const onRuleDeletedCallback = useCallback(() => {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),
     });
@@ -78,15 +79,17 @@ const RuleActionsOverflowComponent = ({
               disabled={!canDuplicateRuleWithActions || !userHasPermissions}
               data-test-subj="rules-details-duplicate-rule"
               onClick={async () => {
+                startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
-                const createdRules = await duplicateRulesAction(
-                  [rule],
-                  [rule.id],
-                  noop,
-                  dispatchToaster
-                );
+                const result = await executeRulesBulkAction({
+                  action: BulkAction.duplicate,
+                  onSuccess: noop,
+                  search: { ids: [rule.id] },
+                  toasts,
+                });
+                const createdRules = result?.attributes.results.created;
                 if (createdRules?.length) {
-                  editRuleAction(createdRules[0].id, navigateToApp);
+                  goToRuleEditPage(createdRules[0].id, navigateToApp);
                 }
               }}
             >
@@ -103,8 +106,14 @@ const RuleActionsOverflowComponent = ({
               disabled={!userHasPermissions || rule.immutable}
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
+                startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
                 closePopover();
-                await exportRulesAction([rule.rule_id], noop, dispatchToaster);
+                await executeRulesBulkAction({
+                  action: BulkAction.export,
+                  onSuccess: noop,
+                  search: { ids: [rule.id] },
+                  toasts,
+                });
               }}
             >
               {i18nActions.EXPORT_RULE}
@@ -115,8 +124,14 @@ const RuleActionsOverflowComponent = ({
               disabled={!userHasPermissions}
               data-test-subj="rules-details-delete-rule"
               onClick={async () => {
+                startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 closePopover();
-                await deleteRulesAction([rule.id], noop, dispatchToaster, onRuleDeletedCallback);
+                await executeRulesBulkAction({
+                  action: BulkAction.delete,
+                  onSuccess: onRuleDeletedCallback,
+                  search: { ids: [rule.id] },
+                  toasts,
+                });
               }}
             >
               {i18nActions.DELETE_RULE}
@@ -126,10 +141,11 @@ const RuleActionsOverflowComponent = ({
     [
       canDuplicateRuleWithActions,
       closePopover,
-      dispatchToaster,
       navigateToApp,
       onRuleDeletedCallback,
       rule,
+      startTransaction,
+      toasts,
       userHasPermissions,
     ]
   );

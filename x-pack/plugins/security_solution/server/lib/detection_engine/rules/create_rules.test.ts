@@ -6,14 +6,15 @@
  */
 
 import { createRules } from './create_rules';
-import { getCreateMlRulesOptionsMock } from './create_rules.mock';
+import {
+  getCreateMlRulesOptionsMock,
+  getCreateThreatMatchRulesOptionsMock,
+} from './create_rules.mock';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../common/constants';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('createRules - %s', (_, isRuleRegistryEnabled) => {
+describe('createRules', () => {
   it('calls the rulesClient with legacy ML params', async () => {
-    const ruleOptions = getCreateMlRulesOptionsMock(isRuleRegistryEnabled);
+    const ruleOptions = getCreateMlRulesOptionsMock();
     await createRules(ruleOptions);
     expect(ruleOptions.rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -29,7 +30,7 @@ describe.each([
 
   it('calls the rulesClient with ML params', async () => {
     const ruleOptions = {
-      ...getCreateMlRulesOptionsMock(isRuleRegistryEnabled),
+      ...getCreateMlRulesOptionsMock(),
       machineLearningJobId: ['new_job_1', 'new_job_2'],
     };
     await createRules(ruleOptions);
@@ -39,6 +40,36 @@ describe.each([
           params: expect.objectContaining({
             anomalyThreshold: 55,
             machineLearningJobId: ['new_job_1', 'new_job_2'],
+          }),
+        }),
+      })
+    );
+  });
+
+  it('populates a threatIndicatorPath value for threat_match rule if empty', async () => {
+    const ruleOptions = getCreateThreatMatchRulesOptionsMock();
+    delete ruleOptions.threatIndicatorPath;
+    await createRules(ruleOptions);
+    expect(ruleOptions.rulesClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          params: expect.objectContaining({
+            threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
+          }),
+        }),
+      })
+    );
+  });
+
+  it('does not populate a threatIndicatorPath value for other rules if empty', async () => {
+    const ruleOptions = getCreateMlRulesOptionsMock();
+    delete ruleOptions.threatIndicatorPath;
+    await createRules(ruleOptions);
+    expect(ruleOptions.rulesClient.create).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          params: expect.objectContaining({
+            threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
           }),
         }),
       })

@@ -25,7 +25,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
 import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('SavedObjectsFinder', () => {
   const doc = {
@@ -69,7 +69,7 @@ describe('SavedObjectsFinder', () => {
 
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
       type: ['search'],
-      fields: ['title'],
+      fields: ['title', 'name'],
       search: undefined,
       page: 1,
       perPage: 10,
@@ -224,7 +224,7 @@ describe('SavedObjectsFinder', () => {
 
       expect(core.savedObjects.client.find).toHaveBeenCalledWith({
         type: ['search'],
-        fields: ['title'],
+        fields: ['title', 'name'],
         search: 'abc*',
         page: 1,
         perPage: 10,
@@ -267,7 +267,7 @@ describe('SavedObjectsFinder', () => {
 
       expect(core.savedObjects.client.find).toHaveBeenCalledWith({
         type: ['type1', 'type2'],
-        fields: ['title', 'field1', 'field2', 'field3'],
+        fields: ['title', 'name', 'field1', 'field2', 'field3'],
         search: 'abc*',
         page: 1,
         perPage: 10,
@@ -333,7 +333,7 @@ describe('SavedObjectsFinder', () => {
 
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
       type: ['search', 'vis'],
-      fields: ['title'],
+      fields: ['title', 'name'],
       search: undefined,
       page: 1,
       perPage: 10,

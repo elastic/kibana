@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { AlertingSetup } from '../../types';
 import {
-  GeoContainmentParams,
   GeoContainmentState,
   GeoContainmentInstanceState,
   GeoContainmentInstanceContext,
@@ -16,6 +15,8 @@ import {
   ActionGroupId,
   RecoveryActionGroupId,
 } from './alert_type';
+
+import { GeoContainmentExtractedParams, GeoContainmentParams } from './alert_type';
 
 interface RegisterParams {
   logger: Logger;
@@ -26,7 +27,7 @@ export function register(params: RegisterParams) {
   const { logger, alerting } = params;
   alerting.registerType<
     GeoContainmentParams,
-    never, // Only use if defining useSavedObjectReferences hook
+    GeoContainmentExtractedParams,
     GeoContainmentState,
     GeoContainmentInstanceState,
     GeoContainmentInstanceContext,

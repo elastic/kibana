@@ -9,7 +9,10 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
-import { createFailError, run } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { ErrorReporter, I18nConfig } from './i18n';
 import {
   extractDefaultMessages,
@@ -18,6 +21,14 @@ import {
   checkConfigs,
   mergeConfigs,
 } from './i18n/tasks';
+
+const toolingLog = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
+
+const runStartTime = Date.now();
+const reportTime = getTimeReporter(toolingLog, 'scripts/i18n_check');
 
 const skipOnNoTranslations = ({ config }: { config: I18nConfig }) =>
   !config.translations.length && 'No translations found.';
@@ -116,13 +127,24 @@ run(
       const reporter = new ErrorReporter();
       const messages: Map<string, { message: string }> = new Map();
       await list.run({ messages, reporter });
-    } catch (error) {
+
+      reportTime(runStartTime, 'total', {
+        success: true,
+      });
+    } catch (error: Error | ErrorReporter) {
       process.exitCode = 1;
       if (error instanceof ErrorReporter) {
         error.errors.forEach((e: string | Error) => log.error(e));
+        reportTime(runStartTime, 'error', {
+          success: false,
+        });
       } else {
         log.error('Unhandled exception!');
         log.error(error);
+        reportTime(runStartTime, 'error', {
+          success: false,
+          error: error.message,
+        });
       }
     }
   },

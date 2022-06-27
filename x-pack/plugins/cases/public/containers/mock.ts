@@ -5,37 +5,48 @@
  * 2.0.
  */
 
-import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
+import type {
+  ResolvedCase,
+  SingleCaseMetrics,
+  SingleCaseMetricsFeature,
+  AlertComment,
+  CasesMetrics,
+} from '../../common/ui/types';
 import {
-  AssociationType,
-  CaseUserActionConnector,
+  Actions,
+  ActionTypes,
+  CaseConnector,
   CaseResponse,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
   CaseStatuses,
-  CaseType,
+  CaseUserActionResponse,
   CaseUserActionsResponse,
   CommentResponse,
   CommentType,
   ConnectorTypes,
-  ResolvedCase,
-  isCreateConnector,
-  isPush,
-  isUpdateConnector,
-  SECURITY_SOLUTION_OWNER,
   UserAction,
-  UserActionField,
-} from '../../common';
-import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
-export { connectorsMock } from './configure/mock';
+  UserActionTypes,
+  UserActionWithResponse,
+  CommentUserAction,
+  CaseSeverity,
+} from '../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { SnakeToCamelCase } from '../../common/types';
+import { covertToSnakeCase } from './utils';
 
+export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
-export const basicSubCaseId = 'basic-sub-case-id';
+export const caseWithAlertsId = 'case-with-alerts-id';
+export const caseWithAlertsSyncOffId = 'case-with-alerts-syncoff-id';
+
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
+const basicClosedAt = '2020-02-21T15:02:57.995Z';
 const laterTime = '2020-02-28T15:02:57.995Z';
 
 export const elasticUser = {
@@ -47,7 +58,6 @@ export const elasticUser = {
 export const tags: string[] = ['coke', 'pepsi'];
 
 export const basicComment: Comment = {
-  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,
@@ -61,10 +71,28 @@ export const basicComment: Comment = {
   version: 'WzQ3LDFc',
 };
 
-export const alertComment: Comment = {
+export const alertComment: AlertComment = {
   alertId: 'alert-id-1',
-  associationType: AssociationType.case,
   index: 'alert-index-1',
+  type: CommentType.alert,
+  id: 'alert-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  rule: {
+    id: 'rule-id-1',
+    name: 'Awesome rule',
+  },
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const alertCommentWithIndices: AlertComment = {
+  alertId: 'alert-id-1',
+  index: '.alerts-matchme.alerts',
   type: CommentType.alert,
   id: 'alert-comment-id',
   createdAt: basicCreatedAt,
@@ -95,7 +123,6 @@ export const hostIsolationComment: () => Comment = () => {
       ],
       type: 'isolate',
     },
-    associationType: AssociationType.case,
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
     owner: SECURITY_SOLUTION_OWNER,
@@ -121,7 +148,6 @@ export const hostReleaseComment: () => Comment = () => {
       ],
       type: 'unisolate',
     },
-    associationType: AssociationType.case,
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
     owner: SECURITY_SOLUTION_OWNER,
@@ -134,7 +160,6 @@ export const hostReleaseComment: () => Comment = () => {
 };
 
 export const basicCase: Case = {
-  type: CaseType.individual,
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -149,6 +174,8 @@ export const basicCase: Case = {
     fields: null,
   },
   description: 'Security banana Issue',
+  severity: CaseSeverity.LOW,
+  duration: null,
   externalService: null,
   status: CaseStatuses.open,
   tags,
@@ -161,7 +188,20 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
-  subCaseIds: [],
+};
+
+export const caseWithAlerts = {
+  ...basicCase,
+  totalAlerts: 2,
+  id: caseWithAlertsId,
+};
+export const caseWithAlertsSyncOff = {
+  ...basicCase,
+  totalAlerts: 2,
+  settings: {
+    syncAlerts: false,
+  },
+  id: caseWithAlertsSyncOffId,
 };
 
 export const basicResolvedCase: ResolvedCase = {
@@ -170,12 +210,54 @@ export const basicResolvedCase: ResolvedCase = {
   aliasTargetId: `${basicCase.id}_2`,
 };
 
-export const collectionCase: Case = {
-  type: CaseType.collection,
+export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
+  'alerts.count',
+  'alerts.users',
+  'alerts.hosts',
+  'actions.isolateHost',
+  'connectors',
+];
+
+export const basicCaseStatusFeatures: SingleCaseMetricsFeature[] = ['lifespan'];
+
+export const basicCaseMetrics: SingleCaseMetrics = {
+  alerts: {
+    count: 12,
+    hosts: {
+      total: 2,
+      values: [
+        { name: 'foo', count: 2, id: 'foo' },
+        { name: 'bar', count: 10, id: 'bar' },
+      ],
+    },
+    users: {
+      total: 1,
+      values: [{ name: 'Jon', count: 12 }],
+    },
+  },
+  actions: {
+    isolateHost: {
+      isolate: { total: 5 },
+      unisolate: { total: 3 },
+    },
+  },
+  connectors: { total: 1 },
+  lifespan: {
+    creationDate: basicCreatedAt,
+    closeDate: basicClosedAt,
+    statusInfo: {
+      inProgressDuration: 20,
+      openDuration: 10,
+      reopenDates: [],
+    },
+  },
+};
+
+export const mockCase: Case = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
-  id: 'collection-id',
+  id: 'mock-id',
   comments: [basicComment],
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -185,11 +267,13 @@ export const collectionCase: Case = {
     type: ConnectorTypes.none,
     fields: null,
   },
+  duration: null,
+  severity: CaseSeverity.LOW,
   description: 'Security banana Issue',
   externalService: null,
   status: CaseStatuses.open,
   tags,
-  title: 'Another horrible breach in a collection!!',
+  title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
   updatedAt: basicUpdatedAt,
@@ -198,8 +282,6 @@ export const collectionCase: Case = {
   settings: {
     syncAlerts: true,
   },
-  subCases: [],
-  subCaseIds: [],
 };
 
 export const basicCasePost: Case = {
@@ -213,6 +295,8 @@ export const basicCommentPatch: Comment = {
   updatedAt: basicUpdatedAt,
   updatedBy: {
     username: 'elastic',
+    email: 'elastic@elastic.co',
+    fullName: 'Elastic',
   },
 };
 
@@ -225,6 +309,10 @@ export const casesStatus: CasesStatus = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+};
+
+export const casesMetrics: CasesMetrics = {
+  mttr: 12,
 };
 
 export const basicPush = {
@@ -249,15 +337,13 @@ export const pushedCase: Case = {
 };
 
 const basicAction = {
-  actionAt: basicCreatedAt,
-  actionBy: elasticUser,
-  oldValConnectorId: null,
-  oldValue: null,
-  newValConnectorId: null,
-  newValue: 'what a cool value',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
   caseId: basicCaseId,
   commentId: null,
   owner: SECURITY_SOLUTION_OWNER,
+  payload: { title: 'a title' },
+  type: 'title',
 };
 
 export const cases: Case[] = [
@@ -266,9 +352,11 @@ export const cases: Case[] = [
   { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
+  caseWithAlerts,
+  caseWithAlertsSyncOff,
 ];
 
-export const allCases: AllCases = {
+export const allCases: Cases = {
   cases,
   page: 1,
   perPage: 5,
@@ -301,7 +389,6 @@ export const elasticUserSnake = {
 };
 
 export const basicCommentSnake: CommentResponse = {
-  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,
@@ -324,11 +411,26 @@ export const basicCaseSnake: CaseResponse = {
   connector: { id: 'none', name: 'My Connector', type: ConnectorTypes.none, fields: null },
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
+  duration: null,
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
 } as CaseResponse;
+
+export const caseWithAlertsSnake = {
+  ...basicCaseSnake,
+  totalAlerts: 2,
+  id: caseWithAlertsId,
+};
+export const caseWithAlertsSyncOffSnake = {
+  ...basicCaseSnake,
+  totalAlerts: 2,
+  settings: {
+    syncAlerts: false,
+  },
+  id: caseWithAlertsSyncOffId,
+};
 
 export const casesStatusSnake: CasesStatusResponse = {
   count_closed_cases: 130,
@@ -338,6 +440,7 @@ export const casesStatusSnake: CasesStatusResponse = {
 
 export const pushConnectorId = '123';
 export const pushSnake = {
+  connector_id: pushConnectorId,
   connector_name: 'connector name',
   external_id: 'external_id',
   external_title: 'external title',
@@ -374,6 +477,8 @@ export const casesSnake: CasesResponse = [
   { ...pushedCaseSnake, updated_at: laterTime, id: '2', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '3', totalComment: 0, comments: [] },
   { ...basicCaseSnake, id: '4', totalComment: 0, comments: [] },
+  caseWithAlertsSnake,
+  caseWithAlertsSyncOffSnake,
 ];
 
 export const allCasesSnake: CasesFindResponse = {
@@ -384,141 +489,200 @@ export const allCasesSnake: CasesFindResponse = {
   ...casesStatusSnake,
 };
 
-const basicActionSnake = {
-  action_at: basicCreatedAt,
-  action_by: elasticUserSnake,
-  old_value: null,
-  new_value: 'what a cool value',
-  case_id: basicCaseId,
-  comment_id: null,
-  owner: SECURITY_SOLUTION_OWNER,
-};
-export const getUserActionSnake = (af: UserActionField, a: UserAction) => {
-  const isPushToService = a === 'push-to-service' && af[0] === 'pushed';
-
-  return {
-    ...basicActionSnake,
-    action_id: `${af[0]}-${a}`,
-    action_field: af,
-    action: a,
-    comment_id: af[0] === 'comment' ? basicCommentId : null,
-    new_value: isPushToService ? JSON.stringify(basicPushSnake) : basicAction.newValue,
-    new_val_connector_id: isPushToService ? pushConnectorId : null,
-    old_val_connector_id: null,
-  };
-};
-
-export const caseUserActionsSnake: CaseUserActionsResponse = [
-  getUserActionSnake(['description'], 'create'),
-  getUserActionSnake(['comment'], 'create'),
-  getUserActionSnake(['description'], 'update'),
-];
-
-// user actions
-
 export const getUserAction = (
-  af: UserActionField,
-  a: UserAction,
-  overrides?: Partial<CaseUserActions>
+  type: UserActionTypes,
+  action: UserAction,
+  overrides?: Record<string, unknown>
 ): CaseUserActions => {
-  return {
+  const commonProperties = {
     ...basicAction,
-    actionId: `${af[0]}-${a}`,
-    actionField: af,
-    action: a,
-    commentId: af[0] === 'comment' ? basicCommentId : null,
-    ...getValues(a, af, overrides),
+    actionId: `${type}-${action}`,
+    action,
   };
-};
 
-const getValues = (
-  userAction: UserAction,
-  actionFields: UserActionField,
-  overrides?: Partial<CaseUserActions>
-): Partial<CaseUserActions> => {
-  if (isCreateConnector(userAction, actionFields)) {
-    return {
-      newValue:
-        overrides?.newValue === undefined ? JSON.stringify(basicCaseSnake) : overrides.newValue,
-      newValConnectorId: overrides?.newValConnectorId ?? null,
-      oldValue: null,
-      oldValConnectorId: null,
-    };
-  } else if (isUpdateConnector(userAction, actionFields)) {
-    return {
-      newValue:
-        overrides?.newValue === undefined
-          ? JSON.stringify({ name: 'My Connector', type: ConnectorTypes.none, fields: null })
-          : overrides.newValue,
-      newValConnectorId: overrides?.newValConnectorId ?? null,
-      oldValue:
-        overrides?.oldValue === undefined
-          ? JSON.stringify({ name: 'My Connector2', type: ConnectorTypes.none, fields: null })
-          : overrides.oldValue,
-      oldValConnectorId: overrides?.oldValConnectorId ?? null,
-    };
-  } else if (isPush(userAction, actionFields)) {
-    return {
-      newValue:
-        overrides?.newValue === undefined ? JSON.stringify(basicPushSnake) : overrides?.newValue,
-      newValConnectorId:
-        overrides?.newValConnectorId === undefined ? pushConnectorId : overrides.newValConnectorId,
-      oldValue: overrides?.oldValue ?? null,
-      oldValConnectorId: overrides?.oldValConnectorId ?? null,
-    };
-  } else {
-    return {
-      newValue: overrides?.newValue === undefined ? basicAction.newValue : overrides.newValue,
-      newValConnectorId: overrides?.newValConnectorId ?? null,
-      oldValue: overrides?.oldValue ?? null,
-      oldValConnectorId: overrides?.oldValConnectorId ?? null,
-    };
+  const externalService = {
+    connectorId: pushConnectorId,
+    connectorName: 'connector name',
+    externalId: 'external_id',
+    externalTitle: 'external title',
+    externalUrl: 'basicPush.com',
+    pushedAt: basicUpdatedAt,
+    pushedBy: elasticUser,
+  };
+
+  switch (type) {
+    case ActionTypes.comment:
+      return {
+        ...commonProperties,
+        type: ActionTypes.comment,
+        payload: {
+          comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
+        },
+        commentId: basicCommentId,
+        ...overrides,
+      };
+    case ActionTypes.connector:
+      return {
+        ...commonProperties,
+        type: ActionTypes.connector,
+        payload: {
+          connector: { ...getJiraConnector() },
+        },
+        ...overrides,
+      };
+    case ActionTypes.create_case:
+      return {
+        ...commonProperties,
+        type: ActionTypes.create_case,
+        payload: {
+          description: 'a desc',
+          connector: { ...getJiraConnector() },
+          status: CaseStatuses.open,
+          severity: CaseSeverity.LOW,
+          title: 'a title',
+          tags: ['a tag'],
+          settings: { syncAlerts: true },
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        ...overrides,
+      };
+    case ActionTypes.delete_case:
+      return {
+        ...commonProperties,
+        type: ActionTypes.delete_case,
+        payload: {},
+        ...overrides,
+      };
+    case ActionTypes.description:
+      return {
+        ...commonProperties,
+        type: ActionTypes.description,
+        payload: { description: 'a desc' },
+        ...overrides,
+      };
+    case ActionTypes.pushed:
+      return {
+        ...commonProperties,
+        type: ActionTypes.pushed,
+        payload: {
+          externalService,
+        },
+        ...overrides,
+      };
+    case ActionTypes.settings:
+      return {
+        ...commonProperties,
+        type: ActionTypes.settings,
+        payload: { settings: { syncAlerts: true } },
+        ...overrides,
+      };
+    case ActionTypes.status:
+      return {
+        ...commonProperties,
+        type: ActionTypes.status,
+        payload: { status: CaseStatuses.open },
+        ...overrides,
+      };
+    case ActionTypes.tags:
+      return {
+        ...commonProperties,
+        type: ActionTypes.tags,
+        payload: { tags: ['a tag'] },
+        ...overrides,
+      };
+    case ActionTypes.title:
+      return {
+        ...commonProperties,
+        type: ActionTypes.title,
+        payload: { title: 'a title' },
+        ...overrides,
+      };
+
+    default:
+      return {
+        ...commonProperties,
+        ...overrides,
+      } as CaseUserActions;
   }
 };
 
-export const getJiraConnectorWithoutId = (overrides?: Partial<CaseUserActionConnector>) => {
-  return JSON.stringify({
+export const getUserActionSnake = (
+  type: UserActionTypes,
+  action: UserAction,
+  overrides?: Record<string, unknown>
+): CaseUserActionResponse => {
+  return {
+    ...covertToSnakeCase(getUserAction(type, action, overrides)),
+  } as unknown as CaseUserActionResponse;
+};
+
+export const caseUserActionsSnake: CaseUserActionsResponse = [
+  getUserActionSnake('description', Actions.create),
+  getUserActionSnake('comment', Actions.create),
+  getUserActionSnake('description', Actions.update),
+];
+
+export const getJiraConnector = (overrides?: Partial<CaseConnector>): CaseConnector => {
+  return {
+    id: '123',
     name: 'jira1',
-    type: ConnectorTypes.jira,
     ...jiraFields,
     ...overrides,
-  });
+    type: ConnectorTypes.jira as const,
+  } as CaseConnector;
 };
 
 export const jiraFields = { fields: { issueType: '10006', priority: null, parent: null } };
 
-export const getAlertUserAction = () => ({
-  ...basicAction,
+export const getAlertUserAction = (): SnakeToCamelCase<
+  UserActionWithResponse<CommentUserAction>
+> => ({
+  ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'alert-action-id',
-  actionField: ['comment'],
-  action: 'create',
   commentId: 'alert-comment-id',
-  newValue: '{"type":"alert","alertId":"alert-id-1","index":"index-id-1"}',
+  type: ActionTypes.comment,
+  payload: {
+    comment: {
+      type: CommentType.alert,
+      alertId: 'alert-id-1',
+      index: 'index-id-1',
+      owner: SECURITY_SOLUTION_OWNER,
+      rule: {
+        id: 'rule-id-1',
+        name: 'Awesome rule',
+      },
+    },
+  },
 });
 
-export const getHostIsolationUserAction = () => ({
-  ...basicAction,
+export const getHostIsolationUserAction = (): SnakeToCamelCase<
+  UserActionWithResponse<CommentUserAction>
+> => ({
+  ...getUserAction(ActionTypes.comment, Actions.create),
   actionId: 'isolate-action-id',
-  actionField: ['comment'] as UserActionField,
-  action: 'create' as UserAction,
+  type: ActionTypes.comment,
   commentId: 'isolate-comment-id',
-  newValue: 'some value',
+  payload: {
+    comment: {
+      type: CommentType.actions,
+      comment: 'a comment',
+      actions: { targets: [], type: 'test' },
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+  },
 });
 
 export const caseUserActions: CaseUserActions[] = [
-  getUserAction(['description'], 'create'),
-  getUserAction(['comment'], 'create'),
-  getUserAction(['description'], 'update'),
+  getUserAction('description', Actions.create),
+  getUserAction('comment', Actions.create),
+  getUserAction('description', Actions.update),
 ];
 
 // components tests
-export const useGetCasesMockState: UseGetCasesState = {
+export const useGetCasesMockState = {
   data: allCases,
-  loading: [],
-  selectedCases: [],
+  isLoading: false,
   isError: false,
-  queryParams: DEFAULT_QUERY_PARAMS,
-  filterOptions: DEFAULT_FILTER_OPTIONS,
 };
 
 export const basicCaseClosed: Case = {

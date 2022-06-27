@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject } from 'rxjs';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   ExecutionContextService,
   InternalExecutionContextSetup,
 } from './execution_context_service';
-import { mockCoreContext } from '../core_context.mock';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 
 const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 describe('ExecutionContextService', () => {
@@ -59,7 +59,7 @@ describe('ExecutionContextService', () => {
             name: 'name-a',
             id: 'id-a',
             description: 'description-a',
-            parent: undefined,
+            child: undefined,
           },
 
           {
@@ -67,7 +67,7 @@ describe('ExecutionContextService', () => {
             name: 'name-b',
             id: 'id-b',
             description: 'description-b',
-            parent: undefined,
+            child: undefined,
           },
         ]);
       });
@@ -271,17 +271,17 @@ describe('ExecutionContextService', () => {
         );
 
         expect(result?.toJSON()).toEqual({
-          type: 'type-b',
-          name: 'name-b',
-          id: 'id-b',
-          description: 'description-b',
-          parent: {
-            type: 'type-a',
-            name: 'name-a',
-            id: 'id-a',
-            description: 'description-a',
-            parent: undefined,
+          child: {
+            child: undefined,
+            type: 'type-b',
+            name: 'name-b',
+            id: 'id-b',
+            description: 'description-b',
           },
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          description: 'description-a',
         });
       });
 
@@ -306,16 +306,16 @@ describe('ExecutionContextService', () => {
         );
 
         expect(result?.toJSON()).toEqual({
-          type: 'type-b',
-          name: 'name-b',
-          id: 'id-b',
-          description: 'description-b',
-          parent: {
-            type: 'type-a',
-            name: 'name-a',
-            id: 'id-a',
-            description: 'description-a',
-            parent: undefined,
+          type: 'type-a',
+          name: 'name-a',
+          id: 'id-a',
+          description: 'description-a',
+          child: {
+            child: undefined,
+            type: 'type-b',
+            name: 'name-b',
+            id: 'id-b',
+            description: 'description-b',
           },
         });
       });

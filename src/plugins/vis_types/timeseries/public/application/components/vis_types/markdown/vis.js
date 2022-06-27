@@ -9,28 +9,26 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
-import uuid from 'uuid';
 import { get } from 'lodash';
-import { Markdown } from '../../../../../../../../plugins/kibana_react/public';
+import { ClassNames } from '@emotion/react';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 
 import { ErrorComponent } from '../../error';
 import { replaceVars } from '../../lib/replace_vars';
 import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
-const getMarkdownId = (id) => `markdown-${id}`;
+import './_markdown.scss';
 
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, getConfig, fieldFormatMap } = props;
   const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, getConfig, fieldFormatMap);
-  const markdownElementId = getMarkdownId(uuid.v1());
 
   const panelBackgroundColor = model.background_color || backgroundColor;
   const style = { backgroundColor: panelBackgroundColor };
 
   let markdown;
-  let markdownCss = '';
 
   if (model.markdown) {
     const markdownSource = replaceVars(
@@ -41,13 +39,6 @@ function MarkdownVisualization(props) {
         ...variables,
       }
     );
-
-    if (model.markdown_css) {
-      markdownCss = model.markdown_css.replace(
-        new RegExp(getMarkdownId(model.id), 'g'),
-        markdownElementId
-      );
-    }
 
     const markdownClasses = classNames('kbnMarkdown__body', {
       'kbnMarkdown__body--reversed': isBackgroundInverted(panelBackgroundColor),
@@ -65,17 +56,20 @@ function MarkdownVisualization(props) {
     markdown = (
       <div className="tvbMarkdown" data-test-subj="tsvbMarkdown">
         {markdownError && <ErrorComponent error={markdownError} />}
-        <style type="text/css">{markdownCss}</style>
-        <div className={contentClasses}>
-          <div id={markdownElementId}>
-            {!markdownError && (
-              <Markdown
-                markdown={markdownSource}
-                openLinksInNewTab={model.markdown_openLinksInNewTab}
-              />
-            )}
-          </div>
-        </div>
+        <ClassNames>
+          {({ css, cx }) => (
+            <div className={cx(contentClasses, css(model.markdown_css))}>
+              <div>
+                {!markdownError && (
+                  <Markdown
+                    markdown={markdownSource}
+                    openLinksInNewTab={model.markdown_openLinksInNewTab}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </ClassNames>
       </div>
     );
   }

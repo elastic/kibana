@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
+
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../rule_actions/legacy_update_or_create_rule_actions_saved_object';
@@ -13,8 +15,6 @@ import { legacyUpdateOrCreateRuleActionsSavedObject } from '../../rule_actions/l
 import { legacyReadNotifications } from '../../notifications/legacy_read_notifications';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleNotificationAlertTypeParams } from '../../notifications/legacy_types';
-// eslint-disable-next-line no-restricted-imports
-import { legacyAddTags } from '../../notifications/legacy_add_tags';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateNotifications } from '../../notifications/legacy_create_notifications';
 
@@ -25,7 +25,10 @@ import { legacyCreateNotifications } from '../../notifications/legacy_create_not
  * @deprecated Once we no longer have legacy notifications and "side car actions" this can be removed.
  * @param router The router
  */
-export const legacyCreateLegacyNotificationRoute = (router: SecuritySolutionPluginRouter): void => {
+export const legacyCreateLegacyNotificationRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+): void => {
   router.post(
     {
       path: '/internal/api/detection/legacy/notifications',
@@ -51,8 +54,8 @@ export const legacyCreateLegacyNotificationRoute = (router: SecuritySolutionPlug
       },
     },
     async (context, request, response) => {
-      const rulesClient = context.alerting.getRulesClient();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const rulesClient = (await context.alerting).getRulesClient();
+      const savedObjectsClient = (await context.core).savedObjects.client;
       const { alert_id: ruleAlertId } = request.query;
       const { actions, interval, name } = request.body;
       try {
@@ -67,7 +70,7 @@ export const legacyCreateLegacyNotificationRoute = (router: SecuritySolutionPlug
           await rulesClient.update<LegacyRuleNotificationAlertTypeParams>({
             id: notification.id,
             data: {
-              tags: legacyAddTags([], ruleAlertId),
+              tags: [],
               name,
               schedule: {
                 interval,
@@ -95,6 +98,7 @@ export const legacyCreateLegacyNotificationRoute = (router: SecuritySolutionPlug
           savedObjectsClient,
           actions,
           throttle: interval,
+          logger,
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'unknown';

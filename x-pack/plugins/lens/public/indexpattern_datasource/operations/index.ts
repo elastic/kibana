@@ -8,9 +8,12 @@
 export * from './operations';
 export * from './layer_helpers';
 export * from './time_scale_utils';
-export {
+
+export type {
   OperationType,
-  IndexPatternColumn,
+  BaseIndexPatternColumn,
+  GenericOperationDefinition,
+  GenericIndexPatternColumn,
   FieldBasedIndexPatternColumn,
   IncompleteColumn,
   RequiredReference,
@@ -25,6 +28,7 @@ export {
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -37,4 +41,6 @@ export {
   OverallAverageIndexPatternColumn,
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './definitions';

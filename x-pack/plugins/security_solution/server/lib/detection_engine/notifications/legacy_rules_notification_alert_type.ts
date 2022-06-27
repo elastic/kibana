@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { schema } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
@@ -15,12 +14,19 @@ import {
 } from '../../../../common/constants';
 
 // eslint-disable-next-line no-restricted-imports
-import { LegacyNotificationAlertTypeDefinition } from './legacy_types';
+import {
+  LegacyNotificationAlertTypeDefinition,
+  legacyRulesNotificationParams,
+} from './legacy_types';
 import { AlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
 import { getSignals } from './get_signals';
+// eslint-disable-next-line no-restricted-imports
+import { legacyExtractReferences } from './legacy_saved_object_references/legacy_extract_references';
+// eslint-disable-next-line no-restricted-imports
+import { legacyInjectReferences } from './legacy_saved_object_references/legacy_inject_references';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -36,17 +42,16 @@ export const legacyRulesNotificationAlertType = ({
   defaultActionGroupId: 'default',
   producer: SERVER_APP_ID,
   validate: {
-    params: schema.object({
-      ruleAlertId: schema.string(),
-    }),
+    params: legacyRulesNotificationParams,
+  },
+  useSavedObjectReferences: {
+    extractReferences: (params) => legacyExtractReferences({ logger, params }),
+    injectReferences: (params, savedObjectReferences) =>
+      legacyInjectReferences({ logger, params, savedObjectReferences }),
   },
   minimumLicenseRequired: 'basic',
   isExportable: false,
-  async executor({ startedAt, previousStartedAt, alertId, services, params }) {
-    // TODO: Change this to be a link to documentation on how to migrate: https://github.com/elastic/kibana/issues/113055
-    logger.warn(
-      'Security Solution notification (Legacy) system detected still running. Please see documentation on how to migrate to the new notification system.'
-    );
+  async executor({ startedAt, previousStartedAt, alertId, services, params, spaceId }) {
     const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',
       params.ruleAlertId
@@ -54,17 +59,26 @@ export const legacyRulesNotificationAlertType = ({
 
     if (!ruleAlertSavedObject.attributes.params) {
       logger.error(
-        `Security Solution notification (Legacy) saved object for alert ${params.ruleAlertId} was not found`
+        [
+          `Security Solution notification (Legacy) saved object for alert ${params.ruleAlertId} was not found with`,
+          `id: "${alertId}".`,
+          `space id: "${spaceId}"`,
+          'This indicates a dangling (Legacy) notification alert.',
+          'You should delete this rule through "Kibana UI -> Stack Management -> Rules and Connectors" to remove this error message.',
+        ].join(' ')
       );
       return;
     }
+
     logger.warn(
       [
         'Security Solution notification (Legacy) system still active for alert with',
         `name: "${ruleAlertSavedObject.attributes.name}"`,
         `description: "${ruleAlertSavedObject.attributes.params.description}"`,
         `id: "${ruleAlertSavedObject.id}".`,
-        `Please see documentation on how to migrate to the new notification system.`,
+        `space id: "${spaceId}"`,
+        'Editing or updating this rule through "Kibana UI -> Security -> Alerts -> Manage Rules"',
+        'will auto-migrate the rule to the new notification system and remove this warning message.',
       ].join(' ')
     );
 
@@ -90,7 +104,7 @@ export const legacyRulesNotificationAlertType = ({
     const signals = results.hits.hits.map((hit) => hit._source);
 
     const signalsCount =
-      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
+      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value ?? 0;
 
     const resultsLink = getNotificationResultsLink({
       from: fromInMs,
@@ -105,7 +119,7 @@ export const legacyRulesNotificationAlertType = ({
     );
 
     if (signalsCount !== 0) {
-      const alertInstance = services.alertInstanceFactory(alertId);
+      const alertInstance = services.alertFactory.create(alertId);
       scheduleNotificationActions({
         alertInstance,
         signalsCount,

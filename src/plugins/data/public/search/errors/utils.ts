@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ErrorCause } from '@elastic/elasticsearch/api/types';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import type { FailedShard, Reason } from './types';
-import { KibanaServerError } from '../../../../kibana_utils/common';
 
 export function getFailedShards(err: KibanaServerError<any>): FailedShard | undefined {
   const errorInfo = err.attributes;

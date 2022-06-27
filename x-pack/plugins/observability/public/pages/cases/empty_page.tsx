@@ -59,7 +59,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
               <EuiFlexItem
                 grow={false}
                 style={{ maxWidth: maxItemWidth }}
-                key={`empty-page-${titles[idx]}-action`}
+                key={`emptyPageAction-${titles[idx]}`}
               >
                 <EuiCard
                   title={descriptionTitle ?? false}
@@ -72,7 +72,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
                       iconType={icon}
                       target={target}
                       fill={fill}
-                      data-test-subj={`empty-page-${titles[idx]}-action`}
+                      data-test-subj={`emptyPageAction-${titles[idx]}`}
                     >
                       {label}
                     </EuiButton>
@@ -83,7 +83,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
               <EuiFlexItem
                 grow={false}
                 style={{ maxWidth: maxItemWidth }}
-                key={`empty-page-${titles[idx]}-action`}
+                key={`emptyPageAction-${titles[idx]}`}
               >
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButton
@@ -91,7 +91,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
                   onClick={onClick}
                   iconType={icon}
                   target={target}
-                  data-test-subj={`empty-page-${titles[idx]}-action`}
+                  data-test-subj={`emptyPageAction-${titles[idx]}`}
                 >
                   {label}
                 </EuiButton>
@@ -103,7 +103,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
 
   return (
     <EmptyPrompt
-      iconType="logoObservability"
+      iconType="casesApp"
       title={<h2>{title}</h2>}
       body={message && <p>{message}</p>}
       actions={<EuiFlexGroup justifyContent="center">{renderActions}</EuiFlexGroup>}

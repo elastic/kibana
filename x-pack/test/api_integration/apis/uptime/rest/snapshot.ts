@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus, getChecksDateRange } from './helper/make_checks';
@@ -18,9 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('when no data is present', async () => {
       it('returns a null snapshot', async () => {
-        const apiResponse = await supertest.get(
-          `/api/uptime/snapshot/count?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
-        );
+        const apiResponse = await supertest.get(API_URLS.SNAPSHOT_COUNT).query({
+          dateRangeStart,
+          dateRangeEnd,
+        });
 
         expectFixtureEql(apiResponse.body, 'snapshot_empty');
       });
@@ -75,9 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
             });
 
             it('will count all statuses correctly', async () => {
-              const apiResponse = await supertest.get(
-                `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}`
-              );
+              const apiResponse = await supertest.get(API_URLS.SNAPSHOT_COUNT).query({
+                dateRangeStart: dateRange.start,
+                dateRangeEnd: dateRange.end,
+              });
 
               expectFixtureEql(apiResponse.body, 'snapshot');
             });

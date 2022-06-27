@@ -10,7 +10,7 @@ import { Router, useParams } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
 
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import {
   mockGlobalState,
   TestProviders,
@@ -20,14 +20,13 @@ import {
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
-import { NetworkDetails } from './index';
-import { FlowTarget } from '../../../../common/search_strategy';
+import { NetworkDetails } from '.';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -88,7 +87,7 @@ const getMockHistory = (ip: string) => ({
 describe('Network Details', () => {
   const mount = useMountAppended();
   beforeAll(() => {
-    (useSourcererScope as jest.Mock).mockReturnValue({
+    (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: false,
       indexPattern: {},
     });
@@ -118,7 +117,7 @@ describe('Network Details', () => {
     const ip = '123.456.78.90';
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
-      flowTarget: FlowTarget.source,
+      flowTarget: FlowTargetSourceDest.source,
     });
     const wrapper = mount(
       <TestProviders store={store}>
@@ -132,13 +131,13 @@ describe('Network Details', () => {
 
   test('it renders ipv6 headline', async () => {
     const ip = 'fe80--24ce-f7ff-fede-a571';
-    (useSourcererScope as jest.Mock).mockReturnValue({
+    (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
-      flowTarget: FlowTarget.source,
+      flowTarget: FlowTargetSourceDest.source,
     });
     const wrapper = mount(
       <TestProviders store={store}>

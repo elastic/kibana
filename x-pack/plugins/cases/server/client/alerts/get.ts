@@ -5,24 +5,33 @@
  * 2.0.
  */
 
-import { CasesClientGetAlertsResponse, AlertGet } from './types';
+import { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/api/types';
+import { CasesClientGetAlertsResponse } from './types';
 import { CasesClientArgs } from '..';
+import { AlertInfo } from '../../common/types';
+import { Alert } from '../../services/alerts';
 
-export const get = async (
-  { alertsInfo }: AlertGet,
+function isAlert(
+  doc?: MgetResponseItem<unknown>
+): doc is Omit<GetGetResult<Alert>, '_source'> & { _source: Alert } {
+  return Boolean(doc && !('error' in doc) && '_source' in doc);
+}
+
+export const getAlerts = async (
+  alertsInfo: AlertInfo[],
   clientArgs: CasesClientArgs
 ): Promise<CasesClientGetAlertsResponse> => {
-  const { alertsService, scopedClusterClient, logger } = clientArgs;
+  const { alertsService } = clientArgs;
   if (alertsInfo.length === 0) {
     return [];
   }
 
-  const alerts = await alertsService.getAlerts({ alertsInfo, scopedClusterClient, logger });
+  const alerts = await alertsService.getAlerts(alertsInfo);
   if (!alerts) {
     return [];
   }
 
-  return alerts.docs.map((alert) => ({
+  return alerts.docs.filter(isAlert).map((alert) => ({
     id: alert._id,
     index: alert._index,
     ...alert._source,

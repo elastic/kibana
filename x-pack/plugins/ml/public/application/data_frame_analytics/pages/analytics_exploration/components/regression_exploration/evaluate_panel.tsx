@@ -7,7 +7,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -75,7 +75,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const dependentVariable = getDependentVar(jobConfig.analysis);
   const predictionFieldName = getPredictionFieldName(jobConfig.analysis);
   // default is 'ml'
-  const resultsField = jobConfig.dest.results_field;
+  const resultsField = jobConfig.dest.results_field ?? 'ml';
 
   const loadGeneralizationData = async (ignoreDefaultQuery: boolean = true) => {
     setIsLoadingGeneralization(true);

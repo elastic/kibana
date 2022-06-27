@@ -32,6 +32,12 @@ import {
   MockIntegrationsService,
   CoreAppConstructor,
   MockCoreApp,
+  MockThemeService,
+  ThemeServiceConstructor,
+  AnalyticsServiceConstructor,
+  MockAnalyticsService,
+  analyticsServiceStartMock,
+  fetchOptionalMemoryInfoMock,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -46,6 +52,17 @@ const defaultCoreSystemParams = {
     csp: {
       warnLegacyBrowsers: true,
     },
+    env: {
+      mode: {
+        name: 'development',
+        dev: true,
+        prod: false,
+      },
+      packageInfo: {
+        dist: false,
+        version: '1.2.3',
+      },
+    },
     version: 'version',
   } as any,
 };
@@ -53,6 +70,19 @@ const defaultCoreSystemParams = {
 beforeEach(() => {
   jest.clearAllMocks();
   MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
+
+  window.performance.mark = jest.fn();
+  window.performance.clearMarks = jest.fn();
+  window.performance.getEntriesByName = jest.fn().mockReturnValue([
+    {
+      detail: 'load_started',
+      startTime: 456,
+    },
+    {
+      detail: 'bootstrap_started',
+      startTime: 123,
+    },
+  ]);
 });
 
 function createCoreSystem(params = {}) {
@@ -77,10 +107,12 @@ describe('constructor', () => {
     expect(RenderingServiceConstructor).toHaveBeenCalledTimes(1);
     expect(IntegrationsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(CoreAppConstructor).toHaveBeenCalledTimes(1);
+    expect(ThemeServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(AnalyticsServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
-    const injectedMetadata = { injectedMetadata: true } as any;
+    const injectedMetadata = { env: { mode: { dev: true }, packageInfo: { dist: false } } } as any;
 
     createCoreSystem({
       injectedMetadata,
@@ -133,6 +165,11 @@ describe('#setup()', () => {
     return core.setup();
   }
 
+  it('calls analytics#setup()', async () => {
+    await setupCore();
+    expect(MockAnalyticsService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls application#setup()', async () => {
     await setupCore();
     expect(MockApplicationService.setup).toHaveBeenCalledTimes(1);
@@ -182,6 +219,11 @@ describe('#setup()', () => {
     await setupCore();
     expect(MockCoreApp.setup).toHaveBeenCalledTimes(1);
   });
+
+  it('calls theme#setup()', async () => {
+    await setupCore();
+    expect(MockThemeService.setup).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('#start()', () => {
@@ -192,7 +234,9 @@ describe('#start()', () => {
     });
 
     await core.setup();
-    await core.start();
+
+    const services = await core.start();
+    await services?.application.navigateToApp('home');
   }
 
   it('clears the children of the rootDomElement and appends container for rendering service with #kibana-body, notifications, overlays', async () => {
@@ -202,6 +246,46 @@ describe('#start()', () => {
     expect(root.innerHTML).toMatchInlineSnapshot(
       `"<div id=\\"kibana-body\\" data-test-subj=\\"kibanaChrome\\"></div><div></div><div></div>"`
     );
+  });
+
+  it('reports the event Loaded Kibana and clears marks', async () => {
+    await startCore();
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+      kibana_version: '1.2.3',
+      load_started: 456,
+      bootstrap_started: 123,
+      protocol: 'http:',
+    });
+
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports the event Loaded Kibana (with memory)', async () => {
+    fetchOptionalMemoryInfoMock.mockReturnValue({
+      load_started: 456,
+      bootstrap_started: 123,
+      memory_js_heap_size_limit: 3,
+      memory_js_heap_size_total: 2,
+      memory_js_heap_size_used: 1,
+    });
+
+    await startCore();
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledTimes(1);
+    expect(analyticsServiceStartMock.reportEvent).toHaveBeenCalledWith('Loaded Kibana', {
+      load_started: 456,
+      bootstrap_started: 123,
+      kibana_version: '1.2.3',
+      memory_js_heap_size_limit: 3,
+      memory_js_heap_size_total: 2,
+      memory_js_heap_size_used: 1,
+      protocol: 'http:',
+    });
+  });
+
+  it('calls analytics#start()', async () => {
+    await startCore();
+    expect(MockAnalyticsService.start).toHaveBeenCalledTimes(1);
   });
 
   it('calls application#start()', async () => {
@@ -235,6 +319,7 @@ describe('#start()', () => {
     expect(MockNotificationsService.start).toHaveBeenCalledWith({
       i18n: expect.any(Object),
       overlays: expect.any(Object),
+      theme: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
@@ -256,6 +341,8 @@ describe('#start()', () => {
       application: expect.any(Object),
       chrome: expect.any(Object),
       overlays: expect.any(Object),
+      i18n: expect.any(Object),
+      theme: expect.any(Object),
       targetDomElement: expect.any(HTMLElement),
     });
   });
@@ -268,6 +355,11 @@ describe('#start()', () => {
   it('calls coreApp#start()', async () => {
     await startCore();
     expect(MockCoreApp.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls theme#start()', async () => {
+    await startCore();
+    expect(MockThemeService.start).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -325,6 +417,14 @@ describe('#stop()', () => {
     expect(MockCoreApp.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(MockCoreApp.stop).toHaveBeenCalled();
+  });
+
+  it('calls theme.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockThemeService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockThemeService.stop).toHaveBeenCalled();
   });
 
   it('clears the rootDomElement', async () => {

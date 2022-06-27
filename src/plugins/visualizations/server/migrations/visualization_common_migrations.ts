@@ -41,6 +41,19 @@ export const commonAddDropLastBucketIntoTSVBModel = (visState: any) => {
   return visState;
 };
 
+export const commonAddDropLastBucketIntoTSVBModel714Above = (visState: any) => {
+  if (visState && visState.type === 'metrics') {
+    return {
+      ...visState,
+      params: {
+        ...visState.params,
+        drop_last_bucket: visState.params.drop_last_bucket ?? 1,
+      },
+    };
+  }
+  return visState;
+};
+
 export const commonHideTSVBLastValueIndicator = (visState: any) => {
   if (visState && visState.type === 'metrics' && visState.params.type !== 'timeseries') {
     return {
@@ -151,6 +164,82 @@ export const commonMigrateTagCloud = (visState: any) => {
             name: 'kibana_palette',
           },
         }),
+      },
+    };
+  }
+
+  return visState;
+};
+
+export const commonRemoveMarkdownLessFromTSVB = (visState: any) => {
+  if (visState && visState.type === 'metrics') {
+    const params: any = get(visState, 'params') || {};
+
+    if (params.type === 'markdown') {
+      // remove less
+      if (params.markdown_less) {
+        delete params.markdown_less;
+      }
+
+      // remove markdown id from css
+      if (params.markdown_css) {
+        params.markdown_css = params.markdown_css
+          .replace(new RegExp(`#markdown-${params.id}`, 'g'), '')
+          .trim();
+      }
+    }
+
+    return {
+      ...visState,
+      params: {
+        ...params,
+      },
+    };
+  }
+
+  return visState;
+};
+
+export const commonUpdatePieVisApi = (visState: any) => {
+  if (visState && visState.type === 'pie') {
+    const { addLegend, ...restParams } = visState.params;
+
+    return {
+      ...visState,
+      params: {
+        ...restParams,
+        legendDisplay: addLegend ? 'show' : 'hide',
+      },
+    };
+  }
+
+  return visState;
+};
+
+export const commonPreserveOldLegendSizeDefault = (visState: any) => {
+  const visualizationTypesWithLegends = [
+    'pie',
+    'area',
+    'histogram',
+    'horizontal_bar',
+    'line',
+    'heatmap',
+  ];
+
+  const pixelsToLegendSize: Record<string, string> = {
+    undefined: 'auto',
+    '80': 'small',
+    '130': 'medium',
+    '180': 'large',
+    '230': 'xlarge',
+  };
+
+  if (visualizationTypesWithLegends.includes(visState?.type)) {
+    return {
+      ...visState,
+      params: {
+        ...visState.params,
+        legendSize: pixelsToLegendSize[visState.params?.legendSize],
       },
     };
   }

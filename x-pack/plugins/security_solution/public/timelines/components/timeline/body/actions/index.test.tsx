@@ -9,15 +9,19 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
-import { Actions } from '.';
+import { Actions, isAlert } from '.';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+
+jest.mock('../../../../../detections/components/user_info', () => ({
+  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
+}));
 jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
-jest.mock('../../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
-}));
+jest.mock('../../../../../common/hooks/use_selector');
 jest.mock(
   '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
   () => ({
@@ -39,6 +43,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
           siem: { crud_alerts: true, read_alerts: true },
         },
       },
+      cases: mockCasesContract(),
       uiSettings: {
         get: jest.fn(),
       },
@@ -81,6 +86,10 @@ const defaultProps = {
 };
 
 describe('Actions', () => {
+  beforeAll(() => {
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  });
+
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
       <TestProviders>
@@ -126,7 +135,7 @@ describe('Actions', () => {
     test('it enables for eventType=signal', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
-        signal: { rule: { id: ['123'] } },
+        kibana: { alert: { rule: { uuid: ['123'], parameters: {} } } },
       };
       const wrapper = mount(
         <TestProviders>
@@ -169,7 +178,7 @@ describe('Actions', () => {
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
     });
-    test('it enables for event.kind: alert and agent.type: endpoint', () => {
+    test('it disables for event.kind: alert and agent.type: endpoint', () => {
       const ecsData = {
         ...mockTimelineData[0].ecs,
         event: { kind: ['alert'] },
@@ -183,7 +192,46 @@ describe('Actions', () => {
 
       expect(
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
-      ).toBe(false);
+      ).toBe(true);
+    });
+    test('it shows the analyze event button when the event is from an endpoint', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['endpoint'] },
+        process: { entity_id: ['1'] },
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(true);
+    });
+    test('it does not render the analyze event button when the event is from an unsupported source', () => {
+      const ecsData = {
+        ...mockTimelineData[0].ecs,
+        event: { kind: ['alert'] },
+        agent: { type: ['notendpoint'] },
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} ecsData={ecsData} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="view-in-analyzer"]').exists()).toBe(false);
+    });
+  });
+
+  describe('isAlert', () => {
+    test('it returns true when the eventType is an alert', () => {
+      expect(isAlert('signal')).toBe(true);
+    });
+
+    test('it returns false when the eventType is NOT an alert', () => {
+      expect(isAlert('raw')).toBe(false);
     });
   });
 });

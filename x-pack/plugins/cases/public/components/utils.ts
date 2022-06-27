@@ -6,9 +6,9 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { ConnectorTypes } from '../../common';
+import { ConnectorTypes } from '../../common/api';
 import { FieldConfig, ValidationConfig } from '../common/shared_imports';
-import { StartPlugins } from '../types';
+import { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
 import { CaseActionConnector } from './types';
 
@@ -24,6 +24,16 @@ const validators: Record<
   [ConnectorTypes.swimlane]: swimlaneConnectorValidator,
 };
 
+export const connectorDeprecationValidator = (
+  connector: CaseActionConnector
+): ReturnType<ValidationConfig['validator']> => {
+  if (connector.isDeprecated) {
+    return {
+      message: 'Deprecated connector',
+    };
+  }
+};
+
 export const getConnectorsFormValidators = ({
   connectors = [],
   config = {},
@@ -37,6 +47,14 @@ export const getConnectorsFormValidators = ({
       validator: ({ value: connectorId }) => {
         const connector = getConnectorById(connectorId as string, connectors);
         if (connector != null) {
+          return connectorDeprecationValidator(connector);
+        }
+      },
+    },
+    {
+      validator: ({ value: connectorId }) => {
+        const connector = getConnectorById(connectorId as string, connectors);
+        if (connector != null) {
           return validators[connector.actionTypeId]?.(connector);
         }
       },
@@ -45,7 +63,7 @@ export const getConnectorsFormValidators = ({
 });
 
 export const getConnectorIcon = (
-  triggersActionsUi: StartPlugins['triggersActionsUi'],
+  triggersActionsUi: CasesPluginStart['triggersActionsUi'],
   type?: string
 ): IconType => {
   /**
@@ -67,4 +85,8 @@ export const getConnectorIcon = (
   }
 
   return emptyResponse;
+};
+
+export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean => {
+  return connector?.isDeprecated ?? false;
 };

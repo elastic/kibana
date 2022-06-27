@@ -7,10 +7,14 @@
  */
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { Observable } from 'rxjs';
+import { CoreTheme } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { i18n } from '@kbn/i18n';
-import { withSuspense } from '../../../presentation_util/public';
+import { CoreSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
 import { RevealImageRendererConfig } from '../../common/types';
 
 export const strings = {
@@ -27,25 +31,32 @@ export const strings = {
 const LazyRevealImageComponent = lazy(() => import('../components/reveal_image_component'));
 const RevealImageComponent = withSuspense(LazyRevealImageComponent, null);
 
-export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
-  name: 'revealImage',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render: (
-    domNode: HTMLElement,
-    config: RevealImageRendererConfig,
-    handlers: IInterpreterRenderHandlers
-  ) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+export const getRevealImageRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$) =>
+  (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
+    name: 'revealImage',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render: (
+      domNode: HTMLElement,
+      config: RevealImageRendererConfig,
+      handlers: IInterpreterRenderHandlers
+    ) => {
+      handlers.onDestroy(() => {
+        unmountComponentAtNode(domNode);
+      });
 
-    render(
-      <I18nProvider>
-        <RevealImageComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
-      </I18nProvider>,
-      domNode
-    );
-  },
-});
+      render(
+        <KibanaThemeProvider theme$={theme$}>
+          <I18nProvider>
+            <RevealImageComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domNode
+      );
+    },
+  });
+
+export const revealImageRendererFactory = (core: CoreSetup) =>
+  getRevealImageRenderer(core.theme.theme$);

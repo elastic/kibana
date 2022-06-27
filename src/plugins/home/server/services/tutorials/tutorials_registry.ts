@@ -6,32 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import {
   TutorialProvider,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
+  TutorialContext,
 } from './lib/tutorials_registry_types';
 import { TutorialSchema, tutorialSchema } from './lib/tutorial_schema';
 import { builtInTutorials } from '../../tutorials/register';
-import { CustomIntegrationsPluginSetup } from '../../../../custom_integrations/server';
-import { Category, CATEGORY_DISPLAY } from '../../../../custom_integrations/common';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 
 function registerTutorialWithCustomIntegrations(
   customIntegrations: CustomIntegrationsPluginSetup,
   tutorial: TutorialSchema
 ) {
-  const allowedCategories: Category[] = (tutorial.integrationBrowserCategories ?? []).filter(
-    (category) => {
-      return CATEGORY_DISPLAY.hasOwnProperty(category);
-    }
-  ) as Category[];
-
   customIntegrations.registerCustomIntegration({
     id: tutorial.id,
     title: tutorial.name,
-    categories: allowedCategories,
+    categories: (tutorial.integrationBrowserCategories ?? []) as IntegrationCategory[],
     uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
     icons: tutorial.euiIconType
@@ -44,6 +39,32 @@ function registerTutorialWithCustomIntegrations(
       : [],
     shipper: 'tutorial',
     isBeta: false,
+    eprOverlap: tutorial.eprPackageOverlap,
+  });
+}
+
+function registerBeatsTutorialsWithCustomIntegrations(
+  core: CoreStart,
+  customIntegrations: CustomIntegrationsPluginSetup,
+  tutorial: TutorialSchema
+) {
+  customIntegrations.registerCustomIntegration({
+    id: tutorial.name,
+    title: tutorial.name,
+    categories: tutorial.integrationBrowserCategories as IntegrationCategory[],
+    uiInternalPath: `${HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
+    description: tutorial.shortDescription,
+    icons: tutorial.euiIconType
+      ? [
+          {
+            type: tutorial.euiIconType.endsWith('svg') ? 'svg' : 'eui',
+            src: core.http.basePath.prepend(tutorial.euiIconType),
+          },
+        ]
+      : [],
+    shipper: 'beats',
+    eprOverlap: tutorial.moduleName,
+    isBeta: false,
   });
 }
 
@@ -51,12 +72,14 @@ export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
 
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
     const router = core.http.createRouter();
     router.get(
       { path: '/api/kibana/home/tutorials', validate: false },
       async (context, req, res) => {
-        const initialContext = {};
+        const initialContext = this.baseTutorialContext;
         const scopedContext = this.scopedTutorialContextFactories.reduce(
           (accumulatedContext, contextFactory) => {
             return { ...accumulatedContext, ...contextFactory(req) };
@@ -72,7 +95,7 @@ export class TutorialsRegistry {
     );
     return {
       registerTutorial: (specProvider: TutorialProvider) => {
-        const emptyContext = {};
+        const emptyContext = this.baseTutorialContext;
         let tutorial: TutorialSchema;
         try {
           tutorial = tutorialSchema.validate(specProvider(emptyContext));
@@ -106,10 +129,21 @@ export class TutorialsRegistry {
     };
   }
 
-  public start() {
+  public start(core: CoreStart, customIntegrations?: CustomIntegrationsPluginSetup) {
     // pre-populate with built in tutorials
     this.tutorialProviders.push(...builtInTutorials);
+
+    if (customIntegrations) {
+      builtInTutorials.forEach((provider) => {
+        const tutorial = provider(this.baseTutorialContext);
+        registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
+      });
+    }
     return {};
+  }
+
+  private get baseTutorialContext(): TutorialContext {
+    return { kibanaBranch: this.initContext.env.packageInfo.branch };
   }
 }
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaFeature } from '../../../../../features/common';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+
 import type { RawKibanaPrivileges, RoleKibanaPrivilege } from '../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../edit_role/privilege_utils';
 import { KibanaPrivilege } from './kibana_privilege';
@@ -58,7 +59,7 @@ export class KibanaPrivileges {
 
   public createCollectionFromRoleKibanaPrivileges(roleKibanaPrivileges: RoleKibanaPrivilege[]) {
     const filterAssigned = (assignedPrivileges: string[]) => (privilege: KibanaPrivilege) =>
-      assignedPrivileges.includes(privilege.id);
+      Array.isArray(assignedPrivileges) && assignedPrivileges.includes(privilege.id);
 
     const privileges: KibanaPrivilege[] = roleKibanaPrivileges
       .map((entry) => {

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { IClusterClient } from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { IClusterClient } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getSettingsCollector } from './get_settings_collector';
 import { getMonitoringUsageCollector } from './get_usage_collector';
 import { MonitoringConfig } from '../../config';
 
-export { KibanaSettingsCollector, getKibanaSettings } from './get_settings_collector';
+export type { KibanaSettingsCollector } from './get_settings_collector';
+export { getKibanaSettings } from './get_settings_collector';
 
 export function registerCollectors(
   usageCollection: UsageCollectionSetup,

@@ -9,11 +9,14 @@
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { ISearchSource } from 'src/plugins/data/public';
-import { DatatableColumnType, SerializedFieldFormat } from 'src/plugins/expressions/common';
-import type { RequestAdapter } from 'src/plugins/inspector/common';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ISearchSource } from '../../../public';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
 import { IAggConfigs } from './agg_configs';
@@ -52,10 +55,12 @@ export interface AggTypeConfig<
   json?: boolean;
   decorateAggConfig?: () => any;
   postFlightRequest?: PostFlightRequestFn<TAggConfig>;
+  hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
   getValueBucketPath?: (agg: TAggConfig) => string;
+  getResponseId?: (agg: TAggConfig) => string;
 }
 
 // TODO need to make a more explicit interface for this
@@ -179,6 +184,9 @@ export class AggType<
    * is created, giving the agg type a chance to modify the agg config
    */
   decorateAggConfig: () => any;
+
+  hasPrecisionError?: (aggBucket: Record<string, unknown>) => boolean;
+
   /**
    * A function that needs to be called after the main request has been made
    * and should return an updated response
@@ -201,7 +209,7 @@ export class AggType<
    * @param  {agg} agg - the agg to pick a format for
    * @return {SerializedFieldFormat}
    */
-  getSerializedFormat: (agg: TAggConfig) => SerializedFieldFormat;
+  getSerializedFormat: <T extends FieldFormatParams>(agg: TAggConfig) => SerializedFieldFormat<T>;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 
@@ -218,6 +226,25 @@ export class AggType<
   splitForTimeShift(agg: TAggConfig, aggs: IAggConfigs) {
     return false;
   }
+
+  /**
+   * Returns the key of the object containing the results of the agg in the Elasticsearch response object.
+   * In most cases this returns the `agg.id` property, but in some cases the response object is structured differently.
+   * In the following example of a terms agg, `getResponseId` returns "myAgg":
+   * ```
+   * {
+   *    "aggregations": {
+   *      "myAgg": {
+   *        "doc_count_error_upper_bound": 0,
+   *        "sum_other_doc_count": 0,
+   *        "buckets": [
+   * ...
+   * ```
+   *
+   * @param  {agg} agg - the agg to return the id in the ES reponse object for
+   * @return {string}
+   */
+  getResponseId: (agg: TAggConfig) => string;
 
   /**
    * Generic AggType Constructor
@@ -282,6 +309,7 @@ export class AggType<
     this.getResponseAggs = config.getResponseAggs || (() => {});
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
+    this.hasPrecisionError = config.hasPrecisionError;
 
     this.getSerializedFormat =
       config.getSerializedFormat ||
@@ -292,5 +320,7 @@ export class AggType<
       });
 
     this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
+
+    this.getResponseId = config.getResponseId || ((agg: TAggConfig) => agg.id);
   }
 }

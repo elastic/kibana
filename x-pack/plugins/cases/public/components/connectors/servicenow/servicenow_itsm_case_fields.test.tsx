@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, render, screen } from '@testing-library/react';
 import { EuiSelect } from '@elastic/eui';
 import { mount } from 'enzyme';
 
@@ -47,6 +47,10 @@ describe('ServiceNowITSM Fields', () => {
 
   it('all params fields are rendered - isEdit: true', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+    wrapper.update();
     expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
@@ -73,7 +77,7 @@ describe('ServiceNowITSM Fields', () => {
     );
   });
 
-  test('it transforms the categories to options correctly', async () => {
+  it('transforms the categories to options correctly', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
     act(() => {
       onChoicesSuccess(mockChoices);
@@ -91,10 +95,14 @@ describe('ServiceNowITSM Fields', () => {
         value: 'software',
         text: 'Software',
       },
+      {
+        text: 'Failed Login',
+        value: 'failed_login',
+      },
     ]);
   });
 
-  test('it transforms the subcategories to options correctly', async () => {
+  it('transforms the subcategories to options correctly', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
     act(() => {
       onChoicesSuccess(mockChoices);
@@ -109,7 +117,7 @@ describe('ServiceNowITSM Fields', () => {
     ]);
   });
 
-  it('it transforms the options correctly', async () => {
+  it('transforms the options correctly', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
     act(() => {
       onChoicesSuccess(mockChoices);
@@ -127,14 +135,65 @@ describe('ServiceNowITSM Fields', () => {
     );
   });
 
+  it('shows the deprecated callout if the connector is deprecated', async () => {
+    const tableApiConnector = { ...connector, isDeprecated: true };
+    render(<Fields fields={fields} onChange={onChange} connector={tableApiConnector} />);
+    expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
+  });
+
+  it('does not show the deprecated callout when the connector is not deprecated', async () => {
+    render(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the deprecated callout when the connector is preconfigured and not deprecated', async () => {
+    render(
+      <Fields
+        fields={fields}
+        onChange={onChange}
+        connector={{ ...connector, isPreconfigured: true }}
+      />
+    );
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
+  });
+
+  it('shows the deprecated callout when the connector is preconfigured and deprecated', async () => {
+    render(
+      <Fields
+        fields={fields}
+        onChange={onChange}
+        connector={{ ...connector, isPreconfigured: true, isDeprecated: true }}
+      />
+    );
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
+  });
+
+  it('should hide subcategory if selecting a category without subcategories', async () => {
+    // Failed Login doesn't have defined subcategories
+    const customFields = {
+      ...fields,
+      category: 'Failed Login',
+      subcategory: '',
+    };
+    const wrapper = mount(
+      <Fields fields={customFields} onChange={onChange} connector={connector} />
+    );
+
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
+  });
+
   describe('onChange calls', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+    wrapper.update();
 
     expect(onChange).toHaveBeenCalledWith(fields);
 
     const testers = ['severity', 'urgency', 'impact', 'subcategory'];
     testers.forEach((subj) =>
-      test(`${subj.toUpperCase()}`, async () => {
+      it(`${subj.toUpperCase()}`, async () => {
         await waitFor(() => {
           const select = wrapper.find(EuiSelect).filter(`[data-test-subj="${subj}Select"]`)!;
           select.prop('onChange')!({
@@ -151,7 +210,7 @@ describe('ServiceNowITSM Fields', () => {
       })
     );
 
-    test('it should set subcategory to null when changing category', async () => {
+    it('should set subcategory to null when changing category', async () => {
       await waitFor(() => {
         const select = wrapper.find(EuiSelect).filter(`[data-test-subj="categorySelect"]`)!;
         select.prop('onChange')!({

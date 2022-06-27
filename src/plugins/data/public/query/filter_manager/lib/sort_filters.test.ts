@@ -7,18 +7,18 @@
  */
 
 import { sortFilters } from './sort_filters';
-import { FilterStateStore, buildQueryFilter } from '../../../../common';
+import { FilterStateStore, buildQueryFilter } from '@kbn/es-query';
 
 describe('sortFilters', () => {
   describe('sortFilters()', () => {
     test('Not sort two application level filters', () => {
       const f1 = {
         $state: { store: FilterStateStore.APP_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       };
       const f2 = {
         $state: { store: FilterStateStore.APP_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       };
 
       const filters = [f1, f2].sort(sortFilters);
@@ -28,11 +28,11 @@ describe('sortFilters', () => {
     test('Not sort two global level filters', () => {
       const f1 = {
         $state: { store: FilterStateStore.GLOBAL_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       };
       const f2 = {
         $state: { store: FilterStateStore.GLOBAL_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       };
 
       const filters = [f1, f2].sort(sortFilters);
@@ -42,11 +42,11 @@ describe('sortFilters', () => {
     test('Move global level filter to the beginning of the array', () => {
       const f1 = {
         $state: { store: FilterStateStore.APP_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       };
       const f2 = {
         $state: { store: FilterStateStore.GLOBAL_STATE },
-        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       };
 
       const filters = [f1, f2].sort(sortFilters);

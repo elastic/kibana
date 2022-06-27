@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { v4 as uuid } from 'uuid';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '../../../../../common/lib';
@@ -24,7 +24,7 @@ export const DOCUMENT_REFERENCE = '-na-';
 // 2^0 as the value of the last documents, the values increasing for older
 // documents.
 export async function createEsDocuments(
-  es: any,
+  es: Client,
   esTestIndexTool: ESTestIndexTool,
   endDate: string = END_DATE,
   intervals: number = 1,
@@ -33,6 +33,7 @@ export async function createEsDocuments(
 ) {
   const endDateMillis = Date.parse(endDate) - intervalMillis / 2;
 
+  const promises: Array<Promise<unknown>> = [];
   times(intervals, (interval) => {
     const date = endDateMillis - interval * intervalMillis;
 
@@ -41,15 +42,21 @@ export async function createEsDocuments(
 
     // don't need await on these, wait at the end of the function
     times(groups, (group) => {
-      createEsDocument(es, date, testedValue + group, `group-${group}`);
+      promises.push(createEsDocument(es, date, testedValue + group, `group-${group}`));
     });
   });
+  await Promise.all(promises);
 
   const totalDocuments = intervals * groups;
   await esTestIndexTool.waitForDocs(DOCUMENT_SOURCE, DOCUMENT_REFERENCE, totalDocuments);
 }
 
-async function createEsDocument(es: any, epochMillis: number, testedValue: number, group: string) {
+async function createEsDocument(
+  es: Client,
+  epochMillis: number,
+  testedValue: number,
+  group: string
+) {
   const document = {
     source: DOCUMENT_SOURCE,
     reference: DOCUMENT_REFERENCE,
@@ -62,11 +69,12 @@ async function createEsDocument(es: any, epochMillis: number, testedValue: numbe
   const response = await es.index({
     id: uuid(),
     index: ES_TEST_INDEX_NAME,
+    refresh: 'wait_for',
     body: document,
   });
   // console.log(`writing document to ${ES_TEST_INDEX_NAME}:`, JSON.stringify(document, null, 4));
 
-  if (response.body.result !== 'created') {
+  if (response.result !== 'created') {
     throw new Error(`document not created: ${JSON.stringify(response)}`);
   }
 }

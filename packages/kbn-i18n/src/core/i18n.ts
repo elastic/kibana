@@ -16,7 +16,7 @@ import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
 // Add all locale data to `IntlMessageFormat`.
-import './locales.js';
+import './locales';
 
 const EN_LOCALE = 'en';
 const translationsForLocale: Record<string, Translation> = {};
@@ -152,7 +152,7 @@ export function getRegisteredLocales() {
   return Object.keys(translationsForLocale);
 }
 
-interface TranslateArguments {
+export interface TranslateArguments {
   values?: Record<string, string | number | boolean | Date | null | undefined>;
   defaultMessage: string;
   description?: string;

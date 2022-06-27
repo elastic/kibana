@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChromeBreadcrumb } from 'src/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
 import type { Page, DynamicPagePathValues } from '../constants';
 import { FLEET_BASE_PATH, INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
 
-import { useStartServices } from './';
+import { useStartServices } from '.';
 
 interface AdditionalBreadcrumbOptions {
   useIntegrationsBasePath: boolean;
@@ -64,24 +64,6 @@ const breadcrumbGetters: {
     },
     { text: policyName },
   ],
-  add_integration_from_policy: ({ policyName, policyId }) => [
-    BASE_BREADCRUMB,
-    {
-      href: pagePathGetters.policies()[1],
-      text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
-        defaultMessage: 'Agent policies',
-      }),
-    },
-    {
-      href: pagePathGetters.policy_details({ policyId })[1],
-      text: policyName,
-    },
-    {
-      text: i18n.translate('xpack.fleet.breadcrumbs.addPackagePolicyPageTitle', {
-        defaultMessage: 'Add integration',
-      }),
-    },
-  ],
   add_integration_to_policy: ({ pkgTitle, pkgkey, integration }) => [
     INTEGRATIONS_BASE_BREADCRUMB,
     {
@@ -126,7 +108,7 @@ const breadcrumbGetters: {
       text: policyName,
     },
     {
-      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePacagePolicyPageTitle', {
+      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePackagePolicyPageTitle', {
         defaultMessage: 'Upgrade integration ',
       }),
     },
@@ -162,6 +144,14 @@ const breadcrumbGetters: {
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.datastreamsPageTitle', {
         defaultMessage: 'Data streams',
+      }),
+    },
+  ],
+  settings: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.settingsPageTitle', {
+        defaultMessage: 'Settings',
       }),
     },
   ],

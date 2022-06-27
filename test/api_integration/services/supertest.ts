@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
+import { systemIndicesSuperuser } from '@kbn/test';
+
 import { format as formatUrl } from 'url';
 
 import supertest from 'supertest';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
@@ -20,7 +22,11 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
 export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const esServerConfig = config.get('servers.elasticsearch');
-  const elasticSearchServerUrl = formatUrl(esServerConfig);
+  const elasticSearchServerUrl = formatUrl({
+    ...esServerConfig,
+    // Use system indices user so tests can write to system indices
+    auth: `${systemIndicesSuperuser.username}:${systemIndicesSuperuser.password}`,
+  });
 
   let agentOptions = {};
   if ('certificateAuthorities' in esServerConfig) {

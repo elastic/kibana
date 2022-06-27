@@ -11,9 +11,10 @@ import { ICON_TYPES } from '@elastic/eui';
 import type { PackageInfo, PackageListItem } from '../types';
 
 // TODO: Determine whether this can be relocated
-import { useLinks as useEPMLinks } from '../applications/integrations/hooks';
+// Import the specific hook to avoid a circular dependency in Babel
+import { useLinks as useEPMLinks } from '../applications/integrations/hooks/use_links';
 
-import { sendGetPackageInfoByKey } from './index';
+import { sendGetPackageInfoByKey } from '.';
 
 type Package = PackageInfo | PackageListItem;
 
@@ -65,11 +66,11 @@ export const usePackageIconType = ({
     }
 
     if (tryApi && !paramIcons && !iconList) {
-      sendGetPackageInfoByKey(cacheKey)
+      sendGetPackageInfoByKey(packageName, version)
         .catch((error) => undefined) // Ignore API errors
         .then((res) => {
           CACHED_ICONS.delete(cacheKey);
-          setIconList(res?.data?.response?.icons);
+          setIconList(res?.data?.item?.icons);
         });
     }
 

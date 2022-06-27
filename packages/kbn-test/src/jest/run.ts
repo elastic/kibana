@@ -21,23 +21,46 @@ import { resolve, relative, sep as osSep } from 'path';
 import { existsSync } from 'fs';
 import { run } from 'jest';
 import { buildArgv } from 'jest-cli/build/cli';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { REPO_ROOT } from '@kbn/utils';
+import { map } from 'lodash';
 
 // yarn test:jest src/core/server/saved_objects
 // yarn test:jest src/core/public/core_system.test.ts
 // :kibana/src/core/server/saved_objects yarn test:jest
 
+// Patch node 16 types to be compatible with jest 26
+// https://github.com/facebook/jest/issues/11640#issuecomment-893867514
+/* eslint-disable */
+declare global {
+  namespace NodeJS {
+    interface Global {}
+    interface InspectOptions {}
+
+    interface ConsoleConstructor extends console.ConsoleConstructor {}
+  }
+}
+/* eslint-enable */
+
 export function runJest(configName = 'jest.config.js') {
   const argv = buildArgv(process.argv);
+  const devConfigName = 'jest.config.dev.js';
 
   const log = new ToolingLog({
     level: argv.verbose ? 'verbose' : 'info',
     writeTo: process.stdout,
   });
 
+  const runStartTime = Date.now();
+  const reportTime = getTimeReporter(log, 'scripts/jest');
+
+  let testFiles: string[];
+
+  const cwd: string = process.env.INIT_CWD || process.cwd();
+
   if (!argv.config) {
-    const cwd = process.env.INIT_CWD || process.cwd();
-    const testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
+    testFiles = argv._.splice(2).map((p) => resolve(cwd, p.toString()));
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;
 
@@ -50,12 +73,43 @@ export function runJest(configName = 'jest.config.js') {
     // sets the working directory to the cwd or the common
     // base directory of the provided test files
     let wd = testFilesProvided ? commonTestFiles : cwd;
+    while (true) {
+      const dev = resolve(wd, devConfigName);
+      if (existsSync(dev)) {
+        configPath = dev;
+        break;
+      }
 
-    configPath = resolve(wd, configName);
+      const actual = resolve(wd, configName);
+      if (existsSync(actual)) {
+        configPath = actual;
+        break;
+      }
 
-    while (!existsSync(configPath)) {
-      wd = resolve(wd, '..');
-      configPath = resolve(wd, configName);
+      if (wd === REPO_ROOT) {
+        break;
+      }
+
+      const parent = resolve(wd, '..');
+      if (parent === wd) {
+        break;
+      }
+
+      wd = parent;
+    }
+
+    if (!configPath) {
+      if (testFilesProvided) {
+        log.error(
+          `unable to find a ${configName} file in ${commonTestFiles} or any parent directory up to the root of the repo. This CLI can only run Jest tests which resolve to a single ${configName} file, and that file must exist in a parent directory of all the paths you pass.`
+        );
+      } else {
+        log.error(
+          `we no longer ship a root config file so you either need to pass a path to a test file, a folder where tests can be found, or a --config argument pointing to one of the many ${configName} files in the repository`
+        );
+      }
+
+      process.exit(1);
     }
 
     log.verbose(`no config provided, found ${configPath}`);
@@ -73,7 +127,14 @@ export function runJest(configName = 'jest.config.js') {
     process.env.NODE_ENV = 'test';
   }
 
-  run();
+  run().then(() => {
+    // Success means that tests finished, doesn't mean they passed.
+    reportTime(runStartTime, 'total', {
+      success: true,
+      isXpack: cwd.includes('x-pack'),
+      testFiles: map(testFiles, (testFile) => relative(cwd, testFile)),
+    });
+  });
 }
 
 /**

@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
@@ -15,11 +17,9 @@ import {
   SampleDataRegistrySetup,
   SampleDataRegistryStart,
 } from './services';
-import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';
-import { CustomIntegrationsPluginSetup } from '../../custom_integrations/server';
 
 export interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
@@ -27,11 +27,18 @@ export interface HomeServerPluginSetupDependencies {
 }
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
-  constructor(private readonly initContext: PluginInitializerContext) {}
-  private readonly tutorialsRegistry = new TutorialsRegistry();
-  private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
+  private readonly tutorialsRegistry;
+  private readonly sampleDataRegistry: SampleDataRegistry;
+  private customIntegrations?: CustomIntegrationsPluginSetup;
+
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.sampleDataRegistry = new SampleDataRegistry(this.initContext);
+    this.tutorialsRegistry = new TutorialsRegistry(this.initContext);
+  }
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
+    this.customIntegrations = plugins.customIntegrations;
+
     core.capabilities.registerProvider(capabilitiesProvider);
     core.savedObjects.registerType(sampleDataTelemetry);
 
@@ -46,9 +53,9 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     };
   }
 
-  public start(): HomeServerPluginStart {
+  public start(core: CoreStart): HomeServerPluginStart {
     return {
-      tutorials: { ...this.tutorialsRegistry.start() },
+      tutorials: { ...this.tutorialsRegistry.start(core, this.customIntegrations) },
       sampleData: { ...this.sampleDataRegistry.start() },
     };
   }

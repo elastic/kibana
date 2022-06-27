@@ -19,7 +19,7 @@ import type {
   RegistryVarsEntry,
 } from '../types';
 
-import { isValidNamespace, doesPackageHaveIntegrations } from './';
+import { isValidNamespace, doesPackageHaveIntegrations } from '.';
 
 type Errors = string[] | null;
 
@@ -55,6 +55,7 @@ export const validatePackagePolicy = (
     description: null,
     namespace: null,
     inputs: {},
+    vars: {},
   };
   const namespaceValidation = isValidNamespace(packagePolicy.namespace);
 
@@ -143,7 +144,7 @@ export const validatePackagePolicy = (
         results[name] = input.enabled
           ? validatePackagePolicyConfig(
               configEntry,
-              inputVarDefsByPolicyTemplateAndType[inputKey][name],
+              (inputVarDefsByPolicyTemplateAndType[inputKey] ?? {})[name],
               name,
               safeLoadYaml
             )
@@ -162,23 +163,17 @@ export const validatePackagePolicy = (
         const streamVarDefs =
           streamVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
 
-        // Validate stream-level config fields
-        if (stream.vars) {
-          streamValidationResults.vars = Object.entries(stream.vars).reduce(
-            (results, [name, configEntry]) => {
-              results[name] =
-                streamVarDefs && streamVarDefs[name] && input.enabled && stream.enabled
-                  ? validatePackagePolicyConfig(
-                      configEntry,
-                      streamVarDefs[name],
-                      name,
-                      safeLoadYaml
-                    )
-                  : null;
-              return results;
-            },
-            {} as ValidationEntry
-          );
+        if (streamVarDefs && Object.keys(streamVarDefs).length) {
+          streamValidationResults.vars = Object.keys(streamVarDefs).reduce((results, name) => {
+            const configEntry = stream?.vars?.[name];
+
+            results[name] =
+              input.enabled && stream.enabled
+                ? validatePackagePolicyConfig(configEntry, streamVarDefs[name], name, safeLoadYaml)
+                : null;
+
+            return results;
+          }, {} as ValidationEntry);
         }
 
         inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
@@ -200,13 +195,15 @@ export const validatePackagePolicy = (
 };
 
 export const validatePackagePolicyConfig = (
-  configEntry: PackagePolicyConfigRecordEntry,
+  configEntry: PackagePolicyConfigRecordEntry | undefined,
   varDef: RegistryVarsEntry,
   varName: string,
   safeLoadYaml: (yaml: string) => any
 ): string[] | null => {
   const errors = [];
-  const { value } = configEntry;
+
+  const value = configEntry?.value;
+
   let parsedValue: any = value;
 
   if (typeof value === 'string') {
@@ -214,6 +211,7 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef === undefined) {
+    // TODO return validation error here once https://github.com/elastic/kibana/issues/125655 is fixed
     // eslint-disable-next-line no-console
     console.debug(`No variable definition for ${varName} found`);
 
@@ -221,7 +219,7 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef.required) {
-    if (parsedValue === undefined || (typeof parsedValue === 'string' && !parsedValue)) {
+    if (parsedValue === undefined || (varDef.type === 'yaml' && parsedValue === '')) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
@@ -253,10 +251,7 @@ export const validatePackagePolicyConfig = (
         })
       );
     }
-    if (
-      varDef.required &&
-      (!parsedValue || (Array.isArray(parsedValue) && parsedValue.length === 0))
-    ) {
+    if (varDef.required && Array.isArray(parsedValue) && parsedValue.length === 0) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',

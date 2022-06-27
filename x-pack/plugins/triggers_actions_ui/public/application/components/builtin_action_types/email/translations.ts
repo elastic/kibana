@@ -7,17 +7,87 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const USERNAME_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+  {
+    defaultMessage: 'Username',
+  }
+);
+
+export const PASSWORD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+  {
+    defaultMessage: 'Password',
+  }
+);
+
+export const FROM_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
+  {
+    defaultMessage: 'Sender',
+  }
+);
+
+export const SERVICE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
+  {
+    defaultMessage: 'Service',
+  }
+);
+
+export const TENANT_ID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.tenantIdFieldLabel',
+  {
+    defaultMessage: 'Tenant ID',
+  }
+);
+
+export const CLIENT_ID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.clientIdFieldLabel',
+  {
+    defaultMessage: 'Client ID',
+  }
+);
+
+export const CLIENT_SECRET_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Client Secret',
+  }
+);
+
+export const HOST_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const PORT_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
+  {
+    defaultMessage: 'Port',
+  }
+);
+
+export const SECURE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
+  {
+    defaultMessage: 'Secure',
+  }
+);
+
+export const HAS_AUTH_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hasAuthSwitchLabel',
+  {
+    defaultMessage: 'Require authentication for this server',
+  }
+);
+
 export const SENDER_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredFromText',
   {
     defaultMessage: 'Sender is required.',
-  }
-);
-
-export const SENDER_NOT_VALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.formatFromText',
-  {
-    defaultMessage: 'Sender is not a valid email address.',
   }
 );
 
@@ -35,17 +105,17 @@ export const TENANT_ID_REQUIRED = i18n.translate(
   }
 );
 
-export const CLIENT_SECRET_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredClientSecretText',
-  {
-    defaultMessage: 'Client Secret is required.',
-  }
-);
-
 export const PORT_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
   {
     defaultMessage: 'Port is required.',
+  }
+);
+
+export const PORT_INVALID = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.invalidPortText',
+  {
+    defaultMessage: 'Port is invalid.',
   }
 );
 
@@ -70,20 +140,6 @@ export const USERNAME_REQUIRED = i18n.translate(
   }
 );
 
-export const PASSWORD_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthPasswordText',
-  {
-    defaultMessage: 'Password is required.',
-  }
-);
-
-export const PASSWORD_REQUIRED_FOR_USER_USED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPasswordText',
-  {
-    defaultMessage: 'Password is required when username is used.',
-  }
-);
-
 export const TO_CC_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredEntryText',
   {
@@ -104,3 +160,20 @@ export const SUBJECT_REQUIRED = i18n.translate(
     defaultMessage: 'Subject is required.',
   }
 );
+
+export function getInvalidEmailAddress(email: string) {
+  return i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.error.invalidEmail',
+    {
+      defaultMessage: 'Email address {email} is not valid.',
+      values: { email },
+    }
+  );
+}
+
+export function getNotAllowedEmailAddress(email: string) {
+  return i18n.translate('xpack.triggersActionsUI.components.builtinActionTypes.error.notAllowed', {
+    defaultMessage: 'Email address {email} is not allowed.',
+    values: { email },
+  });
+}

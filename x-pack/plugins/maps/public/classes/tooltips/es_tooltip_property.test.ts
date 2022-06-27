@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { TooltipProperty } from './tooltip_property';
 import { AbstractField } from '../fields/field';
@@ -25,7 +25,7 @@ const indexPatternField = {
   searchable: true,
   aggregatable: true,
   readFromDocValues: false,
-} as IndexPatternField;
+} as DataViewField;
 
 const featurePropertyField = new MockField({
   fieldName: 'machine.os',
@@ -41,7 +41,7 @@ const nonFilterableIndexPatternField = {
   searchable: true,
   aggregatable: true,
   readFromDocValues: false,
-} as IndexPatternField;
+} as DataViewField;
 
 const nonFilterableFeaturePropertyField = new MockField({
   fieldName: 'location',
@@ -51,7 +51,7 @@ const nonFilterableFeaturePropertyField = new MockField({
 const indexPattern = {
   id: 'indexPatternId',
   fields: {
-    getByName: (name: string): IndexPatternField | null => {
+    getByName: (name: string): DataViewField | null => {
       if (name === 'machine.os') {
         return indexPatternField;
       }
@@ -62,7 +62,7 @@ const indexPattern = {
     },
   },
   title: 'my index pattern',
-} as IndexPattern;
+} as DataView;
 
 describe('getESFilters', () => {
   test('Should return empty array when field does not exist in index pattern', async () => {
@@ -108,6 +108,40 @@ describe('getESFilters', () => {
     ]);
   });
 
+  test('Should return phrase filters when field value is an array', async () => {
+    const esTooltipProperty = new ESTooltipProperty(
+      new TooltipProperty(featurePropertyField.getName(), await featurePropertyField.getLabel(), [
+        'my value',
+        'my other value',
+      ]),
+      indexPattern,
+      featurePropertyField,
+      APPLY_GLOBAL_QUERY
+    );
+    expect(await esTooltipProperty.getESFilters()).toEqual([
+      {
+        meta: {
+          index: 'indexPatternId',
+        },
+        query: {
+          match_phrase: {
+            ['machine.os']: 'my value',
+          },
+        },
+      },
+      {
+        meta: {
+          index: 'indexPatternId',
+        },
+        query: {
+          match_phrase: {
+            ['machine.os']: 'my other value',
+          },
+        },
+      },
+    ]);
+  });
+
   test('Should return NOT exists filter for null values', async () => {
     const esTooltipProperty = new ESTooltipProperty(
       new TooltipProperty(
@@ -125,8 +159,10 @@ describe('getESFilters', () => {
           index: 'indexPatternId',
           negate: true,
         },
-        exists: {
-          field: 'machine.os',
+        query: {
+          exists: {
+            field: 'machine.os',
+          },
         },
       },
     ]);

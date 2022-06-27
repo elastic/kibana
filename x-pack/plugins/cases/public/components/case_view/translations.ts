@@ -17,6 +17,14 @@ export const CHANGED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.ch
   defaultMessage: 'changed',
 });
 
+export const ENABLED_SETTING = i18n.translate('xpack.cases.caseView.actionLabel.enabledSetting', {
+  defaultMessage: 'enabled',
+});
+
+export const DISABLED_SETTING = i18n.translate('xpack.cases.caseView.actionLabel.disableSetting', {
+  defaultMessage: 'disabled',
+});
+
 export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
   i18n.translate('xpack.cases.caseView.actionLabel.selectedThirdParty', {
     values: {
@@ -75,6 +83,14 @@ export const EDIT_COMMENT = i18n.translate('xpack.cases.caseView.edit.comment', 
   defaultMessage: 'Edit comment',
 });
 
+export const DELETE_COMMENT = i18n.translate('xpack.cases.caseView.delete.comment', {
+  defaultMessage: 'Delete comment',
+});
+
+export const DELETE_COMMENT_TITLE = i18n.translate('xpack.cases.caseView.deleteTitle.comment', {
+  defaultMessage: 'Delete this comment?',
+});
+
 export const ON = i18n.translate('xpack.cases.caseView.actionLabel.on', {
   defaultMessage: 'on',
 });
@@ -93,6 +109,10 @@ export const COMMENT = i18n.translate('xpack.cases.caseView.comment', {
 
 export const CASE_REFRESH = i18n.translate('xpack.cases.caseView.caseRefresh', {
   defaultMessage: 'Refresh case',
+});
+
+export const ACTIVITY = i18n.translate('xpack.cases.caseView.activity', {
+  defaultMessage: 'Activity',
 });
 
 export const EMAIL_SUBJECT = (caseTitle: string) =>
@@ -115,6 +135,10 @@ export const SYNC_ALERTS = i18n.translate('xpack.cases.caseView.syncAlertsLabel'
   defaultMessage: `Sync alerts`,
 });
 
+export const SYNC_ALERTS_LC = i18n.translate('xpack.cases.caseView.syncAlertsLowercaseLabel', {
+  defaultMessage: `sync alerts`,
+});
+
 export const DOES_NOT_EXIST_TITLE = i18n.translate('xpack.cases.caseView.doesNotExist.title', {
   defaultMessage: 'This case does not exist',
 });
@@ -131,3 +155,18 @@ export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
 export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
   defaultMessage: 'Back to Cases',
 });
+
+export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity', {
+  defaultMessage: 'Activity',
+});
+
+export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
+  defaultMessage: 'Alerts',
+});
+
+export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.tabs.alerts.emptyDescription',
+  {
+    defaultMessage: 'No alerts have been added to this case.',
+  }
+);

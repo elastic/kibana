@@ -10,17 +10,16 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import {
-  DocValueFields,
   NetworkQueries,
   NetworkDetailsRequestOptions,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -38,7 +37,6 @@ export interface NetworkDetailsArgs {
 
 interface UseNetworkDetails {
   id?: string;
-  docValueFields: DocValueFields[];
   ip: string;
   indexNames: string[];
   filterQuery?: ESTermQuery | string;
@@ -46,7 +44,6 @@ interface UseNetworkDetails {
 }
 
 export const useNetworkDetails = ({
-  docValueFields,
   filterQuery,
   indexNames,
   id = ID,
@@ -126,7 +123,6 @@ export const useNetworkDetails = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: NetworkQueries.details,
         filterQuery: createFilter(filterQuery),
         ip,
@@ -136,7 +132,7 @@ export const useNetworkDetails = ({
       }
       return prevRequest;
     });
-  }, [indexNames, filterQuery, ip, docValueFields, id]);
+  }, [indexNames, filterQuery, ip, id]);
 
   useEffect(() => {
     networkDetailsSearch(networkDetailsRequest);

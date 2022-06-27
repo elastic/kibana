@@ -18,6 +18,7 @@ export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
     experimental: schema.maybe(schema.boolean()),
+    excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
   }),
 };
 
@@ -31,7 +32,33 @@ export const GetFileRequestSchema = {
 
 export const GetInfoRequestSchema = {
   params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.maybe(schema.string()),
+  }),
+};
+
+export const GetInfoRequestSchemaDeprecated = {
+  params: schema.object({
     pkgkey: schema.string(),
+  }),
+};
+
+export const UpdatePackageRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.maybe(schema.string()),
+  }),
+  body: schema.object({
+    keepPoliciesUpToDate: schema.boolean(),
+  }),
+};
+
+export const UpdatePackageRequestSchemaDeprecated = {
+  params: schema.object({
+    pkgkey: schema.string(),
+  }),
+  body: schema.object({
+    keepPoliciesUpToDate: schema.boolean(),
   }),
 };
 
@@ -42,6 +69,19 @@ export const GetStatsRequestSchema = {
 };
 
 export const InstallPackageFromRegistryRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.maybe(schema.string()),
+  }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.boolean({ defaultValue: false }),
+      ignore_constraints: schema.boolean({ defaultValue: false }),
+    })
+  ),
+};
+
+export const InstallPackageFromRegistryRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
   }),
@@ -63,6 +103,18 @@ export const InstallPackageByUploadRequestSchema = {
 };
 
 export const DeletePackageRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.boolean(),
+    })
+  ),
+};
+
+export const DeletePackageRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
   }),

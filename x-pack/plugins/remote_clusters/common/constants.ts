@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 const basicLicense: LicenseType = 'basic';
 
@@ -19,6 +19,8 @@ export const PLUGIN = {
     });
   },
 };
+
+export const MAJOR_VERSION = '8.4.0';
 
 export const API_BASE_PATH = '/api/remote_clusters';
 

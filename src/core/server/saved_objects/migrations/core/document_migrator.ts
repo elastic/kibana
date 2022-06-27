@@ -27,15 +27,7 @@
  * handle property addition / deletion / renaming.
  *
  * A caveat is that this means we must restrict what a migration can do to the doc's
- * migrationVersion itself. We allow only these kinds of changes:
- *
- * - Add a new property to migrationVersion
- * - Move a migrationVersion property forward to a later version
- *
- * Migrations *cannot* move a migrationVersion property backwards (e.g. from 2.0.0 to 1.0.0), and they
- * cannot clear a migrationVersion property, as allowing either of these could produce infinite loops.
- * However, we do wish to allow migrations to modify migrationVersion if they wish, so that
- * they could transform a type from "foo 1.0.0" to  "bar 3.0.0".
+ * migrationVersion itself. Migrations should *not* make any changes to the migrationVersion property.
  *
  * One last gotcha is that any docs which have no migrationVersion are assumed to be up-to-date.
  * This is because Kibana UI and other clients really can't be expected build the migrationVersion
@@ -54,7 +46,7 @@ import uuidv5 from 'uuid/v5';
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
-import { Logger } from '../../../logging';
+import type { Logger } from '@kbn/logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import {
   SavedObjectsMigrationVersion,
@@ -443,7 +435,7 @@ function buildDocumentTransform({
     }
 
     // In order to keep tests a bit more stable, we won't
-    // tack on an empy migrationVersion to docs that have
+    // tack on an empty migrationVersion to docs that have
     // no migrations defined.
     if (_.isEmpty(transformedDoc.migrationVersion)) {
       delete transformedDoc.migrationVersion;
@@ -557,19 +549,21 @@ function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
 
   const { id: originId, type } = otherAttrs;
   const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId!);
-  if (namespace !== undefined) {
-    const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
-      id: `${namespace}:${type}:${originId}`,
-      type: LEGACY_URL_ALIAS_TYPE,
-      attributes: {
-        sourceId: originId,
-        targetNamespace: namespace,
-        targetType: type,
-        targetId: id,
-      },
-    };
-    additionalDocs.push(legacyUrlAlias);
-  }
+  const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
+    id: `${namespace}:${type}:${originId}`,
+    type: LEGACY_URL_ALIAS_TYPE,
+    attributes: {
+      // NOTE TO MAINTAINERS: If a saved object migration is added in `src/core/server/saved_objects/object_types/registration.ts`, these
+      // values must be updated accordingly. That's because a user can upgrade Kibana from 7.17 to 8.x, and any defined migrations will not
+      // be applied to aliases that are created during the conversion process.
+      sourceId: originId,
+      targetNamespace: namespace,
+      targetType: type,
+      targetId: id,
+      purpose: 'savedObjectConversion',
+    },
+  };
+  additionalDocs.push(legacyUrlAlias);
   return {
     transformedDoc: { ...otherAttrs, id, originId, namespaces: [namespace] },
     additionalDocs,
@@ -740,7 +734,7 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
 }
 
 /**
- * Applies any relevent migrations to the document for the specified property.
+ * Applies any relevant migrations to the document for the specified property.
  */
 function migrateProp(
   doc: SavedObjectUnsanitizedDoc,
@@ -753,12 +747,6 @@ function migrateProp(
   let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
 
   for (const { version, transform, transformType } of applicableTransforms(migrations, doc, prop)) {
-    const currentVersion = propVersion(doc, prop);
-    if (currentVersion && Semver.gt(currentVersion, version)) {
-      // the previous transform function increased the object's migrationVersion; break out of the loop
-      break;
-    }
-
     if (convertNamespaceTypes || (transformType !== 'convert' && transformType !== 'reference')) {
       // migrate transforms are always applied, but conversion transforms and reference transforms are only applied during index migrations
       const result = transform(doc);

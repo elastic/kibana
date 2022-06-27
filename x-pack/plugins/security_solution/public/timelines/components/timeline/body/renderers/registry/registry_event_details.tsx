@@ -8,14 +8,12 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
 import { Details, isNillEmptyOrNotFinite } from '../helpers';
 import { Ecs } from '../../../../../../../common/ecs';
 
 import { RegistryEventDetailsLine } from './registry_event_details_line';
 
 interface Props {
-  browserFields: BrowserFields;
   contextId: string;
   data: Ecs;
   isDraggable?: boolean;

@@ -13,6 +13,7 @@ import bbox from '@turf/bbox';
 import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
   KBN_IS_CENTROID_FEATURE,
@@ -24,15 +25,17 @@ import {
   getDataRequestDescriptor,
   getLayerById,
   getLayerList,
+  getEditState,
 } from '../selectors/map_selectors';
 import {
   cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
+  getInspectorAdapters,
   ResultMeta,
 } from '../reducers/non_serializable_instances';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
+import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
@@ -61,12 +64,14 @@ export type DataRequestContext = {
   ): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   onJoinError(errorMessage: string): void;
-  updateSourceData(newData: unknown): void;
+  updateSourceData(newData: object): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
   dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
   isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
+  isFeatureEditorOpenForLayer: boolean; // Boolean signaling that feature editor menu is open for a layer. When true, layer will ignore all global and layer filtering so drawn features are displayed and not filtered out.
+  inspectorAdapters: Adapters;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -145,6 +150,8 @@ function getDataRequestContext(
       dispatch(registerCancelCallback(requestToken, callback)),
     forceRefreshDueToDrawing,
     isForceRefresh,
+    isFeatureEditorOpenForLayer: getEditState(getState())?.layerId === layerId,
+    inspectorAdapters: getInspectorAdapters(getState()),
   };
 }
 
@@ -220,7 +227,7 @@ export function syncDataForLayerId(layerId: string | null, isForceRefresh: boole
   };
 }
 
-function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
+export function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
   return {
     type: SET_LAYER_ERROR_STATUS,
     isInErrorState: errorMessage !== null,
@@ -281,12 +288,12 @@ function endDataLoad(
     }
 
     const features = data && 'features' in data ? (data as FeatureCollection).features : [];
+    const layer = getLayerById(layerId, getState());
 
     const eventHandlers = getEventHandlers(getState());
     if (eventHandlers && eventHandlers.onDataLoadEnd) {
-      const layer = getLayerById(layerId, getState());
       const resultMeta: ResultMeta = {};
-      if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
+      if (layer && layer.getType() === LAYER_TYPE.GEOJSON_VECTOR) {
         const featuresWithoutCentroids = features.filter((feature) => {
           return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
         });
@@ -300,7 +307,12 @@ function endDataLoad(
       });
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId, features));
+    if (dataId === SOURCE_DATA_REQUEST_ID) {
+      if (layer) {
+        dispatch(updateTooltipStateForLayer(layer, features));
+      }
+    }
+
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
@@ -340,7 +352,13 @@ function onDataLoadError(
       });
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId));
+    if (dataId === SOURCE_DATA_REQUEST_ID) {
+      const layer = getLayerById(layerId, getState());
+      if (layer) {
+        dispatch(updateTooltipStateForLayer(layer));
+      }
+    }
+
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
@@ -353,13 +371,23 @@ function onDataLoadError(
 }
 
 export function updateSourceDataRequest(layerId: string, newData: object) {
-  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
       dataId: SOURCE_DATA_REQUEST_ID,
       layerId,
       newData,
     });
+
+    if ('features' in newData) {
+      const layer = getLayerById(layerId, getState());
+      if (layer) {
+        dispatch(updateTooltipStateForLayer(layer, (newData as FeatureCollection).features));
+      }
+    }
 
     dispatch(updateStyleMeta(layerId));
   };

@@ -9,47 +9,9 @@
 import { CLIEngine } from 'eslint';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { createFailError, ToolingLog } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
-
-// For files living on the filesystem
-function lintFilesOnFS(cli: CLIEngine, files: File[]) {
-  const paths = files.map((file) => file.getRelativePath());
-  return cli.executeOnFiles(paths);
-}
-
-// For files living somewhere else (ie. git object)
-async function lintFilesOnContent(cli: CLIEngine, files: File[]) {
-  const report: {
-    results: any[];
-    errorCount: number;
-    warningCount: number;
-    fixableErrorCount: number;
-    fixableWarningCount: number;
-  } = {
-    results: [],
-    errorCount: 0,
-    warningCount: 0,
-    fixableErrorCount: 0,
-    fixableWarningCount: 0,
-  };
-
-  for (let i = 0; i < files.length; i++) {
-    const r = cli.executeOnText(await files[i].getContent(), files[i].getRelativePath());
-    // Despite a relative path was given, the result would contain an absolute one. Work around it.
-    r.results[0].filePath = r.results[0].filePath.replace(
-      files[i].getAbsolutePath(),
-      files[i].getRelativePath()
-    );
-    report.results.push(...r.results);
-    report.errorCount += r.errorCount;
-    report.warningCount += r.warningCount;
-    report.fixableErrorCount += r.fixableErrorCount;
-    report.fixableWarningCount += r.fixableWarningCount;
-  }
-
-  return report;
-}
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log
@@ -59,16 +21,15 @@ async function lintFilesOnContent(cli: CLIEngine, files: File[]) {
  * @param  {Array<File>} files
  * @return {undefined}
  */
-export async function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
+export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
   const cli = new CLIEngine({
     cache: true,
     cwd: REPO_ROOT,
     fix,
   });
 
-  const virtualFilesCount = files.filter((file) => file.isVirtual()).length;
-  const report =
-    virtualFilesCount && !fix ? await lintFilesOnContent(cli, files) : lintFilesOnFS(cli, files);
+  const paths = files.map((file) => file.getRelativePath());
+  const report = cli.executeOnFiles(paths);
 
   if (fix) {
     CLIEngine.outputFixes(report);

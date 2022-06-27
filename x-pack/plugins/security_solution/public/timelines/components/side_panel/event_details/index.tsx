@@ -5,49 +5,21 @@
  * 2.0.
  */
 
-import { some } from 'lodash/fp';
-import {
-  EuiButtonEmpty,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
+
 import deepEqual from 'fast-deep-equal';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EntityType } from '@kbn/timelines-plugin/common';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
-import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
-import {
-  ISOLATE_HOST,
-  UNISOLATE_HOST,
-} from '../../../../detections/components/host_isolation/translations';
-import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
-import { ALERT_DETAILS } from './translations';
-import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
-import { TimelineNonEcsData } from '../../../../../common';
-import { Ecs } from '../../../../../common/ecs';
-import { EventDetailsFooter } from './footer';
-import { EntityType } from '../../../../../../timelines/common';
-
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  .euiFlyoutBody__overflow {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-
-    .euiFlyoutBody__overflowContent {
-      flex: 1;
-      overflow: hidden;
-      padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.m}`};
-    }
-  }
-`;
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
+import { useHostRiskScore, HostRisk } from '../../../../risk_score/containers';
+import { useHostIsolationTools } from './use_host_isolation_tools';
+import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
+import { useBasicDataFromDetailsData } from './helpers';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -56,15 +28,15 @@ interface EventDetailsPanelProps {
   expandedEvent: {
     eventId: string;
     indexName: string;
-    ecsData?: Ecs;
-    nonEcsData?: TimelineNonEcsData[];
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
   isDraggable?: boolean;
   isFlyoutView?: boolean;
+  runtimeMappings: MappingRuntimeFields;
   tabType: TimelineTabs;
   timelineId: string;
+  isReadOnly?: boolean;
 }
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
@@ -75,84 +47,49 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   handleOnEventClosed,
   isDraggable,
   isFlyoutView,
+  runtimeMappings,
   tabType,
   timelineId,
+  isReadOnly,
 }) => {
-  const [loading, detailsData] = useTimelineEventsDetails({
-    docValueFields,
-    entityType,
-    indexName: expandedEvent.indexName ?? '',
-    eventId: expandedEvent.eventId ?? '',
-    skip: !expandedEvent.eventId,
+  const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
+    {
+      docValueFields,
+      entityType,
+      indexName: expandedEvent.indexName ?? '',
+      eventId: expandedEvent.eventId ?? '',
+      runtimeMappings,
+      skip: !expandedEvent.eventId,
+    }
+  );
+
+  const {
+    isolateAction,
+    isHostIsolationPanelOpen,
+    isIsolateActionSuccessBannerVisible,
+    handleIsolationActionSuccess,
+    showAlertDetails,
+    showHostIsolationPanel,
+  } = useHostIsolationTools();
+
+  const { alertId, isAlert, hostName, ruleName, timestamp } =
+    useBasicDataFromDetailsData(detailsData);
+
+  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
+    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
+    pagination: {
+      cursorStart: 0,
+      querySize: 1,
+    },
   });
 
-  const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
-
-  const [isolateAction, setIsolateAction] = useState<'isolateHost' | 'unisolateHost'>(
-    'isolateHost'
-  );
-
-  const [isIsolateActionSuccessBannerVisible, setIsIsolateActionSuccessBannerVisible] =
-    useState(false);
-
-  const showAlertDetails = useCallback(() => {
-    setIsHostIsolationPanel(false);
-    setIsIsolateActionSuccessBannerVisible(false);
-  }, []);
-
-  const showHostIsolationPanel = useCallback((action) => {
-    if (action === 'isolateHost' || action === 'unisolateHost') {
-      setIsHostIsolationPanel(true);
-      setIsolateAction(action);
-    }
-  }, []);
-
-  const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
-
-  const ruleName = useMemo(
-    () => getFieldValue({ category: 'signal', field: 'signal.rule.name' }, detailsData),
-    [detailsData]
-  );
-
-  const alertId = useMemo(
-    () => getFieldValue({ category: '_id', field: '_id' }, detailsData),
-    [detailsData]
-  );
-
-  const hostName = useMemo(
-    () => getFieldValue({ category: 'host', field: 'host.name' }, detailsData),
-    [detailsData]
-  );
-
-  const backToAlertDetailsLink = useMemo(() => {
-    return (
-      <>
-        <EuiButtonEmpty
-          iconType="arrowLeft"
-          iconSide="left"
-          flush="left"
-          onClick={() => showAlertDetails()}
-        >
-          <EuiText size="xs">
-            <p>{ALERT_DETAILS}</p>
-          </EuiText>
-        </EuiButtonEmpty>
-        <EuiTitle>
-          <h2>{isolateAction === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST}</h2>
-        </EuiTitle>
-      </>
-    );
-  }, [showAlertDetails, isolateAction]);
-
-  const caseDetailsRefresh = useWithCaseDetailsRefresh();
-
-  const handleIsolationActionSuccess = useCallback(() => {
-    setIsIsolateActionSuccessBannerVisible(true);
-    // If a case details refresh ref is defined, then refresh actions and comments
-    if (caseDetailsRefresh) {
-      caseDetailsRefresh.refreshUserActionsAndComments();
-    }
-  }, [caseDetailsRefresh]);
+  const hostRisk: HostRisk | null = data
+    ? {
+        loading: hostRiskLoading,
+        isModuleEnabled,
+        result: data,
+      }
+    : null;
 
   if (!expandedEvent?.eventId) {
     return null;
@@ -160,47 +97,43 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   return isFlyoutView ? (
     <>
-      <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
-        {isHostIsolationPanelOpen ? (
-          backToAlertDetailsLink
-        ) : (
-          <ExpandableEventTitle isAlert={isAlert} loading={loading} ruleName={ruleName} />
-        )}
-      </EuiFlyoutHeader>
-      {isIsolateActionSuccessBannerVisible && (
-        <EndpointIsolateSuccess
-          hostName={hostName}
-          alertId={alertId}
-          isolateAction={isolateAction}
-        />
-      )}
-      <StyledEuiFlyoutBody>
-        {isHostIsolationPanelOpen ? (
-          <HostIsolationPanel
-            details={detailsData}
-            cancelCallback={showAlertDetails}
-            successCallback={handleIsolationActionSuccess}
-            isolateAction={isolateAction}
-          />
-        ) : (
-          <ExpandableEvent
-            browserFields={browserFields}
-            detailsData={detailsData}
-            event={expandedEvent}
-            isAlert={isAlert}
-            isDraggable={isDraggable}
-            loading={loading}
-            timelineId={timelineId}
-            timelineTabType="flyout"
-          />
-        )}
-      </StyledEuiFlyoutBody>
-
-      <EventDetailsFooter
+      <FlyoutHeader
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        isAlert={isAlert}
+        isolateAction={isolateAction}
+        loading={loading}
+        ruleName={ruleName}
+        showAlertDetails={showAlertDetails}
+        timestamp={timestamp}
+      />
+      <FlyoutBody
+        alertId={alertId}
+        browserFields={browserFields}
         detailsData={detailsData}
+        event={expandedEvent}
+        hostName={hostName}
+        hostRisk={hostRisk}
+        handleIsolationActionSuccess={handleIsolationActionSuccess}
+        handleOnEventClosed={handleOnEventClosed}
+        isAlert={isAlert}
+        isDraggable={isDraggable}
+        isolateAction={isolateAction}
+        isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        loading={loading}
+        rawEventData={rawEventData}
+        showAlertDetails={showAlertDetails}
+        timelineId={timelineId}
+        isReadOnly={isReadOnly}
+      />
+      <FlyoutFooter
+        detailsData={detailsData}
+        detailsEcsData={ecsData}
         expandedEvent={expandedEvent}
+        refetchFlyoutData={refetchFlyoutData}
         handleOnEventClosed={handleOnEventClosed}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        isReadOnly={isReadOnly}
         loadingEventDetails={loading}
         onAddIsolationStatusClick={showHostIsolationPanel}
         timelineId={timelineId}
@@ -222,8 +155,23 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         isAlert={isAlert}
         isDraggable={isDraggable}
         loading={loading}
+        rawEventData={rawEventData}
         timelineId={timelineId}
         timelineTabType={tabType}
+        hostRisk={hostRisk}
+        handleOnEventClosed={handleOnEventClosed}
+      />
+      <FlyoutFooter
+        detailsData={detailsData}
+        detailsEcsData={ecsData}
+        expandedEvent={expandedEvent}
+        handleOnEventClosed={handleOnEventClosed}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        isReadOnly={isReadOnly}
+        loadingEventDetails={loading}
+        onAddIsolationStatusClick={showHostIsolationPanel}
+        refetchFlyoutData={refetchFlyoutData}
+        timelineId={timelineId}
       />
     </>
   );

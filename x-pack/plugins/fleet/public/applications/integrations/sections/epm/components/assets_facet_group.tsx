@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   AssetsGroupedByServiceByType,
@@ -34,11 +34,11 @@ import {
 } from '../constants';
 
 const FirstHeaderRow = styled(EuiFlexGroup)`
-  padding: 0 0 ${(props) => props.theme.eui.paddingSizes.m} 0;
+  padding: 0 0 ${(props) => props.theme.eui.euiSizeM} 0;
 `;
 
 const HeaderRow = styled(EuiFlexGroup)`
-  padding: ${(props) => props.theme.eui.paddingSizes.m} 0;
+  padding: ${(props) => props.theme.eui.euiSizeM} 0;
 `;
 
 const FacetGroup = styled(EuiFacetGroup)`

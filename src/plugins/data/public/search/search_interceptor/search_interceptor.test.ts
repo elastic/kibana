@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup, CoreStart } from '../../../../../core/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { IEsSearchRequest } from '../../../common/search';
 import { SearchInterceptor } from './search_interceptor';
-import { AbortError } from '../../../../kibana_utils/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from '../errors';
-import { ISessionService, SearchSessionState } from '../';
-import { bfetchPluginMock } from '../../../../bfetch/public/mocks';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { ISessionService, SearchSessionState } from '..';
+import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
@@ -119,7 +119,9 @@ describe('SearchInterceptor', () => {
       }),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
+      executionContext: mockCoreSetup.executionContext,
       session: sessionService,
+      theme: themeServiceMock.createSetupContract(),
     });
   });
 
@@ -141,7 +143,6 @@ describe('SearchInterceptor', () => {
         new PainlessError({
           statusCode: 400,
           message: 'search_phase_execution_exception',
-          // @ts-expect-error searchPhaseException is not properly typed json
           attributes: searchPhaseException.error,
         })
       );
@@ -543,7 +544,12 @@ describe('SearchInterceptor', () => {
           .catch(() => {});
         expect(fetchMock.mock.calls[0][0]).toEqual(
           expect.objectContaining({
-            options: { sessionId, isStored: true, isRestore: true, strategy: 'ese' },
+            options: {
+              sessionId,
+              isStored: true,
+              isRestore: true,
+              strategy: 'ese',
+            },
           })
         );
 

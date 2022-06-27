@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { AdvancedSettingsPlugin } from './plugin';
-export { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
+export type { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
 export { ComponentRegistry } from './component_registry';
 
 /**

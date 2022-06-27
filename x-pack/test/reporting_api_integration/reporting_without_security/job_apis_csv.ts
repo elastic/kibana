@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { pick } from 'lodash';
-import { ReportApiJSON } from '../../../plugins/reporting/common/types';
+import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const apiResponseFields = [
@@ -49,12 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Job Listing APIs', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/logs');
+      await reportingAPI.initLogs();
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/logs');
+      await reportingAPI.teardownLogs();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 

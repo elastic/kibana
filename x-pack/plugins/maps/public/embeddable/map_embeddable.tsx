@@ -9,24 +9,24 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
+import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { type Filter, compareFilters, type TimeRange, type Query } from '@kbn/es-query';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
+  genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../src/plugins/embeddable/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import {
-  ACTION_GLOBAL_APPLY_FILTER,
-  APPLY_FILTER_TRIGGER,
-  esFilters,
-  TimeRange,
-  Filter,
-  Query,
-} from '../../../../../src/plugins/data/public';
+  omitGenericEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
@@ -34,6 +34,7 @@ import {
   setQuery,
   disableScrollZoom,
   setReadOnly,
+  updateLayerById,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -66,7 +67,9 @@ import {
   getCoreI18n,
   getHttp,
   getChartsPaletteServiceGetColor,
+  getSpacesApi,
   getSearchService,
+  getTheme,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -189,7 +192,7 @@ export class MapEmbeddable
       ? this._savedMap.getAttributes().title
       : '';
     const input = this.getInput();
-    const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
+    const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
       ...this.getOutput(),
@@ -208,16 +211,26 @@ export class MapEmbeddable
   }
 
   public async getInputAsRefType(): Promise<MapByReferenceInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsRefType(input, {
+    return getMapAttributeService().getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   }
 
+  public async getExplicitInputIsEqual(
+    lastExplicitInput: Partial<MapByValueInput | MapByReferenceInput>
+  ): Promise<boolean> {
+    const currentExplicitInput = this.getExplicitInput();
+    if (!genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput)) return false;
+
+    // generic embeddable input is equal, now we compare map specific input elements, ignoring 'mapBuffer'.
+    const lastMapInput = omitGenericEmbeddableInput(_.omit(lastExplicitInput, 'mapBuffer'));
+    const currentMapInput = omitGenericEmbeddableInput(_.omit(currentExplicitInput, 'mapBuffer'));
+    return fastIsEqual(lastMapInput, currentMapInput);
+  }
+
   public async getInputAsValueType(): Promise<MapByValueInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsValueType(input);
+    return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
   }
 
   public getDescription() {
@@ -267,7 +280,7 @@ export class MapEmbeddable
     if (
       !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
       !_.isEqual(this.input.query, this._prevQuery) ||
-      !esFilters.compareFilters(this._getFilters(), this._prevFilters) ||
+      !compareFilters(this._getFilters(), this._prevFilters) ||
       this._getSearchSessionId() !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({
@@ -353,22 +366,42 @@ export class MapEmbeddable
       return;
     }
 
-    const I18nContext = getCoreI18n().Context;
+    const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    const content =
+      sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
+        <div className="mapEmbeddedError">
+          <EuiEmptyPrompt
+            iconType="alert"
+            iconColor="danger"
+            data-test-subj="embeddable-maps-failure"
+            body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
+              targetType: MAP_SAVED_OBJECT_TYPE,
+              sourceId: sharingSavedObjectProps.sourceId!,
+            })}
+          />
+        </div>
+      ) : (
+        <MapContainer
+          onSingleValueTrigger={this.onSingleValueTrigger}
+          addFilters={
+            this.input.hideFilterActions || this.input.disableTriggers ? null : this.addFilters
+          }
+          getFilterActions={this.getFilterActions}
+          getActionContext={this.getActionContext}
+          renderTooltipContent={this._renderTooltipContent}
+          title={this.getTitle()}
+          description={this.getDescription()}
+          waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
+          isSharable={this._isSharable}
+        />
+      );
 
+    const I18nContext = getCoreI18n().Context;
     render(
       <Provider store={this._savedMap.getStore()}>
         <I18nContext>
-          <MapContainer
-            onSingleValueTrigger={this.onSingleValueTrigger}
-            addFilters={this.input.hideFilterActions ? null : this.addFilters}
-            getFilterActions={this.getFilterActions}
-            getActionContext={this.getActionContext}
-            renderTooltipContent={this._renderTooltipContent}
-            title={this.getTitle()}
-            description={this.getDescription()}
-            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
-            isSharable={this._isSharable}
-          />
+          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
         </I18nContext>
       </Provider>,
       this._domNode
@@ -383,6 +416,10 @@ export class MapEmbeddable
         indexPatterns,
       });
     });
+  }
+
+  updateLayerById(layerDescriptor: LayerDescriptor) {
+    this._savedMap.getStore().dispatch<any>(updateLayerById(layerDescriptor));
   }
 
   private async _getIndexPatterns() {

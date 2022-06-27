@@ -9,11 +9,11 @@
 import React from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
-import { DatatableRow } from 'src/plugins/expressions';
+import { DatatableRow } from '@kbn/expressions-plugin';
 import { FormattedColumns } from '../types';
 
 export const createTableVisCell =
-  (rows: DatatableRow[], formattedColumns: FormattedColumns) =>
+  (rows: DatatableRow[], formattedColumns: FormattedColumns, autoFitRowToContent?: boolean) =>
   ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
     const rowValue = rows[rowIndex][columnId];
     const column = formattedColumns[columnId];
@@ -28,7 +28,7 @@ export const createTableVisCell =
          */
         dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="tbvChartCellContent"
-        className="tbvChartCellContent"
+        className={autoFitRowToContent ? '' : 'tbvChartCellContent'}
       />
     );
 

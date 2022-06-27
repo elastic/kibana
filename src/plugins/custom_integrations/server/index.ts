@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { CustomIntegrationsPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,
@@ -17,9 +17,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new CustomIntegrationsPlugin(initializerContext);
 }
 
-export { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
+export type { CustomIntegrationsPluginSetup, CustomIntegrationsPluginStart } from './types';
 
-export type { Category, CategoryCount, CustomIntegration } from '../common';
+export type { IntegrationCategory, CustomIntegration } from '../common';
 
 export const config = {
   schema: schema.object({}),

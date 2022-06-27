@@ -26,13 +26,13 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { getUserDisplayName } from '../../../../common/model';
 import { UserAPIClient } from '../user_api_client';
 import { isUserDeprecated, isUserReserved } from '../user_utils';
-import { ChangePasswordFlyout } from './change_password_flyout';
+import { ChangePasswordModal } from './change_password_modal';
 import { ConfirmDeleteUsers } from './confirm_delete_users';
 import { ConfirmDisableUsers } from './confirm_disable_users';
 import { ConfirmEnableUsers } from './confirm_enable_users';
@@ -157,7 +157,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       />
 
       {action === 'changePassword' ? (
-        <ChangePasswordFlyout
+        <ChangePasswordModal
           username={username!}
           onCancel={() => setAction('none')}
           onSuccess={() => setAction('none')}
@@ -211,7 +211,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
             </EuiDescriptionList>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => setAction('changePassword')} size="s">
+            <EuiButton
+              onClick={() => setAction('changePassword')}
+              size="s"
+              data-test-subj="editUserChangePasswordButton"
+            >
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.changePasswordButton"
                 defaultMessage="Change password"
@@ -242,7 +246,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               </EuiDescriptionList>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setAction('enableUser')} size="s">
+              <EuiButton
+                onClick={() => setAction('enableUser')}
+                size="s"
+                data-test-subj="editUserEnableUserButton"
+              >
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.enableUserButton"
                   defaultMessage="Activate user"
@@ -271,7 +279,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               </EuiDescriptionList>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => setAction('disableUser')} size="s">
+              <EuiButton
+                onClick={() => setAction('disableUser')}
+                size="s"
+                data-test-subj="editUserDisableUserButton"
+              >
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.disableUserButton"
                   defaultMessage="Deactivate user"
@@ -304,7 +316,12 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                 </EuiDescriptionList>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => setAction('deleteUser')} size="s" color="danger">
+                <EuiButton
+                  onClick={() => setAction('deleteUser')}
+                  size="s"
+                  color="danger"
+                  data-test-subj="editUserDeleteUserButton"
+                >
                   <FormattedMessage
                     id="xpack.security.management.users.editUserPage.deleteUserButton"
                     defaultMessage="Delete user"

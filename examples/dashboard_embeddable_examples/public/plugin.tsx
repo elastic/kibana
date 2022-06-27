@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '../../../src/core/public';
-import { DashboardStart } from '../../../src/plugins/dashboard/public';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
-import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
+import { AppMountParameters, AppNavLinkStatus, CoreSetup, Plugin } from '@kbn/core/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { EmbeddableExamplesStart } from '@kbn/embeddable-examples-plugin/public/plugin';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -27,7 +27,7 @@ export class DashboardEmbeddableExamples implements Plugin<void, void, {}, Start
       title: 'Dashboard embeddable examples',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const [, depsStart] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
         await depsStart.embeddableExamples.createSampleData();
         return renderApp(
@@ -35,6 +35,7 @@ export class DashboardEmbeddableExamples implements Plugin<void, void, {}, Start
             basename: params.appBasePath,
             DashboardContainerByValueRenderer:
               depsStart.dashboard.getDashboardContainerByValueRenderer(),
+            uiSettings: coreStart.uiSettings,
           },
           params.element
         );

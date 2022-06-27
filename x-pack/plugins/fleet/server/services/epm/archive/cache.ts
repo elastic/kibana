@@ -6,9 +6,9 @@
  */
 
 import type { ArchivePackage, RegistryPackage } from '../../../../common';
-import { appContextService } from '../../';
+import { appContextService } from '../..';
 
-import type { ArchiveEntry } from './index';
+import type { ArchiveEntry } from '.';
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);
@@ -67,3 +67,11 @@ export const setPackageInfo = ({
 };
 
 export const deletePackageInfo = (args: SharedKey) => packageInfoCache.delete(sharedKey(args));
+
+export const clearPackageFileCache = (args: SharedKey) => {
+  const fileList = getArchiveFilelist(args) ?? [];
+  fileList.forEach((filePath) => {
+    deleteArchiveEntry(filePath);
+  });
+  deleteArchiveFilelist(args);
+};

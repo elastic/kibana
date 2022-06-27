@@ -21,7 +21,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     const config = {
       kibana: {
         api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
-        functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
+        functional: await readConfigFile(
+          require.resolve('../../../../test/functional/config.base.js')
+        ),
       },
       xpack: {
         api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
@@ -61,7 +63,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
           `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

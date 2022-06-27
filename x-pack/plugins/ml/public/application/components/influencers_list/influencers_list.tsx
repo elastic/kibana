@@ -12,13 +12,13 @@
 import React, { FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number';
 import { getSeverity, getFormattedSeverityScore } from '../../../../common/util/anomaly_utils';
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 
-interface InfluencerValueData {
+export interface InfluencerValueData {
   influencerFieldValue: string;
   maxAnomalyScore: number;
   sumAnomalyScore: number;
@@ -131,11 +131,13 @@ const InfluencersByName: FC<InfluencersByNameProps> = ({
 
   return (
     <React.Fragment key={influencerFieldName}>
-      <EuiTitle size="xs" data-test-subj={`mlInfluencerFieldName ${influencerFieldName}`}>
+      <EuiTitle size="xxs" data-test-subj={`mlInfluencerFieldName ${influencerFieldName}`}>
         <h3>{influencerFieldName}</h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
       {influencerValues}
+
+      <EuiSpacer size="m" />
     </React.Fragment>
   );
 };
@@ -146,7 +148,7 @@ export const InfluencersList: FC<InfluencersListProps> = ({ influencers, influen
       <EuiFlexGroup justifyContent="spaceAround" className="ml-influencers-list">
         <EuiFlexItem grow={false}>
           <EuiSpacer size="xxl" />
-          <EuiTitle size="xs" className="influencer-title">
+          <EuiTitle size="xxs" className="influencer-title">
             <h3>
               <FormattedMessage
                 id="xpack.ml.influencersList.noInfluencersFoundTitle"

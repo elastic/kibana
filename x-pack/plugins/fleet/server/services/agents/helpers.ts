@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@kbn/core/types/elasticsearch';
 
-import type { SearchHit } from '../../../../../../src/core/types/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 import { getAgentStatus } from '../../../common/services/agent_status';
 
 type FleetServerAgentESResponse =
-  | estypes.MgetHit<FleetServerAgent>
+  | estypes.GetGetResult<FleetServerAgent>
   | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
   | SearchHit<FleetServerAgent>;
 
-export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
+export function searchHitToAgent(hit: FleetServerAgentESResponse & { sort?: SortResults }): Agent {
   // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
   const agent: Agent = {
     id: hit._id,
@@ -25,6 +26,7 @@ export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
     access_api_key: undefined,
     status: undefined,
     packages: hit._source?.packages ?? [],
+    sort: hit.sort,
   };
 
   agent.status = getAgentStatus(agent);
@@ -40,6 +42,10 @@ export function agentSOAttributesToFleetServerAgentDoc(
 
   if (policyRevison !== undefined) {
     doc.policy_revision_idx = policyRevison;
+  }
+
+  if (!doc.updated_at) {
+    doc.updated_at = new Date().toISOString();
   }
 
   return doc;

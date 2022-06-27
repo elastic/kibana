@@ -10,12 +10,14 @@ import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { i18nServiceMock } from '../../i18n/i18n_service.mock';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { ModalService, OverlayModalStart } from './modal_service';
 import { mountReactNode } from '../../utils';
 import { OverlayRef } from '../types';
 
 const i18nMock = i18nServiceMock.createStartContract();
+const themeMock = themeServiceMock.createStartContract();
 
 beforeEach(() => {
   mockReactDomRender.mockClear();
@@ -24,7 +26,11 @@ beforeEach(() => {
 
 const getServiceStart = () => {
   const service = new ModalService();
-  return service.start({ i18n: i18nMock, targetDomElement: document.createElement('div') });
+  return service.start({
+    i18n: i18nMock,
+    theme: themeMock,
+    targetDomElement: document.createElement('div'),
+  });
 };
 
 describe('ModalService', () => {

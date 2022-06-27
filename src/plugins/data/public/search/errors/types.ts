@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
-import { KibanaServerError } from '../../../../kibana_utils/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
 export interface FailedShard {
   shard: number;
@@ -32,7 +32,7 @@ export interface Reason {
   };
 }
 
-export interface IEsErrorAttributes {
+interface IEsErrorAttributes {
   type: string;
   reason: string;
   root_cause?: Reason[];

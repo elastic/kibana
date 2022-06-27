@@ -6,10 +6,10 @@
  */
 
 import { SemVer } from 'semver';
-import { IScopedClusterClient, kibanaResponseFactory } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
-import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-import { mockKibanaVersion } from '../../common/constants';
+import { IScopedClusterClient, kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { MAJOR_VERSION } from '../../common/constants';
 import { getMockVersionInfo } from './__fixtures__/version';
 
 import {
@@ -39,12 +39,10 @@ describe('getAllNodeVersions', () => {
       asInternalUser: {
         nodes: {
           info: jest.fn().mockResolvedValue({
-            body: {
-              nodes: {
-                node1: { version: '7.0.0' },
-                node2: { version: '7.0.0' },
-                node3: { version: '6.0.0' },
-              },
+            nodes: {
+              node1: { version: '7.0.0' },
+              node2: { version: '7.0.0' },
+              node3: { version: '6.0.0' },
             },
           }),
         },
@@ -98,98 +96,75 @@ describe('verifyAllMatchKibanaVersion', () => {
 
 describe('EsVersionPrecheck', () => {
   beforeEach(() => {
-    versionService.setup(mockKibanaVersion);
+    versionService.setup(MAJOR_VERSION);
   });
 
   it('returns a 403 when callCluster fails with a 403', async () => {
-    const fakeCall = jest.fn().mockRejectedValue({ statusCode: 403 });
-
     const ctx = xpackMocks.createRequestHandlerContext();
-    ctx.core.elasticsearch.client = {
-      asInternalUser: {
-        ...ctx.core.elasticsearch.client.asInternalUser,
-        nodes: {
-          ...ctx.core.elasticsearch.client.asInternalUser.nodes,
-          info: fakeCall,
-        },
-      },
-      asCurrentUser: ctx.core.elasticsearch.client.asCurrentUser,
-    };
 
-    const result = await esVersionCheck(ctx, kibanaResponseFactory);
+    ctx.core.elasticsearch.client.asInternalUser.nodes.info.mockRejectedValue({ statusCode: 403 });
+
+    const result = await esVersionCheck(
+      coreMock.createCustomRequestHandlerContext(ctx),
+      kibanaResponseFactory
+    );
     expect(result).toHaveProperty('status', 403);
   });
 
   it('returns a 426 message w/ allNodesUpgraded = false when nodes are not on same version', async () => {
     const ctx = xpackMocks.createRequestHandlerContext();
-    ctx.core.elasticsearch.client = {
-      asInternalUser: {
-        ...ctx.core.elasticsearch.client.asInternalUser,
-        nodes: {
-          ...ctx.core.elasticsearch.client.asInternalUser.nodes,
-          info: jest.fn().mockResolvedValue({
-            body: {
-              nodes: {
-                node1: { version: currentVersion.raw },
-                node2: { version: new SemVer(currentVersion.raw).inc('major').raw },
-              },
-            },
-          }),
-        },
-      },
-      asCurrentUser: ctx.core.elasticsearch.client.asCurrentUser,
-    };
 
-    const result = await esVersionCheck(ctx, kibanaResponseFactory);
+    ctx.core.elasticsearch.client.asInternalUser.nodes.info.mockResponse({
+      nodes: {
+        // @ts-expect-error incomplete type
+        node1: { version: currentVersion.raw },
+        // @ts-expect-error incomplete type
+        node2: { version: new SemVer(currentVersion.raw).inc('major').raw },
+      },
+    });
+
+    const result = await esVersionCheck(
+      coreMock.createCustomRequestHandlerContext(ctx),
+      kibanaResponseFactory
+    );
     expect(result).toHaveProperty('status', 426);
     expect(result).toHaveProperty('payload.attributes.allNodesUpgraded', false);
   });
 
   it('returns a 426 message w/ allNodesUpgraded = true when nodes are on next version', async () => {
     const ctx = xpackMocks.createRequestHandlerContext();
-    ctx.core.elasticsearch.client = {
-      asInternalUser: {
-        ...ctx.core.elasticsearch.client.asInternalUser,
-        nodes: {
-          ...ctx.core.elasticsearch.client.asInternalUser.nodes,
-          info: jest.fn().mockResolvedValue({
-            body: {
-              nodes: {
-                node1: { version: new SemVer(currentVersion.raw).inc('major').raw },
-                node2: { version: new SemVer(currentVersion.raw).inc('major').raw },
-              },
-            },
-          }),
-        },
-      },
-      asCurrentUser: ctx.core.elasticsearch.client.asCurrentUser,
-    };
 
-    const result = await esVersionCheck(ctx, kibanaResponseFactory);
+    ctx.core.elasticsearch.client.asInternalUser.nodes.info.mockResponse({
+      nodes: {
+        // @ts-expect-error incomplete type
+        node1: { version: new SemVer(currentVersion.raw).inc('major').raw },
+        // @ts-expect-error incomplete type
+        node2: { version: new SemVer(currentVersion.raw).inc('major').raw },
+      },
+    });
+
+    const result = await esVersionCheck(
+      coreMock.createCustomRequestHandlerContext(ctx),
+      kibanaResponseFactory
+    );
     expect(result).toHaveProperty('status', 426);
     expect(result).toHaveProperty('payload.attributes.allNodesUpgraded', true);
   });
 
   it('returns undefined when nodes are on same version', async () => {
     const ctx = xpackMocks.createRequestHandlerContext();
-    ctx.core.elasticsearch.client = {
-      asInternalUser: {
-        ...ctx.core.elasticsearch.client.asInternalUser,
-        nodes: {
-          ...ctx.core.elasticsearch.client.asInternalUser.nodes,
-          info: jest.fn().mockResolvedValue({
-            body: {
-              nodes: {
-                node1: { version: currentVersion.raw },
-                node2: { version: currentVersion.raw },
-              },
-            },
-          }),
-        },
-      },
-      asCurrentUser: ctx.core.elasticsearch.client.asCurrentUser,
-    };
 
-    await expect(esVersionCheck(ctx, kibanaResponseFactory)).resolves.toBe(undefined);
+    ctx.core.elasticsearch.client.asInternalUser.nodes.info.mockResponse({
+      nodes: {
+        // @ts-expect-error incomplete type
+        node1: { version: currentVersion.raw },
+        // @ts-expect-error incomplete type
+        node2: { version: currentVersion.raw },
+      },
+    });
+
+    await expect(
+      esVersionCheck(coreMock.createCustomRequestHandlerContext(ctx), kibanaResponseFactory)
+    ).resolves.toBe(undefined);
   });
 });

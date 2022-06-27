@@ -9,9 +9,8 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
-import { useRiskyHostLinks } from '../../containers/overview_risky_host_links/use_risky_host_links';
 import { mockTheme } from '../overview_cti_links/mock';
 import { RiskyHostLinks } from '.';
 import { createStore, State } from '../../../common/store';
@@ -21,16 +20,18 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
-import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
+
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
+import { useHostRiskScore } from '../../../risk_score/containers';
+import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../containers/overview_risky_host_links/use_risky_host_links');
-const useRiskyHostLinksMock = useRiskyHostLinks as jest.Mock;
+jest.mock('../../../risk_score/containers');
+const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
 
-jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href');
-const useRiskyHostsDashboardButtonHrefMock = useRiskyHostsDashboardButtonHref as jest.Mock;
+jest.mock('../../../common/hooks/use_dashboard_button_href');
+const useRiskyHostsDashboardButtonHrefMock = useDashboardButtonHref as jest.Mock;
 useRiskyHostsDashboardButtonHrefMock.mockReturnValue({ buttonHref: '/test' });
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links');
@@ -51,21 +52,25 @@ describe('RiskyHostLinks', () => {
   });
 
   it('renders enabled module view if module is enabled', () => {
-    useRiskyHostLinksMock.mockReturnValueOnce({
-      loading: false,
-      isModuleEnabled: true,
-      listItems: [],
-    });
+    useHostRiskScoreMock.mockReturnValueOnce([
+      false,
+      {
+        data: [],
+        isModuleEnabled: true,
+      },
+    ]);
 
     render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <RiskyHostLinks
-              to={'now'}
-              from={'now-30d'}
-              deleteQuery={jest.fn()}
               setQuery={jest.fn()}
+              deleteQuery={jest.fn()}
+              timerange={{
+                to: 'now',
+                from: 'now-30d',
+              }}
             />
           </ThemeProvider>
         </I18nProvider>
@@ -76,21 +81,25 @@ describe('RiskyHostLinks', () => {
   });
 
   it('renders disabled module view if module is disabled', () => {
-    useRiskyHostLinksMock.mockReturnValueOnce({
-      loading: false,
-      isModuleEnabled: false,
-      listItems: [],
-    });
+    useHostRiskScoreMock.mockReturnValueOnce([
+      false,
+      {
+        data: [],
+        isModuleEnabled: false,
+      },
+    ]);
 
     render(
       <Provider store={store}>
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <RiskyHostLinks
-              to={'now'}
-              from={'now-30d'}
-              deleteQuery={jest.fn()}
               setQuery={jest.fn()}
+              deleteQuery={jest.fn()}
+              timerange={{
+                to: 'now',
+                from: 'now-30d',
+              }}
             />
           </ThemeProvider>
         </I18nProvider>

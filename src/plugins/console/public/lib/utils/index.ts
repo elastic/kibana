@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import { XJson } from '../../../../es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
@@ -46,6 +46,12 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
     changed,
     data: formattedData,
   };
+}
+
+export function hasComments(data: string) {
+  // matches single line and multiline comments
+  const re = /(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)|(\/\/.*)|(#.*)/;
+  return re.test(data);
 }
 
 export function extractWarningMessages(warnings: string) {

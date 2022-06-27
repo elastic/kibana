@@ -18,9 +18,10 @@ import {
   EuiSideNav,
 } from '@elastic/eui';
 import 'brace/mode/json';
-import { AppMountParameters } from '../../../src/core/public';
+import { AppMountParameters, IUiSettingsClient } from '@kbn/core/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardEmbeddableByValue } from './by_value/embeddable';
-import { DashboardStart } from '../../../src/plugins/dashboard/public';
 
 interface PageDef {
   title: string;
@@ -58,9 +59,14 @@ interface Props {
   DashboardContainerByValueRenderer: ReturnType<
     DashboardStart['getDashboardContainerByValueRenderer']
   >;
+  uiSettings: IUiSettingsClient;
 }
 
-const DashboardEmbeddableExplorerApp = ({ basename, DashboardContainerByValueRenderer }: Props) => {
+const DashboardEmbeddableExplorerApp = ({
+  basename,
+  DashboardContainerByValueRenderer,
+  uiSettings,
+}: Props) => {
   const pages: PageDef[] = [
     {
       title: 'By value dashboard embeddable',
@@ -83,16 +89,18 @@ const DashboardEmbeddableExplorerApp = ({ basename, DashboardContainerByValueRen
   ));
 
   return (
-    <Router basename={basename}>
-      <EuiPage>
-        <EuiPageSideBar>
-          <Nav pages={pages} />
-        </EuiPageSideBar>
-        <EuiPageContent>
-          <EuiPageContentBody>{routes}</EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPage>
-    </Router>
+    <KibanaContextProvider services={{ uiSettings }}>
+      <Router basename={basename}>
+        <EuiPage>
+          <EuiPageSideBar>
+            <Nav pages={pages} />
+          </EuiPageSideBar>
+          <EuiPageContent>
+            <EuiPageContentBody>{routes}</EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPage>
+      </Router>
+    </KibanaContextProvider>
   );
 };
 

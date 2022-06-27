@@ -6,7 +6,12 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
+import {
+  FieldLabels,
+  REPORT_METRIC_FIELD,
+  RECORDS_PERCENTAGE_FIELD,
+  ReportTypes,
+} from '../constants';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -24,13 +29,11 @@ import {
   SYNTHETICS_FCP,
   SYNTHETICS_LCP,
 } from '../constants/field_names/synthetics';
+import { buildExistsFilter } from '../utils';
 
-export function getSyntheticsDistributionConfig({
-  series,
-  indexPattern,
-}: ConfigProps): SeriesConfig {
+export function getSyntheticsDistributionConfig({ series, dataView }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'data-distribution',
+    reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: series?.seriesType || 'line',
     seriesTypes: [],
     xAxisColumn: {
@@ -43,7 +46,7 @@ export function getSyntheticsDistributionConfig({
       },
     ],
     hasOperationType: false,
-    filterFields: ['monitor.type', 'observer.geo.name', 'tags'],
+    filterFields: ['monitor.type', 'observer.geo.name', 'tags', 'url.full'],
     breakdownFields: [
       'observer.geo.name',
       'monitor.name',
@@ -53,7 +56,10 @@ export function getSyntheticsDistributionConfig({
       'url.port',
     ],
     baseFilters: [],
-    definitionFields: ['monitor.name', 'url.full'],
+    definitionFields: [
+      { field: 'monitor.name', nested: 'synthetics.step.name.keyword', singleSelection: true },
+      { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
+    ],
     metricOptions: [
       {
         label: MONITORS_DURATION_LABEL,

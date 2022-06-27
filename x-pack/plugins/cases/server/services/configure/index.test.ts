@@ -9,11 +9,10 @@ import {
   CaseConnector,
   CasesConfigureAttributes,
   CasesConfigurePatch,
-  CASE_CONFIGURE_SAVED_OBJECT,
   ConnectorTypes,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+} from '../../../common/api';
+import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   SavedObject,
   SavedObjectReference,
@@ -21,12 +20,13 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { loggerMock } from '@kbn/logging/mocks';
+} from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { CaseConfigureService } from '.';
 import { ESCasesConfigureAttributes } from './types';
-import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 import { createESJiraConnector, createJiraConnector, ESCaseConnectorWithId } from '../test_utils';
 
 const basicConfigFields = {

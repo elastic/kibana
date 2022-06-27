@@ -30,7 +30,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsStatus } from '../../../alerts/status';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
@@ -298,8 +298,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const { sorting, pagination, onTableChange, clusterUuid, setupMode, fetchMoreData, alerts } =
-    props;
+  const { sorting, pagination, onTableChange, clusterUuid, setupMode, alerts } = props;
 
   const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts);
 
@@ -474,7 +473,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
               },
             }}
             onTableChange={onTableChange}
-            fetchMoreData={fetchMoreData}
+            {...props}
           />
         </EuiPageContent>
       </EuiPageBody>

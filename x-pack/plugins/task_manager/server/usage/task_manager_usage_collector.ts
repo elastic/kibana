@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { MonitoredHealth } from '../routes/health';
 import { TaskManagerUsage } from './types';
 
@@ -52,6 +52,15 @@ export function createTaskManagerUsageCollector(
           },
         },
         task_type_exclusion: excludeTaskTypes,
+        failed_tasks: Object.entries(lastMonitoredHealth?.stats.workload?.value.task_types!).reduce(
+          (numb, [key, val]) => {
+            if (val.status.failed !== undefined) {
+              numb += val.status.failed;
+            }
+            return numb;
+          },
+          0
+        ),
       };
     },
     schema: {
@@ -79,6 +88,7 @@ export function createTaskManagerUsageCollector(
         },
       },
       task_type_exclusion: { type: 'array', items: { type: 'keyword' } },
+      failed_tasks: { type: 'long' },
     },
   });
 }

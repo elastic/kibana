@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsViewerUtility } from './exceptions_utility';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
@@ -17,9 +17,7 @@ const mockTheme = getMockTheme({
     euiBreakpoints: {
       l: '1200px',
     },
-    paddingSizes: {
-      m: '10px',
-    },
+    euiSizeM: '10px',
     euiBorderThin: '1px solid #ece',
   },
 });

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'src/core/public';
+import { PluginInitializer } from '@kbn/core/public';
 import { FeaturesPlugin, FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
-export {
-  KibanaFeature,
+export type {
   KibanaFeatureConfig,
   FeatureKibanaPrivileges,
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,
 } from '../common';
+export { KibanaFeature } from '../common';
 
-export { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
+export type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<FeaturesPluginSetup, FeaturesPluginStart> = () =>
   new FeaturesPlugin();

@@ -7,4 +7,5 @@
 
 export * from '../../../hooks';
 
-export { useBreadcrumbs } from './use_breadcrumbs';
+export * from './use_breadcrumbs';
+export * from './use_apm_service_href';

@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const EMPTY_TITLE = i18n.translate('xpack.securitySolution.pages.common.emptyTitle', {
-  defaultMessage: 'Welcome to Elastic Security. Let’s get you started.',
+export const SOLUTION_NAME = i18n.translate('xpack.securitySolution.pages.common.solutionName', {
+  defaultMessage: 'Security',
 });
 
 export const EMPTY_ACTION_ELASTIC_AGENT = i18n.translate(
@@ -62,6 +62,10 @@ export const EMPTY_ACTION_ENDPOINT_DESCRIPTION = i18n.translate(
       'Protect your hosts with threat prevention, detection, and deep security data visibility.',
   }
 );
+
+export const BETA = i18n.translate('xpack.securitySolution.pages.common.beta', {
+  defaultMessage: 'Beta',
+});
 
 export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailed', {

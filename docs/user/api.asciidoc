@@ -1,32 +1,34 @@
 [[api]]
 = REST API
 
-Some {kib} features are provided via a REST API, which is ideal for creating an 
-integration with {kib}, or automating certain aspects of configuring and 
+Some {kib} features are provided via a REST API, which is ideal for creating an
+integration with {kib}, or automating certain aspects of configuring and
 deploying {kib}.
 
 [float]
 [[using-apis]]
 == Using the APIs
 
-Interact with the {kib} APIs through the `curl` command and HTTP and HTTPs protocols.
+Prepend any {kib} API endpoint with `kbn:` and send the request through <<console-kibana, Dev Tools > Console>>.
+For example:
 
-It is recommended that you use HTTPs on port 5601 because it is more secure.
-
-NOTE: The {kib} Console supports only Elasticsearch APIs. You are unable to interact with the {kib} APIs with the Console and must use `curl` or another HTTP tool instead. For more information, refer to <<console-kibana,Console>>.
+[source,sh]
+--------------------------------------------------
+`GET kbn:/api/index_management/indices`
+--------------------------------------------------
 
 [float]
 [[api-authentication]]
 === Authentication
-The {kib} APIs support key- and token-based authentication. 
+The {kib} APIs support key- and token-based authentication.
 
 [float]
 [[token-api-authentication]]
 ==== Token-based authentication
 
-To use token-based authentication, you use the same username and password that you use to log into Elastic.  
-In a given HTTP tool, and when available, you can select to use its 'Basic Authentication' option, 
-which is where the username and password are stored in order to be passed as part of the call. 
+To use token-based authentication, you use the same username and password that you use to log into Elastic.
+In a given HTTP tool, and when available, you can select to use its 'Basic Authentication' option,
+which is where the username and password are stored in order to be passed as part of the call.
 
 [float]
 [[key-authentication]]
@@ -65,7 +67,7 @@ For all APIs, you must use a request header. The {kib} APIs support the `kbn-xsr
 * XSRF protections are disabled using the <<settings-xsrf-disableProtection, `server.xsrf.disableProtection`>> setting
 
 `Content-Type: application/json`::
-  Applicable only when you send a payload in the API request. {kib} API requests and responses use JSON. 
+  Applicable only when you send a payload in the API request. {kib} API requests and responses use JSON.
   Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header.
 
 Request header example:
@@ -91,12 +93,14 @@ include::{kib-repo-dir}/api/spaces-management.asciidoc[]
 include::{kib-repo-dir}/api/role-management.asciidoc[]
 include::{kib-repo-dir}/api/session-management.asciidoc[]
 include::{kib-repo-dir}/api/saved-objects.asciidoc[]
+include::{kib-repo-dir}/api/data-views.asciidoc[]
 include::{kib-repo-dir}/api/index-patterns.asciidoc[]
 include::{kib-repo-dir}/api/alerting.asciidoc[]
 include::{kib-repo-dir}/api/actions-and-connectors.asciidoc[]
+include::{kib-repo-dir}/api/cases.asciidoc[]
 include::{kib-repo-dir}/api/dashboard-api.asciidoc[]
 include::{kib-repo-dir}/api/logstash-configuration-management.asciidoc[]
 include::{kib-repo-dir}/api/machine-learning.asciidoc[]
-include::{kib-repo-dir}/api/url-shortening.asciidoc[]
+include::{kib-repo-dir}/api/short-urls.asciidoc[]
 include::{kib-repo-dir}/api/task-manager/health.asciidoc[]
 include::{kib-repo-dir}/api/upgrade-assistant.asciidoc[]

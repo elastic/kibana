@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -58,6 +59,10 @@ export interface TelemetryEvent {
     };
   };
   license?: ESLicense;
+  event?: {
+    id?: string;
+    kind?: string;
+  };
 }
 
 // EP Policy Response
@@ -82,6 +87,10 @@ interface EndpointPolicyResponseHits {
     total: { value: number };
     hits: EndpointPolicyResponseDocument[];
   };
+}
+
+interface NonPolicyConfiguration {
+  isolation: boolean;
 }
 
 export interface EndpointPolicyResponseDocument {
@@ -109,6 +118,8 @@ export interface EndpointPolicyResponseDocument {
           status: string;
         };
       };
+      configuration: NonPolicyConfiguration;
+      state: NonPolicyConfiguration;
     };
   };
 }
@@ -157,6 +168,17 @@ interface EndpointMetricDocument {
   };
 }
 
+interface DocumentsVolumeMetrics {
+  suppressed_count: number;
+  suppressed_bytes: number;
+  sent_count: number;
+  sent_bytes: number;
+}
+
+interface SystemImpactEventsMetrics {
+  week_ms: number;
+}
+
 export interface EndpointMetrics {
   memory: {
     endpoint: {
@@ -180,6 +202,42 @@ export interface EndpointMetrics {
     endpoint: number;
     system: number;
   };
+  documents_volume: {
+    file_events: DocumentsVolumeMetrics;
+    library_events: DocumentsVolumeMetrics;
+    process_events: DocumentsVolumeMetrics;
+    registry_events: DocumentsVolumeMetrics;
+    network_events: DocumentsVolumeMetrics;
+    overall: DocumentsVolumeMetrics;
+    alerts: DocumentsVolumeMetrics;
+    diagnostic_alerts: DocumentsVolumeMetrics;
+    dns_events: DocumentsVolumeMetrics;
+    security_events: DocumentsVolumeMetrics;
+  };
+  malicious_behavior_rules: Array<{ id: string; endpoint_uptime_percent: number }>;
+  system_impact: Array<{
+    process: {
+      code_signature: Array<{
+        trusted: boolean;
+        subject_name: string;
+        exists: boolean;
+        status: string;
+      }>;
+      executable: string;
+    };
+    malware?: SystemImpactEventsMetrics;
+    process_events?: SystemImpactEventsMetrics;
+    registry_events?: SystemImpactEventsMetrics;
+    dns_events?: SystemImpactEventsMetrics;
+    network_events?: SystemImpactEventsMetrics;
+    overall?: SystemImpactEventsMetrics;
+    library_load_events?: SystemImpactEventsMetrics;
+  }>;
+  threads: Array<{ name: string; cpu: { mean: number } }>;
+  event_filter: {
+    active_global_count: number;
+    active_user_count: number;
+  };
 }
 
 interface EndpointMetricOS {
@@ -192,6 +250,44 @@ interface EndpointMetricOS {
   version: string;
   platform: string;
   full: string;
+}
+
+// EP Metadata
+
+export interface EndpointMetadataAggregation {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    endpoint_metadata: {
+      buckets: Array<{ key: string; doc_count: number; latest_metadata: EndpointMetadataHits }>;
+    };
+  };
+}
+
+interface EndpointMetadataHits {
+  hits: {
+    total: { value: number };
+    hits: EndpointMetadataDocument[];
+  };
+}
+
+export interface EndpointMetadataDocument {
+  _source: {
+    '@timestamp': string;
+    agent: {
+      id: string;
+      version: string;
+    };
+    Endpoint: {
+      capabilities: string[];
+    };
+    elastic: {
+      agent: {
+        id: string;
+      };
+    };
+  };
 }
 
 // List HTTP Types
@@ -217,18 +313,65 @@ export interface GetEndpointListResponse {
 
 export interface ExceptionListItem {
   id: string;
-  version: string;
+  rule_version?: number;
   name: string;
-  description: string;
   created_at: string;
   updated_at: string;
   entries: object;
-  os: string;
   os_types: object;
 }
 
 export interface ListTemplate {
-  trusted_application: TelemetryEvent[];
-  endpoint_exception: TelemetryEvent[];
-  endpoint_event_filter: TelemetryEvent[];
+  '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  license_id: string | undefined;
+  detection_rule?: TelemetryEvent;
+  endpoint_exception?: TelemetryEvent;
+  endpoint_event_filter?: TelemetryEvent;
+  trusted_application?: TelemetryEvent;
+}
+
+// Detection Rule types
+
+interface ExceptionListEntry {
+  id: string;
+  list_id: string;
+  type: string;
+  namespace_type: string;
+}
+
+interface DetectionRuleParms {
+  ruleId: string;
+  version: number;
+  type: string;
+  exceptionsList: ExceptionListEntry[];
+}
+
+export interface RuleSearchResult {
+  alert: {
+    name: string;
+    enabled: boolean;
+    tags: string[];
+    createdAt: string;
+    updatedAt: string;
+    params: DetectionRuleParms;
+  };
+}
+
+// EP Timeline telemetry
+
+export type EnhancedAlertEvent = AlertEvent & { 'event.id': string; 'kibana.alert.uuid': string };
+
+export type TimelineTelemetryEvent = ResolverNode & { event: SafeResolverEvent | undefined };
+
+export interface TimelineTelemetryTemplate {
+  '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  version: string | undefined;
+  license_uuid: string | undefined;
+  alert_id: string | undefined;
+  event_id: string;
+  timeline: TimelineTelemetryEvent[];
 }

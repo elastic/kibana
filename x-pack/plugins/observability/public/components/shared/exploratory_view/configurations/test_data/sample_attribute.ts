@@ -4,13 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RECORDS_FIELD } from '../constants';
+
 export const sampleAttribute = {
-  title: 'Prefilled from exploratory view app',
   description: '',
-  visualizationType: 'lnsXY',
   references: [
-    { id: 'apm-*', name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern' },
-    { id: 'apm-*', name: 'indexpattern-datasource-layer-layer0', type: 'index-pattern' },
+    {
+      id: 'apm-*',
+      name: 'indexpattern-datasource-current-indexpattern',
+      type: 'index-pattern',
+    },
+    {
+      id: 'apm-*',
+      name: 'indexpattern-datasource-layer-layer0',
+      type: 'index-pattern',
+    },
+    {
+      id: 'apm-*',
+      name: 'indexpattern-datasource-layer-layer0-reference-lines',
+      type: 'index-pattern',
+    },
   ],
   state: {
     datasourceStates: {
@@ -24,23 +37,29 @@ export const sampleAttribute = {
               'y-axis-column-layer0X1',
               'y-axis-column-layer0X2',
               'y-axis-column-layer0X3',
-              'y-axis-column-layer0X4',
             ],
             columns: {
               'x-axis-column-layer0': {
-                sourceField: 'transaction.duration.us',
-                label: 'Page load time',
                 dataType: 'number',
-                operationType: 'range',
                 isBucketed: true,
-                scale: 'interval',
+                label: 'Page load time',
+                operationType: 'range',
                 params: {
-                  type: 'histogram',
-                  ranges: [{ from: 0, to: 1000, label: '' }],
                   maxBars: 'auto',
+                  ranges: [
+                    {
+                      from: 0,
+                      label: '',
+                      to: 1000,
+                    },
+                  ],
+                  type: 'histogram',
                 },
+                scale: 'interval',
+                sourceField: 'transaction.duration.us',
               },
               'y-axis-column-layer0': {
+                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -61,8 +80,7 @@ export const sampleAttribute = {
                     "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
                   isFormulaBroken: false,
                 },
-                references: ['y-axis-column-layer0X4'],
-                scale: 'ratio',
+                references: ['y-axis-column-layer0X3'],
               },
               'y-axis-column-layer0X0': {
                 customLabel: true,
@@ -73,34 +91,37 @@ export const sampleAttribute = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : *',
                 },
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'count',
+                params: {
+                  emptyAsNull: false,
+                },
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0X1': {
                 customLabel: true,
                 dataType: 'number',
-                isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
-                operationType: 'count',
-                scale: 'ratio',
-                sourceField: 'Records',
                 filter: {
                   language: 'kuery',
                   query:
                     'transaction.type: page-load and processor.event: transaction and transaction.type : *',
                 },
+                isBucketed: false,
+                label: 'Part of Pages loaded',
+                operationType: 'count',
+                params: {
+                  emptyAsNull: false,
+                },
+                scale: 'ratio',
+                sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0X2': {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
-                operationType: 'math',
-                params: {
-                  tinymathAst: 'y-axis-column-layer0X1',
-                },
+                label: 'Part of Pages loaded',
+                operationType: 'overall_sum',
                 references: ['y-axis-column-layer0X1'],
                 scale: 'ratio',
               },
@@ -108,22 +129,13 @@ export const sampleAttribute = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
-                operationType: 'overall_sum',
-                references: ['y-axis-column-layer0X2'],
-                scale: 'ratio',
-              },
-              'y-axis-column-layer0X4': {
-                customLabel: true,
-                dataType: 'number',
-                isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'math',
                 params: {
                   tinymathAst: {
-                    args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
+                    args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
                     location: {
-                      max: 30,
+                      max: 212,
                       min: 0,
                     },
                     name: 'divide',
@@ -131,8 +143,80 @@ export const sampleAttribute = {
                     type: 'function',
                   },
                 },
-                references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
+                references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
                 scale: 'ratio',
+              },
+            },
+            incompleteColumns: {},
+          },
+          'layer0-reference-lines': {
+            columnOrder: [
+              '50th-percentile-reference-line-layer0-reference-lines',
+              '75th-percentile-reference-line-layer0-reference-lines',
+              '90th-percentile-reference-line-layer0-reference-lines',
+              '95th-percentile-reference-line-layer0-reference-lines',
+              '99th-percentile-reference-line-layer0-reference-lines',
+            ],
+            columns: {
+              '50th-percentile-reference-line-layer0-reference-lines': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: '50th',
+                operationType: 'percentile',
+                params: {
+                  percentile: 50,
+                },
+                scale: 'ratio',
+                sourceField: 'transaction.duration.us',
+              },
+              '75th-percentile-reference-line-layer0-reference-lines': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: '75th',
+                operationType: 'percentile',
+                params: {
+                  percentile: 75,
+                },
+                scale: 'ratio',
+                sourceField: 'transaction.duration.us',
+              },
+              '90th-percentile-reference-line-layer0-reference-lines': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: '90th',
+                operationType: 'percentile',
+                params: {
+                  percentile: 90,
+                },
+                scale: 'ratio',
+                sourceField: 'transaction.duration.us',
+              },
+              '95th-percentile-reference-line-layer0-reference-lines': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: '95th',
+                operationType: 'percentile',
+                params: {
+                  percentile: 95,
+                },
+                scale: 'ratio',
+                sourceField: 'transaction.duration.us',
+              },
+              '99th-percentile-reference-line-layer0-reference-lines': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: '99th',
+                operationType: 'percentile',
+                params: {
+                  percentile: 99,
+                },
+                scale: 'ratio',
+                sourceField: 'transaction.duration.us',
               },
             },
             incompleteColumns: {},
@@ -140,27 +224,108 @@ export const sampleAttribute = {
         },
       },
     },
+    filters: [],
+    query: {
+      language: 'kuery',
+      query:
+        'transaction.type: page-load and processor.event: transaction and transaction.type : * and transaction.duration.us < 60000000',
+    },
     visualization: {
-      legend: { isVisible: true, position: 'right' },
-      valueLabels: 'hide',
-      fittingFunction: 'Linear',
+      axisTitlesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
       curveType: 'CURVE_MONOTONE_X',
-      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      preferredSeriesType: 'line',
+      fittingFunction: 'Linear',
+      gridlinesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
       layers: [
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
           layerType: 'data',
           seriesType: 'line',
-          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
           xAccessor: 'x-axis-column-layer0',
+          yConfig: [
+            {
+              color: 'green',
+              forAccessor: 'y-axis-column-layer0',
+              axisMode: 'left',
+            },
+          ],
+        },
+        {
+          accessors: [
+            '50th-percentile-reference-line-layer0-reference-lines',
+            '75th-percentile-reference-line-layer0-reference-lines',
+            '90th-percentile-reference-line-layer0-reference-lines',
+            '95th-percentile-reference-line-layer0-reference-lines',
+            '99th-percentile-reference-line-layer0-reference-lines',
+          ],
+          layerId: 'layer0-reference-lines',
+          layerType: 'referenceLine',
+          yConfig: [
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '50th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '75th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '90th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '95th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '99th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+          ],
         },
       ],
+      legend: {
+        isVisible: true,
+        position: 'right',
+        showSingleSeries: true,
+      },
+      preferredSeriesType: 'line',
+      tickLabelsVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      valueLabels: 'hide',
     },
-    query: { query: 'transaction.duration.us < 60000000', language: 'kuery' },
-    filters: [],
   },
+  title: 'Prefilled from exploratory view app',
+  visualizationType: 'lnsXY',
 };

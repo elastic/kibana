@@ -7,13 +7,11 @@
  */
 
 import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
-import { createFailError } from '@kbn/dev-utils';
 
 export class File {
   private path: string;
   private relativePath: string;
   private ext: string;
-  private fileReader: undefined | (() => Promise<string>);
 
   constructor(path: string) {
     this.path = resolve(path);
@@ -52,14 +50,17 @@ export class File {
   }
 
   public isFixture() {
-    return (
-      this.relativePath.split(sep).includes('__fixtures__') || this.path.endsWith('.test-d.ts')
-    );
-  }
+    const parts = this.relativePath.split(sep);
+    if (parts.includes('__fixtures__') || this.path.endsWith('.test-d.ts')) {
+      return true;
+    }
 
-  // Virtual files cannot be read as usual, an helper is needed
-  public isVirtual() {
-    return this.fileReader !== undefined;
+    const i = parts.indexOf('kbn-generate');
+    if (i >= 0 && parts[i + 1] === 'templates') {
+      return true;
+    }
+
+    return false;
   }
 
   public getRelativeParentDirs() {
@@ -87,16 +88,5 @@ export class File {
 
   public toJSON() {
     return this.relativePath;
-  }
-
-  public setFileReader(fileReader: () => Promise<string>) {
-    this.fileReader = fileReader;
-  }
-
-  public getContent() {
-    if (this.fileReader) {
-      return this.fileReader();
-    }
-    throw createFailError('getContent() was invoked on a non-virtual File');
   }
 }

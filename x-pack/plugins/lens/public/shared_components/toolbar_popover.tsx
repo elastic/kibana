@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import './toolbar_popover.scss';
 import React, { useState } from 'react';
 import { EuiFlexItem, EuiPopover, EuiIcon, EuiPopoverTitle, IconType } from '@elastic/eui';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
 import { EuiIconLegend } from '../assets/legend';
-import { ToolbarButton, ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
@@ -36,6 +37,8 @@ export interface ToolbarPopoverProps {
    */
   groupPosition?: ToolbarButtonProps['groupPosition'];
   buttonDataTestSubj?: string;
+  panelClassName?: string;
+  handleClose?: () => void;
 }
 
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
@@ -45,6 +48,8 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   isDisabled = false,
   groupPosition,
   buttonDataTestSubj,
+  panelClassName = 'lnsVisToolbar__popover',
+  handleClose,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -53,7 +58,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
-        panelClassName="lnsXyToolbar__popover"
+        panelClassName={panelClassName}
         ownFocus
         aria-label={title}
         button={
@@ -74,6 +79,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
         isOpen={open}
         closePopover={() => {
           setOpen(false);
+          handleClose?.();
         }}
         anchorPosition="downRight"
       >

@@ -5,14 +5,46 @@
  * 2.0.
  */
 
-import { FIELD_TYPES, FormSchema } from '../../shared_imports';
+export const MAX_QUERY_LENGTH = 2000;
 
-export const formSchema: FormSchema = {
-  agents: {
-    type: FIELD_TYPES.MULTI_SELECT,
+import { i18n } from '@kbn/i18n';
+import { FIELD_TYPES } from '../../shared_imports';
+import { queryFieldValidation } from '../../common/validations';
+import { fieldValidators } from '../../shared_imports';
+
+export const liveQueryFormSchema = {
+  agentSelection: {
+    defaultValue: {
+      agents: [],
+      allAgentsSelected: false,
+      platformsSelected: [],
+      policiesSelected: [],
+    },
+    type: FIELD_TYPES.JSON,
+    validations: [],
+  },
+  savedQueryId: {
+    type: FIELD_TYPES.TEXT,
+    validations: [],
   },
   query: {
-    type: FIELD_TYPES.TEXTAREA,
-    validations: [],
+    defaultValue: '',
+    type: FIELD_TYPES.TEXT,
+    validations: [
+      {
+        validator: fieldValidators.maxLengthField({
+          length: MAX_QUERY_LENGTH,
+          message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
+            defaultMessage: 'Query is too large (max {maxLength} characters)',
+            values: { maxLength: MAX_QUERY_LENGTH },
+          }),
+        }),
+      },
+      { validator: queryFieldValidation },
+    ],
+  },
+  ecs_mapping: {
+    defaultValue: [],
+    type: FIELD_TYPES.JSON,
   },
 };

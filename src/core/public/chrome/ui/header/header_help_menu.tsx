@@ -9,7 +9,7 @@
 import React, { Component, Fragment } from 'react';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -331,7 +331,9 @@ export class HeaderHelpMenu extends Component<Props, State> {
         {content && (
           <>
             {customLinks && <EuiSpacer size="xs" />}
-            <HeaderExtension extension={content} />
+            <HeaderExtension
+              extension={(domNode) => content(domNode, { hideHelpMenu: this.closeMenu })}
+            />
           </>
         )}
       </>

@@ -9,15 +9,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase, getDataViewFieldSubtypeNested } from '@kbn/es-query';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
-// import { AutocompleteStart } from '../../../../../../../../src/plugins/data/public';
+// import { AutocompleteStart } from '../../../../../../../../src/plugins/unified_search/public';
 type AutocompleteStart = any;
 
 interface FuncArgs {
-  fieldSelected: IndexPatternFieldBase | undefined;
-  patterns: IndexPatternBase | undefined;
+  fieldSelected: DataViewFieldBase | undefined;
+  patterns: DataViewBase | undefined;
   searchQuery: string;
   value: string | string[] | undefined;
 }
@@ -29,10 +29,10 @@ export type UseFieldValueAutocompleteReturn = [boolean, boolean, string[], Func 
 export interface UseFieldValueAutocompleteProps {
   autocompleteService: AutocompleteStart;
   fieldValue: string | string[] | undefined;
-  indexPattern: IndexPatternBase | undefined;
+  indexPattern: DataViewBase | undefined;
   operatorType: OperatorTypeEnum;
   query: string;
-  selectedField: IndexPatternFieldBase | undefined;
+  selectedField: DataViewFieldBase | undefined;
 }
 /**
  * Hook for using the field value autocomplete service
@@ -68,14 +68,13 @@ export const useFieldValueAutocomplete = ({
             }
 
             setIsLoading(true);
-
-            const field =
-              fieldSelected.subType != null && fieldSelected.subType.nested != null
-                ? {
-                    ...fieldSelected,
-                    name: `${fieldSelected.subType.nested.path}.${fieldSelected.name}`,
-                  }
-                : fieldSelected;
+            const subTypeNested = getDataViewFieldSubtypeNested(fieldSelected);
+            const field = subTypeNested
+              ? {
+                  ...fieldSelected,
+                  name: `${subTypeNested.nested.path}.${fieldSelected.name}`,
+                }
+              : fieldSelected;
 
             const newSuggestions = await autocompleteService.getValueSuggestions({
               field,

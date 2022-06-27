@@ -5,42 +5,49 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../src/core/public';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { LensPublicStart } from '../../../plugins/lens/public';
-import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
-import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { TelemetryManagementSectionPluginSetup } from '../../../../src/plugins/telemetry_management_section/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { FleetStart } from '../../fleet/public';
-import { PluginStart as ListsPluginStart } from '../../lists/public';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { PluginStart as ListsPluginStart } from '@kbn/lists-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
-} from '../../triggers_actions_ui/public';
-import { CasesUiStart } from '../../cases/public';
-import { SecurityPluginSetup } from '../../security/public';
-import { TimelinesUIStart } from '../../timelines/public';
-import { ResolverPluginSetup } from './resolver/types';
-import { Inspect } from '../common/search_strategy';
-import { MlPluginSetup, MlPluginStart } from '../../ml/public';
-
-import { Detections } from './detections';
-import { Cases } from './cases';
-import { Exceptions } from './exceptions';
-import { Hosts } from './hosts';
-import { Network } from './network';
-import { Overview } from './overview';
-import { Rules } from './rules';
-import { Timelines } from './timelines';
-import { Management } from './management';
-import { Ueba } from './ueba';
-import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import type { SessionViewStart } from '@kbn/session-view-plugin/public';
+import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
+import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ApmBase } from '@elastic/apm-rum';
+import type { ResolverPluginSetup } from './resolver/types';
+import type { Inspect } from '../common/search_strategy';
+import type { Detections } from './detections';
+import type { Cases } from './cases';
+import type { Exceptions } from './exceptions';
+import type { Hosts } from './hosts';
+import type { Users } from './users';
+import type { Network } from './network';
+import type { Kubernetes } from './kubernetes';
+import type { Overview } from './overview';
+import type { Rules } from './rules';
+import type { Timelines } from './timelines';
+import type { Management } from './management';
+import { LandingPages } from './landing_pages';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -48,31 +55,37 @@ export interface SetupPlugins {
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
-  telemetryManagementSection?: TelemetryManagementSectionPluginSetup;
   ml?: MlPluginSetup;
 }
 
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   timelines: TimelinesUIStart;
+  sessionView: SessionViewStart;
   uiActions: UiActionsStart;
   ml?: MlPluginStart;
+  spaces?: SpacesPluginStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
+  osquery?: OsqueryPluginStart;
+  security: SecurityPluginSetup;
 }
 
 export type StartServices = CoreStart &
   StartPlugins & {
-    security: SecurityPluginSetup;
     storage: Storage;
+    apm: ApmBase;
   };
 
 export interface PluginSetup {
@@ -87,18 +100,20 @@ export interface AppObservableLibs {
 
 export type InspectResponse = Inspect & { response: string[] };
 
+export const CASES_SUB_PLUGIN_KEY = 'cases';
 export interface SubPlugins {
   alerts: Detections;
   rules: Rules;
   exceptions: Exceptions;
-  cases: Cases;
+  [CASES_SUB_PLUGIN_KEY]: Cases;
   hosts: Hosts;
+  users: Users;
   network: Network;
-  // TODO: Steph/ueba require ueba once no longer experimental
-  ueba?: Ueba;
+  kubernetes: Kubernetes;
   overview: Overview;
   timelines: Timelines;
   management: Management;
+  landingPages: LandingPages;
 }
 
 // TODO: find a better way to defined these types
@@ -106,12 +121,13 @@ export interface StartedSubPlugins {
   alerts: ReturnType<Detections['start']>;
   rules: ReturnType<Rules['start']>;
   exceptions: ReturnType<Exceptions['start']>;
-  cases: ReturnType<Cases['start']>;
+  [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
   hosts: ReturnType<Hosts['start']>;
+  users: ReturnType<Users['start']>;
   network: ReturnType<Network['start']>;
-  // TODO: Steph/ueba require ueba once no longer experimental
-  ueba?: ReturnType<Ueba['start']>;
+  kubernetes: ReturnType<Kubernetes['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;
+  landingPages: ReturnType<LandingPages['start']>;
 }

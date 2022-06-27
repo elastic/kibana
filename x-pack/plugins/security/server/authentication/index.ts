@@ -6,11 +6,11 @@
  */
 
 export { canRedirectRequest } from './can_redirect_request';
-export {
-  AuthenticationService,
+export type {
   AuthenticationServiceStart,
   InternalAuthenticationServiceStart,
 } from './authentication_service';
+export { AuthenticationService } from './authentication_service';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
 export {
@@ -21,6 +21,7 @@ export {
   SAMLAuthenticationProvider,
   OIDCAuthenticationProvider,
   AnonymousAuthenticationProvider,
+  HTTPAuthenticationProvider,
 } from './providers';
 export {
   BasicHTTPAuthorizationHeaderCredentials,

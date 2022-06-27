@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
-
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import {
+  InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+} from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServicePreboot,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from '@kbn/core-analytics-server';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { ConfigDeprecationProvider } from './config';
 import { InternalContextPreboot, ContextSetup } from './context';
 import {
   InternalElasticsearchServicePreboot,
@@ -35,7 +42,6 @@ import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metr
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
@@ -47,6 +53,7 @@ import { InternalPrebootServicePreboot } from './preboot';
 
 /** @internal */
 export interface InternalCorePreboot {
+  analytics: AnalyticsServicePreboot;
   context: InternalContextPreboot;
   http: InternalHttpServicePreboot;
   elasticsearch: InternalElasticsearchServicePreboot;
@@ -58,8 +65,10 @@ export interface InternalCorePreboot {
 
 /** @internal */
 export interface InternalCoreSetup {
+  analytics: AnalyticsServiceSetup;
   capabilities: CapabilitiesSetup;
   context: ContextSetup;
+  docLinks: DocLinksServiceSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
   executionContext: InternalExecutionContextSetup;
@@ -80,8 +89,10 @@ export interface InternalCoreSetup {
  * @internal
  */
 export interface InternalCoreStart {
+  analytics: AnalyticsServiceStart;
   capabilities: CapabilitiesStart;
   elasticsearch: InternalElasticsearchServiceStart;
+  docLinks: DocLinksServiceStart;
   http: InternalHttpServiceStart;
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
@@ -89,19 +100,4 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
-}
-
-/**
- * @internal
- */
-export interface ServiceConfigDescriptor<T = any> {
-  path: string;
-  /**
-   * Schema to use to validate the configuration.
-   */
-  schema: Type<T>;
-  /**
-   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
-   */
-  deprecations?: ConfigDeprecationProvider;
 }

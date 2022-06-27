@@ -13,7 +13,7 @@ import {
 import { mockRecursivelyFetchEngines } from '../../__mocks__';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { EngineLogic } from '../engine';
 import { EngineDetails } from '../engine/types';
@@ -98,12 +98,15 @@ describe('SourceEnginesLogic', () => {
 
         SourceEnginesLogic.actions.setIndexedEngines([
           { name: 'source-engine-1' },
-          { name: 'source-engine-2' },
+          { name: 'source-engine-2', type: 'elasticsearch' },
         ] as EngineDetails[]);
 
         expect(SourceEnginesLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          indexedEngines: [{ name: 'source-engine-1' }, { name: 'source-engine-2' }],
+          indexedEngines: [
+            { name: 'source-engine-1' },
+            { name: 'source-engine-2', type: 'elasticsearch' },
+          ],
           // Selectors
           indexedEngineNames: ['source-engine-1', 'source-engine-2'],
           selectableEngineNames: ['source-engine-1', 'source-engine-2'],

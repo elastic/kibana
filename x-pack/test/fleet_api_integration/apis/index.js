@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import { setupTestUsers } from './test_users';
+
+export default function ({ loadTestFile, getService }) {
   describe('Fleet Endpoints', function () {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
+
     // EPM
-    loadTestFile(require.resolve('./epm/index'));
+    loadTestFile(require.resolve('./epm'));
 
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup'));
 
     // Agents
-    loadTestFile(require.resolve('./agents/delete'));
-    loadTestFile(require.resolve('./agents/list'));
-    loadTestFile(require.resolve('./agents/unenroll'));
-    loadTestFile(require.resolve('./agents/actions'));
-    loadTestFile(require.resolve('./agents/upgrade'));
-    loadTestFile(require.resolve('./agents/reassign'));
-    loadTestFile(require.resolve('./agents/status'));
+    loadTestFile(require.resolve('./agents'));
 
     // Enrollment API keys
     loadTestFile(require.resolve('./enrollment_api_keys/crud'));
@@ -33,16 +33,16 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./package_policy/upgrade'));
 
     // Agent policies
-    loadTestFile(require.resolve('./agent_policy/index'));
+    loadTestFile(require.resolve('./agent_policy'));
 
     // Data Streams
-    loadTestFile(require.resolve('./data_streams/index'));
+    loadTestFile(require.resolve('./data_streams'));
 
     // Settings
-    loadTestFile(require.resolve('./settings/index'));
+    loadTestFile(require.resolve('./settings'));
 
     // Preconfiguration
-    loadTestFile(require.resolve('./preconfiguration/index'));
+    loadTestFile(require.resolve('./preconfiguration'));
 
     // Service tokens
     loadTestFile(require.resolve('./service_tokens'));
@@ -50,7 +50,13 @@ export default function ({ loadTestFile }) {
     // Outputs
     loadTestFile(require.resolve('./outputs'));
 
+    // Download sources
+    loadTestFile(require.resolve('./download_sources'));
+
     // Telemetry
     loadTestFile(require.resolve('./fleet_telemetry'));
+
+    // Integrations
+    loadTestFile(require.resolve('./integrations'));
   });
 }

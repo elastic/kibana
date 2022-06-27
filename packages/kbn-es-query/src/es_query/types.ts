@@ -6,22 +6,38 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**
  * A field's sub type
  * @public
  */
-export interface IFieldSubType {
+export type IFieldSubType = IFieldSubTypeMultiOptional | IFieldSubTypeNestedOptional;
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type IFieldSubTypeMultiOptional = {
   multi?: { parent: string };
+};
+
+export interface IFieldSubTypeMulti {
+  multi: { parent: string };
+}
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type IFieldSubTypeNestedOptional = {
   nested?: { path: string };
+};
+
+export interface IFieldSubTypeNested {
+  nested: { path: string };
 }
 
 /**
  * A base interface for an index pattern field
  * @public
  */
-export interface DataViewFieldBase {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DataViewFieldBase = {
   name: string;
   /**
    * Kibana field type
@@ -33,32 +49,23 @@ export interface DataViewFieldBase {
    */
   script?: string;
   /**
-   * Scripted field langauge
+   * Scripted field language
    * Painless is the only valid scripted field language
    */
   lang?: estypes.ScriptLanguage;
   scripted?: boolean;
-}
-
-/**
- * @deprecated Use DataViewField instead. All index pattern interfaces were renamed.
- */
-export type IndexPatternFieldBase = DataViewFieldBase;
+};
 
 /**
  * A base interface for an index pattern
  * @public
  */
-export interface DataViewBase {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DataViewBase = {
   fields: DataViewFieldBase[];
   id?: string;
-  title?: string;
-}
-
-/**
- * @deprecated Use DataViewBase instead.  All index pattern interfaces were renamed.
- */
-export type IndexPatternBase = DataViewBase;
+  title: string;
+};
 
 export interface BoolQuery {
   must: estypes.QueryDslQueryContainer[];

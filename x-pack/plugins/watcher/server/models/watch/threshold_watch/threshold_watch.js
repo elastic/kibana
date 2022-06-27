@@ -48,8 +48,8 @@ export class ThresholdWatch extends BaseWatch {
     return serializeThresholdWatch(this);
   }
 
-  getVisualizeQuery(visualizeOptions) {
-    return buildVisualizeQuery(this, visualizeOptions);
+  getVisualizeQuery(visualizeOptions, kibanaVersion) {
+    return buildVisualizeQuery(this, visualizeOptions, kibanaVersion);
   }
 
   formatVisualizeData(results) {

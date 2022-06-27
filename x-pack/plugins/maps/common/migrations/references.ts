@@ -7,7 +7,7 @@
 
 // Can not use public Layer classes to extract references since this logic must run in both client and server.
 
-import { SavedObjectReference } from '../../../../../src/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import { MapSavedObjectAttributes } from '../map_saved_object_type';
 import { LayerDescriptor, VectorLayerDescriptor } from '../descriptor_types';
 
@@ -29,7 +29,13 @@ export function extractReferences({
 
   const extractedReferences: SavedObjectReference[] = [];
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layer, layerIndex) => {
     // Extract index-pattern references from source descriptor
     if (layer.sourceDescriptor && 'indexPatternId' in layer.sourceDescriptor) {
@@ -92,7 +98,13 @@ export function injectReferences({
     return { attributes };
   }
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layer) => {
     // Inject index-pattern references into source descriptor
     if (layer.sourceDescriptor && 'indexPatternRefName' in layer.sourceDescriptor) {

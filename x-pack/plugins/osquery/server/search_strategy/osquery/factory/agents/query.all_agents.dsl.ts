@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '../../../../../../../../src/plugins/data/common';
+import { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AgentsRequestOptions } from '../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
@@ -21,9 +21,9 @@ export const buildAgentsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: '.fleet-agents',
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: {
         bool: {

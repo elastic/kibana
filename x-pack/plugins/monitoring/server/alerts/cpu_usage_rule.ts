@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Alert } from '@kbn/alerting-plugin/server';
+import { RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -22,21 +25,16 @@ import {
   CommonAlertParams,
   CommonAlertFilter,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
-import { INDEX_PATTERN_ELASTICSEARCH, RULE_CPU_USAGE, RULE_DETAILS } from '../../common/constants';
+import { RULE_CPU_USAGE, RULE_DETAILS } from '../../common/constants';
 // @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
-import { parseDuration } from '../../../alerting/common/parse_duration';
 import { AlertingDefaults, createLink } from './alert_helpers';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
 
 export class CpuUsageRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_CPU_USAGE,
       name: RULE_DETAILS[RULE_CPU_USAGE].label,
@@ -60,20 +58,14 @@ export class CpuUsageRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: string[]
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (availableCcs) {
-      esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
-    }
     const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
     const stats = await fetchCpuUsageNodeStats(
       esClient,
       clusters,
-      esIndexPattern,
       startMs,
       endMs,
       Globals.app.config.ui.max_bucket_size,
@@ -153,7 +145,7 @@ export class CpuUsageRule extends BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: AlertInstanceState,
     item: AlertData | null,
     cluster: AlertCluster

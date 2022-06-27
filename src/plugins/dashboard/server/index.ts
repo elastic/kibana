@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '../../../core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { DashboardPlugin } from './plugin';
 import { configSchema, ConfigSchema } from '../config';
 
@@ -24,5 +24,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
 }
 
-export { DashboardPluginSetup, DashboardPluginStart } from './types';
+export type { DashboardPluginSetup, DashboardPluginStart } from './types';
 export { findByValueEmbeddables } from './usage/find_by_value_embeddables';

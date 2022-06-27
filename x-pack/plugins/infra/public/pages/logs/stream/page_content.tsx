@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { LogsPageLogsContent } from './page_logs_content';
-import { LogsPageNoIndicesContent } from './page_no_indices_content';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../page_template';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
+import { LogsPageLogsContent } from './page_logs_content';
 
 const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
   defaultMessage: 'Stream',
@@ -25,19 +24,20 @@ export const StreamPageContent: React.FunctionComponent = () => {
     hasFailedLoading,
     isLoading,
     isUninitialized,
-    loadSource,
-    latestLoadSourceFailures,
-    sourceStatus,
-  } = useLogSourceContext();
+    latestLoadLogViewFailures,
+    load,
+    logViewStatus,
+  } = useLogViewContext();
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={loadSource} />;
-  } else if (sourceStatus?.logIndexStatus !== 'missing') {
+    return <LogSourceErrorPage errors={latestLoadLogViewFailures} onRetry={load} />;
+  } else {
     return (
       <LogStreamPageWrapper className={APP_WRAPPER_CLASS}>
         <LogsPageTemplate
+          hasData={logViewStatus?.index !== 'missing'}
           pageHeader={{
             pageTitle: streamTitle,
           }}
@@ -46,8 +46,6 @@ export const StreamPageContent: React.FunctionComponent = () => {
         </LogsPageTemplate>
       </LogStreamPageWrapper>
     );
-  } else {
-    return <LogsPageNoIndicesContent />;
   }
 };
 

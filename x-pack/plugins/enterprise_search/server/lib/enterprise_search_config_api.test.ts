@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../common/__mocks__';
-import '../__mocks__/http_agent.mock.ts';
+import '../__mocks__/http_agent.mock';
 
 jest.mock('node-fetch');
 import fetch from 'node-fetch';
@@ -17,7 +17,7 @@ jest.mock('@kbn/utils', () => ({
   kibanaPackageJson: { version: '1.0.0' },
 }));
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import {
   callEnterpriseSearchConfigAPI,
@@ -41,12 +41,11 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
   const mockResponse = {
     version: {
-      number: '1.0.0',
+      number: '7.16.0',
     },
     settings: {
       external_url: 'http://some.vanity.url/',
       read_only_mode: false,
-      ilm_enabled: true,
       is_federated_auth: false,
       search_oauth: {
         client_id: 'someUID',
@@ -121,6 +120,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
       ...DEFAULT_INITIAL_APP_DATA,
+      kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: true,
         hasWorkplaceSearchAccess: false,
@@ -133,13 +133,13 @@ describe('callEnterpriseSearchConfigAPI', () => {
     (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.resolve(new Response('{}')));
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
+      kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: false,
         hasWorkplaceSearchAccess: false,
       },
       publicUrl: undefined,
       readOnlyMode: false,
-      ilmEnabled: false,
       searchOAuth: {
         clientId: undefined,
         redirectUrl: undefined,
@@ -207,8 +207,19 @@ describe('callEnterpriseSearchConfigAPI', () => {
     (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.resolve('Bad Data'));
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({});
     expect(mockDependencies.log.error).toHaveBeenCalledWith(
-      'Could not perform access check to Enterprise Search: TypeError: response.json is not a function'
+      'Could not perform access check to Enterprise Search: 500'
     );
+
+    (fetch as unknown as jest.Mock).mockReturnValueOnce(
+      Promise.resolve(
+        new Response('{}', {
+          status: 500,
+          statusText: 'I failed',
+        })
+      )
+    );
+    const expected = { responseStatus: 500, responseStatusText: 'I failed' };
+    expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual(expected);
   });
 
   it('handles timeouts', async () => {

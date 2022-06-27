@@ -8,12 +8,12 @@
 
 import moment from 'moment';
 
-import { configServiceMock } from '../config/mocks';
+import { configServiceMock } from '@kbn/config-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
-import { mockCoreContext } from '../core_context.mock';
 import { httpServiceMock } from '../http/http_service.mock';
-import { loggingSystemMock } from '../logging/logging_system.mock';
 import { take } from 'rxjs/operators';
 
 const testInterval = 100;
@@ -203,6 +203,7 @@ describe('MetricsService', () => {
             },
             "process": Object {
               "eventLoopDelay": undefined,
+              "eventLoopDelayHistogram": undefined,
               "memory": Object {
                 "heap": Object {
                   "usedInBytes": undefined,

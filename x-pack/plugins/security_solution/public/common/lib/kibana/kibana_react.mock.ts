@@ -10,10 +10,11 @@
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { securityMock } from '../../../../../../plugins/security/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -32,15 +33,13 @@ import {
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-  DEFAULT_RULE_REFRESH_IDLE_VALUE,
-  DEFAULT_TRANSFORMS,
 } from '../../../../common/constants';
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
-import { MlLocatorDefinition } from '../../../../../ml/public';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
-import { MockUrlService } from 'src/plugins/share/common/mocks';
-import { fleetMock } from '../../../../../fleet/public/mocks';
+import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
+import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -61,10 +60,6 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
-    idleTimeout: DEFAULT_RULE_REFRESH_IDLE_VALUE,
-  },
-  [DEFAULT_TRANSFORMS]: {
-    enabled: false,
   },
 };
 
@@ -91,8 +86,9 @@ export const createUseUiSetting$Mock = () => {
   ];
 };
 
-export const createStartServicesMock = (): StartServices => {
-  const core = coreMock.createStart();
+export const createStartServicesMock = (
+  core: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
+): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
   const data = dataPluginMock.createStartContract();
@@ -100,6 +96,7 @@ export const createStartServicesMock = (): StartServices => {
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
+  const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 
   return {
     ...core,
@@ -110,6 +107,7 @@ export const createStartServicesMock = (): StartServices => {
       getCreateCase: jest.fn(),
       getRecentCases: jest.fn(),
     },
+    unifiedSearch,
     data: {
       ...data,
       query: {
@@ -140,6 +138,13 @@ export const createStartServicesMock = (): StartServices => {
             next: jest.fn(),
             unsubscribe: jest.fn(),
           })),
+          pipe: jest.fn().mockImplementation(() => ({
+            subscribe: jest.fn().mockImplementation(() => ({
+              error: jest.fn(),
+              next: jest.fn(),
+              unsubscribe: jest.fn(),
+            })),
+          })),
         })),
       },
     },
@@ -148,6 +153,13 @@ export const createStartServicesMock = (): StartServices => {
     fleet,
     ml: {
       locator,
+    },
+    theme: {
+      theme$: themeServiceMock.createTheme$(),
+    },
+    timelines: {
+      getLastUpdated: jest.fn(),
+      getFieldBrowser: jest.fn(),
     },
   } as unknown as StartServices;
 };

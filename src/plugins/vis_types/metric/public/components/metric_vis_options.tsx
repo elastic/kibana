@@ -16,9 +16,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
   ColorRanges,
   SetColorRangeValue,
@@ -27,8 +27,8 @@ import {
   ColorSchemaOptions,
   RangeOption,
   PercentageModeOption,
-} from '../../../../vis_default_editor/public';
-import { ColorMode, colorSchemas } from '../../../../charts/public';
+} from '@kbn/vis-default-editor-plugin/public';
+import { ColorMode, colorSchemas } from '@kbn/charts-plugin/public';
 import { MetricVisParam, VisParams } from '../types';
 
 const metricColorMode = [

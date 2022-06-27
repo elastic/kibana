@@ -5,18 +5,36 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ChangeEvent } from 'react';
+import { act } from 'react-dom/test-utils';
+import { EuiRange } from '@elastic/eui';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { EuiFormRow } from '@elastic/eui';
 import { shallow, mount } from 'enzyme';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import { percentileOperation } from './index';
+import { percentileOperation } from '.';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
-import { EuiFieldNumber } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
-import { EuiFormRow } from '@elastic/eui';
+import { TermsIndexPatternColumn } from './terms';
+import {
+  buildExpressionFunction,
+  buildExpression,
+  ExpressionAstExpressionBuilder,
+} from '@kbn/expressions-plugin/public';
+import type { OriginalColumn } from '../../to_expression';
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -26,6 +44,8 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  dataViews: dataViewPluginMocks.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: {
     ...createMockedIndexPattern(),
@@ -58,7 +78,7 @@ describe('percentile', () => {
             orderDirection: 'asc',
           },
           sourceField: 'category',
-        },
+        } as TermsIndexPatternColumn,
         col2: {
           label: '23rd percentile of a',
           dataType: 'number',
@@ -68,7 +88,7 @@ describe('percentile', () => {
           params: {
             percentile: 23,
           },
-        },
+        } as PercentileIndexPatternColumn,
       },
     };
   });
@@ -173,6 +193,441 @@ describe('percentile', () => {
     });
   });
 
+  describe('optimizeEsAggs', () => {
+    const makeEsAggBuilder = (name: string, params: object) =>
+      buildExpression({
+        type: 'expression',
+        chain: [buildExpressionFunction(name, params).toAst()],
+      });
+
+    const buildMapsFromAggBuilders = (aggs: ExpressionAstExpressionBuilder[]) => {
+      const esAggsIdMap: Record<string, OriginalColumn[]> = {};
+      const aggsToIdsMap = new Map();
+      aggs.forEach((builder, i) => {
+        const esAggsId = `col-${i}-${i}`;
+        esAggsIdMap[esAggsId] = [{ id: `original-${i}` } as OriginalColumn];
+        aggsToIdsMap.set(builder, esAggsId);
+      });
+      return {
+        esAggsIdMap,
+        aggsToIdsMap,
+      };
+    };
+
+    it('should collapse percentile dimensions with matching parameters', () => {
+      const field1 = 'foo';
+      const field2 = 'bar';
+      const timeShift1 = '1d';
+      const timeShift2 = '2d';
+
+      const aggs = [
+        // group 1
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: 10,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 2,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: 20,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 3,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: 30,
+          timeShift: undefined,
+        }),
+        // group 2
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 4,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 10,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 5,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 40,
+          timeShift: undefined,
+        }),
+        // group 3
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 6,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 50,
+          timeShift: timeShift1,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 7,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 60,
+          timeShift: timeShift1,
+        }),
+        // group 4
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 8,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 70,
+          timeShift: timeShift2,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 9,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 80,
+          timeShift: timeShift2,
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs.length).toBe(4);
+
+      expect(newAggs[0].functions[0].getArgument('field')![0]).toBe(field1);
+      expect(newAggs[0].functions[0].getArgument('timeShift')).toBeUndefined();
+      expect(newAggs[1].functions[0].getArgument('field')![0]).toBe(field2);
+      expect(newAggs[1].functions[0].getArgument('timeShift')).toBeUndefined();
+      expect(newAggs[2].functions[0].getArgument('field')![0]).toBe(field2);
+      expect(newAggs[2].functions[0].getArgument('timeShift')![0]).toBe(timeShift1);
+      expect(newAggs[3].functions[0].getArgument('field')![0]).toBe(field2);
+      expect(newAggs[3].functions[0].getArgument('timeShift')![0]).toBe(timeShift2);
+
+      expect(newAggs).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "findFunction": [Function],
+            "functions": Array [
+              Object {
+                "addArgument": [Function],
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "field": Array [
+                    "foo",
+                  ],
+                  "id": Array [
+                    1,
+                  ],
+                  "percents": Array [
+                    10,
+                    20,
+                    30,
+                  ],
+                  "schema": Array [
+                    "metric",
+                  ],
+                },
+                "getArgument": [Function],
+                "name": "aggPercentiles",
+                "removeArgument": [Function],
+                "replaceArgument": [Function],
+                "toAst": [Function],
+                "toString": [Function],
+                "type": "expression_function_builder",
+              },
+            ],
+            "toAst": [Function],
+            "toString": [Function],
+            "type": "expression_builder",
+          },
+          Object {
+            "findFunction": [Function],
+            "functions": Array [
+              Object {
+                "addArgument": [Function],
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "field": Array [
+                    "bar",
+                  ],
+                  "id": Array [
+                    4,
+                  ],
+                  "percents": Array [
+                    10,
+                    40,
+                  ],
+                  "schema": Array [
+                    "metric",
+                  ],
+                },
+                "getArgument": [Function],
+                "name": "aggPercentiles",
+                "removeArgument": [Function],
+                "replaceArgument": [Function],
+                "toAst": [Function],
+                "toString": [Function],
+                "type": "expression_function_builder",
+              },
+            ],
+            "toAst": [Function],
+            "toString": [Function],
+            "type": "expression_builder",
+          },
+          Object {
+            "findFunction": [Function],
+            "functions": Array [
+              Object {
+                "addArgument": [Function],
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "field": Array [
+                    "bar",
+                  ],
+                  "id": Array [
+                    6,
+                  ],
+                  "percents": Array [
+                    50,
+                    60,
+                  ],
+                  "schema": Array [
+                    "metric",
+                  ],
+                  "timeShift": Array [
+                    "1d",
+                  ],
+                },
+                "getArgument": [Function],
+                "name": "aggPercentiles",
+                "removeArgument": [Function],
+                "replaceArgument": [Function],
+                "toAst": [Function],
+                "toString": [Function],
+                "type": "expression_function_builder",
+              },
+            ],
+            "toAst": [Function],
+            "toString": [Function],
+            "type": "expression_builder",
+          },
+          Object {
+            "findFunction": [Function],
+            "functions": Array [
+              Object {
+                "addArgument": [Function],
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "field": Array [
+                    "bar",
+                  ],
+                  "id": Array [
+                    8,
+                  ],
+                  "percents": Array [
+                    70,
+                    80,
+                  ],
+                  "schema": Array [
+                    "metric",
+                  ],
+                  "timeShift": Array [
+                    "2d",
+                  ],
+                },
+                "getArgument": [Function],
+                "name": "aggPercentiles",
+                "removeArgument": [Function],
+                "replaceArgument": [Function],
+                "toAst": [Function],
+                "toString": [Function],
+                "type": "expression_function_builder",
+              },
+            ],
+            "toAst": [Function],
+            "toString": [Function],
+            "type": "expression_builder",
+          },
+        ]
+      `);
+
+      expect(newIdMap).toMatchInlineSnapshot(`
+        Object {
+          "col-?-1.10": Array [
+            Object {
+              "id": "original-0",
+            },
+          ],
+          "col-?-1.20": Array [
+            Object {
+              "id": "original-1",
+            },
+          ],
+          "col-?-1.30": Array [
+            Object {
+              "id": "original-2",
+            },
+          ],
+          "col-?-4.10": Array [
+            Object {
+              "id": "original-3",
+            },
+          ],
+          "col-?-4.40": Array [
+            Object {
+              "id": "original-4",
+            },
+          ],
+          "col-?-6.50": Array [
+            Object {
+              "id": "original-5",
+            },
+          ],
+          "col-?-6.60": Array [
+            Object {
+              "id": "original-6",
+            },
+          ],
+          "col-?-8.70": Array [
+            Object {
+              "id": "original-7",
+            },
+          ],
+          "col-?-8.80": Array [
+            Object {
+              "id": "original-8",
+            },
+          ],
+        }
+      `);
+    });
+
+    it('should handle multiple identical percentiles', () => {
+      const field1 = 'foo';
+      const field2 = 'bar';
+      const samePercentile = 90;
+
+      const aggs = [
+        // group 1
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: samePercentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 2,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: samePercentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 4,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 10,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 3,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: samePercentile,
+          timeShift: undefined,
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs.length).toBe(2);
+      expect(newIdMap[`col-?-1.${samePercentile}`].length).toBe(3);
+      expect(newIdMap).toMatchInlineSnapshot(`
+        Object {
+          "col-2-2": Array [
+            Object {
+              "id": "original-2",
+            },
+          ],
+          "col-?-1.90": Array [
+            Object {
+              "id": "original-0",
+            },
+            Object {
+              "id": "original-1",
+            },
+            Object {
+              "id": "original-3",
+            },
+          ],
+        }
+      `);
+    });
+
+    it("shouldn't touch non-percentile aggs or single percentiles with no siblings", () => {
+      const aggs = [
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: 'foo',
+          percentile: 30,
+        }),
+        makeEsAggBuilder('aggMax', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: 'bar',
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs).toEqual(aggs);
+      expect(newIdMap).toEqual(esAggsIdMap);
+    });
+  });
+
   describe('buildColumn', () => {
     it('should set default percentile', () => {
       const indexPattern = createMockedIndexPattern();
@@ -271,8 +726,7 @@ describe('percentile', () => {
       expect(input.prop('value')).toEqual('23');
     });
 
-    it('should update state on change', async () => {
-      jest.useFakeTimers();
+    it('should update state on change', () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
@@ -284,19 +738,18 @@ describe('percentile', () => {
         />
       );
 
-      jest.runAllTimers();
+      const input = instance
+        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
+        .find(EuiRange);
 
-      const input = instance.find(
-        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
-      );
-
-      await act(async () => {
-        input.simulate('change', { target: { value: '27' } });
+      act(() => {
+        input.prop('onChange')!(
+          { currentTarget: { value: '27' } } as ChangeEvent<HTMLInputElement>,
+          true
+        );
       });
 
       instance.update();
-
-      jest.runAllTimers();
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
         ...layer,
@@ -313,7 +766,7 @@ describe('percentile', () => {
       });
     });
 
-    it('should not update on invalid input, but show invalid value locally', async () => {
+    it('should not update on invalid input, but show invalid value locally', () => {
       const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
@@ -325,19 +778,18 @@ describe('percentile', () => {
         />
       );
 
-      jest.runAllTimers();
+      const input = instance
+        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
+        .find(EuiRange);
 
-      const input = instance.find(
-        '[data-test-subj="lns-indexPattern-percentile-input"] input[type="number"]'
-      );
-
-      await act(async () => {
-        input.simulate('change', { target: { value: '12.12' } });
+      act(() => {
+        input.prop('onChange')!(
+          { currentTarget: { value: '12.12' } } as ChangeEvent<HTMLInputElement>,
+          true
+        );
       });
 
       instance.update();
-
-      jest.runAllTimers();
 
       expect(updateLayerSpy).not.toHaveBeenCalled();
 
@@ -350,7 +802,7 @@ describe('percentile', () => {
       expect(
         instance
           .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-          .find(EuiFieldNumber)
+          .find(EuiRange)
           .prop('value')
       ).toEqual('12.12');
     });

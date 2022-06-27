@@ -16,13 +16,14 @@ import {
   PinnedEvent,
 } from './pinned_event';
 import {
+  alias_purpose as savedObjectResolveAliasPurpose,
+  outcome as savedObjectResolveOutcome,
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
-import { FlowTarget } from '../../search_strategy/security_solution/network';
+import { FlowTargetSourceDest } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import { Direction, Maybe } from '../../search_strategy';
-import { Ecs } from '../../ecs';
 
 export * from './actions';
 export * from './cells';
@@ -272,6 +273,7 @@ export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTyp
 export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
+  dataViewId: unionWithNullType(runtimeTypes.string),
   description: unionWithNullType(runtimeTypes.string),
   eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
   eventType: unionWithNullType(runtimeTypes.string),
@@ -305,52 +307,45 @@ export type SavedTimelineNote = runtimeTypes.TypeOf<typeof SavedTimelineRuntimeT
  * This type represents a timeline type stored in a saved object that does not include any fields that reference
  * other saved objects.
  */
-export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'savedQueryId'>;
+export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
 
 /*
  *  Timeline IDs
  */
 
 export enum TimelineId {
+  usersPageEvents = 'users-page-events',
+  usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
+  hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
-  uebaPageExternalAlerts = 'ueba-page-external-alerts',
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+  rulePreview = 'rule-preview',
+  kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TimelineId.usersPageEvents),
+  runtimeTypes.literal(TimelineId.usersPageExternalAlerts),
   runtimeTypes.literal(TimelineId.hostsPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.hostsPageSessions),
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
   runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
-  runtimeTypes.literal(TimelineId.uebaPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
+  runtimeTypes.literal(TimelineId.rulePreview),
+  runtimeTypes.literal(TimelineId.kubernetesPageSessions),
 ]);
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
-
-/**
- * Timeline Saved object type with metadata
- */
-
-export const TimelineSavedObjectRuntimeType = runtimeTypes.intersection([
-  runtimeTypes.type({
-    id: runtimeTypes.string,
-    attributes: SavedTimelineRuntimeType,
-    version: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    savedObjectId: runtimeTypes.string,
-  }),
-]);
 
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,
@@ -378,6 +373,30 @@ export const SingleTimelineResponseType = runtimeTypes.type({
 });
 
 export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineResponseType>;
+
+/** Resolved Timeline Response */
+export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
+  runtimeTypes.type({
+    timeline: TimelineSavedToReturnObjectRuntimeType,
+    outcome: savedObjectResolveOutcome,
+  }),
+  runtimeTypes.partial({
+    alias_target_id: runtimeTypes.string,
+    alias_purpose: savedObjectResolveAliasPurpose,
+  }),
+]);
+
+export type ResolvedTimelineWithOutcomeSavedObject = runtimeTypes.TypeOf<
+  typeof ResolvedTimelineSavedObjectToReturnObjectRuntimeType
+>;
+
+export const ResolvedSingleTimelineResponseType = runtimeTypes.type({
+  data: ResolvedTimelineSavedObjectToReturnObjectRuntimeType,
+});
+
+export type SingleTimelineResolveResponse = runtimeTypes.TypeOf<
+  typeof ResolvedSingleTimelineResponseType
+>;
 
 /**
  * All Timeline Saved object type with metadata
@@ -467,6 +486,7 @@ export enum TimelineTabs {
   notes = 'notes',
   pinned = 'pinned',
   eql = 'eql',
+  session = 'session',
 }
 
 /**
@@ -490,7 +510,6 @@ export type TimelineExpandedEventType =
         eventId: string;
         indexName: string;
         refetch?: () => void;
-        ecsData?: Ecs;
       };
     }
   | EmptyObject;
@@ -509,7 +528,16 @@ export type TimelineExpandedNetworkType =
       panelView?: 'networkDetail';
       params?: {
         ip: string;
-        flowTarget: FlowTarget;
+        flowTarget: FlowTargetSourceDest;
+      };
+    }
+  | EmptyObject;
+
+export type TimelineExpandedUserType =
+  | {
+      panelView?: 'userDetail';
+      params?: {
+        userName: string;
       };
     }
   | EmptyObject;
@@ -517,7 +545,8 @@ export type TimelineExpandedNetworkType =
 export type TimelineExpandedDetailType =
   | TimelineExpandedEventType
   | TimelineExpandedHostType
-  | TimelineExpandedNetworkType;
+  | TimelineExpandedNetworkType
+  | TimelineExpandedUserType;
 
 export type TimelineExpandedDetail = {
   [tab in TimelineTabs]?: TimelineExpandedDetailType;
@@ -620,7 +649,7 @@ export interface ColumnHeaderResult {
   category?: Maybe<string>;
   columnHeaderType?: Maybe<string>;
   description?: Maybe<string>;
-  example?: Maybe<string>;
+  example?: Maybe<string | number>;
   indexes?: Maybe<string[]>;
   id?: Maybe<string>;
   name?: Maybe<string>;
@@ -707,6 +736,7 @@ export interface TimelineResult {
   created?: Maybe<number>;
   createdBy?: Maybe<string>;
   dataProviders?: Maybe<DataProviderResult[]>;
+  dataViewId?: Maybe<string>;
   dateRange?: Maybe<DateRangePickerResult>;
   description?: Maybe<string>;
   eqlOptions?: Maybe<EqlOptionsResult>;

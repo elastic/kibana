@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { config } from './index';
+import { config } from '.';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.stack_alerts';
+const deprecationContext = configDeprecationsMock.createContext();
+
 const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => {
   const deprecations = config.deprecations!(configDeprecationFactory);
   const deprecationMessages: string[] = [];
@@ -19,6 +22,7 @@ const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => 
     deprecations.map((deprecation) => ({
       deprecation,
       path: CONFIG_PATH,
+      context: deprecationContext,
     })),
     () =>
       ({ message }) =>

@@ -12,55 +12,65 @@ import type {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import type { ManagementSetup } from 'src/plugins/management/public';
-import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
-import type { SpacesPluginStart } from '../../spaces/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
-import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
+import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { SecurityPluginSetup } from '../../security/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 
-import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
-import { isFullLicense, isMlEnabled } from '../common/license';
-
-import { setDependencyCache } from './application/util/dependency_cache';
-import { registerFeature } from './register_feature';
-import { MlLocatorDefinition, MlLocator } from './locator';
-import type { MapsStartApi } from '../../maps/public';
+import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
-import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
-import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { registerManagementSection } from './application/management';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { MlLocatorDefinition, MlLocator } from './locator';
+import { setDependencyCache } from './application/util/dependency_cache';
+import { registerFeature } from './register_feature';
+import { isFullLicense, isMlEnabled } from '../common/license';
+import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
+  aiops: AiopsPluginStart;
+  fieldFormats: FieldFormatsStart;
+  dashboard: DashboardStart;
+  charts: ChartsPluginStart;
+  lens?: LensPublicStart;
 }
 
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
+  maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -72,6 +82,8 @@ export interface MlSetupDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
   alerting?: AlertingSetup;
   usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsSetup;
+  dashboard: DashboardSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -101,9 +113,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         return renderApp(
           coreStart,
           {
+            charts: pluginsStart.charts,
             data: pluginsStart.data,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
-            kibanaLegacy: pluginsStart.kibanaLegacy,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
@@ -115,7 +129,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,
+            aiops: pluginsStart.aiops,
             usageCollection: pluginsSetup.usageCollection,
+            fieldFormats: pluginsStart.fieldFormats,
+            lens: pluginsStart.lens,
           },
           params
         );
@@ -151,11 +168,24 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       // register various ML plugin features which require a full license
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const { registerEmbeddables, registerMlUiActions, registerSearchLinks, registerMlAlerts } =
-        await import('./register_helper');
+      const {
+        registerEmbeddables,
+        registerMlUiActions,
+        registerSearchLinks,
+        registerMlAlerts,
+        registerMapExtension,
+      } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
       const fullLicense = isFullLicense(license);
+
+      if (pluginsSetup.maps) {
+        // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
+        const canGetJobs = capabilities.ml?.canGetJobs === true;
+        const canCreateJobs = capabilities.ml?.canCreateJob === true;
+        await registerMapExtension(pluginsSetup.maps, core, { canGetJobs, canCreateJobs });
+      }
+
       if (mlEnabled) {
         registerSearchLinks(this.appUpdater$, fullLicense);
 

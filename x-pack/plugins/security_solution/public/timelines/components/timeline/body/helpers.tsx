@@ -17,8 +17,10 @@ import {
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import * as i18n from './translations';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
+export const omitTypenameAndEmpty = (
+  k: string,
+  v: string | object | Array<string | object>
+): string | object | Array<string | object> | undefined =>
   k !== '__typename' && v != null ? v : undefined;
 
 export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitTypenameAndEmpty, 2);
@@ -26,22 +28,27 @@ export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitType
 export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({
+  isAlert,
   isPinned,
   // eslint-disable-next-line @typescript-eslint/no-shadow
   eventHasNotes,
   timelineType,
 }: {
+  isAlert: boolean;
   isPinned: boolean;
   eventHasNotes: boolean;
   timelineType: TimelineTypeLiteral;
-}) =>
-  timelineType === TimelineType.template
-    ? i18n.DISABLE_PIN
-    : isPinned && eventHasNotes
-    ? i18n.PINNED_WITH_NOTES
-    : isPinned
-    ? i18n.PINNED
-    : i18n.UNPINNED;
+}) => {
+  if (timelineType === TimelineType.template) {
+    return i18n.DISABLE_PIN(isAlert);
+  } else if (isPinned && eventHasNotes) {
+    return i18n.PINNED_WITH_NOTES(isAlert);
+  } else if (isPinned) {
+    return i18n.PINNED(isAlert);
+  } else {
+    return i18n.UNPINNED(isAlert);
+  }
+};
 
 export interface IsPinnedParams {
   eventId: string;
@@ -100,7 +107,7 @@ export const getEventIdToDataMapping = (
   }, {});
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
-  !isEmpty(event.signal?.rule?.building_block_type);
+  !isEmpty(event.kibana?.alert?.building_block_type);
 
 export const isEvenEqlSequence = (event: Ecs): boolean => {
   if (!isEmpty(event.eql?.sequenceNumber)) {
@@ -115,7 +122,7 @@ export const isEvenEqlSequence = (event: Ecs): boolean => {
 };
 /** Return eventType raw or signal or eql */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event.signal?.rule?.id)) {
+  if (!isEmpty(event.kibana?.alert?.rule?.uuid)) {
     return 'signal';
   } else if (!isEmpty(event.eql?.parentId)) {
     return 'eql';

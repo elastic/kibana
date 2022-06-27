@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { FC, useRef, useEffect } from 'react';
+import React, { FC, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { History } from 'history';
-// @ts-expect-error
-import createHashStateHistory from 'history-extra/dist/createHashStateHistory';
+import { ScopedHistory } from '@kbn/core/public';
 import { useNavLinkService } from '../../services';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';
+import { Flyouts } from '../flyouts';
 
 class ShortcutManagerContextWrapper extends React.Component {
   static childContextTypes = {
@@ -29,20 +28,20 @@ class ShortcutManagerContextWrapper extends React.Component {
   }
 }
 
-export const App: FC = () => {
-  const historyRef = useRef<History>(createHashStateHistory() as History);
+export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
   const { updatePath } = useNavLinkService();
 
   useEffect(() => {
-    return historyRef.current.listen(({ pathname }) => {
-      updatePath(pathname);
+    return history.listen(({ pathname, search }) => {
+      updatePath(pathname + search);
     });
   });
 
   return (
     <ShortcutManagerContextWrapper>
       <div className="canvas canvasContainer">
-        <CanvasRouter history={historyRef.current} />
+        <CanvasRouter history={history} />
+        <Flyouts />
       </div>
     </ShortcutManagerContextWrapper>
   );

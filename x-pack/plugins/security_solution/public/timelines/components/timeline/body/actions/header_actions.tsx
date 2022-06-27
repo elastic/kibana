@@ -16,6 +16,7 @@ import {
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import {
   HeaderActionProps,
   SortDirection,
@@ -28,14 +29,15 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
 import { EventsTh, EventsThContent } from '../../styles';
 import { EventsSelect } from '../column_headers/events_select';
 import * as i18n from '../column_headers/translations';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { isFullScreen } from '../column_headers';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { getColumnHeader } from '../column_headers/helpers';
 
 const SortingColumnsContainer = styled.div`
   button {
@@ -54,7 +56,7 @@ const SortingColumnsContainer = styled.div`
 const FieldBrowserContainer = styled.div`
   .euiToolTipAnchor {
     .euiButtonContent {
-      padding: ${({ theme }) => `0 ${theme.eui.paddingSizes.xs}`};
+      padding: ${({ theme }) => `0 ${theme.eui.euiSizeXS}`};
     }
     button {
       color: ${({ theme }) => theme.eui.euiColorPrimary};
@@ -86,11 +88,16 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   sort,
   tabType,
   timelineId,
+  fieldBrowserOptions,
 }) => {
   const { timelines: timelinesUi } = useKibana().services;
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const dispatch = useDispatch();
+
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
+
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
       setTimelineFullScreen(!timelineFullScreen);
@@ -121,11 +128,18 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       dispatch(
         timelineActions.updateSort({
           id: timelineId,
-          sort: cols.map(({ id, direction }) => ({
-            columnId: id,
-            columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
-            sortDirection: direction as SortDirection,
-          })),
+          sort: cols.map(({ id, direction }) => {
+            const columnHeader = columnHeaders.find((ch) => ch.id === id);
+            const columnType = columnHeader?.type ?? '';
+            const esTypes = columnHeader?.esTypes ?? [];
+
+            return {
+              columnId: id,
+              columnType,
+              esTypes,
+              sortDirection: direction as SortDirection,
+            };
+          }),
         })
       ),
     [columnHeaders, dispatch, timelineId]
@@ -160,13 +174,39 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
     [columnHeaders]
   );
 
+  const onResetColumns = useCallback(() => {
+    dispatch(timelineActions.updateColumns({ id: timelineId, columns: defaultColumns }));
+  }, [defaultColumns, dispatch, timelineId]);
+
+  const onToggleColumn = useCallback(
+    (fieldId: string) => {
+      if (columnHeaders.some(({ id }) => id === fieldId)) {
+        dispatch(
+          timelineActions.removeColumn({
+            columnId: fieldId,
+            id: timelineId,
+          })
+        );
+      } else {
+        dispatch(
+          timelineActions.upsertColumn({
+            column: getColumnHeader(fieldId, defaultColumns),
+            id: timelineId,
+            index: 1,
+          })
+        );
+      }
+    },
+    [columnHeaders, dispatch, timelineId, defaultColumns]
+  );
+
   const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
 
   return (
     <ActionsContainer>
       {showSelectAllCheckbox && (
         <EventsTh role="checkbox">
-          <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             <EuiCheckbox
               data-test-subj="select-all-events"
               id={'select-all-events'}
@@ -182,7 +222,9 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
           {timelinesUi.getFieldBrowser({
             browserFields,
             columnHeaders,
-            timelineId,
+            onResetColumns,
+            onToggleColumn,
+            options: fieldBrowserOptions,
           })}
         </FieldBrowserContainer>
       </EventsTh>
@@ -195,7 +237,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       </EventsTh>
 
       <EventsTh role="button">
-        <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+        <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
             <EuiButtonIcon
               aria-label={
@@ -218,7 +260,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       </EventsTh>
       {tabType !== TimelineTabs.eql && (
         <EventsTh role="button" data-test-subj="timeline-sorting-fields">
-          <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             <EuiToolTip content={i18n.SORT_FIELDS}>
               <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
             </EuiToolTip>
@@ -228,7 +270,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
 
       {showEventsSelect && (
         <EventsTh role="button">
-          <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+          <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
             <EventsSelect checkState="unchecked" timelineId={timelineId} />
           </EventsThContent>
         </EventsTh>

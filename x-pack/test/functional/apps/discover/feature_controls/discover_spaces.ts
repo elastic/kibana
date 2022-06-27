@@ -28,8 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // FLAKY https://github.com/elastic/kibana/issues/113067
-  describe.skip('spaces', () => {
+  describe('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
@@ -173,13 +172,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space_no_index_patterns');
       });
 
-      it('Navigates to Kibana home rather than index pattern management when no index patterns exist', async () => {
+      it('shows empty prompt when no data views exist', async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space_no_index_patterns',
           ensureCurrentUrl: false,
           shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await testSubjects.existOrFail('noDataViewsPrompt', {
+          timeout: config.get('timeouts.waitFor'),
+        });
       });
     });
   });

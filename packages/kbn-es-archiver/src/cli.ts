@@ -17,14 +17,16 @@ import Url from 'url';
 import readline from 'readline';
 import Fs from 'fs';
 
-import { RunWithCommands, createFlagError, CA_CERT_PATH } from '@kbn/dev-utils';
-import { readConfigFile, KbnClient } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { readConfigFile, KbnClient, EsVersion } from '@kbn/test';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 
 import { EsArchiver } from './es_archiver';
 
 const resolveConfigPath = (v: string) => Path.resolve(process.cwd(), v);
-const defaultConfigPath = resolveConfigPath('test/functional/config.js');
+const defaultConfigPath = resolveConfigPath('test/functional/config.base.js');
 
 export function runCli() {
   new RunWithCommands({
@@ -33,7 +35,7 @@ export function runCli() {
       string: ['es-url', 'kibana-url', 'config', 'es-ca', 'kibana-ca'],
       help: `
         --config           path to an FTR config file that sets --es-url and --kibana-url
-                             default: ${defaultConfigPath}
+                             default: ${Path.relative(process.cwd(), defaultConfigPath)}
         --es-url           url for Elasticsearch, prefer the --config flag
         --kibana-url       url for Kibana, prefer the --config flag
         --kibana-ca        if Kibana url points to https://localhost we default to the CA from @kbn/dev-utils, customize the CA with this flag
@@ -45,7 +47,7 @@ export function runCli() {
       if (typeof configPath !== 'string') {
         throw createFlagError('--config must be a string');
       }
-      const config = await readConfigFile(log, Path.resolve(configPath));
+      const config = await readConfigFile(log, EsVersion.getDefault(), Path.resolve(configPath));
       statsMeta.set('ftrConfigPath', configPath);
 
       let esUrl = flags['es-url'];
@@ -106,7 +108,8 @@ export function runCli() {
 
       const client = new Client({
         node: esUrl,
-        ssl: esCa ? { ca: esCa } : undefined,
+        tls: esCa ? { ca: esCa } : undefined,
+        Connection: HttpConnection,
       });
       addCleanupTask(() => client.close());
 
@@ -142,11 +145,12 @@ export function runCli() {
           $ node scripts/es_archiver save test/functional/es_archives/my_test_data logstash-*
       `,
       flags: {
-        boolean: ['raw'],
+        boolean: ['raw', 'keep-index-names'],
         string: ['query'],
         help: `
-          --raw              don't gzip the archives
-          --query            query object to limit the documents being archived, needs to be properly escaped JSON
+          --raw                    don't gzip the archives
+          --keep-index-names       don't change the names of Kibana indices to .kibana_1
+          --query                  query object to limit the documents being archived, needs to be properly escaped JSON
         `,
       },
       async run({ flags, esArchiver, statsMeta }) {
@@ -167,6 +171,11 @@ export function runCli() {
           throw createFlagError('--raw does not take a value');
         }
 
+        const keepIndexNames = flags['keep-index-names'];
+        if (typeof keepIndexNames !== 'boolean') {
+          throw createFlagError('--keep-index-names does not take a value');
+        }
+
         const query = flags.query;
         let parsedQuery;
         if (typeof query === 'string' && query.length > 0) {
@@ -177,7 +186,7 @@ export function runCli() {
           }
         }
 
-        await esArchiver.save(path, indices, { raw, query: parsedQuery });
+        await esArchiver.save(path, indices, { raw, keepIndexNames, query: parsedQuery });
       },
     })
     .command({
@@ -195,9 +204,10 @@ export function runCli() {
           $ node scripts/es_archiver load my_test_data --config ../config.js
       `,
       flags: {
-        boolean: ['use-create'],
+        boolean: ['use-create', 'docs-only'],
         help: `
           --use-create       use create instead of index for loading documents
+          --docs-only        load only documents, not indices
         `,
       },
       async run({ flags, esArchiver, statsMeta }) {
@@ -216,7 +226,12 @@ export function runCli() {
           throw createFlagError('--use-create does not take a value');
         }
 
-        await esArchiver.load(path, { useCreate });
+        const docsOnly = flags['docs-only'];
+        if (typeof docsOnly !== 'boolean') {
+          throw createFlagError('--docs-only does not take a value');
+        }
+
+        await esArchiver.load(path, { useCreate, docsOnly });
       },
     })
     .command({

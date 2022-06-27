@@ -11,19 +11,24 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker']);
 
   describe('errors', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('test/functional/fixtures/es_archiver/invalid_scripted_field');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/invalid_scripted_field'
+      );
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async function () {
-      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
     describe('invalid scripted field error', () => {
@@ -31,6 +36,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const toast = await toasts.getToastElement(1);
         const painlessStackTrace = await toast.findByTestSubject('painlessStackTrace');
         expect(painlessStackTrace).not.to.be(undefined);
+      });
+    });
+
+    describe('not found', () => {
+      it('should redirect to main page when trying to access invalid route', async () => {
+        await PageObjects.common.navigateToUrl('discover', '#/invalid-route', {
+          useActualUrl: true,
+        });
+        await PageObjects.header.awaitKibanaChrome();
+
+        const invalidLink = await testSubjects.find('invalidRouteMessage');
+        expect(await invalidLink.getVisibleText()).to.be(
+          `Discover application doesn't recognize this route: /invalid-route`
+        );
       });
     });
   });

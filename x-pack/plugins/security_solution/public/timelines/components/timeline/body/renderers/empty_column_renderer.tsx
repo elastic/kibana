@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
-import { ColumnHeaderOptions } from '../../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import {
   DraggableWrapper,

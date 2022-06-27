@@ -5,23 +5,33 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { HttpResources, IBasePath, Logger } from 'src/core/server';
+import type { Observable } from 'rxjs';
 
-import type { KibanaFeature } from '../../../features/server';
-import type { SecurityLicense } from '../../common/licensing';
+import type { HttpResources, IBasePath, Logger } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import type { SecurityLicense } from '../../common';
+import type { AnalyticsServiceSetup } from '../analytics';
+import type { AnonymousAccessServiceStart } from '../anonymous_access';
 import type { InternalAuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
 import type { SecurityRouter } from '../types';
+import type { UserProfileServiceStart } from '../user_profile';
+import { defineAnalyticsRoutes } from './analytics';
+import { defineAnonymousAccessRoutes } from './anonymous_access';
 import { defineApiKeysRoutes } from './api_keys';
 import { defineAuthenticationRoutes } from './authentication';
 import { defineAuthorizationRoutes } from './authorization';
+import { defineDeprecationsRoutes } from './deprecations';
 import { defineIndicesRoutes } from './indices';
 import { defineRoleMappingRoutes } from './role_mapping';
+import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
 import { defineSessionManagementRoutes } from './session_management';
+import { defineUserProfileRoutes } from './user_profile';
 import { defineUsersRoutes } from './users';
 import { defineViewRoutes } from './views';
 
@@ -34,12 +44,16 @@ export interface RouteDefinitionParams {
   httpResources: HttpResources;
   logger: Logger;
   config: ConfigType;
+  config$: Observable<ConfigType>;
   authz: AuthorizationServiceSetupInternal;
   getSession: () => PublicMethodsOf<Session>;
   license: SecurityLicense;
   getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getAuthenticationService: () => InternalAuthenticationServiceStart;
+  getUserProfileService: () => UserProfileServiceStart;
+  getAnonymousAccessService: () => AnonymousAccessServiceStart;
+  analyticsService: AnalyticsServiceSetup;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
@@ -49,6 +63,11 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineApiKeysRoutes(params);
   defineIndicesRoutes(params);
   defineUsersRoutes(params);
+  defineUserProfileRoutes(params);
   defineRoleMappingRoutes(params);
   defineViewRoutes(params);
+  defineDeprecationsRoutes(params);
+  defineAnonymousAccessRoutes(params);
+  defineSecurityCheckupGetStateRoutes(params);
+  defineAnalyticsRoutes(params);
 }

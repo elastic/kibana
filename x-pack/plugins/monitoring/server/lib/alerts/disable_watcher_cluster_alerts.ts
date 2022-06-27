@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import { ElasticsearchClient } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 interface DisableWatchesResponse {
   exporters: Array<
@@ -24,7 +24,7 @@ interface DisableWatchesResponse {
 
 async function callMigrationApi(callCluster: ElasticsearchClient, logger: Logger) {
   try {
-    const { body: response } = await callCluster.transport.request({
+    const response = await callCluster.transport.request({
       method: 'post',
       path: '/monitoring.disableWatches',
     });

@@ -15,6 +15,7 @@ const snapshotConfigSchema = schema.object({
   indices: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   ignoreUnavailable: schema.maybe(schema.boolean()),
   includeGlobalState: schema.maybe(schema.boolean()),
+  featureStates: schema.maybe(schema.arrayOf(schema.string())),
   partial: schema.maybe(schema.boolean()),
   metadata: schema.maybe(schema.recordOf(schema.string(), schema.string())),
 });
@@ -24,6 +25,31 @@ const snapshotRetentionSchema = schema.object({
   expireAfterUnit: schema.maybe(schema.string()),
   maxCount: schema.maybe(schema.oneOf([schema.number(), schema.literal('')])),
   minCount: schema.maybe(schema.oneOf([schema.number(), schema.literal('')])),
+});
+
+export const snapshotListSchema = schema.object({
+  sortField: schema.oneOf([
+    schema.literal('snapshot'),
+    schema.literal('repository'),
+    schema.literal('indices'),
+    schema.literal('durationInMillis'),
+    schema.literal('startTimeInMillis'),
+    schema.literal('shards.total'),
+    schema.literal('shards.failed'),
+  ]),
+  sortDirection: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
+  pageIndex: schema.number(),
+  pageSize: schema.number(),
+  searchField: schema.maybe(
+    schema.oneOf([
+      schema.literal('snapshot'),
+      schema.literal('repository'),
+      schema.literal('policyName'),
+    ])
+  ),
+  searchValue: schema.maybe(schema.string()),
+  searchMatch: schema.maybe(schema.oneOf([schema.literal('must'), schema.literal('must_not')])),
+  searchOperator: schema.maybe(schema.oneOf([schema.literal('eq'), schema.literal('exact')])),
 });
 
 export const policySchema = schema.object({
@@ -172,6 +198,7 @@ export const restoreSettingsSchema = schema.object({
   renamePattern: schema.maybe(schema.string()),
   renameReplacement: schema.maybe(schema.string()),
   includeGlobalState: schema.maybe(schema.boolean()),
+  featureStates: schema.maybe(schema.arrayOf(schema.string())),
   partial: schema.maybe(schema.boolean()),
   indexSettings: schema.maybe(schema.string()),
   ignoreIndexSettings: schema.maybe(schema.arrayOf(schema.string())),

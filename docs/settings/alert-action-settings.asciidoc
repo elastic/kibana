@@ -5,7 +5,7 @@
 <titleabbrev>Alerting and action settings</titleabbrev>
 ++++
 
-Alerts and actions are enabled by default in {kib}, but require you configure the following in order to use them:
+Alerting and actions are enabled by default in {kib}, but require you to configure the following:
 
 . <<using-kibana-with-security,Set up {kib} to work with {stack} {security-features}>>.
 . <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
@@ -31,11 +31,6 @@ Be sure to back up the encryption key value somewhere safe, as your alerting rul
 [[action-settings]]
 ==== Action settings
 
-`xpack.actions.enabled`::
-deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]
-Feature toggle that enables Actions in {kib}.
-If `false`, all features dependent on Actions are disabled, including the *Observability* and *Security* apps.  Default: `true`.
-
 `xpack.actions.allowedHosts` {ess-icon}::
 A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly added to the allowed hosts. An empty list `[]` can be used to block built-in actions from making any external connections.
 +
@@ -51,10 +46,13 @@ entry.
 +
 In the following example, two custom host settings
 are defined.  The first provides a custom host setting for mail server
-`mail.example.com` using port 465 that supplies server certificate authorization
+`mail.example.com` using port 465 that supplies server certificate authentication
 data from both a file and inline, and requires TLS for the
 connection.  The second provides a custom host setting for https server
-`webhook.example.com` which turns off server certificate authorization.
+`webhook.example.com` which turns off server certificate authentication,
+that will allow Kibana to connect to the server if it's using a self-signed
+certificate.  The individual properties that can be used in the settings are
+documented below.
 +
 [source,yaml]
 --
@@ -71,10 +69,15 @@ xpack.actions.customHostSettings:
       requireTLS: true
   - url: https://webhook.example.com
     ssl:
-      // legacy
-      rejectUnauthorized: false
       verificationMode: 'none'
 --
+
+The settings in `xpack.actions.customHostSettings` can be used to override the
+global option `xpack.actions.ssl.verificationMode` and provide customized TLS
+settings on a per-server basis. Set `xpack.actions.ssl.verificationMode` to the
+value to be used by default for all servers, then add an entry in
+`xpack.actions.customHostSettings` for every server that requires customized
+settings.
 
 `xpack.actions.customHostSettings[n].url` {ess-icon}::
 A URL associated with this custom host setting.  Should be in the form of
@@ -89,17 +92,19 @@ URLs can use both the `ssl` and `smtp` options.
 +
 No other URL values should be part of this URL, including paths,
 query strings, and authentication information.  When an http or smtp request
-is made as part of executing an action, only the protocol, hostname, and
+is made as part of running an action, only the protocol, hostname, and
 port of the URL for that request are used to look up these configuration
 values.
 
 `xpack.actions.customHostSettings[n].smtp.ignoreTLS` {ess-icon}::
 A boolean value indicating that TLS must not be used for this connection.
 The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+Default: `false`.
 
 `xpack.actions.customHostSettings[n].smtp.requireTLS` {ess-icon}::
 A boolean value indicating that TLS must be used for this connection.
 The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+Default: `false`.
 
 `xpack.actions.customHostSettings[n].ssl.rejectUnauthorized`::
 Deprecated. Use <<action-config-custom-host-verification-mode,`xpack.actions.customHostSettings.ssl.verificationMode`>> instead. A boolean value indicating whether to bypass server certificate validation.
@@ -120,8 +125,13 @@ The contents of a PEM-encoded certificate file, or multiple files appended
 into a single string.  This configuration can be used for environments where
 the files cannot be made available.
 
+[[action-config-email-domain-allowlist]] `xpack.actions.email.domain_allowlist`  {ess-icon}::
+A list of allowed email domains which can be used with the email connector. When this setting is not used, all email domains are allowed. When this setting is used, if any email is attempted to be sent that (a) includes an addressee with an email domain that is not in the allowlist, or (b) includes a from address domain that is not in the allowlist, it will fail with a message indicating the email is not allowed.
+
+WARNING: This feature is available in {kib} 7.17.4 and 8.3.0 onwards but is not supported in {kib} 8.0, 8.1 or 8.2. As such, this setting should be removed before upgrading from 7.17 to 8.0, 8.1 or 8.2. It is possible to configure the settings in 7.17.4 and then upgrade to 8.3.0 directly.
+
 `xpack.actions.enabledActionTypes` {ess-icon}::
-A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty list `[]` will disable all action types.
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.email`, `.index`, `.jira`, `.pagerduty`, `.resilient`, `.server-log`, `.servicenow`, .`servicenow-itom`, `.servicenow-sir`, `.slack`, `.swimlane`, `.teams`, `.xmatters`, and `.webhook`. An empty list `[]` will disable all action types.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
@@ -146,8 +156,8 @@ Specifies HTTP headers for the proxy, if using a proxy for actions. Default: {}.
 `xpack.actions.proxyRejectUnauthorizedCertificates` {ess-icon}::
 Deprecated. Use <<action-config-proxy-verification-mode,`xpack.actions.ssl.proxyVerificationMode`>> instead. Set to `false` to bypass certificate validation for the proxy, if using a proxy for actions. Default: `true`.
 
-[[action-config-proxy-verification-mode]]`xpack.actions[n].ssl.proxyVerificationMode` {ess-icon}::
-Controls the verification for the proxy server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`.
+[[action-config-proxy-verification-mode]]`xpack.actions.ssl.proxyVerificationMode` {ess-icon}::
+Controls the verification for the proxy server certificate that Kibana receives when making an outbound SSL/TLS connection to the proxy server. Valid values are `full`, `certificate`, and `none`.
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
 
 `xpack.actions.rejectUnauthorized` {ess-icon}::
@@ -156,12 +166,12 @@ Deprecated. Use <<action-config-verification-mode,`xpack.actions.ssl.verificatio
 As an alternative to setting `xpack.actions.rejectUnauthorized`, you can use the setting
 `xpack.actions.customHostSettings` to set SSL options for specific servers.
 
-[[action-config-verification-mode]] `xpack.actions[n].ssl.verificationMode` {ess-icon}::
+[[action-config-verification-mode]] `xpack.actions.ssl.verificationMode` {ess-icon}::
 Controls the verification for the server certificate that {hosted-ems} receives when making an outbound SSL/TLS connection for actions. Valid values are `full`, `certificate`, and `none`.
 Use `full` to perform hostname verification, `certificate` to skip hostname verification, and `none` to skip verification. Default: `full`. <<elasticsearch-ssl-verificationMode,Equivalent {kib} setting>>.
 +
-As an alternative to setting `xpack.actions.ssl.verificationMode`, you can use the setting
-`xpack.actions.customHostSettings` to set SSL options for specific servers.
+This setting can be overridden for specific URLs by using the setting
+`xpack.actions.customHostSettings[n].ssl.verificationMode` (described above) to a different value.
 
 `xpack.actions.maxResponseContentLength` {ess-icon}::
 Specifies the max number of bytes of the http response for requests to external resources. Default: 1000000 (1MB).
@@ -177,5 +187,59 @@ For example, `20m`, `24h`, `7d`, `1w`. Default: `60s`.
 [[alert-settings]]
 ==== Alerting settings
 
-`xpack.alerting.maxEphemeralActionsPerAlert`::
-Sets the number of actions that will be executed ephemerally. To use this, enable ephemeral tasks in task manager first with <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
+`xpack.alerting.maxEphemeralActionsPerAlert` {ess-icon}::
+Sets the number of actions that will run ephemerally. To use this, enable
+ephemeral tasks in task manager first with
+<<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
+
+`xpack.alerting.cancelAlertsOnRuleTimeout` {ess-icon}::
+Specifies whether to skip writing alerts and scheduling actions if rule
+processing was cancelled due to a timeout. Default: `true`. This setting can be
+overridden by individual rule types.
+
+`xpack.alerting.rules.minimumScheduleInterval.value` {ess-icon}::
+Specifies the minimum schedule interval for rules. This minimum is applied to all rules created or updated after you set this value. The time is formatted as:
++
+`<count>[s,m,h,d]` 
++
+For example, `20m`, `24h`, `7d`. This duration cannot exceed `1d`. Default: `1m`.
+
+`xpack.alerting.rules.minimumScheduleInterval.enforce` {ess-icon}::
+Specifies the behavior when a new or changed rule has a schedule interval less than the value defined in `xpack.alerting.rules.minimumScheduleInterval.value`. If `false`, rules with schedules less than the interval will be created but warnings will be logged. If `true`, rules with schedules less than the interval cannot be created. Default: `false`.
+
+`xpack.alerting.rules.run.actions.max` {ess-icon}::
+Specifies the maximum number of actions that a rule can generate each time detection checks run.
+
+`xpack.alerting.rules.run.timeout` {ess-icon}::
+Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:
++
+`<count>[ms,s,m,h,d,w,M,Y]`
++
+For example, `20m`, `24h`, `7d`, `1w`. Default: `5m`.
+
+`xpack.alerting.rules.run.ruleTypeOverrides` {ess-icon}::
+Overrides the configs under `xpack.alerting.rules.run` for the rule type with the given ID. List the rule identifier and its settings in an array of objects.
++
+For example:
+[source,yaml]
+--
+xpack.alerting.rules.run:
+    timeout: '5m'
+    ruleTypeOverrides:
+        - id: '.index-threshold'
+          timeout: '15m'
+--
+
+`xpack.alerting.rules.run.actions.connectorTypeOverrides` {ess-icon}::
+Overrides the configs under `xpack.alerting.rules.run.actions` for the connector type with the given ID. List the connector type identifier and its settings in an array of objects.
++
+For example:
+[source,yaml]
+--
+xpack.alerting.rules.run:
+    actions:
+        max: 10
+        connectorTypeOverrides:
+            - id: '.server-log'
+              max: 5
+--

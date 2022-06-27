@@ -24,11 +24,19 @@ import { i18n } from '@kbn/i18n';
 import { SchemaFieldTypeSelect } from '../../../../shared/schema';
 import { FIELD_NAME, FIELD_TYPE } from '../../../../shared/schema/constants';
 
+import { AppLogic } from '../../../app_logic';
+
+import { EngineLogic } from '../../engine';
+
 import { SchemaLogic } from '../schema_logic';
 
 export const SchemaTable: React.FC = () => {
+  const {
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
   const { schema, unconfirmedFields } = useValues(SchemaLogic);
   const { updateSchemaFieldType } = useActions(SchemaLogic);
+  const { isElasticsearchEngine } = useValues(EngineLogic);
 
   return (
     <EuiTable tableLayout="auto">
@@ -75,6 +83,7 @@ export const SchemaTable: React.FC = () => {
                 <SchemaFieldTypeSelect
                   fieldName={fieldName}
                   fieldType={fieldType}
+                  disabled={!canManageEngines || isElasticsearchEngine}
                   updateExistingFieldType={updateSchemaFieldType}
                   aria-labelledby="schemaFieldType"
                 />

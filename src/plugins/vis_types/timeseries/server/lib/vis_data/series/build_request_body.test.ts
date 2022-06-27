@@ -12,17 +12,19 @@ const body = JSON.parse(`
 {
     "filters": [
         {
-            "bool": {
-                "must": [
-                    {
-                        "query_string": {
-                            "analyze_wildcard": true,
-                            "query": "*"
-                        }
-                    }
-                ],
-                "must_not": []
-            }
+           "query": {
+                "bool": {
+                  "must": [
+                      {
+                          "query_string": {
+                              "analyze_wildcard": true,
+                              "query": "*"
+                          }
+                      }
+                  ],
+                  "must_not": []
+              }
+           }
         }
     ],
     "panels": [
@@ -157,6 +159,7 @@ describe('buildRequestBody(req)', () => {
           },
           meta: {
             intervalString: '10s',
+            normalized: true,
             seriesId: 'c9b5f9c0-e403-11e6-be91-6f7688e9fac7',
             timeField: '@timestamp',
             panelId: 'c9b5d2b0-e403-11e6-be91-6f7688e9fac7',

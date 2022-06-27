@@ -7,7 +7,8 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+
 import { SecurityLicenseService } from './license_service';
 
 describe('license features', function () {
@@ -28,7 +29,6 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
-      allowLegacyAuditLogging: false,
     });
   });
 
@@ -51,7 +51,6 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
-      allowLegacyAuditLogging: false,
     });
   });
 
@@ -73,7 +72,6 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": false,
             "allowAuditLogging": false,
-            "allowLegacyAuditLogging": false,
             "allowLogin": false,
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
@@ -95,7 +93,6 @@ describe('license features', function () {
           Object {
             "allowAccessAgreement": true,
             "allowAuditLogging": true,
-            "allowLegacyAuditLogging": true,
             "allowLogin": true,
             "allowRbac": true,
             "allowRoleDocumentLevelSecurity": true,
@@ -134,7 +131,6 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
-      allowLegacyAuditLogging: false,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -160,32 +156,6 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
-      allowLegacyAuditLogging: false,
-    });
-  });
-
-  it('should allow all basic features for standard license', () => {
-    const mockRawLicense = licenseMock.createLicense({
-      license: { mode: 'standard', type: 'standard' },
-      features: { security: { isEnabled: true, isAvailable: true } },
-    });
-
-    const serviceSetup = new SecurityLicenseService().setup({
-      license$: of(mockRawLicense),
-    });
-    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
-    expect(serviceSetup.license.getFeatures()).toEqual({
-      showLogin: true,
-      allowLogin: true,
-      showLinks: true,
-      showRoleMappingsManagement: false,
-      allowAccessAgreement: false,
-      allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false,
-      allowRbac: true,
-      allowSubFeaturePrivileges: false,
-      allowAuditLogging: false,
-      allowLegacyAuditLogging: true,
     });
   });
 
@@ -210,7 +180,6 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
-      allowLegacyAuditLogging: true,
     });
   });
 
@@ -235,7 +204,6 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
-      allowLegacyAuditLogging: true,
     });
   });
 });

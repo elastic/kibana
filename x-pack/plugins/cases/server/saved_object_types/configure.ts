@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common';
+import { SavedObjectsType } from '@kbn/core/server';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common/constants';
 import { configureMigrations } from './migrations';
 
 export const caseConfigureSavedObjectType: SavedObjectsType = {
   name: CASE_CONFIGURE_SAVED_OBJECT,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       created_at: {

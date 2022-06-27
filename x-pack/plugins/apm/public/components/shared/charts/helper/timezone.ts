@@ -6,6 +6,8 @@
  */
 
 import d3 from 'd3';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { getTimezoneOffsetInMs } from './get_timezone_offset_in_ms';
 
 interface Params {
@@ -31,3 +33,15 @@ export const getDomainTZ = (min: number, max: number): [number, number] => {
   );
   return [xMinZone, xMaxZone];
 };
+
+export function getTimeZone(uiSettings?: IUiSettingsClient) {
+  const kibanaTimeZone = uiSettings?.get<'Browser' | string>(
+    UI_SETTINGS.DATEFORMAT_TZ
+  );
+
+  if (!kibanaTimeZone || kibanaTimeZone === 'Browser') {
+    return 'local';
+  }
+
+  return kibanaTimeZone;
+}

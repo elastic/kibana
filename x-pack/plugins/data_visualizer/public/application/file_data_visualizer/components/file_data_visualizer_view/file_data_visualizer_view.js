@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -29,6 +29,8 @@ import {
   createUrlOverrides,
   processResults,
 } from '../../../common/components/utils';
+
+import { Chat } from '@kbn/cloud-plugin/public';
 
 import { MODE } from './constants';
 
@@ -63,7 +65,6 @@ export class FileDataVisualizerView extends Component {
       linesToSample: DEFAULT_LINES_TO_SAMPLE,
     };
 
-    this.savedObjectsClient = props.savedObjectsClient;
     this.maxFileUploadBytes = props.fileUpload.getMaxBytes();
   }
 
@@ -72,7 +73,7 @@ export class FileDataVisualizerView extends Component {
     // note, calling hasImportPermission with no arguments just checks the
     // cluster privileges, the user will still need index privileges to create and ingest
     const hasPermissionToImport = await this.props.fileUpload.hasImportPermission({
-      checkCreateIndexPattern: false,
+      checkCreateDataView: false,
       checkHasManagePipeline: true,
     });
     this.setState({ hasPermissionToImport });
@@ -295,12 +296,7 @@ export class FileDataVisualizerView extends Component {
       <div>
         {mode === MODE.READ && (
           <>
-            {!loading && !loaded && (
-              <AboutPanel
-                onFilePickerChange={this.onFilePickerChange}
-                disabled={!fileCouldNotBeReadPermissionError}
-              />
-            )}
+            {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
 
             {loading && <LoadingPanel />}
 
@@ -367,12 +363,12 @@ export class FileDataVisualizerView extends Component {
               fileName={fileName}
               fileContents={fileContents}
               data={data}
-              indexPatterns={this.props.indexPatterns}
+              dataViewsContract={this.props.dataViewsContract}
               showBottomBar={this.showBottomBar}
               hideBottomBar={this.hideBottomBar}
-              savedObjectsClient={this.savedObjectsClient}
               fileUpload={this.props.fileUpload}
-              resultsLinks={this.props.resultsLinks}
+              getAdditionalLinks={this.props.getAdditionalLinks}
+              capabilities={this.props.capabilities}
             />
 
             {bottomBarVisible && (
@@ -387,6 +383,7 @@ export class FileDataVisualizerView extends Component {
             )}
           </>
         )}
+        <Chat />
       </div>
     );
   }

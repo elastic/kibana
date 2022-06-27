@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { repeatImageFunction } from '../common/expression_functions';
-import { repeatImageRenderer } from './expression_renderers';
+import { repeatImageRendererFactory } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -33,7 +33,7 @@ export class ExpressionRepeatImagePlugin
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRepeatImagePluginSetup {
     expressions.registerFunction(repeatImageFunction);
-    expressions.registerRenderer(repeatImageRenderer);
+    expressions.registerRenderer(repeatImageRendererFactory(core));
   }
 
   public start(core: CoreStart): ExpressionRepeatImagePluginStart {}

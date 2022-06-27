@@ -12,7 +12,7 @@ This has three major benefits:
 
 [IMPORTANT]
 ==============================================
-Task definitions for alerts and actions are stored in the index specified by <<task-manager-settings, `xpack.task_manager.index`>>. The default is `.kibana_task_manager`.
+Task definitions for alerts and actions are stored in the index called `.kibana_task_manager`.
  
 You must have at least one replica of this index for production deployments.
 
@@ -68,7 +68,7 @@ This means that you can expect a single {kib} instance to support up to 200 _tas
 
 In practice, a {kib} instance will only achieve the upper bound of `200/tpm` if the duration of task execution is below the polling rate of 3 seconds. For the most part, the duration of tasks is below that threshold, but it can vary greatly as {es} and {kib} usage grow and task complexity increases (such as alerts executing heavy queries across large datasets).
 
-By <<task-manager-rough-throughput-estimation, estimating a rough throughput requirment>>, you can estimate the number of {kib} instances required to reliably execute tasks in a timely manner. An appropriate number of {kib} instances can be estimated to match the required scale.
+By <<task-manager-rough-throughput-estimation, estimating a rough throughput requirement>>, you can estimate the number of {kib} instances required to reliably execute tasks in a timely manner. An appropriate number of {kib} instances can be estimated to match the required scale.
 
 For details on monitoring the health of {kib} Task Manager, follow the guidance in <<task-manager-health-monitoring>>.
 
@@ -101,11 +101,11 @@ Scaling {kib} instances horizontally requires a higher degree of coordination, w
 A recommended strategy is to follow these steps:
 
 1. Produce a <<task-manager-rough-throughput-estimation,rough throughput estimate>> as a guide to provisioning as many {kib} instances as needed. Include any growth in tasks that you predict experiencing in the near future, and a buffer to better address ad-hoc tasks.
-2. After provisioning a deployment, assess whether the provisioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described in <<task-manager-theory-insufficient-throughput, Insufficient throughtput to handle the scheduled workload>>.
+2. After provisioning a deployment, assess whether the provisioned {kib} instances achieve the required throughput by evaluating the <<task-manager-health-monitoring>> as described in <<task-manager-theory-insufficient-throughput, Insufficient throughput to handle the scheduled workload>>.
 3. If the throughput is insufficient, and {kib} instances exhibit low resource usage, incrementally scale vertically while <<kibana-page,monitoring>> the impact of these changes.
 4. If the throughput is insufficient, and {kib} instances are exhibiting high resource usage, incrementally scale horizontally by provisioning new {kib} instances and reassess.
 
-Task Manager, like the rest of the Elastic Stack, is designed to scale horizontally. Take advantage of this ability to ensure mission critical services, such as Alerting and Reporting, always have the capacity they need.
+Task Manager, like the rest of the Elastic Stack, is designed to scale horizontally. Take advantage of this ability to ensure mission critical services, such as Alerting, Actions, and Reporting, always have the capacity they need.
 
 Scaling horizontally requires a higher degree of coordination between {kib} instances. One way Task Manager coordinates with other instances is by delaying its polling schedule to avoid conflicts with other instances.
 By using <<task-manager-health-monitoring, health monitoring>> to evaluate the <<task-manager-health-evaluate-the-runtime,date of the `last_polling_delay`>> across a deployment, you can estimate the frequency at which Task Manager resets its delay mechanism.
@@ -149,7 +149,7 @@ When evaluating the proposed {kib} instance number under `proposed.provisioned_k
 
 By <<task-manager-health-evaluate-the-workload,evaluating the workload>>, you can make a rough estimate as to the required throughput as a _tasks per minute_ measurement.
 
-For example, suppose your current workload reveals a required throughput of `440/tpm`.  You can address this scale by provisioning 3 {kib} instances, with an upper throughput of `600/tpm`. This scale would provide aproximately 25% additional capacity to handle ad-hoc non-recurring tasks and potential growth in recurring tasks.
+For example, suppose your current workload reveals a required throughput of `440/tpm`.  You can address this scale by provisioning 3 {kib} instances, with an upper throughput of `600/tpm`. This scale would provide approximately 25% additional capacity to handle ad-hoc non-recurring tasks and potential growth in recurring tasks.
 
 Given a deployment of 100 recurring tasks, estimating the required throughput depends on the scheduled cadence.
 Suppose you expect to run 50 tasks at a cadence of `10s`, the other 50 tasks at `20m`. In addition, you expect a couple dozen non-recurring tasks every minute.

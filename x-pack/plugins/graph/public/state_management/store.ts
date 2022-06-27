@@ -7,8 +7,8 @@
 
 import createSagaMiddleware, { SagaMiddleware } from 'redux-saga';
 import { combineReducers, createStore, Store, AnyAction, Dispatch, applyMiddleware } from 'redux';
-import { ChromeStart, I18nStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
-import { CoreStart } from 'src/core/public';
+import { ChromeStart, I18nStart, OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { ReactElement } from 'react';
 import {
   fieldsReducer,
@@ -83,7 +83,7 @@ function registerSagas(sagaMiddleware: SagaMiddleware<object>, deps: GraphStoreD
   sagaMiddleware.run(submitSearchSaga(deps));
 }
 
-export const createGraphStore = (deps: GraphStoreDependencies) => {
+export const createGraphStore = (deps: GraphStoreDependencies): Store => {
   const sagaMiddleware = createSagaMiddleware();
 
   const rootReducer = createRootReducer(deps.addBasePath);

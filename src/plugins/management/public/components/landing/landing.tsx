@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiHorizontalRule, EuiPageContent } from '@elastic/eui';
 
 interface ManagementLandingPageProps {
@@ -46,7 +46,7 @@ export const ManagementLandingPage = ({
             <p>
               <FormattedMessage
                 id="management.landing.subhead"
-                defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
+                defaultMessage="Manage your indices, data views, saved objects, Kibana settings, and more."
               />
             </p>
             <EuiHorizontalRule />

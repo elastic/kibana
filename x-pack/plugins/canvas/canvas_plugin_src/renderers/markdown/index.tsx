@@ -7,32 +7,44 @@
 
 import React, { CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
+import { CoreTheme } from '@kbn/core/public';
+import { Observable } from 'rxjs';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common/lib';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { StartInitializer } from '../../plugin';
 import { RendererStrings } from '../../../i18n';
 import { Return as Config } from '../../functions/browser/markdown';
-import { Markdown } from '../../../../../../src/plugins/kibana_react/public';
 import { RendererFactory } from '../../../types';
 
 const { markdown: strings } = RendererStrings;
 
-export const markdown: RendererFactory<Config> = () => ({
-  name: 'markdown',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render(domNode, config, handlers) {
-    const fontStyle = config.font ? config.font.spec : {};
+export const getMarkdownRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<Config> =>
+  () => ({
+    name: 'markdown',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render(domNode, config, handlers) {
+      const fontStyle = config.font ? config.font.spec : {};
 
-    ReactDOM.render(
-      <Markdown
-        className="canvasMarkdown"
-        style={fontStyle as CSSProperties}
-        markdown={config.content}
-        openLinksInNewTab={config.openLinksInNewTab}
-      />,
-      domNode,
-      () => handlers.done()
-    );
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={theme$}>
+          <Markdown
+            className="canvasMarkdown"
+            style={fontStyle as CSSProperties}
+            markdown={config.content}
+            openLinksInNewTab={config.openLinksInNewTab}
+          />
+        </KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-  },
-});
+      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    },
+  });
+
+export const markdownFactory: StartInitializer<RendererFactory<Config>> = (core, plugins) =>
+  getMarkdownRenderer(core.theme.theme$);

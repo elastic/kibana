@@ -28,16 +28,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
-
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
-
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+    });
     describe('query', function () {
       const queryName1 = 'Query # 1';
 
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
+        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime} (interval: Auto - 3 hours)`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
@@ -95,8 +95,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.start).to.be('Sep 21, 2015 @ 12:00:00.000');
         expect(time.end).to.be('Sep 21, 2015 @ 15:00:00.000');
         await retry.waitForWithTimeout(
-          'doc table to contain the right search result',
-          1000,
+          'table to contain the right search result',
+          3000,
           async () => {
             const rowData = await PageObjects.discover.getDocTableField(1);
             log.debug(`The first timestamp value in doc table: ${rowData}`);
@@ -120,8 +120,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           return actualCount === expectedCount;
         });
-        const prevRowData = await PageObjects.discover.getDocTableField(1);
-        log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
+        let prevRowData = '';
+        // to make sure the table is already rendered
+        await retry.try(async () => {
+          prevRowData = await PageObjects.discover.getDocTableField(1);
+          log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
+        });
+
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete after being brushed', async () => {
@@ -233,11 +238,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function () {
-        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.header.awaitKibanaChrome();
-        await queryBar.clearQuery();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await queryBar.clearQuery();
 
         log.debug(
           'check that the newest doc timestamp is now -7 hours from the UTC time in the first test'
@@ -246,36 +251,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowData.startsWith('Sep 22, 2015 @ 16:50:13.253')).to.be.ok();
       });
     });
-    describe('usage of discover:searchOnPageLoad', () => {
-      it('should not fetch data from ES initially when discover:searchOnPageLoad is false', async function () {
-        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': false });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
-
-        expect(await PageObjects.discover.getNrOfFetches()).to.be(0);
-      });
-
-      it('should fetch data from ES initially when discover:searchOnPageLoad is true', async function () {
-        await kibanaServer.uiSettings.replace({ 'discover:searchOnPageLoad': true });
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.awaitKibanaChrome();
-        await retry.waitFor('number of fetches to be 1', async () => {
-          const nrOfFetches = await PageObjects.discover.getNrOfFetches();
-          return nrOfFetches === 1;
-        });
-      });
-    });
 
     describe('invalid time range in URL', function () {
       it('should get the default timerange', async function () {
-        const prevTime = await PageObjects.timePicker.getTimeConfig();
         await PageObjects.common.navigateToUrl('discover', '#/?_g=(time:(from:now-15m,to:null))', {
           useActualUrl: true,
         });
         await PageObjects.header.awaitKibanaChrome();
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be(prevTime.start);
-        expect(time.end).to.be(prevTime.end);
+        expect(time.start).to.be('~ 15 minutes ago');
+        expect(time.end).to.be('now');
       });
     });
 

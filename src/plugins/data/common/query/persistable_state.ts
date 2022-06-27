@@ -6,59 +6,72 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
-import { Filter } from '@kbn/es-query';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from '../../../../core/types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { mapValues } from 'lodash';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+  VersionedState,
+} from '@kbn/kibana-utils-plugin/common';
+import type { QueryState } from './query_state';
+import * as filtersPersistableState from './filters/persistable_state';
 
-export const extract = (filters: Filter[]) => {
+export const extract = (queryState: QueryState) => {
   const references: SavedObjectReference[] = [];
-  const updatedFilters = filters.map((filter) => {
-    if (filter.meta?.index) {
-      const id = uuid();
-      references.push({
-        type: 'index_pattern',
-        name: id,
-        id: filter.meta.index,
+
+  const { state: updatedFilters, references: referencesFromFilters } =
+    filtersPersistableState.extract(queryState.filters ?? []);
+  references.push(...referencesFromFilters);
+
+  return {
+    state: {
+      ...queryState,
+      filters: updatedFilters,
+    },
+    references,
+  };
+};
+
+export const inject = (queryState: QueryState, references: SavedObjectReference[]) => {
+  const updatedFilters = filtersPersistableState.inject(queryState.filters ?? [], references);
+
+  return {
+    ...queryState,
+    filters: updatedFilters,
+  };
+};
+
+export const telemetry = (queryState: QueryState, collector: unknown) => {
+  const filtersTelemetry = filtersPersistableState.telemetry(queryState.filters ?? [], collector);
+  return {
+    ...filtersTelemetry,
+  };
+};
+
+export const migrateToLatest = ({ state, version }: VersionedState<QueryState>) => {
+  const migratedFilters = filtersPersistableState.migrateToLatest({
+    state: state.filters ?? [],
+    version,
+  });
+
+  return {
+    ...state,
+    filters: migratedFilters,
+  };
+};
+
+export const getAllMigrations = (): MigrateFunctionsObject => {
+  const queryMigrations: MigrateFunctionsObject = {};
+
+  const filterMigrations: MigrateFunctionsObject = mapValues(
+    filtersPersistableState.getAllMigrations(),
+    (migrate) => {
+      return (state: QueryState) => ({
+        ...state,
+        filters: migrate(state.filters ?? []),
       });
-
-      return {
-        ...filter,
-        meta: {
-          ...filter.meta,
-          index: id,
-        },
-      };
     }
-    return filter;
-  });
-  return { state: updatedFilters, references };
-};
+  );
 
-export const inject = (filters: Filter[], references: SavedObjectReference[]) => {
-  return filters.map((filter) => {
-    if (!filter.meta.index) {
-      return filter;
-    }
-    const reference = references.find((ref) => ref.name === filter.meta.index);
-    return {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        index: reference && reference.id,
-      },
-    };
-  });
-};
-
-export const telemetry = (filters: SerializableRecord, collector: unknown) => {
-  return {};
-};
-
-export const migrateToLatest = (filters: Filter[], version: string) => {
-  return filters;
-};
-
-export const getAllMigrations = () => {
-  return {};
+  return mergeMigrationFunctionMaps(queryMigrations, filterMigrations);
 };

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
 import { AdvancedJobCreator } from './advanced_job_creator';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { CategorizationJobCreator } from './categorization_job_creator';
 import { RareJobCreator } from './rare_job_creator';
 
@@ -18,7 +18,7 @@ import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export const jobCreatorFactory =
   (jobType: JOB_TYPE) =>
-  (indexPattern: IndexPattern, savedSearch: SavedSearchSavedObject | null, query: object) => {
+  (indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) => {
     let jc;
     switch (jobType) {
       case JOB_TYPE.SINGLE_METRIC:

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ExplainCollectionInterval } from './collection_interval';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -32,7 +32,7 @@ describe('ExplainCollectionInterval', () => {
       />
     );
     const rendered = mountWithIntl(component);
-    expect(rendered).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   test('should have a button that triggers ajax action', () => {
@@ -61,7 +61,7 @@ describe('ExplainCollectionInterval', () => {
         />
       );
       const rendered = mountWithIntl(component);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
 
     test('should show a success message while updated = true', () => {
@@ -74,7 +74,7 @@ describe('ExplainCollectionInterval', () => {
         />
       );
       const rendered = mountWithIntl(component);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
   });
 });

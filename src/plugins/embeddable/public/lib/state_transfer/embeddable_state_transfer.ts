@@ -7,8 +7,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Storage } from '../../../../kibana_utils/public';
-import { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
 import {
   EmbeddableEditorState,
   isEmbeddableEditorState,
@@ -29,15 +29,17 @@ export const EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY = 'EMBEDDABLE_STATE_TRANSFER'
 export class EmbeddableStateTransfer {
   public isTransferInProgress: boolean;
   private storage: Storage;
+  private appList: ReadonlyMap<string, PublicAppInfo> | undefined;
 
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
     currentAppId$: ApplicationStart['currentAppId$'],
-    private appList?: ReadonlyMap<string, PublicAppInfo> | undefined,
+    appList?: ReadonlyMap<string, PublicAppInfo> | undefined,
     customStorage?: Storage
   ) {
     this.storage = customStorage ? customStorage : new Storage(sessionStorage);
     this.isTransferInProgress = false;
+    this.appList = appList;
     currentAppId$.subscribe(() => {
       this.isTransferInProgress = false;
     });
@@ -116,6 +118,7 @@ export class EmbeddableStateTransfer {
     options?: {
       path?: string;
       openInNewTab?: boolean;
+      skipAppLeave?: boolean;
       state: EmbeddableEditorState;
     }
   ): Promise<void> {
@@ -163,7 +166,12 @@ export class EmbeddableStateTransfer {
   private async navigateToWithState<OutgoingStateType = unknown>(
     appId: string,
     key: string,
-    options?: { path?: string; state?: OutgoingStateType; openInNewTab?: boolean }
+    options?: {
+      path?: string;
+      state?: OutgoingStateType;
+      openInNewTab?: boolean;
+      skipAppLeave?: boolean;
+    }
   ): Promise<void> {
     const existingAppState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key] || {};
     const stateObject = {
@@ -174,6 +182,10 @@ export class EmbeddableStateTransfer {
       },
     };
     this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateObject);
-    await this.navigateToApp(appId, { path: options?.path, openInNewTab: options?.openInNewTab });
+    await this.navigateToApp(appId, {
+      path: options?.path,
+      openInNewTab: options?.openInNewTab,
+      skipAppLeave: options?.skipAppLeave,
+    });
   }
 }

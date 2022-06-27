@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 
 import { getJobId, jobCustomSettingsRT } from '../../../../common/infra_ml';
 import { decodeOrThrow } from '../../../../common/runtime_types';
@@ -41,11 +41,13 @@ export type FetchJobStatusRequestPayload = rt.TypeOf<typeof fetchJobStatusReques
 
 const datafeedStateRT = rt.keyof({
   started: null,
+  starting: null,
   stopped: null,
   stopping: null,
   '': null,
 });
 
+// this is the union of the ML API's job state and block reasons
 const jobStateRT = rt.keyof({
   closed: null,
   closing: null,
@@ -53,6 +55,8 @@ const jobStateRT = rt.keyof({
   failed: null,
   opened: null,
   opening: null,
+  resetting: null,
+  reverting: null,
 });
 
 const jobCategorizationStatusRT = rt.keyof({
@@ -77,6 +81,7 @@ export const jobSummaryRT = rt.intersection([
     jobState: jobStateRT,
   }),
   rt.partial({
+    awaitingNodeAssignment: rt.boolean,
     datafeedIndices: rt.array(rt.string),
     datafeedState: datafeedStateRT,
     fullJob: rt.partial({

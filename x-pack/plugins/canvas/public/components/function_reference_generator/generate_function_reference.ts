@@ -7,11 +7,11 @@
 
 // @ts-expect-error untyped lib
 import pluralize from 'pluralize';
-import { ExpressionFunction, ExpressionFunctionParameter } from 'src/plugins/expressions';
+import { ExpressionFunction, ExpressionFunctionParameter } from '@kbn/expressions-plugin';
+import { isValidDataUrl } from '@kbn/presentation-util-plugin/public';
 import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../../../canvas_plugin_src/functions/server';
 import { DATATABLE_COLUMN_TYPES } from '../../../common/lib';
-import { isValidDataUrl } from '../../../../../../src/plugins/presentation_util/public';
 import { getFunctionExamples, FunctionExample } from './function_examples';
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
@@ -26,12 +26,32 @@ const fnList = [
   ...browserFunctions.map((fn) => fn().name),
   ...serverFunctions.map((fn) => fn().name),
   'asset',
+  'clog',
+  'createTable',
+  'embeddable',
   'filters',
+  'font',
+  'image',
+  'kibana',
+  'mapColumn',
+  'math',
+  'mathColumn',
+  'metric',
+  'palette',
+  'pie',
+  'plot',
+  'progress',
+  'removeFilter',
+  'repeatImage',
+  'revealImage',
+  'selectFilter',
+  'shape',
   'timelion',
   'to',
-  'font',
+  'uiSetting',
   'var',
   'var_set',
+
   // ignore unsupported embeddables functions for now
 ].filter((fn) => !['savedSearch'].includes(fn));
 
@@ -156,7 +176,7 @@ ${examplesBlock}
 *Returns:* ${output ? wrapInBackTicks(output) : 'Depends on your input and arguments'}\n\n`;
 };
 
-const getArgsTable = (args: { [key: string]: ExpressionFunctionParameter }) => {
+const getArgsTable = (args: { [key: string]: ExpressionFunctionParameter<any> }) => {
   if (!args || Object.keys(args).length === 0) {
     return 'None';
   }

@@ -100,7 +100,13 @@ export const DraggableSignatureId = React.memo<{
 
   return (
     <SignatureFlexItem grow={false}>
-      <DraggableWrapper dataProvider={dataProviderProp} isDraggable={isDraggable} render={render} />
+      <DraggableWrapper
+        dataProvider={dataProviderProp}
+        isDraggable={isDraggable}
+        render={render}
+        isAggregatable={true}
+        fieldType={'keyword'}
+      />
     </SignatureFlexItem>
   );
 });
@@ -130,6 +136,7 @@ export const SuricataSignature = React.memo<{
           id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
           isDraggable={isDraggable}
           value={signature}
+          tooltipPosition="bottom"
         >
           <div>
             <GoogleLink link={signature}>

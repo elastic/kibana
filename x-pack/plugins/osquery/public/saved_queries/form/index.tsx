@@ -5,28 +5,74 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../scheduled_query_groups/queries/constants';
-import { PlatformCheckBoxGroupField } from '../../scheduled_query_groups/queries/platform_checkbox_group_field';
+import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
+import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
 import { Field, getUseField, UseField } from '../../shared_imports';
 import { CodeEditorField } from './code_editor_field';
+import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
+import { PlaygroundFlyout } from './playground_flyout';
 
 export const CommonUseField = getUseField({ component: Field });
 
 interface SavedQueryFormProps {
   viewMode?: boolean;
+  hasPlayground?: boolean;
+  isValid?: boolean;
 }
 
-const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ viewMode }) => {
+const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
+  viewMode,
+  hasPlayground,
+  isValid,
+}) => {
+  const [playgroundVisible, setPlaygroundVisible] = useState(false);
+
   const euiFieldProps = useMemo(
     () => ({
       isDisabled: !!viewMode,
     }),
     [viewMode]
+  );
+
+  const handleHidePlayground = useCallback(() => setPlaygroundVisible(false), []);
+
+  const handleTogglePlayground = useCallback(
+    () => setPlaygroundVisible((prevValue) => !prevValue),
+    []
+  );
+
+  const intervalEuiFieldProps = useMemo(
+    () => ({
+      append: 's',
+      ...euiFieldProps,
+    }),
+    [euiFieldProps]
+  );
+
+  const versionEuiFieldProps = useMemo(
+    () => ({
+      noSuggestions: false,
+      singleSelection: { asPlainText: true },
+      placeholder: i18n.translate('xpack.osquery.pack.queriesTable.osqueryVersionAllLabel', {
+        defaultMessage: 'ALL',
+      }),
+      options: ALL_OSQUERY_VERSIONS_OPTIONS,
+      onCreateOption: undefined,
+      ...euiFieldProps,
+    }),
+    [euiFieldProps]
   );
 
   return (
@@ -39,18 +85,33 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ viewMode }) =>
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem>
+          <ECSMappingEditorField euiFieldProps={euiFieldProps} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {!viewMode && hasPlayground && (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="play" onClick={handleTogglePlayground}>
+              Test configuration
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <EuiSpacer size="xl" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
-                id="xpack.osquery.savedQueries.form.scheduledQueryGroupConfigSection.title"
-                defaultMessage="Scheduled query group configuration"
+                id="xpack.osquery.savedQueries.form.packConfigSection.title"
+                defaultMessage="Pack configuration"
               />
             </h5>
           </EuiTitle>
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.osquery.savedQueries.form.scheduledQueryGroupConfigSection.description"
-              defaultMessage="The options listed below are optional and are only applied when the query is assigned to a scheduled query group."
+              id="xpack.osquery.savedQueries.form.packConfigSection.description"
+              defaultMessage="The options listed below are optional and are only applied when the query is assigned to a pack."
             />
           </EuiText>
         </EuiFlexItem>
@@ -58,37 +119,28 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({ viewMode }) =>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <CommonUseField
-            path="interval"
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            euiFieldProps={{ append: 's', ...euiFieldProps }}
-          />
-          <EuiSpacer />
-          <CommonUseField
-            path="version"
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            euiFieldProps={{
-              noSuggestions: false,
-              singleSelection: { asPlainText: true },
-              placeholder: i18n.translate(
-                'xpack.osquery.scheduledQueryGroup.queriesTable.osqueryVersionAllLabel',
-                {
-                  defaultMessage: 'ALL',
-                }
-              ),
-              options: ALL_OSQUERY_VERSIONS_OPTIONS,
-              onCreateOption: undefined,
-              ...euiFieldProps,
-            }}
-          />
+          <CommonUseField path="interval" euiFieldProps={intervalEuiFieldProps} />
+          <EuiSpacer size="m" />
+          <CommonUseField path="version" euiFieldProps={versionEuiFieldProps} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <CommonUseField path="platform" component={PlatformCheckBoxGroupField} />
+          <CommonUseField
+            path="platform"
+            component={PlatformCheckBoxGroupField}
+            euiFieldProps={euiFieldProps}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      {playgroundVisible && (
+        <PlaygroundFlyout
+          enabled={isValid !== undefined ? isValid : true}
+          onClose={handleHidePlayground}
+        />
+      )}
     </>
   );
 };
+
+SavedQueryFormComponent.displayName = 'SavedQueryForm';
 
 export const SavedQueryForm = React.memo(SavedQueryFormComponent);

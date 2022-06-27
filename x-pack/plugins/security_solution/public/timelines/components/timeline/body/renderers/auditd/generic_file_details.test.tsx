@@ -9,8 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../../../../../common/mock/match_media';
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { AuditdGenericFileDetails, AuditdGenericFileLine } from './generic_file_details';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
@@ -21,7 +19,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -31,13 +28,10 @@ describe('GenericFileDetails', () => {
 
   describe('rendering', () => {
     test('it renders the default GenericFileDetails', () => {
-      // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
-      const browserFields: BrowserFields = {};
       const wrapper = shallow(
         <AuditdGenericFileDetails
           contextId="contextid-123"
           text="generic-text-123"
-          browserFields={browserFields}
           data={mockTimelineData[27].ecs}
           fileIcon="document"
           timelineId="test"
@@ -52,7 +46,6 @@ describe('GenericFileDetails', () => {
           <AuditdGenericFileDetails
             contextId="contextid-123"
             text="generic-text-123"
-            browserFields={mockBrowserFields}
             data={mockTimelineData[19].ecs}
             fileIcon="document"
             timelineId="test"
@@ -69,7 +62,6 @@ describe('GenericFileDetails', () => {
         <AuditdGenericFileDetails
           contextId="contextid-123"
           text="generic-text-123"
-          browserFields={mockBrowserFields}
           data={mockTimelineData[0].ecs}
           fileIcon="document"
           timelineId="test"

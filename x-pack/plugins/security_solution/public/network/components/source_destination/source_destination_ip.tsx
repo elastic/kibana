@@ -11,7 +11,8 @@ import React from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
-import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME, Port } from '../port';
+import { Port } from '../port';
+import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port/helpers';
 import * as i18n from '../../../timelines/components/timeline/body/renderers/translations';
 
 import { GeoFields } from './geo_fields';
@@ -194,7 +195,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
           gutterSize="xs"
         >
           <EuiFlexItem grow={false}>
-            <Label data-test-subj={`${type}-label`}>{label}</Label>
+            <Label>{label}</Label>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {isIpFieldPopulated({ destinationIp, sourceIp, type }) ? (

@@ -5,23 +5,33 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+jest.mock('../registry');
 
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
-import type { PackagePolicySOAttributes } from '../../../../common';
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
-import { getPackageUsageStats } from './get';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+
+import { PACKAGES_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
+import type { PackagePolicySOAttributes, RegistryPackage } from '../../../../common';
+
+import * as Registry from '../registry';
+
+import { createAppContextStartContractMock } from '../../../mocks';
+import { appContextService } from '../../app_context';
+
+import { PackageNotFoundError } from '../../../errors';
+
+import { getPackageInfo, getPackageUsageStats } from './get';
+
+const MockRegistry = Registry as jest.Mocked<typeof Registry>;
 
 describe('When using EPM `get` services', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-
-  beforeEach(() => {
-    soClient = savedObjectsClientMock.create();
-  });
-
   describe('and invoking getPackageUsageStats()', () => {
+    let soClient: jest.Mocked<SavedObjectsClientContract>;
+
     beforeEach(() => {
+      soClient = savedObjectsClientMock.create();
       const savedObjects: Array<SavedObjectsFindResult<PackagePolicySOAttributes>> = [
         {
           type: 'ingest-package-policies',
@@ -169,6 +179,198 @@ describe('When using EPM `get` services', () => {
         await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' })
       ).toEqual({
         agent_policy_count: 3,
+      });
+    });
+  });
+
+  describe('getPackageInfo', () => {
+    beforeEach(() => {
+      const mockContract = createAppContextStartContractMock();
+      appContextService.start(mockContract);
+      jest.clearAllMocks();
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+        name: 'my-package',
+        version: '1.0.0',
+      } as RegistryPackage);
+      MockRegistry.getRegistryPackage.mockResolvedValue({
+        paths: [],
+        packageInfo: {
+          name: 'my-package',
+          version: '1.0.0',
+        } as RegistryPackage,
+      });
+    });
+
+    describe('installation status', () => {
+      it('should be not_installed when no package SO exists', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+        expect(
+          await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).toMatchObject({
+          status: 'not_installed',
+        });
+      });
+
+      it('should be installing when package SO install_status is installing', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'installing',
+          },
+        });
+
+        expect(
+          await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).toMatchObject({
+          status: 'installing',
+        });
+      });
+
+      it('should be installed when package SO install_status is installed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'installed',
+          },
+        });
+
+        expect(
+          await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).toMatchObject({
+          status: 'installed',
+        });
+      });
+
+      it('should be install_failed when package SO install_status is install_failed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'install_failed',
+          },
+        });
+
+        expect(
+          await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).toMatchObject({
+          status: 'install_failed',
+        });
+      });
+    });
+
+    describe('registry fetch errors', () => {
+      it('throws when a package that is not installed is not available in the registry and not bundled', async () => {
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).rejects.toThrowError(PackageNotFoundError);
+      });
+
+      it('sets the latestVersion to installed version when an installed package is not available in the registry', async () => {
+        MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            install_status: 'installed',
+          },
+        });
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'installed',
+        });
+      });
+
+      it('sets the latestVersion to installed version when an installed package is newer than package in registry', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockResolvedValue({
+          id: 'my-package',
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+          references: [],
+          attributes: {
+            version: '2.0.0',
+            install_status: 'installed',
+          },
+        });
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'installed',
+        });
+      });
+    });
+
+    describe('skipArchive', () => {
+      it('avoids loading archive when skipArchive = true', async () => {
+        const soClient = savedObjectsClientMock.create();
+        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        MockRegistry.fetchInfo.mockResolvedValue({
+          name: 'my-package',
+          version: '1.0.0',
+          assets: [],
+        } as unknown as RegistryPackage);
+
+        await expect(
+          getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: 'my-package',
+            pkgVersion: '1.0.0',
+            skipArchive: true,
+          })
+        ).resolves.toMatchObject({
+          latestVersion: '1.0.0',
+          status: 'not_installed',
+        });
+
+        expect(MockRegistry.getRegistryPackage).not.toHaveBeenCalled();
       });
     });
   });

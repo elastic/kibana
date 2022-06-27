@@ -22,15 +22,16 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { fromKueryExpression } from '@kbn/es-query';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
-import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
-import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import type { TimeRange } from '../../../../../../../../../../../src/plugins/data/public';
-import { LogStream } from '../../../../../../../../../infra/public';
+import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { LogStream } from '@kbn/infra-plugin/public';
+
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
 
@@ -83,25 +84,27 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
           />
         }
       >
-        <FormattedMessage
-          id="xpack.fleet.agentLogs.logDisabledCallOutDescription"
-          defaultMessage="Update the agent's policy {settingsLink} to enable logs collection."
-          values={{
-            settingsLink: (
-              <EuiLink
-                href={getHref('policy_details', {
-                  policyId: agentPolicy.id,
-                  tabId: 'settings',
-                })}
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentLogs.settingsLink"
-                  defaultMessage="settings"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
+        {agentPolicy.is_managed ? null : (
+          <FormattedMessage
+            id="xpack.fleet.agentLogs.logDisabledCallOutDescription"
+            defaultMessage="Update the agent's policy {settingsLink} to enable logs collection."
+            values={{
+              settingsLink: (
+                <EuiLink
+                  href={getHref('policy_details', {
+                    policyId: agentPolicy.id,
+                    tabId: 'settings',
+                  })}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentLogs.settingsLink"
+                    defaultMessage="settings"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        )}
       </EuiCallOut>
     </EuiFlexItem>
   );

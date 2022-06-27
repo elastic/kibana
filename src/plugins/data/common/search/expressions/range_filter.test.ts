@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createMockContext } from '../../../../expressions/common';
+import { createMockContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from './utils';
 import { rangeFilterFunction } from './range_filter';
 
@@ -29,10 +29,12 @@ describe('interpreter/functions#rangeFilter', () => {
           "negate": false,
           "params": Object {},
         },
-        "range": Object {
-          "test": Object {
-            "gte": 10,
-            "lt": 20,
+        "query": Object {
+          "range": Object {
+            "test": Object {
+              "gte": 10,
+              "lt": 20,
+            },
           },
         },
         "type": "kibana_filter",

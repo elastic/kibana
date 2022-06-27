@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { configSchema, ConfigSchema } from '../config';
 import { GraphPlugin } from './plugin';
@@ -18,5 +18,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     savePolicy: true,
   },
   schema: configSchema,
-  deprecations: ({ deprecate }) => [deprecate('enabled', '8.0.0')],
 };

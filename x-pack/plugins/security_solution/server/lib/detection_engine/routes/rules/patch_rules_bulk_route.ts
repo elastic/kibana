@@ -6,6 +6,7 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { Logger } from '@kbn/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
   patchRulesBulkSchema,
@@ -14,25 +15,30 @@ import {
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
+import { legacyMigrate } from '../../rules/utils';
+import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
 
+/**
+ * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ */
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ) => {
   router.patch(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+      path: DETECTION_ENGINE_RULES_BULK_UPDATE,
       validate: {
         body: buildRouteValidation<typeof patchRulesBulkSchema, PatchRulesBulkSchemaDecoded>(
           patchRulesBulkSchema
@@ -43,18 +49,18 @@ export const patchRulesBulkRoute = (
       },
     },
     async (context, request, response) => {
+      logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_UPDATE);
+
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting?.getRulesClient();
-      const ruleStatusClient = context.securitySolution.getExecutionLogClient();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
 
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
-      }
+      const rulesClient = ctx.alerting.getRulesClient();
+      const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+      const savedObjectsClient = ctx.core.savedObjects.client;
 
       const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
+        license: ctx.licensing.license,
         ml,
         request,
         savedObjectsClient,
@@ -67,7 +73,9 @@ export const patchRulesBulkRoute = (
             building_block_type: buildingBlockType,
             description,
             enabled,
+            timestamp_field: timestampField,
             event_category_override: eventCategoryOverride,
+            tiebreaker_field: tiebreakerField,
             false_positives: falsePositives,
             from,
             query,
@@ -82,6 +90,7 @@ export const patchRulesBulkRoute = (
             rule_id: ruleId,
             id,
             index,
+            data_view_id: dataViewId,
             interval,
             max_signals: maxSignals,
             risk_score: riskScore,
@@ -97,6 +106,7 @@ export const patchRulesBulkRoute = (
             threshold,
             threat_filters: threatFilters,
             threat_index: threatIndex,
+            threat_indicator_path: threatIndicatorPath,
             threat_query: threatQuery,
             threat_mapping: threatMapping,
             threat_language: threatLanguage,
@@ -119,28 +129,35 @@ export const patchRulesBulkRoute = (
           try {
             if (type) {
               // reject an unauthorized "promotion" to ML
-              throwHttpError(await mlAuthz.validateRuleType(type));
+              throwAuthzError(await mlAuthz.validateRuleType(type));
             }
 
             const existingRule = await readRules({
-              isRuleRegistryEnabled,
               rulesClient,
               ruleId,
               id,
             });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
-              throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
+              throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
             }
 
-            const rule = await patchRules({
+            const migratedRule = await legacyMigrate({
+              rulesClient,
+              savedObjectsClient,
               rule: existingRule,
+            });
+
+            const rule = await patchRules({
+              rule: migratedRule,
               rulesClient,
               author,
               buildingBlockType,
               description,
               enabled,
+              timestampField,
               eventCategoryOverride,
+              tiebreakerField,
               falsePositives,
               from,
               query,
@@ -148,13 +165,12 @@ export const patchRulesBulkRoute = (
               license,
               outputIndex,
               savedId,
-              spaceId: context.securitySolution.getSpaceId(),
-              ruleStatusClient,
               timelineId,
               timelineTitle,
               meta,
               filters,
               index,
+              dataViewId,
               interval,
               maxSignals,
               riskScore,
@@ -170,6 +186,7 @@ export const patchRulesBulkRoute = (
               threshold,
               threatFilters,
               threatIndex,
+              threatIndicatorPath,
               threatQuery,
               threatMapping,
               threatLanguage,
@@ -186,12 +203,8 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleStatuses = await ruleStatusClient.find({
-                logsCount: 1,
-                ruleId: rule.id,
-                spaceId: context.securitySolution.getSpaceId(),
-              });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
+              const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
+              return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
             } else {
               return getIdBulkError({ id, ruleId });
             }
@@ -203,9 +216,16 @@ export const patchRulesBulkRoute = (
 
       const [validated, errors] = validate(rules, rulesBulkSchema);
       if (errors != null) {
-        return siemResponse.error({ statusCode: 500, body: errors });
+        return siemResponse.error({
+          statusCode: 500,
+          body: errors,
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
+        });
       } else {
-        return response.ok({ body: validated ?? {} });
+        return response.ok({
+          body: validated ?? {},
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
+        });
       }
     }
   );

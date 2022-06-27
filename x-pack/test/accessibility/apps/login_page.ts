@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  describe('Security', () => {
+  describe('Security Accessibility', () => {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 

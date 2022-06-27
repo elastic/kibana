@@ -5,5 +5,23 @@
  * 2.0.
  */
 
-export type { SecurityLicense } from './licensing';
-export type { AuthenticatedUser } from './model';
+export type { SecurityLicense, SecurityLicenseFeatures, LoginLayout } from './licensing';
+export type {
+  AuthenticatedUser,
+  AuthenticatedUserProfile,
+  AuthenticationProvider,
+  PrivilegeDeprecationsService,
+  PrivilegeDeprecationsRolesByFeatureIdRequest,
+  PrivilegeDeprecationsRolesByFeatureIdResponse,
+  Role,
+  RoleIndexPrivilege,
+  RoleKibanaPrivilege,
+  FeaturesPrivileges,
+  User,
+  UserProfile,
+  UserData,
+  UserAvatarData,
+  UserInfo,
+  ApiKey,
+  UserRealm,
+} from './model';

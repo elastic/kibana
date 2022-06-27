@@ -8,7 +8,7 @@
 import { appContextService } from '../../../app_context';
 import type { Field, Fields } from '../../fields/field';
 
-const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
+const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text', 'match_only_text', 'wildcard'];
 const QUERY_DEFAULT_FIELD_LIMIT = 1024;
 
 const flattenFieldsToNameAndType = (
@@ -67,18 +67,6 @@ export function buildDefaultSettings({
       },
       // What should be our default for the compression?
       codec: 'best_compression',
-      mapping: {
-        total_fields: {
-          limit: '10000',
-        },
-      },
-      // This is the default from Beats? So far seems to be a good value
-      refresh_interval: '5s',
-      // Default in the stack now, still good to have it in
-      number_of_shards: '1',
-      // We are setting 30 because it can be devided by several numbers. Useful when shrinking.
-      number_of_routing_shards: '30',
-
       // All the default fields which should be queried have to be added here.
       // So far we add all keyword and text fields here if there are any, otherwise
       // this setting is skipped.

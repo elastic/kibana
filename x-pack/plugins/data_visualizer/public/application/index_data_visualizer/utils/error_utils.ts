@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import Boom from '@hapi/boom';
-import { isPopulatedObject } from '../../../../common/utils/object_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface WrappedError {
   body: {
@@ -85,7 +85,7 @@ export function isDVResponseError(error: any): error is DVResponseError {
 }
 
 export function isBoomError(error: any): error is Boom.Boom {
-  return error.isBoom === true;
+  return error?.isBoom === true;
 }
 
 export function isWrappedError(error: any): error is WrappedError {

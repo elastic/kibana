@@ -21,7 +21,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -55,9 +54,9 @@ describe('Port', () => {
       </TestProviders>
     );
 
-    expect(removeExternalLinkText(wrapper.find('[data-test-subj="port"]').first().text())).toEqual(
-      '443'
-    );
+    expect(
+      removeExternalLinkText(wrapper.find('[data-test-subj="port"]').first().text())
+    ).toContain('443');
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {

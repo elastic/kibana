@@ -95,7 +95,7 @@ export const mapColumn: ExpressionFunctionDefinition<
         input.rows.map((row) =>
           args
             .expression({
-              type: 'datatable',
+              ...input,
               columns: [...input.columns],
               rows: [row],
             })
@@ -110,7 +110,7 @@ export const mapColumn: ExpressionFunctionDefinition<
       map((rows) => {
         let type: DatatableColumnType = 'null';
         for (const row of rows) {
-          const rowType = getType(row[id]);
+          const rowType = getType(row[id]) as DatatableColumnType;
           if (rowType !== 'null') {
             type = rowType;
             break;
@@ -129,9 +129,9 @@ export const mapColumn: ExpressionFunctionDefinition<
         };
 
         return {
+          ...input,
           columns,
           rows,
-          type: 'datatable',
         };
       })
     );

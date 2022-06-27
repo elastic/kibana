@@ -6,7 +6,7 @@
  */
 
 import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon } from '@elastic/eui';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled, { createGlobalStyle, css } from 'styled-components';
 
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 
@@ -18,34 +18,99 @@ export const SecuritySolutionAppWrapper = styled.div`
 `;
 SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
+/**
+ * Stylesheet with Eui class overrides in order to address display issues caused when
+ * the Timeline overlay is opened. These are normally adjustments to ensure that the
+ * z-index of other EUI components continues to work with the z-index used by timeline
+ * overlay.
+ */
+export const TIMELINE_OVERRIDES_CSS_STYLESHEET = () => css`
+  .euiPopover__panel.euiPopover__panel-isOpen {
+    z-index: 9900 !important;
+    min-width: 24px;
+  }
+  .euiPopover__panel.euiPopover__panel-isOpen.sourcererPopoverPanel {
+    // needs to appear under modal
+    z-index: 5900 !important;
+  }
+  .euiToolTip {
+    z-index: 9950 !important;
+  }
+  /*
+      overrides the default styling of euiComboBoxOptionsList because it's implemented
+      as a popover, so it's not selectable as a child of the styled component
+   */
+  .euiComboBoxOptionsList {
+    z-index: 9999;
+  }
+
+  /* ensure elastic charts tooltips appear above open euiPopovers */
+  .echTooltip {
+    z-index: 9950;
+  }
+`;
+
 /*
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
-  .euiPopover__panel.euiPopover__panel-isOpen {
-    z-index: 9900 !important;
-    min-width: 24px;
-  }
-  .euiToolTip {
-    z-index: 9950 !important;
+
+  ${TIMELINE_OVERRIDES_CSS_STYLESHEET}
+
+  .euiDataGridRowCell .euiDataGridRowCell__expandActions .euiDataGridRowCell__actionButtonIcon {
+    display: none;
+
+    &:first-child,
+    &:nth-child(2),
+    &:nth-child(3),
+    &:last-child {
+      display: inline-flex;
+    }
+
   }
 
   /*
     overrides the default styling of EuiDataGrid expand popover footer to
     make it a column of actions instead of the default actions row
   */
-  .euiDataGridRowCell__popover .euiPopoverFooter .euiFlexGroup {
-    flex-direction: column;
-    align-items: flex-start;
-  }
 
-  /*
-    overrides the default styling of euiComboBoxOptionsList because it's implemented
-    as a popover, so it's not selectable as a child of the styled component
-  */
-  .euiComboBoxOptionsList {
-    z-index: 9999;
+  .euiDataGridRowCell__popover {
+
+    max-width: 815px !important;
+    max-height: none !important;
+    overflow: hidden;
+
+
+    .expandable-top-value-button {
+      &.euiButtonEmpty--primary:enabled:focus,
+      .euiButtonEmpty--primary:focus {
+        background-color: transparent;
+      }
+    }
+
+
+    &.euiPopover__panel.euiPopover__panel-isOpen {
+      padding: 8px 0;
+      min-width: 65px;
+    }
+
+
+    .euiPopoverFooter {
+      border: 0;
+      margin-top: 0 !important;
+      .euiFlexGroup {
+        flex-direction: column;
+      }
+    }
+
+    // Hide EUI's 'Filter in' and 'Filter out' footer buttons - replaced with our own buttons
+    .euiPopoverFooter:nth-child(2) {
+      .euiFlexItem:first-child,
+      .euiFlexItem:nth-child(2) {
+          display: none;
+      }
+    }
   }
 
   /* overrides default styling in angular code that was not theme-friendly */
@@ -54,13 +119,11 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
   }
 
   /* hide open draggable popovers when a modal is being displayed to prevent them from covering the modal */
-  body.euiBody-hasOverlayMask .withHoverActions__popover.euiPopover__panel-isOpen{
-    visibility: hidden !important;
-  }
-
-  /* ensure elastic charts tooltips appear above open euiPopovers */
-  .echTooltip {
-    z-index: 9950;
+  body.euiBody-hasOverlayMask {
+    .euiDataGridRowCell__popover.euiPopover__panel-isOpen,
+    .withHoverActions__popover.euiPopover__panel-isOpen {
+      visibility: hidden !important;
+    }
   }
 
   /* applies a "toggled" button style to the Full Screen button */
@@ -90,6 +153,7 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
 export const DescriptionListStyled = styled(EuiDescriptionList)`
   ${({ theme }) => `
+    word-break: break-word;
     dt {
       font-size: ${theme.eui.euiFontSizeXS} !important;
     }

@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { HttpServiceSetup } from 'src/core/server';
+import { HttpServiceSetup } from '@kbn/core/server';
 import { ISavedObjectsManagement } from '../services';
 import { registerFindRoute } from './find';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerScrollForCountRoute } from './scroll_count';
-import { registerScrollForExportRoute } from './scroll_export';
 import { registerRelationshipsRoute } from './relationships';
 import { registerGetAllowedTypesRoute } from './get_allowed_types';
 
@@ -25,7 +24,6 @@ export function registerRoutes({ http, managementServicePromise }: RegisterRoute
   registerFindRoute(router, managementServicePromise);
   registerBulkGetRoute(router, managementServicePromise);
   registerScrollForCountRoute(router);
-  registerScrollForExportRoute(router);
   registerRelationshipsRoute(router, managementServicePromise);
   registerGetAllowedTypesRoute(router);
 }

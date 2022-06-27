@@ -7,13 +7,11 @@
 
 import { createSelector } from 'reselect';
 
-import { tGridSelectors } from '../../../../../timelines/public';
+export { getManageTimelineById } from '@kbn/timelines-plugin/public';
 import { State } from '../../../common/store/types';
 
 import { TimelineModel } from './model';
 import { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
-
-export const { getManageTimelineById } = tGridSelectors;
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
 

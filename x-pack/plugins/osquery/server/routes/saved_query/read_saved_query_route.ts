@@ -6,27 +6,41 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
+import { isSavedQueryPrebuilt } from './utils';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
+import { convertECSMappingToObject } from '../utils';
 
-export const readSavedQueryRoute = (router: IRouter) => {
+export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
       path: '/internal/osquery/saved_query/{id}',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({
+          id: schema.string(),
+        }),
       },
       options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
-      const savedQuery = await savedObjectsClient.get(
-        savedQuerySavedObjectType,
+      const savedQuery = await savedObjectsClient.get<{
+        ecs_mapping: Array<{ key: string; value: Record<string, object> }>;
+        prebuilt: boolean;
+      }>(savedQuerySavedObjectType, request.params.id);
+
+      if (savedQuery.attributes.ecs_mapping) {
         // @ts-expect-error update types
-        request.params.id
-      );
+        savedQuery.attributes.ecs_mapping = convertECSMappingToObject(
+          savedQuery.attributes.ecs_mapping
+        );
+      }
+
+      savedQuery.attributes.prebuilt = await isSavedQueryPrebuilt(osqueryContext, savedQuery.id);
 
       return response.ok({
         body: savedQuery,

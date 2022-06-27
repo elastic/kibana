@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export function createIndexPatternsStartMock() {
-  return {
-    indexPatternsServiceFactory: jest.fn().mockResolvedValue({ get: jest.fn() }),
-  };
-}
+export * from '@kbn/data-views-plugin/server/mocks';

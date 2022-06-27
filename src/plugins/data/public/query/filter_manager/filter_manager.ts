@@ -9,30 +9,35 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { IUiSettingsClient } from 'src/core/public';
-
-import { isFilterPinned, onlyDisabledFiltersChanged, Filter } from '@kbn/es-query';
-import { sortFilters } from './lib/sort_filters';
-import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-import { PartitionedFilters } from './types';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { FilterStateStore } from '@kbn/es-query';
 
 import {
-  FilterStateStore,
+  isFilterPinned,
+  onlyDisabledFiltersChanged,
+  Filter,
   uniqFilters,
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  UI_SETTINGS,
-} from '../../../common';
-import { PersistableStateService } from '../../../../kibana_utils/common/persistable_state';
+} from '@kbn/es-query';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persistable_state';
+import { sortFilters } from './lib/sort_filters';
+import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
+
+import { UI_SETTINGS } from '../../../common';
 import {
   getAllMigrations,
-  migrateToLatest,
   inject,
   extract,
   telemetry,
-} from '../../../common/query/persistable_state';
+} from '../../../common/query/filters/persistable_state';
 
-export class FilterManager implements PersistableStateService {
+interface PartitionedFilters {
+  globalFilters: Filter[];
+  appFilters: Filter[];
+}
+
+export class FilterManager implements PersistableStateService<Filter[]> {
   private filters: Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
@@ -228,16 +233,11 @@ export class FilterManager implements PersistableStateService {
     });
   }
 
-  // Filter needs to implement SerializableRecord
-  public extract = extract as any;
+  public extract = extract;
 
-  // Filter needs to implement SerializableRecord
-  public inject = inject as any;
+  public inject = inject;
 
   public telemetry = telemetry;
-
-  // Filter needs to implement SerializableRecord
-  public migrateToLatest = migrateToLatest as any;
 
   public getAllMigrations = getAllMigrations;
 }

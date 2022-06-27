@@ -3,7 +3,7 @@
 ## Overview
 
 The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with
-security and spaces filtering as well as performing audit logging.
+security and spaces filtering.
 
 [RFC #2: Encrypted Saved Objects Attributes](../../../rfcs/text/0002_encrypted_attributes.md).
 
@@ -98,6 +98,21 @@ const savedObjectWithDecryptedContent =  await esoClient.getDecryptedAsInternalU
 `getDecryptedAsInternalUser` also accepts the 3rd optional `options` argument that has exactly the same type as `options`
 one would pass to `SavedObjectsClient.get`. These argument allows to specify `namespace` property that, for example, is
 required if Saved Object was created within a non-default space.
+
+Alternative option is using `createPointInTimeFinderDecryptedAsInternalUser` API method, that can be used to help page through large sets of saved objects.
+Its interface matches interface of the corresponding Saved Objects API `createPointInTimeFinder` method:
+
+```typescript
+const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser({
+  filter,
+  type: 'my-saved-object-type',
+  perPage: 1000,
+});
+
+for await (const response of finder.find()) {
+  // process response
+}
+```
 
 ### Defining migrations
 EncryptedSavedObjects rely on standard SavedObject migrations, but due to the additional complexity introduced by the need to decrypt and reencrypt the migrated document, there are some caveats to how we support this.

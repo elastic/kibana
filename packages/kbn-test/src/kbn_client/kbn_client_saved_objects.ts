@@ -10,8 +10,9 @@ import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { lastValueFrom } from '@kbn/std';
-import { ToolingLog, isAxiosResponseError, createFailError } from '@kbn/dev-utils';
+import { isAxiosResponseError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -36,6 +37,7 @@ interface SavedObjectResponse<Attributes extends Record<string, any>> {
 interface GetOptions {
   type: string;
   id: string;
+  space?: string;
 }
 
 interface IndexOptions<Attributes> {
@@ -82,7 +84,7 @@ interface DeleteObjectsOptions {
 
 async function concurrently<T>(maxConcurrency: number, arr: T[], fn: (item: T) => Promise<void>) {
   if (arr.length) {
-    await lastValueFrom(
+    await Rx.lastValueFrom(
       Rx.from(arr).pipe(mergeMap(async (item) => await fn(item), maxConcurrency))
     );
   }
@@ -110,11 +112,13 @@ export class KbnClientSavedObjects {
    * Get an object
    */
   public async get<Attributes extends Record<string, any>>(options: GetOptions) {
-    this.log.debug('Gettings saved object: %j', options);
+    this.log.debug('Getting saved object: %j', options);
 
     const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'get saved object',
-      path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
+      path: options.space
+        ? uriencode`/s/${options.space}/api/saved_objects/${options.type}/${options.id}`
+        : uriencode`/api/saved_objects/${options.type}/${options.id}`,
       method: 'GET',
     });
     return data;
@@ -174,7 +178,9 @@ export class KbnClientSavedObjects {
 
     const { data } = await this.requester.request({
       description: 'delete saved object',
-      path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
+      path: options.space
+        ? uriencode`/s/${options.space}/api/saved_objects/${options.type}/${options.id}`
+        : uriencode`/api/saved_objects/${options.type}/${options.id}`,
       method: 'DELETE',
     });
 
@@ -214,6 +220,38 @@ export class KbnClientSavedObjects {
     this.log.success('deleted', deleted, 'objects');
   }
 
+  public async cleanStandardList(options?: { space?: string }) {
+    // add types here
+    const types = [
+      'url',
+      'index-pattern',
+      'action',
+      'query',
+      'alert',
+      'graph-workspace',
+      'tag',
+      'visualization',
+      'canvas-element',
+      'canvas-workpad',
+      'dashboard',
+      'search',
+      'lens',
+      'map',
+      'cases',
+      'uptime-dynamic-settings',
+      'osquery-saved-query',
+      'osquery-pack',
+      'infrastructure-ui-source',
+      'metrics-explorer-view',
+      'inventory-view',
+      'infrastructure-monitoring-log-view',
+      'apm-indices',
+    ];
+
+    const newOptions = { types, space: options?.space };
+    await this.clean(newOptions);
+  }
+
   public async bulkDelete(options: DeleteObjectsOptions) {
     let deleted = 0;
     let missing = 0;
@@ -223,8 +261,8 @@ export class KbnClientSavedObjects {
         await this.requester.request({
           method: 'DELETE',
           path: options.space
-            ? uriencode`/s/${options.space}/api/saved_objects/${obj.type}/${obj.id}`
-            : uriencode`/api/saved_objects/${obj.type}/${obj.id}`,
+            ? uriencode`/s/${options.space}/api/saved_objects/${obj.type}/${obj.id}?force=true`
+            : uriencode`/api/saved_objects/${obj.type}/${obj.id}?force=true`,
         });
         deleted++;
       } catch (error) {

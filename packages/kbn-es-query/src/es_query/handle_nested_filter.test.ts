@@ -9,12 +9,13 @@
 import { handleNestedFilter } from './handle_nested_filter';
 import { fields } from '../filters/stubs';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
-import { IndexPatternBase } from './types';
+import { DataViewBase } from './types';
 
 describe('handleNestedFilter', function () {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     id: 'logstash-*',
     fields,
+    title: 'dataView',
   };
 
   it("should return the filter's query wrapped in nested query if the target field is nested", () => {
@@ -25,12 +26,36 @@ describe('handleNestedFilter', function () {
       meta: {
         index: 'logstash-*',
       },
-      nested: {
-        path: 'nestedField',
-        query: {
-          match_phrase: {
-            'nestedField.child': 'foo',
+      query: {
+        nested: {
+          path: 'nestedField',
+          query: {
+            match_phrase: {
+              'nestedField.child': 'foo',
+            },
           },
+        },
+      },
+    });
+  });
+
+  it('should allow to configure ignore_unmapped', () => {
+    const field = getField('nestedField.child');
+    const filter = buildPhraseFilter(field!, 'foo', indexPattern);
+    const result = handleNestedFilter(filter, indexPattern, { ignoreUnmapped: true });
+    expect(result).toEqual({
+      meta: {
+        index: 'logstash-*',
+      },
+      query: {
+        nested: {
+          path: 'nestedField',
+          query: {
+            match_phrase: {
+              'nestedField.child': 'foo',
+            },
+          },
+          ignore_unmapped: true,
         },
       },
     });
@@ -65,10 +90,8 @@ describe('handleNestedFilter', function () {
     // for example, we don't support query_string queries
     const filter = buildQueryFilter(
       {
-        query: {
-          query_string: {
-            query: 'response:200',
-          },
+        query_string: {
+          query: 'response:200',
         },
       },
       'logstash-*',

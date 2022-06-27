@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { errorRenderer } from '../error_renderer';
-import { Render } from '../../../../presentation_util/public/__stories__';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getErrorRenderer } from '../error_renderer';
 
 storiesOf('renderers/error', module).add('default', () => {
   const thrownError = new Error('There was an error');
   const config = {
     error: thrownError,
   };
-  return <Render renderer={errorRenderer} config={config} />;
+  return <Render renderer={getErrorRenderer()} config={config} />;
 });

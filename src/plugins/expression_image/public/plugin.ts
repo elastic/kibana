@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
-import { imageRenderer } from './expression_renderers';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { imageRendererFactory } from './expression_renderers';
 import { imageFunction } from '../common/expression_functions';
 
 interface SetupDeps {
@@ -27,7 +27,7 @@ export class ExpressionImagePlugin
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionImagePluginSetup {
     expressions.registerFunction(imageFunction);
-    expressions.registerRenderer(imageRenderer);
+    expressions.registerRenderer(imageRendererFactory(core));
   }
 
   public start(core: CoreStart): ExpressionImagePluginStart {}

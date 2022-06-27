@@ -11,11 +11,14 @@ import {
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuItemIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { BaseVisType, VisGroups, VisTypeAlias } from '../../../../visualizations/public';
-import { SolutionToolbarPopover } from '../../../../presentation_util/public';
+import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableFactoryDefinition, EmbeddableInput } from '../../services/embeddable';
 import { useKibana } from '../../services/kibana_react';
 import { DashboardAppServices } from '../../types';
@@ -86,6 +89,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   const factories = embeddable
     ? Array.from(embeddable.getEmbeddableFactories()).filter(
         ({ type, isEditable, canCreateNew, isContainerType }) =>
+          // @ts-expect-error ts 4.5 upgrade
           isEditable() && !isContainerType && canCreateNew() && type !== 'visualization'
       )
     : [];
@@ -123,12 +127,36 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   });
 
   const getVisTypeMenuItem = (visType: BaseVisType): EuiContextMenuPanelItemDescriptor => {
-    const { name, title, titleInWizard, description, icon = 'empty', group } = visType;
+    const {
+      name,
+      title,
+      titleInWizard,
+      description,
+      icon = 'empty',
+      group,
+      isDeprecated,
+    } = visType;
     return {
-      name: titleInWizard || title,
+      name: !isDeprecated ? (
+        titleInWizard || title
+      ) : (
+        <EuiFlexGroup wrap responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>{titleInWizard || title}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="warning">
+              {i18n.translate('dashboard.editorMenu.deprecatedTag', {
+                defaultMessage: 'Deprecated',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       icon: icon as string,
       onClick:
-        group === VisGroups.AGGBASED ? createNewAggsBasedVis(visType) : createNewVisType(visType),
+        // not all the agg-based visualizations need to be created via the wizard
+        group === VisGroups.AGGBASED && visType.options.showIndexSelection
+          ? createNewAggsBasedVis(visType)
+          : createNewVisType(visType),
       'data-test-subj': `visType-${name}`,
       toolTipContent: description,
     };
@@ -149,7 +177,8 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   };
 
   const getEmbeddableFactoryMenuItem = (
-    factory: EmbeddableFactoryDefinition
+    factory: EmbeddableFactoryDefinition,
+    closePopover: () => void
   ): EuiContextMenuPanelItemDescriptor => {
     const icon = factory?.getIconType ? factory.getIconType() : 'empty';
 
@@ -160,6 +189,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       icon,
       toolTipContent,
       onClick: async () => {
+        closePopover();
         if (trackUiMetric) {
           trackUiMetric(METRIC_TYPE.CLICK, factory.type);
         }
@@ -188,63 +218,70 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
     defaultMessage: 'Aggregation based',
   });
 
-  const editorMenuPanels = [
-    {
-      id: 0,
-      items: [
-        ...visTypeAliases.map(getVisTypeAliasMenuItem),
-        ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
-          name: appName,
-          icon,
-          panel: panelId,
-          'data-test-subj': `dashboardEditorMenu-${id}Group`,
-        })),
-        ...ungroupedFactories.map(getEmbeddableFactoryMenuItem),
-        ...promotedVisTypes.map(getVisTypeMenuItem),
-        {
-          name: aggsPanelTitle,
-          icon: 'visualizeApp',
-          panel: aggBasedPanelID,
-          'data-test-subj': `dashboardEditorAggBasedMenuItem`,
-        },
-        ...toolVisTypes.map(getVisTypeMenuItem),
-      ],
-    },
-    {
-      id: aggBasedPanelID,
-      title: aggsPanelTitle,
-      items: aggsBasedVisTypes.map(getVisTypeMenuItem),
-    },
-    ...Object.values(factoryGroupMap).map(
-      ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
-        id: panelId,
-        title: appName,
-        items: groupFactories.map(getEmbeddableFactoryMenuItem),
-      })
-    ),
-  ];
-
+  const getEditorMenuPanels = (closePopover: () => void) => {
+    return [
+      {
+        id: 0,
+        items: [
+          ...visTypeAliases.map(getVisTypeAliasMenuItem),
+          ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
+            name: appName,
+            icon,
+            panel: panelId,
+            'data-test-subj': `dashboardEditorMenu-${id}Group`,
+          })),
+          ...ungroupedFactories.map((factory) => {
+            return getEmbeddableFactoryMenuItem(factory, closePopover);
+          }),
+          ...promotedVisTypes.map(getVisTypeMenuItem),
+          {
+            name: aggsPanelTitle,
+            icon: 'visualizeApp',
+            panel: aggBasedPanelID,
+            'data-test-subj': `dashboardEditorAggBasedMenuItem`,
+          },
+          ...toolVisTypes.map(getVisTypeMenuItem),
+        ],
+      },
+      {
+        id: aggBasedPanelID,
+        title: aggsPanelTitle,
+        items: aggsBasedVisTypes.map(getVisTypeMenuItem),
+      },
+      ...Object.values(factoryGroupMap).map(
+        ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
+          id: panelId,
+          title: appName,
+          items: groupFactories.map((factory) => {
+            return getEmbeddableFactoryMenuItem(factory, closePopover);
+          }),
+        })
+      ),
+    ];
+  };
   return (
     <SolutionToolbarPopover
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-        defaultMessage: 'All types',
+        defaultMessage: 'Select type',
       })}
       iconType="arrowDown"
       iconSide="right"
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={editorMenuPanels}
-        className={`dshSolutionToolbar__editorContextMenu ${
-          IS_DARK_THEME
-            ? 'dshSolutionToolbar__editorContextMenu--dark'
-            : 'dshSolutionToolbar__editorContextMenu--light'
-        }`}
-        data-test-subj="dashboardEditorContextMenu"
-      />
+      {({ closePopover }: { closePopover: () => void }) => (
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={getEditorMenuPanels(closePopover)}
+          className={`dshSolutionToolbar__editorContextMenu ${
+            IS_DARK_THEME
+              ? 'dshSolutionToolbar__editorContextMenu--dark'
+              : 'dshSolutionToolbar__editorContextMenu--light'
+          }`}
+          data-test-subj="dashboardEditorContextMenu"
+        />
+      )}
     </SolutionToolbarPopover>
   );
 };

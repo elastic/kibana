@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
@@ -36,10 +34,9 @@ export const createGenericAuditRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, isDraggable, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <AuditdGenericDetails
-        browserFields={browserFields}
         data={data}
         isDraggable={isDraggable}
         contextId={`${actionName}-${timelineId}`}
@@ -70,10 +67,9 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, isDraggable, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <AuditdGenericFileDetails
-        browserFields={browserFields}
         contextId={`${actionName}-${timelineId}`}
         data={data}
         fileIcon={fileIcon}

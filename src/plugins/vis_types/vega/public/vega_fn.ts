@@ -8,16 +8,16 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExecutionContextSearch } from '../../../data/public';
+import { ExecutionContextSearch } from '@kbn/data-plugin/public';
 import {
   ExecutionContext,
   ExpressionFunctionDefinition,
   Render,
-} from '../../../expressions/public';
+} from '@kbn/expressions-plugin/public';
+import { TimeRange, Query } from '@kbn/es-query';
+import { KibanaContext } from '@kbn/data-plugin/public';
 import { VegaVisualizationDependencies } from './plugin';
-import { createVegaRequestHandler } from './vega_request_handler';
-import { VegaInspectorAdapters } from './vega_inspector/index';
-import { KibanaContext, TimeRange, Query } from '../../../data/public';
+import { VegaInspectorAdapters } from './vega_inspector';
 import { VegaParser } from './data_model/vega_parser';
 
 type Input = KibanaContext | { type: 'null' };
@@ -60,6 +60,7 @@ export const createVegaFn = (
     },
   },
   async fn(input, args, context) {
+    const { createVegaRequestHandler } = await import('./async_services');
     const vegaRequestHandler = createVegaRequestHandler(dependencies, context);
 
     const response = await vegaRequestHandler({

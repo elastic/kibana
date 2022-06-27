@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { useValues } from 'kea';
 
 import { EuiSideNavItemType } from '@elastic/eui';
@@ -19,18 +21,29 @@ import {
   SOURCE_SCHEMAS_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
   SOURCE_SETTINGS_PATH,
+  SOURCE_SYNCHRONIZATION_PATH,
 } from '../../../routes';
 import { SourceLogic } from '../source_logic';
 
+import { useSynchronizationSubNav } from './synchronization/synchronization_sub_nav';
+
 export const useSourceSubNav = () => {
   const { isOrganization } = useValues(AppLogic);
+  const syncSubnav = useSynchronizationSubNav();
   const {
-    contentSource: { id, serviceType },
+    contentSource: { id, serviceType, isIndexedSource, name },
   } = useValues(SourceLogic);
 
   if (!id) return undefined;
 
+  const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
+  const showSynchronization = isIndexedSource && isOrganization && !isCustom;
+
   const navItems: Array<EuiSideNavItemType<unknown>> = [
+    {
+      id: 'sourceName',
+      name: <strong>{name}</strong>,
+    },
     {
       id: 'sourceOverview',
       name: NAV.OVERVIEW,
@@ -43,7 +56,17 @@ export const useSourceSubNav = () => {
     },
   ];
 
-  const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
+  if (showSynchronization) {
+    navItems.push({
+      id: 'sourceSynchronization',
+      name: NAV.SYNCHRONIZATION,
+      ...generateNavLink({
+        to: getContentSourcePath(SOURCE_SYNCHRONIZATION_PATH, id, isOrganization),
+      }),
+      items: syncSubnav,
+    });
+  }
+
   if (isCustom) {
     navItems.push({
       id: 'sourceSchema',

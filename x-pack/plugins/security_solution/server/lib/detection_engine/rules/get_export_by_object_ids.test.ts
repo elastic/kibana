@@ -7,31 +7,50 @@
 
 import { getExportByObjectIds, getRulesFromObjects, RulesErrors } from './get_export_by_object_ids';
 import {
-  getAlertMock,
+  getRuleMock,
   getFindResultWithSingleHit,
   FindHit,
+  getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
+import {
+  getSampleDetailsAsNdjson,
+  getOutputDetailsSampleWithExceptions,
+} from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('get_export_by_object_ids - %s', (_, isRuleRegistryEnabled) => {
+const exceptionsClient = getExceptionListClientMock();
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { requestContextMock } from '../routes/__mocks__/request_context';
+
+describe('get_export_by_object_ids', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const { clients } = requestContextMock.createTools();
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
     jest.clearAllMocks();
+
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
   });
+
   describe('getExportByObjectIds', () => {
     test('it exports object ids into an expected string with new line characters', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getExportByObjectIds(rulesClient, objects, isRuleRegistryEnabled);
+      const exports = await getExportByObjectIds(
+        rulesClient,
+        exceptionsClient,
+        clients.savedObjectsClient,
+        objects,
+        logger
+      );
       const exportsObj = {
         rulesNdjson: JSON.parse(exports.rulesNdjson),
         exportDetails: JSON.parse(exports.exportDetails),
@@ -63,6 +82,9 @@ describe.each([
           name: 'Detect Root/Admin Users',
           query: 'user.name: root or user.name: admin',
           references: ['http://example.com', 'https://example.com'],
+          related_integrations: [],
+          required_fields: [],
+          setup: '',
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
           meta: { someMeta: 'someField' },
@@ -79,7 +101,14 @@ describe.each([
           exceptions_list: getListArrayMock(),
         },
         exportDetails: {
+          exported_exception_list_count: 0,
+          exported_exception_list_item_count: 0,
           exported_count: 1,
+          exported_rules_count: 1,
+          missing_exception_list_item_count: 0,
+          missing_exception_list_items: [],
+          missing_exception_lists: [],
+          missing_exception_lists_count: 0,
           missing_rules: [],
           missing_rules_count: 0,
         },
@@ -88,7 +117,7 @@ describe.each([
 
     test('it does not export immutable rules', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const result = getRuleMock(getQueryRuleParams());
       result.params.immutable = true;
 
       const findResult: FindHit = {
@@ -98,15 +127,25 @@ describe.each([
         data: [result],
       };
 
-      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getExportByObjectIds(rulesClient, objects, isRuleRegistryEnabled);
+      const exports = await getExportByObjectIds(
+        rulesClient,
+        exceptionsClient,
+        clients.savedObjectsClient,
+        objects,
+        logger
+      );
+      const details = getOutputDetailsSampleWithExceptions({
+        missingRules: [{ rule_id: 'rule-1' }],
+        missingCount: 1,
+      });
       expect(exports).toEqual({
         rulesNdjson: '',
-        exportDetails:
-          '{"exported_count":0,"missing_rules":[{"rule_id":"rule-1"}],"missing_rules_count":1}\n',
+        exportDetails: getSampleDetailsAsNdjson(details),
+        exceptionLists: '',
       });
     });
   });
@@ -114,10 +153,15 @@ describe.each([
   describe('getRulesFromObjects', () => {
     test('it returns transformed rules from objects sent in', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
+      const exports = await getRulesFromObjects(
+        rulesClient,
+        clients.savedObjectsClient,
+        objects,
+        logger
+      );
       const expected: RulesErrors = {
         exportedCount: 1,
         missingRules: [],
@@ -140,10 +184,6 @@ describe.each([
             interval: '5m',
             rule_id: 'rule-1',
             language: 'kuery',
-            last_failure_at: undefined,
-            last_failure_message: undefined,
-            last_success_at: undefined,
-            last_success_message: undefined,
             license: 'Elastic License',
             output_index: '.siem-signals',
             max_signals: 10000,
@@ -151,11 +191,12 @@ describe.each([
             risk_score_mapping: [],
             rule_name_override: undefined,
             saved_id: undefined,
-            status: undefined,
-            status_date: undefined,
             name: 'Detect Root/Admin Users',
             query: 'user.name: root or user.name: admin',
             references: ['http://example.com', 'https://example.com'],
+            related_integrations: [],
+            required_fields: [],
+            setup: '',
             timeline_id: 'some-timeline-id',
             timeline_title: 'some-timeline-title',
             meta: { someMeta: 'someField' },
@@ -170,6 +211,7 @@ describe.each([
             note: '# Investigative notes',
             version: 1,
             exceptions_list: getListArrayMock(),
+            execution_summary: undefined,
           },
         ],
       };
@@ -178,7 +220,7 @@ describe.each([
 
     test('it does not transform the rule if the rule is an immutable rule and designates it as a missing rule', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const result = getRuleMock(getQueryRuleParams());
       result.params.immutable = true;
 
       const findResult: FindHit = {
@@ -192,7 +234,12 @@ describe.each([
       rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
+      const exports = await getRulesFromObjects(
+        rulesClient,
+        clients.savedObjectsClient,
+        objects,
+        logger
+      );
       const expected: RulesErrors = {
         exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],
@@ -215,7 +262,12 @@ describe.each([
       rulesClient.find.mockResolvedValue(findResult);
 
       const objects = [{ rule_id: 'rule-1' }];
-      const exports = await getRulesFromObjects(rulesClient, objects, isRuleRegistryEnabled);
+      const exports = await getRulesFromObjects(
+        rulesClient,
+        clients.savedObjectsClient,
+        objects,
+        logger
+      );
       const expected: RulesErrors = {
         exportedCount: 0,
         missingRules: [{ rule_id: 'rule-1' }],

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RuleDataPluginService } from '../../../rule_registry/server';
+import { StartServicesAccessor, Logger } from '@kbn/core/server';
+import { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -34,7 +35,7 @@ import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delet
 import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
-import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
+import { getRuleExecutionEventsRoute } from '../lib/detection_engine/routes/rules/get_rule_execution_events_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import {
   createTimelinesRoute,
@@ -45,6 +46,7 @@ import {
   importTimelinesRoute,
   patchTimelinesRoute,
   persistFavoriteRoute,
+  resolveTimelineRoute,
 } from '../lib/timeline/routes/timelines';
 import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
@@ -53,52 +55,82 @@ import { persistNoteRoute } from '../lib/timeline/routes/notes';
 
 import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
-import { SetupPlugins } from '../plugin';
+import { SetupPlugins, StartPlugins } from '../plugin';
 import { ConfigType } from '../config';
+import { ITelemetryEventsSender } from '../lib/telemetry/sender';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
+import {
+  CreateRuleOptions,
+  CreateSecurityRuleTypeWrapperProps,
+} from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
+import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
+import { ITelemetryReceiver } from '../lib/telemetry/receiver';
+import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
+import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
+  telemetrySender: ITelemetryEventsSender,
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
-  isRuleRegistryEnabled: boolean
+  logger: Logger,
+  ruleDataClient: IRuleDataClient | null,
+  ruleOptions: CreateRuleOptions,
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
+  previewRuleDataClient: IRuleDataClient,
+  previewTelemetryReceiver: ITelemetryReceiver
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
-  // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(router, ml, isRuleRegistryEnabled);
-  readRulesRoute(router, isRuleRegistryEnabled);
-  updateRulesRoute(router, ml, isRuleRegistryEnabled);
-  patchRulesRoute(router, ml, isRuleRegistryEnabled);
-  deleteRulesRoute(router, isRuleRegistryEnabled);
-  findRulesRoute(router, isRuleRegistryEnabled);
+  // All REST rule creation, deletion, updating, etc
+  createRulesRoute(router, ml);
+  readRulesRoute(router, logger);
+  updateRulesRoute(router, ml);
+  patchRulesRoute(router, ml);
+  deleteRulesRoute(router);
+  findRulesRoute(router, logger);
+  previewRulesRoute(
+    router,
+    config,
+    ml,
+    security,
+    ruleOptions,
+    securityRuleTypeOptions,
+    previewRuleDataClient,
+    getStartServices
+  );
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
-  legacyCreateLegacyNotificationRoute(router);
+  legacyCreateLegacyNotificationRoute(router, logger);
 
-  // TODO: pass isRuleRegistryEnabled to all relevant routes
+  addPrepackedRulesRoute(router);
+  getPrepackagedRulesStatusRoute(router, config, security);
+  createRulesBulkRoute(router, ml, logger);
+  updateRulesBulkRoute(router, ml, logger);
+  patchRulesBulkRoute(router, ml, logger);
+  deleteRulesBulkRoute(router, logger);
+  performBulkActionRoute(router, ml, logger);
 
-  addPrepackedRulesRoute(router, config, security, isRuleRegistryEnabled);
-  getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
-  createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  deleteRulesBulkRoute(router, isRuleRegistryEnabled);
-  performBulkActionRoute(router, ml, isRuleRegistryEnabled);
+  getRuleExecutionEventsRoute(router);
+
+  getInstalledIntegrationsRoute(router, logger);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
-  importRulesRoute(router, config, ml, isRuleRegistryEnabled);
-  exportRulesRoute(router, config, isRuleRegistryEnabled);
+  importRulesRoute(router, config, ml);
+  exportRulesRoute(router, config, logger);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
   getTimelineRoute(router, config, security);
+  resolveTimelineRoute(router, config, security);
   getTimelinesRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
   deleteTimelinesRoute(router, config, security);
@@ -109,27 +141,35 @@ export const initRoutes = (
   persistNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
 
-  findRulesStatusesRoute(router);
-
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(router);
-  querySignalsRoute(router, config);
+  setSignalsStatusRoute(router, logger, security, telemetrySender);
+  querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router);
   createSignalsMigrationRoute(router, security);
-  finalizeSignalsMigrationRoute(router, security);
+  finalizeSignalsMigrationRoute(router, ruleDataService, security);
   deleteSignalsMigrationRoute(router, security);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(router, ruleDataService, config);
-  readIndexRoute(router, config);
+  createIndexRoute(router);
+  readIndexRoute(router, ruleDataService);
   deleteIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
-  readTagsRoute(router, isRuleRegistryEnabled);
+  readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
+
+  // Sourcerer API to generate default pattern
+  createSourcererDataViewRoute(router, getStartServices);
+  getSourcererDataViewRoute(router, getStartServices);
+
+  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  if (previewTelemetryUrlEnabled) {
+    // telemetry preview endpoint for e2e integration tests only at the moment.
+    telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
+  }
 };

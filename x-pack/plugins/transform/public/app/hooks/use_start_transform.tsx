@@ -9,7 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type { StartTransformsRequestSchema } from '../../../common/api_schemas/start_transforms';
 import { isStartTransformsResponseSchema } from '../../../common/api_schemas/type_guards';
@@ -23,7 +23,7 @@ import { ToastNotificationText } from '../components';
 import { useApi } from './use_api';
 
 export const useStartTransforms = () => {
-  const deps = useAppDependencies();
+  const { overlays, theme } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -39,7 +39,12 @@ export const useStartTransforms = () => {
           }
         ),
         text: toMountPoint(
-          <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(results)} />
+          <ToastNotificationText
+            overlays={overlays}
+            theme={theme}
+            text={getErrorMessage(results)}
+          />,
+          { theme$: theme.theme$ }
         ),
       });
       return;

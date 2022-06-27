@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 
 import numeral from '@elastic/numeral';
-import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../common';
-import { FindFileStructureErrorResponse } from '../../../../../../file_upload/common';
+import { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';
+import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../common/constants';
 
 interface FileTooLargeProps {
   fileSize: number;

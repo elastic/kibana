@@ -6,9 +6,9 @@
  */
 
 import { all } from 'deepmerge';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import type { DataViewBase } from '@kbn/es-query';
 import { Immutable } from '../../../../../common/endpoint/types';
 
-export function clone(value: IIndexPattern | Immutable<IIndexPattern>): IIndexPattern {
-  return all([value]) as IIndexPattern;
+export function clone(value: DataViewBase | Immutable<DataViewBase>): DataViewBase {
+  return all([value]) as DataViewBase;
 }

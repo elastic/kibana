@@ -8,7 +8,6 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { CaseCallOut } from './callout';
 import {
@@ -19,22 +18,21 @@ import {
   getCaseClosedInfo,
 } from './helpers';
 import * as i18n from './translations';
-import { Case, CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
+import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { CasesNavigation } from '../links';
 import { ErrorMessage } from './callout/types';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
 
 export interface UsePushToService {
   caseId: string;
   caseServices: CaseServices;
   caseStatus: string;
-  configureCasesNavigation: CasesNavigation;
   connector: CaseConnector;
   connectors: ActionConnector[];
   hasDataToPush: boolean;
   isValidConnector: boolean;
   onEditClick: () => void;
-  updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
 }
 
@@ -47,19 +45,18 @@ export const usePushToService = ({
   caseId,
   caseServices,
   caseStatus,
-  configureCasesNavigation,
   connector,
   connectors,
   hasDataToPush,
   isValidConnector,
   onEditClick,
-  updateCase,
   userCanCrud,
 }: UsePushToService): ReturnUsePushToService => {
   const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
-  const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
+  const { isLoading: loadingLicense, data: actionLicense = null } = useGetActionLicense();
   const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
@@ -69,10 +66,10 @@ export const usePushToService = ({
       });
 
       if (theCase != null) {
-        updateCase(theCase);
+        refreshCaseViewPage();
       }
     }
-  }, [caseId, connector, pushCaseToExternalService, updateCase]);
+  }, [caseId, connector, pushCaseToExternalService, refreshCaseViewPage]);
 
   const errorsMsg = useMemo(() => {
     const errors: ErrorMessage[] = [];
@@ -175,7 +172,6 @@ export const usePushToService = ({
       pushCallouts:
         errorsMsg.length > 0 ? (
           <CaseCallOut
-            configureCasesNavigation={configureCasesNavigation}
             hasConnectors={connectors.length > 0}
             hasLicenseError={hasLicenseError}
             messages={errorsMsg}
@@ -184,7 +180,6 @@ export const usePushToService = ({
         ) : null,
     }),
     [
-      configureCasesNavigation,
       connector.name,
       connectors.length,
       errorsMsg,

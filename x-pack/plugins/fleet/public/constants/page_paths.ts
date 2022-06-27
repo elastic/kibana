@@ -14,30 +14,36 @@ export type StaticPage =
   | 'policies'
   | 'policies_list'
   | 'enrollment_tokens'
-  | 'data_streams';
+  | 'data_streams'
+  | 'settings'
+  | 'settings_edit_fleet_server_hosts'
+  | 'settings_create_outputs'
+  | 'debug';
 
 export type DynamicPage =
   | 'integrations_all'
   | 'integrations_installed'
+  | 'integrations_installed_updates_available'
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_policy_edit'
+  | 'integration_policy_upgrade'
   | 'policy_details'
-  | 'add_integration_from_policy'
   | 'add_integration_to_policy'
   | 'edit_integration'
   | 'upgrade_package_policy'
   | 'agent_list'
   | 'agent_details'
-  | 'agent_details_logs';
+  | 'agent_details_logs'
+  | 'settings_edit_outputs';
 
 export type Page = StaticPage | DynamicPage;
 
 export interface DynamicPagePathValues {
-  [key: string]: string;
+  [key: string]: string | boolean;
 }
 
 export const FLEET_BASE_PATH = '/app/fleet';
@@ -56,10 +62,13 @@ export const FLEET_ROUTING_PATHS = {
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
-  // TODO: Review uses and remove if it is no longer used or linked to in any UX flows
-  add_integration_from_policy: '/policies/:policyId/add-integration',
   enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',
+  settings: '/settings',
+  settings_edit_fleet_server_hosts: '/settings/edit-fleet-server-hosts',
+  settings_create_outputs: '/settings/create-outputs',
+  settings_edit_outputs: '/settings/outputs/:outputId',
+  debug: '/_debug',
 
   // TODO: Move this to the integrations app
   add_integration_to_policy: '/integrations/:pkgkey/add-integration/:integration?',
@@ -70,6 +79,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?',
   integrations_installed: '/installed/:category?',
+  integrations_installed_updates_available: '/installed/updates_available/:category?',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
@@ -77,6 +87,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_custom: '/detail/:pkgkey/custom',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
+  integration_policy_upgrade: '/edit-integration/:packagePolicyId',
 };
 
 export const pagePathGetters: {
@@ -96,6 +107,17 @@ export const pagePathGetters: {
     const categoryPath = category ? `/${category}` : ``;
     const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/installed${categoryPath}${queryParams}`];
+  },
+  integrations_installed_updates_available: ({
+    query,
+    category,
+  }: {
+    query?: string;
+    category?: string;
+  }) => {
+    const categoryPath = category ? `/${category}` : ``;
+    const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
+    return [INTEGRATIONS_BASE_PATH, `/installed/updates_available${categoryPath}${queryParams}`];
   },
   integration_details_overview: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
@@ -121,22 +143,29 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,
   ],
+  // Upgrades happen on the same edit form, just with a flag set. Separate page record here
+  // allows us to set different breadcrumbs for upgrades when needed.
+  integration_policy_upgrade: ({ packagePolicyId }) => [
+    INTEGRATIONS_BASE_PATH,
+    `/edit-integration/${packagePolicyId}`,
+  ],
   policies: () => [FLEET_BASE_PATH, '/policies'],
   policies_list: () => [FLEET_BASE_PATH, '/policies'],
   policy_details: ({ policyId, tabId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  // TODO: This might need to be removed because we do not have a way to pick an integration in line anymore
-  add_integration_from_policy: ({ policyId }) => [
-    FLEET_BASE_PATH,
-    `/policies/${policyId}/add-integration`,
-  ],
-  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId }) => [
-    FLEET_BASE_PATH,
-    // prettier-ignore
-    `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${agentPolicyId ? `?policyId=${agentPolicyId}` : ''}`,
-  ],
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, useMultiPageLayout }) => {
+    const qs = stringify({
+      ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
+      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
+    });
+    return [
+      FLEET_BASE_PATH,
+      // prettier-ignore
+      `/integrations/${pkgkey}/add-integration${integration ? `/${integration}` : ''}${qs ? `?${qs}` : ''}`,
+    ];
+  },
   edit_integration: ({ policyId, packagePolicyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/edit-integration/${packagePolicyId}`,
@@ -153,4 +182,15 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
+  settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
+  settings_edit_fleet_server_hosts: () => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts,
+  ],
+  settings_edit_outputs: ({ outputId }) => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_edit_outputs.replace(':outputId', outputId as string),
+  ],
+  settings_create_outputs: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings_create_outputs],
+  debug: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.debug],
 };

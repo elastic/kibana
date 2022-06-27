@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 import React from 'react';
 
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
-import { FlowTarget, NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
+import {
+  FlowTargetSourceDest,
+  NetworkDetailsStrategyResponse,
+} from '../../../../common/search_strategy';
 import { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 
@@ -40,7 +42,7 @@ export interface IpOverviewProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
   data: NetworkDetailsStrategyResponse['networkDetails'];
   endDate: string;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   id: string;
   ip: string;
   isDraggable?: boolean;
@@ -71,7 +73,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-    const typeData = data[flowTarget]!;
+    const typeData = data[flowTarget];
     const column: DescriptionList[] = [
       {
         title: i18n.LOCATION,

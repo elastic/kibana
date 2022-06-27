@@ -8,7 +8,7 @@
 import moment from 'moment';
 
 import { action } from '@storybook/addon-actions';
-import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { getId } from '../../lib/get_id';
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../state/defaults';
@@ -31,7 +31,7 @@ type CanvasWorkpadServiceFactory = PluginServiceFactory<CanvasWorkpadService, St
 const TIMEOUT = 500;
 const promiseTimeout = (time: number) => () => new Promise((resolve) => setTimeout(resolve, time));
 
-const { findNoTemplates, findNoWorkpads, findSomeTemplates } = stubs;
+const { findNoTemplates, findNoWorkpads, findSomeTemplates, importWorkpad } = stubs;
 
 const getRandomName = () => {
   const lorem =
@@ -77,9 +77,17 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({
     action('workpadService.get')(id);
     return Promise.resolve({ ...getDefaultWorkpad(), id });
   },
+  resolve: (id: string) => {
+    action('workpadService.resolve')(id);
+    return Promise.resolve({ outcome: 'exactMatch', workpad: { ...getDefaultWorkpad(), id } });
+  },
   findTemplates: () => {
     action('workpadService.findTemplates')();
     return (hasTemplates ? findSomeTemplates() : findNoTemplates())();
+  },
+  import: (workpad) => {
+    action('workpadService.import')(workpad);
+    return importWorkpad(workpad);
   },
   create: (workpad) => {
     action('workpadService.create')(workpad);

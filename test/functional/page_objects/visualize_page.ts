@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { FtrService } from '../ftr_provider_context';
-import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
-import { FORMATS_UI_SETTINGS } from '../../../src/plugins/field_formats/common';
 
 // TODO: Remove & Refactor to use the TTV page objects
 interface VisualizeSaveModalArgs {
@@ -39,6 +39,7 @@ export class VisualizePageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
   private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly visChart = this.ctx.getPageObject('visChart');
 
@@ -47,6 +48,9 @@ export class VisualizePageObject extends FtrService {
     LOGSTASH_NON_TIME_BASED: 'logstash*',
   };
 
+  remoteEsPrefix = 'ftr-remote:';
+  defaultIndexString = 'logstash-*';
+
   public async initTests(isNewLibrary = false) {
     await this.kibanaServer.savedObjects.clean({ types: ['visualization'] });
     await this.kibanaServer.importExport.load(
@@ -54,9 +58,10 @@ export class VisualizePageObject extends FtrService {
     );
 
     await this.kibanaServer.uiSettings.replace({
-      defaultIndex: 'logstash-*',
+      defaultIndex: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       'visualization:visualize:legacyPieChartsLibrary': !isNewLibrary,
+      'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
     });
   }
 
@@ -150,6 +155,10 @@ export class VisualizePageObject extends FtrService {
   public async clickVisType(type: string) {
     await this.testSubjects.click(`visType-${type}`);
     await this.header.waitUntilLoadingHasFinished();
+
+    if (type === 'lens') {
+      await this.unifiedSearch.closeTour();
+    }
   }
 
   public async clickAreaChart() {
@@ -315,7 +324,10 @@ export class VisualizePageObject extends FtrService {
 
   public async openSavedVisualization(vizName: string) {
     const dataTestSubj = `visListingTitleLink-${vizName.split(' ').join('-')}`;
-    await this.testSubjects.click(dataTestSubj, 20000);
+    await this.retry.try(async () => {
+      await this.testSubjects.click(dataTestSubj, 20000);
+      await this.notOnLandingPageOrFail();
+    });
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -335,6 +347,11 @@ export class VisualizePageObject extends FtrService {
   public async onLandingPage() {
     this.log.debug(`VisualizePage.onLandingPage`);
     return await this.testSubjects.exists('visualizationLandingPage');
+  }
+
+  public async notOnLandingPageOrFail() {
+    this.log.debug(`VisualizePage.notOnLandingPageOrFail`);
+    return await this.testSubjects.missingOrFail('visualizationLandingPage');
   }
 
   public async gotoLandingPage() {

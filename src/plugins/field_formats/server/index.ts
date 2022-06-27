@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { FieldFormatsPlugin } from './plugin';
 export { DateFormat, DateNanosFormat } from './lib/converters';
 
@@ -14,4 +14,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new FieldFormatsPlugin(initializerContext);
 }
 
-export { FieldFormatsSetup, FieldFormatsStart } from './types';
+export type { FieldFormatsSetup, FieldFormatsStart } from './types';

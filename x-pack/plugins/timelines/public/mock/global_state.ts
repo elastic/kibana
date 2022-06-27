@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Direction } from '../../common';
+import { Direction } from '../../common/search_strategy';
 import { TimelineState } from '../types';
 import { defaultHeaders } from './header';
 
@@ -18,6 +18,7 @@ export const mockGlobalState: TimelineState = {
         end: '2020-07-08T08:20:18.966Z',
       },
       dataProviders: [],
+      dataViewId: null,
       deletedEventIds: [],
       excludedRowRendererIds: [],
       expandedDetail: {},
@@ -33,15 +34,20 @@ export const mockGlobalState: TimelineState = {
         'packetbeat-*',
         'winlogbeat-*',
       ],
-      isAddToExistingCaseOpen: false,
-      isCreateNewCaseOpen: false,
       isLoading: false,
       isSelectAllChecked: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       loadingEventIds: [],
       showCheckboxes: false,
-      sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+      sort: [
+        {
+          columnId: '@timestamp',
+          columnType: 'date',
+          esTypes: ['date'],
+          sortDirection: Direction.desc,
+        },
+      ],
       selectedEventIds: {},
       savedObjectId: null,
       version: null,
@@ -52,6 +58,7 @@ export const mockGlobalState: TimelineState = {
       queryFields: [],
       selectAll: false,
       title: 'Events',
+      timelineType: 'default',
     },
   },
 };

@@ -14,17 +14,19 @@ import {
   TimelineEventsAllRequestOptions,
   TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../../server/utils/build_query';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { getPreferredEsType } from './helpers';
 
 export const buildTimelineEventsAllQuery = ({
+  authFilter,
   defaultIndex,
   docValueFields,
   fields,
   filterQuery,
   pagination: { activePage, querySize },
+  runtimeMappings,
   sort,
   timerange,
-  authFilter,
 }: Omit<TimelineEventsAllRequestOptions, 'fieldRequested'>) => {
   const filterClause = [...createQueryFilterClauses(filterQuery)];
 
@@ -57,15 +59,15 @@ export const buildTimelineEventsAllQuery = ({
       return {
         [field]: {
           order: item.direction,
-          unmapped_type: item.type,
+          unmapped_type: getPreferredEsType(item.esTypes),
         },
       };
     });
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
@@ -78,12 +80,13 @@ export const buildTimelineEventsAllQuery = ({
           filter,
         },
       },
+      runtime_mappings: runtimeMappings,
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,
       sort: getSortField(sort),
       fields,
-      _source: ['signal.*'],
+      _source: ['signal.*', 'kibana.alert.*'],
     },
   };
 

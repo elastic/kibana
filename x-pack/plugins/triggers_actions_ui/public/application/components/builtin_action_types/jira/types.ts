@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UserConfiguredActionConnector } from '../../../../types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/jira/types';
+import { ExecutorSubActionPushParams } from '@kbn/actions-plugin/server/builtin_action_types/jira/types';
+import { UserConfiguredActionConnector } from '../../../../types';
 
 export type JiraActionConnector = UserConfiguredActionConnector<JiraConfig, JiraSecrets>;
 export interface JiraActionParams {
@@ -23,4 +23,19 @@ export interface JiraConfig {
 export interface JiraSecrets {
   email: string;
   apiToken: string;
+}
+
+export type IssueTypes = Array<{ id: string; name: string }>;
+
+export interface Issue {
+  id: string;
+  key: string;
+  title: string;
+}
+
+export interface Fields {
+  [key: string]: {
+    allowedValues: Array<{ name: string; id: string }> | [];
+    defaultValue: { name: string; id: string } | {};
+  };
 }

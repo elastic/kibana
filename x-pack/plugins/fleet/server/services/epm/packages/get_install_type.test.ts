@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type { Installation } from '../../../types';
@@ -18,6 +18,7 @@ const mockInstallation: SavedObject<Installation> = {
   type: 'epm-packages',
   attributes: {
     id: 'test-pkg',
+    installed_kibana_space_id: 'default',
     installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
     package_assets: [],
@@ -28,6 +29,7 @@ const mockInstallation: SavedObject<Installation> = {
     install_version: '1.0.0',
     install_started_at: new Date().toISOString(),
     install_source: 'registry',
+    keep_policies_up_to_date: false,
   },
 };
 const mockInstallationUpdateFail: SavedObject<Installation> = {
@@ -36,6 +38,7 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
   type: 'epm-packages',
   attributes: {
     id: 'test-pkg',
+    installed_kibana_space_id: 'default',
     installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
     package_assets: [],
@@ -46,6 +49,7 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
     install_version: '1.0.1',
     install_started_at: new Date().toISOString(),
     install_source: 'registry',
+    keep_policies_up_to_date: false,
   },
 };
 

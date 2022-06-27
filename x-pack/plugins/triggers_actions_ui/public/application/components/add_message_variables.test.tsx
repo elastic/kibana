@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { AddMessageVariables } from './add_message_variables';
 
 describe('AddMessageVariables', () => {
@@ -28,7 +28,7 @@ describe('AddMessageVariables', () => {
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
 
     expect(
-      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').first().text()
+      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().text()
     ).toEqual('{{myVar}}');
   });
 
@@ -51,7 +51,7 @@ describe('AddMessageVariables', () => {
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
 
     expect(
-      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').first().text()
+      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().text()
     ).toEqual('{{{myVar}}}');
   });
 
@@ -76,10 +76,7 @@ describe('AddMessageVariables', () => {
     );
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper
-      .find('[data-test-subj="variableMenuButton-1-templated-name"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-1-templated-name"]').last().simulate('click');
 
     expect(onSelectEventHandler).toHaveBeenCalledTimes(1);
     expect(onSelectEventHandler).toHaveBeenCalledWith({

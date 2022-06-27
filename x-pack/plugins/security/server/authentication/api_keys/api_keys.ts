@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
+/* eslint-disable max-classes-per-file */
+
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { OneOf } from '@kbn/utility-types';
 
 import type { SecurityLicense } from '../../../common/licensing';
+import type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../lib';
+import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
@@ -21,17 +27,28 @@ export interface ConstructorOptions {
   logger: Logger;
   clusterClient: IClusterClient;
   license: SecurityLicense;
+  applicationName: string;
+  kibanaFeatures: KibanaFeature[];
+}
+
+interface BaseCreateAPIKeyParams {
+  name: string;
+  expiration?: string;
+  metadata?: Record<string, any>;
+  role_descriptors: Record<string, any>;
+  kibana_role_descriptors: Record<
+    string,
+    { elasticsearch: ElasticsearchPrivilegesType; kibana: KibanaPrivilegesType }
+  >;
 }
 
 /**
  * Represents the params for creating an API key
  */
-export interface CreateAPIKeyParams {
-  name: string;
-  role_descriptors: Record<string, any>;
-  expiration?: string;
-  metadata?: Record<string, any>;
-}
+export type CreateAPIKeyParams = OneOf<
+  BaseCreateAPIKeyParams,
+  'role_descriptors' | 'kibana_role_descriptors'
+>;
 
 type GrantAPIKeyParams =
   | {
@@ -113,11 +130,11 @@ export interface InvalidateAPIKeyResult {
    * Details about these errors. This field is not present in the response when error_count is 0.
    */
   error_details?: Array<{
-    type: string;
-    reason: string;
+    type?: string;
+    reason?: string;
     caused_by?: {
-      type: string;
-      reason: string;
+      type?: string;
+      reason?: string;
     };
   }>;
 }
@@ -129,11 +146,21 @@ export class APIKeys {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
+  private readonly applicationName: string;
+  private readonly kibanaFeatures: KibanaFeature[];
 
-  constructor({ logger, clusterClient, license }: ConstructorOptions) {
+  constructor({
+    logger,
+    clusterClient,
+    license,
+    applicationName,
+    kibanaFeatures,
+  }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
     this.license = license;
+    this.applicationName = applicationName;
+    this.kibanaFeatures = kibanaFeatures;
   }
 
   /**
@@ -171,32 +198,33 @@ export class APIKeys {
    * Returns newly created API key or `null` if API keys are disabled.
    *
    * @param request Request instance.
-   * @param params The params to create an API key
+   * @param createParams The params to create an API key
    */
   async create(
     request: KibanaRequest,
-    params: CreateAPIKeyParams
+    createParams: CreateAPIKeyParams
   ): Promise<CreateAPIKeyResult | null> {
     if (!this.license.isEnabled()) {
       return null;
     }
+
+    const { expiration, metadata, name } = createParams;
+
+    const roleDescriptors = this.parseRoleDescriptorsWithKibanaPrivileges(createParams);
 
     this.logger.debug('Trying to create an API key');
 
     // User needs `manage_api_key` privilege to use this API
     let result: CreateAPIKeyResult;
     try {
-      result = (
-        await this.clusterClient
-          .asScoped(request)
-          .asCurrentUser.security.createApiKey({ body: params })
-      ).body;
+      result = await this.clusterClient.asScoped(request).asCurrentUser.security.createApiKey({
+        body: { role_descriptors: roleDescriptors, name, metadata, expiration },
+      });
       this.logger.debug('API key was created successfully');
     } catch (e) {
       this.logger.error(`Failed to create API key: ${e.message}`);
       throw e;
     }
-
     return result;
   }
 
@@ -217,17 +245,22 @@ export class APIKeys {
         `Unable to grant an API Key, request does not contain an authorization header`
       );
     }
-    const params = this.getGrantParams(createParams, authorizationHeader);
+    const { expiration, metadata, name } = createParams;
+
+    const roleDescriptors = this.parseRoleDescriptorsWithKibanaPrivileges(createParams);
+
+    const params = this.getGrantParams(
+      { expiration, metadata, name, role_descriptors: roleDescriptors },
+      authorizationHeader
+    );
 
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
-      result = (
-        await this.clusterClient.asInternalUser.security.grantApiKey({
-          // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors  doesn't support `Record<string, any>`
-          body: params,
-        })
-      ).body;
+      result = await this.clusterClient.asInternalUser.security.grantApiKey({
+        // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors  doesn't support `Record<string, any>`
+        body: params,
+      });
       this.logger.debug('API key was granted successfully');
     } catch (e) {
       this.logger.error(`Failed to grant API key: ${e.message}`);
@@ -252,13 +285,11 @@ export class APIKeys {
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
-      result = (
-        await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
-          body: {
-            ids: params.ids,
-          },
-        })
-      ).body;
+      result = await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
+        body: {
+          ids: params.ids,
+        },
+      });
       this.logger.debug(
         `API keys by ids=[${params.ids.join(', ')}] was invalidated successfully as current user`
       );
@@ -288,13 +319,11 @@ export class APIKeys {
     let result: InvalidateAPIKeyResult;
     try {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
-      result = (
-        await this.clusterClient.asInternalUser.security.invalidateApiKey({
-          body: {
-            ids: params.ids,
-          },
-        })
-      ).body;
+      result = await this.clusterClient.asInternalUser.security.invalidateApiKey({
+        body: {
+          ids: params.ids,
+        },
+      });
       this.logger.debug(`API keys by ids=[${params.ids.join(', ')}] was invalidated successfully`);
     } catch (e) {
       this.logger.error(
@@ -336,5 +365,50 @@ export class APIKeys {
     }
 
     throw new Error(`Unsupported scheme "${authorizationHeader.scheme}" for granting API Key`);
+  }
+
+  private parseRoleDescriptorsWithKibanaPrivileges(createParams: CreateAPIKeyParams) {
+    if (createParams.role_descriptors) {
+      return createParams.role_descriptors;
+    }
+
+    const roleDescriptors = Object.create(null);
+
+    const { kibana_role_descriptors: kibanaRoleDescriptors } = createParams;
+
+    const allValidationErrors: string[] = [];
+    if (kibanaRoleDescriptors) {
+      Object.entries(kibanaRoleDescriptors).forEach(([roleKey, roleDescriptor]) => {
+        const { validationErrors } = validateKibanaPrivileges(
+          this.kibanaFeatures,
+          roleDescriptor.kibana
+        );
+        allValidationErrors.push(...validationErrors);
+
+        const applications = transformPrivilegesToElasticsearchPrivileges(
+          this.applicationName,
+          roleDescriptor.kibana
+        );
+        if (applications.length > 0 && roleDescriptors) {
+          roleDescriptors[roleKey] = {
+            ...roleDescriptor.elasticsearch,
+            applications,
+          };
+        }
+      });
+    }
+    if (allValidationErrors.length) {
+      throw new CreateApiKeyValidationError(
+        `API key cannot be created due to validation errors: ${JSON.stringify(allValidationErrors)}`
+      );
+    }
+
+    return roleDescriptors;
+  }
+}
+
+export class CreateApiKeyValidationError extends Error {
+  constructor(message: string) {
+    super(message);
   }
 }

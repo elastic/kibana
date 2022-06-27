@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { metricFunction } from '../common/expression_functions';
-import { metricRenderer } from './expression_renderers';
+import { metricRendererFactory } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -27,7 +27,7 @@ export class ExpressionMetricPlugin
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
     expressions.registerFunction(metricFunction);
-    expressions.registerRenderer(metricRenderer);
+    expressions.registerRenderer(metricRendererFactory(core));
   }
 
   public start(core: CoreStart): ExpressionMetricPluginStart {}

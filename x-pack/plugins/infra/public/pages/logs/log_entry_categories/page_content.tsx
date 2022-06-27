@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -21,10 +22,10 @@ import {
 import { SubscriptionSplashPage } from '../../../components/subscription_splash_content';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
+import { useLogViewContext } from '../../../hooks/use_log_view';
+import { LogsPageTemplate } from '../page_template';
 import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
-import { LogsPageTemplate } from '../page_template';
-import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
 
 const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle', {
   defaultMessage: 'Categories',
@@ -114,8 +115,10 @@ const CategoriesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
   children,
   ...rest
 }) => {
+  const { logViewStatus } = useLogViewContext();
   return (
     <LogsPageTemplate
+      hasData={logViewStatus?.index !== 'missing'}
       data-test-subj="logsLogEntryCategoriesPage"
       pageHeader={
         rest.isEmptyState

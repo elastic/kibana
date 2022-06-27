@@ -5,27 +5,19 @@
  * 2.0.
  */
 
-import {
-  Filter,
-  FilterManager,
-  IIndexPattern,
-  Query,
-  SavedQueryService,
-} from 'src/plugins/data/public';
-
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { FilterManager, SavedQueryService } from '@kbn/data-plugin/public';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SecurityNav } from '../navigation/types';
 
 import { CONSTANTS, UrlStateType } from './constants';
-import { SourcererScopePatterns } from '../../store/sourcerer/model';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.appQuery,
   CONSTANTS.filters,
   CONSTANTS.savedQuery,
-  CONSTANTS.sourcerer,
   CONSTANTS.timerange,
   CONSTANTS.timeline,
 ];
@@ -38,6 +30,7 @@ export type LocationTypes =
   | CONSTANTS.alertsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
+  | CONSTANTS.kubernetesPage
   | CONSTANTS.networkDetails
   | CONSTANTS.networkPage
   | CONSTANTS.overviewPage
@@ -48,7 +41,6 @@ export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
-  [CONSTANTS.sourcerer]: SourcererScopePatterns;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: TimelineUrl;
 }
@@ -58,7 +50,7 @@ export type ValueUrlState = UrlState[keyof UrlState];
 
 export interface UrlStateProps {
   navTabs: SecurityNav;
-  indexPattern?: IIndexPattern;
+  indexPattern?: DataViewBase;
   mapToUrlState?: (value: string) => UrlState;
   onChange?: (urlState: UrlState, previousUrlState: UrlState) => void;
   onInitialize?: (urlState: UrlState) => void;
@@ -79,6 +71,7 @@ export interface PreviousLocationUrlState {
   pathName: string | undefined;
   pageName: string | undefined;
   urlState: UrlState;
+  search: string | undefined;
 }
 
 export interface UrlStateToRedux {
@@ -88,7 +81,7 @@ export interface UrlStateToRedux {
 
 export interface SetInitialStateFromUrl {
   filterManager: FilterManager;
-  indexPattern: IIndexPattern | undefined;
+  indexPattern: DataViewBase | undefined;
   pageName: string;
   savedQueries: SavedQueryService;
   urlStateToUpdate: UrlStateToRedux[];

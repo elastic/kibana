@@ -9,8 +9,8 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPanel } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { AppLeaveHandler } from '../../../../../../../src/core/public';
-import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
+import { AppLeaveHandler } from '@kbn/core/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -23,8 +23,20 @@ import {
 } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { gutterTimeline } from '../../../common/lib/helpers';
+import { useShowPagesWithEmptyView } from '../../../common/utils/empty_view/use_show_pages_with_empty_view';
+import { useIsPolicySettingsBarVisible } from '../../../management/pages/policy/view/policy_hooks';
+import { useIsGroupedNavigationEnabled } from '../../../common/components/navigation/helpers';
 
-/* eslint-disable react/display-name */
+const NO_DATA_PAGE_MAX_WIDTH = 950;
+
+const NO_DATA_PAGE_TEMPLATE_PROPS = {
+  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
+  template: 'centeredBody',
+  pageContentProps: {
+    hasShadow: false,
+    color: 'transparent',
+  },
+};
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -32,7 +44,7 @@ import { gutterTimeline } from '../../../common/lib/helpers';
  */
 const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   $isShowingTimelineOverlay?: boolean;
-  $isTimelineBottomBarVisible?: boolean;
+  $addBottomPadding?: boolean;
 }>`
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
@@ -50,8 +62,8 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<{
   }
 
   // If the bottom bar is visible add padding to the navigation
-  ${({ $isTimelineBottomBarVisible }) =>
-    $isTimelineBottomBarVisible &&
+  ${({ $addBottomPadding }) =>
+    $addBottomPadding &&
     `
     @media (min-width: 768px) {
       .kbnPageTemplateSolutionNav {
@@ -68,35 +80,56 @@ interface SecuritySolutionPageWrapperProps {
 export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapperProps> =
   React.memo(({ children, onAppLeave }) => {
     const solutionNav = useSecuritySolutionNavigation();
+    const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
     const [isTimelineBottomBarVisible] = useShowTimeline();
     const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+    const isGroupedNavEnabled = useIsGroupedNavigationEnabled();
+    const addBottomPadding =
+      isTimelineBottomBarVisible || isPolicySettingsVisible || isGroupedNavEnabled;
 
-    /* StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop, which may account for any style discrepancies, such as the bottom border not extending the full width of the page, between EuiPageTemplate and the security solution pages.
+    const showEmptyState = useShowPagesWithEmptyView();
+    const emptyStateProps = showEmptyState
+      ? {
+          ...NO_DATA_PAGE_TEMPLATE_PROPS,
+          template: 'centeredContent',
+          pageContentProps: { verticalPosition: 'top' },
+        }
+      : {};
+
+    /*
+     * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
+     * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
+     * which may account for any style discrepancies, such as the bottom border not extending the full width of the page,
+     * between EuiPageTemplate and the security solution pages.
      */
-
     return (
       <StyledKibanaPageTemplate
-        $isTimelineBottomBarVisible={isTimelineBottomBarVisible}
+        $addBottomPadding={addBottomPadding}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         bottomBarProps={SecuritySolutionBottomBarProps}
-        bottomBar={<SecuritySolutionBottomBar onAppLeave={onAppLeave} />}
+        bottomBar={
+          isTimelineBottomBarVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
+        }
         paddingSize="none"
         solutionNav={solutionNav}
         restrictWidth={false}
         template="default"
+        {...emptyStateProps}
       >
-        <GlobalKQLHeader />
-        <EuiPanel
-          className="securityPageWrapper"
-          data-test-subj="pageContainer"
-          hasShadow={false}
-          paddingSize="l"
-        >
-          {children}
-        </EuiPanel>
+        <>
+          <GlobalKQLHeader />
+          <EuiPanel
+            className="securityPageWrapper"
+            data-test-subj="pageContainer"
+            hasShadow={false}
+            paddingSize="l"
+          >
+            {children}
+          </EuiPanel>
+        </>
       </StyledKibanaPageTemplate>
     );
   });

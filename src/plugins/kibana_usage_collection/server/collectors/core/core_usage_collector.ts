@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreUsageData, CoreUsageDataStart } from '../../../../../core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CoreUsageData, CoreUsageDataStart } from '@kbn/core/server';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -355,14 +355,14 @@ export function getCoreUsageCollector(
                 type: 'long',
                 _meta: {
                   description:
-                    'The number of documents in the index, including hidden nested documents.',
+                    'The number of lucene documents in the index, including hidden nested documents.',
                 },
               },
               docsDeleted: {
                 type: 'long',
                 _meta: {
                   description:
-                    'The number of deleted documents in the index, including hidden nested documents.',
+                    'The number of deleted lucene documents in the index, including hidden nested documents.',
                 },
               },
               alias: {
@@ -380,6 +380,12 @@ export function getCoreUsageCollector(
                 type: 'long',
                 _meta: {
                   description: 'The size in bytes of the index, for primaries and replicas.',
+                },
+              },
+              savedObjectsDocsCount: {
+                type: 'long',
+                _meta: {
+                  description: 'The number of saved objects documents in the index.',
                 },
               },
             },

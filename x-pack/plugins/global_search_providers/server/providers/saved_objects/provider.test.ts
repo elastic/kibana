@@ -13,12 +13,12 @@ import {
   SavedObjectsFindResult,
   SavedObjectsType,
   SavedObjectTypeRegistry,
-} from 'src/core/server';
-import { globalSearchPluginMock } from '../../../../global_search/server/mocks';
+} from '@kbn/core/server';
+import { globalSearchPluginMock } from '@kbn/global-search-plugin/server/mocks';
 import {
   GlobalSearchResultProvider,
   GlobalSearchProviderFindOptions,
-} from '../../../../global_search/server';
+} from '@kbn/global-search-plugin/server';
 import { createSavedObjectsResultProvider } from './provider';
 
 const getTestScheduler = () =>
@@ -202,7 +202,7 @@ describe('savedObjectsResultProvider', () => {
           type: 'typeA',
           url: '/type-a/resultA',
           score: 50,
-          meta: { tagIds: [] },
+          meta: { tagIds: [], displayName: 'typeA' },
         },
         {
           id: 'resultB',
@@ -210,7 +210,7 @@ describe('savedObjectsResultProvider', () => {
           type: 'typeB',
           url: '/type-b/resultB',
           score: 78,
-          meta: { tagIds: [] },
+          meta: { tagIds: [], displayName: 'typeB' },
         },
       ]);
     });

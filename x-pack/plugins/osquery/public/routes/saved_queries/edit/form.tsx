@@ -14,7 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { Form } from '../../../shared_imports';
@@ -42,7 +42,7 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
 
   return (
     <Form form={form}>
-      <SavedQueryForm viewMode={viewMode} />
+      <SavedQueryForm viewMode={viewMode} hasPlayground />
       {!viewMode && (
         <>
           <EuiBottomBar>

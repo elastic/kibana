@@ -28,8 +28,8 @@ export const buildHostsKpiUniqueIpsQuery = ({
 
   const dslQuery = {
     index: defaultIndex,
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggregations: {
@@ -75,6 +75,15 @@ export const buildHostsKpiUniqueIpsQuery = ({
           filter,
         },
       },
+      _source: false,
+      fields: [
+        'destination.ip',
+        'source.ip',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

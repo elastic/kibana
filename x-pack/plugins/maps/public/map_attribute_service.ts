@@ -5,19 +5,37 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'src/core/types';
-import { AttributeService } from '../../../../src/plugins/embeddable/public';
+import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectsResolveResponse } from '@kbn/core/public';
+import { AttributeService } from '@kbn/embeddable-plugin/public';
+import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
-type MapDoc = MapSavedObjectAttributes & { references?: SavedObjectReference[] };
+export interface SharingSavedObjectProps {
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
+  sourceId?: string;
+}
 
-export type MapAttributeService = AttributeService<MapDoc, MapByValueInput, MapByReferenceInput>;
+type MapDoc = MapSavedObjectAttributes & {
+  references?: SavedObjectReference[];
+};
+export interface MapUnwrapMetaInfo {
+  sharingSavedObjectProps: SharingSavedObjectProps;
+}
+
+export type MapAttributeService = AttributeService<
+  MapDoc,
+  MapByValueInput,
+  MapByReferenceInput,
+  MapUnwrapMetaInfo
+>;
 
 let mapAttributeService: MapAttributeService | null = null;
 
@@ -29,7 +47,8 @@ export function getMapAttributeService(): MapAttributeService {
   mapAttributeService = getEmbeddableService().getAttributeService<
     MapDoc,
     MapByValueInput,
-    MapByReferenceInput
+    MapByReferenceInput,
+    MapUnwrapMetaInfo
   >(MAP_SAVED_OBJECT_TYPE, {
     saveMethod: async (attributes: MapDoc, savedObjectId?: string) => {
       // AttributeService "attributes" contains "references" as a child.
@@ -57,8 +76,18 @@ export function getMapAttributeService(): MapAttributeService {
           ));
       return { id: savedObject.id };
     },
-    unwrapMethod: async (savedObjectId: string): Promise<MapDoc> => {
-      const savedObject = await getSavedObjectsClient().get<MapSavedObjectAttributes>(
+    unwrapMethod: async (
+      savedObjectId: string
+    ): Promise<{
+      attributes: MapDoc;
+      metaInfo: MapUnwrapMetaInfo;
+    }> => {
+      const {
+        saved_object: savedObject,
+        outcome,
+        alias_target_id: aliasTargetId,
+        alias_purpose: aliasPurpose,
+      } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
         MAP_SAVED_OBJECT_TYPE,
         savedObjectId
       );
@@ -68,7 +97,20 @@ export function getMapAttributeService(): MapAttributeService {
       }
 
       const { attributes } = injectReferences(savedObject);
-      return { ...attributes, references: savedObject.references };
+      return {
+        attributes: {
+          ...attributes,
+          references: savedObject.references,
+        },
+        metaInfo: {
+          sharingSavedObjectProps: {
+            aliasTargetId,
+            outcome,
+            aliasPurpose,
+            sourceId: savedObjectId,
+          },
+        },
+      };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       return checkForDuplicateTitle(

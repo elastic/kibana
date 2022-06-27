@@ -5,137 +5,172 @@
  * 2.0.
  */
 
-import type { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
 import { getAsset, getPathParts } from '../../archive';
 import type { ArchiveEntry } from '../../archive';
-import { saveInstalledEsRefs } from '../../packages/install';
-import { getInstallationObject } from '../../packages';
 import {
   FLEET_FINAL_PIPELINE_CONTENT,
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
+import {
+  getCustomPipelineNameForDatastream,
+  getPipelineNameForDatastream,
+} from '../../../../../common';
 
-import { deletePipelineRefs } from './remove';
+import { appendMetadataToIngestPipeline } from '../meta';
+import { retryTransientEsErrors } from '../retry';
 
-interface RewriteSubstitution {
-  source: string;
-  target: string;
-  templateFunction: string;
-}
+import {
+  getPipelineNameForInstallation,
+  rewriteIngestPipeline,
+  isTopLevelPipeline,
+  addCustomPipelineProcessor,
+} from './helpers';
+import type { PipelineInstall, RewriteSubstitution } from './types';
 
-export const installPipelines = async (
+export const prepareToInstallPipelines = (
   installablePackage: InstallablePackage,
-  paths: string[],
-  esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract
-) => {
+  paths: string[]
+): {
+  assetsToAdd: EsAssetReference[];
+  install: (esClient: ElasticsearchClient, logger: Logger) => Promise<void>;
+} => {
   // unlike other ES assets, pipeline names are versioned so after a template is updated
   // it can be created pointing to the new template, without removing the old one and effecting data
   // so do not remove the currently installed pipelines here
   const dataStreams = installablePackage.data_streams;
-  const { name: pkgName, version: pkgVersion } = installablePackage;
-  if (!dataStreams?.length) return [];
+  const { version: pkgVersion } = installablePackage;
   const pipelinePaths = paths.filter((path) => isPipeline(path));
-  // get and save pipeline refs before installing pipelines
-  const pipelineRefs = dataStreams.reduce<EsAssetReference[]>((acc, dataStream) => {
-    const filteredPaths = pipelinePaths.filter((path) =>
-      isDataStreamPipeline(path, dataStream.path)
-    );
-    const pipelineObjectRefs = filteredPaths.map((path) => {
-      const { name } = getNameAndExtension(path);
-      const nameForInstallation = getPipelineNameForInstallation({
-        pipelineName: name,
-        dataStream,
-        packageVersion: installablePackage.version,
-      });
-      return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
-    });
-    acc.push(...pipelineObjectRefs);
-    return acc;
-  }, []);
+  const topLevelPipelinePaths = paths.filter((path) => isTopLevelPipeline(path));
 
-  // check that we don't duplicate the pipeline refs if the user is reinstalling
-  const installedPkg = await getInstallationObject({
-    savedObjectsClient,
-    pkgName,
+  if (!dataStreams?.length && topLevelPipelinePaths.length === 0)
+    return { assetsToAdd: [], install: () => Promise.resolve() };
+
+  // get and save pipeline refs before installing pipelines
+  let pipelineRefs = dataStreams
+    ? dataStreams.reduce<EsAssetReference[]>((acc, dataStream) => {
+        const filteredPaths = pipelinePaths.filter((path) =>
+          isDataStreamPipeline(path, dataStream.path)
+        );
+        let createdDatastreamPipeline = false;
+        const pipelineObjectRefs = filteredPaths.map((path) => {
+          const { name } = getNameAndExtension(path);
+          if (name === dataStream.ingest_pipeline) {
+            createdDatastreamPipeline = true;
+          }
+          const nameForInstallation = getPipelineNameForInstallation({
+            pipelineName: name,
+            dataStream,
+            packageVersion: pkgVersion,
+          });
+          return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
+        });
+        if (!createdDatastreamPipeline) {
+          const nameForInstallation = getPipelineNameForDatastream({
+            dataStream,
+            packageVersion: pkgVersion,
+          });
+          acc.push({ id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline });
+        }
+        acc.push(...pipelineObjectRefs);
+        return acc;
+      }, [])
+    : [];
+
+  const topLevelPipelineRefs = topLevelPipelinePaths.map((path) => {
+    const { name } = getNameAndExtension(path);
+
+    const nameForInstallation = getPipelineNameForInstallation({
+      pipelineName: name,
+      packageVersion: pkgVersion,
+    });
+    return { id: nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
   });
-  if (!installedPkg) throw new Error("integration wasn't found while installing pipelines");
-  // remove the current pipeline refs, if any exist, associated with this version before saving new ones so no duplicates occur
-  await deletePipelineRefs(
-    savedObjectsClient,
-    installedPkg.attributes.installed_es,
-    pkgName,
-    pkgVersion
-  );
-  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, pipelineRefs);
-  const pipelines = dataStreams.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataStream) => {
-    if (dataStream.ingest_pipeline) {
-      acc.push(
-        installPipelinesForDataStream({
-          dataStream,
-          esClient,
-          paths: pipelinePaths,
-          pkgVersion: installablePackage.version,
-        })
-      );
-    }
-    return acc;
-  }, []);
-  return await Promise.all(pipelines).then((results) => results.flat());
+
+  pipelineRefs = [...pipelineRefs, ...topLevelPipelineRefs];
+
+  return {
+    assetsToAdd: pipelineRefs,
+    install: async (esClient, logger) => {
+      const pipelines = dataStreams
+        ? dataStreams.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataStream) => {
+            acc.push(
+              installAllPipelines({
+                dataStream,
+                esClient,
+                logger,
+                paths: pipelinePaths,
+                installablePackage,
+              })
+            );
+
+            return acc;
+          }, [])
+        : [];
+
+      if (topLevelPipelinePaths) {
+        pipelines.push(
+          installAllPipelines({
+            dataStream: undefined,
+            esClient,
+            logger,
+            paths: topLevelPipelinePaths,
+            installablePackage,
+          })
+        );
+      }
+
+      await Promise.all(pipelines);
+    },
+  };
 };
 
-export function rewriteIngestPipeline(
-  pipeline: string,
-  substitutions: RewriteSubstitution[]
-): string {
-  substitutions.forEach((sub) => {
-    const { source, target, templateFunction } = sub;
-    // This fakes the use of the golang text/template expression {{SomeTemplateFunction 'some-param'}}
-    // cf. https://github.com/elastic/beats/blob/master/filebeat/fileset/fileset.go#L294
-
-    // "Standard style" uses '{{' and '}}' as delimiters
-    const matchStandardStyle = `{{\\s?${templateFunction}\\s+['"]${source}['"]\\s?}}`;
-    // "Beats style" uses '{<' and '>}' as delimiters because this is current practice in the beats project
-    const matchBeatsStyle = `{<\\s?${templateFunction}\\s+['"]${source}['"]\\s?>}`;
-
-    const regexStandardStyle = new RegExp(matchStandardStyle);
-    const regexBeatsStyle = new RegExp(matchBeatsStyle);
-    pipeline = pipeline.replace(regexStandardStyle, target).replace(regexBeatsStyle, target);
-  });
-  return pipeline;
-}
-
-export async function installPipelinesForDataStream({
+export async function installAllPipelines({
   esClient,
-  pkgVersion,
+  logger,
   paths,
   dataStream,
+  installablePackage,
 }: {
   esClient: ElasticsearchClient;
-  pkgVersion: string;
+  logger: Logger;
   paths: string[];
-  dataStream: RegistryDataStream;
+  dataStream?: RegistryDataStream;
+  installablePackage: InstallablePackage;
 }): Promise<EsAssetReference[]> {
-  const pipelinePaths = paths.filter((path) => isDataStreamPipeline(path, dataStream.path));
-  let pipelines: any[] = [];
+  const pipelinePaths = dataStream
+    ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
+    : paths;
+  const pipelinesInfos: Array<{
+    nameForInstallation: string;
+    customIngestPipelineNameForInstallation?: string;
+    content: string;
+    extension: string;
+  }> = [];
   const substitutions: RewriteSubstitution[] = [];
 
+  let datastreamPipelineCreated = false;
   pipelinePaths.forEach((path) => {
     const { name, extension } = getNameAndExtension(path);
+    if (name === dataStream?.ingest_pipeline) {
+      datastreamPipelineCreated = true;
+    }
     const nameForInstallation = getPipelineNameForInstallation({
       pipelineName: name,
       dataStream,
-      packageVersion: pkgVersion,
+      packageVersion: installablePackage.version,
     });
     const content = getAsset(path).toString('utf-8');
-    pipelines.push({
-      name,
+    pipelinesInfos.push({
       nameForInstallation,
+      customIngestPipelineNameForInstallation: dataStream
+        ? getCustomPipelineNameForDatastream(dataStream)
+        : undefined,
       content,
       extension,
     });
@@ -146,15 +181,29 @@ export async function installPipelinesForDataStream({
     });
   });
 
-  pipelines = pipelines.map((pipeline) => {
+  const pipelinesToInstall: PipelineInstall[] = pipelinesInfos.map((pipeline) => {
     return {
       ...pipeline,
       contentForInstallation: rewriteIngestPipeline(pipeline.content, substitutions),
     };
   });
 
-  const installationPromises = pipelines.map(async (pipeline) => {
-    return installPipeline({ esClient, pipeline });
+  if (!datastreamPipelineCreated && dataStream) {
+    const nameForInstallation = getPipelineNameForDatastream({
+      dataStream,
+      packageVersion: installablePackage.version,
+    });
+
+    pipelinesToInstall.push({
+      nameForInstallation,
+      customIngestPipelineNameForInstallation: getCustomPipelineNameForDatastream(dataStream),
+      contentForInstallation: 'processors: []',
+      extension: 'yml',
+    });
+  }
+
+  const installationPromises = pipelinesToInstall.map(async (pipeline) => {
+    return installPipeline({ esClient, pipeline, installablePackage, logger });
   });
 
   return Promise.all(installationPromises);
@@ -162,21 +211,39 @@ export async function installPipelinesForDataStream({
 
 async function installPipeline({
   esClient,
+  logger,
   pipeline,
+  installablePackage,
+  shouldAddCustomPipelineProcessor = true,
 }: {
   esClient: ElasticsearchClient;
-  pipeline: any;
+  logger: Logger;
+  pipeline: PipelineInstall;
+  installablePackage?: InstallablePackage;
+  shouldAddCustomPipelineProcessor?: boolean;
 }): Promise<EsAssetReference> {
+  let pipelineToInstall = appendMetadataToIngestPipeline({
+    pipeline,
+    packageName: installablePackage?.name,
+  });
+
+  if (shouldAddCustomPipelineProcessor) {
+    pipelineToInstall = addCustomPipelineProcessor(pipelineToInstall);
+  }
+
   const esClientParams = {
-    id: pipeline.nameForInstallation,
-    body: pipeline.contentForInstallation,
+    id: pipelineToInstall.nameForInstallation,
+    body:
+      pipelineToInstall.extension === 'yml'
+        ? pipelineToInstall.contentForInstallation
+        : JSON.parse(pipelineToInstall.contentForInstallation),
   };
 
   const esClientRequestOptions: TransportRequestOptions = {
     ignore: [404],
   };
 
-  if (pipeline.extension === 'yml') {
+  if (pipelineToInstall.extension === 'yml') {
     esClientRequestOptions.headers = {
       // pipeline is YAML
       'Content-Type': 'application/yaml',
@@ -185,18 +252,27 @@ async function installPipeline({
     };
   }
 
-  await esClient.ingest.putPipeline(esClientParams, esClientRequestOptions);
+  await retryTransientEsErrors(
+    () => esClient.ingest.putPipeline(esClientParams, esClientRequestOptions),
+    { logger }
+  );
 
-  return { id: pipeline.nameForInstallation, type: ElasticsearchAssetType.ingestPipeline };
+  return {
+    id: pipelineToInstall.nameForInstallation,
+    type: ElasticsearchAssetType.ingestPipeline,
+  };
 }
 
-export async function ensureFleetFinalPipelineIsInstalled(esClient: ElasticsearchClient) {
+export async function ensureFleetFinalPipelineIsInstalled(
+  esClient: ElasticsearchClient,
+  logger: Logger
+) {
   const esClientRequestOptions: TransportRequestOptions = {
     ignore: [404],
   };
   const res = await esClient.ingest.getPipeline(
     { id: FLEET_FINAL_PIPELINE_ID },
-    esClientRequestOptions
+    { ...esClientRequestOptions, meta: true }
   );
 
   const installedVersion = res?.body[FLEET_FINAL_PIPELINE_ID]?.version;
@@ -207,6 +283,7 @@ export async function ensureFleetFinalPipelineIsInstalled(esClient: Elasticsearc
   ) {
     await installPipeline({
       esClient,
+      logger,
       pipeline: {
         nameForInstallation: FLEET_FINAL_PIPELINE_ID,
         contentForInstallation: FLEET_FINAL_PIPELINE_CONTENT,
@@ -248,19 +325,4 @@ const getNameAndExtension = (
     name: filename.split('.')[0],
     extension: filename.split('.')[1],
   };
-};
-
-export const getPipelineNameForInstallation = ({
-  pipelineName,
-  dataStream,
-  packageVersion,
-}: {
-  pipelineName: string;
-  dataStream: RegistryDataStream;
-  packageVersion: string;
-}): string => {
-  const isPipelineEntry = pipelineName === dataStream.ingest_pipeline;
-  const suffix = isPipelineEntry ? '' : `-${pipelineName}`;
-  // if this is the pipeline entry, don't add a suffix
-  return `${dataStream.type}-${dataStream.dataset}-${packageVersion}${suffix}`;
 };

@@ -6,45 +6,51 @@
  */
 
 import React from 'react';
-import { injectI18n } from '@kbn/i18n/react';
-import { esFilters, Filter, IndexPattern } from '../../../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { injectI18n } from '@kbn/i18n-react';
+import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
+import { FilterItem } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export function buildFilterLabel({
   field,
   value,
   label,
-  indexPattern,
+  dataView,
   negate,
 }: {
   label: string;
-  value: string;
+  value: string | string[];
   negate: boolean;
   field: string;
-  indexPattern: IndexPattern;
+  dataView: DataView;
 }) {
-  const indexField = indexPattern.getFieldByName(field)!;
+  const indexField = dataView.getFieldByName(field)!;
 
-  const filter = esFilters.buildPhraseFilter(indexField, value, indexPattern);
+  const filter =
+    value instanceof Array && value.length > 1
+      ? buildPhrasesFilter(indexField, value, dataView)
+      : buildPhraseFilter(indexField, value as string, dataView);
 
-  filter.meta.value = value;
+  filter.meta.type = value instanceof Array && value.length > 1 ? 'phrases' : 'phrase';
+
+  filter.meta.value = value as string;
   filter.meta.key = label;
   filter.meta.alias = null;
   filter.meta.negate = negate;
   filter.meta.disabled = false;
-  filter.meta.type = 'phrase';
 
   return filter;
 }
 
-interface Props {
+export interface FilterValueLabelProps {
   field: string;
   label: string;
-  value: string;
+  value: string | string[];
   negate: boolean;
-  removeFilter: (field: string, value: string, notVal: boolean) => void;
-  invertFilter: (val: { field: string; value: string; negate: boolean }) => void;
-  indexPattern: IndexPattern;
+  removeFilter: (field: string, value: string | string[], notVal: boolean) => void;
+  invertFilter: (val: { field: string; value: string | string[]; negate: boolean }) => void;
+  dataView: DataView;
   allowExclusion?: boolean;
 }
 export function FilterValueLabel({
@@ -52,22 +58,22 @@ export function FilterValueLabel({
   field,
   value,
   negate,
-  indexPattern,
+  dataView,
   invertFilter,
   removeFilter,
   allowExclusion = true,
-}: Props) {
-  const FilterItem = injectI18n(esFilters.FilterItem);
+}: FilterValueLabelProps) {
+  const FilterItemI18n = injectI18n(FilterItem);
 
-  const filter = buildFilterLabel({ field, value, label, indexPattern, negate });
+  const filter = buildFilterLabel({ field, value, label, dataView, negate });
 
   const {
     services: { uiSettings },
   } = useKibana();
 
-  return indexPattern ? (
-    <FilterItem
-      indexPatterns={[indexPattern]}
+  return dataView ? (
+    <FilterItemI18n
+      indexPatterns={[dataView]}
       id={`${field}-${value}-${negate}`}
       filter={filter}
       onRemove={() => {
@@ -88,3 +94,6 @@ export function FilterValueLabel({
     />
   ) : null;
 }
+
+// eslint-disable-next-line import/no-default-export
+export default FilterValueLabel;

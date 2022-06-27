@@ -8,10 +8,10 @@
 import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
-import { estypes } from '@elastic/elasticsearch';
-// @ts-ignore
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
@@ -24,7 +24,7 @@ import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_typ
 import { MLCATEGORY } from '../constants/field_types';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
-import { getFirstKeyInObject, isPopulatedObject } from './object_utils';
+import { getFirstKeyInObject } from './object_utils';
 import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
@@ -71,6 +71,12 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
     isMappable = functionName === ML_JOB_AGGREGATION.LAT_LONG;
   }
   return isMappable;
+}
+
+// Returns a boolean indicating whether the specified job is suitable for maps plugin.
+export function isJobWithGeoData(job: Job): boolean {
+  const { detectors } = job.analysis_config;
+  return detectors.some((detector) => detector.function === ML_JOB_AGGREGATION.LAT_LONG);
 }
 
 /**

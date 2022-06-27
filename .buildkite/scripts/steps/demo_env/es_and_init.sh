@@ -12,7 +12,7 @@ mkdir -p target
 
 export ES_IMAGE="gcr.io/elastic-kibana-184716/demo/elasticsearch:$DEPLOYMENT_NAME-$(git rev-parse HEAD)"
 
-DOCKER_EXPORT_URL=$(curl https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$DEPLOYMENT_VERSION/manifest-latest-verified.json | jq -r '.archives | .[] | select(.platform=="docker") | .url')
+DOCKER_EXPORT_URL=$(curl https://storage.googleapis.com/kibana-ci-es-snapshots-daily/$DEPLOYMENT_VERSION/manifest-latest-verified.json | jq -r '.archives | .[] | select(.url | test("docker-image")) | .url')
 curl "$DOCKER_EXPORT_URL" > target/elasticsearch-docker.tar.gz
 docker load < target/elasticsearch-docker.tar.gz
 docker tag "docker.elastic.co/elasticsearch/elasticsearch:$DEPLOYMENT_VERSION-SNAPSHOT" "$ES_IMAGE"

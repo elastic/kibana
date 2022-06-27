@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { fullContentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiEmptyPrompt, EuiTable } from '@elastic/eui';
 
 import { ComponentLoader } from '../../../components/shared/component_loader';
+
+import { CustomSourceDeployment } from './custom_source_deployment';
 
 import { Overview } from './overview';
 
 describe('Overview', () => {
+  const initializeSourceSynchronization = jest.fn();
   const contentSource = fullContentSources[0];
   const dataLoading = false;
   const isOrganization = true;
@@ -30,7 +33,9 @@ describe('Overview', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues({ ...mockValues });
+    setMockActions({ initializeSourceSynchronization });
   });
 
   it('renders', () => {
@@ -81,14 +86,6 @@ describe('Overview', () => {
     expect(groupsSummary.find('[data-test-subj="SourceGroupLink"]')).toHaveLength(1);
   });
 
-  it('renders DocumentationCallout', () => {
-    setMockValues({ ...mockValues, contentSource: fullContentSources[1] });
-    const wrapper = shallow(<Overview />);
-    const documentationCallout = wrapper.find('[data-test-subj="DocumentationCallout"]').dive();
-
-    expect(documentationCallout.find(EuiPanel)).toHaveLength(1);
-  });
-
   it('renders PermissionsStatus', () => {
     setMockValues({
       ...mockValues,
@@ -117,5 +114,44 @@ describe('Overview', () => {
     const wrapper = shallow(<Overview />);
 
     expect(wrapper.find('[data-test-subj="DocumentPermissionsDisabled"]')).toHaveLength(1);
+  });
+
+  it('renders feedback callout for external sources', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...fullContentSources[1],
+        serviceTypeSupportsPermissions: true,
+        custom: false,
+        serviceType: 'external',
+      },
+    });
+
+    const wrapper = shallow(<Overview />);
+
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+  });
+
+  it('handles confirmModal submission', () => {
+    const wrapper = shallow(<Overview />);
+    const button = wrapper.find('[data-test-subj="SyncButton"]');
+    button.prop('onClick')!({} as any);
+    const modal = wrapper.find(EuiConfirmModal);
+    modal.prop('onConfirm')!({} as any);
+
+    expect(initializeSourceSynchronization).toHaveBeenCalled();
+  });
+
+  describe('custom sources', () => {
+    it('includes deployment instructions', () => {
+      setMockValues({
+        ...mockValues,
+        contentSource: fullContentSources[1],
+      });
+
+      const wrapper = shallow(<Overview />);
+
+      expect(wrapper.find(CustomSourceDeployment)).toHaveLength(1);
+    });
   });
 });

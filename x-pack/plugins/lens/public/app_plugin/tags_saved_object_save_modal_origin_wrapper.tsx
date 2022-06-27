@@ -11,8 +11,8 @@ import {
   SavedObjectSaveModalOrigin,
   OnSaveProps,
   SaveModalState,
-} from '../../../../../src/plugins/saved_objects/public';
-import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+} from '@kbn/saved-objects-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
 export type OriginSaveProps = OnSaveProps & { returnToOrigin: boolean; newTags?: string[] };
 
@@ -22,53 +22,54 @@ export type TagEnhancedSavedObjectSaveModalOriginProps = Omit<OriginSaveModalPro
   onSave: (props: OriginSaveProps) => void;
 };
 
-export const TagEnhancedSavedObjectSaveModalOrigin: FC<TagEnhancedSavedObjectSaveModalOriginProps> =
-  ({ initialTags, onSave, savedObjectsTagging, options, ...otherProps }) => {
-    const [selectedTags, setSelectedTags] = useState(initialTags);
+export const TagEnhancedSavedObjectSaveModalOrigin: FC<
+  TagEnhancedSavedObjectSaveModalOriginProps
+> = ({ initialTags, onSave, savedObjectsTagging, options, ...otherProps }) => {
+  const [selectedTags, setSelectedTags] = useState(initialTags);
 
-    const tagSelectorOption = useMemo(
-      () =>
-        savedObjectsTagging ? (
-          <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-            initialSelection={initialTags}
-            onTagsSelected={setSelectedTags}
-          />
-        ) : undefined,
-      [savedObjectsTagging, initialTags]
+  const tagSelectorOption = useMemo(
+    () =>
+      savedObjectsTagging ? (
+        <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+          initialSelection={initialTags}
+          onTagsSelected={setSelectedTags}
+        />
+      ) : undefined,
+    [savedObjectsTagging, initialTags]
+  );
+
+  const tagEnhancedOptions =
+    typeof options === 'function' ? (
+      (state: SaveModalState) => {
+        return (
+          <>
+            {tagSelectorOption}
+            {options(state)}
+          </>
+        );
+      }
+    ) : (
+      <>
+        {tagSelectorOption}
+        {options}
+      </>
     );
 
-    const tagEnhancedOptions =
-      typeof options === 'function' ? (
-        (state: SaveModalState) => {
-          return (
-            <>
-              {tagSelectorOption}
-              {options(state)}
-            </>
-          );
-        }
-      ) : (
-        <>
-          {tagSelectorOption}
-          {options}
-        </>
-      );
+  const tagEnhancedOnSave: OriginSaveModalProps['onSave'] = useCallback(
+    (saveOptions) => {
+      onSave({
+        ...saveOptions,
+        newTags: selectedTags,
+      });
+    },
+    [onSave, selectedTags]
+  );
 
-    const tagEnhancedOnSave: OriginSaveModalProps['onSave'] = useCallback(
-      (saveOptions) => {
-        onSave({
-          ...saveOptions,
-          newTags: selectedTags,
-        });
-      },
-      [onSave, selectedTags]
-    );
-
-    return (
-      <SavedObjectSaveModalOrigin
-        {...otherProps}
-        onSave={tagEnhancedOnSave}
-        options={tagEnhancedOptions}
-      />
-    );
-  };
+  return (
+    <SavedObjectSaveModalOrigin
+      {...otherProps}
+      onSave={tagEnhancedOnSave}
+      options={tagEnhancedOptions}
+    />
+  );
+};

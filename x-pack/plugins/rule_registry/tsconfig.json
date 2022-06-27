@@ -19,6 +19,5 @@
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" }
   ]
 }

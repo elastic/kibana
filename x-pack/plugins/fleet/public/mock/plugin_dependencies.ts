@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { licensingMock } from '../../../licensing/public/mocks';
-import { homePluginMock } from '../../../../../src/plugins/home/public/mocks';
-import { navigationPluginMock } from '../../../../../src/plugins/navigation/public/mocks';
-import { customIntegrationsMock } from '../../../../../src/plugins/custom_integrations/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { homePluginMock } from '@kbn/home-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
-import type { MockedFleetSetupDeps, MockedFleetStartDeps } from './types';
-
-export const createSetupDepsMock = (): MockedFleetSetupDeps => {
+export const createSetupDepsMock = () => {
+  const cloud = cloudMock.createSetup();
   return {
-    licensing: licensingMock.createSetup(),
     data: dataPluginMock.createSetupContract(),
     home: homePluginMock.createSetupContract(),
     customIntegrations: customIntegrationsMock.createSetup(),
+    cloud,
   };
 };
 
-export const createStartDepsMock = (): MockedFleetStartDeps => {
+export const createStartDepsMock = () => {
   return {
+    licensing: licensingMock.createStart(),
     data: dataPluginMock.createStartContract(),
+    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     navigation: navigationPluginMock.createStartContract(),
+    customIntegrations: customIntegrationsMock.createStart(),
+    share: sharePluginMock.createStartContract(),
+    cloud: cloudMock.createStart(),
   };
 };

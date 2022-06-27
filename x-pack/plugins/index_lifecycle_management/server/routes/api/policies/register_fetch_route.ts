@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { ApiResponse } from '@elastic/elasticsearch';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
@@ -24,6 +24,7 @@ interface PoliciesMap {
     };
   };
 }
+
 function formatPolicies(policiesMap: PoliciesMap): PolicyFromES[] {
   return Object.keys(policiesMap).reduce((accum: PolicyFromES[], lifecycleName: string) => {
     const policyEntry = policiesMap[lifecycleName];
@@ -46,10 +47,11 @@ function formatPolicies(policiesMap: PoliciesMap): PolicyFromES[] {
   }, []);
 }
 
-async function fetchPolicies(client: ElasticsearchClient): Promise<ApiResponse<PoliciesMap>> {
+async function fetchPolicies(client: ElasticsearchClient): Promise<TransportResult<PoliciesMap>> {
   const options = {
     // we allow 404 since they may have no policies
     ignore: [404],
+    meta: true,
   };
 
   // @ts-expect-error Policy doesn't contain all known properties (name, in_use_by)
@@ -60,7 +62,7 @@ export function registerFetchRoute({ router, license, lib: { handleEsError } }: 
   router.get(
     { path: addBasePath('/policies'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
-      const { asCurrentUser } = context.core.elasticsearch.client;
+      const { asCurrentUser } = (await context.core).elasticsearch.client;
 
       try {
         const policiesResponse = await fetchPolicies(asCurrentUser);

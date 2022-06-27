@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions, autoInterval } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
@@ -49,12 +49,13 @@ describe('AggConfig Filters', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry(),
-        }
+        },
+        jest.fn()
       );
       const bucketKey = 1422579600000;
 
       agg = aggConfigs.aggs[0] as IBucketDateHistogramAggConfig;
-      bucketStart = moment(bucketKey);
+      bucketStart = moment.tz(bucketKey, aggConfigs.timeZone);
 
       const timePad = moment.duration(duration / 2);
 
@@ -69,10 +70,10 @@ describe('AggConfig Filters', () => {
     test('creates a valid range filter', () => {
       init();
 
-      expect(filter).toHaveProperty('range');
-      expect(filter.range).toHaveProperty(field.name);
+      expect(filter.query).toHaveProperty('range');
+      expect(filter.query.range).toHaveProperty(field.name);
 
-      const fieldParams = filter.range[field.name];
+      const fieldParams = filter.query.range[field.name];
       expect(fieldParams).toHaveProperty('gte');
       expect(typeof fieldParams.gte).toBe('string');
 
@@ -100,7 +101,7 @@ describe('AggConfig Filters', () => {
         init(option.val, duration);
 
         const interval = agg.buckets.getInterval();
-        const params = filter.range[field.name];
+        const params = filter.query.range[field.name];
 
         expect(params.gte).toBe(bucketStart.toISOString());
         expect(params.lt).toBe(bucketStart.clone().add(interval).toISOString());

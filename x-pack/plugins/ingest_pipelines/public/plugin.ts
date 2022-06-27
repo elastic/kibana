@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from 'src/core/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
@@ -25,7 +25,7 @@ export class IngestPipelinesPlugin
     apiService.setup(http, uiMetricService);
 
     const pluginName = i18n.translate('xpack.ingestPipelines.appTitle', {
-      defaultMessage: 'Ingest Node Pipelines',
+      defaultMessage: 'Ingest Pipelines',
     });
 
     management.sections.section.ingest.registerApp({

@@ -6,11 +6,9 @@
  */
 
 export { SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
-export {
-  DashboardToDiscoverDrilldown,
-  Params as DashboardToDiscoverDrilldownParams,
-} from './drilldown';
-export {
+export type { Params as DashboardToDiscoverDrilldownParams } from './drilldown';
+export { DashboardToDiscoverDrilldown } from './drilldown';
+export type {
   ActionContext as DashboardToDiscoverActionContext,
   Config as DashboardToDiscoverConfig,
 } from './types';

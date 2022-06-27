@@ -15,7 +15,7 @@ export function FieldValueSuggestions({
   fullWidth,
   sourceField,
   label,
-  indexPatternTitle,
+  dataViewTitle,
   selectedValue,
   excludedValue,
   filters,
@@ -28,22 +28,28 @@ export function FieldValueSuggestions({
   singleSelection,
   compressed,
   asFilterButton,
+  usePrependLabel,
   allowAllValuesSelection,
+  required,
+  allowExclusions = true,
   cardinalityField,
-  allowExclusions,
+  inspector,
   asCombobox = true,
+  keepHistory = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
 
   const { values, loading } = useValuesList({
-    indexPatternTitle,
+    dataViewTitle,
     query,
     sourceField,
     filters,
     time,
+    inspector,
     cardinalityField,
-    keepHistory: true,
+    keepHistory,
+    label,
   });
 
   const SelectionComponent = asCombobox ? FieldValueCombobox : FieldValueSelection;
@@ -67,8 +73,10 @@ export function FieldValueSuggestions({
       width={width}
       compressed={compressed}
       asFilterButton={asFilterButton}
-      allowAllValuesSelection={allowAllValuesSelection}
+      usePrependLabel={usePrependLabel}
       allowExclusions={allowExclusions}
+      allowAllValuesSelection={singleSelection ? false : allowAllValuesSelection}
+      required={required}
     />
   );
 }

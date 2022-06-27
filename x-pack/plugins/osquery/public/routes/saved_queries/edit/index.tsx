@@ -11,18 +11,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiConfirmModal,
+  EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 
+import styled from 'styled-components';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
+
+const StyledEuiCallOut = styled(EuiCallOut)`
+  margin: 10px;
+`;
 
 const EditSavedQueryPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -37,7 +43,14 @@ const EditSavedQueryPageComponent = () => {
 
   useBreadcrumbs('saved_query_edit', { savedQueryName: savedQueryDetails?.attributes?.id ?? '' });
 
-  const viewMode = useMemo(() => !permissions.writeSavedQueries, [permissions.writeSavedQueries]);
+  const elasticPrebuiltQuery = useMemo(
+    () => savedQueryDetails?.attributes?.prebuilt,
+    [savedQueryDetails]
+  );
+  const viewMode = useMemo(
+    () => !permissions.writeSavedQueries || elasticPrebuiltQuery,
+    [permissions.writeSavedQueries, elasticPrebuiltQuery]
+  );
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
     setIsDeleteModalVisible(false);
@@ -65,17 +78,27 @@ const EditSavedQueryPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               {viewMode ? (
-                <FormattedMessage
-                  id="xpack.osquery.viewSavedQuery.pageTitle"
-                  defaultMessage='"{savedQueryId}" details'
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  values={{
-                    savedQueryId: savedQueryDetails?.attributes?.id ?? '',
-                  }}
-                />
+                <>
+                  <FormattedMessage
+                    id="xpack.osquery.viewSavedQuery.pageTitle"
+                    defaultMessage='"{savedQueryId}" details'
+                    // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+                    values={{
+                      savedQueryId: savedQueryDetails?.attributes?.id ?? '',
+                    }}
+                  />
+                  {elasticPrebuiltQuery && (
+                    <StyledEuiCallOut size="s">
+                      <FormattedMessage
+                        id="xpack.osquery.viewSavedQuery.prebuiltInfo"
+                        defaultMessage="This is a prebuilt Elastic query, and it cannot be edited."
+                      />
+                    </StyledEuiCallOut>
+                  )}
+                </>
               ) : (
                 <FormattedMessage
                   id="xpack.osquery.editSavedQuery.pageTitle"
@@ -87,12 +110,11 @@ const EditSavedQueryPageComponent = () => {
                 />
               )}
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [savedQueryDetails?.attributes?.id, savedQueryListProps, viewMode]
+    [elasticPrebuiltQuery, savedQueryDetails?.attributes?.id, savedQueryListProps, viewMode]
   );
 
   const RightColumn = useMemo(
@@ -118,7 +140,6 @@ const EditSavedQueryPageComponent = () => {
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
           defaultValue={savedQueryDetails?.attributes}
-          // @ts-expect-error update types
           handleSubmit={updateSavedQueryMutation.mutateAsync}
           viewMode={viewMode}
         />

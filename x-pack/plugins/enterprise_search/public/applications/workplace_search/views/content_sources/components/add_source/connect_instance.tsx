@@ -5,47 +5,29 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useEffect, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
-import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../../constants';
-import { DOCUMENT_PERMISSIONS_DOCS_URL, ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
 import { FeatureIds, Configuration, Features } from '../../../../types';
-import { LEARN_MORE_LINK } from '../../constants';
 
 import { AddSourceLogic } from './add_source_logic';
-import {
-  CONNECT_WHICH_OPTION_LINK,
-  CONNECT_DOC_PERMISSIONS_LABEL,
-  CONNECT_DOC_PERMISSIONS_TITLE,
-  CONNECT_NEEDS_PERMISSIONS,
-  CONNECT_NOT_SYNCED_TITLE,
-  CONNECT_NOT_SYNCED_TEXT,
-  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE,
-  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE,
-} from './constants';
+import { DocumentPermissionsCallout } from './document_permissions_callout';
+import { DocumentPermissionsField } from './document_permissions_field';
 import { SourceFeatures } from './source_features';
 
 interface ConnectInstanceProps {
@@ -60,17 +42,14 @@ interface ConnectInstanceProps {
 }
 
 export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
-  configuration: { needsSubdomain, hasOauthRedirect },
+  configuration: { needsSubdomain, hasOauthRedirect, needsCredentials },
   features,
   objTypes,
   name,
-  serviceType,
   needsPermissions,
   onFormCreated,
   header,
 }) => {
-  const [formLoading, setFormLoading] = useState(false);
-
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const {
@@ -82,8 +61,14 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue,
   } = useActions(AddSourceLogic);
 
-  const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
-    useValues(AddSourceLogic);
+  const {
+    buttonLoading,
+    loginValue,
+    passwordValue,
+    indexPermissionsValue,
+    subdomainValue,
+    sourceConfigData: { connectionRequiresRedirect },
+  } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -92,17 +77,16 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
 
+  const doRedirect = hasOauthRedirect || connectionRequiresRedirect;
+
   const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
-  const onOauthFormSubmit = () => getSourceConnectData(serviceType, redirectOauth);
-  const handleFormSubmitError = () => setFormLoading(false);
-  const onCredentialsFormSubmit = () =>
-    createContentSource(serviceType, redirectFormCreated, handleFormSubmitError);
+  const onOauthFormSubmit = () => getSourceConnectData(redirectOauth);
+  const onCredentialsFormSubmit = () => createContentSource(redirectFormCreated);
 
   const handleFormSubmit = (e: FormEvent) => {
-    setFormLoading(true);
     e.preventDefault();
-    const onSubmit = hasOauthRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
+    const onSubmit = doRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
     onSubmit();
   };
 
@@ -118,6 +102,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           name="login"
           value={loginValue}
           onChange={(e) => setSourceLoginValue(e.target.value)}
+          data-test-subj="LoginField"
         />
       </EuiFormRow>
       <EuiFormRow label="Password">
@@ -127,6 +112,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           type="password"
           value={passwordValue}
           onChange={(e) => setSourcePasswordValue(e.target.value)}
+          data-test-subj="PasswordField"
         />
       </EuiFormRow>
       <EuiSpacer size="xxl" />
@@ -147,105 +133,23 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     </>
   );
 
-  const whichDocsLink = (
-    <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-      {CONNECT_WHICH_OPTION_LINK}
-    </EuiLink>
-  );
-
   const permissionField = (
-    <>
-      <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
-        <EuiTitle size="s">
-          <h1>
-            <strong>{CONNECT_DOC_PERMISSIONS_TITLE}</strong>
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued" size="s">
-          {!needsPermissions && (
-            <span>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.contentSource.connect.docPermissionsUnavailable.message"
-                defaultMessage="Document-level permissions are not yet available for this source. {link}"
-                values={{
-                  link: (
-                    <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-                      {LEARN_MORE_LINK}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </span>
-          )}
-          {needsPermissions && indexPermissionsValue && (
-            <span>
-              {CONNECT_NEEDS_PERMISSIONS}
-              <EuiSpacer size="s" />
-              {whichDocsLink}
-            </span>
-          )}
-        </EuiText>
-        {!indexPermissionsValue && (
-          <>
-            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning">
-              <p>
-                {CONNECT_NOT_SYNCED_TEXT}
-                {needsPermissions && whichDocsLink}
-              </p>
-            </EuiCallOut>
-          </>
-        )}
-        <EuiSpacer />
-        <EuiSwitch
-          label={<strong>{CONNECT_DOC_PERMISSIONS_LABEL}</strong>}
-          name="index_permissions"
-          onChange={(e) => setSourceIndexPermissionsValue(e.target.checked)}
-          checked={indexPermissionsValue}
-          disabled={!needsPermissions}
-        />
-      </EuiPanel>
-      <EuiSpacer size="xl" />
-    </>
-  );
-
-  const documentLevelPermissionsCallout = (
-    <>
-      <EuiPanel paddingSize="l" data-test-subj="DocumentLevelPermissionsCallout">
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="lock" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <strong>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE}</strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText size="xs">
-          <p>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE}</p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiText size="xs">
-          <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-            {EXPLORE_PLATINUM_FEATURES_LINK}
-          </EuiLink>
-        </EuiText>
-      </EuiPanel>
-      <EuiSpacer />
-    </>
+    <DocumentPermissionsField
+      needsPermissions={needsPermissions}
+      indexPermissionsValue={indexPermissionsValue}
+      setValue={setSourceIndexPermissionsValue}
+    />
   );
 
   const formFields = (
     <>
       {isOrganization && hasPlatinumLicense && permissionField}
-      {!hasOauthRedirect && credentialsFields}
+      {needsCredentials && credentialsFields}
       {needsSubdomain && subdomainField}
-      {permissionsExcluded && !hasPlatinumLicense && documentLevelPermissionsCallout}
+      {permissionsExcluded && !hasPlatinumLicense && <DocumentPermissionsCallout />}
 
       <EuiFormRow>
-        <EuiButton color="primary" type="submit" fill isLoading={formLoading}>
+        <EuiButton color="primary" type="submit" fill isLoading={buttonLoading}>
           {i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.connect.button', {
             defaultMessage: 'Connect {name}',
             values: { name },

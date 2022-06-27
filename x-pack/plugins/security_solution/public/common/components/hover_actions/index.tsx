@@ -11,8 +11,8 @@ import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
+import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
-import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
 
@@ -37,8 +37,6 @@ const StyledHoverActionsContainer = styled.div<{
   $hideTopN: boolean;
   $isActive: boolean;
 }>`
-  min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
-  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
   display: flex;
 
   ${(props) =>
@@ -82,8 +80,15 @@ const StyledHoverActionsContainer = styled.div<{
       : ''}
 `;
 
+const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
+  min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
+  padding: ${(props) => `0 ${props.theme.eui.euiSizeS}`};
+  position: relative;
+`;
+
 interface Props {
   additionalContent?: React.ReactNode;
+  applyWidthAndPadding?: boolean;
   closeTopN?: () => void;
   closePopOver?: () => void;
   dataProvider?: DataProvider | DataProvider[];
@@ -91,7 +96,10 @@ interface Props {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
+  fieldType: string;
+  isAggregatable: boolean;
   goGetTimelineId?: (args: boolean) => void;
+  hideAddToTimeline?: boolean;
   hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
@@ -128,9 +136,13 @@ export const HoverActions: React.FC<Props> = React.memo(
     dataType,
     draggableId,
     enableOverflowButton = false,
+    applyWidthAndPadding = true,
     field,
+    fieldType,
+    isAggregatable,
     goGetTimelineId,
     isObjectArray,
+    hideAddToTimeline = false,
     hideTopN = false,
     onFilterAdded,
     ownFocus,
@@ -211,7 +223,10 @@ export const HoverActions: React.FC<Props> = React.memo(
       draggableId,
       enableOverflowButton: enableOverflowButton && !isCaseView,
       field,
+      fieldType,
+      isAggregatable,
       handleHoverActionClicked,
+      hideAddToTimeline,
       hideTopN,
       isCaseView,
       isObjectArray,
@@ -227,6 +242,10 @@ export const HoverActions: React.FC<Props> = React.memo(
       values,
     });
 
+    const Container = applyWidthAndPadding
+      ? StyledHoverActionsContainerWithPaddingsAndMinWidth
+      : StyledHoverActionsContainer;
+
     return (
       <EuiFocusTrap
         disabled={isFocusTrapDisabled({
@@ -234,7 +253,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           showTopN,
         })}
       >
-        <StyledHoverActionsContainer
+        <Container
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}
@@ -249,7 +268,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           {additionalContent != null && <AdditionalContent>{additionalContent}</AdditionalContent>}
 
           {enableOverflowButton && !isCaseView ? overflowActionItems : allActionItems}
-        </StyledHoverActionsContainer>
+        </Container>
       </EuiFocusTrap>
     );
   }

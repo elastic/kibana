@@ -10,6 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
+import { flattenDocument } from '../../utils/results';
 import { EngineLogic } from '../engine';
 
 import { Result } from '../result/types';
@@ -49,7 +50,7 @@ export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
     searchResults: [
       [],
       {
-        onSearch: (_, { results }) => results,
+        onSearch: (_, { results }) => results.map((res) => flattenDocument(res) as Result),
       },
     ],
   }),
@@ -61,9 +62,10 @@ export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.post(`/internal/app_search/engines/${engineName}/search`, {
-          query: { query },
-        });
+        const response = await http.post<{ results: Result[] }>(
+          `/internal/app_search/engines/${engineName}/search`,
+          { query: { query } }
+        );
         actions.onSearch(response);
       } catch (e) {
         flashAPIErrors(e);

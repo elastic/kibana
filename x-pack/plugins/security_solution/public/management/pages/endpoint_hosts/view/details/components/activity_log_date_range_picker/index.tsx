@@ -8,7 +8,7 @@
 import { useDispatch } from 'react-redux';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,14 +32,13 @@ interface Range {
 
 const DatePickerWrapper = styled.div`
   width: ${(props) => props.theme.eui.fractions.single.percentage};
-  max-width: 350px;
 `;
 const StickyFlexItem = styled(EuiFlexItem)`
   background: ${(props) => `${props.theme.eui.euiHeaderBackgroundColor}`};
   position: sticky;
   top: 0;
   z-index: 1;
-  padding: ${(props) => `${props.theme.eui.paddingSizes.m}`};
+  padding: ${(props) => `${props.theme.eui.euiSizeM}`};
 `;
 
 export const DateRangePicker = memo(() => {

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-export * from '../../../../src/plugins/expressions/common';
+export * from '@kbn/expressions-plugin/common';
 export * from './assets';
 export * from './canvas';
 export * from './elements';
+export * from './embeddables';
 export * from './filters';
 export * from './functions';
 export * from './renderers';

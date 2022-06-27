@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '../../../../triggers_actions_ui/public';
+import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { GeoContainmentAlertParams } from './types';
 
 export const validateExpression = (alertParams: GeoContainmentAlertParams): ValidationResult => {
@@ -29,7 +29,7 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
   if (!index) {
     errors.index.push(
       i18n.translate('xpack.stackAlerts.geoContainment.error.requiredIndexTitleText', {
-        defaultMessage: 'Index pattern is required.',
+        defaultMessage: 'Data view is required.',
       })
     );
   }
@@ -69,7 +69,7 @@ export const validateExpression = (alertParams: GeoContainmentAlertParams): Vali
   if (!boundaryIndexTitle) {
     errors.boundaryIndexTitle.push(
       i18n.translate('xpack.stackAlerts.geoContainment.error.requiredBoundaryIndexTitleText', {
-        defaultMessage: 'Boundary index pattern title is required.',
+        defaultMessage: 'Boundary data view title is required.',
       })
     );
   }

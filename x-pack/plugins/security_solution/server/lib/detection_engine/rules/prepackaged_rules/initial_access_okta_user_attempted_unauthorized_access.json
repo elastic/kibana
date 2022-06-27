@@ -1,0 +1,74 @@
+{
+  "author": [
+    "Elastic",
+    "Austin Songer"
+  ],
+  "description": "Identifies unauthorized access attempts to Okta applications.",
+  "index": [
+    "filebeat-*",
+    "logs-okta*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Unauthorized Access to an Okta Application",
+  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:okta.system and event.action:app.generic.unauth_app_access_attempt\n",
+  "risk_score": 21,
+  "rule_id": "4edd3e1a-3aa0-499b-8147-4d2ea43b1613",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Identity",
+    "Okta",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": []
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": []
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

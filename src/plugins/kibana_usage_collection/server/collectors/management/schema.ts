@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { UsageStats } from './types';
 
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
-  // sensitive
-  'timelion:quandl.key': {
-    type: 'keyword',
-    _meta: { description: 'Default value of the setting was changed.' },
-  },
   'securitySolution:defaultIndex': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -34,10 +29,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'notifications:banner': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
-  },
-  'timelion:graphite.url': {
-    type: 'keyword',
-    _meta: { description: 'Default value of the setting changed.' },
   },
   'xpackDashboardMode:roles': {
     type: 'keyword',
@@ -64,6 +55,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'visualization:useLegacyTimeAxis': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'visualization:regionmap:showWarnings': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -78,10 +73,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'visualization:tileMap:WMSdefaults': {
     type: 'text',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'timelion:legacyChartsLibrary': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'timelion:target_buckets': {
@@ -117,6 +108,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:enableNewsFeed': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableCcsWarning': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -168,7 +163,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -388,7 +382,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'bfetch:disable': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'visualization:visualize:legacyPieChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'visualization:visualize:legacyHeatmapChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -412,8 +414,24 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableNewSyntheticsView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:maxSuggestions': {
     type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableComparisonByDefault': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInfrastructureView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableServiceGroups': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'banners:placement': {
@@ -436,6 +454,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'labs:canvas:byValueEmbeddable': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'labs:canvas:useDataService': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -445,6 +467,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:dashboardControls': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:showFieldStatistics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

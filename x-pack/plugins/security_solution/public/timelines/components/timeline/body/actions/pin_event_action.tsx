@@ -8,14 +8,16 @@
 import React, { useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { EventsTdContent } from '../../styles';
-import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import { Pin } from '../../pin';
 import { TimelineType } from '../../../../../../common/types/timeline';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 interface PinEventActionProps {
   ariaLabel?: string;
+  isAlert: boolean;
   noteIds: string[];
   onPinClicked: () => void;
   eventIsPinned: boolean;
@@ -24,29 +26,34 @@ interface PinEventActionProps {
 
 const PinEventActionComponent: React.FC<PinEventActionProps> = ({
   ariaLabel,
+  isAlert,
   noteIds,
   onPinClicked,
   eventIsPinned,
   timelineType,
 }) => {
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
   const tooltipContent = useMemo(
     () =>
       getPinTooltip({
         isPinned: eventIsPinned,
+        isAlert,
         eventHasNotes: eventHasNotes(noteIds),
         timelineType,
       }),
-    [eventIsPinned, noteIds, timelineType]
+    [eventIsPinned, isAlert, noteIds, timelineType]
   );
 
   return (
     <div key="timeline-action-pin-tool-tip">
-      <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+      <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
         <EuiToolTip data-test-subj="timeline-action-pin-tool-tip" content={tooltipContent}>
           <Pin
             ariaLabel={ariaLabel}
             allowUnpinning={!eventHasNotes(noteIds)}
             data-test-subj="pin-event"
+            isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
+            isAlert={isAlert}
             onClick={onPinClicked}
             pinned={eventIsPinned}
             timelineType={timelineType}

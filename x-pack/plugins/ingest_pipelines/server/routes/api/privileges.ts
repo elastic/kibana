@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Privileges } from '@kbn/es-ui-shared-plugin/common';
 import { RouteDependencies } from '../../types';
 import { API_BASE_PATH, APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../../common/constants';
-import { Privileges } from '../../../../../../src/plugins/es_ui_shared/common';
 
 const extractMissingPrivileges = (privilegesObject: { [key: string]: boolean } = {}): string[] =>
   Object.keys(privilegesObject).reduce((privileges: string[], privilegeName: string): string[] => {
@@ -36,13 +36,13 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
         return res.ok({ body: privilegesResult });
       }
 
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
-      const {
-        body: { has_all_requested: hasAllPrivileges, cluster },
-      } = await clusterClient.asCurrentUser.security.hasPrivileges({
-        body: { cluster: APP_CLUSTER_REQUIRED_PRIVILEGES },
-      });
+      const { has_all_requested: hasAllPrivileges, cluster } =
+        await clusterClient.asCurrentUser.security.hasPrivileges({
+          // @ts-expect-error @elastic/elasticsearch SecurityClusterPrivilege doesn’t contain all the priviledges
+          body: { cluster: APP_CLUSTER_REQUIRED_PRIVILEGES },
+        });
 
       if (!hasAllPrivileges) {
         privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);

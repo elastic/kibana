@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { SavedObject } from '@kbn/core/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasStartDeps } from '../../plugin';
-import { CanvasWorkpadService } from '../workpad';
+import { CanvasWorkpadService, ResolveWorkpadResponse } from '../workpad';
 
 import {
   API_ROUTE_WORKPAD,
@@ -63,9 +64,40 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
 
   return {
     get: async (id: string) => {
-      const workpad = await coreStart.http.get(`${getApiPath()}/${id}`);
+      const workpad = await coreStart.http.get<any>(`${getApiPath()}/${id}`);
 
       return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
+    },
+    export: async (id: string) => {
+      const workpad = await coreStart.http.get<SavedObject<CanvasWorkpad>>(
+        `${getApiPath()}/export/${id}`
+      );
+      const { attributes } = workpad;
+
+      return {
+        ...workpad,
+        attributes: {
+          ...attributes,
+          css: attributes.css ?? DEFAULT_WORKPAD_CSS,
+          variables: attributes.variables ?? [],
+        },
+      };
+    },
+    resolve: async (id: string) => {
+      const { workpad, ...resolveProps } = await coreStart.http.get<ResolveWorkpadResponse>(
+        `${getApiPath()}/resolve/${id}`
+      );
+
+      return {
+        ...resolveProps,
+        workpad: {
+          // @ts-ignore: Shimming legacy workpads that might not have CSS
+          css: DEFAULT_WORKPAD_CSS,
+          // @ts-ignore: Shimming legacy workpads that might not have variables
+          variables: [],
+          ...workpad,
+        },
+      };
     },
     create: (workpad: CanvasWorkpad) => {
       return coreStart.http.post(getApiPath(), {
@@ -76,6 +108,14 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
         }),
       });
     },
+    import: (workpad: CanvasWorkpad) =>
+      coreStart.http.post(`${getApiPath()}/import`, {
+        body: JSON.stringify({
+          ...sanitizeWorkpad({ ...workpad }),
+          assets: workpad.assets || {},
+          variables: workpad.variables || [],
+        }),
+      }),
     createFromTemplate: (templateId: string) => {
       return coreStart.http.post(getApiPath(), {
         body: JSON.stringify({ templateId }),

@@ -8,7 +8,7 @@
 import { History } from 'history';
 import React from 'react';
 import { Router as ReactRouter } from 'react-router-dom';
-import { Route, Router } from './types';
+import { RouteMap, Router } from './types';
 import { RouterContextProvider } from './use_router';
 
 export function RouterProvider({
@@ -16,9 +16,9 @@ export function RouterProvider({
   router,
   history,
 }: {
-  router: Router<Route[]>;
+  router: Router<RouteMap>;
   history: History;
-  children: React.ReactElement;
+  children: React.ReactNode;
 }) {
   return (
     <ReactRouter history={history}>

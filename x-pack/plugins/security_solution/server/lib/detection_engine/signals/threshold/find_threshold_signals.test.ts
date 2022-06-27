@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertsMock, AlertServicesMock } from '../../../../../../alerting/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { mockLogger } from '../__mocks__/es_results';
 import { buildRuleMessageFactory } from '../rule_messages';
@@ -23,12 +23,12 @@ const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
 const mockSingleSearchAfter = jest.fn();
 
 describe('findThresholdSignals', () => {
-  let mockService: AlertServicesMock;
+  let mockService: RuleExecutorServicesMock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(single_search_after, 'singleSearchAfter').mockImplementation(mockSingleSearchAfter);
-    mockService = alertsMock.createAlertServices();
+    mockService = alertsMock.createRuleExecutorServices();
   });
 
   it('should generate a threshold signal query when only a value is provided', async () => {
@@ -45,6 +45,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -58,22 +59,14 @@ describe('findThresholdSignals', () => {
               min_doc_count: 100,
             },
             aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
                 },
               },
             },
@@ -97,6 +90,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -108,22 +102,14 @@ describe('findThresholdSignals', () => {
               size: 10000,
             },
             aggs: {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
                 },
               },
             },
@@ -148,6 +134,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -166,22 +153,14 @@ describe('findThresholdSignals', () => {
                   size: 10000,
                 },
                 aggs: {
-                  top_threshold_hits: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      fields: [
-                        {
-                          field: '*',
-                          include_unmapped: true,
-                        },
-                      ],
-                      size: 1,
+                  max_timestamp: {
+                    max: {
+                      field: '@timestamp',
+                    },
+                  },
+                  min_timestamp: {
+                    min: {
+                      field: '@timestamp',
                     },
                   },
                 },
@@ -213,6 +192,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -245,22 +225,14 @@ describe('findThresholdSignals', () => {
                       script: 'params.cardinalityCount >= 2',
                     },
                   },
-                  top_threshold_hits: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      fields: [
-                        {
-                          field: '*',
-                          include_unmapped: true,
-                        },
-                      ],
-                      size: 1,
+                  max_timestamp: {
+                    max: {
+                      field: '@timestamp',
+                    },
+                  },
+                  min_timestamp: {
+                    min: {
+                      field: '@timestamp',
                     },
                   },
                 },
@@ -292,6 +264,7 @@ describe('findThresholdSignals', () => {
       },
       buildRuleMessage,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -319,22 +292,14 @@ describe('findThresholdSignals', () => {
                   script: 'params.cardinalityCount >= 5',
                 },
               },
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                  fields: [
-                    {
-                      field: '*',
-                      include_unmapped: true,
-                    },
-                  ],
-                  size: 1,
+              max_timestamp: {
+                max: {
+                  field: '@timestamp',
+                },
+              },
+              min_timestamp: {
+                min: {
+                  field: '@timestamp',
                 },
               },
             },

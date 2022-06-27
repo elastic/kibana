@@ -20,13 +20,14 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         }
         labelType="label"
       >
-        <InjectIntl(GroupBySelectUi)
+        <GroupBySelect
           onChange={[Function]}
         />
       </EuiFormRow>
     </EuiFlexItem>
     <EuiFlexItem>
       <FieldSelect
+        allowMultiSelect={true}
         data-test-subj="groupByField"
         fields={
           Object {
@@ -89,6 +90,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         <EuiFieldText
           data-test-subj="groupByInclude"
           onChange={[Function]}
+          value=""
         />
       </EuiFormRow>
     </EuiFlexItem>
@@ -112,6 +114,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         <EuiFieldText
           data-test-subj="groupByExclude"
           onChange={[Function]}
+          value=""
         />
       </EuiFormRow>
     </EuiFlexItem>

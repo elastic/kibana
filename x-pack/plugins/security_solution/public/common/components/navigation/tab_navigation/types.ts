@@ -5,11 +5,10 @@
  * 2.0.
  */
 
+import type { Filter, Query } from '@kbn/es-query';
 import { UrlInputsModel } from '../../../store/inputs/model';
 import { CONSTANTS } from '../../url_state/constants';
-import { SourcererScopePatterns } from '../../../store/sourcerer/model';
 import { TimelineUrl } from '../../../../timelines/store/timeline/model';
-import { Filter, Query } from '../../../../../../../../src/plugins/data/public';
 
 import { SecuritySolutionTabNavigationProps } from '../types';
 import { SiemRouteType } from '../../../utils/route/types';
@@ -21,7 +20,6 @@ export interface TabNavigationProps extends SecuritySolutionTabNavigationProps {
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
-  [CONSTANTS.sourcerer]: SourcererScopePatterns;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: TimelineUrl;
 }
@@ -32,4 +30,5 @@ export interface TabNavigationItemProps {
   disabled: boolean;
   name: string;
   isSelected: boolean;
+  isBeta?: boolean;
 }

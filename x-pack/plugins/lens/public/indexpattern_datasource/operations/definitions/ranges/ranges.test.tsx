@@ -9,11 +9,13 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { rangeOperation } from '../index';
+import { rangeOperation } from '..';
 import { RangeIndexPatternColumn } from './ranges';
 import {
   MODES,
@@ -51,8 +53,10 @@ jest.mock('lodash', () => {
 });
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
+const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
+const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
-dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ params }) => {
+dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
     convert: ({ gte, lt }: { gte: string; lt: string }) => {
       if (params?.id === 'custom') {
@@ -60,6 +64,9 @@ dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ p
       }
       if (params?.id === 'bytes') {
         return `Bytes format: ${gte} - ${lt}`;
+      }
+      if (!id) {
+        return 'Error';
       }
       return `${gte} - ${lt}`;
     },
@@ -81,6 +88,8 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataPluginMockValue,
+  unifiedSearch: unifiedSearchPluginMockValue,
+  dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {
     id: '1',
@@ -151,12 +160,12 @@ describe('ranges', () => {
             ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
             maxBars: 'auto',
           },
-        },
+        } as RangeIndexPatternColumn,
         col2: {
           label: 'Count',
           dataType: 'number',
           isBucketed: false,
-          sourceField: 'Records',
+          sourceField: '___records___',
           operationType: 'count',
         },
       },
@@ -186,6 +195,9 @@ describe('ranges', () => {
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
           "arguments": Object {
+            "autoExtendBounds": Array [
+              false,
+            ],
             "enabled": Array [
               true,
             ],
@@ -246,6 +258,30 @@ describe('ranges', () => {
           function: 'aggHistogram',
           arguments: expect.objectContaining({
             maxBars: [10],
+          }),
+        })
+      );
+    });
+
+    it('should reflect show empty rows correctly', () => {
+      (layer.columns.col1 as RangeIndexPatternColumn).params.maxBars = 10;
+      (layer.columns.col1 as RangeIndexPatternColumn).params.includeEmptyRows = true;
+
+      const esAggsFn = rangeOperation.toEsAggsFn(
+        layer.columns.col1 as RangeIndexPatternColumn,
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggHistogram',
+          arguments: expect.objectContaining({
+            autoExtendBounds: [true],
+            min_doc_count: [true],
           }),
         })
       );
@@ -382,10 +418,10 @@ describe('ranges', () => {
             col1: {
               ...layer.columns.col1,
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                 maxBars: MAX_HISTOGRAM_VALUE,
               },
-            },
+            } as RangeIndexPatternColumn,
           },
         });
       });
@@ -421,7 +457,7 @@ describe('ranges', () => {
             col1: {
               ...layer.columns.col1,
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                 maxBars: GRANULARITY_DEFAULT_VALUE - GRANULARITY_STEP,
               },
             },
@@ -445,7 +481,7 @@ describe('ranges', () => {
             col1: {
               ...layer.columns.col1,
               params: {
-                ...layer.columns.col1.params,
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                 maxBars: GRANULARITY_DEFAULT_VALUE,
               },
             },
@@ -474,6 +510,52 @@ describe('ranges', () => {
         );
 
         expect(instance.find(DragDropBuckets).children).toHaveLength(1);
+      });
+
+      it('should use the parentFormat to create the trigger label', () => {
+        const updateLayerSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            layer={layer}
+            updateLayer={updateLayerSpy}
+            columnId="col1"
+            currentColumn={layer.columns.col1 as RangeIndexPatternColumn}
+          />
+        );
+
+        expect(
+          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+        ).toBe('0 - 1000');
+      });
+
+      it('should not print error if the parentFormat is not provided', () => {
+        // while in the actual React implementation will print an error, here
+        // we intercept the formatter without an id assigned an print "Error"
+        const updateLayerSpy = jest.fn();
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            layer={layer}
+            updateLayer={updateLayerSpy}
+            columnId="col1"
+            currentColumn={
+              {
+                ...layer.columns.col1,
+                params: {
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                  parentFormat: undefined,
+                },
+              } as RangeIndexPatternColumn
+            }
+          />
+        );
+
+        expect(
+          instance.find('[data-test-subj="indexPattern-ranges-popover-trigger"]').first().text()
+        ).not.toBe('Error');
       });
 
       it('should add a new range', () => {
@@ -519,7 +601,7 @@ describe('ranges', () => {
               col1: {
                 ...layer.columns.col1,
                 params: {
-                  ...layer.columns.col1.params,
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                   ranges: [
                     { from: 0, to: DEFAULT_INTERVAL, label: '' },
                     { from: 50, to: Infinity, label: '' },
@@ -574,7 +656,7 @@ describe('ranges', () => {
               col1: {
                 ...layer.columns.col1,
                 params: {
-                  ...layer.columns.col1.params,
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                   ranges: [
                     { from: 0, to: DEFAULT_INTERVAL, label: '' },
                     { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
@@ -601,7 +683,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -624,7 +706,7 @@ describe('ranges', () => {
               col1: {
                 ...layer.columns.col1,
                 params: {
-                  ...layer.columns.col1.params,
+                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
                   ranges: [{ from: 0, to: 50, label: '' }],
                 },
               },
@@ -648,7 +730,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -735,7 +817,7 @@ describe('ranges', () => {
         );
 
         act(() => {
-          instance.find(RangePopover).last().find(EuiLink).simulate('click');
+          instance.find(RangePopover).last().find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -842,7 +924,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(EuiLink).first().simulate('click');
+          instance.find(EuiLink).first().find('button').simulate('click');
         });
 
         expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({

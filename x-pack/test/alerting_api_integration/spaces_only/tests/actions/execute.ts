@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -15,14 +16,11 @@ import {
   getEventLog,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
-
-const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es: Client = getService('es');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -76,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       expect(response.body).to.be.an('object');
       const searchResult = await esTestIndexTool.search('action:test.index-record', reference);
+      // @ts-expect-error doesn't handle total: number
       expect(searchResult.body.hits.total.value).to.eql(1);
       const indexedRecord = searchResult.body.hits.hits[0];
       expect(indexedRecord._source).to.eql({
@@ -132,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         connector_id: createdAction.id,
         status: 'error',
-        message: 'an error occurred while running the action executor',
+        message: 'an error occurred while running the action',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
         retry: false,
       });
@@ -143,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
         actionTypeId: 'test.failing',
         outcome: 'failure',
         message: `action execution failure: test.failing:${createdAction.id}: failing action`,
-        errorMessage: `an error occurred while running the action executor: expected failure for .kibana-alerting-test-data actions-failure-1:space1`,
+        errorMessage: `an error occurred while running the action: expected failure for .kibana-alerting-test-data actions-failure-1:space1`,
       });
     });
 
@@ -211,15 +210,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const searchResult = await esTestIndexTool.search('action:test.authorization', reference);
+      // @ts-expect-error doesn't handle total: number
       expect(searchResult.body.hits.total.value).to.eql(1);
       const indexedRecord = searchResult.body.hits.hits[0];
+      // @ts-expect-error _source is not typed
       expect(indexedRecord._source.state).to.eql({
         callClusterSuccess: true,
         callScopedClusterSuccess: true,
         savedObjectsClientSuccess: false,
         savedObjectsClientError: {
+          // @ts-expect-error _source is not typed
           ...indexedRecord._source.state.savedObjectsClientError,
           output: {
+            // @ts-expect-error _source is not typed
             ...indexedRecord._source.state.savedObjectsClientError.output,
             statusCode: 404,
           },
@@ -322,7 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           actionId: createdAction.id,
           status: 'error',
-          message: 'an error occurred while running the action executor',
+          message: 'an error occurred while running the action',
           serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
           retry: false,
         });
@@ -367,14 +370,12 @@ export default function ({ getService }: FtrProviderContext) {
     const executeEventEnd = Date.parse(executeEvent?.event?.end || 'undefined');
     const dateNow = Date.now();
 
-    expect(typeof duration).to.be('number');
+    expect(typeof duration).to.be('string');
     expect(executeEventStart).to.be.ok();
     expect(startExecuteEventStart).to.equal(executeEventStart);
     expect(executeEventEnd).to.be.ok();
 
-    const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (executeEventEnd - executeEventStart)
-    );
+    const durationDiff = Math.abs(nanosToMillis(duration!) - (executeEventEnd - executeEventStart));
 
     // account for rounding errors
     expect(durationDiff < 1).to.equal(true);

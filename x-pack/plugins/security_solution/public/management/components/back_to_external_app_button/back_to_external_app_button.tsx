@@ -6,7 +6,7 @@
  */
 import React, { memo } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CommonProps, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -15,7 +15,7 @@ import { ListPageRouteState } from '../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
 const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 
   .euiIcon {
     width: ${({ theme }) => theme.eui.euiIconSizes.small};
@@ -24,14 +24,14 @@ const EuiButtonEmptyStyled = styled(EuiButtonEmpty)`
 
   .text {
     font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-    margin-inline-start: ${({ theme }) => theme.eui.paddingSizes.xs};
+    margin-inline-start: ${({ theme }) => theme.eui.euiSizeXS};
   }
 `;
 
 export type BackToExternalAppButtonProps = CommonProps & ListPageRouteState;
 export const BackToExternalAppButton = memo<BackToExternalAppButtonProps>(
   ({ backButtonLabel, backButtonUrl, onBackButtonNavigateTo, ...commonProps }) => {
-    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo!);
+    const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo);
 
     return (
       <EuiButtonEmptyStyled
@@ -40,7 +40,7 @@ export const BackToExternalAppButton = memo<BackToExternalAppButtonProps>(
         flush="left"
         size="xs"
         iconType="arrowLeft"
-        href={backButtonUrl!}
+        href={backButtonUrl}
         onClick={handleBackOnClick}
         textProps={{ className: 'text' }}
       >

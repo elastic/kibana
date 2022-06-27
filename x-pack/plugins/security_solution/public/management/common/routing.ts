@@ -6,29 +6,34 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { generatePath } from 'react-router-dom';
+// FIXME: Remove references to `querystring`
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-
+import { generatePath } from 'react-router-dom';
+import { appendSearch } from '../../common/components/link_to/helpers';
+import { ArtifactListPageUrlParams } from '../components/artifact_list_page';
+import { paginationFromUrlParams } from '../hooks/use_url_pagination';
+import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
+import { EventFiltersPageLocation } from '../pages/event_filters/types';
+import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
+import { AdministrationSubTab } from '../types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
+  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from './constants';
-import { AdministrationSubTab } from '../types';
-import { appendSearch } from '../../common/components/link_to/helpers';
-import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
-import { TrustedAppsListPageLocation } from '../pages/trusted_apps/state';
-import { EventFiltersPageLocation } from '../pages/event_filters/types';
-import { HostIsolationExceptionsPageLocation } from '../pages/host_isolation_exceptions/types';
-import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
+import { isDefaultOrMissing, getArtifactListPageUrlPath } from './url_routing';
 
 // Taken from: https://github.com/microsoft/TypeScript/issues/12936#issuecomment-559034150
 type ExactKeys<T1, T2> = Exclude<keyof T1, keyof T2> extends never ? T1 : never;
@@ -132,35 +137,16 @@ export const getPolicyTrustedAppsPath = (policyId: string, search?: string) => {
   })}${appendSearch(search)}`;
 };
 
-const isDefaultOrMissing = <T>(value: T | undefined, defaultValue: T) => {
-  return value === undefined || value === defaultValue;
-};
-
-const normalizeTrustedAppsPageLocation = (
-  location?: Partial<TrustedAppsListPageLocation>
-): Partial<TrustedAppsListPageLocation> => {
-  if (location) {
-    return {
-      ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
-        ? { page_index: location.page_index }
-        : {}),
-      ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
-        ? { page_size: location.page_size }
-        : {}),
-      ...(!isDefaultOrMissing(location.view_type, 'grid') ? { view_type: location.view_type } : {}),
-      ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
-      ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
-      ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
-      ...(!isDefaultOrMissing(location.included_policies, '')
-        ? { included_policies: location.included_policies }
-        : ''),
-      ...(!isDefaultOrMissing(location.excluded_policies, '')
-        ? { excluded_policies: location.excluded_policies }
-        : ''),
-    };
-  } else {
-    return {};
-  }
+export const getPolicyEventFiltersPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  return `${generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  })}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
 };
 
 const normalizePolicyDetailsArtifactsListPageLocation = (
@@ -168,11 +154,11 @@ const normalizePolicyDetailsArtifactsListPageLocation = (
 ): Partial<PolicyDetailsArtifactsPageLocation> => {
   if (location) {
     return {
-      ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
-        ? { page_index: location.page_index }
+      ...(!isDefaultOrMissing(location.page, MANAGEMENT_DEFAULT_PAGE + 1)
+        ? { page: location.page }
         : {}),
-      ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
-        ? { page_size: location.page_size }
+      ...(!isDefaultOrMissing(location.pageSize, MANAGEMENT_DEFAULT_PAGE_SIZE)
+        ? { pageSize: location.pageSize }
         : {}),
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
@@ -196,26 +182,9 @@ const normalizeEventFiltersPageLocation = (
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
       ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
-    };
-  } else {
-    return {};
-  }
-};
-
-const normalizeHostIsolationExceptionsPageLocation = (
-  location?: Partial<EventFiltersPageLocation>
-): Partial<EventFiltersPageLocation> => {
-  if (location) {
-    return {
-      ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
-        ? { page_index: location.page_index }
-        : {}),
-      ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
-        ? { page_size: location.page_size }
-        : {}),
-      ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
-      ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
-      ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
+      ...(!isDefaultOrMissing(location.included_policies, '')
+        ? { included_policies: location.included_policies }
+        : ''),
     };
   } else {
     return {};
@@ -256,10 +225,6 @@ const extractIncludedPolicies = (query: querystring.ParsedUrlQuery): string => {
   return extractFirstParamValue(query, 'included_policies') || '';
 };
 
-const extractExcludedPolicies = (query: querystring.ParsedUrlQuery): string => {
-  return extractFirstParamValue(query, 'excluded_policies') || '';
-};
-
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
@@ -269,34 +234,19 @@ export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) =
 export const extractTrustedAppsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   ...extractListPaginationParams(query),
   included_policies: extractIncludedPolicies(query),
-  excluded_policies: extractExcludedPolicies(query),
 });
 
-export const extractTrustedAppsListPageLocation = (
-  query: querystring.ParsedUrlQuery
-): TrustedAppsListPageLocation => {
-  const showParamValue = extractFirstParamValue(
-    query,
-    'show'
-  ) as TrustedAppsListPageLocation['show'];
+export const extractArtifactsListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
+  ...extractListPaginationParams(query),
+  included_policies: extractIncludedPolicies(query),
+});
 
-  return {
-    ...extractTrustedAppsListPaginationParams(query),
-    view_type: extractFirstParamValue(query, 'view_type') === 'list' ? 'list' : 'grid',
-    show:
-      showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
-    id: extractFirstParamValue(query, 'id'),
-  };
-};
-
-export const getTrustedAppsListPath = (location?: Partial<TrustedAppsListPageLocation>): string => {
+export const getTrustedAppsListPath = (location?: Partial<ArtifactListPageUrlParams>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
   });
 
-  return `${path}${appendSearch(
-    querystring.stringify(normalizeTrustedAppsPageLocation(location))
-  )}`;
+  return getArtifactListPageUrlPath(path, location);
 };
 
 export const extractPolicyDetailsArtifactsListPageLocation = (
@@ -306,9 +256,11 @@ export const extractPolicyDetailsArtifactsListPageLocation = (
     query,
     'show'
   ) as PolicyDetailsArtifactsPageLocation['show'];
-
+  const pagination = paginationFromUrlParams(query);
   return {
-    ...extractListPaginationParams(query),
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+    filter: query.filter as string,
     show: showParamValue && 'list' === showParamValue ? showParamValue : undefined,
   };
 };
@@ -327,13 +279,13 @@ export const getPolicyDetailsArtifactsListPath = (
   )}`;
 };
 
-export const extractEventFiltetrsPageLocation = (
+export const extractEventFiltersPageLocation = (
   query: querystring.ParsedUrlQuery
 ): EventFiltersPageLocation => {
   const showParamValue = extractFirstParamValue(query, 'show') as EventFiltersPageLocation['show'];
 
   return {
-    ...extractListPaginationParams(query),
+    ...extractArtifactsListPaginationParams(query),
     show:
       showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
     id: extractFirstParamValue(query, 'id'),
@@ -350,30 +302,46 @@ export const getEventFiltersListPath = (location?: Partial<EventFiltersPageLocat
   )}`;
 };
 
-export const extractHostIsolationExceptionsPageLocation = (
-  query: querystring.ParsedUrlQuery
-): HostIsolationExceptionsPageLocation => {
-  const showParamValue = extractFirstParamValue(
-    query,
-    'show'
-  ) as HostIsolationExceptionsPageLocation['show'];
-
-  return {
-    ...extractListPaginationParams(query),
-    show:
-      showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
-    id: extractFirstParamValue(query, 'id'),
-  };
-};
-
 export const getHostIsolationExceptionsListPath = (
-  location?: Partial<HostIsolationExceptionsPageLocation>
+  location?: Partial<ArtifactListPageUrlParams>
 ): string => {
   const path = generatePath(MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH, {
     tabName: AdministrationSubTab.hostIsolationExceptions,
   });
 
+  return getArtifactListPageUrlPath(path, location);
+};
+
+export const getPolicyHostIsolationExceptionsPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  const path = generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  });
   return `${path}${appendSearch(
-    querystring.stringify(normalizeHostIsolationExceptionsPageLocation(location))
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
+  )}`;
+};
+
+export const getBlocklistsListPath = (location?: Partial<ArtifactListPageUrlParams>): string => {
+  const path = generatePath(MANAGEMENT_ROUTING_BLOCKLIST_PATH, {
+    tabName: AdministrationSubTab.blocklist,
+  });
+
+  return getArtifactListPageUrlPath(path, location);
+};
+
+export const getPolicyBlocklistsPath = (
+  policyId: string,
+  location?: Partial<PolicyDetailsArtifactsPageLocation>
+) => {
+  const path = generatePath(MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH, {
+    tabName: AdministrationSubTab.policies,
+    policyId,
+  });
+  return `${path}${appendSearch(
+    querystring.stringify(normalizePolicyDetailsArtifactsListPageLocation(location))
   )}`;
 };

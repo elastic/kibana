@@ -13,9 +13,9 @@ import {
   IKibanaResponse,
   IRouter,
   IScopedClusterClient,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { EventEmitter } from 'events';
-import { TaskManagerStartContract } from '../../../../../plugins/task_manager/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const scope = 'testing';
 const taskManagerQuery = {
@@ -107,6 +107,31 @@ export function initRoutes(
         return res.ok({ body: await taskManager.runNow(id) });
       } catch (err) {
         return res.ok({ body: { id, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/sample_tasks/bulk_update_schedules`,
+      validate: {
+        body: schema.object({
+          taskIds: schema.arrayOf(schema.string()),
+          schedule: schema.object({ interval: schema.string() }),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) {
+      const { taskIds, schedule } = req.body;
+      try {
+        const taskManager = await taskManagerStart;
+        return res.ok({ body: await taskManager.bulkUpdateSchedules(taskIds, schedule) });
+      } catch (err) {
+        return res.ok({ body: { taskIds, error: `${err}` } });
       }
     }
   );
@@ -249,7 +274,7 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       try {
-        await ensureIndexIsRefreshed(context.core.elasticsearch.client);
+        await ensureIndexIsRefreshed((await context.core).elasticsearch.client);
         const taskManager = await taskManagerStart;
         return res.ok({ body: await taskManager.get(req.params.taskId) });
       } catch ({ isBoom, output, message }) {
@@ -268,7 +293,7 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      await ensureIndexIsRefreshed(context.core.elasticsearch.client);
+      await ensureIndexIsRefreshed((await context.core).elasticsearch.client);
       return res.ok({ body: {} });
     }
   );
@@ -284,7 +309,7 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       try {
-        await ensureIndexIsRefreshed(context.core.elasticsearch.client);
+        await ensureIndexIsRefreshed((await context.core).elasticsearch.client);
         let tasksFound = 0;
         const taskManager = await taskManagerStart;
         do {

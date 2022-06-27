@@ -50,13 +50,6 @@ export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
   }
 );
 
-export const CASE_CLOSURE_OPTIONS_SUB_CASES = i18n.translate(
-  'xpack.cases.configureCases.caseClosureOptionsSubCases',
-  {
-    defaultMessage: 'Automatic closure of sub-cases is not supported.',
-  }
-);
-
 export const CASE_CLOSURE_OPTIONS_LABEL = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsLabel',
   {
@@ -162,3 +155,21 @@ export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string =>
     values: { connectorName },
     defaultMessage: 'Update { connectorName }',
   });
+
+export const DEPRECATED_TOOLTIP_TEXT = i18n.translate(
+  'xpack.cases.configureCases.deprecatedTooltipText',
+  {
+    defaultMessage: 'deprecated',
+  }
+);
+
+export const DEPRECATED_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.cases.configureCases.deprecatedTooltipContent',
+  {
+    defaultMessage: 'This connector is deprecated. Update it, or create a new one.',
+  }
+);
+
+export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
+  defaultMessage: 'Configure cases',
+});

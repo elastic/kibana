@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import clusterFixture from './fixtures/cluster';
+import clusterFixture from './fixtures/cluster.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -34,7 +34,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange, codePaths })
         .expect(200);
-
       expect(body).to.eql(clusterFixture);
     });
   });

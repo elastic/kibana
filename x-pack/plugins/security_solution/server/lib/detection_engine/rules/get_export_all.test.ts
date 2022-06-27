@@ -6,24 +6,40 @@
  */
 
 import {
-  getAlertMock,
+  getRuleMock,
   getFindResultWithSingleHit,
   FindHit,
+  getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
-import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import {
+  getOutputDetailsSampleWithExceptions,
+  getSampleDetailsAsNdjson,
+} from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('getExportAll - %s', (_, isRuleRegistryEnabled) => {
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { requestContextMock } from '../routes/__mocks__/request_context';
+
+const exceptionsClient = getExceptionListClientMock();
+
+describe('getExportAll', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const { clients } = requestContextMock.createTools();
+
+  beforeEach(async () => {
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+  });
+
   test('it exports everything from the alerts client', async () => {
     const rulesClient = rulesClientMock.create();
-    const result = getFindResultWithSingleHit(isRuleRegistryEnabled);
-    const alert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+    const result = getFindResultWithSingleHit();
+    const alert = getRuleMock(getQueryRuleParams());
+
     alert.params = {
       ...alert.params,
       filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
@@ -35,7 +51,12 @@ describe.each([
     result.data = [alert];
     rulesClient.find.mockResolvedValue(result);
 
-    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
+    const exports = await getExportAll(
+      rulesClient,
+      exceptionsClient,
+      clients.savedObjectsClient,
+      logger
+    );
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
     expect(rulesJson).toEqual({
@@ -64,6 +85,9 @@ describe.each([
       name: 'Detect Root/Admin Users',
       query: 'user.name: root or user.name: admin',
       references: ['http://example.com', 'https://example.com'],
+      related_integrations: [],
+      required_fields: [],
+      setup: '',
       timeline_id: 'some-timeline-id',
       timeline_title: 'some-timeline-title',
       meta: { someMeta: 'someField' },
@@ -80,7 +104,14 @@ describe.each([
       exceptions_list: getListArrayMock(),
     });
     expect(detailsJson).toEqual({
-      exported_count: 1,
+      exported_exception_list_count: 1,
+      exported_exception_list_item_count: 1,
+      exported_count: 3,
+      exported_rules_count: 1,
+      missing_exception_list_item_count: 0,
+      missing_exception_list_items: [],
+      missing_exception_lists: [],
+      missing_exception_lists_count: 0,
       missing_rules: [],
       missing_rules_count: 0,
     });
@@ -94,13 +125,20 @@ describe.each([
       total: 0,
       data: [],
     };
+    const details = getOutputDetailsSampleWithExceptions();
 
     rulesClient.find.mockResolvedValue(findResult);
 
-    const exports = await getExportAll(rulesClient, isRuleRegistryEnabled);
+    const exports = await getExportAll(
+      rulesClient,
+      exceptionsClient,
+      clients.savedObjectsClient,
+      logger
+    );
     expect(exports).toEqual({
       rulesNdjson: '',
-      exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',
+      exportDetails: getSampleDetailsAsNdjson(details),
+      exceptionLists: '',
     });
   });
 });

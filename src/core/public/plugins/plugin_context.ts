@@ -7,12 +7,12 @@
  */
 
 import { omit } from 'lodash';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import { DiscoveredPlugin } from '../../server';
 import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
-import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CoreSetup, CoreStart } from '../';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * The available core services passed to a `PluginInitializer`
@@ -34,7 +34,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 }
 
 /**
- * Provides a plugin-specific context passed to the plugin's construtor. This is currently
+ * Provides a plugin-specific context passed to the plugin's constructor. This is currently
  * empty but should provide static services in the future, such as config and logging.
  *
  * @param coreContext
@@ -83,17 +83,20 @@ export function createPluginSetupContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
+    analytics: deps.analytics,
     application: {
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
     },
     fatalErrors: deps.fatalErrors,
+    executionContext: deps.executionContext,
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },
+    theme: deps.theme,
     getStartServices: () => plugin.startDependencies,
   };
 }
@@ -119,6 +122,7 @@ export function createPluginStartContext<
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreStart {
   return {
+    analytics: deps.analytics,
     application: {
       applications$: deps.application.applications$,
       currentAppId$: deps.application.currentAppId$,
@@ -128,6 +132,7 @@ export function createPluginStartContext<
       getUrlForApp: deps.application.getUrlForApp,
     },
     docLinks: deps.docLinks,
+    executionContext: deps.executionContext,
     http: deps.http,
     chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
@@ -140,5 +145,6 @@ export function createPluginStartContext<
     },
     fatalErrors: deps.fatalErrors,
     deprecations: deps.deprecations,
+    theme: deps.theme,
   };
 }

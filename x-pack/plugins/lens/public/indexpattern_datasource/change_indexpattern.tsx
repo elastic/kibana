@@ -7,10 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
+import { ToolbarButton, ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { ToolbarButton, ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;
@@ -19,6 +20,7 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
 
 export function ChangeIndexPattern({
   indexPatternRefs,
+  isMissingCurrent,
   indexPatternId,
   onChangeIndexPattern,
   trigger,
@@ -26,13 +28,12 @@ export function ChangeIndexPattern({
 }: {
   trigger: ChangeIndexPatternTriggerProps;
   indexPatternRefs: IndexPatternRef[];
+  isMissingCurrent?: boolean;
   onChangeIndexPattern: (newId: string) => void;
   indexPatternId?: string;
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-
-  const isMissingCurrent = !indexPatternRefs.some(({ id }) => id === indexPatternId);
 
   // be careful to only add color with a value, otherwise it will fallbacks to "primary"
   const colorProp = isMissingCurrent
@@ -61,53 +62,32 @@ export function ChangeIndexPattern({
       <EuiPopover
         panelClassName="lnsChangeIndexPatternPopover"
         button={createTrigger()}
+        panelProps={{
+          ['data-test-subj']: 'lnsChangeIndexPatternPopover',
+        }}
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
         display="block"
-        panelPaddingSize="s"
+        panelPaddingSize="none"
         ownFocus
       >
         <div>
-          <EuiPopoverTitle>
-            {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
-              defaultMessage: 'Index pattern',
+          <EuiPopoverTitle paddingSize="s">
+            {i18n.translate('xpack.lens.indexPattern.changeDataViewTitle', {
+              defaultMessage: 'Data view',
             })}
           </EuiPopoverTitle>
-          <EuiSelectable<{
-            key?: string;
-            label: string;
-            value?: string;
-            checked?: 'on' | 'off' | undefined;
-          }>
-            {...selectableProps}
-            searchable
-            singleSelection="always"
-            options={indexPatternRefs.map(({ title, id }) => ({
-              key: id,
-              label: title,
-              value: id,
-              checked: id === indexPatternId ? 'on' : undefined,
-            }))}
-            onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked) as unknown as {
-                value: string;
-              };
+
+          <DataViewsList
+            dataViewsList={indexPatternRefs}
+            onChangeDataView={(newId) => {
               trackUiEvent('indexpattern_changed');
-              onChangeIndexPattern(choice.value);
+              onChangeIndexPattern(newId);
               setPopoverIsOpen(false);
             }}
-            searchProps={{
-              compressed: true,
-              ...(selectableProps ? selectableProps.searchProps : undefined),
-            }}
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
+            currentDataViewId={indexPatternId}
+            selectableProps={selectableProps}
+          />
         </div>
       </EuiPopover>
     </>

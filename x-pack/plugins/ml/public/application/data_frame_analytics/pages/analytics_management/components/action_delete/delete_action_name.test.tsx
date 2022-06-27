@@ -9,11 +9,8 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 import mockAnalyticsListItem from '../analytics_list/__mocks__/analytics_list_item.json';
-import { I18nProvider } from '@kbn/i18n/react';
-import {
-  coreMock as mockCoreServices,
-  i18nServiceMock,
-} from '../../../../../../../../../../src/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock as mockCoreServices, i18nServiceMock } from '@kbn/core/public/mocks';
 
 import { DeleteActionName } from './delete_action_name';
 import { DeleteActionModal } from './delete_action_modal';
@@ -24,13 +21,13 @@ jest.mock('../../../../../capabilities/check_capabilities', () => ({
   createPermissionFailureMessage: jest.fn(),
 }));
 
-jest.mock('../../../../../../application/util/dependency_cache', () => ({
+jest.mock('../../../../../util/dependency_cache', () => ({
   getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
 }));
 
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
-    services: mockCoreServices.createStart(),
+    services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
   }),
   useNotifications: () => {
     return {
@@ -69,7 +66,7 @@ describe('DeleteAction', () => {
   });
 
   describe('When delete model is open', () => {
-    it('should allow to delete target index by default.', () => {
+    it('should not allow to delete target index by default.', () => {
       const mock = jest.spyOn(CheckPrivilige, 'checkPermission');
       mock.mockImplementation((p) => p === 'canDeleteDataFrameAnalytics');
 
@@ -101,10 +98,9 @@ describe('DeleteAction', () => {
       const deleteButton = getByTestId('mlAnalyticsJobDeleteButton');
       fireEvent.click(deleteButton);
       expect(getByTestId('mlAnalyticsJobDeleteModal')).toBeInTheDocument();
-      expect(getByTestId('mlAnalyticsJobDeleteIndexSwitch')).toBeInTheDocument();
-      const mlAnalyticsJobDeleteIndexSwitch = getByTestId('mlAnalyticsJobDeleteIndexSwitch');
-      expect(mlAnalyticsJobDeleteIndexSwitch).toHaveAttribute('aria-checked', 'true');
+      expect(queryByTestId('mlAnalyticsJobDeleteIndexSwitch')).toBeNull();
       expect(queryByTestId('mlAnalyticsJobDeleteIndexPatternSwitch')).toBeNull();
+
       mock.mockRestore();
     });
   });

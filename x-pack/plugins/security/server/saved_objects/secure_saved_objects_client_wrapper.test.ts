@@ -14,18 +14,18 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsResolveResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
-} from 'src/core/server';
-import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { AuditEvent } from '../audit';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import { auditLoggerMock } from '../audit/mocks';
 import { Actions } from '../authorization';
 import type { SavedObjectActions } from '../authorization/actions/saved_object';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
-jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => {
   const { SavedObjectsUtils } = jest.requireActual(
-    'src/core/server/saved_objects/service/lib/utils'
+    '@kbn/core/server/saved_objects/service/lib/utils'
   );
   return {
     SavedObjectsUtils: {
@@ -65,8 +65,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     checkSavedObjectsPrivilegesAsCurrentUser: jest.fn(),
     errors,
     getSpacesService,
-    legacyAuditLogger: securityAuditLoggerMock.create(),
-    auditLogger: auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest()),
+    auditLogger: auditLoggerMock.create(),
     forbiddenError,
     generalError,
   };
@@ -81,8 +80,6 @@ const expectGeneralError = async (fn: Function, args: Record<string, any>) => {
     clientOpts.generalError
   );
   expect(clientOpts.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
 };
 
 /**
@@ -98,51 +95,12 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>, act
   await expect(fn.bind(client)(...Object.values(args))).rejects.toThrowError(
     clientOpts.forbiddenError
   );
-  const getCalls = (
-    clientOpts.actions.savedObject.get as jest.MockedFunction<SavedObjectActions['get']>
-  ).mock.calls;
-  const actions = clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mock.calls[0][0];
-  const spaceId = args.options?.namespaces
-    ? args.options?.namespaces[0]
-    : args.options?.namespace || 'default';
-
-  const ACTION = getCalls[0][1];
-  const types = getCalls.map((x) => x[0]);
-  const missing = [{ spaceId, privilege: actions[0] }]; // if there was more than one type, only the first type was unauthorized
-  const spaceIds = [spaceId];
 
   expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-    USERNAME,
-    action ?? ACTION,
-    types,
-    spaceIds,
-    missing,
-    args
-  );
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
 };
 
 const expectSuccess = async (fn: Function, args: Record<string, any>, action?: string) => {
-  const result = await fn.bind(client)(...Object.values(args));
-  const getCalls = (
-    clientOpts.actions.savedObject.get as jest.MockedFunction<SavedObjectActions['get']>
-  ).mock.calls;
-  const ACTION = getCalls[0][1];
-  const types = getCalls.map((x) => x[0]);
-  const spaceIds = args.options?.namespaces || [args.options?.namespace || 'default'];
-
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-    USERNAME,
-    action ?? ACTION,
-    types,
-    spaceIds,
-    args
-  );
-  return result;
+  return await fn.bind(client)(...Object.values(args));
 };
 
 const expectPrivilegeCheck = async (
@@ -795,15 +753,6 @@ describe('#find', () => {
     const result = await client.find(options);
 
     expect(clientOpts.baseClient.find).not.toHaveBeenCalled();
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-      USERNAME,
-      'find',
-      [type1],
-      options.namespaces,
-      [{ spaceId: 'some-ns', privilege: 'mock-saved_object:foo/find' }],
-      { options }
-    );
     expect(result).toEqual({ page: 1, per_page: 20, total: 0, saved_objects: [] });
   });
 
@@ -1508,6 +1457,8 @@ describe('#collectMultiNamespaceReferences', () => {
     const reqObj1 = { type: 'a', id: '1' };
     const reqObj2 = { type: 'b', id: '2' };
     const spaces = [spaceX, spaceY, spaceZ];
+    const spacesWithMatchingAliases = [spaceX, spaceY, spaceZ];
+    const spacesWithMatchingOrigins = [spaceX, spaceY, spaceZ];
 
     // Actual object graph:
     //   ─► obj1 (a:1) ─┬─► obj3 (c:3) ───► obj5 (c:5) ─► obj8 (c:8) ─┐
@@ -1522,9 +1473,24 @@ describe('#collectMultiNamespaceReferences', () => {
     //                  │                       └───────────────────────────────────┘
     //                  └─► obj4 (d:4)
     //   ─► obj2 (b:2)
-    const obj1 = { ...reqObj1, spaces, inboundReferences: [] };
+    const obj1 = {
+      ...reqObj1,
+      spaces,
+      inboundReferences: [],
+      // We include spacesWithMatchingAliases and spacesWithMatchingOrigins on this object of type 'a' (which the user is authorized to access globally) to assert that they are not redacted
+      spacesWithMatchingAliases,
+      spacesWithMatchingOrigins,
+    };
     const obj2 = { ...reqObj2, spaces: [], inboundReferences: [] }; // non-multi-namespace types and hidden types will be returned with an empty spaces array
-    const obj3 = { type: 'c', id: '3', spaces, ...getInboundRefsFrom(obj1) };
+    const obj3 = {
+      type: 'c',
+      id: '3',
+      spaces,
+      ...getInboundRefsFrom(obj1),
+      // We include spacesWithMatchingAliases and spacesWithMatchingOrigins on this object of type 'c' (which the user is partially authorized for) to assert that they are redacted
+      spacesWithMatchingAliases,
+      spacesWithMatchingOrigins,
+    };
     const obj4 = { type: 'd', id: '4', spaces, ...getInboundRefsFrom(obj1) };
     const obj5 = {
       type: 'c',
@@ -1561,9 +1527,14 @@ describe('#collectMultiNamespaceReferences', () => {
       const result = await client.collectMultiNamespaceReferences([reqObj1, reqObj2], options);
       expect(result).toEqual({
         objects: [
-          obj1, // obj1's spaces array is not redacted because the user is globally authorized to access it
+          obj1, // obj1's spaces, spacesWithMatchingAliases, and spacesWithMatchingOrigins arrays are not redacted because the user is globally authorized to access it
           obj2, // obj2 has an empty spaces array (see above)
-          { ...obj3, spaces: [spaceX, '?', '?'] },
+          {
+            ...obj3,
+            spaces: [spaceX, '?', '?'],
+            spacesWithMatchingAliases: [spaceX, '?', '?'],
+            spacesWithMatchingOrigins: [spaceX, '?', '?'],
+          },
           { ...obj4, spaces: [], isMissing: true }, // obj4 is marked as Missing because the user was not authorized to access it
           obj5, // obj5's spaces array is not redacted, because it exists in All Spaces
           // obj7 is not included at all because the user was not authorized to access its inbound reference (obj4)
@@ -1618,9 +1589,14 @@ describe('#collectMultiNamespaceReferences', () => {
       const result = await client.collectMultiNamespaceReferences([reqObj1, reqObj2], options);
       expect(result).toEqual({
         objects: [
-          obj1, // obj1's spaces array is not redacted because the user is globally authorized to access it
+          obj1, // obj1's spaces, spacesWithMatchingAliases, and spacesWithMatchingOrigins arrays are not redacted because the user is globally authorized to access it
           obj2, // obj2 has an empty spaces array (see above)
-          { ...obj3, spaces: [spaceX, spaceY, '?'] },
+          {
+            ...obj3,
+            spaces: [spaceX, spaceY, '?'],
+            spacesWithMatchingAliases: [spaceX, spaceY, '?'],
+            spacesWithMatchingOrigins: [spaceX, spaceY, '?'],
+          },
           { ...obj4, spaces: [], isMissing: true }, // obj4 is marked as Missing because the user was not authorized to access it
           obj5, // obj5's spaces array is not redacted, because it exists in All Spaces
           // obj7 is not included at all because the user was not authorized to access its inbound reference (obj4)

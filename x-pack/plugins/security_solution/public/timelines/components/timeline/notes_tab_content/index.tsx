@@ -21,7 +21,7 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineActions } from '../../../store/timeline';
 import {
@@ -32,13 +32,14 @@ import { TimelineStatus, TimelineTabs } from '../../../../../common/types/timeli
 import { appSelectors } from '../../../../common/store/app';
 import { AddNote } from '../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../notes/translations';
-import { PARTICIPANTS } from '../../../../cases/translations';
+import { PARTICIPANTS } from '../translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
 import { getTimelineNoteSelector } from './selectors';
 import { DetailsPanel } from '../../side_panel';
 import { getScrollToTopSelector } from '../tabs_content/selectors';
 import { useScrollToTop } from '../../../../common/components/scroll_to_top';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -95,8 +96,11 @@ const ParticipantsComponent: React.FC<ParticipantsProps> = ({ users }) => {
   const List = useMemo(
     () =>
       users.map((user) => (
-        <Fragment key={user.updatedBy!}>
-          <UsernameWithAvatar key={user.updatedBy!} username={user.updatedBy!} />
+        <Fragment key={user.updatedBy === null ? undefined : user.updatedBy}>
+          <UsernameWithAvatar
+            key={user.updatedBy === null ? undefined : user.updatedBy}
+            username={String(user.updatedBy)}
+          />
           <EuiSpacer size="s" />
         </Fragment>
       )),
@@ -128,6 +132,7 @@ interface NotesTabContentProps {
 
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
   const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
   const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
@@ -142,8 +147,9 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     noteIds,
     status: timelineStatus,
   } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
-
-  const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
 
   const getNotesAsCommentsList = useMemo(
     () => appSelectors.selectNotesAsCommentsListSelector(),
@@ -185,11 +191,19 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
           browserFields={browserFields}
           docValueFields={docValueFields}
           handleOnPanelClosed={handleOnPanelClosed}
+          runtimeMappings={runtimeMappings}
           tabType={TimelineTabs.notes}
           timelineId={timelineId}
         />
       ) : null,
-    [browserFields, docValueFields, expandedDetail, handleOnPanelClosed, timelineId]
+    [
+      browserFields,
+      docValueFields,
+      expandedDetail,
+      handleOnPanelClosed,
+      runtimeMappings,
+      timelineId,
+    ]
   );
 
   const SidebarContent = useMemo(
@@ -227,7 +241,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
             showTimelineDescription
           />
           <EuiSpacer size="s" />
-          {!isImmutable && (
+          {!isImmutable && kibanaSecuritySolutionsPrivileges.crud === true && (
             <AddNote
               associateNote={associateNote}
               newNote={newNote}

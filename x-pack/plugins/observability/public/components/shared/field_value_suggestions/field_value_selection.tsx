@@ -20,13 +20,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { isEqual, map } from 'lodash';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FieldValueSelectionProps, ListItem } from './types';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 const Counter = euiStyled.div`
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
   background: ${({ theme }) => theme.eui.euiColorLightShade};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: 0 ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const formatOptions = (
@@ -70,8 +70,8 @@ export function FieldValueSelection({
   values = [],
   selectedValue,
   excludedValue,
-  compressed = true,
   allowExclusions = true,
+  compressed = true,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
@@ -174,8 +174,8 @@ export function FieldValueSelection({
           }}
           options={options}
           onChange={onChange}
-          isLoading={loading && !query && options.length === 0}
           allowExclusions={allowExclusions}
+          isLoading={loading && !query && options.length === 0}
         >
           {(list, search) => (
             <div style={{ width: 240 }}>
@@ -223,6 +223,9 @@ export function FieldValueSelection({
     </Wrapper>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default FieldValueSelection;
 
 const Wrapper = styled.div`
   &&& {

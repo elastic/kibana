@@ -6,15 +6,13 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { Query, IIndexPattern, Filter } from 'src/plugins/data/public';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { HostsTableType } from '../../store/model';
 import { HostsQueryProps } from '../types';
 import { NavTab } from '../../../common/components/navigation/types';
 import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
 import { hostsModel } from '../../store';
-import { DocValueFields } from '../../../common/containers/source';
-
 interface HostDetailsComponentReduxProps {
   query: Query;
   filters: Filter[];
@@ -58,11 +56,10 @@ export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 
 export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
-    docValueFields?: DocValueFields[];
     indexNames: string[];
     pageFilters?: Filter[];
     filterQuery?: string;
-    indexPattern: IIndexPattern;
+    indexPattern: DataViewBase;
     type: hostsModel.HostsType;
   };
 

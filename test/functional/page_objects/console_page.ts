@@ -14,6 +14,7 @@ export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  log = this.ctx.getService('log');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -83,20 +84,124 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
-  public async promptAutocomplete() {
-    // This focusses the cursor on the bottom of the text area
-    const editor = await this.getEditor();
-    const content = await editor.findByCssSelector('.ace_content');
-    await content.click();
+  // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
+  public async promptAutocomplete(letter = 'b') {
     const textArea = await this.testSubjects.find('console-textarea');
-    // There should be autocomplete for this on all license levels
-    await textArea.pressKeys('\nGET s');
-    await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
+    await textArea.clickMouseButton();
+    await textArea.type(letter);
+    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
-  public async hasAutocompleter(): Promise<boolean> {
+  public async isAutocompleteVisible() {
+    const element = await this.find.byCssSelector('.ace_autocomplete');
+    if (!element) return false;
+
+    const attribute = await element.getAttribute('style');
+    return !attribute.includes('display: none;');
+  }
+
+  public async enterRequest(request: string = '\nGET _search') {
+    const textArea = await this.getEditorTextArea();
+    await textArea.pressKeys(request);
+  }
+
+  public async enterText(text: string) {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.type(text);
+  }
+
+  private async getEditorTextArea() {
+    // This focusses the cursor on the bottom of the text area
+    await this.retry.try(async () => {
+      const editor = await this.getEditor();
+      const content = await editor.findByCssSelector('.ace_content');
+      await content.click();
+    });
+    return await this.testSubjects.find('console-textarea');
+  }
+
+  public async getAllTextLines() {
+    const editor = await this.getEditor();
+    return await editor.findAllByClassName('ace_line_group');
+  }
+
+  public async getAllVisibleText() {
+    let textString = '';
+    const textLineElements = await this.getAllTextLines();
+    for (let i = 0; i < textLineElements.length; i++) {
+      textString = textString.concat(await textLineElements[i].getVisibleText());
+    }
+    return textString;
+  }
+
+  public async getVisibleTextAt(lineIndex: number) {
+    const lines = await this.getAllTextLines();
+    if (lines.length < lineIndex) {
+      throw new Error(`No line with index: ${lineIndex}`);
+    }
+
+    const line = lines[lineIndex];
+    const text = await line.getVisibleText();
+
+    return text.trim();
+  }
+
+  public async pressEnter() {
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.pressKeys(Key.ENTER);
+  }
+
+  public async clearTextArea() {
+    await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
+      const textArea = await this.testSubjects.find('console-textarea');
+      await textArea.clickMouseButton();
+      await textArea.clearValueWithKeyboard();
+
+      const editor = await this.getEditor();
+      const lines = await editor.findAllByClassName('ace_line_group');
+      // there should be only one empty line after clearing the textarea
+      const text = await lines[lines.length - 1].getVisibleText();
+      return lines.length === 1 && text.trim() === '';
+    });
+  }
+
+  public async selectAllRequests() {
+    const editor = await this.getEditorTextArea();
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await editor.pressKeys([selectionKey, 'a']);
+  }
+
+  public async hasSuccessBadge() {
     try {
-      return Boolean(await this.find.byCssSelector('.ace_autocomplete'));
+      const responseEditor = await this.testSubjects.find('response-editor');
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--success'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasWarningBadge() {
+    try {
+      const responseEditor = await this.testSubjects.find('response-editor');
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--warning'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasInvalidSyntax() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_invalid'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasErrorMarker() {
+    try {
+      const requestEditor = await this.getRequestEditor();
+      return Boolean(await requestEditor.findByCssSelector('.ace_error'));
     } catch (e) {
       return false;
     }

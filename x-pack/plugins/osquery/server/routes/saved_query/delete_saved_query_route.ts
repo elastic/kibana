@@ -6,37 +6,38 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { isSavedQueryPrebuilt } from './utils';
 
-export const deleteSavedQueryRoute = (router: IRouter) => {
+export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.delete(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/internal/osquery/saved_query/{id}',
       validate: {
-        body: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({
+          id: schema.string(),
+        }),
       },
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
-      // @ts-expect-error update types
-      const { savedQueryIds } = request.body;
+      const isPrebuilt = await isSavedQueryPrebuilt(osqueryContext, request.params.id);
+      if (isPrebuilt) {
+        return response.conflict({ body: `Elastic prebuilt Saved query cannot be deleted.` });
+      }
 
-      await Promise.all(
-        savedQueryIds.map(
-          // @ts-expect-error update types
-          async (savedQueryId) =>
-            await savedObjectsClient.delete(savedQuerySavedObjectType, savedQueryId, {
-              refresh: 'wait_for',
-            })
-        )
-      );
+      await savedObjectsClient.delete(savedQuerySavedObjectType, request.params.id, {
+        refresh: 'wait_for',
+      });
 
       return response.ok({
-        body: savedQueryIds,
+        body: {},
       });
     }
   );

@@ -10,8 +10,8 @@ import {
   Tree,
   EndpointDocGenerator,
   Event,
-} from '../../../plugins/security_solution/common/endpoint/generate_data';
-import { firstNonNullValue } from '../../../plugins/security_solution/common/endpoint/models/ecs_safety_helpers';
+} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export const processEventsIndex = 'logs-endpoint.events.process-default';
@@ -64,7 +64,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
       const bulkResp = await client.bulk({ body, refresh: true });
 
       const eventsInfo = events.map((event: Event, i: number) => {
-        return { event, _id: bulkResp.body.items[i].create?._id };
+        return { event, _id: bulkResp.items[i].create?._id };
       });
 
       // @ts-expect-error @elastic/elasticsearch expected BulkResponseItemBase._id: string

@@ -58,7 +58,7 @@ export const useGetOneAgentPolicyFull = (agentPolicyId: string) => {
 
 export const sendGetOneAgentPolicyFull = (
   agentPolicyId: string,
-  query: { standalone?: boolean } = {}
+  query: { standalone?: boolean; kubernetes?: boolean } = {}
 ) => {
   return sendRequest<GetFullAgentPolicyResponse>({
     path: agentPolicyRouteService.getInfoFullPath(agentPolicyId),
@@ -113,5 +113,21 @@ export const sendDeleteAgentPolicy = (body: DeleteAgentPolicyRequest['body']) =>
     path: agentPolicyRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),
+  });
+};
+
+export const sendResetOnePreconfiguredAgentPolicy = (agentPolicyId: string) => {
+  return sendRequest({
+    path: agentPolicyRouteService.getResetOnePreconfiguredAgentPolicyPath(agentPolicyId),
+    method: 'post',
+    body: JSON.stringify({}),
+  });
+};
+
+export const sendResetAllPreconfiguredAgentPolicies = () => {
+  return sendRequest({
+    path: agentPolicyRouteService.getResetAllPreconfiguredAgentPolicyPath(),
+    method: 'post',
+    body: JSON.stringify({}),
   });
 };

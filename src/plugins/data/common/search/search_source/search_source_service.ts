@@ -6,13 +6,43 @@
  * Side Public License, v 1.
  */
 
-import { createSearchSource, SearchSource, SearchSourceDependencies } from './';
-import { IndexPatternsContract } from '../..';
+import { mapValues } from 'lodash';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+} from '@kbn/kibana-utils-plugin/common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import {
+  createSearchSource,
+  extractReferences,
+  injectReferences,
+  SearchSource,
+  SearchSourceDependencies,
+  SerializedSearchSourceFields,
+} from '.';
+import { getAllMigrations as filtersGetAllMigrations } from '../../query/filters/persistable_state';
+
+const getAllMigrations = (): MigrateFunctionsObject => {
+  const searchSourceMigrations = {};
+
+  // we don't know if embeddables have any migrations defined so we need to fetch them and map the received functions so we pass
+  // them the correct input and that we correctly map the response
+  const filterMigrations = mapValues(filtersGetAllMigrations(), (migrate) => {
+    return (state: SerializedSearchSourceFields) => ({
+      ...state,
+      filter: migrate(state.filter),
+    });
+  });
+
+  return mergeMigrationFunctionMaps(searchSourceMigrations, filterMigrations);
+};
 
 export class SearchSourceService {
-  public setup() {}
+  public setup() {
+    return { getAllMigrations };
+  }
 
-  public start(indexPatterns: IndexPatternsContract, dependencies: SearchSourceDependencies) {
+  public start(indexPatterns: DataViewsContract, dependencies: SearchSourceDependencies) {
     return {
       /**
        * creates searchsource based on serialized search source fields
@@ -23,6 +53,15 @@ export class SearchSourceService {
        */
       createEmpty: () => {
         return new SearchSource({}, dependencies);
+      },
+      extract: (state: SerializedSearchSourceFields) => {
+        const [newState, references] = extractReferences(state);
+        return { state: newState, references };
+      },
+      inject: injectReferences,
+      getAllMigrations,
+      telemetry: () => {
+        return {};
       },
     };
   }

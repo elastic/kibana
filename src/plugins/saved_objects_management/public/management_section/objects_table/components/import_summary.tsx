@@ -22,12 +22,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
   IBasePath,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
 import './import_summary.scss';

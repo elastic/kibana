@@ -17,9 +17,10 @@ import {
   buildFilter,
   FilterStateStore,
   FILTERS,
+  DataViewFieldBase,
+  DataViewBase,
 } from '@kbn/es-query';
 
-import { IFieldType, IIndexPattern } from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
@@ -32,7 +33,7 @@ function getExistingFilter(
     if (!filter) return;
 
     if (fieldName === '_exists_' && isExistsFilter(filter)) {
-      return filter.exists!.field === value;
+      return filter.query.exists!.field === value;
     }
 
     if (isPhraseFilter(filter)) {
@@ -40,7 +41,9 @@ function getExistingFilter(
     }
 
     if (isScriptedPhraseFilter(filter)) {
-      return filter.meta.field === fieldName && filter.script.script.params?.value === value;
+      return (
+        filter.meta.field === fieldName && filter.query?.script?.script?.params?.value === value
+      );
     }
   }) as any;
 }
@@ -66,10 +69,10 @@ function updateExistingFilter(existingFilter: Filter, negate: boolean) {
  */
 export function generateFilters(
   filterManager: FilterManager,
-  field: IFieldType | string,
+  field: DataViewFieldBase | string,
   values: any,
   operation: string,
-  index: string
+  index: DataViewBase
 ): Filter[] {
   values = Array.isArray(values) ? _.uniq(values) : [values];
   const fieldObj = (
@@ -78,7 +81,7 @@ export function generateFilters(
       : {
           name: field,
         }
-  ) as IFieldType;
+  ) as DataViewFieldBase;
   const fieldName = fieldObj.name;
   const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();
@@ -93,12 +96,8 @@ export function generateFilters(
       updateExistingFilter(existing, negate);
       filter = existing;
     } else if (fieldObj.type?.includes('range') && value && typeof value === 'object') {
-      // When dealing with range fields, the filter type depends on the data passed in. If it's an
-      // object we assume that it's a min/max value
-      const tmpIndexPattern = { id: index } as IIndexPattern;
-
       filter = buildFilter(
-        tmpIndexPattern,
+        index,
         fieldObj,
         FILTERS.RANGE_FROM_VALUE,
         false,
@@ -108,16 +107,16 @@ export function generateFilters(
         FilterStateStore.APP_STATE
       );
     } else {
-      const tmpIndexPattern = { id: index } as IIndexPattern;
       // exists filter special case:  fieldname = '_exists' and value = fieldname
       const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
-      const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;
+      const actualFieldObj =
+        fieldName === '_exists_' ? ({ name: value } as DataViewFieldBase) : fieldObj;
 
       // Fix for #7189 - if value is empty, phrase filters become exists filters.
       const isNullFilter = value === null || value === undefined;
 
       filter = buildFilter(
-        tmpIndexPattern,
+        index,
         actualFieldObj,
         isNullFilter ? FILTERS.EXISTS : filterType,
         isNullFilter ? !negate : negate,

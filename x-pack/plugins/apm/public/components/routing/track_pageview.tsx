@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { useRoutePath } from '@kbn/typed-react-router-config';
-import { useTrackPageview } from '../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 
 export function TrackPageview({ children }: { children: React.ReactElement }) {
   const routePath = useRoutePath();
