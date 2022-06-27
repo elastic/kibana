@@ -9,7 +9,7 @@ import {
   AggregationsBuckets,
   AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { replaceDotSymbols } from './replace_dots_in_rule_type_id';
+import { replaceDotSymbols } from './replace_dots_with_underscores';
 
 export function parseSimpleRuleTypeBucket(
   ruleTypeBuckets: AggregationsBuckets<AggregationsStringTermsBucketKeys>

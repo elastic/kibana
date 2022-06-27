@@ -20,7 +20,7 @@ import {
   NUM_ALERTING_RULE_TYPES,
   NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
 } from '../alerting_usage_collector';
-import { replaceDotSymbols } from './replace_dots_in_rule_type_id';
+import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 
 const Millis2Nanos = 1000 * 1000;

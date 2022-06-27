@@ -12,7 +12,7 @@ import type {
   AggregationsBuckets,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { replaceDotSymbols } from './replace_dots_in_rule_type_id';
+import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 
 interface Opts {

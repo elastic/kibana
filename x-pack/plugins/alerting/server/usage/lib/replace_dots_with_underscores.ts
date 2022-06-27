@@ -8,10 +8,3 @@
 export function replaceDotSymbols(strToReplace: string) {
   return strToReplace.replaceAll('.', '__');
 }
-
-export function replaceDotSymbolsInRuleTypeIds(ruleTypeIdObj: Record<string, unknown>) {
-  return Object.keys(ruleTypeIdObj).reduce(
-    (obj, key) => ({ ...obj, [replaceDotSymbols(key)]: ruleTypeIdObj[key] }),
-    {}
-  );
-}
