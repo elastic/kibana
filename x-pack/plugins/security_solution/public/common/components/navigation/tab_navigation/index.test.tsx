@@ -15,6 +15,7 @@ import { RouteSpyState } from '../../../utils/route/types';
 import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from '.';
 import { TabNavigationProps } from './types';
+import { SecurityPageName } from '../../../../app/types';
 
 jest.mock('../../link_to');
 jest.mock('../../../lib/kibana/kibana_react', () => {
@@ -54,7 +55,7 @@ describe('Table Navigation', () => {
   const mockRiskyHostEnabled = true;
 
   const mockProps: TabNavigationProps & RouteSpyState = {
-    pageName: 'hosts',
+    pageName: SecurityPageName.hosts,
     pathName: '/hosts',
     detailName: hostName,
     search: '',
@@ -89,7 +90,6 @@ describe('Table Navigation', () => {
     },
     [CONSTANTS.appQuery]: { query: 'host.name:"siem-es"', language: 'kuery' },
     [CONSTANTS.filters]: [],
-    [CONSTANTS.sourcerer]: {},
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',

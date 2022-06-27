@@ -13,7 +13,11 @@ import { Provider } from 'react-redux';
 import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
 import { mockPatterns } from './mocks';
 import { RouteSpyState } from '../../utils/route/types';
-import { DEFAULT_INDEX_PATTERN, SecurityPageName } from '../../../../common/constants';
+import {
+  DEFAULT_DATA_VIEW_ID,
+  DEFAULT_INDEX_PATTERN,
+  SecurityPageName,
+} from '../../../../common/constants';
 import { createStore } from '../../store';
 import {
   useUserInfo,
@@ -25,9 +29,12 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   mockSourcererState,
+  TestProviders,
 } from '../../mock';
 import { SelectedDataView, SourcererScopeName } from '../../store/sourcerer/model';
 import { postSourcererDataView } from './api';
+import { sourcererActions } from '../../store/sourcerer';
+import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -40,6 +47,7 @@ const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
 jest.mock('../../../detections/components/user_info');
 jest.mock('./api');
+jest.mock('../../utils/global_query_string');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
@@ -51,6 +59,8 @@ jest.mock('react-redux', () => {
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
+
+(useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) => onInitialize({}));
 
 const mockSearch = jest.fn();
 
@@ -185,6 +195,50 @@ describe('Sourcerer Hooks', () => {
         expect(mockDispatch).toHaveBeenCalledTimes(7);
         expect(mockSearch).toHaveBeenCalledTimes(2);
       });
+    });
+  });
+
+  it('initilizes dataview with data from query string', async () => {
+    const selectedPatterns = ['testPattern-*'];
+    const selectedDataViewId = 'security-solution-default';
+    (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
+      onInitialize({
+        [SourcererScopeName.default]: {
+          id: selectedDataViewId,
+          selectedPatterns,
+        },
+      })
+    );
+
+    renderHook<string, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(mockDispatch).toHaveBeenCalledWith(
+      sourcererActions.setSelectedDataView({
+        id: SourcererScopeName.default,
+        selectedDataViewId,
+        selectedPatterns,
+      })
+    );
+  });
+
+  it('sets default selected patterns to the URL when there is no sorcerer URL param in the query string', async () => {
+    const updateUrlParam = jest.fn();
+    (useUpdateUrlParam as jest.Mock).mockReturnValue(updateUrlParam);
+    (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
+      onInitialize(null)
+    );
+
+    renderHook<string, void>(() => useInitSourcerer(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(updateUrlParam).toHaveBeenCalledWith({
+      [SourcererScopeName.default]: {
+        id: DEFAULT_DATA_VIEW_ID,
+        selectedPatterns: DEFAULT_INDEX_PATTERN,
+      },
     });
   });
 

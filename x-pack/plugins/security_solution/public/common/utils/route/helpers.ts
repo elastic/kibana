@@ -7,11 +7,12 @@
 
 import { noop } from 'lodash/fp';
 import { createContext, Dispatch } from 'react';
+import { SecurityPageName } from '../../../app/types';
 
 import { RouteSpyState, RouteSpyAction } from './types';
 
 export const initRouteSpy: RouteSpyState = {
-  pageName: '',
+  pageName: SecurityPageName.noPage,
   detailName: undefined,
   tabName: undefined,
   search: '',

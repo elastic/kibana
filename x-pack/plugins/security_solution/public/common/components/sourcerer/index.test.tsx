@@ -54,6 +54,16 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+const mockUpdateUrlParam = jest.fn();
+jest.mock('../../utils/global_query_string', () => {
+  const original = jest.requireActual('../../utils/global_query_string');
+
+  return {
+    ...original,
+    useUpdateUrlParam: () => mockUpdateUrlParam,
+  };
+});
+
 const mockOptions = DEFAULT_INDEX_PATTERN.map((index) => ({ label: index, value: index }));
 
 const defaultProps = {
@@ -411,6 +421,50 @@ describe('Sourcerer component', () => {
       })
     );
   });
+
+  it('onSave updates the URL param', () => {
+    store = createStore(
+      {
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          kibanaDataViews: [
+            mockGlobalState.sourcerer.defaultDataView,
+            {
+              ...mockGlobalState.sourcerer.defaultDataView,
+              id: '1234',
+              title: 'filebeat-*',
+              patternList: ['filebeat-*'],
+            },
+          ],
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+              selectedDataViewId: id,
+              selectedPatterns: patternListNoSignals.slice(0, 2),
+            },
+          },
+        },
+      },
+      SUB_PLUGINS_REDUCER,
+      kibanaObservable,
+      storage
+    );
+
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Sourcerer {...defaultProps} />
+      </TestProviders>
+    );
+    wrapper.find(`[data-test-subj="sourcerer-trigger"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="comboBoxInput"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="sourcerer-combo-option"]`).first().simulate('click');
+    wrapper.find(`[data-test-subj="sourcerer-save"]`).first().simulate('click');
+
+    expect(mockUpdateUrlParam).toHaveBeenCalledTimes(1);
+  });
+
   it('resets to default index pattern', async () => {
     const wrapper = mount(
       <TestProviders store={store}>

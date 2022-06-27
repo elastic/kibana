@@ -146,7 +146,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
                 <a
                   class="euiLink css-102pf9n-euiLink-primary"
                   data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/raspberrypi?sourcerer=(default:(id:security-solution,selectedPatterns:!('apm-*-transaction*','auditbeat-*','endgame-*','filebeat-*','logs-*','packetbeat-*','traces-apm*','winlogbeat-*','-*elastic-cloud-logs-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)))"
+                  href="securitySolutionUI/hosts/raspberrypi?timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)))"
                   rel="noreferrer"
                 >
                   raspberrypi
@@ -201,7 +201,7 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
                 <a
                   class="euiLink css-102pf9n-euiLink-primary"
                   data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/raspberrypi?sourcerer=(default:(id:security-solution,selectedPatterns:!('apm-*-transaction*','auditbeat-*','endgame-*','filebeat-*','logs-*','packetbeat-*','traces-apm*','winlogbeat-*','-*elastic-cloud-logs-*')))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)))"
+                  href="securitySolutionUI/hosts/raspberrypi?timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now%2Fd,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now%2Fd)))"
                   rel="noreferrer"
                 >
                   raspberrypi
