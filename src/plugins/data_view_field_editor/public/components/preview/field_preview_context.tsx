@@ -333,11 +333,10 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     const currentApiCall = ++previewCount.current;
 
     const response = await getFieldPreview({
-      index: dataView.title,
+      index: currentDocIndex,
       document: document!,
       context: `${type!}_field` as PainlessExecuteContext,
       script: script!,
-      documentId: currentDocId,
     });
 
     if (currentApiCall !== previewCount.current) {
@@ -391,7 +390,7 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     allParamsDefined,
     scriptEditorValidation,
     hasSomeParamsChanged,
-    dataView.title,
+    currentDocIndex,
   ]);
 
   const goToNextDoc = useCallback(() => {

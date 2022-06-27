@@ -737,6 +737,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_agents_response'
       operationId: get-agents
+      parameters:
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - $ref: '#/components/parameters/kuery'
+        - $ref: '#/components/parameters/show_inactive'
+        - $ref: '#/components/parameters/show_upgradeable'
+        - $ref: '#/components/parameters/sort_field'
+        - $ref: '#/components/parameters/sort_order'
       security:
         - basicAuth: []
   /agents/bulk_upgrade:
@@ -2047,7 +2055,7 @@ components:
       required: false
       schema:
         type: integer
-        default: 50
+        default: 20
     page_index:
       name: page
       in: query
@@ -2061,6 +2069,33 @@ components:
       required: false
       schema:
         type: string
+    show_inactive:
+      name: showInactive
+      in: query
+      required: false
+      schema:
+        type: boolean
+    show_upgradeable:
+      name: showUpgradeable
+      in: query
+      required: false
+      schema:
+        type: boolean
+    sort_field:
+      name: sortField
+      in: query
+      required: false
+      schema:
+        type: string
+    sort_order:
+      name: sortOrder
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
   schemas:
     fleet_setup_response:
       title: Fleet Setup response
