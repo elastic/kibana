@@ -32,7 +32,6 @@ describe('ExceptionsViewerItems', () => {
         disableActions={false}
         exceptions={[]}
         loadingItemIds={[]}
-        commentsAccordionId="comments-accordion-id"
         onDeleteException={jest.fn()}
         onEditExceptionItem={jest.fn()}
       />
@@ -58,7 +57,6 @@ describe('ExceptionsViewerItems', () => {
           disableActions={false}
           exceptions={[]}
           loadingItemIds={[]}
-          commentsAccordionId="comments-accordion-id"
           onDeleteException={jest.fn()}
           onEditExceptionItem={jest.fn()}
         />
@@ -83,7 +81,6 @@ describe('ExceptionsViewerItems', () => {
           disableActions={false}
           exceptions={[getExceptionListItemSchemaMock()]}
           loadingItemIds={[]}
-          commentsAccordionId="comments-accordion-id"
           onDeleteException={jest.fn()}
           onEditExceptionItem={jest.fn()}
         />
@@ -104,7 +101,6 @@ describe('ExceptionsViewerItems', () => {
           disableActions={false}
           exceptions={[]}
           loadingItemIds={[]}
-          commentsAccordionId="comments-accordion-id"
           onDeleteException={jest.fn()}
           onEditExceptionItem={jest.fn()}
         />
@@ -129,7 +125,6 @@ describe('ExceptionsViewerItems', () => {
           disableActions={false}
           exceptions={[exception1, exception2]}
           loadingItemIds={[]}
-          commentsAccordionId="comments-accordion-id"
           onDeleteException={jest.fn()}
           onEditExceptionItem={jest.fn()}
         />
@@ -155,7 +150,6 @@ describe('ExceptionsViewerItems', () => {
           disableActions={false}
           exceptions={[exception1, exception2]}
           loadingItemIds={[]}
-          commentsAccordionId="comments-accordion-id"
           onDeleteException={jest.fn()}
           onEditExceptionItem={jest.fn()}
         />
@@ -181,7 +175,6 @@ describe('ExceptionsViewerItems', () => {
           disableActions={false}
           exceptions={[getExceptionListItemSchemaMock()]}
           loadingItemIds={[]}
-          commentsAccordionId="comments-accordion-id"
           onDeleteException={mockOnDeleteException}
           onEditExceptionItem={jest.fn()}
         />

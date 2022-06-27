@@ -96,10 +96,6 @@ export const CONDITION_OPERATOR_TYPE_LIST = i18n.translate(
   }
 );
 
-export const CONDITION_OS = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.conditions.os', {
-  defaultMessage: 'OS',
-});
-
 export const CONDITION_AND = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.conditions.and', {
   defaultMessage: 'AND',
 });

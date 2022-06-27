@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
-import { ExceptionItem } from './exception_item_2';
+import { ExceptionItemCard } from './exception_item_card';
 import type { ExceptionListItemIdentifiers } from '../types';
 
 const MyFlexItem = styled(EuiFlexItem)`
@@ -33,7 +33,6 @@ interface ExceptionsViewerItemsProps {
   disableActions: boolean;
   exceptions: ExceptionListItemSchema[];
   loadingItemIds: ExceptionListItemIdentifiers[];
-  commentsAccordionId: string;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
 }
@@ -44,7 +43,6 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
   isInitLoading,
   exceptions,
   loadingItemIds,
-  commentsAccordionId,
   onDeleteException,
   onEditExceptionItem,
   disableActions,
@@ -80,10 +78,9 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
             exceptions.length > 0 &&
             exceptions.map((exception, index) => (
               <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
-                <ExceptionItem
+                <ExceptionItemCard
                   disableActions={disableActions}
                   loadingItemIds={loadingItemIds}
-                  commentsAccordionId={commentsAccordionId}
                   exceptionItem={exception}
                   onDeleteException={onDeleteException}
                   onEditException={onEditExceptionItem}

@@ -396,7 +396,6 @@ const ExceptionsViewerComponent = ({
           isInitLoading={isInitLoading}
           exceptions={exceptions}
           loadingItemIds={loadingItemIds}
-          commentsAccordionId={commentsAccordionId}
           onDeleteException={handleDeleteException}
           onEditExceptionItem={handleEditException}
         />
