@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import SemVer from 'semver/classes/semver';
+import type SemVer from 'semver/classes/semver';
 import semverParse from 'semver/functions/parse';
 import { TelemetrySavedObject } from './types';
 
