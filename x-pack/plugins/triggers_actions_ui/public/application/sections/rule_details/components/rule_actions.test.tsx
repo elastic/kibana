@@ -8,7 +8,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { Actions } from './rule_actions';
+import { RuleActions } from './rule_actions';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ActionConnector, ActionTypeModel } from '../../../../types';
 import * as useFetchRuleActionConnectorsHook from '../../../hooks/use_fetch_rule_action_connectors';
@@ -60,7 +60,7 @@ describe('Actions', () => {
     ] as ActionTypeModel[]);
 
     const wrapper = mount(
-      <Actions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistry} />
+      <RuleActions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistry} />
     );
     await act(async () => {
       await nextTick();

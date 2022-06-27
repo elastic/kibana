@@ -17,11 +17,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ActionTypeRegistryContract, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
-export interface ActionsProps {
+export interface RuleActionsProps {
   ruleActions: any[];
   actionTypeRegistry: ActionTypeRegistryContract;
 }
-export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
+export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProps) {
   const { isLoadingActionConnectors, actionConnectors } = useFetchRuleActionConnectors({
     ruleActions,
   });
