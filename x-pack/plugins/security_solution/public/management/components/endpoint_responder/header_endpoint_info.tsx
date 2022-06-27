@@ -20,7 +20,9 @@ interface HeaderEndpointInfoProps {
 }
 
 export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId }) => {
-  const { data: endpointDetails } = useGetEndpointDetails(endpointId, { refetchInterval: 10000 });
+  const { data: endpointDetails, isFetching } = useGetEndpointDetails(endpointId, {
+    refetchInterval: 10000,
+  });
   const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary([endpointId], {
     refetchInterval: 10000,
   });
@@ -42,12 +44,12 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
     };
   }, [endpointPendingActions?.data]);
 
-  if (!endpointDetails) {
-    return null;
+  if (isFetching && endpointPendingActions === undefined) {
+    return <EuiLoadingContent lines={2} />;
   }
 
-  if (isFetching) {
-    return <EuiLoadingContent lines={2} />;
+  if (!endpointDetails) {
+    return null;
   }
 
   return (
