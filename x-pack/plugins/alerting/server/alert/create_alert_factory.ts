@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { cloneDeep } from 'lodash';
 import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { Alert, PublicAlert } from './alert';
 import { getAlerts } from '../lib';
@@ -33,7 +34,7 @@ export function createAlertFactory<
   ActionGroupIds extends string
 >({ alerts, logger, canSetRecoveryContext = false }: CreateAlertFactoryOpts<State, Context>) {
   // Keep track of which alerts we started with so we can determine which have recovered
-  const initialAlertIds = new Set(Object.keys(alerts));
+  const originalAlerts = cloneDeep(alerts);
   let isDone = false;
   return {
     create: (id: string): PublicAlert<State, Context, ActionGroupIds> => {
@@ -59,7 +60,7 @@ export function createAlertFactory<
 
           const { recoveredAlerts } = getAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
             alerts,
-            initialAlertIds
+            originalAlerts
           );
           return Object.keys(recoveredAlerts ?? {}).map(
             (alertId: string) => recoveredAlerts[alertId]

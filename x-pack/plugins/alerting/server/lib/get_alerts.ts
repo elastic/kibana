@@ -27,8 +27,10 @@ export function getAlerts<
   RecoveryActionGroupId extends string
 >(
   alerts: Record<string, Alert<State, Context>>,
-  originalAlertIds: Set<string>
+  originalAlerts: Record<string, Alert<State, Context>>
 ): GetAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
+  const originalAlertIds = new Set(Object.keys(originalAlerts));
+
   const currentTime = new Date().toISOString();
   const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   const activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
@@ -51,7 +53,7 @@ export function getAlerts<
           // this alert did exist in previous run
           // calculate duration to date for active alerts
           const state = originalAlertIds.has(id)
-            ? alerts[id].getState()
+            ? originalAlerts[id].getState()
             : activeAlerts[id].getState();
           const durationInMs =
             new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();

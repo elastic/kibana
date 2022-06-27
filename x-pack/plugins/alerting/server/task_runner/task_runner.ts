@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { omit } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import uuid from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
@@ -302,7 +302,7 @@ export class TaskRunner<
         alerts[id] = new Alert<State, Context>(id, alertRawInstances[id]);
       }
     }
-    const originalAlertIds = new Set(Object.keys(alerts));
+    const originalAlerts = cloneDeep(alerts);
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
@@ -428,7 +428,7 @@ export class TaskRunner<
       Context,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alerts, originalAlertIds);
+    >(alerts, originalAlerts);
 
     logActiveAndRecoveredAlerts({
       logger: this.logger,
