@@ -23,11 +23,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     spanName,
     kuery = '',
     environment = ENVIRONMENT_ALL.value,
+    sampleRangeFrom,
+    sampleRangeTo,
   }: {
     backendName: string;
     spanName: string;
     kuery?: string;
     environment?: string;
+    sampleRangeFrom?: number;
+    sampleRangeTo?: number;
   }) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/backends/operations/spans`,
@@ -39,6 +43,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment,
           kuery,
           spanName,
+          sampleRangeFrom,
+          sampleRangeTo,
         },
       },
     });
@@ -88,6 +94,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                     .span('/_search', 'db', 'elasticsearch')
                     .destination('elasticsearch')
                     .duration(100)
+                    .success()
                     .timestamp(timestamp)
                 ),
               goInstance
@@ -144,6 +151,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             spanName: '/_search',
             transactionName: 'GET /api/my-endpoint',
             transactionType: 'request',
+            outcome: 'success',
           });
 
           expect(omit(goSpans[0], 'traceId', 'transactionId')).to.eql({
@@ -154,6 +162,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             spanName: '/_search',
             transactionName: 'GET /api/my-other-endpoint',
             transactionType: 'request',
+            outcome: 'unknown',
           });
         });
       });
@@ -221,11 +230,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             duration: 200000,
             serviceName: 'java',
             spanName: 'without transaction',
+            outcome: 'unknown',
           });
 
           expect(spans[0].transactionType).not.to.be.ok();
           expect(spans[0].transactionId).not.to.be.ok();
           expect(spans[0].transactionName).not.to.be.ok();
+        });
+      });
+
+      describe('when requesting spans within a specific sample range', () => {
+        it('returns only spans whose duration falls into the requested range', async () => {
+          const response = await callApi({
+            backendName: 'elasticsearch',
+            spanName: '/_search',
+            sampleRangeFrom: 50000,
+            sampleRangeTo: 99999,
+          });
+
+          const { spans } = response.body;
+
+          expect(spans.every((span) => span.duration === 50000)).to.be(true);
         });
       });
 
