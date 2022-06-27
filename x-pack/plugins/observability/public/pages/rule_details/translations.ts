@@ -12,12 +12,6 @@ export const RULE_LOAD_ERROR = (errorMessage: string) =>
     values: { message: errorMessage },
   });
 
-export const ACTIONS_LOAD_ERROR = (errorMessage: string) =>
-  i18n.translate('xpack.observability.ruleDetails.connectorsLoadError', {
-    defaultMessage: 'Unable to load rule actions connectors. Reason: {message}',
-    values: { message: errorMessage },
-  });
-
 export const EXECUTION_LOG_ERROR = (errorMessage: string) =>
   i18n.translate('xpack.observability.ruleDetails.executionLogError', {
     defaultMessage: 'Unable to load rule execution log. Reason: {message}',
