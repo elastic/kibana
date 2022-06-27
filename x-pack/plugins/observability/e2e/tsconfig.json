@@ -11,9 +11,6 @@
       "path": "../../apm/tsconfig.json",
     },
     {
-      "path": "../../synthetics/e2e/tsconfig.json",
-    },
-    {
       "path": "../tsconfig.json",
     }
   ]

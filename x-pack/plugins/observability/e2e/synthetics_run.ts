@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
-import { argv } from '@kbn/synthetics-plugin/e2e/parse_args_params';
-import { SyntheticsRunner } from '@kbn/synthetics-plugin/e2e/synthetics_start';
 import path from 'path';
+import { SyntheticsRunner } from './synthetics_runner';
+import { argv } from './parse_args_params';
 
 const { headless, grep, pauseOnError } = argv;
 
