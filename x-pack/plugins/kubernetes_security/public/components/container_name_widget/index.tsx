@@ -67,7 +67,7 @@ export const ContainerNameWidget = ({
     groupedBy,
     countBy,
     indexPattern?.title,
-    sortDirection,
+    sortDirection
   );
 
   const onTableChange = ({ sort = {} }) => {
@@ -80,11 +80,9 @@ export const ContainerNameWidget = ({
     fetchNextPage();
   };
 
-  
-
-  useEffect(()=>{
-      fetchNextPage()
-  },[fetchNextPage])
+  useEffect(() => {
+    fetchNextPage();
+  }, [fetchNextPage]);
 
   const sorting = {
     sort: {
@@ -99,41 +97,45 @@ export const ContainerNameWidget = ({
     const result: FilterButtons = {
       filterForButtons:
         data &&
-        data?.pages?.map((aggsData) => {
+        data?.pages
+          ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
-          return getFilterForValueButton({
-            field: CONTAINER_IMAGE_NAME,
-            filterManager,
-            size: 'xs',
-            onClick: () => {},
-            onFilterAdded: () => {},
-            ownFocus: false,
-            showTooltip: true,
-            value: aggData.key,
-          });
-          //here below
-        })
-        }).flat(),
+              return getFilterForValueButton({
+                field: CONTAINER_IMAGE_NAME,
+                filterManager,
+                size: 'xs',
+                onClick: () => {},
+                onFilterAdded: () => {},
+                ownFocus: false,
+                showTooltip: true,
+                value: aggData.key,
+              });
+              // here below
+            });
+          })
+          .flat(),
 
       filterOutButtons:
         data &&
-        data?.pages?.map((aggsData) => {
+        data?.pages
+          ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
-          return getFilterOutValueButton({
-            field: CONTAINER_IMAGE_NAME,
-            filterManager,
-            size: 'xs',
-            onClick: () => {},
-            onFilterAdded: () => {},
-            ownFocus: false,
-            showTooltip: true,
-            value: aggData.key,
-          });
-          //here below
-        })
-        }).flat(),
+              return getFilterOutValueButton({
+                field: CONTAINER_IMAGE_NAME,
+                filterManager,
+                size: 'xs',
+                onClick: () => {},
+                onFilterAdded: () => {},
+                ownFocus: false,
+                showTooltip: true,
+                value: aggData.key,
+              });
+              // here below
+            });
+          })
+          .flat(),
     };
-    //return true
+    // return true
     return result;
   }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager, hoveredFilter]);
 
@@ -146,18 +148,20 @@ export const ContainerNameWidget = ({
 
   const containerNameArray: ContainerNameArrayDataValue[] = useMemo(() => {
     return data
-      ? data?.pages?.map((aggsData) => {
+      ? data?.pages
+          ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
-                return {
-                    name: aggData.key,
-                    count: aggData.count_by_aggs.value,
-          }});
-        }).flat()
+              return {
+                name: aggData.key,
+                count: aggData.count_by_aggs.value,
+              };
+            });
+          })
+          .flat()
       : [];
   }, [data]);
 
   const columns = useMemo(() => {
-
     return [
       {
         field: 'name',
@@ -167,7 +171,7 @@ export const ContainerNameWidget = ({
           const indexHelper = containerNameArray.findIndex((obj) => {
             return obj.name === name;
           });
-        
+
           return (
             <EuiFlexItem
               key={`percentage-widget--haha}`}

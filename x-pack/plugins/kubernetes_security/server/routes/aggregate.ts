@@ -103,12 +103,12 @@ export const doSearch = async (
 
   const agg: any = search.aggregations?.custom_agg;
   const buckets = agg?.buckets || [];
-  
+
   const hasNextPage = buckets.length > AGGREGATE_PAGE_SIZE;
 
-  if(hasNextPage){
-    buckets.pop()
+  if (hasNextPage) {
+    buckets.pop();
   }
 
-  return {buckets, hasNextPage};
+  return { buckets, hasNextPage };
 };
