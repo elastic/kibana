@@ -10,7 +10,6 @@ import { DashboardPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
-import { Logger } from '@kbn/core/server';
 
 jest.mock('./usage/dashboard_telemetry_collection_task', () => ({
   scheduleDashboardTelemetry: jest.fn().mockResolvedValue('ok'),
@@ -22,13 +21,11 @@ describe('DashboardPlugin', () => {
     let mockCoreStart: ReturnType<typeof coreMock.createStart>;
     let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
     let mockTaskManager: ReturnType<typeof taskManagerMock.createStart>;
-    let mockLogger: Logger;
 
     beforeEach(() => {
       mockCoreStart = coreMock.createStart();
       mockTaskManager = taskManagerMock.createStart();
       initContext = coreMock.createPluginInitializerContext();
-      mockLogger = initContext.logger.get();
     });
 
     afterEach(() => {
