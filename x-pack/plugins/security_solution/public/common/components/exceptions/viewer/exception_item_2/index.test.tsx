@@ -27,7 +27,7 @@ const mockTheme = getMockTheme({
 
 describe('ExceptionItemCard', () => {
   it('it renders header, item meta information and conditions', () => {
-    const exceptionItem = {...getExceptionListItemSchemaMock(), comments: []};
+    const exceptionItem = { ...getExceptionListItemSchemaMock(), comments: [] };
 
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
@@ -45,7 +45,9 @@ describe('ExceptionItemCard', () => {
     expect(wrapper.find('ExceptionItemCardHeader')).toHaveLength(1);
     expect(wrapper.find('ExceptionItemCardMetaInfo')).toHaveLength(1);
     expect(wrapper.find('ExceptionItemCardConditions')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="exceptionsViewerCommentAccordion"]').exists()).toBeFalsy();
+    expect(
+      wrapper.find('[data-test-subj="exceptionsViewerCommentAccordion"]').exists()
+    ).toBeFalsy();
   });
 
   it('it renders header, item meta information, conditions, and comments if any exist', () => {
@@ -67,7 +69,9 @@ describe('ExceptionItemCard', () => {
     expect(wrapper.find('ExceptionItemCardHeader')).toHaveLength(1);
     expect(wrapper.find('ExceptionItemCardMetaInfo')).toHaveLength(1);
     expect(wrapper.find('ExceptionItemCardConditions')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="exceptionsViewerCommentAccordion"]').exists()).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="exceptionsViewerCommentAccordion"]').exists()
+    ).toBeTruthy();
   });
 
   it('it does not render edit or delete action buttons when "disableActions" is "true"', () => {
@@ -107,8 +111,14 @@ describe('ExceptionItemCard', () => {
     );
 
     // click on popover
-    wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionButton"]').at(0).simulate('click');
-    wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionItem"]').at(0).simulate('click');
+    wrapper
+      .find('button[data-test-subj="exceptionItemCardHeader-actionButton"]')
+      .at(0)
+      .simulate('click');
+    wrapper
+      .find('button[data-test-subj="exceptionItemCardHeader-actionItem"]')
+      .at(0)
+      .simulate('click');
 
     expect(mockOnEditException).toHaveBeenCalledWith(getExceptionListItemSchemaMock());
   });
@@ -131,8 +141,14 @@ describe('ExceptionItemCard', () => {
     );
 
     // click on popover
-    wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionButton"]').at(0).simulate('click');
-    wrapper.find('button[data-test-subj="exceptionItemCardHeader-actionItem"]').at(1).simulate('click');
+    wrapper
+      .find('button[data-test-subj="exceptionItemCardHeader-actionButton"]')
+      .at(0)
+      .simulate('click');
+    wrapper
+      .find('button[data-test-subj="exceptionItemCardHeader-actionItem"]')
+      .at(1)
+      .simulate('click');
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({
       id: '1',
