@@ -19,6 +19,7 @@ import type { CspFinding } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;
@@ -76,7 +77,7 @@ export const getFindingsQuery = ({
     sort: [{ [getSortKey(sort.field)]: sort.direction }],
     size,
     from,
-    aggs: { count: { terms: { field: 'result.evaluation.keyword' } } },
+    aggs: getFindingsCountAggQuery(),
   },
   pit: { id: pitId },
   ignore_unavailable: false,
@@ -125,14 +126,4 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       refetchIntervalInBackground: true,
     }
   );
-};
-
-const getAggregationCount = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) => {
-  const passed = buckets.find((bucket) => bucket.key === 'passed');
-  const failed = buckets.find((bucket) => bucket.key === 'failed');
-
-  return {
-    passed: passed?.doc_count || 0,
-    failed: failed?.doc_count || 0,
-  };
 };
