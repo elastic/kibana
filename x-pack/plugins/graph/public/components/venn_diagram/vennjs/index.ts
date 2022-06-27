@@ -1,13 +1,8 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-/**
- * The source code of this file was taken from https://github.com/benfred/venn.js
- * See also author article https://www.benfrederickson.com/venn-diagrams-with-d3.js/
+ * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),
+ * and may include modifications made by Elasticsearch B.V.
+ * Elasticsearch B.V. licenses this file to you under the MIT License.
+ * See `x-pack/plugins/graph/public/components/venn_diagram/vennjs/LICENSE` for more information.
  */
 
 const SMALL$1 = 1e-10;
