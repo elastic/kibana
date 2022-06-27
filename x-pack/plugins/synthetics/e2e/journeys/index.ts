@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './synthetics'; // TODO: Enable these in a follow up PR
+export * from './synthetics';
 export * from './alerts';
 export * from './data_view_permissions';
 export * from './uptime.journey';

@@ -7,13 +7,21 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getOverallLatencyDistribution } from './get_overall_latency_distribution';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import {
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
 
-const latencyOverallDistributionRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/latency/overall_distribution',
+const latencyOverallTransactionDistributionRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
   params: t.type({
     body: t.intersection([
       t.partial({
@@ -54,19 +62,29 @@ const latencyOverallDistributionRoute = createApmServerRoute({
     } = resources.params.body;
 
     return getOverallLatencyDistribution({
+      setup,
+      eventType: ProcessorEvent.transaction,
       environment,
       kuery,
-      serviceName,
-      transactionType,
-      transactionName,
       start,
       end,
+      query: {
+        bool: {
+          filter: [
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
+            ...termQuery(TRANSACTION_NAME, transactionName),
+            ...(termFilters?.flatMap(
+              (fieldValuePair): QueryDslQueryContainer[] =>
+                termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)
+            ) ?? []),
+          ],
+        },
+      },
       percentileThreshold,
-      termFilters,
-      setup,
     });
   },
 });
 
 export const latencyDistributionRouteRepository =
-  latencyOverallDistributionRoute;
+  latencyOverallTransactionDistributionRoute;
