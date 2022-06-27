@@ -87,7 +87,7 @@ function createMetricAggs(metric: Metric) {
             derivative: {
               buckets_path: 'metric_mb',
               gap_policy: 'skip',
-              ...(metric.derivativeNormalizedUnits ? { units: NORMALIZED_DERIVATIVE_UNIT } : {}),
+              ...(metric.derivativeNormalizedUnits ? { unit: NORMALIZED_DERIVATIVE_UNIT } : {}),
             },
           },
         }
@@ -97,7 +97,7 @@ function createMetricAggs(metric: Metric) {
         derivative: {
           buckets_path: 'metric',
           gap_policy: 'skip',
-          ...(metric.derivativeNormalizedUnits ? { units: NORMALIZED_DERIVATIVE_UNIT } : {}),
+          ...(metric.derivativeNormalizedUnits ? { unit: NORMALIZED_DERIVATIVE_UNIT } : {}),
         },
       },
       ...mbDerivative,
