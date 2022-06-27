@@ -6,6 +6,22 @@
  */
 
 import { RuleType, Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
+
+export function getHealthColor(status: RuleExecutionStatuses) {
+  switch (status) {
+    case 'active':
+      return 'success';
+    case 'error':
+      return 'danger';
+    case 'ok':
+      return 'primary';
+    case 'pending':
+      return 'accent';
+    default:
+      return 'subdued';
+  }
+}
 
 type Capabilities = Record<string, any>;
 
