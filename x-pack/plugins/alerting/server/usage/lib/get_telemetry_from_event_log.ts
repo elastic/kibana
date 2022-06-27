@@ -81,21 +81,7 @@ export async function getExecutionsPerDayCount({
   logger,
 }: Opts): Promise<GetExecutionsPerDayCountResults> {
   try {
-    const generatedActionsPercentilesAgg = {
-      percentiles: {
-        field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
-        percents: [50, 90, 99],
-      },
-    };
-
-    const alertsPercentilesAgg = {
-      percentiles: {
-        field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
-        percents: [50, 90, 99],
-      },
-    };
-
-    const executionTimeAggs = {
+    const eventLogAggs = {
       avg_execution_time: {
         avg: {
           field: 'event.duration',
@@ -111,6 +97,34 @@ export async function getExecutionsPerDayCount({
           field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms',
         },
       },
+
+      percentile_scheduled_actions: {
+        percentiles: {
+          field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+          percents: [50, 90, 99],
+        },
+      },
+      percentile_alerts: {
+        percentiles: {
+          field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+          percents: [50, 90, 99],
+        },
+      },
+      execution_failures: {
+        filter: {
+          term: {
+            'event.outcome': 'failure',
+          },
+        },
+        aggs: {
+          by_reason: {
+            terms: {
+              field: 'event.reason',
+              size: NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
+            },
+          },
+        },
+      },
     };
 
     const query = {
@@ -119,57 +133,13 @@ export async function getExecutionsPerDayCount({
       body: {
         query: getProviderAndActionFilterForTimeRange('execute'),
         aggs: {
-          ...executionTimeAggs,
-          percentile_scheduled_actions: generatedActionsPercentilesAgg,
-          percentile_alerts: alertsPercentilesAgg,
-          execution_failures: {
-            filter: {
-              term: {
-                'event.outcome': 'failure',
-              },
-            },
-            aggs: {
-              by_reason: {
-                terms: {
-                  field: 'event.reason',
-                  size: NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
-                },
-              },
-            },
-          },
+          ...eventLogAggs,
           by_rule_type_id: {
             terms: {
               field: 'rule.category',
               size: NUM_ALERTING_RULE_TYPES,
             },
-            aggs: {
-              ...executionTimeAggs,
-              execution_failures: {
-                filter: {
-                  term: {
-                    'event.outcome': 'failure',
-                  },
-                },
-                aggs: {
-                  by_reason: {
-                    terms: {
-                      field: 'event.reason',
-                      size: NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
-                    },
-                    aggs: {
-                      by_rule_type_id: {
-                        terms: {
-                          field: 'rule.category',
-                          size: NUM_ALERTING_RULE_TYPES,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              percentile_scheduled_actions: generatedActionsPercentilesAgg,
-              percentile_alerts: alertsPercentilesAgg,
-            },
+            aggs: eventLogAggs,
           },
         },
       },
