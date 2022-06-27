@@ -20,8 +20,6 @@ import { HttpLogic } from '../http';
 import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
-import './page_template.scss';
-
 /*
  * EnterpriseSearchPageTemplateWrapper is a light wrapper for KibanaPageTemplate (which
  * is a light wrapper for EuiPageTemplate). It should contain only concerns shared
@@ -34,13 +32,13 @@ import './page_template.scss';
  */
 
 export type PageTemplateProps = KibanaPageTemplateProps & {
+  emptyState?: React.ReactNode;
   hideFlashMessages?: boolean;
   isLoading?: boolean;
-  emptyState?: React.ReactNode;
-  setPageChrome?: React.ReactNode;
   // Used by product-specific page templates
   pageChrome?: BreadcrumbTrail;
   pageViewTelemetry?: string;
+  setPageChrome?: React.ReactNode;
 };
 
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({

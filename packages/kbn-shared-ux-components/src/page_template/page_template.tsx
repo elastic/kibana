@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './page_template.scss';
-
 import React, { FunctionComponent } from 'react';
 
 import { NoDataConfigPage, NoDataConfigPageWithSolutionNavBar } from './no_data_page';

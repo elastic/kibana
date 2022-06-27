@@ -11,6 +11,8 @@ import classNames from 'classnames';
 import { useIsWithinBreakpoints, EuiPageTemplateProps } from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 
+import './with_solution_nav.scss';
+
 // https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
 function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
@@ -51,9 +53,9 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
     // Default navigation to allow collapsing
     const { canBeCollapsed = true } = solutionNav;
     const sideBarClasses = classNames(
-      'kbnPageTemplate__pageSideBar',
+      'kbnWithSolutionNav',
       {
-        'kbnPageTemplate__pageSideBar--shrink':
+        'kbnWithSolutionNav--shrink':
           isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop),
       },
       props.pageSideBarProps?.className

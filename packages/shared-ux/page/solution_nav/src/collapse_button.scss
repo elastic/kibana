@@ -14,19 +14,19 @@
     transition-delay: 0s !important;
   }
 
-  .kbnPageTemplate__pageSideBar:hover &,
+  .kbnWithSolutionNav:hover &,
   &:hover,
   &:focus {
     opacity: 1;
     left: 248px - $euiSizeL;
   }
 
-  .kbnPageTemplate__pageSideBar:hover & {
+  .kbnWithSolutionNav:hover & {
     transition-delay: $euiAnimSpeedSlow * 2;
   }
 
   &:not(&-isCollapsed) {
-    background-color: $euiColorEmptyShade !important; // Override all states
+    background-color: $euiColorEmptyShade  !important; // Override all states
   }
 }
 
