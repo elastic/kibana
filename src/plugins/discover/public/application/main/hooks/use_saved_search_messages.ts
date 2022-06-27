@@ -60,7 +60,7 @@ export function sendPartialMsg(main$: DataMain$) {
  */
 export function sendLoadingMsg(
   data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
-  textBasedLanguageMode: string
+  textBasedLanguageMode?: string
 ) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
     data$.next({

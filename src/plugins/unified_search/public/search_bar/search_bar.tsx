@@ -87,6 +87,7 @@ export interface SearchBarOwnProps {
   // super update button background fill control
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
+  textBasedLanguageModeErrors?: Error[];
   showSubmitButton?: boolean;
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
@@ -530,6 +531,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
+          textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
           suggestionsSize={this.props.suggestionsSize}

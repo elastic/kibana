@@ -15,6 +15,13 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { queryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { DataTableRecord } from '../../../types';
 
+interface SQLErrorResponse {
+  error: {
+    message: string;
+  };
+  type: 'error';
+}
+
 export function fetchSql(
   query: Query,
   dataViewsService: DataViewsContract,
@@ -31,19 +38,31 @@ export function fetchSql(
       if (ast) {
         const execution = expressions.run(ast, null);
         let finalData: DataTableRecord[] = [];
-        execution.pipe(pluck('result')).subscribe((response) => {
-          const table = response as Datatable;
-          const rows = table?.rows ?? [];
-          finalData = rows.map(
-            (row: Record<string, string>, idx: number) =>
-              ({
-                id: String(idx),
-                raw: row,
-                flattened: row,
-              } as unknown as DataTableRecord)
-          );
+        let error: string | undefined;
+        execution.pipe(pluck('result')).subscribe((resp) => {
+          const response = resp as Datatable | SQLErrorResponse;
+          if (response.type === 'error') {
+            error = response.error.message;
+          } else {
+            const table = response as Datatable;
+            const rows = table?.rows ?? [];
+            finalData = rows.map(
+              (row: Record<string, string>, idx: number) =>
+                ({
+                  id: String(idx),
+                  raw: row,
+                  flattened: row,
+                } as unknown as DataTableRecord)
+            );
+          }
         });
-        return lastValueFrom(execution).then(() => finalData || []);
+        return lastValueFrom(execution).then(() => {
+          if (error) {
+            throw new Error(error);
+          } else {
+            return finalData || [];
+          }
+        });
       }
       return [];
     })

@@ -28,7 +28,7 @@ const COMMAND_KEY = isMac ? '⌘' : '^';
 interface EditorFooterProps {
   lines: number;
   containerCSS: Interpolation<Theme>;
-  errors?: string[];
+  errors?: Error[];
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -91,7 +91,7 @@ export const EditorFooter = memo(function EditorFooter({
                         {errors.map((error, index) => {
                           return (
                             <EuiDescriptionListDescription key={index}>
-                              {error}
+                              {String(error)}
                             </EuiDescriptionListDescription>
                           );
                         })}

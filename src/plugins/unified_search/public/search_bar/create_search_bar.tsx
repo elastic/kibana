@@ -204,6 +204,7 @@ export function createSearchBar({
           placeholder={props.placeholder}
           {...overrideDefaultBehaviors(props)}
           dataViewPickerComponentProps={props.dataViewPickerComponentProps}
+          textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
           displayStyle={props.displayStyle}
           isScreenshotMode={isScreenshotMode}
         />

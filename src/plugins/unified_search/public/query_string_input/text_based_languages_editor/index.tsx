@@ -39,7 +39,7 @@ interface TextBasedLanguagesEditorProps {
   onTextLangQueryChange: (query: any) => void;
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
-  errors?: string[];
+  errors?: Error[];
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;

@@ -212,6 +212,12 @@ export function DiscoverLayout({
     savedSearchTitle.current?.focus();
   }, []);
 
+  const textBasedLanguageModeErrors = useMemo(() => {
+    if (dataState.textBasedLanguageMode) {
+      return dataState.error;
+    }
+  }, [dataState.error, dataState.textBasedLanguageMode]);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1
@@ -246,6 +252,7 @@ export function DiscoverLayout({
         onChangeIndexPattern={onChangeIndexPattern}
         onEditRuntimeField={onEditRuntimeField}
         textBasedLanguageMode={dataState.textBasedLanguageMode}
+        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout

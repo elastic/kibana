@@ -29,6 +29,7 @@ export type DiscoverTopNavProps = Pick<
   onChangeIndexPattern: (indexPattern: string) => void;
   onEditRuntimeField: () => void;
   textBasedLanguageMode?: string;
+  textBasedLanguageModeErrors?: Error;
 };
 
 export const DiscoverTopNav = ({
@@ -45,6 +46,7 @@ export const DiscoverTopNav = ({
   onChangeIndexPattern,
   onEditRuntimeField,
   textBasedLanguageMode,
+  textBasedLanguageModeErrors,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
   const showDatePicker = useMemo(
@@ -199,6 +201,9 @@ export const DiscoverTopNav = ({
       useDefaultBehaviors={true}
       dataViewPickerComponentProps={dataViewPickerProps}
       displayStyle="detached"
+      textBasedLanguageModeErrors={
+        textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
+      }
     />
   );
 };

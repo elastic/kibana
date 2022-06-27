@@ -85,6 +85,7 @@ export interface QueryBarTopRowProps {
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
+  textBasedLanguageModeErrors?: Error[];
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
@@ -518,6 +519,7 @@ export const QueryBarTopRow = React.memo(
             onTextLangQueryChange={props.onTextLangQueryChange}
             expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
             isCodeEditorExpanded={codeEditorIsExpanded}
+            errors={props.textBasedLanguageModeErrors}
           />
         )
       );
