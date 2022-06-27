@@ -98,6 +98,8 @@ export const sampleAttribute = {
                 },
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
+                timeScale: undefined,
+                timeShift: undefined,
               },
               'y-axis-column-layer0X1': {
                 customLabel: true,
@@ -115,6 +117,8 @@ export const sampleAttribute = {
                 },
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
+                timeScale: undefined,
+                timeShift: undefined,
               },
               'y-axis-column-layer0X2': {
                 customLabel: true,
@@ -122,6 +126,7 @@ export const sampleAttribute = {
                 isBucketed: false,
                 label: 'Part of Pages loaded',
                 operationType: 'overall_sum',
+                params: undefined,
                 references: ['y-axis-column-layer0X1'],
                 scale: 'ratio',
               },
@@ -232,14 +237,14 @@ export const sampleAttribute = {
     },
     visualization: {
       axisTitlesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
       curveType: 'CURVE_MONOTONE_X',
       fittingFunction: 'Linear',
       gridlinesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
@@ -248,6 +253,7 @@ export const sampleAttribute = {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
           layerType: 'data',
+          palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [
