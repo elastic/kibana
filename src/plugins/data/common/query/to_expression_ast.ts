@@ -27,11 +27,13 @@ function getAggregateQueryMode(query: AggregateQuery): string {
 }
 
 function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
-  const match = sqlQuery?.match(/FROM\s+(\w+)/);
-  if (match) {
-    return match[1];
+  const [_, fromText] = sqlQuery?.split('FROM') ?? [];
+  const dataViewString = fromText.replaceAll('"', '');
+  const [indexPattern] = dataViewString?.split(' ') ?? [];
+  if (indexPattern) {
+    return indexPattern;
   }
-  return '';
+  return dataViewString;
 }
 
 interface Args extends QueryState {

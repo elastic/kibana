@@ -27,6 +27,7 @@ describe('saved_searches_utils', () => {
         description: 'foo',
         grid: {},
         hideChart: true,
+        isTextBasedQuery: false,
       };
 
       expect(fromSavedSearchAttributes('id', attributes, createSearchSourceMock(), {}))

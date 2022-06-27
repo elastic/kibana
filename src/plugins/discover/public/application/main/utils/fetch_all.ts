@@ -168,7 +168,6 @@ export function fetchAll(
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
           result: docs,
-          textBasedLanguageMode,
         });
 
         checkHitCount(docs.length);
