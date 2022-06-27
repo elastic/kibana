@@ -47,6 +47,7 @@ import type { MapExtentState } from '../../reducers/map/types';
 // @ts-expect-error
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
+import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
 
 export interface Props {
   isMapReady: boolean;
@@ -462,6 +463,7 @@ export class MbMap extends Component<Props, State> {
     let drawFeatureControl;
     let tooltipControl;
     let scaleControl;
+    let keydownScrollZoom;
     if (this.state.mbMap) {
       drawFilterControl =
         this.props.addFilters && this.props.filterModeActive ? (
@@ -483,6 +485,7 @@ export class MbMap extends Component<Props, State> {
       scaleControl = this.props.settings.showScaleControl ? (
         <ScaleControl mbMap={this.state.mbMap} isFullScreen={this.props.isFullScreen} />
       ) : null;
+      keydownScrollZoom = <KeydownScrollZoom mbMap={this.state.mbMap} />
     }
     return (
       <div
@@ -493,6 +496,7 @@ export class MbMap extends Component<Props, State> {
       >
         {drawFilterControl}
         {drawFeatureControl}
+        {keydownScrollZoom}
         {scaleControl}
         {tooltipControl}
       </div>
