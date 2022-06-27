@@ -10,6 +10,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EmbedAction } from '../../header/embed_action';
 import { ObservabilityAppServices } from '../../../../../application/types';
 import { AddToCaseAction } from '../../header/add_to_case_action';
 
@@ -36,6 +37,9 @@ export function ExpViewActionMenuContent({
         responsive={false}
         style={{ paddingRight: 20 }}
       >
+        <EuiFlexItem grow={false}>
+          <EmbedAction />
+        </EuiFlexItem>
         {timeRange && (
           <EuiFlexItem grow={false}>
             <AddToCaseAction lensAttributes={lensAttributes} timeRange={timeRange} />
