@@ -6,10 +6,11 @@
  */
 
 import React, { useCallback } from 'react';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-interface CategoriesBadgesProps {
+export interface CategoriesBadgesProps {
   setSelectedCategoryIds: (categoryIds: string[]) => void;
   selectedCategoryIds: string[];
 }

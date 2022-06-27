@@ -10,6 +10,8 @@ import { render, RenderResult } from '@testing-library/react';
 import { mockBrowserFields } from './mock';
 
 import { FieldTable, FieldTableProps } from './field_table';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { ThemeProvider } from 'styled-components';
 
 const timestampFieldId = '@timestamp';
 
@@ -28,6 +30,14 @@ const defaultProps: FieldTableProps = {
   onToggleColumn: mockOnToggleColumn,
 };
 
+const getComponent = (props: Partial<FieldTableProps> = {}) => (
+  <ThemeProvider theme={() => ({ eui: { euiSizeXS: '12px', euiBorderThin: '1px' } })}>
+    <FieldTable {...{ ...defaultProps, ...props }} />
+  </ThemeProvider>
+);
+
+const renderComponent = (props: Partial<FieldTableProps> = {}) => render(getComponent(props));
+
 describe('FieldTable', () => {
   const timestampField = mockBrowserFields.base.fields![timestampFieldId];
   const defaultPageSize = 10;
@@ -37,15 +47,13 @@ describe('FieldTable', () => {
   });
 
   it('should render empty field table', () => {
-    const result = render(<FieldTable {...defaultProps} />);
+    const result = renderComponent();
 
     expect(result.getByText('No items found')).toBeInTheDocument();
   });
 
   it('should render field table with fields of all categories', () => {
-    const result = render(
-      <FieldTable {...defaultProps} filteredBrowserFields={mockBrowserFields} />
-    );
+    const result = renderComponent({ filteredBrowserFields: mockBrowserFields });
 
     expect(result.container.getElementsByClassName('euiTableRow').length).toBe(defaultPageSize);
   });
@@ -59,13 +67,10 @@ describe('FieldTable', () => {
       0
     );
 
-    const result = render(
-      <FieldTable
-        {...defaultProps}
-        selectedCategoryIds={selectedCategoryIds}
-        filteredBrowserFields={mockBrowserFields}
-      />
-    );
+    const result = renderComponent({
+      selectedCategoryIds,
+      filteredBrowserFields: mockBrowserFields,
+    });
 
     expect(result.container.getElementsByClassName('euiTableRow').length).toBe(fieldCount);
   });
@@ -79,40 +84,31 @@ describe('FieldTable', () => {
       },
     ];
 
-    const result = render(
-      <FieldTable
-        {...defaultProps}
-        getFieldTableColumns={() => fieldTableColumns}
-        filteredBrowserFields={mockBrowserFields}
-      />
-    );
+    const result = renderComponent({
+      getFieldTableColumns: () => fieldTableColumns,
+      filteredBrowserFields: mockBrowserFields,
+    });
 
     expect(result.getAllByText('Custom column').length).toBeGreaterThan(0);
     expect(result.getAllByTestId('customColumn').length).toEqual(defaultPageSize);
   });
 
   it('should render field table with unchecked field', () => {
-    const result = render(
-      <FieldTable
-        {...defaultProps}
-        selectedCategoryIds={['base']}
-        filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-      />
-    );
+    const result = renderComponent({
+      selectedCategoryIds: ['base'],
+      filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+    });
 
     const checkbox = result.getByTestId(`field-${timestampFieldId}-checkbox`);
     expect(checkbox).not.toHaveAttribute('checked');
   });
 
   it('should render field table with checked field', () => {
-    const result = render(
-      <FieldTable
-        {...defaultProps}
-        selectedCategoryIds={['base']}
-        columnIds={columnIds}
-        filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-      />
-    );
+    const result = renderComponent({
+      selectedCategoryIds: ['base'],
+      columnIds,
+      filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+    });
 
     const checkbox = result.getByTestId(`field-${timestampFieldId}-checkbox`);
     expect(checkbox).toHaveAttribute('checked');
@@ -120,14 +116,11 @@ describe('FieldTable', () => {
 
   describe('selection', () => {
     it('should call onToggleColumn callback when field unchecked', () => {
-      const result = render(
-        <FieldTable
-          {...defaultProps}
-          selectedCategoryIds={['base']}
-          columnIds={columnIds}
-          filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-        />
-      );
+      const result = renderComponent({
+        selectedCategoryIds: ['base'],
+        columnIds,
+        filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+      });
 
       result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
 
@@ -136,13 +129,10 @@ describe('FieldTable', () => {
     });
 
     it('should call onToggleColumn callback when field checked', () => {
-      const result = render(
-        <FieldTable
-          {...defaultProps}
-          selectedCategoryIds={['base']}
-          filteredBrowserFields={{ base: { fields: { [timestampFieldId]: timestampField } } }}
-        />
-      );
+      const result = renderComponent({
+        selectedCategoryIds: ['base'],
+        filteredBrowserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
+      });
 
       result.getByTestId(`field-${timestampFieldId}-checkbox`).click();
 
@@ -159,13 +149,12 @@ describe('FieldTable', () => {
       result.getByTestId('pagination-button-1').click();
     };
 
-    const defaultPaginationProps: FieldTableProps = {
-      ...defaultProps,
+    const paginationProps = {
       filteredBrowserFields: mockBrowserFields,
     };
 
     it('should paginate on page clicked', () => {
-      const result = render(<FieldTable {...defaultPaginationProps} />);
+      const result = renderComponent(paginationProps);
 
       expect(isAtFirstPage(result)).toBeTruthy();
 
@@ -175,7 +164,7 @@ describe('FieldTable', () => {
     });
 
     it('should not reset on field checked', () => {
-      const result = render(<FieldTable {...defaultPaginationProps} />);
+      const result = renderComponent(paginationProps);
 
       changePage(result);
 
@@ -186,21 +175,19 @@ describe('FieldTable', () => {
     });
 
     it('should reset on filter change', () => {
-      const result = render(
-        <FieldTable
-          {...defaultPaginationProps}
-          selectedCategoryIds={['destination', 'event', 'client', 'agent', 'host']}
-        />
-      );
+      const result = renderComponent({
+        ...paginationProps,
+        selectedCategoryIds: ['destination', 'event', 'client', 'agent', 'host'],
+      });
 
       changePage(result);
       expect(isAtFirstPage(result)).toBeFalsy();
 
       result.rerender(
-        <FieldTable
-          {...defaultPaginationProps}
-          selectedCategoryIds={['destination', 'event', 'client', 'agent']}
-        />
+        getComponent({
+          ...paginationProps,
+          selectedCategoryIds: ['destination', 'event', 'client', 'agent'],
+        })
       );
 
       expect(isAtFirstPage(result)).toBeTruthy();

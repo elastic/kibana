@@ -7,8 +7,10 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { ThemeProvider } from 'styled-components';
 
-import { CategoriesBadges } from './categories_badges';
+import { CategoriesBadges, CategoriesBadgesProps } from './categories_badges';
 
 const mockSetSelectedCategoryIds = jest.fn();
 const defaultProps = {
@@ -16,13 +18,20 @@ const defaultProps = {
   selectedCategoryIds: [],
 };
 
+const renderComponent = (props: Partial<CategoriesBadgesProps> = {}) =>
+  render(
+    <ThemeProvider theme={() => ({ eui: { euiSizeXS: '12px' } })}>
+      <CategoriesBadges {...{ ...defaultProps, ...props }} />
+    </ThemeProvider>
+  );
+
 describe('CategoriesBadges', () => {
   beforeEach(() => {
     mockSetSelectedCategoryIds.mockClear();
   });
 
   it('should render empty badges', () => {
-    const result = render(<CategoriesBadges {...defaultProps} />);
+    const result = renderComponent();
 
     const badges = result.getByTestId('category-badges');
     expect(badges).toBeInTheDocument();
@@ -30,9 +39,7 @@ describe('CategoriesBadges', () => {
   });
 
   it('should render the selector button with selected categories', () => {
-    const result = render(
-      <CategoriesBadges {...defaultProps} selectedCategoryIds={['base', 'event']} />
-    );
+    const result = renderComponent({ selectedCategoryIds: ['base', 'event'] });
 
     const badges = result.getByTestId('category-badges');
     expect(badges.childNodes.length).toBe(2);
@@ -41,9 +48,7 @@ describe('CategoriesBadges', () => {
   });
 
   it('should call the set selected callback when badge unselect button clicked', () => {
-    const result = render(
-      <CategoriesBadges {...defaultProps} selectedCategoryIds={['base', 'event']} />
-    );
+    const result = renderComponent({ selectedCategoryIds: ['base', 'event'] });
 
     result.getByTestId('category-badge-unselect-base').click();
     expect(mockSetSelectedCategoryIds).toHaveBeenCalledWith(['event']);

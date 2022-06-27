@@ -14,6 +14,8 @@ import { FIELD_BROWSER_WIDTH } from './helpers';
 
 import { FieldBrowserComponent } from './field_browser';
 import type { FieldBrowserProps } from './types';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { ThemeProvider } from 'styled-components';
 
 const defaultProps: FieldBrowserProps = {
   browserFields: mockBrowserFields,
@@ -23,9 +25,13 @@ const defaultProps: FieldBrowserProps = {
 };
 
 const renderComponent = (props: Partial<FieldBrowserProps> = {}) =>
-  render(<FieldBrowserComponent {...{ ...defaultProps, ...props }} />);
+  render(
+    <ThemeProvider theme={() => ({ eui: { euiSizeXS: '12px', euiBorderThin: '1px' } })}>
+      <FieldBrowserComponent {...{ ...defaultProps, ...props }} />
+    </ThemeProvider>
+  );
 
-describe('StatefulFieldsBrowser', () => {
+describe('FieldsBrowser', () => {
   it('should render the Fields button, which displays the fields browser on click', () => {
     const result = renderComponent();
 

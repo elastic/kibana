@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
 import type { FieldBrowserProps, BrowserFields } from './types';

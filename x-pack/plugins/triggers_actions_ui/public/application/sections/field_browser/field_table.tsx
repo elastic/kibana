@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { EuiInMemoryTable, Pagination, Direction } from '@elastic/eui';
 import { getFieldColumns, getFieldItems, isActionsColumn } from './field_items';

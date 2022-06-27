@@ -18,6 +18,7 @@ import {
   EuiTableActionsColumnType,
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
+// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
 import { getEmptyValue, getExampleText, getIconFromType } from './helpers';
