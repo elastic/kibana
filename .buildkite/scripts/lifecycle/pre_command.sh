@@ -4,15 +4,9 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# By default, all steps should set up these things to get a full environment before running
-# It can be skipped for pipeline upload steps though, to make job start time a little faster
-if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
-  if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
-    echo '--- Setup environment vars'
-    source .buildkite/scripts/common/env.sh
-    source .buildkite/scripts/common/setup_node.sh
-  fi
-fi
+echo '--- Setup environment vars'
+source .buildkite/scripts/common/env.sh
+source .buildkite/scripts/common/setup_node.sh
 
 BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
 export BUILDKITE_TOKEN
