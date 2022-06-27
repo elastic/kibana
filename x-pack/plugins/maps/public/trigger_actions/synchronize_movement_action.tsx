@@ -43,19 +43,15 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
       return false;
     }
 
-    if (embeddable.type === MAP_SAVED_OBJECT_TYPE) {
-      return true;
-    }
-
     if (
       embeddable.type === 'lens' &&
-      typeof (embeddable as LensEmbeddable).getVisualizationType === 'function' &&
-      (embeddable as LensEmbeddable).getVisualizationType() === 'lnsChoropleth'
+      typeof (embeddable as LensEmbeddable).getSavedVis === 'function' &&
+      (embeddable as LensEmbeddable).getSavedVis()?.visualizationType === 'lnsChoropleth'
     ) {
       return true;
     }
 
-    return false;
+    return embeddable.type === MAP_SAVED_OBJECT_TYPE;
   },
   execute: async ({ embeddable }: SynchronizeMovementActionContext) => {
     const { SynchronizeMovementModal } = await import('./synchronize_movement_modal');
