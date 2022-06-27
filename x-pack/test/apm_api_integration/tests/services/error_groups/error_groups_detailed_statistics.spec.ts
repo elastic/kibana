@@ -19,7 +19,7 @@ import { config, generateData } from './generate_data';
 import { getErrorGroupIds } from './get_error_group_ids';
 
 type ErrorGroupsDetailedStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -32,22 +32,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi(
     overrides?: RecursivePartial<
-      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>['params']
+      APIClientRequestParamsOf<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>['params']
     >
   ) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics`,
+      endpoint: `POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics`,
       params: {
         path: { serviceName, ...overrides?.path },
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           numBuckets: 20,
-          groupIds: JSON.stringify(['foo']),
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
           ...overrides?.query,
         },
+        body: { groupIds: JSON.stringify(['foo']), ...overrides?.body },
       },
     });
   }
@@ -82,7 +82,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           before(async () => {
             errorIds = await getErrorGroupIds({ serviceName, start, end, apmApiClient });
             const response = await callApi({
-              query: {
+              body: {
                 groupIds: JSON.stringify(errorIds),
               },
             });
@@ -116,7 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let errorGroupsDetailedStatistics: ErrorGroupsDetailedStatistics;
           before(async () => {
             const response = await callApi({
-              query: {
+              body: {
                 groupIds: JSON.stringify(['foo']),
               },
             });
@@ -138,10 +138,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             errorIds = await getErrorGroupIds({ serviceName, start, end, apmApiClient });
             const response = await callApi({
               query: {
-                groupIds: JSON.stringify(errorIds),
                 start: moment(end).subtract(7, 'minutes').toISOString(),
                 end: new Date(end).toISOString(),
                 offset: '7m',
+              },
+              body: {
+                groupIds: JSON.stringify(errorIds),
               },
             });
             errorGroupsDetailedStatistics = response.body;
