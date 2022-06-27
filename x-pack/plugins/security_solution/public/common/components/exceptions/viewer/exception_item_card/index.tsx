@@ -13,6 +13,7 @@ import {
   EuiAccordion,
   EuiFlexItem,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -41,6 +42,8 @@ const ExceptionItemCardComponent = ({
   onEditException,
   dataTestSubj,
 }: ExceptionItemProps): JSX.Element => {
+  const { euiTheme } = useEuiTheme();
+
   const handleDelete = useCallback((): void => {
     onDeleteException({
       id: exceptionItem.id,
@@ -98,7 +101,15 @@ const ExceptionItemCardComponent = ({
           <EuiFlexItem>
             <EuiAccordion
               id="exceptionItemCardComments"
-              buttonContent={<EuiText size="s" color="primary">{i18n.exceptionItemCommentsAccordion(formattedComments.length)}</EuiText>}
+              buttonContent={(
+                <EuiText
+                  size="s"
+                  style={{ color: euiTheme.colors.primary }}
+                >
+                  {i18n.exceptionItemCommentsAccordion(formattedComments.length)}
+                </EuiText>
+              )}
+              arrowDisplay="none"
               data-test-subj="exceptionsViewerCommentAccordion"
             >
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
