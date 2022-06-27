@@ -110,7 +110,7 @@ describe('Alerts detection rules', () => {
 
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
 
-    cy.clock(Date.now(), ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']);
+    cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
 
     waitForRulesTableToBeLoaded();
 
