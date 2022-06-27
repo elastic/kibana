@@ -1,0 +1,114 @@
+{
+  "id": "@kbn/core-analytics-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-analytics-server",
+        "id": "def-server.AnalyticsServicePreboot",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServicePreboot",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the preboot phase\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "{ optIn: (optInConfig: ",
+          "OptInConfig",
+          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          "Observable",
+          "<",
+          "TelemetryCounter",
+          ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+          "EventTypeOpts",
+          "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+          "IShipper",
+          ", ShipperConfig>(Shipper: ",
+          "ShipperClassConstructor",
+          "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+          "RegisterShipperOpts",
+          " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+          "ContextProviderOpts",
+          "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
+        ],
+        "path": "packages/core/analytics/core-analytics-server/src/contracts.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-analytics-server",
+        "id": "def-server.AnalyticsServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServiceSetup",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "{ optIn: (optInConfig: ",
+          "OptInConfig",
+          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          "Observable",
+          "<",
+          "TelemetryCounter",
+          ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+          "EventTypeOpts",
+          "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+          "IShipper",
+          ", ShipperConfig>(Shipper: ",
+          "ShipperClassConstructor",
+          "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+          "RegisterShipperOpts",
+          " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+          "ContextProviderOpts",
+          "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
+        ],
+        "path": "packages/core/analytics/core-analytics-server/src/contracts.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-analytics-server",
+        "id": "def-server.AnalyticsServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServiceStart",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "{ optIn: (optInConfig: ",
+          "OptInConfig",
+          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          "Observable",
+          "<",
+          "TelemetryCounter",
+          ">; }"
+        ],
+        "path": "packages/core/analytics/core-analytics-server/src/contracts.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
