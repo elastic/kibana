@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
+  copyToClipboard,
   EuiButton,
   EuiButtonEmpty,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -27,14 +27,45 @@ export function TestQueryRow({
   hasValidationErrors: boolean;
 }) {
   const { onTestQuery, testQueryResult, testQueryError, testQueryLoading } = useTestQuery(fetch);
-  const [copyQueryText, setCopyQueryText] = useState('');
-  const euiCopyRef = useRef<EuiCopy>(null);
+  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 
-  useEffect(() => {
-    if (copyQueryText) {
-      euiCopyRef.current?.copy();
-    }
-  }, [copyQueryText]);
+  let message: React.ReactElement | undefined;
+
+  if (showCopiedMessage) {
+    message = (
+      <EuiText data-test-subj="queryCopiedMessage" color="subdued" size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.queryCopiedToClipboard"
+            defaultMessage="Query copied to clipboard."
+          />
+        </p>
+      </EuiText>
+    );
+  } else if (testQueryLoading) {
+    message = (
+      <EuiText color="subdued" size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.testQueryIsExecuted"
+            defaultMessage="Query is executed."
+          />
+        </p>
+      </EuiText>
+    );
+  } else if (testQueryResult) {
+    message = (
+      <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">
+        <p>{testQueryResult}</p>
+      </EuiText>
+    );
+  } else if (testQueryError) {
+    message = (
+      <EuiText data-test-subj="testQueryError" color="danger" size="s">
+        <p>{testQueryError}</p>
+      </EuiText>
+    );
+  }
 
   return (
     <>
@@ -46,7 +77,10 @@ export function TestQueryRow({
               color="primary"
               iconSide="left"
               iconType="playFilled"
-              onClick={onTestQuery}
+              onClick={() => {
+                setShowCopiedMessage(false);
+                onTestQuery();
+              }}
               disabled={hasValidationErrors}
               isLoading={testQueryLoading}
               size="s"
@@ -59,57 +93,29 @@ export function TestQueryRow({
           </EuiFlexItem>
           {copyQuery && (
             <EuiFlexItem grow={false}>
-              <EuiCopy ref={euiCopyRef} textToCopy={copyQueryText}>
-                {() => (
-                  <EuiButtonEmpty
-                    data-test-subj="copyQuery"
-                    color="primary"
-                    iconSide="left"
-                    iconType="copyClipboard"
-                    onClick={() => {
-                      setCopyQueryText(copyQuery());
-                    }}
-                    disabled={hasValidationErrors}
-                    isLoading={testQueryLoading}
-                    size="s"
-                  >
-                    <FormattedMessage
-                      id="xpack.stackAlerts.esQuery.ui.copyQuery"
-                      defaultMessage="Copy query"
-                    />
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
+              <EuiButtonEmpty
+                data-test-subj="copyQuery"
+                color="primary"
+                iconSide="left"
+                iconType="copyClipboard"
+                onClick={() => {
+                  const copied = copyToClipboard(copyQuery());
+                  setShowCopiedMessage(copied);
+                }}
+                disabled={hasValidationErrors}
+                isLoading={testQueryLoading}
+                size="s"
+              >
+                <FormattedMessage
+                  id="xpack.stackAlerts.esQuery.ui.copyQuery"
+                  defaultMessage="Copy query"
+                />
+              </EuiButtonEmpty>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFormRow>
-      {testQueryLoading && (
-        <EuiFormRow>
-          <EuiText color="subdued" size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.stackAlerts.esQuery.ui.testQueryIsExecuted"
-                defaultMessage="Query is executed."
-              />
-            </p>
-          </EuiText>
-        </EuiFormRow>
-      )}
-      {testQueryResult && (
-        <EuiFormRow>
-          <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">
-            <p>{testQueryResult}</p>
-          </EuiText>
-        </EuiFormRow>
-      )}
-      {testQueryError && (
-        <EuiFormRow>
-          <EuiText data-test-subj="testQueryError" color="danger" size="s">
-            <p>{testQueryError}</p>
-          </EuiText>
-        </EuiFormRow>
-      )}
+      {message && <EuiFormRow>{message}</EuiFormRow>}
     </>
   );
 }
