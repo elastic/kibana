@@ -134,7 +134,7 @@ describe('KibanaPageTemplate', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(component.find('div.kbnWithSolutionNav').length).toBe(1);
+    expect(component.find('div.kbnPageTemplate__pageSideBar').length).toBe(1);
   });
 
   test('render noDataContent', () => {
@@ -168,6 +168,6 @@ describe('KibanaPageTemplate', () => {
         pageSideBarProps={{ className: 'customClass' }}
       />
     );
-    expect(component.html().includes('kbnWithSolutionNav customClass')).toBe(true);
+    expect(component.html().includes('kbnPageTemplate__pageSideBar customClass')).toBe(true);
   });
 });

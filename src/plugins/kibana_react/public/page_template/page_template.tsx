@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import './page_template.scss';
+
 import React, { FunctionComponent } from 'react';
 import { EuiPageTemplateProps } from '@elastic/eui';
 import { KibanaPageTemplateSolutionNavProps } from './solution_nav';
