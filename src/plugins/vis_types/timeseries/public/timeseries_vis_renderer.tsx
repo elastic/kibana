@@ -55,7 +55,7 @@ export const getTimeseriesVisRenderer: (deps: {
       // Important for reporting!
       setTimeout(() => {
         handlers.done();
-      }, 350);
+      }, 100);
     };
 
     render(

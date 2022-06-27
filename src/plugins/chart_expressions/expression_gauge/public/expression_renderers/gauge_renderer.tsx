@@ -46,10 +46,7 @@ export const gaugeRenderer: (
           />
         </div>
       </KibanaThemeProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });

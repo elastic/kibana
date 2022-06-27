@@ -71,10 +71,7 @@ export const heatmapRenderer: (
           />
         </div>
       </KibanaThemeProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });
