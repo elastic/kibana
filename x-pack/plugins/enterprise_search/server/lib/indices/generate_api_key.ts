@@ -35,9 +35,9 @@ export const generateApiKey = async (client: IScopedClusterClient, indexName: st
       await client.asCurrentUser.security.invalidateApiKey({ id: connector.fields.api_key_id });
     }
     await client.asCurrentUser.index({
+      document: { ...connector._source, api_key_id: apiKeyResult.id },
       id: connector._id,
       index: CONNECTORS_INDEX,
-      document: { ...connector._source, api_key_id: apiKeyResult.id },
     });
   }
   return apiKeyResult;

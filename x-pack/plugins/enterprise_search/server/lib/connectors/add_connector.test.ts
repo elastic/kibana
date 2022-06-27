@@ -14,10 +14,10 @@ import { addConnector } from './add_connector';
 describe('addConnector lib function', () => {
   const mockClient = {
     asCurrentUser: {
+      index: jest.fn(),
       indices: {
         create: jest.fn(),
       },
-      index: jest.fn(),
     },
     asInternalUser: {},
   };
@@ -33,7 +33,6 @@ describe('addConnector lib function', () => {
       addConnector(mockClient as unknown as IScopedClusterClient, { index_name: 'index_name' })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      index: CONNECTORS_INDEX,
       document: {
         api_key_id: '',
         configuration: {},
@@ -47,6 +46,7 @@ describe('addConnector lib function', () => {
         sync_status: 'not connected',
         updated_at: '',
       },
+      index: CONNECTORS_INDEX,
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({ index: 'index_name' });
   });
@@ -62,7 +62,6 @@ describe('addConnector lib function', () => {
       index: CONNECTORS_INDEX,
     });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      index: CONNECTORS_INDEX,
       document: {
         api_key_id: null,
         configuration: {},
@@ -76,6 +75,7 @@ describe('addConnector lib function', () => {
         sync_status: null,
         updated_at: null,
       },
+      index: CONNECTORS_INDEX,
     });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledTimes(2);
   });

@@ -13,18 +13,17 @@ export interface KeyValuePair {
 export interface Connector {
   api_key_id: string | null;
   configuration: Record<string, KeyValuePair | undefined>;
+  created_at: string | null;
   index_name: string;
-  service_type: string | null;
-  status: string | null;
-  sync_status: string | null;
-  sync_error: string | null;
   last_seen: string | null;
   last_synced: string | null;
-  created_at: string | null;
-  updated_at: string | null;
   scheduling: {
     enabled: boolean;
     interval: string | null; // crontab syntax
   };
+  service_type: string | null;
+  status: string | null;
+  sync_error: string | null;
   sync_now: boolean;
+  sync_status: string | null;
 }

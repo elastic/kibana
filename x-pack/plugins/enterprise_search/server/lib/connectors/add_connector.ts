@@ -21,8 +21,8 @@ const createConnector = async (
   client: IScopedClusterClient
 ): Promise<{ id: string; index_name: string }> => {
   const result = await client.asCurrentUser.index({
-    index,
     document,
+    index,
   });
   await client.asCurrentUser.indices.create({ index: document.index_name });
 
@@ -42,12 +42,11 @@ export const addConnector = async (
     last_seen: null,
     last_synced: 'never',
     scheduling: { enabled: false, interval: null },
-    status: 'not connected',
     service_type: null,
+    status: 'not connected',
     sync_error: null,
     sync_now: false,
     sync_status: null,
-    updated_at: null,
   };
   try {
     return await createConnector(index, document, client);

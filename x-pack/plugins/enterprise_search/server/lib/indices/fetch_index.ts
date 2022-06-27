@@ -28,8 +28,8 @@ export const fetchIndex = async (client: IScopedClusterClient, index: string) =>
   const connector = connectorResult.hits.hits[0] ? connectorResult.hits.hits[0]._source : undefined;
   if (connector) {
     return {
-      index: indexResult,
       connector: { ...connector, id: connectorResult.hits.hits[0]._id },
+      index: indexResult,
     };
   } else {
     return { index: indexResult };

@@ -8,12 +8,31 @@
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export interface IndexData {
-  connector?: {
-    api_key_id: string;
-    index_name: string;
-    id: string;
+export interface KeyValuePair {
+  label: string;
+  value: string;
+}
+
+export interface Connector {
+  api_key_id: string | null;
+  configuration: Record<string, KeyValuePair | undefined>;
+  created_at: string | null;
+  index_name: string;
+  last_seen: string | null;
+  last_synced: string | null;
+  scheduling: {
+    enabled: boolean;
+    interval: string | null; // crontab syntax
   };
+  service_type: string | null;
+  status: string | null;
+  sync_error: string | null;
+  sync_now: boolean;
+  sync_status: string | null;
+}
+
+export interface IndexData {
+  connector?: Connector;
   index: {
     aliases: string[];
     health: string;

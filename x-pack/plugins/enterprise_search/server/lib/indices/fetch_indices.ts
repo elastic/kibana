@@ -31,12 +31,12 @@ export const mapIndexStats = (
     },
   };
   return {
-    health: indexStats?.health,
-    status: indexStats?.status,
-    name: indexName,
-    uuid: indexStats?.uuid,
-    total,
     aliases,
+    health: indexStats?.health,
+    name: indexName,
+    status: indexStats?.status,
+    total,
+    uuid: indexStats?.uuid,
   };
 };
 
@@ -47,13 +47,13 @@ export const fetchIndices = async (
 ): Promise<ElasticsearchIndex[]> => {
   // This call retrieves alias and settings information about indices
   const indices = await client.asCurrentUser.indices.get({
-    index: indexPattern,
     expand_wildcards: ['open'],
+    // for better performance only compute aliases and settings of indices but not mappings
+    features: ['aliases', 'settings'],
     // only get specified index properties from ES to keep the response under 536MB
     // node.js string length limit: https://github.com/nodejs/node/issues/33960
     filter_path: ['*.aliases'],
-    // for better performance only compute aliases and settings of indices but not mappings
-    features: ['aliases', 'settings'],
+    index: indexPattern,
   });
 
   if (!Object.keys(indices).length) {
@@ -61,8 +61,8 @@ export const fetchIndices = async (
   }
 
   const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
-    index: indexPattern,
     expand_wildcards: ['open'],
+    index: indexPattern,
     metric: ['docs', 'store'],
   });
   const indicesNames = Object.keys(indices);

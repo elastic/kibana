@@ -31,8 +31,8 @@ describe('fetchIndices lib function', () => {
     indices: {
       'search-regular-index': {
         health: 'green',
+        size: new ByteSizeValue(108000).toString(),
         status: 'open',
-        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
         total: {
           docs: {
             count: 100,
@@ -42,7 +42,7 @@ describe('fetchIndices lib function', () => {
             size_in_bytes: 108000,
           },
         },
-        size: new ByteSizeValue(108000).toString(),
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
       },
     },
   };
@@ -60,8 +60,8 @@ describe('fetchIndices lib function', () => {
     ).resolves.toEqual([
       {
         health: 'green',
+        name: 'search-regular-index',
         status: 'open',
-        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
         total: {
           docs: {
             count: 100,
@@ -71,7 +71,7 @@ describe('fetchIndices lib function', () => {
             size_in_bytes: '105.47kb',
           },
         },
-        name: 'search-regular-index',
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
       },
     ]);
     expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
@@ -82,9 +82,9 @@ describe('fetchIndices lib function', () => {
     });
 
     expect(mockClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-      metric: ['docs', 'store'],
       expand_wildcards: ['open'],
       index: 'search-*',
+      metric: ['docs', 'store'],
     });
   });
 
@@ -111,8 +111,8 @@ describe('fetchIndices lib function', () => {
     ).resolves.toEqual([
       {
         health: 'green',
+        name: 'search-aliased',
         status: 'open',
-        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
         total: {
           docs: {
             count: 100,
@@ -122,12 +122,12 @@ describe('fetchIndices lib function', () => {
             size_in_bytes: '105.47kb',
           },
         },
-        name: 'search-aliased',
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
       },
       {
         health: 'green',
+        name: 'search-double-aliased',
         status: 'open',
-        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
         total: {
           docs: {
             count: 100,
@@ -137,7 +137,7 @@ describe('fetchIndices lib function', () => {
             size_in_bytes: '105.47kb',
           },
         },
-        name: 'search-double-aliased',
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
       },
     ]);
   });
@@ -157,7 +157,9 @@ describe('fetchIndices lib function', () => {
       fetchIndices(mockClient as unknown as IScopedClusterClient, 'search-*', /search-.*/)
     ).resolves.toEqual([
       {
+        health: undefined,
         name: 'search-regular-index',
+        status: undefined,
         total: {
           docs: {
             count: 0,
@@ -168,8 +170,6 @@ describe('fetchIndices lib function', () => {
           },
         },
         uuid: undefined,
-        health: undefined,
-        status: undefined,
       },
     ]);
   });
