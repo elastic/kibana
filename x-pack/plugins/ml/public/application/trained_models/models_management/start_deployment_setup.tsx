@@ -35,6 +35,8 @@ export interface ThreadingParams {
   threadsPerAllocations: number;
 }
 
+const THREADS_MAX_EXPONENT = 6;
+
 /**
  * Form for setting threading params.
  */
@@ -44,7 +46,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
 
   const threadsPerAllocationsOptions = useMemo(
     () =>
-      new Array(6).fill(null).map((v, i) => {
+      new Array(THREADS_MAX_EXPONENT).fill(null).map((v, i) => {
         const value = Math.pow(2, i);
 
         return {
