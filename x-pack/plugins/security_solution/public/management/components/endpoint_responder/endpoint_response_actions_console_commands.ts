@@ -75,6 +75,24 @@ export const getEndpointResponseActionsConsoleCommands = (
           ),
         },
         pid: {
+          required: false,
+          exclusiveOr: true,
+          allowMultiples: false,
+          about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
+            defaultMessage: 'A PID representng the process to kill',
+          }),
+        },
+        entityId: {
+          required: false,
+          exclusiveOr: true,
+          allowMultiples: false,
+          about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
+            defaultMessage: 'An Entity ID representng the process to kill',
+          }),
+        },
+      },
+      oneOf: {
+        pid: {
           required: true,
           allowMultiples: false,
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {

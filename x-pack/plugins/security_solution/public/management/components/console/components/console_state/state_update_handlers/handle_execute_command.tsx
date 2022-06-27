@@ -26,6 +26,13 @@ import { BadArgument } from '../../bad_argument';
 import { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
 
 const toCliArgumentOption = (argName: string) => `--${argName}`;
+const toCliArgumentOptions = (argNames: string[]) => {
+  let argNamesResult = '';
+  for (const argName of argNames) {
+    argNamesResult += `--${argName} `;
+  }
+  return argNamesResult;
+};
 
 const getRequiredArguments = (argDefinitions: CommandDefinition['args']): string[] => {
   if (!argDefinitions) {
@@ -34,6 +41,16 @@ const getRequiredArguments = (argDefinitions: CommandDefinition['args']): string
 
   return Object.entries(argDefinitions)
     .filter(([_, argDef]) => argDef.required)
+    .map(([argName]) => argName);
+};
+
+const getExclusiveOrArgs = (argDefinitions: CommandDefinition['args']): string[] => {
+  if (!argDefinitions) {
+    return [];
+  }
+
+  return Object.entries(argDefinitions)
+    .filter(([_, argDef]) => argDef.exclusiveOr)
     .map(([argName]) => argName);
 };
 
@@ -128,9 +145,10 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     commandDefinition,
   };
   const requiredArgs = getRequiredArguments(commandDefinition.args);
+  const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
 
   // If args were entered, then validate them
-  if (parsedInput.hasArgs) {
+  if (parsedInput.hasArgs || requiredArgs.length > 0 || exclusiveOrArgs.length > 0) {
     // Show command help
     if (parsedInput.hasArg('help')) {
       return updateStateWithNewCommandHistoryItem(state, {
@@ -202,6 +220,27 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           }),
         });
       }
+    }
+
+    // Validate exclusiveOr arguments, can only have one.
+    const exclusiveArgsUsed = exclusiveOrArgs.filter((arg) => parsedInput.args[arg]);
+    if (exclusiveArgsUsed.length !== 1) {
+      return updateStateWithNewCommandHistoryItem(state, {
+        id: uuidV4(),
+        command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        state: createCommandExecutionState({
+          errorMessage: i18n.translate(
+            'xpack.securitySolution.console.commandValidation.missingRequiredArg',
+            {
+              defaultMessage:
+                'This command supports one and only one of the following arguments: {argNames}',
+              values: {
+                argNames: toCliArgumentOptions(exclusiveOrArgs),
+              },
+            }
+          ),
+        }),
+      });
     }
 
     // Validate each argument given to the command

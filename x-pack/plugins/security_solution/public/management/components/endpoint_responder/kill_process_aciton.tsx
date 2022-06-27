@@ -44,7 +44,8 @@ export const KillProcessActionResult = memo<
         endpoint_ids: [endpointId],
         comment: command.args.args?.comment?.[0],
         parameters: {
-          pid: 123,
+          pid: command.args.args?.pid?.[0],
+          entity_id: command.args.args?.entityId?.[0],
         },
       });
 
@@ -52,7 +53,15 @@ export const KillProcessActionResult = memo<
         return { ...prevState, actionRequestSent: true };
       });
     }
-  }, [actionRequestSent, command.args.args?.comment, endpointId, killProcessApi, setStore]);
+  }, [
+    actionRequestSent,
+    command.args.args?.comment,
+    command.args.args?.pid,
+    command.args.args?.entityId,
+    endpointId,
+    killProcessApi,
+    setStore,
+  ]);
 
   // If release request was created, store the action id if necessary
   useEffect(() => {
