@@ -72,7 +72,6 @@ beforeEach(() => {
   MockPluginsService.getOpaqueIds.mockReturnValue(new Map());
 
   window.performance.mark = jest.fn();
-  // window.location.protocol = 'https:';
   window.performance.clearMarks = jest.fn();
   window.performance.getEntriesByName = jest.fn().mockReturnValue([
     {
