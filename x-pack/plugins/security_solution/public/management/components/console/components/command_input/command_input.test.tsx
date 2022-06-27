@@ -14,11 +14,12 @@ describe('When entering data into the Console input', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let enterCommand: ConsoleTestSetup['enterCommand'];
+  let typeText: ConsoleTestSetup['typeText'];
 
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
-    ({ enterCommand } = testSetup);
+    ({ enterCommand, typeText } = testSetup);
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
@@ -81,9 +82,14 @@ describe('When entering data into the Console input', () => {
     );
   });
 
-  describe('and the UP arrow is pressed', () => {
-    it.todo('should display the input history popover');
+  it('should display the input history popover when UP key is pressed', async () => {
+    render();
+    typeText('{ArrowUp}');
 
+    expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
+  });
+
+  describe('and when the command input history popver is opened', () => {
     it.todo('should clear the input area and show placeholder with first item that is focused');
 
     it.todo(
