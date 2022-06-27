@@ -17,6 +17,7 @@ import {
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
   InstanceInfo,
+  NodeInfo,
 } from './plugin_context';
 
 import { PluginManifest, PluginType } from './types';
@@ -25,6 +26,7 @@ import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';
 import { coreMock } from '../mocks';
+import { nodeServiceMock } from '../node/node_service.mock';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -54,6 +56,7 @@ describe('createPluginInitializerContext', () => {
   let coreContext: CoreContext;
   let server: Server;
   let instanceInfo: InstanceInfo;
+  let nodeInfo: NodeInfo;
 
   beforeEach(async () => {
     logger = loggingSystemMock.create();
@@ -62,6 +65,7 @@ describe('createPluginInitializerContext', () => {
     instanceInfo = {
       uuid: 'instance-uuid',
     };
+    nodeInfo = nodeServiceMock.createInternalPrebootContract();
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
@@ -100,7 +104,8 @@ describe('createPluginInitializerContext', () => {
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
+        instanceInfo,
+        nodeInfo
       );
 
       expect(pluginInitializerContext.config.get()).toEqual({
@@ -115,7 +120,8 @@ describe('createPluginInitializerContext', () => {
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
+        instanceInfo,
+        nodeInfo
       );
 
       expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
@@ -145,7 +151,8 @@ describe('createPluginInitializerContext', () => {
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
+        instanceInfo,
+        nodeInfo
       );
       expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
     });
@@ -164,7 +171,8 @@ describe('createPluginInitializerContext', () => {
         coreContext,
         opaqueId,
         createPluginManifest(),
-        instanceInfo
+        instanceInfo,
+        nodeInfo
       );
       expect(pluginInitializerContext.env.configs).toEqual([
         '/home/kibana/config/kibana.yml',
@@ -172,11 +180,26 @@ describe('createPluginInitializerContext', () => {
       ]);
     });
   });
+
+  describe('context.node', () => {
+    it('should expose the correct node roles', () => {
+      const pluginInitializerContext = createPluginInitializerContext(
+        coreContext,
+        opaqueId,
+        createPluginManifest(),
+        instanceInfo,
+        { roles: { backgroundTasks: false, ui: true } }
+      );
+      expect(pluginInitializerContext.node.roles.backgroundTasks).toBe(false);
+      expect(pluginInitializerContext.node.roles.ui).toBe(true);
+    });
+  });
 });
 
 describe('createPluginPrebootSetupContext', () => {
   let coreContext: CoreContext;
   let opaqueId: symbol;
+  let nodeInfo: NodeInfo;
 
   beforeEach(async () => {
     opaqueId = Symbol();
@@ -186,6 +209,7 @@ describe('createPluginPrebootSetupContext', () => {
       logger: loggingSystemMock.create(),
       configService: configServiceMock.create(),
     };
+    nodeInfo = nodeServiceMock.createInternalPrebootContract();
   });
 
   it('`holdSetupUntilResolved` captures plugin.name', () => {
@@ -194,9 +218,15 @@ describe('createPluginPrebootSetupContext', () => {
       path: 'some-path',
       manifest,
       opaqueId,
-      initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest, {
-        uuid: 'instance-uuid',
-      }),
+      initializerContext: createPluginInitializerContext(
+        coreContext,
+        opaqueId,
+        manifest,
+        {
+          uuid: 'instance-uuid',
+        },
+        nodeInfo
+      ),
     });
 
     const corePreboot = coreMock.createInternalPreboot();

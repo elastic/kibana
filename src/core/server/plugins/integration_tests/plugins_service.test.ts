@@ -19,6 +19,7 @@ import { PluginsService } from '../plugins_service';
 import { BehaviorSubject, from } from 'rxjs';
 import { config } from '../plugins_config';
 import { environmentServiceMock } from '../../environment/environment_service.mock';
+import { nodeServiceMock } from '../../node/node_service.mock';
 import { coreMock } from '../../mocks';
 import { AsyncPlugin, PluginType } from '../types';
 import { PluginWrapper } from '../plugin';
@@ -26,6 +27,7 @@ import { PluginWrapper } from '../plugin';
 describe('PluginsService', () => {
   const logger = loggingSystemMock.create();
   const environmentPreboot = environmentServiceMock.createPrebootContract();
+  const nodePreboot = nodeServiceMock.createInternalPrebootContract();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -156,7 +158,7 @@ describe('PluginsService', () => {
       }
     );
 
-    await pluginsService.discover({ environment: environmentPreboot });
+    await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
 
     const prebootDeps = coreMock.createInternalPreboot();
     await pluginsService.preboot(prebootDeps);

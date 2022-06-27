@@ -29,6 +29,7 @@ import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { InternalEnvironmentServicePreboot } from '../environment';
+import { InternalNodeServicePreboot } from '../node';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -84,6 +85,7 @@ export type PluginsServiceStartDeps = InternalCoreStart;
 /** @internal */
 export interface PluginsServiceDiscoverDeps {
   environment: InternalEnvironmentServicePreboot;
+  node: InternalNodeServicePreboot;
 }
 
 /** @internal */
@@ -109,12 +111,22 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
   }
 
-  public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
+  public async discover({
+    environment,
+    node,
+  }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
     const config = await firstValueFrom(this.config$);
 
-    const { error$, plugin$ } = discover(config, this.coreContext, {
-      uuid: environment.instanceUuid,
-    });
+    const { error$, plugin$ } = discover(
+      config,
+      this.coreContext,
+      {
+        uuid: environment.instanceUuid,
+      },
+      {
+        roles: node.roles,
+      }
+    );
 
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);

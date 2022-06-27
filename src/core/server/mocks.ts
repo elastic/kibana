@@ -34,6 +34,7 @@ import { SharedGlobalConfig } from './plugins';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { environmentServiceMock } from './environment/environment_service.mock';
+import { nodeServiceMock } from './node/node_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
@@ -124,6 +125,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
       configs: ['/some/path/to/config/kibana.yml'],
     },
     config: pluginInitializerContextConfigMock<T>(config),
+    node: nodeServiceMock.createInternalPrebootContract(),
   };
 
   return mock;

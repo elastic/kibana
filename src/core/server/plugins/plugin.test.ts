@@ -16,6 +16,7 @@ import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { coreMock } from '../mocks';
+import { nodeServiceMock } from '../node/node_service.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginManifest, PluginType } from './types';
@@ -23,6 +24,7 @@ import {
   createPluginInitializerContext,
   createPluginSetupContext,
   InstanceInfo,
+  NodeInfo,
 } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
@@ -68,6 +70,7 @@ let coreId: symbol;
 let env: Env;
 let coreContext: CoreContext;
 let instanceInfo: InstanceInfo;
+let nodeInfo: NodeInfo;
 
 const setupDeps = coreMock.createInternalSetup();
 
@@ -77,6 +80,7 @@ beforeEach(() => {
   instanceInfo = {
     uuid: 'instance-uuid',
   };
+  nodeInfo = nodeServiceMock.createInternalPrebootContract();
 
   coreContext = { coreId, env, logger, configService: configService as any };
 });
@@ -96,7 +100,8 @@ test('`constructor` correctly initializes plugin instance', () => {
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -120,7 +125,8 @@ describe('`constructor` correctly sets non-external source', () => {
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
+        instanceInfo,
+        nodeInfo
       ),
     });
   }
@@ -157,7 +163,8 @@ test('`setup` fails if `plugin` initializer is not exported', () => {
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -179,7 +186,8 @@ test('`setup` fails if plugin initializer is not a function', () => {
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -201,7 +209,8 @@ test('`setup` fails if initializer does not return object', () => {
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -225,7 +234,8 @@ test('`setup` fails if object returned from initializer does not define `setup` 
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -246,7 +256,8 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
     coreContext,
     opaqueId,
     manifest,
-    instanceInfo
+    instanceInfo,
+    nodeInfo
   );
   const plugin = new PluginWrapper({
     path: 'plugin-with-initializer-path',
@@ -280,7 +291,8 @@ test('`start` fails if setup is not called first', () => {
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -300,7 +312,8 @@ test('`start` fails invoked for the `preboot` plugin', async () => {
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -325,7 +338,8 @@ test('`start` calls plugin.start with context and dependencies', async () => {
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
   const context = { any: 'thing' } as any;
@@ -359,7 +373,8 @@ test("`start` resolves `startDependencies` Promise after plugin's start", async 
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
   const startContext = { any: 'thing' } as any;
@@ -403,7 +418,8 @@ test('`stop` fails if plugin is not set up', async () => {
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -427,7 +443,8 @@ test('`stop` does nothing if plugin does not define `stop` function', async () =
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -448,7 +465,8 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
       coreContext,
       opaqueId,
       manifest,
-      instanceInfo
+      instanceInfo,
+      nodeInfo
     ),
   });
 
@@ -483,7 +501,8 @@ describe('#getConfigSchema()', () => {
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
+        instanceInfo,
+        nodeInfo
       ),
     });
 
@@ -502,7 +521,8 @@ describe('#getConfigSchema()', () => {
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
+        instanceInfo,
+        nodeInfo
       ),
     });
     expect(plugin.getConfigDescriptor()).toBe(null);
@@ -519,7 +539,8 @@ describe('#getConfigSchema()', () => {
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
+        instanceInfo,
+        nodeInfo
       ),
     });
     expect(plugin.getConfigDescriptor()).toBe(null);
@@ -547,7 +568,8 @@ describe('#getConfigSchema()', () => {
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
+        instanceInfo,
+        nodeInfo
       ),
     });
     expect(() => plugin.getConfigDescriptor()).toThrowErrorMatchingInlineSnapshot(

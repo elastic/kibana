@@ -20,6 +20,7 @@ import type {
 import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
 
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
+import { NodeRoles } from '../node';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
 
@@ -353,6 +354,31 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     packageInfo: Readonly<PackageInfo>;
     instanceUuid: string;
     configs: readonly string[];
+  };
+  /**
+   * Access the configuration for this particular Kibana node.
+   * Can be used to determine which `roles` the current process was started with.
+   *
+   * @example
+   * ```typescript
+   * // plugins/my-plugin/server/plugin.ts
+   *
+   * export class MyPlugin implements Plugin  {
+   *   constructor(private readonly initContext: PluginInitializerContext) {
+   *     this.initContext = initContext;
+   *   }
+   *   setup() {
+   *     if (this.initContext.node.roles.backgroundTasks) {
+   *       // run background tasks
+   *     } else if (this.initContext.node.roles.ui) {
+   *       // register http routes, etc
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  node: {
+    roles: NodeRoles;
   };
   /**
    * {@link LoggerFactory | logger factory} instance already bound to the plugin's logging context

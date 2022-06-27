@@ -11,7 +11,7 @@ import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } fr
 import { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { PluginWrapper } from '../plugin';
-import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
+import { createPluginInitializerContext, InstanceInfo, NodeInfo } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
@@ -30,7 +30,8 @@ import { scanPluginSearchPaths } from './scan_plugin_search_paths';
 export function discover(
   config: PluginsConfig,
   coreContext: CoreContext,
-  instanceInfo: InstanceInfo
+  instanceInfo: InstanceInfo,
+  nodeInfo: NodeInfo
 ) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
@@ -55,7 +56,7 @@ export function discover(
     }),
     concatMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo)
+        ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo, nodeInfo)
         : [pluginPathOrError];
     }),
     shareReplay()
@@ -78,12 +79,15 @@ export function discover(
  * @param path Path to the plugin directory where manifest should be loaded from.
  * @param log Plugin discovery logger instance.
  * @param coreContext Kibana core context.
+ * @param instanceInfo Info about the instance running Kibana, including uuid.
+ * @param nodeRoles Roles this process has been configured with.
  */
 function createPlugin$(
   path: string,
   log: Logger,
   coreContext: CoreContext,
-  instanceInfo: InstanceInfo
+  instanceInfo: InstanceInfo,
+  nodeInfo: NodeInfo
 ) {
   return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map((manifest) => {
@@ -97,7 +101,8 @@ function createPlugin$(
           coreContext,
           opaqueId,
           manifest,
-          instanceInfo
+          instanceInfo,
+          nodeInfo
         ),
       });
     }),

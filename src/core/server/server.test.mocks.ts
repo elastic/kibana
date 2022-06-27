@@ -75,6 +75,13 @@ jest.doMock('./environment/environment_service', () => ({
   EnvironmentService: jest.fn(() => mockEnvironmentService),
 }));
 
+import { nodeServiceMock } from './node/node_service.mock';
+
+export const mockNodeService = nodeServiceMock.create();
+jest.doMock('./node/node_service', () => ({
+  NodeService: jest.fn(() => mockNodeService),
+}));
+
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 
 export const mockMetricsService = metricsServiceMock.create();

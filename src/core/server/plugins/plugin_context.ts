@@ -21,8 +21,14 @@ import { IRouter, RequestHandlerContextProvider } from '../http';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
 
+/** @internal */
 export interface InstanceInfo {
   uuid: string;
+}
+
+/** @internal */
+export interface NodeInfo {
+  roles: { backgroundTasks: boolean; ui: boolean };
 }
 
 /**
@@ -42,7 +48,8 @@ export function createPluginInitializerContext(
   coreContext: CoreContext,
   opaqueId: PluginOpaqueId,
   pluginManifest: PluginManifest,
-  instanceInfo: InstanceInfo
+  instanceInfo: InstanceInfo,
+  nodeInfo: NodeInfo
 ): PluginInitializerContext {
   return {
     opaqueId,
@@ -55,6 +62,17 @@ export function createPluginInitializerContext(
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
       configs: coreContext.env.configs,
+    },
+
+    /**
+     * Access the configuration for this particular Kibana node.
+     * Can be used to determine which `roles` the current process was started with.
+     */
+    node: {
+      roles: {
+        backgroundTasks: nodeInfo.roles.backgroundTasks,
+        ui: nodeInfo.roles.ui,
+      },
     },
 
     /**
