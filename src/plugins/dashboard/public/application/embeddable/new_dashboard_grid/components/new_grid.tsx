@@ -63,7 +63,7 @@ export const TestReactGrid: FC<Props> = ({
       handleClass: HANDLE_CLASS,
       itemClass: `${PANEL_CLASS}`,
       column: columns,
-      cellHeight: `${GRID_CONFIG[columns].cellHeight}px`,
+      cellHeight: `${GRID_CONFIG[columns].cellHeight}px`, // auto
       margin: guttersize,
       minRow: columns / 3,
     }),
@@ -172,7 +172,7 @@ export const TestReactGrid: FC<Props> = ({
   return (
     <div>
       <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>{' '}
-      <EuiButton onClick={addNewPanelGroup}>Add Group</EuiButton>
+      {/* <EuiButton onClick={addNewPanelGroup}>Add Group</EuiButton> */}
       <div>Count:{panels.length}</div>
       <EuiAccordion id={`accordion`} buttonContent="Panel data">
         <div>{JSON.stringify(panels)}</div>
