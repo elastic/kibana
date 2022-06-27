@@ -10,6 +10,7 @@ import React, { FC } from 'react';
 import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
+import { stringHash } from '@kbn/ml-string-hash';
 
 import moment from 'moment-timezone';
 import { TransformListRow } from '../../../../common';
@@ -26,23 +27,6 @@ function getItemDescription(value: any) {
   }
 
   return value.toString();
-}
-
-/**
- * Creates a deterministic number based hash out of a string.
- */
-export function stringHash(str: string): number {
-  let hash = 0;
-  let chr = 0;
-  if (str.length === 0) {
-    return hash;
-  }
-  for (let i = 0; i < str.length; i++) {
-    chr = str.charCodeAt(i);
-    hash = (hash << 5) - hash + chr; // eslint-disable-line no-bitwise
-    hash |= 0; // eslint-disable-line no-bitwise
-  }
-  return hash < 0 ? hash * -2 : hash;
 }
 
 type Item = SectionItem;
