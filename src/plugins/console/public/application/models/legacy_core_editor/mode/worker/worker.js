@@ -1901,8 +1901,8 @@ ace.define(
         reset(i + upTo.length);
         return text.substring(currentAt, i);
       },
-      peek = function (c) {
-        return text.substr(at, c.length) === c; // nocommit - double check
+      peek = function (offset) {
+        return text.charAt(at + offset);
       },
       number = function () {
         let number,
@@ -1948,7 +1948,8 @@ ace.define(
           uffff;
 
         if (ch === '"') {
-          if (peek('""')) {
+          let c = '""';
+          if (text.substring(at, c.length) === c) {
             // literal
             next('"');
             next('"');
@@ -1984,8 +1985,31 @@ ace.define(
         error('Bad string');
       },
       white = function () {
-        while (ch && ch <= ' ') {
-          next();
+        while (ch) {
+          // Skip whitespace.
+          while (ch && ch <= ' ') {
+            next();
+          }
+          // if the current char in iteration is '#' or the char and the next char is equal to '//'
+          // we are on the single line comment
+          if (ch === '#' || ch === '/' && peek(0) === '/') {
+            // Until we are on the new line, skip to the next char
+            while (ch && ch !== '\n') {
+              next();
+            }
+          } else if (ch === '/' && peek(0) === '*') {
+            // If the chars starts with '/*', we are on the multiline comment
+            next();
+            next();
+            while (ch && !(ch === '*' && peek(0) === '/')) {
+              // Until we have closing tags '*/', skip to the next char
+              next();
+            }
+            if (ch) {
+              next();
+              next();
+            }
+          } else break;
         }
       },
       strictWhite = function () {
