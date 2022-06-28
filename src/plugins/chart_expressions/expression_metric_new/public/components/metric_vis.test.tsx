@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import MetricVis, { MetricVisComponentProps } from './metric_vis';
 import { LayoutDirection, Metric, MetricWProgress, Settings } from '@elastic/charts';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 
 jest.mock('../services', () => ({
   // getFormatService: () => {
@@ -252,7 +254,7 @@ describe('MetricVisComponent', function () {
         Object {
           "color": "#5e5e5e",
           "extra": <span>
-            13.633
+            13.63
           </span>,
           "subtitle": "Median products.min_price",
           "title": "Median products.base_price",
@@ -693,5 +695,93 @@ describe('MetricVisComponent', function () {
     component.find(Settings).props().onRenderChange!(true);
 
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
+  });
+
+  describe('metric value formatting', () => {
+    const getFormattedMetrics = (
+      value: number,
+      secondaryValue: number,
+      fieldFormatter: SerializedFieldFormat<SerializableRecord>
+    ) => {
+      const config: Props['config'] = {
+        metric: {
+          progressDirection: 'vertical',
+          maxCols: 5,
+        },
+        dimensions: {
+          metric: '1',
+          secondaryMetric: '2',
+        },
+      };
+
+      const component = shallow(
+        <MetricVis
+          config={config}
+          data={{
+            type: 'datatable',
+            columns: [
+              {
+                id: '1',
+                name: '',
+                meta: { type: 'number', params: fieldFormatter },
+              },
+              {
+                id: '2',
+                name: '',
+                meta: { type: 'number', params: fieldFormatter },
+              },
+            ],
+            rows: [{ '1': value, '2': secondaryValue }],
+          }}
+          renderComplete={() => {}}
+        />
+      );
+
+      const {
+        value: primaryMetric,
+        valueFormatter,
+        extra,
+      } = component.find(Metric).props().data?.[0][0]!;
+
+      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children };
+    };
+
+    it('correctly formats plain numbers', () => {
+      const { primary, secondary } = getFormattedMetrics(394.2393, 983123.984, { id: 'number' });
+      expect(primary).toBe('394.24');
+      expect(secondary).toBe('983.12K');
+    });
+
+    it('correctly formats currency', () => {});
+
+    it('correctly formats percentages', () => {
+      const { primary, secondary } = getFormattedMetrics(0.23939, 11.2, { id: 'percent' });
+      expect(primary).toBe('23.94%');
+      expect(secondary).toBe('1.12K%');
+    });
+
+    it('correctly formats bytes', () => {
+      const base = 1024;
+
+      const { primary: bytesValue } = getFormattedMetrics(base - 1, 0, { id: 'bytes' });
+      expect(bytesValue).toBe('1,023 byte');
+
+      const { primary: kiloBytesValue } = getFormattedMetrics(Math.pow(base, 1), 0, {
+        id: 'bytes',
+      });
+      expect(kiloBytesValue).toBe('1 kB');
+
+      const { primary: megaBytesValue } = getFormattedMetrics(Math.pow(base, 2), 0, {
+        id: 'bytes',
+      });
+      expect(megaBytesValue).toBe('1 MB');
+
+      const { primary: moreThanPetaValue } = getFormattedMetrics(Math.pow(base, 6), 0, {
+        id: 'bytes',
+      });
+      expect(moreThanPetaValue).toBe('1,024 PB');
+    });
+
+    it('correctly formats durations', () => {});
   });
 });
