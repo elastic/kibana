@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  BASE_BUCKET_DAILY: 'kibana-ci-es-snapshots-daily',
-  BASE_BUCKET_PERMANENT: 'kibana-ci-es-snapshots-permanent',
-};
+export * from './buildkite';
+export * as CiStats from './ci-stats';
+export * from './github';
+export * as TestFailures from './test-failures';

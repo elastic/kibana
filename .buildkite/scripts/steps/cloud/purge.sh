@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-node .buildkite/scripts/steps/cloud/purge.js
+ts-node .buildkite/scripts/steps/cloud/purge.ts
