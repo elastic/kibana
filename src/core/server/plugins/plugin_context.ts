@@ -9,7 +9,7 @@
 import { shareReplay } from 'rxjs/operators';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import type { NodeRoles } from '@kbn/core-node-server';
+import type { NodeInfo } from '@kbn/core-node-server';
 import type { RequestHandlerContext } from '..';
 import { PluginWrapper } from './plugin';
 import {
@@ -27,11 +27,6 @@ export interface InstanceInfo {
   uuid: string;
 }
 
-/** @internal */
-export interface NodeInfo {
-  roles: NodeRoles;
-}
-
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
  * This facade should be safe to use across entire plugin lifespan.
@@ -42,16 +37,26 @@ export interface NodeInfo {
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param coreContext Kibana core context
- * @param pluginManifest The manifest of the plugin we're building these values for.
+ * @param opaqueId The opaque id created for this particular plugin.
+ * @param manifest The manifest of the plugin we're building these values for.
+ * @param instanceInfo Info about the instance Kibana is running on.
+ * @param nodeInfo Info about how the Kibana process has been configured.
+ *
  * @internal
  */
-export function createPluginInitializerContext(
-  coreContext: CoreContext,
-  opaqueId: PluginOpaqueId,
-  pluginManifest: PluginManifest,
-  instanceInfo: InstanceInfo,
-  nodeInfo: NodeInfo
-): PluginInitializerContext {
+export function createPluginInitializerContext({
+  coreContext,
+  opaqueId,
+  manifest,
+  instanceInfo,
+  nodeInfo,
+}: {
+  coreContext: CoreContext;
+  opaqueId: PluginOpaqueId;
+  manifest: PluginManifest;
+  instanceInfo: InstanceInfo;
+  nodeInfo: NodeInfo;
+}): PluginInitializerContext {
   return {
     opaqueId,
 
@@ -81,7 +86,7 @@ export function createPluginInitializerContext(
      */
     logger: {
       get(...contextParts) {
-        return coreContext.logger.get('plugins', pluginManifest.id, ...contextParts);
+        return coreContext.logger.get('plugins', manifest.id, ...contextParts);
       },
     },
 
@@ -99,10 +104,10 @@ export function createPluginInitializerContext(
        * manifest.
        */
       create<T>() {
-        return coreContext.configService.atPath<T>(pluginManifest.configPath).pipe(shareReplay(1));
+        return coreContext.configService.atPath<T>(manifest.configPath).pipe(shareReplay(1));
       },
       get<T>() {
-        return coreContext.configService.atPathSync<T>(pluginManifest.configPath);
+        return coreContext.configService.atPathSync<T>(manifest.configPath);
       },
     },
   };

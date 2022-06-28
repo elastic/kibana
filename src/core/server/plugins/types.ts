@@ -18,7 +18,7 @@ import type {
   ConfigDeprecationProvider,
 } from '@kbn/config';
 import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
-import type { NodeRoles } from '@kbn/core-node-server';
+import type { NodeInfo } from '@kbn/core-node-server';
 
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
@@ -377,9 +377,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
    * }
    * ```
    */
-  node: {
-    roles: NodeRoles;
-  };
+  node: NodeInfo;
   /**
    * {@link LoggerFactory | logger factory} instance already bound to the plugin's logging context
    *

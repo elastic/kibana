@@ -13,12 +13,12 @@ import { fromRoot } from '@kbn/utils';
 import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import {
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
   InstanceInfo,
-  NodeInfo,
 } from './plugin_context';
 
 import { PluginManifest, PluginType } from './types';
@@ -100,13 +100,13 @@ describe('createPluginInitializerContext', () => {
         configPath: 'plugin',
       });
 
-      const pluginInitializerContext = createPluginInitializerContext(
+      const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
         instanceInfo,
-        nodeInfo
-      );
+        nodeInfo,
+      });
 
       expect(pluginInitializerContext.config.get()).toEqual({
         foo: 'bar',
@@ -116,13 +116,13 @@ describe('createPluginInitializerContext', () => {
 
     it('config.globalConfig$ should be an observable for the global config', async () => {
       const manifest = createPluginManifest();
-      const pluginInitializerContext = createPluginInitializerContext(
+      const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
         instanceInfo,
-        nodeInfo
-      );
+        nodeInfo,
+      });
 
       expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
 
@@ -147,13 +147,13 @@ describe('createPluginInitializerContext', () => {
       instanceInfo = {
         uuid: 'kibana-uuid',
       };
-      const pluginInitializerContext = createPluginInitializerContext(
+      const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
         instanceInfo,
-        nodeInfo
-      );
+        nodeInfo,
+      });
       expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
     });
 
@@ -167,13 +167,13 @@ describe('createPluginInitializerContext', () => {
           })
         ),
       };
-      const pluginInitializerContext = createPluginInitializerContext(
+      const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId,
-        createPluginManifest(),
+        manifest: createPluginManifest(),
         instanceInfo,
-        nodeInfo
-      );
+        nodeInfo,
+      });
       expect(pluginInitializerContext.env.configs).toEqual([
         '/home/kibana/config/kibana.yml',
         '/home/kibana/config/kibana.dev.yml',
@@ -183,13 +183,13 @@ describe('createPluginInitializerContext', () => {
 
   describe('context.node', () => {
     it('should expose the correct node roles', () => {
-      const pluginInitializerContext = createPluginInitializerContext(
+      const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId,
-        createPluginManifest(),
+        manifest: createPluginManifest(),
         instanceInfo,
-        { roles: { backgroundTasks: false, ui: true } }
-      );
+        nodeInfo: { roles: { backgroundTasks: false, ui: true } },
+      });
       expect(pluginInitializerContext.node.roles.backgroundTasks).toBe(false);
       expect(pluginInitializerContext.node.roles.ui).toBe(true);
     });
@@ -218,15 +218,15 @@ describe('createPluginPrebootSetupContext', () => {
       path: 'some-path',
       manifest,
       opaqueId,
-      initializerContext: createPluginInitializerContext(
+      initializerContext: createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
-        {
+        instanceInfo: {
           uuid: 'instance-uuid',
         },
-        nodeInfo
-      ),
+        nodeInfo,
+      }),
     });
 
     const corePreboot = coreMock.createInternalPreboot();

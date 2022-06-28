@@ -21,7 +21,7 @@ import {
   coreDeprecationProvider,
   ensureValidConfiguration,
 } from '@kbn/core-config-server-internal';
-import { NodeService, config as nodeConfig } from '@kbn/core-node-server-internal';
+import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { CoreApp } from './core_app';

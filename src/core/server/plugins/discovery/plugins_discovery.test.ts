@@ -18,8 +18,9 @@ import { map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
-import type { InstanceInfo, NodeInfo } from '../plugin_context';
+import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { PluginType } from '../types';
 
@@ -188,12 +189,12 @@ describe('plugins discovery system', () => {
   });
 
   it('discovers plugins in the search locations', async () => {
-    const { plugin$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -215,12 +216,12 @@ describe('plugins discovery system', () => {
   });
 
   it('return errors when the manifest is invalid or incompatible', async () => {
-    const { plugin$, error$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$, error$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -282,12 +283,12 @@ describe('plugins discovery system', () => {
   });
 
   it('return errors when the plugin search path is not accessible', async () => {
-    const { plugin$, error$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$, error$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -322,12 +323,12 @@ describe('plugins discovery system', () => {
   });
 
   it('return an error when the manifest file is not accessible', async () => {
-    const { plugin$, error$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$, error$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -358,12 +359,12 @@ describe('plugins discovery system', () => {
   });
 
   it('discovers plugins in nested directories', async () => {
-    const { plugin$, error$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$, error$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -403,12 +404,12 @@ describe('plugins discovery system', () => {
   });
 
   it('does not discover plugins nested inside another plugin', async () => {
-    const { plugin$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -427,12 +428,12 @@ describe('plugins discovery system', () => {
   });
 
   it('stops scanning when reaching `maxDepth`', async () => {
-    const { plugin$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     mockFs(
       {
@@ -457,12 +458,12 @@ describe('plugins discovery system', () => {
   });
 
   it('works with symlinks', async () => {
-    const { plugin$ } = discover(
-      new PluginsConfig(pluginConfig, env),
+    const { plugin$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
       coreContext,
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     const pluginFolder = resolve(KIBANA_ROOT, '..', 'ext-plugins');
 
@@ -497,17 +498,17 @@ describe('plugins discovery system', () => {
       })
     );
 
-    discover(
-      new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
-      {
+    discover({
+      config: new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
+      coreContext: {
         coreId: Symbol(),
         configService,
         env,
         logger,
       },
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     expect(loggingSystemMock.collect(logger).warn).toEqual([
       [
@@ -526,17 +527,17 @@ describe('plugins discovery system', () => {
       })
     );
 
-    discover(
-      new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
-      {
+    discover({
+      config: new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
+      coreContext: {
         coreId: Symbol(),
         configService,
         env,
         logger,
       },
       instanceInfo,
-      nodeInfo
-    );
+      nodeInfo,
+    });
 
     expect(loggingSystemMock.collect(logger).warn).toEqual([]);
   });
@@ -564,12 +565,12 @@ describe('plugins discovery system', () => {
         ])
       );
 
-      let { plugin$ } = discover(
-        new PluginsConfig(pluginConfig, env),
+      let { plugin$ } = discover({
+        config: new PluginsConfig(pluginConfig, env),
         coreContext,
         instanceInfo,
-        nodeInfo
-      );
+        nodeInfo,
+      });
 
       expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(1);
       let plugins = await firstValueFrom(plugin$.pipe(toArray()));
@@ -588,12 +589,12 @@ describe('plugins discovery system', () => {
         ])
       );
 
-      plugin$ = discover(
-        new PluginsConfig(pluginConfig, env),
+      plugin$ = discover({
+        config: new PluginsConfig(pluginConfig, env),
         coreContext,
         instanceInfo,
-        nodeInfo
-      ).plugin$;
+        nodeInfo,
+      }).plugin$;
 
       expect(scanPluginSearchPathsMock).toHaveBeenCalledTimes(2);
       plugins = await firstValueFrom(plugin$.pipe(toArray()));

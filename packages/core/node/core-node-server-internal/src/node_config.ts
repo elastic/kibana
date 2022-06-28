@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 /** @internal */
@@ -14,12 +14,17 @@ export const NODE_CONFIG_PATH = 'node' as const;
 /** @internal */
 export const NODE_WILDCARD_CHAR = '*';
 /** @internal */
-export const NODE_ACCEPTED_ROLES = ['background-tasks', 'ui'];
+export const NODE_ACCEPTED_ROLES = ['background_tasks', 'ui'];
+
+/** @internal */
+export interface NodeConfigType {
+  roles: string[];
+}
 
 const configSchema = schema.object({
   roles: schema.oneOf(
     [
-      schema.arrayOf(schema.oneOf([schema.literal('background-tasks'), schema.literal('ui')])),
+      schema.arrayOf(schema.oneOf([schema.literal('background_tasks'), schema.literal('ui')])),
       schema.arrayOf(schema.literal(NODE_WILDCARD_CHAR), { minSize: 1, maxSize: 1 }),
     ],
     {
@@ -28,9 +33,7 @@ const configSchema = schema.object({
   ),
 });
 
-export type NodeConfigType = TypeOf<typeof configSchema>;
-
-export const config: ServiceConfigDescriptor<NodeConfigType> = {
+export const nodeConfig: ServiceConfigDescriptor<NodeConfigType> = {
   path: NODE_CONFIG_PATH,
   schema: configSchema,
 };

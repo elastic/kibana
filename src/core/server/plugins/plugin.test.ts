@@ -15,6 +15,7 @@ import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { coreMock } from '../mocks';
 
@@ -24,7 +25,6 @@ import {
   createPluginInitializerContext,
   createPluginSetupContext,
   InstanceInfo,
-  NodeInfo,
 } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
@@ -96,13 +96,13 @@ test('`constructor` correctly initializes plugin instance', () => {
     path: 'some-plugin-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   expect(plugin.name).toBe('some-plugin-id');
@@ -121,13 +121,13 @@ describe('`constructor` correctly sets non-external source', () => {
       path,
       manifest,
       opaqueId,
-      initializerContext: createPluginInitializerContext(
+      initializerContext: createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
         instanceInfo,
-        nodeInfo
-      ),
+        nodeInfo,
+      }),
     });
   }
 
@@ -159,13 +159,13 @@ test('`setup` fails if `plugin` initializer is not exported', () => {
     path: 'plugin-without-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   expect(() =>
@@ -182,13 +182,13 @@ test('`setup` fails if plugin initializer is not a function', () => {
     path: 'plugin-with-wrong-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   expect(() =>
@@ -205,13 +205,13 @@ test('`setup` fails if initializer does not return object', () => {
     path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   mockPluginInitializer.mockReturnValue(null);
@@ -230,13 +230,13 @@ test('`setup` fails if object returned from initializer does not define `setup` 
     path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   const mockPluginInstance = { run: jest.fn() };
@@ -252,13 +252,13 @@ test('`setup` fails if object returned from initializer does not define `setup` 
 test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
-  const initializerContext = createPluginInitializerContext(
+  const initializerContext = createPluginInitializerContext({
     coreContext,
     opaqueId,
     manifest,
     instanceInfo,
-    nodeInfo
-  );
+    nodeInfo,
+  });
   const plugin = new PluginWrapper({
     path: 'plugin-with-initializer-path',
     manifest,
@@ -287,13 +287,13 @@ test('`start` fails if setup is not called first', () => {
     path: 'some-plugin-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
@@ -308,13 +308,13 @@ test('`start` fails invoked for the `preboot` plugin', async () => {
     path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   const mockPluginInstance = { setup: jest.fn() };
@@ -334,13 +334,13 @@ test('`start` calls plugin.start with context and dependencies', async () => {
     path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
   const context = { any: 'thing' } as any;
   const deps = { otherDep: 'value' };
@@ -369,13 +369,13 @@ test("`start` resolves `startDependencies` Promise after plugin's start", async 
     path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
   const startContext = { any: 'thing' } as any;
   const pluginDeps = { someDep: 'value' };
@@ -414,13 +414,13 @@ test('`stop` fails if plugin is not set up', async () => {
     path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
@@ -439,13 +439,13 @@ test('`stop` does nothing if plugin does not define `stop` function', async () =
     path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   mockPluginInitializer.mockReturnValue({ setup: jest.fn() });
@@ -461,13 +461,13 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
     path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
-    initializerContext: createPluginInitializerContext(
+    initializerContext: createPluginInitializerContext({
       coreContext,
       opaqueId,
       manifest,
       instanceInfo,
-      nodeInfo
-    ),
+      nodeInfo,
+    }),
   });
 
   const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
@@ -497,13 +497,13 @@ describe('#getConfigSchema()', () => {
       path: 'plugin-with-schema',
       manifest,
       opaqueId,
-      initializerContext: createPluginInitializerContext(
+      initializerContext: createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
         instanceInfo,
-        nodeInfo
-      ),
+        nodeInfo,
+      }),
     });
 
     expect(plugin.getConfigDescriptor()).toBe(configDescriptor);
@@ -517,13 +517,13 @@ describe('#getConfigSchema()', () => {
       path: 'plugin-with-no-definition',
       manifest,
       opaqueId,
-      initializerContext: createPluginInitializerContext(
+      initializerContext: createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
         instanceInfo,
-        nodeInfo
-      ),
+        nodeInfo,
+      }),
     });
     expect(plugin.getConfigDescriptor()).toBe(null);
   });
@@ -535,13 +535,13 @@ describe('#getConfigSchema()', () => {
       path: 'plugin-with-no-definition',
       manifest,
       opaqueId,
-      initializerContext: createPluginInitializerContext(
+      initializerContext: createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
         instanceInfo,
-        nodeInfo
-      ),
+        nodeInfo,
+      }),
     });
     expect(plugin.getConfigDescriptor()).toBe(null);
   });
@@ -564,13 +564,13 @@ describe('#getConfigSchema()', () => {
       path: 'plugin-invalid-schema',
       manifest,
       opaqueId,
-      initializerContext: createPluginInitializerContext(
+      initializerContext: createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
         instanceInfo,
-        nodeInfo
-      ),
+        nodeInfo,
+      }),
     });
     expect(() => plugin.getConfigDescriptor()).toThrowErrorMatchingInlineSnapshot(
       `"Configuration schema expected to be an instance of Type"`

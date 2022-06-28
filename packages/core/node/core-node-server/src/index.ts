@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { NodeRoles } from './types';
+export type { NodeInfo, NodeRoles } from './types';

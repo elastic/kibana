@@ -7,6 +7,15 @@
  */
 
 /**
+ * Contains information about how this Kibana process has been configured.
+ *
+ * @public
+ */
+export interface NodeInfo {
+  roles: NodeRoles;
+}
+
+/**
  * The Kibana process can be run in dedicated "modes" via `node.roles`.
  * This configuration is then exposed to plugins via `NodeRoles`,
  * which is available on the `PluginInitializerContext`.

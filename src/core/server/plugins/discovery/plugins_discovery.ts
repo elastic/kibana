@@ -10,8 +10,9 @@ import { from, merge } from 'rxjs';
 import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
 import { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginWrapper } from '../plugin';
-import { createPluginInitializerContext, InstanceInfo, NodeInfo } from '../plugin_context';
+import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
@@ -27,12 +28,17 @@ import { scanPluginSearchPaths } from './scan_plugin_search_paths';
  * @param coreContext Kibana core values.
  * @internal
  */
-export function discover(
-  config: PluginsConfig,
-  coreContext: CoreContext,
-  instanceInfo: InstanceInfo,
-  nodeInfo: NodeInfo
-) {
+export function discover({
+  config,
+  coreContext,
+  instanceInfo,
+  nodeInfo,
+}: {
+  config: PluginsConfig;
+  coreContext: CoreContext;
+  instanceInfo: InstanceInfo;
+  nodeInfo: NodeInfo;
+}) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
@@ -97,13 +103,13 @@ function createPlugin$(
         path,
         manifest,
         opaqueId,
-        initializerContext: createPluginInitializerContext(
+        initializerContext: createPluginInitializerContext({
           coreContext,
           opaqueId,
           manifest,
           instanceInfo,
-          nodeInfo
-        ),
+          nodeInfo,
+        }),
       });
     }),
     catchError((err) => [err])

@@ -716,8 +716,8 @@ describe('PluginsService', () => {
       }
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
-      expect(mockDiscover).toHaveBeenCalledWith(
-        {
+      expect(mockDiscover).toHaveBeenCalledWith({
+        config: {
           additionalPluginPaths: [],
           initialize: true,
           pluginSearchPaths: [
@@ -727,10 +727,10 @@ describe('PluginsService', () => {
             resolve(process.cwd(), '..', 'kibana-extra'),
           ],
         },
-        { coreId, env, logger, configService },
-        { uuid: 'uuid' },
-        { roles: { backgroundTasks: true, ui: true } }
-      );
+        coreContext: { coreId, env, logger, configService },
+        instanceInfo: { uuid: 'uuid' },
+        nodeInfo: { roles: { backgroundTasks: true, ui: true } },
+      });
 
       const logs = loggingSystemMock.collect(logger);
       expect(logs.info).toHaveLength(0);

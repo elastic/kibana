@@ -53,7 +53,7 @@ export class NodeService {
 
     return {
       roles: NODE_ACCEPTED_ROLES.reduce((acc, curr) => {
-        return { ...acc, [camelCase(curr)]: Boolean(nodeRoles.includes(curr)) };
+        return { ...acc, [camelCase(curr)]: nodeRoles.includes(curr) };
       }, {} as NodeRoles),
     };
   }

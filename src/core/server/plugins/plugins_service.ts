@@ -117,16 +117,16 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
     const config = await firstValueFrom(this.config$);
 
-    const { error$, plugin$ } = discover(
+    const { error$, plugin$ } = discover({
       config,
-      this.coreContext,
-      {
+      coreContext: this.coreContext,
+      instanceInfo: {
         uuid: environment.instanceUuid,
       },
-      {
+      nodeInfo: {
         roles: node.roles,
-      }
-    );
+      },
+    });
 
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);

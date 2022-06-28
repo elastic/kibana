@@ -53,8 +53,8 @@ describe('NodeService', () => {
       expect(roles.ui).toBe(true);
     });
 
-    it('returns correct roles when node is configured to `background-tasks`', async () => {
-      configService = getMockedConfigService({ roles: ['background-tasks'] });
+    it('returns correct roles when node is configured to `background_tasks`', async () => {
+      configService = getMockedConfigService({ roles: ['background_tasks'] });
       coreContext = mockCoreContext.create({ logger, configService });
 
       service = new NodeService(coreContext);
@@ -75,8 +75,8 @@ describe('NodeService', () => {
       expect(roles.ui).toBe(true);
     });
 
-    it('returns correct roles when node is configured to both `background-tasks` and `ui`', async () => {
-      configService = getMockedConfigService({ roles: ['background-tasks', 'ui'] });
+    it('returns correct roles when node is configured to both `background_tasks` and `ui`', async () => {
+      configService = getMockedConfigService({ roles: ['background_tasks', 'ui'] });
       coreContext = mockCoreContext.create({ logger, configService });
 
       service = new NodeService(coreContext);
@@ -100,7 +100,7 @@ describe('NodeService', () => {
       expect(logger.get).toHaveBeenCalledWith('node');
       expect(mockLogger.info).toHaveBeenCalledTimes(1);
       expect(mockLogger.info.mock.calls[0][0]).toMatchInlineSnapshot(
-        `"Kibana process configured with roles: [background-tasks, ui]"`
+        `"Kibana process configured with roles: [background_tasks, ui]"`
       );
     });
   });
