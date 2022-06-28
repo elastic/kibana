@@ -166,6 +166,9 @@ export interface DiscoverGridProps {
    * Update row height state
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
+  /**
+   * Callback to execute on edit runtime field
+   */
   onEditRuntimeField: () => void;
 }
 
@@ -334,6 +337,25 @@ export const DiscoverGrid = ({
     };
   }, []);
 
+  const editField = useCallback(
+    (fieldName: string) => {
+      const ref = services.dataViewFieldEditor.openEditor({
+        ctx: {
+          dataView: indexPattern,
+        },
+        fieldName,
+        onSave: async () => {
+          onEditRuntimeField();
+        },
+      });
+
+      if (setFieldEditorRef) {
+        setFieldEditorRef(ref);
+      }
+    },
+    [indexPattern, onEditRuntimeField, services.dataViewFieldEditor, setFieldEditorRef]
+  );
+
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
@@ -346,8 +368,7 @@ export const DiscoverGrid = ({
         isSortEnabled,
         services,
         valueToStringConverter,
-        onEditRuntimeField,
-        setFieldEditorRef,
+        editField,
       }),
     [
       displayedColumns,
@@ -359,8 +380,7 @@ export const DiscoverGrid = ({
       isSortEnabled,
       services,
       valueToStringConverter,
-      onEditRuntimeField,
-      setFieldEditorRef,
+      editField,
     ]
   );
 
