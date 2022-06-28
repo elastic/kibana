@@ -343,6 +343,7 @@ const defaultValue = {
 const schema = {
   ruleType: {
     label: 'Rule type',
+    helpText: 'Change the rule type to load other processor configurations',
     defaultValue: 'type_one',
   },
 };

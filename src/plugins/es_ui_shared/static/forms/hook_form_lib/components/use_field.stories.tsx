@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiButton, EuiSpacer, EuiHealth } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiHealth, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { fieldFormatters } from '../../helpers';
 import { STORYBOOK_SECTION } from '../constants';
@@ -251,15 +251,25 @@ interface Params {
 
 export function FieldTypes({ fieldType }: Params) {
   return (
-    <UseField<any>
-      // We add a key to force a reset of the state whenever
-      // the field type changes
-      key={fieldType}
-      path="myField"
-      config={{ ...fieldConfigBase }}
-      onChange={action('onChange')}
-      {...getPropsForType(fieldType)}
-    />
+    <>
+      <EuiText>
+        <p>
+          <EuiTextColor color="subdued">
+            Info: change the field type in the &quot;Controls&quot; panel below.
+          </EuiTextColor>
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <UseField<any>
+        // We add a key to force a reset of the state whenever
+        // the field type changes
+        key={fieldType}
+        path="myField"
+        config={{ ...fieldConfigBase }}
+        onChange={action('onChange')}
+        {...getPropsForType(fieldType)}
+      />
+    </>
   );
 }
 
@@ -281,10 +291,10 @@ FieldTypes.argTypes = {
  * and events occur whenever a field value changes.
  */
 export const ChangeListeners = () => {
-  const onFieldChangeHook = ({ title }: { title: string }) => {
+  const onUseFormDataChange = ({ title }: { title: string }) => {
     action('1. useFormData() -> onChange() handler')(title);
   };
-  const [{ title }] = useFormData({ watch: 'title', onChange: onFieldChangeHook });
+  const [{ title }] = useFormData({ watch: 'title', onChange: onUseFormDataChange });
 
   const onFieldChangeProp = (value: string) => {
     action('2. onChange() prop handler')(value);
@@ -292,24 +302,36 @@ export const ChangeListeners = () => {
 
   useEffect(() => {
     action('4. useEffect() "title" changed')(title);
+    action('')('----------------------------------');
   }, [title]);
 
   return (
-    <UseField<string>
-      path="title"
-      component={TextField}
-      config={{
-        label: 'Title',
-        helpText: 'This is a help text for the field.',
-        validations: [
-          {
-            validator: ({ value }) => {
-              action('3. Validating "title" field')(value);
+    <>
+      <EuiText>
+        <p>
+          <EuiTextColor color="subdued">
+            Info: start writing in the field and see the order of change listeners appear in the
+            &quot;Actions&quot; panel below.
+          </EuiTextColor>
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <UseField<string>
+        path="title"
+        component={TextField}
+        config={{
+          label: 'Title',
+          helpText: 'This is a help text for the field.',
+          validations: [
+            {
+              validator: ({ value }) => {
+                action('3. Validating "title" field')(value);
+              },
             },
-          },
-        ],
-      }}
-      onChange={onFieldChangeProp}
-    />
+          ],
+        }}
+        onChange={onFieldChangeProp}
+      />
+    </>
   );
 };
