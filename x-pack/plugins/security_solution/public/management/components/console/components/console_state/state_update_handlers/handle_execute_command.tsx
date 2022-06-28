@@ -13,6 +13,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { EuiCode } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { handleInputAreaState } from './handle_input_area_state';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
 import {
   CommandHistoryItem,
@@ -56,10 +57,14 @@ const updateStateWithNewCommandHistoryItem = (
   state: ConsoleDataState,
   newHistoryItem: ConsoleDataState['commandHistory'][number]
 ): ConsoleDataState => {
-  return {
-    ...state,
-    commandHistory: [...state.commandHistory, newHistoryItem],
-  };
+  const updatedState = handleInputAreaState(state, {
+    type: 'updateInputHistoryState',
+    payload: { command: newHistoryItem.command.input },
+  });
+
+  updatedState.commandHistory = [...state.commandHistory, newHistoryItem];
+
+  return updatedState;
 };
 
 const UnknownCommandDefinition: CommandDefinition = {

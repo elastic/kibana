@@ -7,6 +7,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { CommandDefinition } from '..';
+
 export type ParsedArgData = string[];
 
 interface ParsedCommandInput<TArgs extends object = any> {
@@ -17,16 +19,16 @@ interface ParsedCommandInput<TArgs extends object = any> {
 }
 const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
-  const inputFirstSpacePosition = input.indexOf(' ');
-
   const response: ParsedCommandInput = {
-    name: input.substring(
-      0,
-      inputFirstSpacePosition === -1 ? input.length : inputFirstSpacePosition
-    ),
+    name: getCommandNameFromTextInput(input),
     args: {},
   };
 
+  if (!input) {
+    return response;
+  }
+
+  const inputFirstSpacePosition = input.indexOf(' ');
   const rawArguments =
     inputFirstSpacePosition === -1
       ? []
@@ -115,4 +117,43 @@ class ParsedCommand implements ParsedCommandInterface {
 
 export const parseCommandInput = (input: string): ParsedCommandInterface => {
   return new ParsedCommand(input);
+};
+
+export const getCommandNameFromTextInput = (input: string): string => {
+  const trimmedInput = input.trimStart();
+
+  if (!trimmedInput) {
+    return '';
+  }
+
+  const firstSpacePosition = input.indexOf(' ');
+
+  if (firstSpacePosition === -1) {
+    return trimmedInput;
+  }
+
+  return trimmedInput.substring(0, firstSpacePosition);
+};
+
+export const getArgumentsForCommand = (command: CommandDefinition): string => {
+  let requiredArgs = '';
+  let optionalArgs = '';
+
+  if (command.args) {
+    for (const [argName, argDefinition] of Object.entries(command.args)) {
+      if (argDefinition.required) {
+        if (requiredArgs.length) {
+          requiredArgs += ' ';
+        }
+        requiredArgs += `--${argName}`;
+      } else {
+        if (optionalArgs.length) {
+          optionalArgs += ' ';
+        }
+        optionalArgs += `--${argName}`;
+      }
+    }
+  }
+
+  return `${requiredArgs} ${optionalArgs.length > 0 ? `[${optionalArgs}]` : ''}`.trim();
 };

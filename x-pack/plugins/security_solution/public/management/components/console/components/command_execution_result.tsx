@@ -15,15 +15,15 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const COMMAND_EXECUTION_RESULT_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.successTitle',
-  { defaultMessage: 'Command successful.' }
+  { defaultMessage: 'Success. Action was complete.' }
 );
 const COMMAND_EXECUTION_RESULT_FAILURE_TITLE = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.failureTitle',
-  { defaultMessage: 'Command failed.' }
+  { defaultMessage: 'Error. Action failed.' }
 );
 const COMMAND_EXECUTION_RESULT_PENDING = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.pending',
-  { defaultMessage: 'Waiting for response' }
+  { defaultMessage: 'Action pending' }
 );
 
 export type CommandExecutionResultProps = PropsWithChildren<{

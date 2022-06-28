@@ -74,14 +74,7 @@ export const IsolateActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return (
-      <ResultComponent showAs="pending">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.isolate.pendingMessage"
-          defaultMessage="Isolating"
-        />
-      </ResultComponent>
-    );
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
@@ -91,7 +84,7 @@ export const IsolateActionResult = memo<
         showAs="failure"
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.isolate.errorMessageTitle',
-          { defaultMessage: 'Isolate action failed' }
+          { defaultMessage: 'Error. Isolate action failed.' }
         )}
         data-test-subj="isolateErrorCallout"
       >
@@ -109,7 +102,7 @@ export const IsolateActionResult = memo<
     <ResultComponent
       title={i18n.translate(
         'xpack.securitySolution.endpointResponseActions.isolate.successMessageTitle',
-        { defaultMessage: 'Host isolated successfully!' }
+        { defaultMessage: 'Success. Host isolated.' }
       )}
       data-test-subj="isolateSuccessCallout"
     />

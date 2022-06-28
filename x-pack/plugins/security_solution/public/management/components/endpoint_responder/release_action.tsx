@@ -74,23 +74,17 @@ export const ReleaseActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return (
-      <ResultComponent showAs="pending">
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.release.pendingMessage"
-          defaultMessage="Releasing"
-        />
-      </ResultComponent>
-    );
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
       <ResultComponent
+        showAs="failure"
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.release.errorMessageTitle',
-          { defaultMessage: 'Release action Failure' }
+          { defaultMessage: 'Error. Release action failed.' }
         )}
         data-test-subj="releaseErrorCallout"
       >
@@ -108,7 +102,7 @@ export const ReleaseActionResult = memo<
     <ResultComponent
       title={i18n.translate(
         'xpack.securitySolution.endpointResponseActions.release.successMessageTitle',
-        { defaultMessage: 'Host isolated successfully!' }
+        { defaultMessage: 'Success. Host released.' }
       )}
       data-test-subj="releaseSuccessCallout"
     />
