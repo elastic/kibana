@@ -74,6 +74,7 @@ export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
 export const RECORDS_FIELD = DOCUMENT_FIELD_NAME;
 export const RECORDS_PERCENTAGE_FIELD = 'RecordsPercentage';
+export const FORMULA_COLUMN = 'FORMULA_COLUMN';
 
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': BROWSER_FAMILY_LABEL,

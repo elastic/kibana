@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { AlertsFlyout } from './alerts_flyout';
+import { GlobalUrlParam } from '.';
+import { State } from '../types';
+
+export const selectGlobalUrlParam = (state: State): GlobalUrlParam => state.globalUrlParam;

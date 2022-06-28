@@ -33,15 +33,17 @@ export const useGlobalTime = (clearAllQuery: boolean = true) => {
   );
 
   useEffect(() => {
-    if (isInitializing) {
-      setIsInitializing(false);
-    }
+    setIsInitializing(false);
+  }, []);
+
+  // This effect must not have any mutable dependencies. Otherwise, the cleanup function gets called before the component unmounts.
+  useEffect(() => {
     return () => {
       if (clearAllQuery) {
         dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
       }
     };
-  }, [clearAllQuery, dispatch, isInitializing]);
+  }, [dispatch, clearAllQuery]);
 
   const memoizedReturn = useMemo(
     () => ({
