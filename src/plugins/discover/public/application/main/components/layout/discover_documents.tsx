@@ -32,6 +32,7 @@ import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
+import { getTextBasedLanguageMode } from '../../../../utils/get_text_based_language_mode';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
@@ -67,6 +68,7 @@ function DiscoverDocumentsComponent({
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState: DataDocumentsMsg = useDataState(documents$);
+  const textBasedLanguageMode = state.query ? getTextBasedLanguageMode(state.query) : '';
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
 
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
@@ -110,10 +112,10 @@ function DiscoverDocumentsComponent({
 
   const showTimeCol = useMemo(
     () =>
-      !documentState.textBasedLanguageMode &&
+      !textBasedLanguageMode &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
       !!indexPattern.timeFieldName,
-    [uiSettings, indexPattern.timeFieldName, documentState.textBasedLanguageMode]
+    [uiSettings, indexPattern.timeFieldName, textBasedLanguageMode]
   );
 
   if (
@@ -153,7 +155,7 @@ function DiscoverDocumentsComponent({
             onFilter={onAddFilter as DocViewFilterFn}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
-            onSort={!documentState.textBasedLanguageMode ? onSort : undefined}
+            onSort={!textBasedLanguageMode ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
           />
@@ -176,19 +178,19 @@ function DiscoverDocumentsComponent({
               sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}
-              setExpandedDoc={!documentState.textBasedLanguageMode ? setExpandedDoc : undefined}
+              setExpandedDoc={!textBasedLanguageMode ? setExpandedDoc : undefined}
               showTimeCol={showTimeCol}
               settings={state.grid}
               onAddColumn={onAddColumn}
               onFilter={onAddFilter as DocViewFilterFn}
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
-              onSort={!documentState.textBasedLanguageMode ? onSort : undefined}
+              onSort={!textBasedLanguageMode ? onSort : undefined}
               onResize={onResize}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
-              isSortEnabled={!documentState.textBasedLanguageMode}
+              isSortEnabled={!textBasedLanguageMode}
             />
           </div>
         </>

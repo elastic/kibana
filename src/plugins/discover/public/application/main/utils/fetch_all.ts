@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AggregateQuery, Query } from '@kbn/es-query';
 import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
@@ -33,6 +32,7 @@ import {
   SavedSearchData,
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
+import { getTextBasedLanguageMode } from '../../../utils/get_text_based_language_mode';
 import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
@@ -45,14 +45,6 @@ export interface FetchDeps {
   searchSessionId: string;
   services: DiscoverServices;
   useNewFieldsApi: boolean;
-}
-
-function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
-  return Boolean(query && 'sql' in query);
-}
-
-function getAggregateQueryMode(query: AggregateQuery): string {
-  return Object.keys(query)[0];
 }
 
 /**
@@ -97,11 +89,7 @@ export function fetchAll(
     }
 
     const { hideChart, sort, query } = appStateContainer.getState();
-    let textBasedLanguageMode = '';
-    if (query && isOfAggregateQueryType(query)) {
-      const aggregatedQuery = query as AggregateQuery;
-      textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
-    }
+    const textBasedLanguageMode = query ? getTextBasedLanguageMode(query) : '';
 
     // Update the base searchSource, base for all child fetches
     if (!textBasedLanguageMode) {

@@ -7,7 +7,6 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { AggregateQuery, Query } from '@kbn/es-query';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -22,6 +21,7 @@ import { fetchAll } from '../utils/fetch_all';
 import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
+import { getTextBasedLanguageMode } from '../../../utils/get_text_based_language_mode';
 import { SavedSearch } from '../../../services/saved_searches';
 import type { DataTableRecord } from '../../../types';
 
@@ -85,14 +85,6 @@ export interface DataAvailableFieldsMsg extends DataMsg {
   fields?: string[];
 }
 
-function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
-  return Boolean(query && 'sql' in query);
-}
-
-function getAggregateQueryMode(query: AggregateQuery): string {
-  return Object.keys(query)[0];
-}
-
 /**
  * This hook return 2 observables, refetch$ allows to trigger data fetching, data$ to subscribe
  * to the data fetching
@@ -117,13 +109,7 @@ export const useSavedSearch = ({
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
   const { query } = stateContainer.appStateContainer.getState();
-  let textBasedLanguageMode = '';
-  if (query && isOfAggregateQueryType(query)) {
-    const aggregatedQuery = query as AggregateQuery;
-    textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
-  } else {
-    textBasedLanguageMode = '';
-  }
+  const textBasedLanguageMode = query ? getTextBasedLanguageMode(query) : '';
 
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 

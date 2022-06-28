@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { AggregateQuery, Query } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
@@ -48,6 +47,7 @@ import {
 } from '../../../../services/saved_searches';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { getTextBasedLanguageMode } from '../../../../utils/get_text_based_language_mode';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { hasActiveFilter } from './utils';
 
@@ -60,14 +60,6 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
-
-function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
-  return Boolean(query && 'sql' in query);
-}
-
-function getAggregateQueryMode(query: AggregateQuery): string {
-  return Object.keys(query)[0];
-}
 
 export function DiscoverLayout({
   indexPattern,
@@ -182,11 +174,7 @@ export function DiscoverLayout({
     useNewFieldsApi,
   });
 
-  let textBasedLanguageMode = '';
-  if (state.query && isOfAggregateQueryType(state.query)) {
-    const aggregatedQuery = state.query as AggregateQuery;
-    textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
-  }
+  const textBasedLanguageMode = state.query ? getTextBasedLanguageMode(state.query) : '';
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: string, operation: '+' | '-') => {
