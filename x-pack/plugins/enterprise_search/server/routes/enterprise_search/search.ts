@@ -27,7 +27,7 @@ export function registerSearchRoute({ router }: RouteDependencies) {
         const searchResults = await fetchSearchResults(
           client,
           request.params.index_name,
-          request.params.query,
+          request.params.query
         );
         return response.ok({
           body: searchResults,

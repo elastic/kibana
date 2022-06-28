@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchSearchResults } from './fetch_search_results';
 
@@ -27,26 +27,26 @@ describe('fetchSearchResults lib function', () => {
       total: 2,
       successful: 2,
       skipped: 0,
-      failed: 0
+      failed: 0,
     },
     hits: {
       total: {
         value: 1,
-        relation: "eq"
+        relation: 'eq',
       },
       max_score: null,
       hits: [
         {
-          _index: "search-regular-index",
-          _id: "5a12292a0f5ae10021650d7e",
+          _index: 'search-regular-index',
+          _id: '5a12292a0f5ae10021650d7e',
           _score: 4.437291,
           _source: {
-            name: "banana",
-            id: "5a12292a0f5ae10021650d7e"
-          }
-        }
-      ]
-    }
+            name: 'banana',
+            id: '5a12292a0f5ae10021650d7e',
+          },
+        },
+      ],
+    },
   };
 
   const emptySearchResultsResponse = {
@@ -56,16 +56,16 @@ describe('fetchSearchResults lib function', () => {
       total: 2,
       successful: 2,
       skipped: 0,
-      failed: 0
+      failed: 0,
     },
     hits: {
       total: {
         value: 0,
-        relation: "eq"
+        relation: 'eq',
       },
       max_score: null,
-      hits: []
-    }
+      hits: [],
+    },
   };
 
   beforeEach(() => {
@@ -73,7 +73,9 @@ describe('fetchSearchResults lib function', () => {
   });
 
   it('should return search results with hits', async () => {
-    mockClient.asCurrentUser.search.mockImplementation(() => regularSearchResultsResponse as SearchResponseBody);
+    mockClient.asCurrentUser.search.mockImplementation(
+      () => regularSearchResultsResponse as SearchResponseBody
+    );
 
     await expect(
       fetchSearchResults(mockClient as unknown as IScopedClusterClient, indexName, query)
@@ -86,7 +88,9 @@ describe('fetchSearchResults lib function', () => {
   });
 
   it('should return empty search results', async () => {
-    mockClient.asCurrentUser.search.mockImplementationOnce(() => emptySearchResultsResponse as SearchResponseBody);
+    mockClient.asCurrentUser.search.mockImplementationOnce(
+      () => emptySearchResultsResponse as SearchResponseBody
+    );
 
     await expect(
       fetchSearchResults(mockClient as unknown as IScopedClusterClient, indexName, query)

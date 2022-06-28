@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
 import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 export const fetchSearchResults = async (
   client: IScopedClusterClient,
   indexName: string,
-  query: string,
+  query: string
 ): Promise<SearchResponseBody> => {
   const results = await client.asCurrentUser.search({
     index: indexName,
