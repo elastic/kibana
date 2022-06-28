@@ -62,7 +62,7 @@ export const useBreakdowns = ({
       const pageDistBreakdowns = aggregations?.breakdowns.buckets;
 
       return pageDistBreakdowns?.map(({ key, page_dist: pageDist }) => {
-        // @ts-ignore inferred es response type broken
+        // @ts-ignore inferred es response type for `pageDist.values` incompatible
         let seriesData = pageDist.values?.map(
           (datum: any, index: number, arr: any[]) => {
             // FIXME: values from percentile* aggs can be null
