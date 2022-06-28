@@ -56,7 +56,7 @@ function extractReferences({
     description: description.trim(),
     query: {
       ...query,
-      query: queryString,
+      ...(queryString && { query: queryString }),
     },
     filters: extractedFilters,
     ...(timefilter && { timefilter }),
