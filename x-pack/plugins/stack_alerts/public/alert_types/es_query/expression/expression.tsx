@@ -80,12 +80,13 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   );
 
   // Creating a rule from Stack Management page
-  if ((!ruleParams || !Object.keys(ruleParams).length) && !activeQueryFormType) {
+  if (!ruleParams.searchType && !activeQueryFormType) {
     // Showing the type chooser
     return (
       <QueryFormTypeChooser
         activeFormType={activeQueryFormType}
         onFormTypeSelect={formTypeSelected}
+        errors={errors}
       />
     );
   }
@@ -99,6 +100,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         <QueryFormTypeChooser
           activeFormType={activeQueryFormType}
           onFormTypeSelect={formTypeSelected}
+          errors={errors}
         />
       )}
 

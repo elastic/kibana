@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 
 export enum QueryFormType {
   KQL_OR_LUCENE = 'kql_or_lucene',
@@ -60,11 +61,13 @@ const FORM_TYPE_ITEMS: Array<{ formType: QueryFormType; label: string; descripti
 
 export interface QueryFormTypeProps {
   activeFormType: QueryFormType | null;
+  errors: IErrorObject;
   onFormTypeSelect: (formType: QueryFormType | null) => void;
 }
 
 export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
   activeFormType,
+  errors,
   onFormTypeSelect,
 }) => {
   if (activeFormType) {
@@ -111,6 +114,14 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
           />
         </h5>
       </EuiTitle>
+      {errors.searchType?.length > 0 && (
+        <EuiText color="danger" size="xs">
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.selectQueryFormTypeValidationError"
+            defaultMessage="Query is required."
+          />
+        </EuiText>
+      )}
       <EuiListGroup flush gutterSize="m" size="l" maxWidth={false}>
         {FORM_TYPE_ITEMS.map((item) => (
           <EuiListGroupItem
