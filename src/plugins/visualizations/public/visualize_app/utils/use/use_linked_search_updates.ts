@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 
-import { Filter } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
@@ -38,7 +38,7 @@ export const useLinkedSearchUpdates = (
         searchSource.setParent(searchSourceGrandparent);
 
         appState.transitions.unlinkSavedSearch({
-          query: searchSourceParent?.getField('query'),
+          query: searchSourceParent?.getField('query') as Query,
           parentFilters: (searchSourceParent?.getOwnField('filter') as Filter[]) || [],
         });
 
