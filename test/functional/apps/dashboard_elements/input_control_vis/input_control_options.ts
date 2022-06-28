@@ -25,9 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('input control options', () => {
     before(async () => {
       await PageObjects.visualize.initTests();
+      await PageObjects.common.setTime({ from, to });
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickInputControlVis();
-      await PageObjects.common.setTime({ from, to });
       await PageObjects.visEditor.clickVisEditorTab('controls');
       await PageObjects.visEditor.addInputControl();
       await comboBox.set('indexPatternSelect-0', 'logstash-');
@@ -134,7 +134,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'inputControlEditorUpdateFiltersOnChangeCheckbox'
         );
         await PageObjects.visEditor.clickGo();
-        await PageObjects.common.unsetTime();
       });
 
       it('should not display staging control buttons', async () => {
@@ -179,6 +178,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const menu = await comboBox.getOptionsList('listControlSelect0');
         expect(menu.trim().split('\n').join()).to.equal('osx,win 7,win 8,win xp');
       });
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
   });
 }
