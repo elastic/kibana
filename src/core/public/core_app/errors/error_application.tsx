@@ -16,7 +16,7 @@ import {
   EuiEmptyPrompt,
   EuiPage,
   EuiPageBody,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { IBasePath } from '@kbn/core-http-browser';

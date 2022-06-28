@@ -10,7 +10,7 @@ import {
   EuiButton,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PolicyList as PresentationComponent } from './policy_list';

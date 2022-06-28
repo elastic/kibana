@@ -10,7 +10,7 @@ import {
   EuiLoadingElastic,
   EuiPage,
   EuiPageBody,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 
 import { Container, Wrapper } from './layouts';
