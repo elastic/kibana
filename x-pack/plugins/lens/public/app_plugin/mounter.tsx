@@ -139,6 +139,17 @@ export async function mountApp(
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
+  if (!lensServices.application.capabilities.visualize.save) {
+    coreStart.chrome.setBadge({
+      text: i18n.translate('xpack.lens.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('xpack.lens.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save visualizations to the library',
+      }),
+      iconType: 'glasses',
+    });
+  }
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
