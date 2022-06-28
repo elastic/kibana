@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { BuildkiteClient } = require('kibana-buildkite-library');
+import { BuildkiteClient } from '#pipeline-utils';
 
 const pipelineSlug = process.argv[2];
 const branch = process.argv[3] || 'main';

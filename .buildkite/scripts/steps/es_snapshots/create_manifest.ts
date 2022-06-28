@@ -6,9 +6,19 @@
  * Side Public License, v 1.
  */
 
-const fs = require('fs');
-const { execSync } = require('child_process');
-const { BASE_BUCKET_DAILY } = require('./bucket_config');
+import fs from 'fs';
+import { execSync } from 'child_process';
+import { BASE_BUCKET_DAILY } from './bucket_config';
+
+interface ManifestEntry {
+  filename?: string;
+  checksum: string;
+  url: string;
+  version: string;
+  platform: string;
+  architecture: string;
+  license: string;
+}
 
 (async () => {
   console.log('--- Create ES Snapshot Manifest');
@@ -40,7 +50,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config');
 
   try {
     const files = fs.readdirSync(destination);
-    const manifestEntries = files
+    const manifestEntries: ManifestEntry[] = files
       .filter((filename) => !filename.match(/.sha512$/))
       .filter((filename) => !filename.match(/.json$/))
       .map((filename) => {
@@ -51,7 +61,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config');
         DESTINATION = DESTINATION || `${VERSION}/archives/${SNAPSHOT_ID}`;
 
         return {
-          filename: filename,
+          filename,
           checksum: filename + '.sha512',
           url: `https://storage.googleapis.com/${BASE_BUCKET_DAILY}/${DESTINATION}/${filename}`,
           version: parts[1],
