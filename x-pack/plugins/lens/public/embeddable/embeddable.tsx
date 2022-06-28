@@ -576,7 +576,7 @@ export class Embeddable
 
     const context: ExecutionContextSearch = {
       timeRange: this.externalSearchContext.timeRange,
-      query: [this.savedVis.state.query],
+      query: [this.savedVis.state.query as Query],
       filters: this.deps.injectFilterReferences(
         this.savedVis.state.filters,
         this.savedVis.references
