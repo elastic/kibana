@@ -817,7 +817,7 @@ describe('SearchSource', () => {
       expect(JSON.parse(searchSourceJSON).indexRefName).toEqual(references[0].name);
     });
 
-    test('sould contain persited index patters by value', () => {
+    test('should contain persisted data view by value', () => {
       const localDataView = {
         id: 'local-123',
         isPersisted: () => false,
