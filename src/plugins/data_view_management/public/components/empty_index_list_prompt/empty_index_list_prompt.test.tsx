@@ -25,7 +25,6 @@ describe('EmptyIndexListPrompt', () => {
       <EmptyIndexListPrompt
         onRefresh={() => {}}
         createAnyway={() => {}}
-        closeFlyout={() => {}}
         addDataUrl={'http://elastic.co'}
         navigateToApp={async (appId) => {}}
         canSaveIndexPattern={true}
@@ -44,7 +43,6 @@ describe('EmptyIndexListPrompt', () => {
           <EmptyIndexListPrompt
             onRefresh={onRefreshHandler}
             createAnyway={() => {}}
-            closeFlyout={() => {}}
             addDataUrl={'http://elastic.co'}
             navigateToApp={async (appId) => {}}
             canSaveIndexPattern={true}
