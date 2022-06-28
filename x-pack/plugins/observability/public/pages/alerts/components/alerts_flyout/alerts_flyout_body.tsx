@@ -39,7 +39,7 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
   const dateFormat = useUiSetting<string>('dateFormat');
   const prepend = http?.basePath.prepend;
   const ruleId = get(props.alert.fields, ALERT_RULE_UUID) ?? null;
-  const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
+  const linkToRule = ruleId && prepend ? prepend(paths.observability.ruleDetails(ruleId)) : null;
   const overviewListItems = [
     {
       title: translations.alertsFlyout.statusLabel,
