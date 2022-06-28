@@ -39,7 +39,7 @@ export class QueryStringManager {
     };
   }
 
-  public formatQuery(query: Query | string | undefined): Query {
+  public formatQuery(query: Query | AggregateQuery | string | undefined): Query | AggregateQuery {
     if (!query) {
       return this.getDefaultQuery();
     } else if (typeof query === 'string') {

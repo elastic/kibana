@@ -31,7 +31,7 @@ import { EmbeddableStart } from './services/embeddable';
 import { DashboardSessionStorage } from './application/lib';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
-import { Query, RefreshInterval, TimeRange } from './services/data';
+import { Query, RefreshInterval, TimeRange, AggregateQuery } from './services/data';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, DataViewsContract } from './services/data';
@@ -58,7 +58,7 @@ export interface DashboardPanelMap {
  * DashboardState contains all pieces of tracked state for an individual dashboard
  */
 export interface DashboardState {
-  query: Query;
+  query: Query | AggregateQuery;
   title: string;
   tags: string[];
   filters: Filter[];
@@ -96,7 +96,7 @@ export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
   filters: Filter[];
   title: string;
-  query: Query;
+  query: Query | AggregateQuery;
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };

@@ -6,7 +6,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import {
   EuiButton,
   EuiCodeBlock,
@@ -23,7 +23,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { DataView, Query } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { APP_ID } from '../../../../common/constants';
 import { getIndexPatternService, getData, getSearchBar } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
@@ -33,7 +33,7 @@ import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox
 
 export interface Props {
   layer: ILayer;
-  setLayerQuery: (id: string, query: Query) => void;
+  setLayerQuery: (id: string, query: Query | AggregateQuery) => void;
   updateSourceProp: (layerId: string, propName: string, value: unknown) => void;
   isFeatureEditorOpenForLayer: boolean;
 }
@@ -101,7 +101,7 @@ export class FilterEditor extends Component<Props, State> {
     this.setState({ isPopoverOpen: false });
   };
 
-  _onQueryChange = ({ query }: { query?: Query }) => {
+  _onQueryChange = ({ query }: { query?: Query | AggregateQuery }) => {
     if (!query) {
       return;
     }
