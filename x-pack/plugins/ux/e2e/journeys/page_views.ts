@@ -29,7 +29,7 @@ journey('Page Views Chart', async ({ page, params }) => {
     });
     await loginToKibana({
       page,
-      user: { username: 'viewer', password: 'changeme' },
+      user: { username: 'elastic', password: 'changeme' },
     });
   });
 
@@ -39,11 +39,11 @@ journey('Page Views Chart', async ({ page, params }) => {
   });
 
   step('Check Page Views charts', async () => {
+    await page.waitForLoadState('networkidle');
     await page.click(
       'text=Total page viewsSelect an option: No breakdown, is selectedNo breakdown >> button'
     );
     await page.click('button[role="option"]:has-text("Browser")');
-    // assumption is if these values appear there is data for them within the date range
     expect(await page.waitForSelector('text=Chrome'));
     expect(await page.waitForSelector('text=Chrome Mobile iOS'));
     expect(await page.waitForSelector('text=Edge'));
