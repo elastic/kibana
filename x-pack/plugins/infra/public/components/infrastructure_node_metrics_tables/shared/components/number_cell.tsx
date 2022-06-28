@@ -7,6 +7,7 @@
 
 import { EuiI18nNumber, EuiTextColor } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface NumberCellProps {
   value?: number;
@@ -15,7 +16,15 @@ interface NumberCellProps {
 
 export function NumberCell({ value, unit }: NumberCellProps) {
   if (value === null || value === undefined || isNaN(value)) {
-    return <EuiTextColor color="subdued">N/A</EuiTextColor>;
+    return (
+      <EuiTextColor color="subdued">
+        <FormattedMessage
+          id="xpack.infra.metricsTable.numberCell.metricNotAvailableLabel"
+          defaultMessage="N/A"
+          description="N/A is short for not available"
+        />
+      </EuiTextColor>
+    );
   }
 
   if (!unit) {

@@ -24,6 +24,7 @@ import {
   DOC_TABLE_LEGACY,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
+  HIDE_ANNOUNCEMENTS,
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { SavedSearch } from '../../../../services/saved_searches';
@@ -32,10 +33,10 @@ import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
-import { ElasticSearchHit } from '../../../../types';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
+import { DataTableRecord } from '../../../../types';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -51,18 +52,18 @@ function DiscoverDocumentsComponent({
   stateContainer,
 }: {
   documents$: DataDocuments$;
-  expandedDoc?: ElasticSearchHit;
+  expandedDoc?: DataTableRecord;
   indexPattern: DataView;
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
-  setExpandedDoc: (doc?: ElasticSearchHit) => void;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
   const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-
+  const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
@@ -137,7 +138,7 @@ function DiscoverDocumentsComponent({
       </EuiScreenReaderOnly>
       {isLegacy && rows && rows.length && (
         <>
-          <DocumentExplorerCallout />
+          {!hideAnnouncements && <DocumentExplorerCallout />}
           <DocTableInfiniteMemoized
             columns={columns}
             indexPattern={indexPattern}
@@ -158,9 +159,11 @@ function DiscoverDocumentsComponent({
       )}
       {!isLegacy && (
         <>
-          <DiscoverTourProvider>
-            <DocumentExplorerUpdateCallout />
-          </DiscoverTourProvider>
+          {!hideAnnouncements && (
+            <DiscoverTourProvider>
+              <DocumentExplorerUpdateCallout />
+            </DiscoverTourProvider>
+          )}
           <div className="dscDiscoverGrid">
             <DataGridMemoized
               ariaLabelledBy="documentsAriaLabel"
