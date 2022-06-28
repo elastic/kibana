@@ -10,4 +10,4 @@ cat << EOF | buildkite-agent annotate --style "info"
   $ES_SNAPSHOT_MANIFEST
 EOF
 
-node "$(dirname "${0}")/promote_manifest.js" "$ES_SNAPSHOT_MANIFEST"
+ts-node "$(dirname "${0}")/promote_manifest.ts" "$ES_SNAPSHOT_MANIFEST"

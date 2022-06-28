@@ -6,21 +6,27 @@
  * Side Public License, v 1.
  */
 
-const execSync = require('child_process').execSync;
-const fs = require('fs');
-const { areChangesSkippable, doAnyChangesMatch } = require('kibana-buildkite-library');
-const prConfigs = require('../../../pull_requests.json');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import prConfigs from '../../../pull_requests.json';
+import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
+if (!prConfig) {
+  console.error(`'kibana-pull-request' pipeline not found in .buildkite/pull_requests.json`);
+  process.exit(1);
+}
+
+const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed.map((r) => new RegExp(r, 'i'));
 
-const getPipeline = (filename, removeSteps = true) => {
+const getPipeline = (filename: string, removeSteps = true) => {
   const str = fs.readFileSync(filename).toString();
   return removeSteps ? str.replace(/^steps:/, '') : str;
 };
 
-const uploadPipeline = (pipelineContent) => {
+const uploadPipeline = (pipelineContent: string | object) => {
   const str =
     typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
 
@@ -57,7 +63,7 @@ const uploadPipeline = (pipelineContent) => {
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
         /^x-pack\/test\/security_solution_cypress/,
       ])) ||
-      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
     }
@@ -71,35 +77,35 @@ const uploadPipeline = (pipelineContent) => {
         /^x-pack\/plugins\/rule_registry/,
         /^x-pack\/plugins\/task_manager/,
       ])) ||
-      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
     }
 
     if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
-      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
     }
 
     if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) ||
-      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
     }
 
     if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/fleet/, /^x-pack\/test\/fleet_cypress/])) ||
-      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
     if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
-      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
@@ -108,7 +114,7 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
     }
 
-    if (process.env.GITHUB_PR_LABELS.includes('ci:deploy-cloud')) {
+    if (GITHUB_PR_LABELS.includes('ci:deploy-cloud')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
 
