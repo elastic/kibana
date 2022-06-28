@@ -511,12 +511,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           ) : null}
 
           <EuiPageTemplate
-            style={{ backgroundColor: euiTheme.colors.emptyShade }}
             className="eui-fullHeight"
-            pageContentBodyProps={{ style: { paddingLeft: 0, paddingRight: 0 } }}
             pageHeader={{
-              style: { paddingLeft: 0, paddingRight: 0 },
-              bottomBorder: true,
               pageTitle: (
                 <FormattedMessage
                   id="xpack.security.accountManagement.userProfile.title"
