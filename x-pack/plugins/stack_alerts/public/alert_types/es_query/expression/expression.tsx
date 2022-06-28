@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { memo, PropsWithChildren, useCallback, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
@@ -37,6 +36,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
 > = (props) => {
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
+  const isManagementPage = useRef(!Object.keys(ruleParams).length).current;
 
   const formTypeSelected = useCallback(
     (searchType: SearchType | null) => {
@@ -50,7 +50,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     [setRuleParams, setRuleProperty]
   );
 
-  const hasExpressionErrors = Object.keys(errors).some((errorKey) => {
+  const errorParam = Object.keys(errors).find((errorKey) => {
     return (
       EXPRESSION_ERROR_KEYS.includes(errorKey as ErrorKey) &&
       errors[errorKey].length >= 1 &&
@@ -58,16 +58,9 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     );
   });
 
-  const expressionErrorMessage = i18n.translate(
-    'xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
-    {
-      defaultMessage: 'Expression contains errors.',
-    }
-  );
-
-  const expressionError = hasExpressionErrors && (
+  const expressionError = !!errorParam && (
     <>
-      <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
+      <EuiCallOut color="danger" size="s" title={errors[errorParam]} />
       <EuiSpacer />
     </>
   );
@@ -76,26 +69,20 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     <>
       {expressionError}
 
-      {ruleParams.searchType ? (
-        <>
-          {/* Showing the selected type */}
-          <QueryFormTypeChooser
-            searchType={ruleParams.searchType as SearchType}
-            onFormTypeSelect={formTypeSelected}
-          />
-
-          {isSearchSource ? (
-            <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
-          ) : (
-            <EsQueryExpression {...props} ruleParams={ruleParams} />
-          )}
-        </>
-      ) : (
-        // Choosing a rule type from Stack Management page
+      {/* Showing the selected type */}
+      {isManagementPage && (
         <QueryFormTypeChooser
           searchType={ruleParams.searchType as SearchType}
           onFormTypeSelect={formTypeSelected}
         />
+      )}
+
+      {ruleParams.searchType && isSearchSource && (
+        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
+      )}
+
+      {ruleParams.searchType && !isSearchSource && (
+        <EsQueryExpression {...props} ruleParams={ruleParams} />
       )}
 
       <EuiHorizontalRule />
