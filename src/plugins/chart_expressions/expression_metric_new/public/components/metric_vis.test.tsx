@@ -32,6 +32,15 @@ jest.mock('../services', () => ({
   },
 }));
 
+jest.mock('@elastic/numeral', () => ({
+  language: () => 'en',
+  languageData: () => ({
+    currency: {
+      symbol: '$',
+    },
+  }),
+}));
+
 type Props = MetricVisComponentProps;
 
 const dayOfWeekColumnId = 'col-0-0';
@@ -752,7 +761,21 @@ describe('MetricVisComponent', function () {
       expect(secondary).toBe('983.12K');
     });
 
-    it('correctly formats currency', () => {});
+    it('correctly formats currency', () => {
+      // TODO - figure out how to test another language
+      // jest.mock('@elastic/numeral', () => ({
+      //   language: () => 'da-dk',
+      //   languageData: () => ({
+      //     currency: {
+      //       symbol: 'DKK',
+      //     },
+      //   }),
+      // }));
+
+      const { primary, secondary } = getFormattedMetrics(1000.839, 11.2, { id: 'currency' });
+      expect(primary).toBe('$1.00K');
+      expect(secondary).toBe('$11.20');
+    });
 
     it('correctly formats percentages', () => {
       const { primary, secondary } = getFormattedMetrics(0.23939, 11.2, { id: 'percent' });
