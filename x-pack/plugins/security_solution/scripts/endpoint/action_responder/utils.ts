@@ -19,7 +19,8 @@ import {
   EndpointActionData,
   EndpointActionResponse,
   LogsEndpointActionResponse,
-  OutputActionRunningProcess,
+  ActionResponseOutput,
+  RunningProcessesEntry,
 } from '../../../common/endpoint/types';
 import { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -135,6 +136,6 @@ const getOutputDataIfNeeded = (command: EndpointActionData['command']) => {
             ],
           },
         },
-      } as EndpointActionData<undefined, OutputActionRunningProcess>)
+      } as { output: ActionResponseOutput<RunningProcessesEntry> })
     : {};
 };

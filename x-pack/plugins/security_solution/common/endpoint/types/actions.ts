@@ -15,7 +15,7 @@ import {
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 /** The output provided by some of the Endpoint responses */
-interface ActionResponseOutput<TOutputContent extends object = object> {
+export interface ActionResponseOutput<TOutputContent extends object = object> {
   type: 'json' | 'text';
   content: {
     entries: TOutputContent[];
@@ -272,7 +272,7 @@ export interface ActionDetails<TOutputContent extends object = object> {
   /**
    * The output data from an action
    */
-  outputs?: Record<string, ActionResponseOutput<TOutputContent>>;
+  outputs: Record<string, ActionResponseOutput<TOutputContent>>;
   /** user that created the action */
   createdBy: string;
   /** comment submitted with action */

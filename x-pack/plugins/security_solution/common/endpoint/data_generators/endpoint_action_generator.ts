@@ -91,6 +91,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             parameters: undefined,
           },
           started_at: this.randomPastDate(),
+          output: {
+            type: 'json',
+            content: {
+              entries: [],
+            },
+          },
         },
         error: undefined,
       },
@@ -120,6 +126,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       comment: 'thisisacomment',
       createdBy: 'auserid',
       parameters: undefined,
+      outputs: {},
     };
 
     return merge(details, overrides);
