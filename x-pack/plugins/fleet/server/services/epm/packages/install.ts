@@ -47,6 +47,8 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
+import { verifyPackageArchiveSignature } from './package_verification';
+
 import { getInstallation, getInstallationObject } from '.';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
@@ -340,6 +342,13 @@ async function installPackageFromRegistry({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
+    if (appContextService.getExperimentalFeatures().packageVerification) {
+      const verificationResult = await verifyPackageArchiveSignature({
+        pkgName,
+        pkgVersion,
+        logger,
+      });
+    }
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return await _installPackage({
