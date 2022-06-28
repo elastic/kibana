@@ -19,7 +19,7 @@ describe('useRedirectPath', () => {
   beforeEach(() => {
     mockStart.application.navigateToUrl.mockReset();
     mockedUseKibana.mockReturnValue({
-      core: {
+      services: {
         application: mockStart.application,
       },
     } as any);
