@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { useFormikContext } from 'formik';
 import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
