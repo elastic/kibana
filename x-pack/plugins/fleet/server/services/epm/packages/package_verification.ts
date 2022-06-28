@@ -19,7 +19,9 @@ interface VerificationResult {
   keyId: string;
 }
 
-type PackageVerificationResult = { didVerify: false } | ({ didVerify: true } & VerificationResult);
+export type PackageVerificationResult =
+  | { verificationAttempted: false }
+  | ({ verificationAttempted: true } & VerificationResult);
 
 let cachedKey: openpgp.Key | undefined | null = null;
 
@@ -69,7 +71,7 @@ export async function verifyPackageArchiveSignature({
 
   if (!verificationKey) {
     logger.warn(`Not performing package verification as no local verification key found`);
-    return { didVerify: false };
+    return { verificationAttempted: false };
   }
   const pkgArchiveSignature = await Registry.getPackageArchiveSignatureOrUndefined({
     pkgName,
@@ -79,7 +81,7 @@ export async function verifyPackageArchiveSignature({
 
   if (!pkgArchiveSignature) {
     logger.warn(`Not performing package verification as package has no signature file`);
-    return { didVerify: false };
+    return { verificationAttempted: false };
   }
 
   const { archiveBuffer: pkgArchiveBuffer } = await Registry.fetchArchiveBuffer(
@@ -94,7 +96,7 @@ export async function verifyPackageArchiveSignature({
     logger,
   });
 
-  return { didVerify: true, ...verificationResult };
+  return { verificationAttempted: true, ...verificationResult };
 }
 
 async function _verifyPackageSignature({

@@ -41,6 +41,7 @@ import { packagePolicyService } from '../..';
 
 import { createInstallation, updateEsAssetReferences } from './install';
 import { withPackageSpan } from './utils';
+import type { PackageVerificationResult } from './package_verification';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -56,6 +57,7 @@ export async function _installPackage({
   installType,
   installSource,
   spaceId,
+  verificationResult,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -67,6 +69,7 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
   spaceId: string;
+  verificationResult?: PackageVerificationResult;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion } = packageInfo;
 
@@ -101,6 +104,7 @@ export async function _installPackage({
         packageInfo,
         installSource,
         spaceId,
+        verificationResult,
       });
     }
 

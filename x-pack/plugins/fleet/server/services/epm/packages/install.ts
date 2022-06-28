@@ -51,6 +51,7 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
+import type { PackageVerificationResult } from './package_verification';
 import { verifyPackageArchiveSignature } from './package_verification';
 
 import { getInstallation, getInstallationObject } from '.';
@@ -346,13 +347,15 @@ async function installPackageFromRegistry({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
+    let verificationResult;
     if (appContextService.getExperimentalFeatures().packageVerification) {
-      const verificationResult = await verifyPackageArchiveSignature({
+      verificationResult = await verifyPackageArchiveSignature({
         pkgName,
         pkgVersion,
         logger,
       });
-      const isUnverified = verificationResult.didVerify && !verificationResult.isVerified;
+      const isUnverified =
+        verificationResult.verificationAttempted && !verificationResult.isVerified;
       if (isUnverified && !force) {
         throw new PackageFailedVerificationError(pkgkey);
       }
@@ -369,6 +372,7 @@ async function installPackageFromRegistry({
       packageInfo,
       installType,
       spaceId,
+      verificationResult,
       installSource: 'registry',
     })
       .then(async (assets) => {
@@ -602,8 +606,9 @@ export async function createInstallation(options: {
   packageInfo: InstallablePackage;
   installSource: InstallSource;
   spaceId: string;
+  verificationResult?: PackageVerificationResult;
 }) {
-  const { savedObjectsClient, packageInfo, installSource } = options;
+  const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
 
@@ -616,23 +621,38 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
+  const savedObject: Installation = {
+    installed_kibana: [],
+    installed_kibana_space_id: options.spaceId,
+    installed_es: [],
+    package_assets: [],
+    es_index_patterns: toSaveESIndexPatterns,
+    name: pkgName,
+    version: pkgVersion,
+    install_version: pkgVersion,
+    install_status: 'installing',
+    install_started_at: new Date().toISOString(),
+    install_source: installSource,
+    install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+    keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
+  };
+
+  if (verificationResult) {
+    const verification: Installation['verification'] = {
+      verification_attempted: verificationResult.verificationAttempted,
+    };
+
+    if (verificationResult.verificationAttempted) {
+      verification.is_verified = verificationResult.isVerified;
+      verification.key_id = verificationResult.keyId;
+    }
+
+    savedObject.verification = verification;
+  }
+
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
-    {
-      installed_kibana: [],
-      installed_kibana_space_id: options.spaceId,
-      installed_es: [],
-      package_assets: [],
-      es_index_patterns: toSaveESIndexPatterns,
-      name: pkgName,
-      version: pkgVersion,
-      install_version: pkgVersion,
-      install_status: 'installing',
-      install_started_at: new Date().toISOString(),
-      install_source: installSource,
-      install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
-      keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
-    },
+    savedObject,
     { id: pkgName, overwrite: true }
   );
 
