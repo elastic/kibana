@@ -11,7 +11,7 @@ import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService, DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   createSearchSource,
   extractReferences,
@@ -34,7 +34,20 @@ const getAllMigrations = (): MigrateFunctionsObject => {
     });
   });
 
-  return mergeMigrationFunctionMaps(searchSourceMigrations, filterMigrations);
+  const dataviewsMigrations = mapValues(
+    DataViewPersistableStateService.getAllMigrations(),
+    (migrate) => {
+      return (state: SerializedSearchSourceFields) => ({
+        ...state,
+        index: migrate(state.index),
+      });
+    }
+  );
+
+  return mergeMigrationFunctionMaps(
+    mergeMigrationFunctionMaps(searchSourceMigrations, filterMigrations),
+    dataviewsMigrations
+  );
 };
 
 export class SearchSourceService {

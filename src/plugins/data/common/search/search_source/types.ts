@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SerializableRecord } from '@kbn/utility-types';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AggConfigSerialized, IAggConfigs } from '../../../public';
 import { Query } from '../..';
@@ -159,7 +159,7 @@ export type SerializedSearchSourceFields = {
   /**
    * {@link IndexPatternService}
    */
-  index?: string;
+  index?: string | DataViewSpec;
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
