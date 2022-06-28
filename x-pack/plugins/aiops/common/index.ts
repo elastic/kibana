@@ -19,4 +19,4 @@ export const PLUGIN_NAME = 'AIOps';
  * This is an internal hard coded feature flag so we can easily turn on/off the
  * "Explain log rate spikes UI" during development until the first release.
  */
-export const AIOPS_ENABLED = false;
+export const AIOPS_ENABLED = true;
