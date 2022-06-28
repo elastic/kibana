@@ -24,6 +24,7 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
+import type { LogMeta } from '@kbn/logging';
 import type { IShipper } from '../shippers';
 import type {
   AnalyticsClientInitContext,
@@ -41,6 +42,10 @@ import { ShippersRegistry } from './shippers_registry';
 import { OptInConfigService } from './opt_in_config';
 import { ContextService } from './context_service';
 import { schemaToIoTs, validateSchema } from '../schema/validation';
+
+interface EventDebugLogMeta extends LogMeta {
+  ebt_event: Event;
+}
 
 export class AnalyticsClient implements IAnalyticsClient {
   private readonly internalTelemetryCounter$ = new Subject<TelemetryCounter>();
@@ -127,13 +132,9 @@ export class AnalyticsClient implements IAnalyticsClient {
 
     // debug-logging before checking the opt-in status to help during development
     if (this.initContext.isDev) {
-      this.initContext.logger.debug(`Report event "${eventType}"`);
-      // If in the browser, log the event as such (to make it easier to debug in the browser's console).
-      //   It needs the casting because the logger types expect debug to be a string
-      // If in the server, stringify to avoid printing [object Object]
-      this.initContext.logger.debug(
-        global.window ? (event as unknown as string) : JSON.stringify(event)
-      );
+      this.initContext.logger.debug<EventDebugLogMeta>(`Report event "${eventType}"`, {
+        ebt_event: event,
+      });
     }
 
     const optInConfig = this.optInConfig$.value;
