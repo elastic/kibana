@@ -5,48 +5,76 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
 } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useTriggersAndActionsUiDeps } from '../es_query/util';
 
-interface DataViewSelectPopoverProps {
+export interface DataViewSelectPopoverProps {
   onSelectDataView: (newDataViewId: string) => void;
-  initialDataViewTitle: string;
-  initialDataViewId?: string;
+  dataViewName?: string;
+  dataViewId?: string;
 }
 
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
   onSelectDataView,
-  initialDataViewTitle,
-  initialDataViewId,
+  dataViewName,
+  dataViewId,
 }) => {
-  const { data } = useTriggersAndActionsUiDeps();
+  const { data, dataViewEditor } = useTriggersAndActionsUiDeps();
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>();
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
-  const [selectedDataViewId, setSelectedDataViewId] = useState(initialDataViewId);
-  const [selectedTitle, setSelectedTitle] = useState<string>(initialDataViewTitle);
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
-  useEffect(() => {
-    const initDataViews = async () => {
-      const fetchedDataViewItems = await data.dataViews.getIdsWithTitle();
-      setDataViewsItems(fetchedDataViewItems);
-    };
-    initDataViews();
-  }, [data.dataViews]);
+  const loadDataViews = useCallback(async () => {
+    const fetchedDataViewItems = await data.dataViews.getIdsWithTitle();
+    setDataViewsItems(fetchedDataViewItems);
+  }, [setDataViewsItems, data.dataViews]);
 
   const closeDataViewPopover = useCallback(() => setDataViewPopoverOpen(false), []);
+
+  const createDataView = useMemo(
+    () =>
+      dataViewEditor?.userPermissions.editDataView()
+        ? () => {
+            closeDataViewEditor.current = dataViewEditor.openEditor({
+              onSave: async (createdDataView) => {
+                if (createdDataView.id) {
+                  await onSelectDataView(createdDataView.id);
+                  await loadDataViews();
+                }
+              },
+            });
+          }
+        : undefined,
+    [dataViewEditor, onSelectDataView, loadDataViews]
+  );
+
+  useEffect(() => {
+    return () => {
+      // Make sure to close the editor when unmounting
+      if (closeDataViewEditor.current) {
+        closeDataViewEditor.current();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    loadDataViews();
+  }, [loadDataViews]);
 
   if (!dataViewItems) {
     return null;
@@ -63,7 +91,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             defaultMessage: 'data view',
           })}
           value={
-            selectedTitle ??
+            dataViewName ??
             i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPlaceholder', {
               defaultMessage: 'Select a data view',
             })
@@ -72,7 +100,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           onClick={() => {
             setDataViewPopoverOpen(true);
           }}
-          isInvalid={!selectedTitle}
+          isInvalid={!dataViewId}
         />
       }
       isOpen={dataViewPopoverOpen}
@@ -107,18 +135,31 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           <DataViewsList
             dataViewsList={dataViewItems}
             onChangeDataView={(newId) => {
-              setSelectedDataViewId(newId);
-              const newTitle = dataViewItems?.find(({ id }) => id === newId)?.title;
-              if (newTitle) {
-                setSelectedTitle(newTitle);
-              }
-
               onSelectDataView(newId);
               closeDataViewPopover();
             }}
-            currentDataViewId={selectedDataViewId}
+            currentDataViewId={dataViewId}
           />
         </EuiFormRow>
+        {createDataView && (
+          <EuiPopoverFooter>
+            <EuiButtonEmpty
+              iconType="plusInCircleFilled"
+              data-test-subj="chooseDataViewPopover.createDataViewButton"
+              onClick={() => {
+                closeDataViewPopover();
+                createDataView();
+              }}
+            >
+              {i18n.translate(
+                'xpack.stackAlerts.components.ui.alertParams.dataViewPopover.createDataViewButton',
+                {
+                  defaultMessage: 'Create a data view',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiPopoverFooter>
+        )}
       </div>
     </EuiPopover>
   );

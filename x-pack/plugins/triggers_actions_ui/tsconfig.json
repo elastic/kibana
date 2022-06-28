@@ -19,6 +19,7 @@
     { "path": "../features/tsconfig.json" },
     { "path": "../rule_registry/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/data_view_editor/tsconfig.json" },
     { "path": "../../../src/plugins/saved_objects/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/charts/tsconfig.json" },
