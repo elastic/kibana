@@ -102,14 +102,14 @@ export const sampleAttributeCoreWebVital = {
     },
     visualization: {
       axisTitlesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
       curveType: 'CURVE_MONOTONE_X',
       fittingFunction: 'Linear',
       gridlinesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: true,
         yRight: true,
       },
@@ -118,6 +118,7 @@ export const sampleAttributeCoreWebVital = {
           accessors: ['y-axis-column-layer0', 'y-axis-column-1', 'y-axis-column-2'],
           layerId: 'layer0',
           layerType: 'data',
+          palette: undefined,
           seriesType: 'bar_horizontal_percentage_stacked',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [

@@ -32,9 +32,9 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { PercentileAnnotations } from '../page_load_distribution/percentile_annotations';
 import { I18LABELS } from '../translations';
 import { ChartWrapper } from '../chart_wrapper';
-import { PercentileRange } from '../page_load_distribution';
 import { BreakdownSeries } from '../page_load_distribution/breakdown_series';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { PercentileRange } from '../page_load_distribution/types';
 
 interface PageLoadData {
   pageLoadDistribution: Array<{ x: number; y: number }>;

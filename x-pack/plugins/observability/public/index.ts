@@ -104,6 +104,7 @@ export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_
 export {
   ReportTypes,
   FILTER_RECORDS,
+  ENVIRONMENT_ALL,
   REPORT_METRIC_FIELD,
   USE_BREAK_DOWN_COLUMN,
   RECORDS_FIELD,

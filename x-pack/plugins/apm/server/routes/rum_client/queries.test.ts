@@ -9,7 +9,6 @@ import {
   SearchParamsMock,
   inspectSearchParams,
 } from '../../utils/test_helpers';
-import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 
 describe('rum client dashboard queries', () => {
@@ -17,20 +16,6 @@ describe('rum client dashboard queries', () => {
 
   afterEach(() => {
     mock.teardown();
-  });
-
-  it('fetches page view trends', async () => {
-    mock = await inspectSearchParams(
-      (setup) =>
-        getPageViewTrends({
-          setup,
-          start: 0,
-          end: 50000,
-        }),
-      { uiFilters: { environment: 'staging' } }
-    );
-
-    expect(mock.params).toMatchSnapshot();
   });
 
   it('fetches page load distribution', async () => {
