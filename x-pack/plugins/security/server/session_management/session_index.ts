@@ -238,7 +238,7 @@ export class SessionIndex {
           'Attempted to create a new session, but session index or alias was missing.'
         );
         await this.ensureSessionIndexExists();
-        ({ body } = await this.writeNewSessionDocument(sessionValue, {
+        ({ body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
           ignore404: false,
         }));
       }
@@ -258,19 +258,20 @@ export class SessionIndex {
    * @param sessionValue Session index value.
    */
   async update(sessionValue: Readonly<SessionIndexValue>) {
-    const { sid, metadata, ...sessionValueToStore } = sessionValue;
     try {
-      const { body: response, statusCode } = await this.options.elasticsearchClient.index(
-        {
-          id: sid,
-          index: this.indexName,
-          body: sessionValueToStore,
-          if_seq_no: metadata.sequenceNumber,
-          if_primary_term: metadata.primaryTerm,
-          refresh: 'wait_for',
-        },
-        { ignore: [409], meta: true }
-      );
+      let { body: response, statusCode } = await this.updateExistingSessionDocument(sessionValue, {
+        ignore404: true,
+      });
+
+      if (statusCode === 404) {
+        this.options.logger.warn(
+          'Attempted to update an existing session, but session index or alias was missing.'
+        );
+        await this.ensureSessionIndexExists();
+        ({ body: response, statusCode } = await this.updateExistingSessionDocument(sessionValue, {
+          ignore404: false,
+        }));
+      }
 
       // We don't want to override changes that were made after we fetched session value or
       // re-create it if has been deleted already. If we detect such a case we discard changes and
@@ -280,7 +281,7 @@ export class SessionIndex {
         this.options.logger.debug(
           'Cannot update session value due to conflict, session either does not exist or was already updated.'
         );
-        return await this.get(sid);
+        return await this.get(sessionValue.sid);
       }
 
       return {
@@ -565,6 +566,28 @@ export class SessionIndex {
         require_alias: true,
       } as CreateRequest,
       { meta: true, ignore: ignore404 ? [404] : [] }
+    );
+
+    return { body, statusCode };
+  }
+
+  private async updateExistingSessionDocument(
+    sessionValue: Readonly<SessionIndexValue>,
+    { ignore404 }: { ignore404: boolean }
+  ) {
+    const { sid, metadata, ...sessionValueToStore } = sessionValue;
+
+    const { body, statusCode } = await this.options.elasticsearchClient.index(
+      {
+        id: sid,
+        index: this.aliasName,
+        body: sessionValueToStore,
+        if_seq_no: metadata.sequenceNumber,
+        if_primary_term: metadata.primaryTerm,
+        refresh: 'wait_for',
+        require_alias: true,
+      },
+      { ignore: ignore404 ? [404, 409] : [409], meta: true }
     );
 
     return { body, statusCode };

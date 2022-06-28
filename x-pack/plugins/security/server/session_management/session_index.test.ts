@@ -1064,13 +1064,14 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.index).toHaveBeenCalledWith(
         {
           id: sid,
-          index: indexName,
+          index: aliasName,
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
           refresh: 'wait_for',
+          require_alias: true,
         },
-        { ignore: [409], meta: true }
+        { ignore: [404, 409], meta: true }
       );
     });
 
@@ -1105,11 +1106,80 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.index).toHaveBeenCalledWith(
         {
           id: sid,
-          index: indexName,
+          index: aliasName,
           body: sessionValue,
           if_seq_no: 456,
           if_primary_term: 123,
           refresh: 'wait_for',
+          require_alias: true,
+        },
+        { ignore: [404, 409], meta: true }
+      );
+    });
+
+    it('properly stores session value in the index, recreating the index/alias if missing', async () => {
+      let callCount = 0;
+      mockElasticsearchClient.index.mockResponseImplementation(() => {
+        callCount++;
+        // Fail the first update attempt because the index/alias doesn't exist
+        if (callCount === 1) {
+          return { statusCode: 404 };
+        }
+        // Pass the second update attempt
+        return {
+          body: {
+            _shards: { total: 1, failed: 0, successful: 1, skipped: 0 },
+            _index: 'my-index',
+            _id: 'W0tpsmIBdwcYyG50zbta',
+            _version: 1,
+            _primary_term: 321,
+            _seq_no: 654,
+            result: 'created',
+          },
+          statusCode: 201,
+        };
+      });
+
+      const sid = 'some-long-sid';
+      const metadata = { primaryTerm: 123, sequenceNumber: 456 };
+      const sessionValue = {
+        usernameHash: 'some-username-hash',
+        provider: { type: 'basic', name: 'basic1' },
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
+        content: 'some-encrypted-content',
+      };
+
+      await expect(sessionIndex.update({ sid, metadata, ...sessionValue })).resolves.toEqual({
+        ...sessionValue,
+        sid,
+        metadata: { primaryTerm: 321, sequenceNumber: 654 },
+      });
+
+      expect(mockElasticsearchClient.index).toHaveBeenCalledTimes(2);
+      expect(mockElasticsearchClient.index).toHaveBeenNthCalledWith(
+        1,
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          if_seq_no: 456,
+          if_primary_term: 123,
+          refresh: 'wait_for',
+          require_alias: true,
+        },
+        { ignore: [404, 409], meta: true }
+      );
+      expect(mockElasticsearchClient.index).toHaveBeenNthCalledWith(
+        2,
+        {
+          id: sid,
+          index: aliasName,
+          body: sessionValue,
+          if_seq_no: 456,
+          if_primary_term: 123,
+          refresh: 'wait_for',
+          require_alias: true,
         },
         { ignore: [409], meta: true }
       );
