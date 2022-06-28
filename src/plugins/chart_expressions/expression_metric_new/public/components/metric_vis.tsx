@@ -22,6 +22,35 @@ import { currencyCodeMap } from './currency_code_map';
 // TODO - find a reasonable default (from EUI perhaps?)
 const defaultColor = '#5e5e5e';
 
+const getBytesUnit = (value: number) => {
+  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];
+  const abs = Math.abs(value);
+
+  const base = 1024;
+  let unit = units[0];
+  let matched = abs < base;
+  let power;
+
+  if (!matched) {
+    for (power = 1; power < units.length; power++) {
+      const [min, max] = [Math.pow(base, power), Math.pow(base, power + 1)];
+      if (abs >= min && abs < max) {
+        unit = units[power];
+        matched = true;
+        value = value / min;
+        break;
+      }
+    }
+  }
+
+  if (!matched) {
+    value = value / Math.pow(base, units.length - 1);
+    unit = units[units.length - 1];
+  }
+
+  return { value, unit };
+};
+
 const getFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
@@ -77,7 +106,12 @@ const getFormatter = (
     intlOptions.style = 'percent';
   }
 
-  return new Intl.NumberFormat(locale, intlOptions).format;
+  return formatId === 'bytes'
+    ? (rawValue: number) => {
+        const { value, unit } = getBytesUnit(rawValue);
+        return new Intl.NumberFormat(locale, { ...intlOptions, style: 'unit', unit }).format(value);
+      }
+    : new Intl.NumberFormat(locale, intlOptions).format;
 };
 
 const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
