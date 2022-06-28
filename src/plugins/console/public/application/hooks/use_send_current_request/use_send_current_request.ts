@@ -25,11 +25,11 @@ export const useSendCurrentRequest = () => {
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
-  const variables = storage.get('variables', []);
 
   return useCallback(async () => {
     try {
       const editor = registry.getInputEditor();
+      const variables = storage.get('variables', []);
       let requests = await editor.getRequestsInRange();
       requests = replaceVariables(requests, variables);
       if (!requests.length) {
@@ -131,7 +131,7 @@ export const useSendCurrentRequest = () => {
       }
     }
   }, [
-    variables,
+    storage,
     dispatch,
     http,
     settings,
