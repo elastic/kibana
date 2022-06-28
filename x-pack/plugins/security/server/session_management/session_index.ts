@@ -194,7 +194,7 @@ export class SessionIndex {
     try {
       const { body: response, statusCode } =
         await this.options.elasticsearchClient.get<SessionIndexValue>(
-          { id: sid, index: this.indexName },
+          { id: sid, index: this.aliasName },
           { ignore: [404], meta: true }
         );
 

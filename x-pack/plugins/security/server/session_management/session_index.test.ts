@@ -863,7 +863,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.get).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.get).toHaveBeenCalledWith(
-        { id: 'some-sid', index: indexName },
+        { id: 'some-sid', index: aliasName },
         { ignore: [404], meta: true }
       );
     });
