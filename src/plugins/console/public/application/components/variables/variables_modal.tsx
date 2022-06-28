@@ -45,8 +45,12 @@ export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
   const formId = useGeneratedHtmlId({ prefix: '__console' });
 
   const addNewVariable = useCallback(() => {
-    setVariables((v) => [...v, utils.generateEmptyVariableField()]);
-  }, []);
+    const lastInputField = variables[variables.length - 1];
+    // Add input fields if previous fields are not empty
+    if (lastInputField.name || lastInputField.value) {
+      setVariables((v) => [...v, utils.generateEmptyVariableField()]);
+    }
+  }, [variables]);
 
   const deleteVariable = useCallback(
     (id: string) => {
@@ -59,7 +63,7 @@ export const DevToolsVariablesModal = (props: DevToolsVariablesModalProps) => {
   const onSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      props.onSaveVariables(variables);
+      props.onSaveVariables(variables.filter(({ name, value }) => name && value));
     },
     [props, variables]
   );

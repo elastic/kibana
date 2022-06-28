@@ -19,17 +19,8 @@ import { constructUrl } from '../../../lib/es/es';
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 import createAutocompleter from '../../../lib/autocomplete/autocomplete';
-import { getStorage } from '../../../services';
-import type { DevToolsVariable } from '../../components';
 
 const { collapseLiteralStrings } = XJson;
-
-function replaceVariableWithValue(value: string) {
-  const key = value.replace(/[^a-z\d.]+/gi, '');
-  const storage = getStorage();
-  const variables = storage.get('variables', []);
-  return variables.find((v: DevToolsVariable) => v.name === key).value ?? '';
-}
 
 export class SenseEditor {
   currentReqRange: (Range & { markerRef: unknown }) | null;
@@ -258,9 +249,6 @@ export class SenseEditor {
     request.url = '';
 
     while (t && t.type && (t.type.indexOf('url') === 0 || t.type === 'variable.template')) {
-      if (t.type === 'variable.template') {
-        t.value = replaceVariableWithValue(t.value);
-      }
       request.url += t.value;
       t = tokenIter.stepForward();
     }
@@ -285,24 +273,7 @@ export class SenseEditor {
         },
         end: dataEndPos,
       };
-      let data = this.coreEditor.getValueInRange(bodyRange)!;
-      const re = /("\${\w+}")/g;
-
-      data = data.replaceAll(re, (match) => {
-        const value = replaceVariableWithValue(match);
-
-        if (
-          !(value.startsWith('{') && value.endsWith('}')) &&
-          isNaN(parseFloat(value)) &&
-          !(value.startsWith('[') && value.endsWith(']')) &&
-          value !== 'true' &&
-          value !== 'false'
-        ) {
-          return JSON.stringify(value);
-        }
-
-        return value;
-      });
+      const data = this.coreEditor.getValueInRange(bodyRange)!;
       request.data.push(data.trim());
       bodyStartLineNumber = dataEndPos.lineNumber + 1;
     }

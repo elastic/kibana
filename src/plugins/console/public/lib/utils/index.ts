@@ -9,6 +9,8 @@
 import _ from 'lodash';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { RequestResult } from '../../application/hooks/use_send_current_request/send_request';
+import type { DevToolsVariable } from '../../application/components';
+import type { RequestArgs } from '../../application/hooks/use_send_current_request/send_request';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
@@ -107,4 +109,57 @@ export const getResponseWithMostSevereStatusCode = (requestData: RequestResult[]
       .sort((a, b) => a.response.statusCode - b.response.statusCode)
       .pop();
   }
+}
+
+export const replaceVariables = (
+  requests: RequestArgs['requests'],
+  variables: DevToolsVariable[]
+) => {
+  const urlRegex = /(\${\w+})/g;
+  const bodyRegex = /("\${\w+}")/g;
+  const updatedRequests = requests.map((req) => {
+    if (urlRegex.test(req.url)) {
+      req.url = req.url.replaceAll(urlRegex, (match) => {
+        // Sanitize variable name
+        const key = match.replace('${', '').replace('}', '');
+        // Get variable value from storage
+        const variable = variables.find(({ name }) => name === key);
+
+        return variable?.value ?? match;
+      });
+    }
+
+    if (req.data.length) {
+      if (bodyRegex.test(req.data[0])) {
+        const data = req.data[0].replaceAll(bodyRegex, (match) => {
+          // Sanitize variable name
+          const key = match.replace('"${', '').replace('}"', '');
+          // Get variable value from storage
+          const variable = variables.find(({ name }) => name === key);
+
+          if (variable) {
+            const { value } = variable;
+            if (
+              !(value.startsWith('{') && value.endsWith('}')) &&
+              isNaN(parseFloat(value)) &&
+              !(value.startsWith('[') && value.endsWith(']')) &&
+              value !== 'true' &&
+              value !== 'false'
+            ) {
+              return JSON.stringify(value);
+            }
+
+            return value;
+          }
+
+          return match;
+        });
+        req.data = [data];
+      }
+    }
+
+    return req;
+  });
+
+  return updatedRequests;
 };

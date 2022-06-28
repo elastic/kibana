@@ -193,4 +193,55 @@ describe('Utils class', () => {
 
     expect(utils.getResponseWithMostSevereStatusCode(undefined)).toBe(undefined);
   });
+
+  describe('replaceVariables', () => {
+    const variablesMock = [
+      { name: 'v1', value: 'test' },
+      { name: 'v2', value: 'true' },
+      { name: 'v3', value: '{"f": "test"}' },
+      { name: 'v4', value: '[{"t": "test"}]' },
+      { name: 'v5', value: '1' },
+    ];
+
+    function testVariables(data, variables, expected) {
+      const result = utils.replaceVariables(data, variables);
+      expect(result).toEqual(expected);
+    }
+
+    it('should replace variables in url and body', () => {
+      testVariables([{ url: '${v1}/search', data: ['{\n  "f": "${v1}"\n}'] }], variablesMock, [
+        {
+          url: 'test/search',
+          data: ['{\n  "f": "test"\n}'],
+        },
+      ]);
+    });
+
+    describe('with booleans as field value', () => {
+      testVariables([{ url: 'test', data: ['{\n  "f": "${v2}"\n}'] }], variablesMock, [
+        {
+          url: 'test',
+          data: ['{\n  "f": true\n}'],
+        },
+      ]);
+    });
+
+    describe('with objects as field values', () => {
+      testVariables([{ url: 'test', data: ['{\n  "f": "${v3}"\n}'] }], variablesMock, [
+        { url: 'test', data: ['{\n  "f": {"f": "test"}\n}'] },
+      ]);
+    });
+
+    describe('with arrays as field values', () => {
+      testVariables([{ url: 'test', data: ['{\n  "f": "${v4}"\n}'] }], variablesMock, [
+        { url: 'test', data: ['{\n  "f": [{"t": "test"}]\n}'] },
+      ]);
+    });
+
+    describe('with numbers as field values', () => {
+      testVariables([{ url: 'test', data: ['{\n  "f": "${v5}"\n}'] }], variablesMock, [
+        { url: 'test', data: ['{\n  "f": 1\n}'] },
+      ]);
+    });
+  });
 });

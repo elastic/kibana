@@ -11,6 +11,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';
+import { replaceVariables } from '../../../lib/utils';
 
 const { collapseLiteralStrings } = XJson;
 
