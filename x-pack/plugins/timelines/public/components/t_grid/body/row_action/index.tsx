@@ -113,6 +113,7 @@ const RowActionComponent = ({
     return <span data-test-subj="noData" />;
   }
 
+  console.log('ECS INFORMATION: ', timelineNonEcsData, ecsData); // eslint-disable-line
   return (
     <>
       {Action && (

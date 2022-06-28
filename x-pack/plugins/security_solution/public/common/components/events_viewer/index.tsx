@@ -15,7 +15,7 @@ import { useBulkAddToCaseActions } from '../../../detections/components/alerts_t
 import { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
-import { APP_ID, APP_UI_ID, SERVER_APP_ID } from '../../../../common/constants';
+import { APP_UI_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -37,6 +37,7 @@ import {
   useSessionViewNavigation,
   useSessionView,
 } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+import { useFetchAlertData } from '../../../cases/pages/use_fetch_alert_data';
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
@@ -210,13 +211,21 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   });
 
   const alertStateProps = {
-    alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-    configurationId: APP_ID,
-    id,
+    alertsTableConfiguration: triggersActionsUi.alertsTableConfigurationRegistry,
+    bulkActions,
+    columns: defaultColumns,
+    visibleColumns: columns,
+    'data-test-subj': 'test-table',
+    deletedEventIds,
+    disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
     flyoutSize: 'm',
-    featureIds: [SERVER_APP_ID],
-    query,
+    pageSize: itemsPerPage,
+    pageSizeOptions: [10, 25, 50, 100],
+    leadingControlColumns,
+    showCheckboxes: true,
     showExpandToDetails: true,
+    trailingControlColumns,
+    useFetchAlertsData: useFetchAlertData,
   };
 
   const isLive = input.policy.kind === 'interval';
@@ -225,7 +234,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
-          {triggersActionsUi.getAlertsStateTable(alertStateProps)}
+          {/* {triggersActionsUi.getAlertsStateTable(alertStateProps)} */}
           {timelinesUi.getTGrid<'embedded'>({
             additionalFilters,
             appId: APP_UI_ID,
