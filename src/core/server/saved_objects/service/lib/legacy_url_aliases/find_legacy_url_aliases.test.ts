@@ -82,10 +82,10 @@ describe('findLegacyUrlAliases', () => {
       const typeAndIdFilter = typeAndIdFilters[i].arguments;
       expect(typeAndIdFilter).toEqual([
         expect.objectContaining({
-          arguments: expect.arrayContaining([{ type: 'literal', value: type }]),
+          arguments: expect.arrayContaining([{ type: 'literal', value: type, isQuoted: false }]),
         }),
         expect.objectContaining({
-          arguments: expect.arrayContaining([{ type: 'literal', value: id }]),
+          arguments: expect.arrayContaining([{ type: 'literal', value: id, isQuoted: false }]),
         }),
       ]);
     });

@@ -3637,16 +3637,13 @@ describe('SavedObjectsRepository', () => {
           Object {
             "arguments": Array [
               Object {
+                "isQuoted": false,
                 "type": "literal",
                 "value": "dashboard.otherField",
               },
               Object {
                 "type": "wildcard",
                 "value": "@kuery-wildcard@",
-              },
-              Object {
-                "type": "literal",
-                "value": false,
               },
             ],
             "function": "is",
@@ -3677,16 +3674,13 @@ describe('SavedObjectsRepository', () => {
           Object {
             "arguments": Array [
               Object {
+                "isQuoted": false,
                 "type": "literal",
                 "value": "dashboard.otherField",
               },
               Object {
                 "type": "wildcard",
                 "value": "@kuery-wildcard@",
-              },
-              Object {
-                "type": "literal",
-                "value": false,
               },
             ],
             "function": "is",

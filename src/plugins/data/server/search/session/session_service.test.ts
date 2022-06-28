@@ -358,16 +358,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "search-session.attributes.realmType",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "my_realm_type",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -376,16 +374,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "search-session.attributes.realmName",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "my_realm_name",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -394,16 +390,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "search-session.attributes.username",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "my_username",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -450,16 +444,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "search-session.attributes.realmType",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "my_realm_type",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -468,16 +460,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "search-session.attributes.realmName",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "my_realm_name",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -486,16 +476,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "search-session.attributes.username",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "my_username",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -504,16 +492,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": null,
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "foobar",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -533,16 +519,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "search-session.attributes.realmType",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "my_realm_type",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -551,16 +535,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "search-session.attributes.realmName",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "my_realm_name",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -569,16 +551,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "search-session.attributes.username",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "my_username",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
@@ -587,16 +567,14 @@ describe('SearchSessionService', () => {
                 Object {
                   "arguments": Array [
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "foo",
                     },
                     Object {
+                      "isQuoted": false,
                       "type": "literal",
                       "value": "bar",
-                    },
-                    Object {
-                      "type": "literal",
-                      "value": false,
                     },
                   ],
                   "function": "is",
