@@ -23,7 +23,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import { catchAndWrapError, getTimeSortedActionListLogEntries } from '../../utils';
+import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
 import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
@@ -116,15 +116,14 @@ export const getActionDetailsById = async (
     agents: normalizedActionRequest.agents,
     command: normalizedActionRequest.command,
     startedAt: normalizedActionRequest.createdAt,
-    logEntries: getTimeSortedActionListLogEntries([
-      ...actionRequestsLogEntries,
-      ...actionResponses,
-    ]),
     isCompleted,
     completedAt,
     wasSuccessful,
     errors,
     isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
+    createdBy: normalizedActionRequest.createdBy,
+    comment: normalizedActionRequest.comment,
+    parameters: normalizedActionRequest.parameters,
   };
 
   return actionDetails;

@@ -31,6 +31,7 @@ export const PROJECTS = [
   createProject('test/tsconfig.json', { name: 'kibana/test' }),
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
   createProject('src/core/tsconfig.json'),
+  createProject('.buildkite/tsconfig.json'),
 
   createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
     name: 'security_solution/cypress',
@@ -72,6 +73,11 @@ export const PROJECTS = [
 
   createProject('x-pack/plugins/ux/e2e/tsconfig.json', {
     name: 'ux/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+
+  createProject('x-pack/plugins/observability/e2e/tsconfig.json', {
+    name: 'observability/synthetics-e2e-tests',
     disableTypeCheck: true,
   }),
 
