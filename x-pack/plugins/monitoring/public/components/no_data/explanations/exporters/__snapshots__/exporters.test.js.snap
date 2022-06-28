@@ -8,10 +8,10 @@ Array [
     You need to make some adjustments
   </h2>,
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="css-xv0fhq-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         To run monitoring please perform the following steps
@@ -22,7 +22,7 @@ Array [
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium eui-textLeft"
+    class="euiText eui-textLeft css-1lo1kz-euiText-m"
   >
     <p>
       We checked the 
@@ -72,10 +72,10 @@ Array [
 exports[`ExplainExportersCloud should explain about xpack.monitoring.exporters setting in a cloud environment 1`] = `
 Array [
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="css-xv0fhq-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         Configure monitoring through 
@@ -145,7 +145,7 @@ Array [
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium eui-textLeft"
+    class="euiText eui-textLeft css-1lo1kz-euiText-m"
   >
     <p>
       In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.

@@ -17,7 +17,7 @@ import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj'
 const CommandInputContainer = styled.div`
   background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
   border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
-  padding: ${({ theme: { eui } }) => eui.paddingSizes.s};
+  padding: ${({ theme: { eui } }) => eui.euiSizeS};
 
   .prompt {
     padding-right: 1ch;
@@ -31,7 +31,7 @@ const CommandInputContainer = styled.div`
     display: inline-block;
     width: 0.5em;
     height: 1em;
-    background-color: ${({ theme }) => theme.eui.euiTextColors.default};
+    background-color: ${({ theme }) => theme.eui.euiTextColor};
 
     animation: cursor-blink-animation 1s steps(5, start) infinite;
     -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;

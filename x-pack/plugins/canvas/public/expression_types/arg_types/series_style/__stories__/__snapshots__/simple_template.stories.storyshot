@@ -17,7 +17,7 @@ exports[`Storyshots arguments/SeriesStyle simple 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         Color
       </div>
@@ -26,7 +26,7 @@ exports[`Storyshots arguments/SeriesStyle simple 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         <button
           aria-label="Color: Auto"
@@ -60,7 +60,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         Color
       </div>
@@ -69,7 +69,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         <button
           aria-label="Color: Auto"
@@ -103,7 +103,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         Color
       </div>
@@ -112,7 +112,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         <button
           aria-label="Color: Auto"
@@ -146,7 +146,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         Color
       </div>
@@ -155,7 +155,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         <button
           aria-label="Color: Auto"
@@ -208,7 +208,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         Color
       </div>
@@ -217,7 +217,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        className="euiText euiText--extraSmall"
+        className="euiText css-1utxlgq-euiText-xs"
       >
         <button
           aria-label="Color: Auto"

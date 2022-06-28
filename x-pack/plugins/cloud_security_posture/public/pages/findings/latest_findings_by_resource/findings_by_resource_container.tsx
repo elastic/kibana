@@ -90,14 +90,13 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
           <PageTitleText
             title={
               <FormattedMessage
-                id="xpack.csp.findings.findingsByResourceTitle"
+                id="xpack.csp.findings.findingsByResource.findingsByResourcePageTitle"
                 defaultMessage="Findings"
               />
             }
           />
         </PageTitle>
         {error && <ErrorCallout error={error} />}
-
         {!error && (
           <>
             <FindingsGroupBySelector type="resource" />

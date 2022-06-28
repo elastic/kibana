@@ -11,12 +11,12 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { omitBy, isUndefined } from 'lodash';
 
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import { ErrorToast } from './error_toast';
 import { MountPoint } from '../../types';
 import { mountReactNode } from '../../utils';
 import { IUiSettingsClient } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
-import { I18nStart } from '../../i18n';
 
 /**
  * Allowed fields for {@link ToastInput}.

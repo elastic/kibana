@@ -16,10 +16,8 @@ import {
   ActivityLogItemTypes,
   EndpointAction,
   EndpointActionResponse,
-  ISOLATION_ACTIONS,
+  RESPONSE_ACTION_COMMANDS,
 } from '../types';
-
-const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */
@@ -38,8 +36,9 @@ export class FleetActionGenerator extends BaseDataGenerator {
         agents: [this.seededUUIDv4()],
         user_id: 'elastic',
         data: {
-          command: this.randomIsolateCommand(),
+          command: this.randomResponseActionCommand(),
           comment: this.randomString(15),
+          parameter: undefined,
         },
       },
       overrides
@@ -69,8 +68,9 @@ export class FleetActionGenerator extends BaseDataGenerator {
     return merge(
       {
         action_data: {
-          command: this.randomIsolateCommand(),
+          command: this.randomResponseActionCommand(),
           comment: '',
+          parameter: undefined,
         },
         action_id: this.seededUUIDv4(),
         agent_id: this.seededUUIDv4(),
@@ -135,7 +135,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
-  protected randomIsolateCommand() {
-    return this.randomChoice(ISOLATION_COMMANDS);
+  protected randomResponseActionCommand() {
+    return this.randomChoice(RESPONSE_ACTION_COMMANDS);
   }
 }

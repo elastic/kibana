@@ -2,7 +2,7 @@
 
 exports[`Inspector Data View component should render empty state 1`] = `
 <div
-  class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+  class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge css-7iihzj-euiPanel-m-transparent"
 >
   <div
     class="euiEmptyPrompt__main"
@@ -18,20 +18,16 @@ exports[`Inspector Data View component should render empty state 1`] = `
         >
           No data available
         </h2>
-        <span
-          class="euiTextColor euiTextColor--subdued"
+        <div
+          class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        />
+        <div
+          class="euiText css-nexvet-euiText-m-euiTextColor-subdued"
         >
-          <div
-            class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
-          />
-          <div
-            class="euiText euiText--medium"
-          >
-            <p>
-              The element did not provide any data.
-            </p>
-          </div>
-        </span>
+          <p>
+            The element did not provide any data.
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -463,7 +459,7 @@ Array [
       class="euiFlexItem"
     >
       <div
-        class="euiText euiText--extraSmall"
+        class="euiText css-1utxlgq-euiText-xs"
       >
         <p
           aria-atomic="true"

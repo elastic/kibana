@@ -10,6 +10,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { HttpStart } from '@kbn/core/public';
 import { getAppInfo } from './api';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
+import { FETCH_ERROR } from './translations';
 
 export interface UseGetAppInfoProps {
   actionTypeId?: string;
@@ -56,6 +57,18 @@ export const useGetAppInfo = ({ actionTypeId, http }: UseGetAppInfoProps): UseGe
         if (!didCancel.current) {
           setIsLoading(false);
         }
+
+        /**
+         * According to https://developer.mozilla.org/en-US/docs/Web/API/fetch#exceptions
+         * all network errors throw a TypeError. Usually fetch errors are happening
+         * due to CORS misconfiguration. By detecting fetch errors we can provide
+         * a better message about CORS. Adding a CORS rule to allow requests from the UI
+         * in the ServiceNow instance is needed by our ServiceNow applications.
+         */
+        if (error.name === 'TypeError') {
+          throw new Error(FETCH_ERROR);
+        }
+
         throw error;
       }
     },

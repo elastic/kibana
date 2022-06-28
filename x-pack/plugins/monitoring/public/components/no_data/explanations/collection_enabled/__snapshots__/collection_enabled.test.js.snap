@@ -8,10 +8,10 @@ Array [
     Monitoring is currently off
   </h2>,
   <span
-    class="euiTextColor euiTextColor--subdued"
+    class="css-xv0fhq-euiTextColor-subdued"
   >
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         Monitoring provides insight to your hardware performance and load.
@@ -22,7 +22,7 @@ Array [
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText euiText--medium"
+    class="euiText css-1lo1kz-euiText-m"
   >
     <p>
       We checked the cluster settings and found that 

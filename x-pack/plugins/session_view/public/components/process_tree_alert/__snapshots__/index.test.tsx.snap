@@ -42,7 +42,7 @@ Object {
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="euiText euiText--small css-slhc61-EuiText"
+              class="euiText css-slhc61-EuiText"
             >
               cmd test alert
             </div>
@@ -127,7 +127,7 @@ Object {
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiText euiText--small css-slhc61-EuiText"
+            class="euiText css-slhc61-EuiText"
           >
             cmd test alert
           </div>

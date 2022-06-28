@@ -16,13 +16,13 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
       }
     >
       <div
-        className="euiAccordion__triggerWrapper"
+        className="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
       >
         <button
           aria-controls="canvas-filter-group-0"
           aria-expanded={true}
           aria-labelledby="generated-id"
-          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
+          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen css-1n6daz4-euiAccordion__iconButton-isOpen"
           onClick={[Function]}
           tabIndex={-1}
           type="button"
@@ -40,7 +40,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
         <button
           aria-controls="canvas-filter-group-0"
           aria-expanded={true}
-          className="euiAccordion__button"
+          className="euiAccordion__button css-ot1kdj-euiAccordion__button"
           id="generated-id"
           onClick={[Function]}
           type="button"
@@ -54,7 +54,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent default 1`] 
       </div>
       <div
         aria-labelledby="generated-id"
-        className="euiAccordion__childWrapper"
+        className="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
         id="canvas-filter-group-0"
         role="region"
         tabIndex={-1}
@@ -80,13 +80,13 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent empty group 
       }
     >
       <div
-        className="euiAccordion__triggerWrapper"
+        className="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
       >
         <button
           aria-controls="canvas-filter-group-0"
           aria-expanded={true}
           aria-labelledby="generated-id"
-          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen"
+          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen css-1n6daz4-euiAccordion__iconButton-isOpen"
           onClick={[Function]}
           tabIndex={-1}
           type="button"
@@ -104,7 +104,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent empty group 
         <button
           aria-controls="canvas-filter-group-0"
           aria-expanded={true}
-          className="euiAccordion__button"
+          className="euiAccordion__button css-ot1kdj-euiAccordion__button"
           id="generated-id"
           onClick={[Function]}
           type="button"
@@ -118,7 +118,7 @@ exports[`Storyshots components/WorkpadFilters/FiltersGroupComponent empty group 
       </div>
       <div
         aria-labelledby="generated-id"
-        className="euiAccordion__childWrapper"
+        className="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
         id="canvas-filter-group-0"
         role="region"
         tabIndex={-1}

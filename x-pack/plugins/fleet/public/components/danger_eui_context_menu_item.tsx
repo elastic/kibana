@@ -9,5 +9,5 @@ import styled from 'styled-components';
 import { EuiContextMenuItem } from '@elastic/eui';
 
 export const DangerEuiContextMenuItem = styled(EuiContextMenuItem)`
-  color: ${(props) => props.theme.eui.euiTextColors.danger};
+  color: ${(props) => props.theme.eui.euiColorDangerText};
 `;

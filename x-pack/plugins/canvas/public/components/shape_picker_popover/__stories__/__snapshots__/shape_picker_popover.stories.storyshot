@@ -8,7 +8,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
     className="euiPopover__anchor"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall css-6zsgh2-euiPanel-grow-m-s-plain"
     >
       <button
         className="euiLink css-102pf9n-euiLink-primary"
@@ -38,7 +38,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
     className="euiPopover__anchor"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall css-6zsgh2-euiPanel-grow-m-s-plain"
     >
       <button
         className="euiLink css-102pf9n-euiLink-primary"
@@ -82,7 +82,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
     className="euiPopover__anchor"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall css-6zsgh2-euiPanel-grow-m-s-plain"
     >
       <button
         className="euiLink css-102pf9n-euiLink-primary"

@@ -140,61 +140,57 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
     class="euiFlexItem"
   >
     <div
-      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--primary euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--primary css-1flvw80-euiCallOut"
+      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary css-1lbbq49-euiPanel-none-m-primary-euiCallOut"
     >
       <div
-        class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+        class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
       >
-        <div
-          class="euiTextColor euiTextColor--default"
+        <dl
+          class="euiDescriptionList euiDescriptionList--row"
         >
-          <dl
-            class="euiDescriptionList euiDescriptionList--row"
+          <dt
+            class="euiDescriptionList__title"
           >
-            <dt
-              class="euiDescriptionList__title"
+            Response Body
+          </dt>
+          <dd
+            class="euiDescriptionList__description"
+          >
+            <div
+              class="euiText css-1lo1kz-euiText-m"
             >
-              Response Body
-            </dt>
-            <dd
-              class="euiDescriptionList__description"
+              Body size is 1MB.
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+            />
+            <div
+              class="euiText css-1lo1kz-euiText-m"
             >
-              <div
-                class="euiText euiText--medium"
+              Body not recorded. Read our 
+              <a
+                class="euiLink css-102pf9n-euiLink-primary"
+                href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
+                rel="noopener"
+                target="_blank"
               >
-                Body size is 1MB.
-              </div>
-              <div
-                class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
-              />
-              <div
-                class="euiText euiText--medium"
-              >
-                Body not recorded. Read our 
-                <a
-                  class="euiLink css-102pf9n-euiLink-primary"
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
-                  rel="noopener"
-                  target="_blank"
+                docs
+                <span
+                  class="css-q4vwwx-euiLink__externalIcon"
+                  data-euiicon-type="popout"
                 >
-                  docs
-                  <span
-                    class="css-q4vwwx-euiLink__externalIcon"
-                    data-euiicon-type="popout"
-                  >
-                    External link
-                  </span>
-                  <span
-                    class="euiScreenReaderOnly"
-                  >
-                    (opens in a new tab or window)
-                  </span>
-                </a>
-                 for more information on recording response bodies.
-              </div>
-            </dd>
-          </dl>
-        </div>
+                  External link
+                </span>
+                <span
+                  class="euiScreenReaderOnly"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+               for more information on recording response bodies.
+            </div>
+          </dd>
+        </dl>
       </div>
     </div>
   </div>

@@ -2,7 +2,7 @@
 
 exports[`UploadLicense should display a modal when license requires acknowledgement 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter css-1f0qifb-euiPanel-grow-m-l-subdued"
   role="main"
 >
   <div
@@ -17,7 +17,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         Your license key is a JSON file with a signature attached.
@@ -119,7 +119,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
 
 exports[`UploadLicense should display an error when ES says license is expired 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter css-1f0qifb-euiPanel-grow-m-l-subdued"
   role="main"
 >
   <div
@@ -134,7 +134,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         Your license key is a JSON file with a signature attached.
@@ -153,7 +153,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
     >
       <div
         aria-live="assertive"
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger euiForm__errors css-1flvw80-euiCallOut"
+        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-j9niqn-euiPanel-none-m-danger-euiCallOut"
         role="alert"
         tabindex="-1"
       >
@@ -163,19 +163,15 @@ exports[`UploadLicense should display an error when ES says license is expired 1
           Please address the highlighted errors.
         </p>
         <div
-          class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+          class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
         >
-          <div
-            class="euiTextColor euiTextColor--default"
-          >
-            <ul>
-              <li
-                class="euiForm__error"
-              >
-                The supplied license has expired.
-              </li>
-            </ul>
-          </div>
+          <ul>
+            <li
+              class="euiForm__error"
+            >
+              The supplied license has expired.
+            </li>
+          </ul>
         </div>
       </div>
       <div
@@ -263,7 +259,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
 
 exports[`UploadLicense should display an error when ES says license is invalid 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter css-1f0qifb-euiPanel-grow-m-l-subdued"
   role="main"
 >
   <div
@@ -278,7 +274,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         Your license key is a JSON file with a signature attached.
@@ -297,7 +293,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
     >
       <div
         aria-live="assertive"
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger euiForm__errors css-1flvw80-euiCallOut"
+        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-j9niqn-euiPanel-none-m-danger-euiCallOut"
         role="alert"
         tabindex="-1"
       >
@@ -307,19 +303,15 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
           Please address the highlighted errors.
         </p>
         <div
-          class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+          class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
         >
-          <div
-            class="euiTextColor euiTextColor--default"
-          >
-            <ul>
-              <li
-                class="euiForm__error"
-              >
-                The supplied license is not valid for this product.
-              </li>
-            </ul>
-          </div>
+          <ul>
+            <li
+              class="euiForm__error"
+            >
+              The supplied license is not valid for this product.
+            </li>
+          </ul>
         </div>
       </div>
       <div
@@ -407,7 +399,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
 
 exports[`UploadLicense should display an error when submitting invalid JSON 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter css-1f0qifb-euiPanel-grow-m-l-subdued"
   role="main"
 >
   <div
@@ -422,7 +414,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         Your license key is a JSON file with a signature attached.
@@ -441,7 +433,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
     >
       <div
         aria-live="assertive"
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger euiForm__errors css-1flvw80-euiCallOut"
+        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-j9niqn-euiPanel-none-m-danger-euiCallOut"
         role="alert"
         tabindex="-1"
       >
@@ -451,19 +443,15 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
           Please address the highlighted errors.
         </p>
         <div
-          class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+          class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
         >
-          <div
-            class="euiTextColor euiTextColor--default"
-          >
-            <ul>
-              <li
-                class="euiForm__error"
-              >
-                Error encountered uploading license: Check your license file.
-              </li>
-            </ul>
-          </div>
+          <ul>
+            <li
+              class="euiForm__error"
+            >
+              Error encountered uploading license: Check your license file.
+            </li>
+          </ul>
         </div>
       </div>
       <div
@@ -551,7 +539,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
 
 exports[`UploadLicense should display error when ES returns error 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter css-1f0qifb-euiPanel-grow-m-l-subdued"
   role="main"
 >
   <div
@@ -566,7 +554,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
     />
     <div
-      class="euiText euiText--medium"
+      class="euiText css-1lo1kz-euiText-m"
     >
       <p>
         Your license key is a JSON file with a signature attached.
@@ -585,7 +573,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
     >
       <div
         aria-live="assertive"
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--danger euiForm__errors css-1flvw80-euiCallOut"
+        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-j9niqn-euiPanel-none-m-danger-euiCallOut"
         role="alert"
         tabindex="-1"
       >
@@ -595,19 +583,15 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
           Please address the highlighted errors.
         </p>
         <div
-          class="euiText euiText--small css-i7i3v9-euiCallOut__description"
+          class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
         >
-          <div
-            class="euiTextColor euiTextColor--default"
-          >
-            <ul>
-              <li
-                class="euiForm__error"
-              >
-                Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
-              </li>
-            </ul>
-          </div>
+          <ul>
+            <li
+              class="euiForm__error"
+            >
+              Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
+            </li>
+          </ul>
         </div>
       </div>
       <div

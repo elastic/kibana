@@ -16,17 +16,17 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
       >
         <span
           aria-label="Open the popover for time range value field"
-          class="euiExpression euiExpression-isUppercase euiExpression--success"
+          class="euiExpression css-eius8q-euiExpression-success"
           data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeValueExpression"
         >
           <span
-            class="euiExpression__description"
+            class="euiExpression__description css-1vjxuey-euiExpression__description-success-isUppercase"
           >
             within
           </span>
            
           <span
-            class="euiExpression__value"
+            class="euiExpression__value css-xlzuv8-euiExpression__value"
           >
             last 15
           </span>
@@ -46,15 +46,15 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
       >
         <span
           aria-label="Open the popover for time range unit select field"
-          class="euiExpression euiExpression-isUppercase euiExpression--success"
+          class="euiExpression css-eius8q-euiExpression-success"
           data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeUnitExpression"
         >
           <span
-            class="euiExpression__description"
+            class="euiExpression__description css-1vjxuey-euiExpression__description-success-isUppercase"
           />
            
           <span
-            class="euiExpression__value"
+            class="euiExpression__value css-xlzuv8-euiExpression__value"
           >
             minutes
           </span>

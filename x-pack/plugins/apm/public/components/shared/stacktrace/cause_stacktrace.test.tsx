@@ -46,7 +46,9 @@ describe('CauseStacktrace', () => {
         };
 
         expect(
-          shallow(<CauseStacktrace {...props} />).find('Styled(EuiAccordion)')
+          shallow(<CauseStacktrace {...props} />).find(
+            'Styled(WithEuiTheme(EuiAccordionClass))'
+          )
         ).toHaveLength(1);
       });
     });

@@ -104,12 +104,12 @@ Array [
       data-test-subj="collapsibleNavGroup-recentlyViewed"
     >
       <div
-        class="euiAccordion__triggerWrapper"
+        class="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
       >
         <button
           aria-controls="generated-id"
           aria-expanded="true"
-          class="euiAccordion__button euiCollapsibleNavGroup__heading"
+          class="euiAccordion__button euiCollapsibleNavGroup__heading css-ot1kdj-euiAccordion__button"
           id="generated-id"
           type="button"
         >
@@ -136,7 +136,7 @@ Array [
           aria-controls="generated-id"
           aria-expanded="true"
           aria-labelledby="generated-id"
-          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right css-1flihik-euiAccordion__iconButton-isOpen-arrowRight"
           tabindex="-1"
           type="button"
         >
@@ -150,14 +150,14 @@ Array [
       </div>
       <div
         aria-labelledby="generated-id"
-        class="euiAccordion__childWrapper"
+        class="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
         id="generated-id"
         role="region"
         tabindex="-1"
       >
         <div>
           <div
-            class=""
+            class=" css-ip8p5q-euiAccordion__children"
           >
             <div
               class="euiCollapsibleNavGroup__children"
@@ -222,12 +222,12 @@ Array [
         data-test-subj="collapsibleNavGroup-kibana"
       >
         <div
-          class="euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
         >
           <button
             aria-controls="generated-id"
             aria-expanded="true"
-            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
+            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton css-ot1kdj-euiAccordion__button"
             id="generated-id"
             type="button"
           >
@@ -261,7 +261,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right css-1flihik-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -275,14 +275,14 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper"
+          class="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
           id="generated-id"
           role="region"
           tabindex="-1"
         >
           <div>
             <div
-              class=""
+              class=" css-ip8p5q-euiAccordion__children"
             >
               <div
                 class="euiCollapsibleNavGroup__children"
@@ -354,12 +354,12 @@ Array [
         data-test-subj="collapsibleNavGroup-observability"
       >
         <div
-          class="euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
         >
           <button
             aria-controls="generated-id"
             aria-expanded="true"
-            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
+            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton css-ot1kdj-euiAccordion__button"
             id="generated-id"
             type="button"
           >
@@ -393,7 +393,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right css-1flihik-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -407,14 +407,14 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper"
+          class="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
           id="generated-id"
           role="region"
           tabindex="-1"
         >
           <div>
             <div
-              class=""
+              class=" css-ip8p5q-euiAccordion__children"
             >
               <div
                 class="euiCollapsibleNavGroup__children"
@@ -469,12 +469,12 @@ Array [
         data-test-subj="collapsibleNavGroup-securitySolution"
       >
         <div
-          class="euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
         >
           <button
             aria-controls="generated-id"
             aria-expanded="true"
-            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
+            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton css-ot1kdj-euiAccordion__button"
             id="generated-id"
             type="button"
           >
@@ -508,7 +508,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right css-1flihik-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -522,14 +522,14 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper"
+          class="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
           id="generated-id"
           role="region"
           tabindex="-1"
         >
           <div>
             <div
-              class=""
+              class=" css-ip8p5q-euiAccordion__children"
             >
               <div
                 class="euiCollapsibleNavGroup__children"
@@ -567,12 +567,12 @@ Array [
         data-test-subj="collapsibleNavGroup-management"
       >
         <div
-          class="euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
         >
           <button
             aria-controls="generated-id"
             aria-expanded="true"
-            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton"
+            class="euiAccordion__button kbnCollapsibleNav__solutionGroupButton css-ot1kdj-euiAccordion__button"
             id="generated-id"
             type="button"
           >
@@ -606,7 +606,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right css-1flihik-euiAccordion__iconButton-isOpen-arrowRight"
             tabindex="-1"
             type="button"
           >
@@ -620,14 +620,14 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper"
+          class="euiAccordion__childWrapper css-1ymmbjr-euiAccordion__childWrapper-isOpen"
           id="generated-id"
           role="region"
           tabindex="-1"
         >
           <div>
             <div
-              class=""
+              class=" css-ip8p5q-euiAccordion__children"
             >
               <div
                 class="euiCollapsibleNavGroup__children"

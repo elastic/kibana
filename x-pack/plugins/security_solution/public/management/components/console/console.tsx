@@ -30,14 +30,13 @@ const ConsoleWindow = styled.div`
     }
 
     &-bottomBorder {
-      border-bottom: ${({ theme: { eui } }) => eui.paddingSizes.s} solid
+      border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
         ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
     }
 
     &-container {
-      padding: ${({ theme: { eui } }) => eui.paddingSizes.l}
-        ${({ theme: { eui } }) => eui.paddingSizes.l} ${({ theme: { eui } }) => eui.paddingSizes.s}
-        ${({ theme: { eui } }) => eui.paddingSizes.l};
+      padding: ${({ theme: { eui } }) => eui.euiSizeL} ${({ theme: { eui } }) => eui.euiSizeL}
+        ${({ theme: { eui } }) => eui.euiSizeS} ${({ theme: { eui } }) => eui.euiSizeL};
     }
 
     &-header {
@@ -47,7 +46,7 @@ const ConsoleWindow = styled.div`
     &-rightPanel {
       width: 35%;
       background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
-      border-bottom: ${({ theme: { eui } }) => eui.paddingSizes.s} solid
+      border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
         ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
     }
 
@@ -61,7 +60,7 @@ const ConsoleWindow = styled.div`
     }
 
     &-commandInput {
-      padding-top: ${({ theme: { eui } }) => eui.paddingSizes.xs};
+      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
     }
   }
 

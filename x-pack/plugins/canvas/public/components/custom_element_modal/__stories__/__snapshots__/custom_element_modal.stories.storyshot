@@ -200,7 +200,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 </div>
               </div>
               <div
-                className="euiText euiText--extraSmall canvasCustomElementForm__thumbnailHelp"
+                className="euiText canvasCustomElementForm__thumbnailHelp css-1utxlgq-euiText-xs"
               >
                 <p>
                   Take a screenshot of your element and upload it here. This can also be done after saving.
@@ -219,7 +219,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
               />
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon css-f2xo4o-euiPanel-grow-m-m-plain-hasShadow"
               >
                 <div
                   className="euiCard__top"
@@ -242,7 +242,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                     
                   </span>
                   <div
-                    className="euiText euiText--small euiCard__description"
+                    className="euiText euiCard__description css-1vkrgyt-euiText-s"
                     id="generated-idDescription"
                   >
                     <p>
@@ -517,7 +517,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 </div>
               </div>
               <div
-                className="euiText euiText--extraSmall canvasCustomElementForm__thumbnailHelp"
+                className="euiText canvasCustomElementForm__thumbnailHelp css-1utxlgq-euiText-xs"
               >
                 <p>
                   Take a screenshot of your element and upload it here. This can also be done after saving.
@@ -536,7 +536,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
               />
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned canvasElementCard"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned canvasElementCard css-f2xo4o-euiPanel-grow-m-m-plain-hasShadow"
               >
                 <div
                   className="euiCard__top"
@@ -829,7 +829,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 </div>
               </div>
               <div
-                className="euiText euiText--extraSmall canvasCustomElementForm__thumbnailHelp"
+                className="euiText canvasCustomElementForm__thumbnailHelp css-1utxlgq-euiText-xs"
               >
                 <p>
                   Take a screenshot of your element and upload it here. This can also be done after saving.
@@ -848,7 +848,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
               />
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon css-f2xo4o-euiPanel-grow-m-m-plain-hasShadow"
               >
                 <div
                   className="euiCard__top"
@@ -1138,7 +1138,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 </div>
               </div>
               <div
-                className="euiText euiText--extraSmall canvasCustomElementForm__thumbnailHelp"
+                className="euiText canvasCustomElementForm__thumbnailHelp css-1utxlgq-euiText-xs"
               >
                 <p>
                   Take a screenshot of your element and upload it here. This can also be done after saving.
@@ -1157,7 +1157,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
               />
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon css-f2xo4o-euiPanel-grow-m-m-plain-hasShadow"
               >
                 <div
                   className="euiCard__top"

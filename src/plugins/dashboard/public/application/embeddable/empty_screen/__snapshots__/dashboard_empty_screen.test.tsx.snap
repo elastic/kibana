@@ -21,15 +21,11 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
     class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <div
-    class="euiText euiText--small"
+    class="euiText css-czh9ev-euiText-s-euiTextColor-subdued"
   >
-    <div
-      class="euiTextColor euiTextColor--subdued"
-    >
-      <span>
-        Create content that tells a story about your data.
-      </span>
-    </div>
+    <span>
+      Create content that tells a story about your data.
+    </span>
   </div>
 </div>
 `;
@@ -44,7 +40,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
     class="euiPageBody euiPageBody--borderRadiusNone"
   >
     <div
-      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+      class="euiPanel euiPanel--plain euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent css-n9us4v-euiPanel-grow-m-plain-hasShadow"
       role="main"
     >
       <figure
@@ -57,7 +53,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
         />
       </figure>
       <div
-        class="euiText euiText--medium"
+        class="euiText css-1lo1kz-euiText-m"
       >
         <p
           style="font-weight: bold;"
@@ -66,13 +62,9 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
         </p>
       </div>
       <div
-        class="euiText euiText--medium"
+        class="euiText css-nexvet-euiText-m-euiTextColor-subdued"
       >
-        <div
-          class="euiTextColor euiTextColor--subdued"
-        >
-          You need additional privileges to edit this dashboard.
-        </div>
+        You need additional privileges to edit this dashboard.
       </div>
     </div>
   </div>
@@ -89,7 +81,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
     class="euiPageBody euiPageBody--borderRadiusNone"
   >
     <div
-      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent"
+      class="euiPanel euiPanel--plain euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent css-n9us4v-euiPanel-grow-m-plain-hasShadow"
       role="main"
     >
       <figure
@@ -102,7 +94,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
         />
       </figure>
       <div
-        class="euiText euiText--medium"
+        class="euiText css-1lo1kz-euiText-m"
       >
         <p
           style="font-weight: bold;"
@@ -117,15 +109,11 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
         class="dshStartScreen__panelDesc"
       >
         <div
-          class="euiText euiText--medium"
+          class="euiText css-nexvet-euiText-m-euiTextColor-subdued"
         >
-          <div
-            class="euiTextColor euiTextColor--subdued"
-          >
-            <p>
-              Click edit in the menu bar above to start adding panels.
-            </p>
-          </div>
+          <p>
+            Click edit in the menu bar above to start adding panels.
+          </p>
         </div>
       </div>
     </div>

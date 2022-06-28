@@ -41,6 +41,7 @@ disabled:
   - x-pack/plugins/synthetics/e2e/config.ts
   - x-pack/plugins/synthetics/e2e/synthetics_run.ts
   - x-pack/plugins/ux/e2e/synthetics_run.ts
+  - x-pack/plugins/observability/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - test/visual_regression/config.ts
@@ -73,6 +74,7 @@ enabled:
   - test/functional/apps/discover/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
+  - test/functional/apps/kibana_overview/config.ts
   - test/functional/apps/management/config.ts
   - test/functional/apps/saved_objects_management/config.ts
   - test/functional/apps/status_page/config.ts
@@ -204,6 +206,7 @@ enabled:
   - x-pack/test/reporting_functional/reporting_and_deprecated_security.config.ts
   - x-pack/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/test/reporting_functional/reporting_without_security.config.ts
+  - x-pack/test/reporting_functional/reporting_and_timeout.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts

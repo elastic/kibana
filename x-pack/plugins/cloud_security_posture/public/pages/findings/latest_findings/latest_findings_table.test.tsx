@@ -27,21 +27,24 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
     },
   },
   rule: {
-    name,
-    description: chance.paragraph(),
-    impact: chance.word(),
-    remediation: chance.word(),
+    audit: chance.paragraph(),
     benchmark: {
       name: 'CIS Kubernetes',
       version: '1.6.0',
     },
-    section: chance.sentence(),
-    audit: chance.paragraph(),
-    references: chance.paragraph(),
+    default_value: chance.sentence(),
+    description: chance.paragraph(),
+    id: chance.guid(),
+    impact: chance.word(),
+    name,
     profile_applicability: chance.sentence(),
     rationale: chance.paragraph(),
-    default_value: chance.sentence(),
+    references: chance.paragraph(),
+    rego_rule_id: 'cis_X_X_X',
+    remediation: chance.word(),
+    section: chance.sentence(),
     tags: [],
+    version: '1.0',
   },
   agent: {
     id: chance.string(),
@@ -80,7 +83,9 @@ describe('<FindingsTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByTestId(TEST_SUBJECTS.FINDINGS_TABLE_ZERO_STATE)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE)
+    ).toBeInTheDocument();
   });
 
   it('renders the table with provided items', () => {

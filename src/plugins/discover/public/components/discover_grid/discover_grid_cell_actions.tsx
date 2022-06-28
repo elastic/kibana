@@ -20,8 +20,8 @@ function onFilterCell(
   columnId: EuiDataGridColumnCellActionProps['columnId'],
   mode: '+' | '-'
 ) {
-  const row = context.rowsFlattened[rowIndex];
-  const value = String(row[columnId]);
+  const row = context.rows[rowIndex];
+  const value = String(row.flattened[columnId]);
   const field = context.indexPattern.fields.getByName(columnId);
 
   if (value && field) {

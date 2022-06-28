@@ -1,0 +1,356 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoDataCard props button 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable css-1xmyfa3-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+  >
+    <div
+      class="euiCard__top"
+    >
+      <div
+        class="euiCard__image"
+      >
+        <figure
+          class="euiImage euiImage--fullWidth"
+        >
+          <img
+            alt=""
+            class="euiImage__img"
+            src="test-file-stub"
+            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+          />
+        </figure>
+      </div>
+    </div>
+    <div
+      class="euiCard__content"
+    >
+      <span
+        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <a
+          aria-describedby="generated-idDescription"
+          class="euiCard__titleAnchor"
+          href="/app/integrations/browse"
+          rel="noreferrer"
+        >
+          <span
+            class="euiScreenReaderOnly"
+          >
+            Card title
+          </span>
+        </a>
+      </span>
+      <div
+        class="euiText euiCard__description css-1vkrgyt-euiText-s"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiCard__footer"
+    >
+      <button
+        class="euiButton euiButton--primary euiButton--fill"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Button
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard props extends EuiCardProps 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable custom_class css-1xmyfa3-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+  >
+    <div
+      class="euiCard__top"
+    >
+      <div
+        class="euiCard__image"
+      >
+        <figure
+          class="euiImage euiImage--fullWidth"
+        >
+          <img
+            alt=""
+            class="euiImage__img"
+            src="test-file-stub"
+            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+          />
+        </figure>
+      </div>
+    </div>
+    <div
+      class="euiCard__content"
+    >
+      <span
+        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <a
+          aria-describedby="generated-idDescription"
+          class="euiCard__titleAnchor"
+          href="/app/integrations/browse"
+          rel="noreferrer"
+        >
+          <span
+            class="euiScreenReaderOnly"
+          >
+            Card title
+          </span>
+        </a>
+      </span>
+      <div
+        class="euiText euiCard__description css-1vkrgyt-euiText-s"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiCard__footer"
+    >
+      <button
+        class="euiButton euiButton--primary euiButton--fill"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Button
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard props href 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable css-1xmyfa3-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+  >
+    <div
+      class="euiCard__top"
+    >
+      <div
+        class="euiCard__image"
+      >
+        <figure
+          class="euiImage euiImage--fullWidth"
+        >
+          <img
+            alt=""
+            class="euiImage__img"
+            src="test-file-stub"
+            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+          />
+        </figure>
+      </div>
+    </div>
+    <div
+      class="euiCard__content"
+    >
+      <span
+        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <a
+          aria-describedby="generated-idDescription"
+          class="euiCard__titleAnchor"
+          href="#"
+          rel="noreferrer"
+        >
+          <span
+            class="euiScreenReaderOnly"
+          >
+            Card title
+          </span>
+        </a>
+      </span>
+      <div
+        class="euiText euiCard__description css-1vkrgyt-euiText-s"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiCard__footer"
+    >
+      <button
+        class="euiButton euiButton--primary euiButton--fill"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Button
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard props no access to Fleet 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard-isDisabled css-97w5mt-euiPanel-grow-m-l-subdued-EuiCard"
+  >
+    <div
+      class="euiCard__top"
+    >
+      <div
+        class="euiCard__image"
+      >
+        <figure
+          class="euiImage euiImage--fullWidth"
+        >
+          <img
+            alt=""
+            class="euiImage__img"
+            src="test-file-stub"
+            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+          />
+        </figure>
+      </div>
+    </div>
+    <div
+      class="euiCard__content"
+    >
+      <span
+        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <button
+          aria-describedby=" generated-idDescription"
+          class="euiCard__titleButton"
+          disabled=""
+        >
+          <span
+            class="css-7fidck-euiTextColor-default"
+          >
+            Contact your administrator
+          </span>
+        </button>
+      </span>
+      <div
+        class="euiText euiCard__description css-1vkrgyt-euiText-s"
+        id="generated-idDescription"
+      >
+        <p>
+          <span
+            class="css-7fidck-euiTextColor-default"
+          >
+            This integration is not yet enabled. Your administrator has the required permissions to turn it on.
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NoDataCard renders 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable css-1xmyfa3-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+  >
+    <div
+      class="euiCard__top"
+    >
+      <div
+        class="euiCard__image"
+      >
+        <figure
+          class="euiImage euiImage--fullWidth"
+        >
+          <img
+            alt=""
+            class="euiImage__img"
+            src="test-file-stub"
+            style="width:max(100%, 360px);height:240px;object-fit:cover;background:aliceblue"
+          />
+        </figure>
+      </div>
+    </div>
+    <div
+      class="euiCard__content"
+    >
+      <span
+        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        id="generated-idTitle"
+      >
+        <a
+          aria-describedby="generated-idDescription"
+          class="euiCard__titleAnchor"
+          href="/app/integrations/browse"
+          rel="noreferrer"
+        >
+          <span
+            class="euiScreenReaderOnly"
+          >
+            Card title
+          </span>
+        </a>
+      </span>
+      <div
+        class="euiText euiCard__description css-1vkrgyt-euiText-s"
+        id="generated-idDescription"
+      >
+        <p>
+          Description
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiCard__footer"
+    >
+      <button
+        class="euiButton euiButton--primary euiButton--fill"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButton__content"
+        >
+          <span
+            class="euiButton__text"
+          >
+            Card title
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

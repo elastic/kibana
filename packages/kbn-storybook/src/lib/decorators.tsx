@@ -23,6 +23,7 @@ const EuiProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
     key: 'eui-styles',
     container: document.querySelector(`meta[name="eui-styles-global"]`) as HTMLElement,
   });
+  emotionCache.compat = true;
 
   return (
     <EuiProvider colorMode={colorMode} cache={emotionCache}>

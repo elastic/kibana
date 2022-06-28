@@ -7,9 +7,8 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { Query } from '@kbn/data-plugin/public';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableInput,

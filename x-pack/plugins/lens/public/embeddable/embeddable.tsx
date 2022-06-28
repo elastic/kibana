@@ -9,14 +9,12 @@ import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { DataViewBase, Filter } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
   ExecutionContextSearch,
-  Query,
   TimefilterContract,
-  TimeRange,
   FilterManager,
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';

@@ -11,13 +11,13 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
       className="euiAccordion canvasVarConfig__listView canvasSidebar__accordion"
     >
       <div
-        className="euiAccordion__triggerWrapper"
+        className="euiAccordion__triggerWrapper css-mrlcwq-euiAccordion__triggerWrapper"
       >
         <button
           aria-controls="accordion-variables"
           aria-expanded={false}
           aria-labelledby="generated-id"
-          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton"
+          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiAccordion__iconButton css-86d10e-euiAccordion__iconButton"
           onClick={[Function]}
           tabIndex={-1}
           type="button"
@@ -35,7 +35,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
         <button
           aria-controls="accordion-variables"
           aria-expanded={false}
-          className="euiAccordion__button"
+          className="euiAccordion__button css-ot1kdj-euiAccordion__button"
           id="generated-id"
           onClick={[Function]}
           type="button"
@@ -58,7 +58,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
           </span>
         </button>
         <div
-          className="euiAccordion__optionalAction"
+          className="euiAccordion__optionalAction css-lxr8cy-euiAccordion__optionalAction"
         >
           <span
             className="euiToolTipAnchor"
@@ -88,7 +88,7 @@ exports[`Storyshots components/Variables/VarConfig default 1`] = `
       </div>
       <div
         aria-labelledby="generated-id"
-        className="euiAccordion__childWrapper"
+        className="euiAccordion__childWrapper css-bu9wkr-euiAccordion__childWrapper"
         id="accordion-variables"
         role="region"
         tabIndex={-1}

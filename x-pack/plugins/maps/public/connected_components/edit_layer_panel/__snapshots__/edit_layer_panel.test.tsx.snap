@@ -52,16 +52,9 @@ exports[`EditLayerPanel is rendered 1`] = `
       <div
         className="mapLayerPanel__sourceDetails"
       >
-        <EuiAccordion
-          arrowDisplay="left"
+        <WithEuiTheme(EuiAccordionClass)
           buttonContent="Source details"
-          buttonElement="button"
-          element="div"
           id="accordion1"
-          initialIsOpen={false}
-          isLoading={false}
-          isLoadingMessage={false}
-          paddingSize="none"
         >
           <EuiText
             color="subdued"
@@ -83,7 +76,7 @@ exports[`EditLayerPanel is rendered 1`] = `
               </span>
             </p>
           </EuiText>
-        </EuiAccordion>
+        </WithEuiTheme(EuiAccordionClass)>
       </div>
     </EuiFlyoutHeader>
     <div

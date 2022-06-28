@@ -38,19 +38,15 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <div
-    className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--warning css-1flvw80-euiCallOut"
+    className="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1yqbqzs-euiPanel-none-m-warning-euiCallOut"
   >
     <div
-      className="euiText euiText--small css-i7i3v9-euiCallOut__description"
+      className="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
+      style={Object {}}
     >
-      <div
-        className="euiTextColor euiTextColor--default"
-        style={Object {}}
-      >
-        <p>
-          The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
-        </p>
-      </div>
+      <p>
+        The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
+      </p>
     </div>
   </div>
 </div>

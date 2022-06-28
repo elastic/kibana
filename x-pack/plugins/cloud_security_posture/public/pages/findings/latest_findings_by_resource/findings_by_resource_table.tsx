@@ -20,7 +20,6 @@ import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import * as TEST_SUBJECTS from '../test_subjects';
-import * as TEXT from '../translations';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
 
@@ -48,7 +47,20 @@ const FindingsByResourceTableComponent = ({
   });
 
   if (!loading && !items.length)
-    return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
+    return (
+      <EuiEmptyPrompt
+        data-test-subj={TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE}
+        iconType="logoKibana"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.csp.findings.findingsByResource.noFindingsTitle"
+              defaultMessage="There are no Findings"
+            />
+          </h2>
+        }
+      />
+    );
 
   return (
     <EuiBasicTable
@@ -67,12 +79,13 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     field: 'resource_id',
     name: (
       <ColumnNameWithTooltip
-        columnName={TEXT.RESOURCE_ID}
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsByResourceTable.findingsByResourceTableColumn.resourceIdColumnLabel',
+          { defaultMessage: 'Resource ID' }
+        )}
         tooltipContent={i18n.translate(
-          'xpack.csp.findings.resourceTable.resourceTableColumn.resourceIdColumnTooltipLabel',
-          {
-            defaultMessage: 'Custom Elastic Resource ID',
-          }
+          'xpack.csp.findings.findingsByResourceTable.findingsByResourceTableColumn.resourceIdColumnTooltipLabel',
+          { defaultMessage: 'Custom Elastic Resource ID' }
         )}
       />
     ),
@@ -87,7 +100,7 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.resourceTypeColumnLabel"
+        id="xpack.csp.findings.findingsByResourceTable.resourceTypeColumnLabel"
         defaultMessage="Resource Type"
       />
     ),
@@ -97,7 +110,7 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.resourceNameColumnLabel"
+        id="xpack.csp.findings.findingsByResourceTable.resourceNameColumnLabel"
         defaultMessage="Resource Name"
       />
     ),
@@ -107,7 +120,7 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.cisSectionsColumnLabel"
+        id="xpack.csp.findings.findingsByResourceTable.cisSectionsColumnLabel"
         defaultMessage="CIS Sections"
       />
     ),
@@ -117,12 +130,13 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     field: 'cluster_id',
     name: (
       <ColumnNameWithTooltip
-        columnName={TEXT.CLUSTER_ID}
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
+          { defaultMessage: 'Cluster ID' }
+        )}
         tooltipContent={i18n.translate(
-          'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
-          {
-            defaultMessage: 'Kube-System Namespace ID',
-          }
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
+          { defaultMessage: 'Kube-System Namespace ID' }
         )}
       />
     ),
@@ -134,19 +148,22 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.failedFindingsColumnLabel"
+        id="xpack.csp.findings.findingsByResourceTable.failedFindingsColumnLabel"
         defaultMessage="Failed Findings"
       />
     ),
     render: (failedFindings: FindingsByResourcePage['failed_findings']) => (
       <EuiToolTip
-        content={i18n.translate('xpack.csp.findings.groupByResourceTable.failedFindingsToolTip', {
-          defaultMessage: '{failed} out of {total}',
-          values: {
-            failed: failedFindings.count,
-            total: failedFindings.total_findings,
-          },
-        })}
+        content={i18n.translate(
+          'xpack.csp.findings.findingsByResourceTable.failedFindingsToolTip',
+          {
+            defaultMessage: '{failed} out of {total}',
+            values: {
+              failed: failedFindings.count,
+              total: failedFindings.total_findings,
+            },
+          }
+        )}
       >
         <>
           <EuiTextColor color={failedFindings.count === 0 ? '' : 'danger'}>

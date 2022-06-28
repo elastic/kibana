@@ -20,28 +20,31 @@ import {
 } from '../url_state/helpers';
 
 import { SearchNavTab } from './types';
-import { SourcererUrlState } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useUiSetting$ } from '../../lib/kibana';
 import { ENABLE_GROUPED_NAVIGATION } from '../../../../common/constants';
 
-export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
+export const getSearch = (
+  tab: SearchNavTab,
+  urlState: UrlState,
+  globalQueryString: string
+): string => {
   if (tab && tab.urlKey != null && !isAdministration(tab.urlKey)) {
-    return getUrlStateSearch(urlState);
+    // TODO: Temporary code while we are migrating all query strings to global_query_string_manager
+    if (globalQueryString.length > 0) {
+      return `${getUrlStateSearch(urlState)}&${globalQueryString}`;
+    } else {
+      return getUrlStateSearch(urlState);
+    }
   }
+
   return '';
 };
 
 export const getUrlStateSearch = (urlState: UrlState): string =>
   ALL_URL_STATE_KEYS.reduce<Location>(
     (myLocation: Location, urlKey: KeyUrlState) => {
-      let urlStateToReplace:
-        | Filter[]
-        | Query
-        | SourcererUrlState
-        | TimelineUrl
-        | UrlInputsModel
-        | string = '';
+      let urlStateToReplace: Filter[] | Query | TimelineUrl | UrlInputsModel | string = '';
 
       if (urlKey === CONSTANTS.appQuery && urlState.query != null) {
         if (urlState.query.query === '') {
@@ -57,8 +60,6 @@ export const getUrlStateSearch = (urlState: UrlState): string =>
         }
       } else if (urlKey === CONSTANTS.timerange) {
         urlStateToReplace = urlState[CONSTANTS.timerange];
-      } else if (urlKey === CONSTANTS.sourcerer) {
-        urlStateToReplace = urlState[CONSTANTS.sourcerer];
       } else if (urlKey === CONSTANTS.timeline && urlState[CONSTANTS.timeline] != null) {
         const timeline = urlState[CONSTANTS.timeline];
         if (timeline.id === '') {

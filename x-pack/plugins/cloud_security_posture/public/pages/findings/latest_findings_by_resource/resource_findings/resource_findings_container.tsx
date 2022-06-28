@@ -96,7 +96,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             title={
               <div style={{ padding: euiTheme.size.s }}>
                 <FormattedMessage
-                  id="xpack.csp.findings.resourceFindingsTitle"
+                  id="xpack.csp.findings.resourceFindings.resourceFindingsPageTitle"
                   defaultMessage="{resourceId} - Findings"
                   values={{ resourceId: params.resourceId }}
                 />

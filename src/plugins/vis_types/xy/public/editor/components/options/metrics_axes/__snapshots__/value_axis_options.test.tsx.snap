@@ -112,19 +112,13 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
   <EuiHorizontalRule
     margin="s"
   />
-  <EuiAccordion
+  <WithEuiTheme(EuiAccordionClass)
     aria-label="Toggle custom extents"
-    arrowDisplay="left"
     buttonContent="Custom extents"
     buttonContentClassName="euiText euiText--small"
-    buttonElement="button"
     className="visEditorSidebar__section visEditorSidebar__collapsible"
-    element="div"
     id="yAxisOptionsAccordionValueAxis-1"
     initialIsOpen={false}
-    isLoading={false}
-    isLoadingMessage={false}
-    paddingSize="none"
   >
     <EuiSpacer
       size="m"
@@ -145,6 +139,6 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
       setValueAxis={[Function]}
       setValueAxisScale={[Function]}
     />
-  </EuiAccordion>
+  </WithEuiTheme(EuiAccordionClass)>
 </Fragment>
 `;

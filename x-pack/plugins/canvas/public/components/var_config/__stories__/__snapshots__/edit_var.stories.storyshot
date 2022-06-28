@@ -38,7 +38,7 @@ Array [
   >
     <div>
       <div
-        className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--warning css-1flvw80-euiCallOut"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning css-1mgmgmu-euiPanel-none-s-warning-euiCallOut"
       >
         <p
           className="euiTitle euiCallOutHeader__title css-8qudto-euiTitle-xxs-euiCallOutHeader-warning"
@@ -331,7 +331,7 @@ Array [
   >
     <div>
       <div
-        className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--warning css-1flvw80-euiCallOut"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning css-1mgmgmu-euiPanel-none-s-warning-euiCallOut"
       >
         <p
           className="euiTitle euiCallOutHeader__title css-8qudto-euiTitle-xxs-euiCallOutHeader-warning"
@@ -565,7 +565,7 @@ Array [
   >
     <div>
       <div
-        className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--warning css-1flvw80-euiCallOut"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning css-1mgmgmu-euiPanel-none-s-warning-euiCallOut"
       >
         <p
           className="euiTitle euiCallOutHeader__title css-8qudto-euiTitle-xxs-euiCallOutHeader-warning"

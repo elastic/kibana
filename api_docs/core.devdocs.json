@@ -1267,13 +1267,7 @@
               "{@link FatalErrorsSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.FatalErrorsSetup",
-                "text": "FatalErrorsSetup"
-              }
+              "FatalErrorsSetup"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1583,13 +1577,7 @@
               "{@link I18nStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1667,13 +1655,7 @@
               "{@link FatalErrorsStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.FatalErrorsSetup",
-                "text": "FatalErrorsSetup"
-              }
+              "FatalErrorsSetup"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -2517,9 +2499,9 @@
         "tags": [],
         "label": "FatalErrorInfo",
         "description": [
-          "\nRepresents the `message` and `stack` of a fatal Error\n"
+          "\r\nRepresents the `message` and `stack` of a fatal Error\r\n"
         ],
-        "path": "src/core/public/fatal_errors/get_error_info.ts",
+        "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -2529,7 +2511,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "src/core/public/fatal_errors/get_error_info.ts",
+            "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -2542,7 +2524,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/public/fatal_errors/get_error_info.ts",
+            "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
             "deprecated": false
           }
         ],
@@ -2555,9 +2537,9 @@
         "tags": [],
         "label": "FatalErrorsSetup",
         "description": [
-          "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
+          "\r\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\r\nwith details about the Kibana build and the error.\r\n"
         ],
-        "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
+        "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -2567,12 +2549,12 @@
             "tags": [],
             "label": "add",
             "description": [
-              "\nAdd a new fatal error. This will stop the Kibana Public Core and display\na fatal error screen with details about the Kibana build and the error.\n"
+              "\r\nAdd a new fatal error. This will stop the Kibana Public Core and display\r\na fatal error screen with details about the Kibana build and the error.\r\n"
             ],
             "signature": [
               "(error: string | Error, source?: string | undefined) => never"
             ],
-            "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
+            "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -2587,7 +2569,7 @@
                 "signature": [
                   "string | Error"
                 ],
-                "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
+                "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               },
@@ -2603,7 +2585,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
+                "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -2617,22 +2599,16 @@
             "tags": [],
             "label": "get$",
             "description": [
-              "\nAn Observable that will emit whenever a fatal error is added with `add()`"
+              "\r\nAn Observable that will emit whenever a fatal error is added with `add()`"
             ],
             "signature": [
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.FatalErrorInfo",
-                "text": "FatalErrorInfo"
-              },
+              "FatalErrorInfo",
               ">"
             ],
-            "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
+            "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2647,9 +2623,9 @@
         "tags": [],
         "label": "I18nStart",
         "description": [
-          "\nI18nStart.Context is required by any localizable React component from \\@kbn/i18n and \\@elastic/eui packages\nand is supposed to be used as the topmost component for any i18n-compatible React tree.\n"
+          "\r\nI18nStart.Context is required by any localizable React component from \\@kbn/i18n and \\@elastic/eui packages\r\nand is supposed to be used as the topmost component for any i18n-compatible React tree.\r\n"
         ],
-        "path": "src/core/public/i18n/i18n_service.tsx",
+        "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -2659,12 +2635,12 @@
             "tags": [],
             "label": "Context",
             "description": [
-              "\nReact Context provider required as the topmost component for any i18n-compatible React tree."
+              "\r\nReact Context provider required as the topmost component for any i18n-compatible React tree."
             ],
             "signature": [
               "({ children }: { children: React.ReactNode; }) => JSX.Element"
             ],
-            "path": "src/core/public/i18n/i18n_service.tsx",
+            "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -2674,7 +2650,7 @@
                 "tags": [],
                 "label": "{ children }",
                 "description": [],
-                "path": "src/core/public/i18n/i18n_service.tsx",
+                "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
                 "deprecated": false,
                 "children": [
                   {
@@ -2687,7 +2663,7 @@
                     "signature": [
                       "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
                     ],
-                    "path": "src/core/public/i18n/i18n_service.tsx",
+                    "path": "node_modules/@types/kbn__core-i18n-browser/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -7633,18 +7609,12 @@
         "tags": [],
         "label": "FatalErrorsStart",
         "description": [
-          "\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\nwith details about the Kibana build and the error.\n"
+          "\r\nFatalErrors stop the Kibana Public Core and displays a fatal error screen\r\nwith details about the Kibana build and the error.\r\n"
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.FatalErrorsSetup",
-            "text": "FatalErrorsSetup"
-          }
+          "FatalErrorsSetup"
         ],
-        "path": "src/core/public/fatal_errors/fatal_errors_service.tsx",
+        "path": "node_modules/@types/kbn__core-fatal-errors-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -11089,13 +11059,7 @@
               "{@link LoggingServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.LoggingServiceSetup",
-                "text": "LoggingServiceSetup"
-              }
+              "LoggingServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -13975,9 +13939,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; helpers: ",
+              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
-              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -16386,9 +16350,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; helpers: ",
+              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
-              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -17589,9 +17553,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; helpers: ",
+              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
-              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -19430,12 +19394,65 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.LoggerConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "LoggerConfigType",
+        "description": [
+          "\r\nDescribes the configuration of a given logger.\r\n"
+        ],
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LoggerConfigType.appenders",
+            "type": "Array",
+            "tags": [],
+            "label": "appenders",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LoggerConfigType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.LoggerConfigType.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "\"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\""
+            ],
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.LoggerContextConfigInput",
         "type": "Interface",
         "tags": [],
         "label": "LoggerContextConfigInput",
-        "description": [],
-        "path": "src/core/server/logging/logging_config.ts",
+        "description": [
+          "\r\nInput used to configure logging dynamically using {@link LoggingServiceSetup.configure}"
+        ],
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -19447,24 +19464,12 @@
             "description": [],
             "signature": [
               "Record<string, ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.AppenderConfigType",
-                "text": "AppenderConfigType"
-              },
+              "AppenderConfigType",
               "> | Map<string, ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.AppenderConfigType",
-                "text": "AppenderConfigType"
-              },
+              "AppenderConfigType",
               "> | undefined"
             ],
-            "path": "src/core/server/logging/logging_config.ts",
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false
           },
           {
@@ -19475,9 +19480,10 @@
             "label": "loggers",
             "description": [],
             "signature": [
-              "Readonly<{} & { name: string; level: \"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; appenders: string[]; }>[] | undefined"
+              "LoggerConfigType",
+              "[] | undefined"
             ],
-            "path": "src/core/server/logging/logging_config.ts",
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false
           }
         ],
@@ -19540,9 +19546,9 @@
         "tags": [],
         "label": "LoggingServiceSetup",
         "description": [
-          "\nProvides APIs to plugins for customizing the plugin's logger."
+          "\r\nProvides APIs to plugins for customizing the plugin's logger."
         ],
-        "path": "src/core/server/logging/logging_service.ts",
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -19552,22 +19558,16 @@
             "tags": [],
             "label": "configure",
             "description": [
-              "\nCustomizes the logging config for the plugin's context.\n"
+              "\r\nCustomizes the logging config for the plugin's context.\r\n"
             ],
             "signature": [
               "(config$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.LoggerContextConfigInput",
-                "text": "LoggerContextConfigInput"
-              },
+              "LoggerContextConfigInput",
               ">) => void"
             ],
-            "path": "src/core/server/logging/logging_service.ts",
+            "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -19580,16 +19580,10 @@
                 "signature": [
                   "Observable",
                   "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.LoggerContextConfigInput",
-                    "text": "LoggerContextConfigInput"
-                  },
+                  "LoggerContextConfigInput",
                   ">"
                 ],
-                "path": "src/core/server/logging/logging_service.ts",
+                "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -21082,9 +21076,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; helpers: ",
+              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
-              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -24152,7 +24146,7 @@
         "tags": [],
         "label": "AnalyticsServicePreboot",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the preboot phase\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the preboot phase\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -24173,7 +24167,7 @@
           "ContextProviderOpts",
           "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
         ],
-        "path": "src/core/server/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24184,7 +24178,7 @@
         "tags": [],
         "label": "AnalyticsServiceSetup",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the setup phase.\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -24205,7 +24199,7 @@
           "ContextProviderOpts",
           "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
         ],
-        "path": "src/core/server/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24216,7 +24210,7 @@
         "tags": [],
         "label": "AnalyticsServiceStart",
         "description": [
-          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+          "\r\nExposes the public APIs of the AnalyticsClient during the start phase\r\n{@link AnalyticsClient}"
         ],
         "signature": [
           "{ optIn: (optInConfig: ",
@@ -24227,7 +24221,7 @@
           "TelemetryCounter",
           ">; }"
         ],
-        "path": "src/core/server/analytics/analytics_service.ts",
+        "path": "node_modules/@types/kbn__core-analytics-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24263,7 +24257,7 @@
           " | ",
           "RollingFileAppenderConfig"
         ],
-        "path": "src/core/server/logging/appenders/appenders.ts",
+        "path": "node_modules/@types/kbn__core-logging-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24845,9 +24839,9 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "ClosePointInTimeResponse",
-          ">; }; helpers: ",
+          ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
           "default",
-          "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+          "; helpers: ",
           "default",
           "; child: (opts: ",
           "ClientOptions",
@@ -26779,20 +26773,6 @@
           " | undefined; }"
         ],
         "path": "src/core/types/execution_context.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.LoggerConfigType",
-        "type": "Type",
-        "tags": [],
-        "label": "LoggerConfigType",
-        "description": [],
-        "signature": [
-          "{ readonly name: string; readonly level: \"error\" | \"all\" | \"info\" | \"off\" | \"debug\" | \"trace\" | \"warn\" | \"fatal\"; readonly appenders: string[]; }"
-        ],
-        "path": "src/core/server/logging/logging_config.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

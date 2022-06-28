@@ -144,7 +144,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 0 16px 16px;
+  padding: 0 12px 12px;
 }
 
 <div
@@ -297,7 +297,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 }
 
 .c4 {
-  padding: 16px;
+  padding: 12px;
   background: rgba(250,251,253,0.9);
   bottom: 0;
   left: 0;
@@ -635,7 +635,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
 }
 
 .c4 {
-  padding: 16px;
+  padding: 12px;
   background: rgba(250,251,253,0.9);
   bottom: 0;
   left: 0;

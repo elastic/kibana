@@ -71,10 +71,10 @@ export const LinkCard: FC<LinkCardProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{title}</h3>
             </EuiTitle>
-            <EuiText color="subdued">
+            <EuiText color="subdued" size={'s'}>
               <p>{description}</p>
             </EuiText>
           </EuiFlexItem>

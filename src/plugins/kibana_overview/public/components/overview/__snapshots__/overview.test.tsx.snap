@@ -1,22 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Overview during loading 1`] = `
-<div
-  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
->
-  <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
-  >
-    <span
-      aria-label="Loading"
-      class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
-      role="progressbar"
-    />
-  </div>
-</div>
-`;
-
-exports[`Overview render 1`] = `
+exports[`Overview renders correctly 1`] = `
 <Overview
   features={
     Array [
@@ -246,7 +230,7 @@ exports[`Overview render 1`] = `
 </Overview>
 `;
 
-exports[`Overview when there is no user data view 1`] = `
+exports[`Overview renders correctly when there is no user data view 1`] = `
 <Overview
   features={
     Array [
@@ -746,7 +730,7 @@ exports[`Overview when there is no user data view 1`] = `
 </Overview>
 `;
 
-exports[`Overview without features 1`] = `
+exports[`Overview renders correctly without features 1`] = `
 <Overview
   features={Array []}
   intl={
@@ -946,7 +930,7 @@ exports[`Overview without features 1`] = `
 </Overview>
 `;
 
-exports[`Overview without solutions 1`] = `
+exports[`Overview renders correctly without solutions 1`] = `
 <Overview
   features={
     Array [
@@ -1139,4 +1123,20 @@ exports[`Overview without solutions 1`] = `
     <MockedKibanaPageTemplate />
   </KibanaPageTemplate>
 </Overview>
+`;
+
+exports[`Overview show loading spinner during loading 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <span
+      aria-label="Loading"
+      class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+      role="progressbar"
+    />
+  </div>
+</div>
 `;

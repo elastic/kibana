@@ -32,6 +32,7 @@ export interface GlobalFilter {
 
 export interface KubernetesSecurityDeps {
   filter: React.ReactNode;
+  renderSessionsView: (sessionsFilterQuery: string | undefined) => JSX.Element;
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
 }

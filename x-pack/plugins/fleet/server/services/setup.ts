@@ -26,6 +26,7 @@ import { agentPolicyService } from './agent_policy';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 import { ensurePreconfiguredOutputs } from './preconfiguration/outputs';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
 import { settingsService } from '.';
@@ -76,6 +77,8 @@ async function createSetupSideEffects(
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
 
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
+
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');
     await ensureFleetGlobalEsAssets(soClient, esClient);
@@ -109,6 +112,7 @@ async function createSetupSideEffects(
       policies,
       packages,
       defaultOutput,
+      defaultDownloadSource,
       DEFAULT_SPACE_ID
     );
 

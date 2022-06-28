@@ -7,8 +7,9 @@
 
 import moment from 'moment';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+
+import type { TimeRange } from '@kbn/es-query';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 // mock the specific inner variable:
