@@ -23,7 +23,7 @@ export function isNode(node: KueryNode): node is KqlLiteralNode {
 
 export function buildNode(value: KqlLiteralType): KqlLiteralNode {
   return {
-    type: 'literal',
+    type: KQL_NODE_TYPE_LITERAL,
     value,
   };
 }
