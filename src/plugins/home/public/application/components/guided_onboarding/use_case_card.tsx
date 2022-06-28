@@ -46,7 +46,7 @@ const constants: UseCaseConstants = {
       }),
       description: i18n.translate('home.guidedOnboarding.gettingStarted.search.cardDescription', {
         defaultMessage:
-          'Create a search experience for your websites, applications, workplace content, and more.',
+          'Create a finely-tuned search experience for your websites, applications, workplace content, and more.',
       }),
     },
     icon: {
