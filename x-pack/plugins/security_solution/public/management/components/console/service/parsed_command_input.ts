@@ -161,7 +161,7 @@ export const getArgumentsForCommand = (command: CommandDefinition): string => {
     }
   }
 
-  return `${requiredArgs} ${exclusiveOrArgs.length > 0 ? `ONE OF (${exclusiveOrArgs})` : ''}${
+  return `${requiredArgs} ${exclusiveOrArgs.length > 0 ? `ONE OF (${exclusiveOrArgs}) ` : ''}${
     optionalArgs.length > 0 ? `[${optionalArgs}]` : ''
   }`.trim();
 };

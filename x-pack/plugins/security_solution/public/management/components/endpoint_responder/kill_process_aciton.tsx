@@ -39,17 +39,26 @@ export const KillProcessActionResult = memo<
 
   // Send Kill request if not yet done
   useEffect(() => {
-    const parameters = command.args.args?.pid?.[0]
-      ? { pid: command.args.args?.pid?.[0] }
-      : command.args.args?.entityId?.[0]
-      ? { entity_id: command.args.args?.entityId?.[0] }
-      : undefined;
-    if (!actionRequestSent && endpointId && parameters) {
-      killProcessApi.mutate({
-        endpoint_ids: [endpointId],
-        comment: command.args.args?.comment?.[0],
-        parameters,
-      });
+    const pid = Number(command.args.args?.pid?.[0]);
+    const entityId = command.args.args?.entityId?.[0];
+    if (!actionRequestSent && endpointId) {
+      if (pid !== undefined) {
+        killProcessApi.mutate({
+          endpoint_ids: [endpointId],
+          comment: command.args.args?.comment?.[0],
+          parameters: {
+            pid,
+          },
+        });
+      } else if (entityId !== undefined) {
+        killProcessApi.mutate({
+          endpoint_ids: [endpointId],
+          comment: command.args.args?.comment?.[0],
+          parameters: {
+            entity_id: entityId,
+          },
+        });
+      }
 
       setStore((prevState) => {
         return { ...prevState, actionRequestSent: true };
@@ -122,7 +131,7 @@ export const KillProcessActionResult = memo<
     <ResultComponent
       title={i18n.translate(
         'xpack.securitySolution.endpointResponseActions.killProcess.successMessageTitle',
-        { defaultMessage: 'Host isolated successfully!' }
+        { defaultMessage: 'Process killed successfully!' }
       )}
       data-test-subj="releaseSuccessCallout"
     />
