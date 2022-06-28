@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { getFlattenedObject } from '@kbn/std';
+import { i18n } from '@kbn/i18n';
 import { CspFinding } from '../types';
-import * as TEXT from '../translations';
 
 const getDescriptionDisplay = (value: unknown) => {
   if (value === undefined) return 'undefined';
@@ -55,12 +55,17 @@ export const ResourceTab = ({ data }: { data: CspFinding }) => {
   const accordions = useMemo(
     () => [
       {
-        title: TEXT.RESOURCE,
+        title: i18n.translate(
+          'xpack.csp.findings.findingsFlyout.resourceTab.resourceAccordionTitle',
+          { defaultMessage: 'Resource' }
+        ),
         id: 'resourceAccordion',
         listItems: prepareDescriptionList(data.resource),
       },
       {
-        title: TEXT.HOST,
+        title: i18n.translate('xpack.csp.findings.findingsFlyout.resourceTab.hostAccordionTitle', {
+          defaultMessage: 'Host',
+        }),
         id: 'hostAccordion',
         listItems: prepareDescriptionList(data.host),
       },

@@ -6,7 +6,7 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { waitForLoadingToFinish } from './utils';
+import { waitForLoadingToFinish } from '@kbn/observability-plugin/e2e/utils';
 import { loginPageProvider } from '../page_objects/login';
 
 journey('StepsDuration', async ({ page, params }) => {
