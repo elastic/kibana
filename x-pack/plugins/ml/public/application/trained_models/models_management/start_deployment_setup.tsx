@@ -209,7 +209,7 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
               size={'s'}
               title={
                 <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.cloudWarning"
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningHeader"
                   defaultMessage="In the future Cloud deployments will autoscale to have the required number of processors."
                 />
               }
@@ -218,7 +218,7 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
             >
               <p>
                 <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.cloudWarning"
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.cloudWarningText"
                   defaultMessage="However, in this release you must increase the size of your ML nodes manually in the Cloud console to get more processors."
                 />
               </p>
