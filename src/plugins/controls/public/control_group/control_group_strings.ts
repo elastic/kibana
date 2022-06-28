@@ -273,4 +273,10 @@ export const ControlGroupStrings = {
         defaultMessage: 'Remove control',
       }),
   },
+  otherActions: {
+    getMoveControlButtonTitle: () =>
+      i18n.translate('controls.controlGroup.floatingActions.removeTitle', {
+        defaultMessage: 'Move control',
+      }),
+  },
 };
