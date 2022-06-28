@@ -6,6 +6,9 @@
  */
 
 import React, { Component } from 'react';
+import classNames from 'classnames';
+import { EuiText, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   mbMap: MbMap;
@@ -49,14 +52,36 @@ export class KeydownScrollZoom extends Component<Props, State> {
       if (this._isMounted) {
         this.setState({ show: false });
       }
-    }, 200);
+    }, 500);
     event.preventDefault();
   }
 
   render() {
-    return this.state.show
-      ? <div class="mapKeydownScrollZoom">test</div>
-      : null;
+    return (
+      <div 
+        className={classNames('mapKeydownScrollZoom', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          mapKeydownScrollZoom__show: this.state.show,
+        })}
+      >
+        <EuiText textAlign="center">
+          <h2>
+            <EuiTextColor color="ghost">
+              {i18n.translate('xpack.maps.keydownScrollZoom.keydownToZoomInstructions', {
+                defaultMessage: 'Use shift + scroll to zoom the map',
+              })}
+            </EuiTextColor>
+          </h2>
+          <h2>
+            <EuiTextColor color="ghost">
+              {i18n.translate('xpack.maps.keydownScrollZoom.keydownClickAndDragZoomInstructions', {
+                defaultMessage: 'Use shift + click and drag to zoom the map to fit within a bounding box',
+              })}
+            </EuiTextColor>
+          </h2>
+        </EuiText>
+      </div>
+    );
   }
 }
 

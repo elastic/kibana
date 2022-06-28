@@ -4,5 +4,16 @@
   height: 100%;
   position: absolute;
   z-index: $euiZLevel2;
-  transition: opacity 1s ease 1s;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity 1.5s ease 1.5s;
+}
+
+.mapKeydownScrollZoom__show {
+  opacity: 1;
+  transition: opacity 0.1s;
 }
