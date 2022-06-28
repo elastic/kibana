@@ -53,7 +53,7 @@ describe('ExceptionsViewerItems', () => {
   it('it renders no search results found prompt if "showNoResults" is "true"', () => {
     const wrapper = mount(
       <TestProviders>
-        <ThemeProvider theme={mockTheme}>   
+        <ThemeProvider theme={mockTheme}>
           <ExceptionsViewerItems
             showEmpty={false}
             showNoResults
