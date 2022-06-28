@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { jsonValueRt } from '../runtime_types';
 import { SavedObjectFindOptionsRt } from '../saved_object';
 
 import { UserRT } from '../user';
@@ -24,6 +25,7 @@ export enum CommentType {
   user = 'user',
   alert = 'alert',
   actions = 'actions',
+  externalReference = 'externalReference',
 }
 
 export enum IsolateHostActionType {
@@ -68,22 +70,74 @@ export const ActionsCommentRequestRt = rt.type({
   owner: rt.string,
 });
 
+export enum ExternalReferenceStorageType {
+  savedObject = 'savedObject',
+  elasticSearchDoc = 'elasticSearchDoc',
+}
+
+const ExternalReferenceStorageNoSORt = rt.type({
+  type: rt.literal(ExternalReferenceStorageType.elasticSearchDoc),
+});
+
+const ExternalReferenceStorageSORt = rt.type({
+  type: rt.literal(ExternalReferenceStorageType.savedObject),
+  soType: rt.string,
+});
+
+export const ExternalReferenceNoSORt = rt.type({
+  externalReferenceId: rt.string,
+  externalReferenceStorage: ExternalReferenceStorageNoSORt,
+  externalReferenceAttachmentTypeId: rt.string,
+  externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
+  type: rt.literal(CommentType.externalReference),
+  owner: rt.string,
+});
+
+export const ExternalReferenceSORt = rt.type({
+  ...ExternalReferenceNoSORt.props,
+  externalReferenceStorage: ExternalReferenceStorageSORt,
+});
+
+export const ExternalReferenceRt = rt.union([ExternalReferenceNoSORt, ExternalReferenceSORt]);
+export const ExternalReferenceWithoutSORefsRt = ExternalReferenceNoSORt;
+
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
 const AttributesTypeAlertsRt = rt.intersection([AlertCommentRequestRt, CommentAttributesBasicRt]);
 const AttributesTypeActionsRt = rt.intersection([
   ActionsCommentRequestRt,
   CommentAttributesBasicRt,
 ]);
+
+const AttributesTypeExternalReferenceRt = rt.intersection([
+  ExternalReferenceRt,
+  CommentAttributesBasicRt,
+]);
+
+const AttributesTypeExternalReferenceWithoutSORefsRt = rt.intersection([
+  ExternalReferenceWithoutSORefsRt,
+  CommentAttributesBasicRt,
+]);
+
 const CommentAttributesRt = rt.union([
   AttributesTypeUserRt,
   AttributesTypeAlertsRt,
   AttributesTypeActionsRt,
+  AttributesTypeExternalReferenceRt,
+]);
+
+const CommentAttributesWithoutSORefsRt = rt.union([
+  AttributesTypeUserRt,
+  AttributesTypeAlertsRt,
+  AttributesTypeActionsRt,
+  AttributesTypeExternalReferenceWithoutSORefsRt,
 ]);
 
 export const CommentRequestRt = rt.union([
   ContextTypeUserRt,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
+  ExternalReferenceNoSORt,
+  ExternalReferenceSORt,
 ]);
 
 export const CommentResponseRt = rt.intersection([
@@ -118,6 +172,14 @@ export const CommentResponseTypeActionsRt = rt.intersection([
   }),
 ]);
 
+export const CommentResponseTypeExternalReferenceRt = rt.intersection([
+  AttributesTypeExternalReferenceRt,
+  rt.type({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
 export const AllCommentsResponseRT = rt.array(CommentResponseRt);
 
 export const CommentPatchRequestRt = rt.intersection([
@@ -136,7 +198,13 @@ export const CommentPatchRequestRt = rt.intersection([
  * We ensure that partial updates of CommentContext is not going to happen inside the patch comment route.
  */
 export const CommentPatchAttributesRt = rt.intersection([
-  rt.union([rt.partial(CommentAttributesBasicRt.props), rt.partial(AlertCommentRequestRt.props)]),
+  rt.union([
+    rt.partial(ContextTypeUserRt.props),
+    rt.partial(AlertCommentRequestRt.props),
+    rt.partial(ActionsCommentRequestRt.props),
+    rt.partial(ExternalReferenceNoSORt.props),
+    rt.partial(ExternalReferenceSORt.props),
+  ]),
   rt.partial(CommentAttributesBasicRt.props),
 ]);
 
@@ -160,12 +228,16 @@ export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
+export type CommentAttributesWithoutSORefs = rt.TypeOf<typeof CommentAttributesWithoutSORefsRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type BulkCreateCommentRequest = rt.TypeOf<typeof BulkCreateCommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
 export type CommentResponseUserType = rt.TypeOf<typeof CommentResponseTypeUserRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
 export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
+export type CommentResponseExternalReferenceType = rt.TypeOf<
+  typeof CommentResponseTypeExternalReferenceRt
+>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
 export type CommentsResponse = rt.TypeOf<typeof CommentsResponseRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
@@ -173,3 +245,6 @@ export type CommentPatchAttributes = rt.TypeOf<typeof CommentPatchAttributesRt>;
 export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;
 export type CommentRequestAlertType = rt.TypeOf<typeof AlertCommentRequestRt>;
 export type CommentRequestActionsType = rt.TypeOf<typeof ActionsCommentRequestRt>;
+export type CommentRequestExternalReferenceType = rt.TypeOf<typeof ExternalReferenceRt>;
+export type CommentRequestExternalReferenceSOType = rt.TypeOf<typeof ExternalReferenceSORt>;
+export type CommentRequestExternalReferenceNoSOType = rt.TypeOf<typeof ExternalReferenceNoSORt>;

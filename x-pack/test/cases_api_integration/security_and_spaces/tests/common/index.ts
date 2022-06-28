@@ -45,6 +45,12 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     loadTestFile(require.resolve('./internal/bulk_create_attachments'));
 
+    /**
+     * Attachments framework
+     */
+
+    loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
+
     // NOTE: Migrations are not included because they can inadvertently remove the .kibana indices which removes the users and spaces
     // which causes errors in any tests after them that relies on those
   });

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
 import { either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
+
+import { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 type ErrorFactory = (message: string) => Error;
@@ -107,3 +109,17 @@ export function excess<
   );
   return r as C;
 }
+
+export const jsonScalarRt = rt.union([rt.null, rt.boolean, rt.number, rt.string]);
+
+export const jsonValueRt: rt.Type<JsonValue> = rt.recursion('JsonValue', () =>
+  rt.union([jsonScalarRt, jsonArrayRt, jsonObjectRt])
+);
+
+export const jsonArrayRt: rt.Type<JsonArray> = rt.recursion('JsonArray', () =>
+  rt.array(jsonValueRt)
+);
+
+export const jsonObjectRt: rt.Type<JsonObject> = rt.recursion('JsonObject', () =>
+  rt.record(rt.string, jsonValueRt)
+);
