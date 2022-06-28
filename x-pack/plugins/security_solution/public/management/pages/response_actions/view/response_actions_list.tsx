@@ -117,7 +117,6 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
 export const ResponseActionsList = memo<
   Pick<EndpointActionListRequestQuery, 'agentIds' | 'commands' | 'userIds'> & {
     hideHeader?: boolean;
-    hideHostNameColumn?: boolean;
   }
 >(({ agentIds, commands, userIds, hideHeader = false }) => {
   const getTestId = useTestIdGenerator('response-actions-list');
@@ -268,7 +267,7 @@ export const ResponseActionsList = memo<
             title: OUTPUT_MESSAGES.expandSection.output,
             description: (
               // codeblock for output
-              <StyledEuiCodeBlock>
+              <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
                 {isExpired
                   ? OUTPUT_MESSAGES.hasExpired(command)
                   : isCompleted
@@ -284,7 +283,7 @@ export const ResponseActionsList = memo<
         itemIdToExpandedRowMapValues[item.id] = (
           <>
             <EuiFlexGroup
-              data-test-subj={getTestId('output-section')}
+              data-test-subj={getTestId('details-tray')}
               direction="column"
               style={{ maxHeight: 270, overflowY: 'auto' }}
               className="eui-yScrollWithShadows"
