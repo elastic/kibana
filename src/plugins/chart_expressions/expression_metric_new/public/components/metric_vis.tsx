@@ -16,7 +16,7 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { VisParams } from '../../common';
-import { getPaletteService, getThemeService } from '../services';
+import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { currencyCodeMap } from './currency_code_map';
 
 // TODO - find a reasonable default (from EUI perhaps?)
@@ -26,7 +26,8 @@ const getFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
-  const formatId = getFormatByAccessor(accessor, columns)?.id ?? 'number';
+  const serializedFieldFormat = getFormatByAccessor(accessor, columns);
+  const formatId = serializedFieldFormat?.id ?? 'number';
   if (!['number', 'currency', 'percent', 'bytes', 'duration'].includes(formatId)) {
     throw new Error(
       i18n.translate('newMetricVis.errors.unsupportedColumnFormat', {
@@ -64,7 +65,20 @@ const getFormatter = (
     intlOptions.style = 'percent';
   }
 
-  return new Intl.NumberFormat(locale, intlOptions).format;
+  if (formatId === 'duration') {
+    const formatter = getFormatService().deserialize({
+      ...serializedFieldFormat,
+      params: {
+        ...serializedFieldFormat!.params,
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        useShortSuffix: true,
+      },
+    });
+    return formatter.getConverterFor('text');
+  } else {
+    return new Intl.NumberFormat(locale, intlOptions).format;
+  }
 };
 
 const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
