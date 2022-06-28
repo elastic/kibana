@@ -46,13 +46,8 @@ export const FormLabel: FunctionComponent<FormLabelProps> = (props) => {
   useEffect(() => report(isEqual), [isEqual]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="xs">
-      <EuiFlexItem grow={false}>{props.children}</EuiFlexItem>
-      {!isEqual ? (
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="dot" color="success" />
-        </EuiFlexItem>
-      ) : undefined}
-    </EuiFlexGroup>
+    <>
+      {props.children} {!isEqual ? <EuiIcon type="dot" color="success" /> : undefined}
+    </>
   );
 };
