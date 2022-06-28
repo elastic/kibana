@@ -182,11 +182,13 @@ describe('validate_email_address', () => {
           },
           Object {
             "address": "totally invalid",
-            "valid": true,
+            "reason": "invalid",
+            "valid": false,
           },
           Object {
             "address": "{{sneaky}}",
-            "valid": true,
+            "reason": "invalid",
+            "valid": false,
           },
         ]
       `);
@@ -226,7 +228,8 @@ describe('validate_email_address', () => {
           },
           Object {
             "address": "totally invalid",
-            "valid": true,
+            "reason": "invalid",
+            "valid": false,
           },
           Object {
             "address": "{{sneaky}}",
