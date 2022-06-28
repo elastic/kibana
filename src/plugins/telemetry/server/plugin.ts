@@ -133,7 +133,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.isOptedIn$ = timer(0, OPT_IN_POLL_INTERVAL_MS).pipe(
       takeUntil(this.pluginStop$),
       switchMap(() => this.getOptInStatus()),
-      startWith(this.isOptedIn),
+      startWith(this.isOptedIn), // feed the initial config value to the pipeline
       filter((isOptedIn): isOptedIn is boolean => typeof isOptedIn === 'boolean'),
       distinctUntilChanged(),
       tap((optedIn) => (this.isOptedIn = optedIn)),
