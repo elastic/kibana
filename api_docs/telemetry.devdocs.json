@@ -50,18 +50,6 @@
         "children": [
           {
             "parentPluginId": "telemetry",
-            "id": "def-public.TelemetryPluginConfig.enabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "enabled",
-            "description": [
-              "Is the plugin enabled?"
-            ],
-            "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "telemetry",
             "id": "def-public.TelemetryPluginConfig.banner",
             "type": "boolean",
             "tags": [],
