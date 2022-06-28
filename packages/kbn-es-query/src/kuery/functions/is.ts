@@ -48,9 +48,8 @@ export function toElasticsearchQuery(
     arguments: [fieldNameArg, valueArg, isPhraseArg],
   } = node;
 
-  const isExistsQuery = valueArg.type === 'wildcard' && valueArg.value === wildcard.wildcardSymbol;
-  const isAllFieldsQuery =
-    fieldNameArg.type === 'wildcard' && fieldNameArg.value === wildcard.wildcardSymbol;
+  const isExistsQuery = wildcard.isNode(valueArg) && wildcard.isLoneWildcard(valueArg);
+  const isAllFieldsQuery = wildcard.isNode(fieldNameArg) && wildcard.isLoneWildcard(fieldNameArg);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 
   if (isMatchAllQuery) {
@@ -65,7 +64,7 @@ export function toElasticsearchQuery(
   const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
   if (fullFieldNameArg.value === null) {
-    if (valueArg.type === 'wildcard') {
+    if (wildcard.isNode(valueArg)) {
       return {
         query_string: {
           query: wildcard.toQueryStringQuery(valueArg),
@@ -106,7 +105,7 @@ export function toElasticsearchQuery(
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
       const subTypeNested = getDataViewFieldSubtypeNested(field);
-      if (!(fullFieldNameArg.type === 'wildcard') || !subTypeNested?.nested || context?.nested) {
+      if (!wildcard.isNode(fullFieldNameArg) || !subTypeNested?.nested || context?.nested) {
         return query;
       } else {
         return {
@@ -143,7 +142,7 @@ export function toElasticsearchQuery(
           },
         }),
       ];
-    } else if (valueArg.type === 'wildcard') {
+    } else if (wildcard.isNode(valueArg)) {
       return [
         ...accumulator,
         wrapWithNestedQuery({
