@@ -1413,8 +1413,6 @@ Review the {kib} 8.0.0 changes, then use the {kibana-ref-all}/7.17/upgrade-assis
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.0.0, review the breaking change, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
-
 [discrete]
 [[breaking-123754]]
 .Removes the `console.ssl` setting
@@ -1426,9 +1424,6 @@ The `console.ssl` setting has been removed. For more information, refer to {kiba
 *Impact* +
 Before you upgrade to 8.0.0, remove `console.ssl` from kibana.yml.
 ====
-
-// end::notable-breaking-changes[]
-
 
 To review the breaking changes in previous versions, refer to the following:
 
