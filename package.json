@@ -1,6 +1,6 @@
 {
   "name": "kibana",
-  "description": "Kibana is a browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
+  "description": "xKibana is a browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
   "keywords": [
     "kibana",
     "elasticsearch",
