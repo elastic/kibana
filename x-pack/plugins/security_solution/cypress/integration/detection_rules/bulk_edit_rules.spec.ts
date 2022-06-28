@@ -12,6 +12,7 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULES_TAGS_FILTER_BTN,
+  RULES_TABLE_REFRESH_INDICATOR,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -119,7 +120,8 @@ describe('Detection rules, bulk edit', () => {
 
     // check if rule has been updated
     cy.get(CUSTOM_RULES_BTN).click();
-    cy.wait(1000);
+    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
+    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
     goToTheRuleDetailsOf(RULE_NAME);
     hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
   });
