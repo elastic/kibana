@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, FC, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, FC, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -42,27 +42,43 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   const [filters, setFilters] = useState<SearchFilterConfig[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
-  const refresh = useCallback(() => {
-    setIsLoading(true);
-    getList(currentTabId)
-      .then((jobList) => {
-        setItems(jobList);
-        setIsLoading(false);
-        setFilters(getFilters(currentTabId, jobList));
-      })
-      .catch(() => {
-        setItems([]);
-        setFilters(undefined);
-        setIsLoading(false);
-      });
-  }, [getList, currentTabId]);
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  const loadingTab = useRef<MlSavedObjectType | null>(null);
+  const refresh = useCallback(
+    (tabId: MlSavedObjectType) => {
+      loadingTab.current = tabId;
+      setIsLoading(true);
+      getList(tabId)
+        .then((jobList) => {
+          if (isMounted.current && tabId === loadingTab.current) {
+            setItems(jobList);
+            setIsLoading(false);
+            setFilters(getFilters(tabId, jobList));
+          }
+        })
+        .catch(() => {
+          if (isMounted.current) {
+            setItems([]);
+            setFilters(undefined);
+            setIsLoading(false);
+          }
+        });
+    },
+    [getList, loadingTab]
+  );
 
   useEffect(
     function refreshOnTabChange() {
       setItems(undefined);
       setColumns(createColumns());
       setCurrentTab(currentTabId);
-      refresh();
+      refresh(currentTabId);
     },
     [currentTabId]
   );
@@ -86,7 +102,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
                     spaceIds={item.spaces ?? []}
                     id={item.id}
                     mlSavedObjectType={currentTabId}
-                    refresh={refresh}
+                    refresh={refresh.bind(null, currentTabId)}
                   />
                 );
               },
@@ -105,7 +121,10 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
             <EuiFlexGroup>
               <EuiFlexItem />
               <EuiFlexItem grow={false}>
-                <RefreshButton onRefreshClick={refresh} isRefreshing={isLoading} />
+                <RefreshButton
+                  onRefreshClick={refresh.bind(null, currentTabId)}
+                  isRefreshing={isLoading}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiInMemoryTable<ManagementItems>
@@ -137,7 +156,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
         )}
       </>
     );
-  }, [items, columns, isLoading, filters]);
+  }, [items, columns, isLoading, filters, currentTabId, refresh]);
 
   const tabs = useMemo(
     () => [
