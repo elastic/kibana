@@ -23,6 +23,7 @@ import {
   isPushedUserAction,
   isUserActionType,
   isCreateCaseUserAction,
+  isCommentUserAction,
 } from '../../../common/utils/user_actions';
 import {
   Actions,
@@ -46,13 +47,14 @@ import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
+  EXTERNAL_REFERENCE_REF_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
 import { buildFilter, combineFilters, isTwoArraysDifference } from '../../client/utils';
 import { BuilderParameters, BuilderReturnValue, CommonArguments, CreateUserAction } from './types';
 import { BuilderFactory } from './builder_factory';
-import { defaultSortField } from '../../common/utils';
+import { defaultSortField, isCommentRequestTypeExternalReferenceSO } from '../../common/utils';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -588,6 +590,22 @@ const addReferenceIdToPayload = (
         connector_id: connectorId ?? NONE_CONNECTOR_ID,
       },
     };
+  } else if (isCommentUserAction(userActionAttributes)) {
+    if (isCommentRequestTypeExternalReferenceSO(userActionAttributes.payload.comment)) {
+      const externalReferenceId = findReferenceId(
+        EXTERNAL_REFERENCE_REF_NAME,
+        userActionAttributes.payload.comment.externalReferenceStorage.soType,
+        userAction.references
+      );
+
+      return {
+        ...userAction.attributes.payload,
+        comment: {
+          ...userActionAttributes.payload.comment,
+          externalReferenceId: externalReferenceId ?? '',
+        },
+      };
+    }
   }
 
   return userAction.attributes.payload;
