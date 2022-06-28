@@ -7,7 +7,7 @@
  */
 
 import classNames from 'classnames';
-import React, { PureComponent } from 'react';
+import React, { useEffect } from 'react';
 import MarkdownIt from 'markdown-it';
 import { memoize } from 'lodash';
 import { getSecureRelForTarget } from '@elastic/eui';
@@ -81,30 +81,28 @@ export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   onRender?: () => void;
 }
 
-export class Markdown extends PureComponent<MarkdownProps> {
-  componentDidMount() {
-    this.props.onRender?.();
-  }
-  render() {
-    const { className, markdown = '', openLinksInNewTab, whiteListedRules, ...rest } = this.props;
+export const Markdown = (props: MarkdownProps) => {
+  useEffect(() => {
+    props.onRender?.();
+  }, [props]);
 
-    const classes = classNames('kbnMarkdown__body', className);
-    const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab);
-    const renderedMarkdown = markdownRenderer(markdown);
-    return (
-      <div
-        {...rest}
-        className={classes}
-        /*
-         * Justification for dangerouslySetInnerHTML:
-         * The Markdown Visualization is, believe it or not, responsible for rendering Markdown.
-         * This relies on `markdown-it` to produce safe and correct HTML.
-         */
-        dangerouslySetInnerHTML={{ __html: renderedMarkdown }} // eslint-disable-line react/no-danger
-      />
-    );
-  }
-}
+  const { className, markdown = '', openLinksInNewTab, whiteListedRules, ...rest } = props;
+  const classes = classNames('kbnMarkdown__body', className);
+  const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab);
+  const renderedMarkdown = markdownRenderer(markdown);
+  return (
+    <div
+      {...rest}
+      className={classes}
+      /*
+       * Justification for dangerouslySetInnerHTML:
+       * The Markdown Visualization is, believe it or not, responsible for rendering Markdown.
+       * This relies on `markdown-it` to produce safe and correct HTML.
+       */
+      dangerouslySetInnerHTML={{ __html: renderedMarkdown }} // eslint-disable-line react/no-danger
+    />
+  );
+};
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
