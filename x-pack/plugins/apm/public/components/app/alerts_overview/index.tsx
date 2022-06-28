@@ -8,7 +8,6 @@
 import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
-import { AlertsTableFlyoutState } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -77,8 +76,7 @@ export function AlertsOverview() {
     alertsTableConfigurationRegistry,
     id: 'service-overview-alerts',
     configurationId: AlertConsumers.OBSERVABILITY,
-    featureIds: [AlertConsumers.OBSERVABILITY],
-    flyoutState: AlertsTableFlyoutState.external,
+    featureIds: [AlertConsumers.APM],
     query: alertQuery,
     showExpandToDetails: false,
   };
