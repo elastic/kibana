@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useEffect, useState, ComponentType, useMemo, CSSProperties } from 'react';
-import { throttle } from 'lodash';
+import React, {
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  ComponentType,
+  CSSProperties,
+} from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { autoScaleWrapperStyle } from './with_auto_scale.styles';
 
@@ -18,6 +24,7 @@ interface AutoScaleParams {
 
 interface AutoScaleProps {
   autoScaleParams?: AutoScaleParams;
+  renderComplete?: () => void;
 }
 interface ClientDimensionable {
   clientWidth: number;
@@ -55,7 +62,7 @@ function hasAutoscaleProps<T>(props: T): props is T & AutoScaleProps {
 
 function getWrappedComponentProps<T>(props: T) {
   if (hasAutoscaleProps(props)) {
-    const { autoScaleParams, ...rest } = props;
+    const { autoScaleParams, renderComplete, ...rest } = props;
     return rest;
   }
 
@@ -67,33 +74,44 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
     // An initial scale of 0 means we always redraw
     // at least once, which is sub-optimal, but it
     // prevents an annoying flicker.
-    const { autoScaleParams } = props;
+    const { autoScaleParams, renderComplete } = props;
     const restProps = getWrappedComponentProps(props);
-    const [scale, setScale] = useState(0);
     const parentRef = useRef<HTMLDivElement>(null);
     const childrenRef = useRef<HTMLDivElement>(null);
     const parentDimensions = useResizeObserver(parentRef.current);
 
-    const scaleFn = useMemo(
-      () =>
-        throttle(() => {
-          const newScale = computeScale(
-            { clientHeight: parentDimensions.height, clientWidth: parentDimensions.width },
-            childrenRef.current,
-            autoScaleParams?.minScale
-          );
-
-          // Prevent an infinite render loop
-          if (scale !== newScale) {
-            setScale(newScale);
-          }
-        }),
-      [parentDimensions, setScale, scale, autoScaleParams]
-    );
+    const [scale, setScale] = useState(0);
+    const [resized, setResized] = useState(false);
 
     useEffect(() => {
-      scaleFn();
-    }, [scaleFn]);
+      setTimeout(() => {
+        const newScale = computeScale(
+          { clientHeight: parentDimensions.height, clientWidth: parentDimensions.width },
+          childrenRef.current,
+          autoScaleParams?.minScale
+        );
+
+        // Prevent an infinite render loop
+        if (scale !== newScale) {
+          setScale(newScale);
+        }
+        if (parentDimensions.height && parentDimensions.width) {
+          setResized(true);
+        }
+      }, 0);
+    }, [
+      parentDimensions.height,
+      parentDimensions.width,
+      autoScaleParams?.minScale,
+      scale,
+      setResized,
+    ]);
+
+    useLayoutEffect(() => {
+      if (resized) {
+        renderComplete?.();
+      }
+    }, [renderComplete, resized]);
 
     return (
       <div ref={parentRef} style={autoScaleParams?.containerStyles} css={autoScaleWrapperStyle}>

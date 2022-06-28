@@ -86,7 +86,7 @@ export const getXyChartRenderer = ({
               renderMode={handlers.getRenderMode()}
               syncColors={handlers.isSyncColorsEnabled()}
               syncTooltips={handlers.isSyncTooltipsEnabled()}
-              renderComplete={handlers.done}
+              renderComplete={() => handlers.done()}
             />
           </div>{' '}
         </I18nProvider>
