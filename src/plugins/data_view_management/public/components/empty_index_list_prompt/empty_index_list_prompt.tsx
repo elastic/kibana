@@ -30,14 +30,12 @@ import { ApplicationStart } from '@kbn/core/public';
 
 export const EmptyIndexListPrompt = ({
   onRefresh,
-  closeFlyout,
   createAnyway,
   canSaveIndexPattern,
   addDataUrl,
   navigateToApp,
 }: {
   onRefresh: () => void;
-  closeFlyout: () => void;
   createAnyway: () => void;
   canSaveIndexPattern: boolean;
   addDataUrl: string;
@@ -46,13 +44,13 @@ export const EmptyIndexListPrompt = ({
   const createAnywayLink = (
     <EuiText color="subdued" textAlign="center" size="xs">
       <FormattedMessage
-        id="indexPatternEditor.createIndexPattern.emptyState.createAnywayTxt"
+        id="indexPatternManagement.createDataView.emptyState.createAnywayTxt"
         defaultMessage="You can also {link}"
         values={{
           link: (
             <EuiLink onClick={() => createAnyway()} data-test-subj="createAnyway">
               <FormattedMessage
-                id="indexPatternEditor.createDataView.emptyState.createAnywayLink"
+                id="indexPatternManagement.createDataView.emptyState.createAnywayLink"
                 defaultMessage="create a data view against hidden, system or default indices."
               />
             </EuiLink>
@@ -77,7 +75,7 @@ export const EmptyIndexListPrompt = ({
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="indexPatternEditor.createIndexPattern.emptyState.noDataTitle"
+                  id="indexPatternManagement.createDataView.emptyState.noDataTitle"
                   defaultMessage="Ready to try Kibana? First, you need data."
                 />
               </h2>
@@ -92,18 +90,17 @@ export const EmptyIndexListPrompt = ({
                 className="inpEmptyState__card"
                 onClick={() => {
                   navigateToApp('integrations', { path: '/browse' });
-                  closeFlyout();
                 }}
                 icon={<EuiIcon size="xl" type="database" color="subdued" />}
                 title={
                   <FormattedMessage
-                    id="indexPatternEditor.createIndexPattern.emptyState.integrationCardTitle"
+                    id="indexPatternManagement.createDataView.emptyState.integrationCardTitle"
                     defaultMessage="Add integration"
                   />
                 }
                 description={
                   <FormattedMessage
-                    id="indexPatternEditor.createIndexPattern.emptyState.integrationCardDescription"
+                    id="indexPatternManagement.createDataView.emptyState.integrationCardDescription"
                     defaultMessage="Add data from a variety of sources."
                   />
                 }
@@ -116,13 +113,13 @@ export const EmptyIndexListPrompt = ({
                 icon={<EuiIcon size="xl" type="document" color="subdued" />}
                 title={
                   <FormattedMessage
-                    id="indexPatternEditor.createIndexPattern.emptyState.uploadCardTitle"
+                    id="indexPatternManagement.createDataView.emptyState.uploadCardTitle"
                     defaultMessage="Upload a file"
                   />
                 }
                 description={
                   <FormattedMessage
-                    id="indexPatternEditor.createIndexPattern.emptyState.uploadCardDescription"
+                    id="indexPatternManagement.createDataView.emptyState.uploadCardDescription"
                     defaultMessage="Import a CSV, NDJSON, or log file."
                   />
                 }
@@ -133,18 +130,17 @@ export const EmptyIndexListPrompt = ({
                 className="inpEmptyState__card"
                 onClick={() => {
                   navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
-                  closeFlyout();
                 }}
                 icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
                 title={
                   <FormattedMessage
-                    id="indexPatternEditor.createIndexPattern.emptyState.sampleDataCardTitle"
+                    id="indexPatternManagement.createDataView.emptyState.sampleDataCardTitle"
                     defaultMessage="Add sample data"
                   />
                 }
                 description={
                   <FormattedMessage
-                    id="indexPatternEditor.createIndexPattern.emptyState.sampleDataCardDescription"
+                    id="indexPatternManagement.createDataView.emptyState.sampleDataCardDescription"
                     defaultMessage="Load a data set and a Kibana dashboard."
                   />
                 }
@@ -160,14 +156,14 @@ export const EmptyIndexListPrompt = ({
                     {
                       title: (
                         <FormattedMessage
-                          id="indexPatternEditor.createIndexPattern.emptyState.learnMore"
+                          id="indexPatternManagement.createDataView.emptyState.learnMore"
                           defaultMessage="Want to learn more?"
                         />
                       ),
                       description: (
                         <EuiLink href={addDataUrl} target="_blank" external>
                           <FormattedMessage
-                            id="indexPatternEditor.createIndexPattern.emptyState.readDocs"
+                            id="indexPatternManagement.createDataView.emptyState.readDocs"
                             defaultMessage="Read documentation"
                           />
                         </EuiLink>
@@ -182,14 +178,14 @@ export const EmptyIndexListPrompt = ({
                     {
                       title: (
                         <FormattedMessage
-                          id="indexPatternEditor.createIndexPattern.emptyState.haveData"
+                          id="indexPatternManagement.createDataView.emptyState.haveData"
                           defaultMessage="Think you already have data?"
                         />
                       ),
                       description: (
                         <EuiLink onClick={onRefresh} data-test-subj="refreshIndicesButton">
                           <FormattedMessage
-                            id="indexPatternEditor.createIndexPattern.emptyState.checkDataButton"
+                            id="indexPatternManagement.createDataView.emptyState.checkDataButton"
                             defaultMessage="Check for new data"
                           />{' '}
                           <EuiIcon type="refresh" size="s" />
