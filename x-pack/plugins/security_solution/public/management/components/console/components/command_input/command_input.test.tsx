@@ -9,12 +9,18 @@ import { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { ConsoleTestSetup, getConsoleTestSetup } from '../../mocks';
 import { ConsoleProps } from '../../types';
 import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../console_state/state_update_handlers/handle_input_area_state';
+import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('When entering data into the Console input', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let enterCommand: ConsoleTestSetup['enterCommand'];
   let typeText: ConsoleTestSetup['typeText'];
+
+  const showInputHistoryPopover = () => {
+    typeText('{ArrowUp}');
+  };
 
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
@@ -84,18 +90,70 @@ describe('When entering data into the Console input', () => {
 
   it('should display the input history popover when UP key is pressed', async () => {
     render();
-    typeText('{ArrowUp}');
+    showInputHistoryPopover();
 
     expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
   });
 
-  describe('and when the command input history popver is opened', () => {
-    it.todo('should clear the input area and show placeholder with first item that is focused');
+  describe('and when the command input history popover is opened', () => {
+    const renderWithInputHistory = (inputText: string = '') => {
+      render();
+      enterCommand('cmd1 --help');
+      enterCommand('help');
+      enterCommand('cmd2 --help');
+      enterCommand('clear');
 
-    it.todo(
-      'should return original value to input and clear placeholder if popup is closed with no selection'
-    );
+      if (inputText) {
+        enterCommand(inputText, { inputOnly: true });
+      }
 
-    it.todo('should add history item to the input area when selected and clear placeholder');
+      showInputHistoryPopover();
+    };
+
+    it('should clear the input area and show placeholder with first item that is focused', async () => {
+      renderWithInputHistory('one');
+
+      expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('');
+
+      waitFor(() => {
+        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
+          'cmd1 --help'
+        );
+      });
+    });
+
+    it('should return original value to input and clear placeholder if popup is closed with no selection', async () => {
+      renderWithInputHistory('one');
+
+      waitFor(() => {
+        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
+          'cmd1 --help'
+        );
+      });
+
+      userEvent.keyboard('{Escape}');
+
+      waitFor(() => {
+        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual('one');
+      });
+    });
+
+    it('should add history item to the input area when selected and clear placeholder', async () => {
+      renderWithInputHistory('one');
+
+      waitFor(() => {
+        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
+          'cmd1 --help'
+        );
+      });
+
+      userEvent.keyboard('{Enter}');
+
+      waitFor(() => {
+        expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual(
+          'cmd1 --help'
+        );
+      });
+    });
   });
 });
