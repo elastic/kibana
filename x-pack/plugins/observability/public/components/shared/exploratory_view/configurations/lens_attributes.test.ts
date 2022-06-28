@@ -439,7 +439,7 @@ describe('Lens Attribute', () => {
       formulaHelper
     ).getJSON();
     const query = multiSeriesLensAttr.state.query as Query;
-    expect(query).toEqual('transaction.duration.us < 60000000');
+    expect(query.query).toEqual('transaction.duration.us < 60000000');
   });
 
   describe('Layer breakdowns', function () {
