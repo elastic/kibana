@@ -6,20 +6,19 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import {FtrProviderContext} from '../../../ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({getService}: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
   describe('save', () => {
+    after('delete created pipeline', async () => {
+      await supertest
+        .delete('/api/logstash/pipeline/fast_generator')
+        .set('kbn-xsrf', 'xxx')
+        .expect(204);
 
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await supertest.get('/api/logstash/pipeline/fast_generator').expect(404);
     });
 
     it('should create the specified pipeline', async () => {
@@ -32,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(204);
 
-      const { body } = await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
+      const {body} = await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
 
       expect(body.description).to.eql('foobar baz');
     });
