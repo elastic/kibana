@@ -148,7 +148,6 @@ describe('<FindingsTable />', () => {
       const cellElement = screen.getByTestId(
         TEST_SUBJECTS.getFindingsTableCellTestId(column.field, row.resource.id)
       );
-      userEvent.hover(cellElement);
       const addFilterElement = within(cellElement).getByTestId(
         TEST_SUBJECTS.FINDINGS_TABLE_CELL_ADD_FILTER
       );

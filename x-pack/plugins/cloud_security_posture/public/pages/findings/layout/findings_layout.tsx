@@ -89,7 +89,7 @@ const baseColumns = [
     width: '15%',
     sortable: true,
     render: (filename: string) => (
-      <EuiToolTip position="top" content={filename}>
+      <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
         <span>{filename}</span>
       </EuiToolTip>
     ),
@@ -187,24 +187,25 @@ const FilterableCell: React.FC<{
     css={css`
       position: relative;
       width: 100%;
-      > div:nth-child(2) {
-        opacity: 0;
-      }
 
       &:hover {
-        > div:nth-child(2) {
+        > .__filter_buttons {
           opacity: 1;
+        }
+        > .__filter_value {
+          max-width: calc(100% - calc(${euiThemeVars.euiSizeL} * 2));
         }
       }
     `}
   >
-    <div className="eui-textTruncate">{children}</div>
+    <div className="__filter_value eui-textTruncate">{children}</div>
     <div
+      className="__filter_buttons"
       css={css`
+        opacity: 0;
         position: absolute;
         right: 0;
         top: 0;
-        background: ${euiThemeVars.euiColorEmptyShade};
         display: flex;
       `}
     >
