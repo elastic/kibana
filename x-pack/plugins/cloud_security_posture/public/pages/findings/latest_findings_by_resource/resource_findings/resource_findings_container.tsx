@@ -18,6 +18,7 @@ import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findi
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
 import {
+  addFilter,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -117,6 +118,18 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             })}
             setTableOptions={({ page }) =>
               setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+            }
+            onAddFilter={(field, value, negate) =>
+              setUrlQuery({
+                pageIndex: 0,
+                filters: addFilter({
+                  filters: urlQuery.filters,
+                  dataView,
+                  field,
+                  value,
+                  negate,
+                }),
+              })
             }
           />
         )}

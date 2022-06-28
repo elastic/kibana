@@ -14,7 +14,12 @@ import {
   EuiTableActionsColumnType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getExpandColumn, getFindingsColumns } from '../../layout/findings_layout';
+import {
+  baseFindingsColumns,
+  createColumnWithFilters,
+  getExpandColumn,
+  type OnAddFilter,
+} from '../../layout/findings_layout';
 import type { CspFinding } from '../../types';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
 
@@ -23,17 +28,34 @@ interface Props {
   loading: boolean;
   pagination: Pagination;
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
+  onAddFilter: OnAddFilter;
 }
 
-const ResourceFindingsTableComponent = ({ items, loading, pagination, setTableOptions }: Props) => {
+const ResourceFindingsTableComponent = ({
+  items,
+  loading,
+  pagination,
+  setTableOptions,
+  onAddFilter,
+}: Props) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
   const columns: [
     EuiTableActionsColumnType<CspFinding>,
     ...Array<EuiBasicTableColumn<CspFinding>>
   ] = useMemo(
-    () => [getExpandColumn<CspFinding>({ onClick: setSelectedFinding }), ...getFindingsColumns()],
-    []
+    () => [
+      getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
+      baseFindingsColumns['resource.id'],
+      createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
+      baseFindingsColumns['rule.section'],
+      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
+      baseFindingsColumns['@timestamp'],
+    ],
+    [onAddFilter]
   );
   if (!loading && !items.length)
     return (
