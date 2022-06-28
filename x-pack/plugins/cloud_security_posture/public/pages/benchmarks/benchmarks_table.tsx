@@ -71,7 +71,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     ),
     truncateText: true,
     sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMN_HEADERS.INTEGRATION,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
   },
   {
     field: 'rules',
@@ -86,7 +86,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
         values={{ enabled, all }}
       />
     ),
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMN_HEADERS.ACTIVE_RULES,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.ACTIVE_RULES,
   },
   {
     field: 'package_policy.package.title',
@@ -96,7 +96,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     dataType: 'string',
     truncateText: true,
     sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMN_HEADERS.INTEGRATION_TYPE,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_TYPE,
   },
   {
     field: 'agent_policy.name',
@@ -107,7 +107,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
       <AgentPolicyButtonLink name={name} id={benchmark.agent_policy.id} />
     ),
     truncateText: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMN_HEADERS.AGENT_POLICY,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.AGENT_POLICY,
   },
   {
     field: 'agent_policy.agents',
@@ -115,7 +115,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
       defaultMessage: 'Number of Agents',
     }),
     truncateText: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMN_HEADERS.NUMBER_OF_AGENTS,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.NUMBER_OF_AGENTS,
   },
   {
     field: 'package_policy.created_by',
@@ -125,7 +125,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     dataType: 'string',
     truncateText: true,
     sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMN_HEADERS.CREATED_BY,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_BY,
   },
   {
     field: 'package_policy.created_at',
@@ -136,7 +136,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     render: (date: Benchmark['package_policy']['created_at']) => moment(date).fromNow(),
     sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMN_HEADERS.CREATED_AT,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_AT,
   },
 ];
 
