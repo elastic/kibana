@@ -14,6 +14,7 @@ import type { Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
 import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
 import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { ObservabilityTour } from '../tour';
@@ -63,6 +64,10 @@ export function ObservabilityPageTemplate({
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
   const sharedUXServices = getSharedUXContext();
+
+  const { services } = useKibana();
+
+  const kibanaAnnouncementsDisabled = Boolean(services.uiSettings?.get('hideAnnouncements'));
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
@@ -132,7 +137,8 @@ export function ObservabilityPageTemplate({
         navigateToApp={navigateToApp}
         isPageDataLoaded={isPageDataLoaded}
         // The tour is dependent on the solution nav, and should not render if it is not visible
-        showTour={showSolutionNav}
+        // It should also not render if Kibana announcements are disabled in settings
+        showTour={showSolutionNav && kibanaAnnouncementsDisabled !== true}
       >
         {({ isTourVisible }) => {
           return (
