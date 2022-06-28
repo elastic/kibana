@@ -9,7 +9,6 @@
 import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum';
 import { modifyUrl } from '@kbn/std';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
-import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { CachedResourceObserver } from './apm_resource_counter';
 import type { InternalApplicationStart } from './application';
 
@@ -71,7 +70,7 @@ export class ApmSystem {
     this.executionContext = start.executionContext;
     this.markPageLoadStart();
 
-    start.executionContext.context$.subscribe((c: KibanaExecutionContext) => {
+    start.executionContext.context$.subscribe((c) => {
       // We're using labels because we want the context to be indexed
       // https://www.elastic.co/guide/en/apm/get-started/current/metadata.html
       const apmContext = start.executionContext.getAsLabels();

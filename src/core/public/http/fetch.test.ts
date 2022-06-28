@@ -11,7 +11,7 @@ import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { first } from 'rxjs/operators';
-import { executionContextServiceMock } from '../mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';

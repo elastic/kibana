@@ -15,9 +15,9 @@ import {
   fatalErrorsServiceMock,
   injectedMetadataServiceMock,
   docLinksServiceMock,
-  executionContextServiceMock,
 } from '@kbn/core/public/mocks';
 import { HttpService } from '@kbn/core/public/http';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 import { PolicyFromES } from '../common/types';
