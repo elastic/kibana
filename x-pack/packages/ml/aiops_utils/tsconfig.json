@@ -7,6 +7,10 @@
     "rootDir": "src",
     "stripInternal": false,
     "types": [
+      "d3-brush",
+      "d3-scale",
+      "d3-selection",
+      "d3-transition",
       "jest",
       "node",
       "react"

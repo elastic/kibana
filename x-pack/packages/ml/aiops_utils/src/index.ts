@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { DualBrush, DualBrushAnnotation } from './components/dual_brush';
 export { ProgressControls } from './components/progress_controls';
 export { getWindowParameters } from './lib/get_window_parameters';
 export type { WindowParameters } from './lib/get_window_parameters';
