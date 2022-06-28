@@ -13,7 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType } from '@elastic/eui';
+import type { IconType, EuiFlyoutSize } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
@@ -50,7 +50,10 @@ import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
-import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
+import type {
+  RuleTagBadgeProps,
+  RuleTagBadgeOptions,
+} from './application/sections/rules_list/components/rule_tag_badge';
 import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
@@ -90,6 +93,7 @@ export type {
   RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleTagBadgeOptions,
   RuleEventLogListProps,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -386,7 +390,7 @@ export interface AlertsTableProps {
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
-  flyoutState: AlertsTableFlyoutState;
+  flyoutSize?: EuiFlyoutSize;
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
@@ -412,15 +416,10 @@ export type AlertTableFlyoutComponent =
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
-  externalFlyout?: {
-    header?: AlertTableFlyoutComponent;
-    body?: AlertTableFlyoutComponent;
-    footer?: AlertTableFlyoutComponent;
-  };
   useInternalFlyout?: () => {
-    header?: AlertTableFlyoutComponent;
-    body?: AlertTableFlyoutComponent;
-    footer?: AlertTableFlyoutComponent;
+    header: AlertTableFlyoutComponent;
+    body: AlertTableFlyoutComponent;
+    footer: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
@@ -429,11 +428,6 @@ export interface AlertsTableConfigurationRegistry {
 export interface AlertsTableFlyoutBaseProps {
   alert: EcsFieldsResponse;
   isLoading: boolean;
-}
-
-export enum AlertsTableFlyoutState {
-  internal = 'internal',
-  external = 'external',
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

@@ -6750,7 +6750,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nSaved object id"
+              "\nSaved object id (or generated id if in-memory only)"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
@@ -11048,10 +11048,6 @@
               "path": "x-pack/plugins/stack_alerts/public/alert_types/threshold/expression.tsx"
             },
             {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/indexpattern_datasource/dimension_panel/droppable/droppable.test.ts"
-            },
-            {
               "plugin": "visTypeTable",
               "path": "src/plugins/vis_types/table/public/plugin.ts"
             },
@@ -11855,6 +11851,21 @@
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
               "; }"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataView.isPersisted",
+            "type": "Function",
+            "tags": [],
+            "label": "isPersisted",
+            "description": [],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -13796,7 +13807,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "(spec: ",
+              "({ id, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -13822,10 +13833,8 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "spec",
-                "description": [
-                  "data view spec"
-                ],
+                "label": "{ id, ...restOfSpec }",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -14027,7 +14036,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -18277,6 +18286,21 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataView.isPersisted",
+            "type": "Function",
+            "tags": [],
+            "label": "isPersisted",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataView.toSpec",
             "type": "Function",
             "tags": [],
@@ -20917,7 +20941,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "(spec: ",
+              "({ id, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20943,10 +20967,8 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "spec",
-                "description": [
-                  "data view spec"
-                ],
+                "label": "{ id, ...restOfSpec }",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -21148,7 +21170,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -22145,7 +22167,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nSaved object id"
+              "\nSaved object id (or generated id if in-memory only)"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
@@ -23084,7 +23106,7 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ create: (spec: ",
+          "{ create: ({ id, ...restOfSpec }: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23668,16 +23690,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_INDEX_PATTERN",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
@@ -23688,30 +23700,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
             "label": "ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_ENDPOINT_INDEX_TO_IGNORE",
             "description": [],
             "path": "src/plugins/data_views/common/constants.ts",
             "deprecated": false

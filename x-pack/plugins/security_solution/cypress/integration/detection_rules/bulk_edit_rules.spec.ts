@@ -14,6 +14,7 @@ import {
   RULES_TAGS_FILTER_BTN,
   RULE_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
+  RULES_TABLE_REFRESH_INDICATOR,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -123,6 +124,8 @@ describe('Detection rules, bulk edit', () => {
 
     // check if rule has been updated
     cy.get(CUSTOM_RULES_BTN).click();
+    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
+    cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
     goToTheRuleDetailsOf(RULE_NAME);
     hasIndexPatterns([...DEFAULT_INDEX_PATTERNS, CUSTOM_INDEX_PATTERN_1].join(''));
   });
