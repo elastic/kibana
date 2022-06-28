@@ -13,12 +13,14 @@ import {
   EuiLink,
   EuiHorizontalRule,
   EuiDescriptionList,
+  EuiFlyoutBody,
 } from '@elastic/eui';
 import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
@@ -27,22 +29,17 @@ import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { translations, paths } from '../../../../config';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
-import { parseAlert } from '../parse_alert';
 import { FlyoutProps } from './types';
 
 // eslint-disable-next-line import/no-default-export
 export default function AlertsFlyoutBody(props: FlyoutProps) {
-  const { observabilityRuleTypeRegistry } = usePluginContext();
-  const alert = props.alert.start
-    ? props.alert
-    : parseAlert(observabilityRuleTypeRegistry)(props.alert as unknown as Record<string, unknown>);
+  const alert = props.alert;
   const { services } = useKibana();
   const { http } = services;
   const dateFormat = useUiSetting<string>('dateFormat');
   const prepend = http?.basePath.prepend;
-  const ruleId = get(props.alert, 'kibana.alert.rule.uuid') ?? null;
-  const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
+  const ruleId = get(props.alert.fields, ALERT_RULE_UUID) ?? null;
+  const linkToRule = ruleId && prepend ? prepend(paths.observability.ruleDetails(ruleId)) : null;
   const overviewListItems = [
     {
       title: translations.alertsFlyout.statusLabel,
@@ -53,9 +50,17 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
       ),
     },
     {
-      title: translations.alertsFlyout.lastUpdatedLabel,
+      title: translations.alertsFlyout.startedAtLabel,
       description: (
         <span title={alert.start.toString()}>{moment(alert.start).format(dateFormat)}</span>
+      ),
+    },
+    {
+      title: translations.alertsFlyout.lastUpdatedLabel,
+      description: (
+        <span title={alert.lastUpdated.toString()}>
+          {moment(alert.lastUpdated).format(dateFormat)}
+        </span>
       ),
     },
     {
@@ -77,7 +82,7 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
   ];
 
   return (
-    <>
+    <EuiFlyoutBody>
       <EuiTitle size="xs">
         <h4>{translations.alertsFlyout.reasonTitle}</h4>
       </EuiTitle>
@@ -105,6 +110,6 @@ export default function AlertsFlyoutBody(props: FlyoutProps) {
           'data-test-subj': 'alertsFlyoutDescriptionListDescription',
         }}
       />
-    </>
+    </EuiFlyoutBody>
   );
 }
