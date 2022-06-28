@@ -28,6 +28,7 @@ const getFormatter = (
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
   const formatId = serializedFieldFormat?.id ?? 'number';
+
   if (!['number', 'currency', 'percent', 'bytes', 'duration'].includes(formatId)) {
     throw new Error(
       i18n.translate('newMetricVis.errors.unsupportedColumnFormat', {
@@ -39,13 +40,24 @@ const getFormatter = (
     );
   }
 
+  if (formatId === 'duration') {
+    const formatter = getFormatService().deserialize({
+      ...serializedFieldFormat,
+      params: {
+        ...serializedFieldFormat!.params,
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        useShortSuffix: true,
+      },
+    });
+    return formatter.getConverterFor('text');
+  }
+
   const locale = String(numeral.language());
 
-  const intlOptions: Intl.NumberFormatOptions = {};
-
-  if (formatId !== 'duration') {
-    intlOptions.maximumFractionDigits = 2;
-  }
+  const intlOptions: Intl.NumberFormatOptions = {
+    maximumFractionDigits: 2,
+  };
 
   if (['number', 'currency', 'percent'].includes(formatId)) {
     intlOptions.notation = 'compact';
@@ -65,20 +77,7 @@ const getFormatter = (
     intlOptions.style = 'percent';
   }
 
-  if (formatId === 'duration') {
-    const formatter = getFormatService().deserialize({
-      ...serializedFieldFormat,
-      params: {
-        ...serializedFieldFormat!.params,
-        outputFormat: 'humanizePrecise',
-        outputPrecision: 1,
-        useShortSuffix: true,
-      },
-    });
-    return formatter.getConverterFor('text');
-  } else {
-    return new Intl.NumberFormat(locale, intlOptions).format;
-  }
+  return new Intl.NumberFormat(locale, intlOptions).format;
 };
 
 const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
