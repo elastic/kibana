@@ -24,6 +24,11 @@ import {
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
 import type { CoreTheme, OverlayStart } from '@kbn/core/public';
+import {
+  composeValidators,
+  numberValidator,
+  requiredValidator,
+} from '../../../../common/util/validators';
 
 interface StartDeploymentSetup {
   config: ThreadingParams;
@@ -82,6 +87,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
       >
         <EuiFieldNumber
           min={1}
+          step={1}
           name={'numOfAllocations'}
           value={numOfAllocation}
           onChange={(event) => {
@@ -147,6 +153,13 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
     threadsPerAllocations: 1,
   });
 
+  const numOfAllocationsValidator = composeValidators(
+    requiredValidator(),
+    numberValidator({ min: 1, integerOnly: true })
+  );
+
+  const errors = numOfAllocationsValidator(config.numOfAllocations);
+
   return (
     <EuiModal onClose={onClose} initialFocus="[name=numOfAllocations]">
       <EuiModalHeader>
@@ -178,6 +191,7 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
           form={'startDeploymentForm'}
           onClick={onConfigChange.bind(null, config)}
           fill
+          disabled={!!errors}
         >
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.startButton"
