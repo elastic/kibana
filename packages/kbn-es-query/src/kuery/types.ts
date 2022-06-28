@@ -48,3 +48,13 @@ export interface KueryQueryOptions {
    */
   nestedIgnoreUnmapped?: boolean;
 }
+
+/** @public */
+export interface KqlContext {
+  nested?: {
+    /**
+     * For nested queries, we pass along the path to the nested document so we can properly craft the query DSL.
+     */
+    path: string;
+  };
+}

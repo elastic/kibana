@@ -12,7 +12,8 @@ import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../..';
+import type { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../..';
+import type { KqlContext } from '../types';
 
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
@@ -40,7 +41,7 @@ export function toElasticsearchQuery(
   node: KueryNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context: Record<string, any> = {}
+  context: KqlContext = {}
 ): estypes.QueryDslQueryContainer {
   const {
     arguments: [fieldNameArg, valueArg],
