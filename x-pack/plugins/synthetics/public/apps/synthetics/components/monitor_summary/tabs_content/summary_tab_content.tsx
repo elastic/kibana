@@ -17,7 +17,7 @@ export const SummaryTabContent = () => {
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
         <EuiPanel>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3>{MONITOR_DETAILS_LABEL}</h3>
           </EuiTitle>
           <MonitorDetailsPanel />

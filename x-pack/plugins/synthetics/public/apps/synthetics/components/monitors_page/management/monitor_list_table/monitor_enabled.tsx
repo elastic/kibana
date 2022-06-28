@@ -76,6 +76,7 @@ export const MonitorEnabled = ({ id, monitor, reloadPage, initialLoading }: Prop
         <EuiLoadingSpinner size="m" />
       ) : (
         <EuiSwitch
+          compressed={true}
           checked={enabled}
           disabled={isLoading || isDisabled}
           showLabel={false}
