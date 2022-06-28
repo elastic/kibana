@@ -167,9 +167,13 @@ export class Vis<TVisParams = VisParams> {
       const configStates = this.initializeDefaultsFromSchemas(aggs, this.type.schemas.all || []);
 
       if (!this.data.indexPattern && aggs.length) {
+        const dataViewId =
+          typeof state.data.searchSource?.index === 'string'
+            ? state.data.searchSource?.index
+            : state.data.searchSource?.index?.id;
         this.data.indexPattern = new DataView({
           spec: {
-            id: state.data.savedSearchId ?? state.data.searchSource?.index,
+            id: state.data.savedSearchId ?? dataViewId,
           },
           fieldFormats: getFieldsFormats(),
         });

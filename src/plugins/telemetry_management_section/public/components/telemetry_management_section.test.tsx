@@ -26,7 +26,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const telemetryService = new TelemetryService({
       config: {
         sendUsageTo: 'staging',
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: true,
@@ -57,7 +56,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -109,7 +107,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -155,7 +152,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: true,
@@ -192,7 +188,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -233,7 +228,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: true,
         optIn: false,
@@ -281,7 +275,6 @@ describe('TelemetryManagementSectionComponent', () => {
     const onQueryMatchChange = jest.fn();
     const telemetryService = new TelemetryService({
       config: {
-        enabled: true,
         banner: true,
         allowChangingOptInStatus: false,
         optIn: false,

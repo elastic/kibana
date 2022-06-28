@@ -84,7 +84,13 @@ export const PageLayout = memo<PageLayoutProps>(
 
     const headerTitleContainer = useMemo(() => {
       return hideHeader ? null : (
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart" wrap={false}>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          alignItems="flexStart"
+          wrap={false}
+          responsive={false}
+        >
           {headerBackComponent && <EuiFlexItem grow={false}>{headerBackComponent}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">

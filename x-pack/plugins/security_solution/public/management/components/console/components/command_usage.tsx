@@ -17,32 +17,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getArgumentsForCommand } from '../service/parsed_command_input';
 import { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
-
-const getArgumentsForCommand = (command: CommandDefinition): string => {
-  let requiredArgs = '';
-  let optionalArgs = '';
-
-  if (command.args) {
-    for (const [argName, argDefinition] of Object.entries(command.args)) {
-      if (argDefinition.required) {
-        if (requiredArgs.length) {
-          requiredArgs += ' ';
-        }
-        requiredArgs += `--${argName}`;
-      } else {
-        if (optionalArgs.length) {
-          optionalArgs += ' ';
-        }
-        optionalArgs += `--${argName}`;
-      }
-    }
-  }
-
-  return `${requiredArgs} ${optionalArgs.length > 0 ? `[${optionalArgs}]` : ''}`.trim();
-};
 
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
   const usageHelp = useMemo(() => {
