@@ -3384,7 +3384,7 @@ Object {
 }
 `;
 
-exports[`data modeling with metrics in the data 1`] = `
+exports[`data modeling with metrics and execution times in the data 1`] = `
 Object {
   "PNG": Object {
     "app": Object {
@@ -3823,7 +3823,11 @@ Object {
     "available": true,
     "deprecated": 0,
     "error_codes": Object {},
-    "execution_times": Object {},
+    "execution_times": Object {
+      "avg": 13.01,
+      "max": 14,
+      "min": 12,
+    },
     "layout": Object {
       "canvas": 0,
       "preserve_layout": 0,
