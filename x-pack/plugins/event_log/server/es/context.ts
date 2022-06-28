@@ -70,13 +70,17 @@ class EsContextImpl implements EsContext {
         this.logger.debug(`readySignal.signal(${success})`);
         this.readySignal.signal(success);
       } catch (err) {
-        this.logger.debug('readySignal.signal(false)');
+        this.logger.debug(`readySignal.signal(false), reason: ${err.message}`);
         this.readySignal.signal(false);
       }
     });
   }
 
   async shutdown() {
+    if (!this.readySignal.isEmitted()) {
+      this.logger.debug('readySignal.signal(false); reason: Kibana server is shutting down');
+      this.readySignal.signal(false);
+    }
     await this.esAdapter.shutdown();
   }
 
