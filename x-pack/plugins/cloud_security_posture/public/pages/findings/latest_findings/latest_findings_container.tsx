@@ -125,7 +125,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 const LatestFindingsPageTitle = () => (
   <PageTitle>
     <PageTitleText
-      title={<FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />}
+      title={
+        <FormattedMessage
+          id="xpack.csp.findings.latestFindings.latestFindingsPageTitle"
+          defaultMessage="Findings"
+        />
+      }
     />
   </PageTitle>
 );
