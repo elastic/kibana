@@ -32,11 +32,6 @@ import { EphemeralTask } from './task';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
-
-// TODO - This value will eventually be replaced by a boolean passed into the plugin start
-// contract that is based on the current Kibana's role
-// https://github.com/elastic/kibana/issues/134275
-const shouldRunTasks: boolean = true;
 export interface TaskManagerSetupContract {
   /**
    * @deprecated
@@ -71,6 +66,7 @@ export class TaskManagerPlugin
   private middleware: Middleware = createInitialMiddleware();
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
+  private shouldRunBackgroundTasks: boolean;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(private readonly initContext: PluginInitializerContext) {
@@ -79,6 +75,7 @@ export class TaskManagerPlugin
     this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
     this.kibanaVersion = initContext.env.packageInfo.version;
+    this.shouldRunBackgroundTasks = initContext.node.roles.backgroundTasks;
   }
 
   public setup(
@@ -118,7 +115,7 @@ export class TaskManagerPlugin
       kibanaIndexName: core.savedObjects.getKibanaIndex(),
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
-      shouldRunTasks,
+      shouldRunTasks: this.shouldRunBackgroundTasks,
     });
 
     core.status.derivedStatus$.subscribe((status) =>
@@ -192,7 +189,7 @@ export class TaskManagerPlugin
     });
 
     // Only poll for tasks if configured to run tasks
-    if (shouldRunTasks) {
+    if (this.shouldRunBackgroundTasks) {
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -247,7 +244,8 @@ export class TaskManagerPlugin
       runSoon: (...args) => taskScheduling.runSoon(...args),
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
-      supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled && shouldRunTasks,
+      supportsEphemeralTasks: () =>
+        this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
     };
   }
 
