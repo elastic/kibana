@@ -13,4 +13,4 @@ export const PLUGIN_NAME = 'files' as const;
  */
 export const FILE_SO_TYPE = 'file';
 
-export const ES_SINGLE_INDEX_BLOB_STORE = 'esSingleIndex' as const;
+export const ES_FIXED_SIZE_INDEX_BLOB_STORE = 'esFixedSizeIndex' as const;

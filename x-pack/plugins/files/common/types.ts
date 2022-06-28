@@ -7,7 +7,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObject } from '@kbn/core/server';
 import type { Readable } from 'stream';
-import type { ES_SINGLE_INDEX_BLOB_STORE } from './constants';
+import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
 export type FileStatus = 'AWAITING_UPLOAD' | 'UPLOADING' | 'READY' | 'UPLOAD_ERROR' | 'DELETED';
 
@@ -127,7 +127,7 @@ export interface BlobStorageSettings {
   /**
    * Single index that supports up to 50GB of blobs
    */
-  [ES_SINGLE_INDEX_BLOB_STORE]?: {
+  [ES_FIXED_SIZE_INDEX_BLOB_STORE]?: {
     index: string;
   };
   // Other blob store settings will go here once available
