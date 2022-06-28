@@ -23690,16 +23690,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_INDEX_PATTERN",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
@@ -23710,30 +23700,10 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
             "label": "ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_ENDPOINT_INDEX_TO_IGNORE",
             "description": [],
             "path": "src/plugins/data_views/common/constants.ts",
             "deprecated": false
