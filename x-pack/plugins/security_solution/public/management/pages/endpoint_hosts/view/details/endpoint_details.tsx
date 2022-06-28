@@ -14,7 +14,6 @@ import { getEndpointDetailsPath } from '../../../../common/routing';
 import {
   detailsData,
   detailsError,
-  getActivityLogData,
   hostStatusInfo,
   policyVersionInfo,
   showView,
@@ -29,14 +28,13 @@ import {
 } from './components/endpoint_details_tabs';
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
-import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsContent } from './endpoint_details_content';
+import { ResponseActionsList } from '../../../response_actions/view/response_actions_list';
 
 export const EndpointDetails = memo(() => {
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
 
-  const activityLog = useEndpointSelector(getActivityLogData);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsError = useEndpointSelector(detailsError);
 
@@ -84,10 +82,10 @@ export const EndpointDetails = memo(() => {
           name: 'endpointActivityLog',
           selected_endpoint: id,
         }),
-        content: <EndpointActivityLog activityLog={activityLog} />,
+        content: <ResponseActionsList hideHeader agentIds={id} />,
       },
     ],
-    [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, activityLog, queryParams]
+    [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, queryParams]
   );
 
   const showFlyoutFooter =
