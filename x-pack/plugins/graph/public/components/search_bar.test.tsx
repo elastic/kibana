@@ -91,7 +91,9 @@ describe('search_bar', () => {
   const defaultProps = {
     isLoading: false,
     indexPatternProvider: {
-      get: jest.fn(() => Promise.resolve({ fields: [] } as unknown as DataView)),
+      get: jest.fn(() =>
+        Promise.resolve({ fields: [], getName: () => 'Test Name' } as unknown as DataView)
+      ),
     },
     confirmWipeWorkspace: (callback: () => void) => {
       callback();

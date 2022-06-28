@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { CoreTheme, I18nStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -51,8 +51,14 @@ export function OptionsPopover(props: OptionsPopoverProps) {
         defaultMessage: 'Document Explorer',
       });
 
+  const { anchorElement, onClose: originalOnClose } = props;
+  const closePopover = useCallback(() => {
+    originalOnClose();
+    anchorElement?.focus();
+  }, [anchorElement, originalOnClose]);
+
   return (
-    <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={props.onClose} isOpen>
+    <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={closePopover} isOpen>
       <div className="dscOptionsPopover">
         <EuiText color="subdued" size="s">
           <p>

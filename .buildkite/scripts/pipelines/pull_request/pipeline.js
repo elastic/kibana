@@ -104,6 +104,10 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
 
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/observability/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/observability_plugin.yml'));
+    }
+
     if (await doAnyChangesMatch([/^x-pack\/plugins\/synthetics/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
     }
