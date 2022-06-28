@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should emit a "click" event', async () => {
-      const [event] = await ebtUIHelper.getEvents(1, ['click']);
+      const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['click'] });
       expect(event.event_type).to.eql('click');
       expect(event.properties.target).to.be.an('array');
       const targets = event.properties.target as string[];

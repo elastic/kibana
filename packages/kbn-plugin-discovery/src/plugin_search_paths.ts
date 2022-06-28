@@ -25,7 +25,7 @@ export function getPluginSearchPaths({ rootDir, oss, examples, testPlugins }: Se
     resolve(rootDir, '..', 'kibana-extra'),
     ...(testPlugins
       ? [
-          resolve(rootDir, 'test/analytics/__fixtures__/plugins'),
+          resolve(rootDir, 'test/analytics/fixtures/plugins'),
           resolve(rootDir, 'test/plugin_functional/plugins'),
           resolve(rootDir, 'test/interpreter_functional/plugins'),
           resolve(rootDir, 'test/common/fixtures/plugins'),

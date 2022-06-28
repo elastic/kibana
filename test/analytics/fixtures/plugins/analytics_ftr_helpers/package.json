@@ -1,7 +1,7 @@
 {
   "name": "analytics_ftr_helpers",
   "version": "1.0.0",
-  "main": "target/test/analytics/__fixtures__/plugins/analytics_ftr_helpers",
+  "main": "target/test/analytics/fixtures/plugins/analytics_ftr_helpers",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
