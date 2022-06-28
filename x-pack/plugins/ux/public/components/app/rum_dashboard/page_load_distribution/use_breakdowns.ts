@@ -15,7 +15,6 @@ import { callDateMath } from '../../../../services/data/call_date_math';
 import { getPageLoadDistBreakdown } from '../../../../services/data/page_load_distribution_breakdown_query';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { PercentileRange } from './types';
-import { useUxQuery } from '../hooks/use_ux_query';
 
 interface Props {
   percentileRange?: PercentileRange;
@@ -30,7 +29,6 @@ export const useBreakdowns = ({
   value,
 }: Props) => {
   const { urlParams, uxUiFilters } = useLegacyUrlParams();
-  useUxQuery();
   const { start: startString, end: endString } = urlParams;
   const start = callDateMath(startString);
   const end = callDateMath(endString);
