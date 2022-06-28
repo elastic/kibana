@@ -91,7 +91,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
         description={
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsHelp"
-            defaultMessage="Increasing the number of allocations will increase throughput, providing your ML nodes have sufficient processors."
+            defaultMessage="Increase to improve throughput of all requests."
           />
         }
       >
@@ -130,7 +130,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
         description={
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationHelp"
-            defaultMessage="Increasing threads per allocation will decrease latency, providing your ML nodes have sufficient processors."
+            defaultMessage="Increase to improve latency for each request."
           />
         }
       >
