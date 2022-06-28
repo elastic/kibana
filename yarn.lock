@@ -2919,6 +2919,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-components@link:bazel-bin/x-pack/packages/ml/aiops_components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/aiops-utils@link:bazel-bin/x-pack/packages/ml/aiops_utils":
   version "0.0.0"
   uid ""
@@ -6390,6 +6394,10 @@
     "@types/node" "*"
 
 "@types/kbn__ace@link:bazel-bin/packages/kbn-ace/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__aiops-components@link:bazel-bin/x-pack/packages/ml/aiops_components/npm_module_types":
   version "0.0.0"
   uid ""
 

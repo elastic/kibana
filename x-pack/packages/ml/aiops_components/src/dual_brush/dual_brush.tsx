@@ -7,17 +7,20 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import { brush, brushSelection, brushX } from 'd3-brush';
-import type { BrushBehavior } from 'd3-brush';
-import { scaleLinear } from 'd3-scale';
-// Import fix to apply correct types for the use of d3.select(this).transition()
-import { select as d3Select, BaseType } from 'd3-selection';
-import { transition as d3Transition } from 'd3-transition';
-d3Select.prototype.transition = d3Transition;
+import * as d3Brush from 'd3-brush';
+import * as d3Scale from 'd3-scale';
+import * as d3Selection from 'd3-selection';
+import * as d3Transition from 'd3-transition';
 
-import type { WindowParameters } from '../../lib/get_window_parameters';
+import type { WindowParameters } from '@kbn/aiops-utils';
 
 import './dual_brush.scss';
+
+const { brush, brushSelection, brushX } = d3Brush;
+const { scaleLinear } = d3Scale;
+const { select: d3Select } = d3Selection;
+// Import fix to apply correct types for the use of d3.select(this).transition()
+d3Select.prototype.transition = d3Transition.transition;
 
 const d3 = {
   brush,
@@ -39,7 +42,7 @@ const isBrushXSelection = (arg: unknown): arg is [number, number] => {
 
 interface DualBrush {
   id: string;
-  brush: BrushBehavior<DualBrush>;
+  brush: d3Brush.BrushBehavior<DualBrush>;
   start: number;
   end: number;
 }
@@ -84,7 +87,7 @@ export function DualBrush({
           end,
         });
 
-        function brushend(this: BaseType) {
+        function brushend(this: d3Selection.BaseType) {
           const currentWidth = widthRef.current;
 
           const x = d3.scaleLinear().domain([min, max]).rangeRound([0, currentWidth]);

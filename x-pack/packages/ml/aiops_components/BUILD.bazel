@@ -2,11 +2,12 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "aiops_utils"
-PKG_REQUIRE_NAME = "@kbn/aiops-utils"
+PKG_DIRNAME = "aiops_components"
+PKG_REQUIRE_NAME = "@kbn/aiops-components"
 
 SOURCE_FILES = glob(
   [
+    "src/**/*.scss",
     "src/**/*.ts",
     "src/**/*.tsx",
   ],
@@ -37,11 +38,15 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//d3-brush",
+  "@npm//d3-scale",
+  "@npm//d3-selection",
+  "@npm//d3-transition",
   "@npm//react",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "//packages/kbn-i18n-react",
-  "//packages/kbn-logging"
+  "//x-pack/packages/ml/aiops_utils",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -54,13 +59,17 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
+  "@npm//@types/d3-brush",
+  "@npm//@types/d3-scale",
+  "@npm//@types/d3-selection",
+  "@npm//@types/d3-transition",
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-logging:npm_module_types"
+  "//x-pack/packages/ml/aiops_utils:npm_module_types",
 ]
 
 jsts_transpiler(
@@ -74,6 +83,10 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
