@@ -2,6 +2,7 @@
 
 exports[`use case card should render use case card component for observability 1`] = `
 <EuiCard
+  data-test-subj="onboarding--observabilityUseCaseCard"
   description={
     <EuiText
       color="subdued"
@@ -50,6 +51,7 @@ exports[`use case card should render use case card component for observability 1
 
 exports[`use case card should render use case card component for search 1`] = `
 <EuiCard
+  data-test-subj="onboarding--searchUseCaseCard"
   description={
     <EuiText
       color="subdued"
@@ -98,6 +100,7 @@ exports[`use case card should render use case card component for search 1`] = `
 
 exports[`use case card should render use case card component for security 1`] = `
 <EuiCard
+  data-test-subj="onboarding--securityUseCaseCard"
   description={
     <EuiText
       color="subdued"
