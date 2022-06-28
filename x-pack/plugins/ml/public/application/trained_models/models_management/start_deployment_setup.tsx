@@ -22,6 +22,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiSpacer,
+  EuiDescribedFormGroup,
 } from '@elastic/eui';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
@@ -73,63 +74,87 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
 
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsLabel"
-            defaultMessage="Number of allocations"
-          />
+      <EuiDescribedFormGroup
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsLabel"
+              defaultMessage="Number of allocations"
+            />
+          </h3>
         }
-        hasChildLabel={false}
-        helpText={
+        description={
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsHelp"
-            defaultMessage="Each allocation means the model gets another thread for executing parallel inference requests"
+            defaultMessage="Increasing the number of allocations will increase throughput, providing your ML nodes have sufficient processors."
           />
         }
       >
-        <EuiFieldNumber
-          min={1}
-          step={1}
-          name={'numOfAllocations'}
-          value={numOfAllocation}
-          onChange={(event) => {
-            onConfigChange({ ...config, numOfAllocations: Number(event.target.value) });
-          }}
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
-            defaultMessage="Threads per allocation"
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.numbersOfAllocationsLabel"
+              defaultMessage="Number of allocations"
+            />
+          }
+          hasChildLabel={false}
+        >
+          <EuiFieldNumber
+            fullWidth
+            min={1}
+            step={1}
+            name={'numOfAllocations'}
+            value={numOfAllocation}
+            onChange={(event) => {
+              onConfigChange({ ...config, numOfAllocations: Number(event.target.value) });
+            }}
           />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      <EuiDescribedFormGroup
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
+              defaultMessage="Threads per allocation"
+            />
+          </h3>
         }
-        hasChildLabel={false}
-        helpText={
+        description={
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationHelp"
-            defaultMessage="Each allocation is may be using a number of threads to parallelize each individual inference request"
+            defaultMessage="Increasing threads per allocation will decrease latency, providing your ML nodes have sufficient processors."
           />
         }
       >
-        <EuiButtonGroup
-          legend={i18n.translate(
-            'xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLegend',
-            {
-              defaultMessage: 'Threads per allocation selector',
-            }
-          )}
-          name={'threadsPerAllocation'}
-          idSelected={toggleIdSelected}
-          onChange={(optionId) => {
-            const value = threadsPerAllocationsOptions.find((v) => v.id === optionId)!.value;
-            onConfigChange({ ...config, threadsPerAllocations: value });
-          }}
-          options={threadsPerAllocationsOptions}
-        />
-      </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLabel"
+              defaultMessage="Threads per allocation"
+            />
+          }
+          hasChildLabel={false}
+        >
+          <EuiButtonGroup
+            legend={i18n.translate(
+              'xpack.ml.trainedModels.modelsList.startDeployment.threadsPerAllocationLegend',
+              {
+                defaultMessage: 'Threads per allocation selector',
+              }
+            )}
+            name={'threadsPerAllocation'}
+            isFullWidth
+            idSelected={toggleIdSelected}
+            onChange={(optionId) => {
+              const value = threadsPerAllocationsOptions.find((v) => v.id === optionId)!.value;
+              onConfigChange({ ...config, threadsPerAllocations: value });
+            }}
+            options={threadsPerAllocationsOptions}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
     </EuiForm>
   );
 };
