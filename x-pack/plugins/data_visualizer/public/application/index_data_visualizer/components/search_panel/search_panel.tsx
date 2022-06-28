@@ -8,7 +8,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Query, Filter } from '@kbn/es-query';
+import { Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ShardSizeFilter } from './shard_size_select';
@@ -132,9 +132,10 @@ export const SearchPanel: FC<Props> = ({
           showDatePicker={false}
           showQueryInput={true}
           query={searchInput}
-          onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
-            searchHandler({ query: params.query })
-          }
+          onQuerySubmit={(params: {
+            dateRange: TimeRange;
+            query?: Query | AggregateQuery | undefined;
+          }) => searchHandler({ query: params.query as Query })}
           // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
           indexPatterns={[dataView]}
