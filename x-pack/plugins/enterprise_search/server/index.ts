@@ -39,4 +39,4 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   },
 };
 
-export const CONNECTORS_INDEX = '.ent-search-connectors';
+export const CONNECTORS_INDEX = '.elastic-connectors';
