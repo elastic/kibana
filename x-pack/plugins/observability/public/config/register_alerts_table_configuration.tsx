@@ -5,36 +5,26 @@
  * 2.0.
  */
 
-import type {
-  AlertTableFlyoutComponent,
-  GetRenderCellValue,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { lazy } from 'react';
-
+import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { observabilityFeatureId } from '../../common';
+import { TopAlert, useToGetInternalFlyout } from '../pages/alerts';
 import { getRenderCellValue } from '../pages/alerts/components/render_cell_value';
 import { addDisplayNames } from '../pages/alerts/containers/alerts_table_t_grid/add_display_names';
 import { columns as alertO11yColumns } from '../pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
+import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 
-const AlertsPageFlyoutHeaderLazy = lazy(
-  () => import('../pages/alerts/components/alerts_flyout/alerts_flyout_header')
-);
-const AlertsPageFlyoutBodyLazy = lazy(
-  () => import('../pages/alerts/components/alerts_flyout/alerts_flyout_body')
-);
-const AlertsFlyoutFooterLazy = lazy(
-  () => import('../pages/alerts/components/alerts_flyout/alerts_flyout_footer')
-);
-
-const getO11yAlertsTableConfiguration = () => ({
+const getO11yAlertsTableConfiguration = (
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
+) => ({
   id: observabilityFeatureId,
   columns: alertO11yColumns.map(addDisplayNames),
-  externalFlyout: {
-    header: AlertsPageFlyoutHeaderLazy as AlertTableFlyoutComponent,
-    body: AlertsPageFlyoutBodyLazy as AlertTableFlyoutComponent,
-    footer: AlertsFlyoutFooterLazy as AlertTableFlyoutComponent,
+  useInternalFlyout: () => {
+    const { header, body, footer } = useToGetInternalFlyout(observabilityRuleTypeRegistry);
+    return { header, body, footer };
   },
-  getRenderCellValue: getRenderCellValue as GetRenderCellValue,
+  getRenderCellValue: (({ setFlyoutAlert }: { setFlyoutAlert: (data: TopAlert) => void }) => {
+    return getRenderCellValue({ observabilityRuleTypeRegistry, setFlyoutAlert });
+  }) as unknown as GetRenderCellValue,
 });
 
 export { getO11yAlertsTableConfiguration };
