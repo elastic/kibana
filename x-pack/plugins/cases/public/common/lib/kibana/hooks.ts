@@ -185,7 +185,10 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   return useMemo(
     () => ({
       actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
-      generalCases: permissions,
+      generalCases: {
+        all: permissions.all,
+        read: permissions.read,
+      },
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
         crud: !!capabilities.dashboard?.createNew,
@@ -199,7 +202,8 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       capabilities.dashboard?.show,
       capabilities.visualize?.save,
       capabilities.visualize?.show,
-      permissions,
+      permissions.all,
+      permissions.read,
     ]
   );
 };

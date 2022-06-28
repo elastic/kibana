@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 
 import '../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
-import { TestProviders } from '../../common/mock';
+import { readCasesPermissions, TestProviders } from '../../common/mock';
 import { CaseStatuses, ConnectorTypes } from '../../../common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses, connectorsMock } from '../../containers/mock';
@@ -292,7 +292,9 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () => usePushToService(defaultArgs),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -312,7 +314,9 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () => usePushToService(defaultArgs),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -335,7 +339,9 @@ describe('usePushToService', () => {
               },
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -357,7 +363,9 @@ describe('usePushToService', () => {
               },
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -380,7 +388,9 @@ describe('usePushToService', () => {
               isValidConnector: false,
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -404,7 +414,9 @@ describe('usePushToService', () => {
               isValidConnector: false,
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -421,7 +433,9 @@ describe('usePushToService', () => {
               caseStatus: CaseStatuses.closed,
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();

@@ -14,7 +14,7 @@ export const getUICapabilities = (
   featureCapabilities: Partial<Record<string, boolean | Record<string, boolean>>>
 ): CasesPermissions => {
   const read = !!featureCapabilities?.read_cases;
-  const all = !!featureCapabilities?.all;
+  const all = !!featureCapabilities?.crud_cases;
 
   return {
     all,
