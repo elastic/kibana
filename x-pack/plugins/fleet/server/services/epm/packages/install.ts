@@ -29,7 +29,11 @@ import type {
   InstallSource,
 } from '../../../../common';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
-import { IngestManagerError, PackageOutdatedError } from '../../../errors';
+import {
+  IngestManagerError,
+  PackageOutdatedError,
+  PackageFailedVerificationError,
+} from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
 import { licenseService } from '../..';
@@ -348,6 +352,10 @@ async function installPackageFromRegistry({
         pkgVersion,
         logger,
       });
+      const isUnverified = verificationResult.didVerify && !verificationResult.isVerified;
+      if (isUnverified && !force) {
+        throw new PackageFailedVerificationError(pkgkey);
+      }
     }
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
