@@ -9,13 +9,15 @@
 import { take } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
 import { DocumentMigrator } from './core/document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { lastValueFrom } from 'rxjs';
 
 jest.mock('./core/document_migrator', () => {
   return {
@@ -97,15 +99,9 @@ describe('KibanaMigrator', () => {
     it('throws if prepareMigrations is not called first', async () => {
       const options = mockOptions();
 
-      options.client.cat.templates.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise([], { statusCode: 404 })
-      );
-      options.client.indices.get.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
-      );
-      options.client.indices.getAlias.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
-      );
+      options.client.cat.templates.mockResponse([], { statusCode: 404 });
+      options.client.indices.get.mockResponse({}, { statusCode: 404 });
+      options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
 
       const migrator = new KibanaMigrator(options);
 
@@ -116,14 +112,16 @@ describe('KibanaMigrator', () => {
 
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
+      options.client.indices.get.mockResponse({}, { statusCode: 404 });
+      options.client.indices.getAlias.mockResponse({}, { statusCode: 404 });
 
-      options.client.indices.get.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+      options.client.cluster.getSettings.mockResponse(
+        {
+          transient: {},
+          persistent: {},
+        },
+        { statusCode: 404 }
       );
-      options.client.indices.getAlias.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
-      );
-
       const migrator = new KibanaMigrator(options);
 
       migrator.prepareMigrations();
@@ -138,7 +136,7 @@ describe('KibanaMigrator', () => {
     it('emits results on getMigratorResult$()', async () => {
       const options = mockV2MigrationOptions();
       const migrator = new KibanaMigrator(options);
-      const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+      const migratorStatus = lastValueFrom(migrator.getStatus$().pipe(take(3)));
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
@@ -158,20 +156,18 @@ describe('KibanaMigrator', () => {
     });
     it('rejects when the migration state machine terminates in a FATAL state', () => {
       const options = mockV2MigrationOptions();
-      options.client.indices.get.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          {
-            '.my-index_8.2.4_001': {
-              aliases: {
-                '.my-index': {},
-                '.my-index_8.2.4': {},
-              },
-              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-              settings: {},
+      options.client.indices.get.mockResponse(
+        {
+          '.my-index_8.2.4_001': {
+            aliases: {
+              '.my-index': {},
+              '.my-index_8.2.4': {},
             },
+            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            settings: {},
           },
-          { statusCode: 200 }
-        )
+        },
+        { statusCode: 200 }
       );
 
       const migrator = new KibanaMigrator(options);
@@ -183,14 +179,11 @@ describe('KibanaMigrator', () => {
 
     it('rejects when an unexpected exception occurs in an action', async () => {
       const options = mockV2MigrationOptions();
-      options.client.tasks.get.mockReturnValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
-          completed: true,
-          error: { type: 'elasticsearch_exception', reason: 'task failed with an error' },
-          failures: [],
-          task: { description: 'task description' } as any,
-        })
-      );
+      options.client.tasks.get.mockResponse({
+        completed: true,
+        error: { type: 'elasticsearch_exception', reason: 'task failed with an error' },
+        task: { description: 'task description' } as any,
+      });
 
       const migrator = new KibanaMigrator(options);
       migrator.prepareMigrations();
@@ -212,57 +205,46 @@ type MockedOptions = KibanaMigratorOptions & {
 
 const mockV2MigrationOptions = () => {
   const options = mockOptions();
+  options.client.cluster.getSettings.mockResponse(
+    {
+      transient: {},
+      persistent: {},
+    },
+    { statusCode: 200 }
+  );
 
-  options.client.indices.get.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise(
-      {
-        '.my-index': {
-          aliases: { '.kibana': {} },
-          mappings: { properties: {} },
-          settings: {},
-        },
+  options.client.indices.get.mockResponse(
+    {
+      '.my-index': {
+        aliases: { '.kibana': {} },
+        mappings: { properties: {} },
+        settings: {},
       },
-      { statusCode: 200 }
-    )
+    },
+    { statusCode: 200 }
   );
-  options.client.indices.addBlock.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({
-      acknowledged: true,
-      shards_acknowledged: true,
-      indices: [],
-    })
-  );
-  options.client.reindex.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({
-      taskId: 'reindex_task_id',
-    } as estypes.ReindexResponse)
-  );
-  options.client.tasks.get.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({
-      completed: true,
-      error: undefined,
-      failures: [],
-      task: { description: 'task description' } as any,
-    } as estypes.TasksGetResponse)
-  );
+  options.client.indices.addBlock.mockResponse({
+    acknowledged: true,
+    shards_acknowledged: true,
+    indices: [],
+  });
+  options.client.reindex.mockResponse({
+    taskId: 'reindex_task_id',
+  } as estypes.ReindexResponse);
+  options.client.tasks.get.mockResponse({
+    completed: true,
+    error: undefined,
+    failures: [],
+    task: { description: 'task description' } as any,
+  } as estypes.TasksGetResponse);
 
-  options.client.search = jest
-    .fn()
-    .mockImplementation(() =>
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ hits: { hits: [] } })
-    );
+  options.client.search.mockResponse({ hits: { hits: [] } } as any);
 
-  options.client.openPointInTime = jest
-    .fn()
-    .mockImplementation(() =>
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ id: 'pit_id' })
-    );
+  options.client.openPointInTime.mockResponse({ id: 'pit_id' });
 
-  options.client.closePointInTime = jest
-    .fn()
-    .mockImplementation(() =>
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ succeeded: true })
-    );
+  options.client.closePointInTime.mockResponse({
+    succeeded: true,
+  } as estypes.ClosePointInTimeResponse);
 
   return options;
 };
@@ -306,6 +288,7 @@ const mockOptions = () => {
       retryAttempts: 20,
     },
     client: elasticsearchClientMock.createElasticsearchClient(),
+    docLinks: docLinksServiceMock.createSetupContract(),
   };
   return options;
 };

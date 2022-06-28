@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
@@ -22,6 +23,7 @@ export const renderApp = ({
   store,
   usageCollection,
   subPluginRoutes,
+  theme$,
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
@@ -32,6 +34,7 @@ export const renderApp = ({
       services={services}
       setHeaderActionMenu={setHeaderActionMenu}
       store={store}
+      theme$={theme$}
     >
       <ApplicationUsageTrackingProvider>
         <Switch>

@@ -28,12 +28,13 @@ const detectionAlertsTimelines = [TimelineId.detectionsPage, TimelineId.detectio
 const otherTimelines = [
   TimelineId.hostsPageEvents,
   TimelineId.hostsPageExternalAlerts,
+  TimelineId.hostsPageSessions,
   TimelineId.networkPageExternalAlerts,
-  TimelineId.uebaPageExternalAlerts,
   TimelineId.active,
   TimelineId.casePage,
   TimelineId.test,
   TimelineId.alternateTest,
+  TimelineId.kubernetesPageSessions,
 ];
 
 const othersWithoutActive = otherTimelines.filter((x) => x !== TimelineId.active);
@@ -115,17 +116,12 @@ const ruleNameFilter: Filter = {
 const threatMappingFilter: Filter = {
   meta: {
     alias: null,
-    negate: true,
     disabled: false,
-    type: 'exists',
-    key: 'kibana.alert.rule.threat_mapping',
-    value: 'exists',
+    negate: false,
+    key: 'kibana.alert.rule.type',
+    type: 'term',
   },
-  query: {
-    exists: {
-      field: 'kibana.alert.rule.threat_mapping',
-    },
-  },
+  query: { term: { 'kibana.alert.rule.type': 'threat_match' } },
 };
 
 const workflowStatusFilter: Filter = {

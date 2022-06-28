@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from 'kibana/server';
+import { Logger, CoreSetup } from '@kbn/core/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
   getExecutionsPerDayCount,
-} from './alerts_telemetry';
+  getExecutionTimeoutsPerDayCount,
+  getFailedAndUnrecognizedTasksPerDay,
+} from './alerting_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -50,7 +52,13 @@ function registerAlertingTelemetryTask(
     [TELEMETRY_TASK_TYPE]: {
       title: 'Alerting usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, kibanaIndex, eventLogIndex),
+      createTaskRunner: telemetryTaskRunner(
+        logger,
+        core,
+        kibanaIndex,
+        eventLogIndex,
+        taskManager.index
+      ),
     },
   });
 }
@@ -72,7 +80,8 @@ export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
   kibanaIndex: string,
-  eventLogIndex: string
+  eventLogIndex: string,
+  taskManagerIndex: string
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
@@ -89,32 +98,64 @@ export function telemetryTaskRunner(
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCountAggregations(esClient, kibanaIndex),
-          getTotalCountInUse(esClient, kibanaIndex),
-          getExecutionsPerDayCount(esClient, eventLogIndex),
+          getTotalCountAggregations(esClient, kibanaIndex, logger),
+          getTotalCountInUse(esClient, kibanaIndex, logger),
+          getExecutionsPerDayCount(esClient, eventLogIndex, logger),
+          getExecutionTimeoutsPerDayCount(esClient, eventLogIndex, logger),
+          getFailedAndUnrecognizedTasksPerDay(esClient, taskManagerIndex, logger),
         ])
-          .then(([totalCountAggregations, totalInUse, totalExecutions]) => {
-            return {
-              state: {
-                runs: (state.runs || 0) + 1,
-                ...totalCountAggregations,
-                count_active_by_type: totalInUse.countByType,
-                count_active_total: totalInUse.countTotal,
-                count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
-                count_rules_namespaces: totalInUse.countNamespaces,
-                count_rules_executions_per_day: totalExecutions.countTotal,
-                count_rules_executions_by_type_per_day: totalExecutions.countByType,
-                count_rules_executions_failured_per_day: totalExecutions.countTotalFailures,
-                count_rules_executions_failured_by_reason_per_day:
-                  totalExecutions.countFailuresByReason,
-                count_rules_executions_failured_by_reason_by_type_per_day:
-                  totalExecutions.countFailuresByReasonByType,
-                avg_execution_time_per_day: totalExecutions.avgExecutionTime,
-                avg_execution_time_by_type_per_day: totalExecutions.avgExecutionTimeByType,
-              },
-              runAt: getNextMidnight(),
-            };
-          })
+          .then(
+            ([
+              totalCountAggregations,
+              totalInUse,
+              dailyExecutionCounts,
+              dailyExecutionTimeoutCounts,
+              dailyFailedAndUnrecognizedTasks,
+            ]) => {
+              return {
+                state: {
+                  runs: (state.runs || 0) + 1,
+                  ...totalCountAggregations,
+                  count_active_by_type: totalInUse.countByType,
+                  count_active_total: totalInUse.countTotal,
+                  count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
+                  count_rules_namespaces: totalInUse.countNamespaces,
+                  count_rules_executions_per_day: dailyExecutionCounts.countTotal,
+                  count_rules_executions_by_type_per_day: dailyExecutionCounts.countByType,
+                  count_rules_executions_failured_per_day: dailyExecutionCounts.countTotalFailures,
+                  count_rules_executions_failured_by_reason_per_day:
+                    dailyExecutionCounts.countFailuresByReason,
+                  count_rules_executions_failured_by_reason_by_type_per_day:
+                    dailyExecutionCounts.countFailuresByReasonByType,
+                  count_rules_executions_timeouts_per_day: dailyExecutionTimeoutCounts.countTotal,
+                  count_rules_executions_timeouts_by_type_per_day:
+                    dailyExecutionTimeoutCounts.countByType,
+                  count_failed_and_unrecognized_rule_tasks_per_day:
+                    dailyFailedAndUnrecognizedTasks.countTotal,
+                  count_failed_and_unrecognized_rule_tasks_by_status_per_day:
+                    dailyFailedAndUnrecognizedTasks.countByStatus,
+                  count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day:
+                    dailyFailedAndUnrecognizedTasks.countByStatusByRuleType,
+                  avg_execution_time_per_day: dailyExecutionCounts.avgExecutionTime,
+                  avg_execution_time_by_type_per_day: dailyExecutionCounts.avgExecutionTimeByType,
+                  avg_es_search_duration_per_day: dailyExecutionCounts.avgEsSearchDuration,
+                  avg_es_search_duration_by_type_per_day:
+                    dailyExecutionCounts.avgEsSearchDurationByType,
+                  avg_total_search_duration_per_day: dailyExecutionCounts.avgTotalSearchDuration,
+                  avg_total_search_duration_by_type_per_day:
+                    dailyExecutionCounts.avgTotalSearchDurationByType,
+                  percentile_num_generated_actions_per_day:
+                    dailyExecutionCounts.generatedActionsPercentiles,
+                  percentile_num_generated_actions_by_type_per_day:
+                    dailyExecutionCounts.generatedActionsPercentilesByType,
+                  percentile_num_alerts_per_day: dailyExecutionCounts.alertsPercentiles,
+                  percentile_num_alerts_by_type_per_day:
+                    dailyExecutionCounts.alertsPercentilesByType,
+                },
+                runAt: getNextMidnight(),
+              };
+            }
+          )
           .catch((errMsg) => {
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {

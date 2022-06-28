@@ -6,8 +6,8 @@
  */
 
 import { ImportExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { SavedObjectsClientContract } from '../../../../../../../../src/core/server/';
 import { ImportDataResponse, ImportResponse } from '../../import_exception_list_and_items';
 
 import { getAllListTypes } from './find_all_exception_list_types';
@@ -43,7 +43,14 @@ export const importExceptionLists = async ({
 
     // Gather lists referenced by items
     // Dictionary of found lists
-    const foundLists = await getAllListTypes(agnosticLists, nonAgnosticLists, savedObjectsClient);
+    const foundLists = await getAllListTypes(
+      agnosticLists.map((list) => ({ listId: list.list_id, namespaceType: list.namespace_type })),
+      nonAgnosticLists.map((list) => ({
+        listId: list.list_id,
+        namespaceType: list.namespace_type,
+      })),
+      savedObjectsClient
+    );
 
     // Figure out what lists to bulk create/update
     const { errors, listItemsToDelete, listsToCreate, listsToUpdate } =

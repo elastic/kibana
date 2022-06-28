@@ -6,18 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
+import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
+import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,
@@ -35,14 +38,12 @@ import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { asDecimalOrInteger } from '../../../common/utils/formatters';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
 import { getDocumentTypeFilterForTransactions } from '../../lib/helpers/transactions';
-import { asPercent } from '../../../../observability/common/utils/formatters';
-import { termQuery } from '../../../../observability/server';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -60,6 +61,7 @@ export function registerTransactionErrorRateAlertType({
   ruleDataClient,
   logger,
   config$,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -83,13 +85,15 @@ export function registerTransactionErrorRateAlertType({
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.interval,
+          apmActionVariables.reason,
+          apmActionVariables.viewInAppUrl,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ services, params: ruleParams }) => {
-        const config = await config$.pipe(take(1)).toPromise();
+        const config = await firstValueFrom(config$);
         const indices = await getApmIndices({
           config,
           savedObjectsClient: services.savedObjectsClient,
@@ -198,7 +202,26 @@ export function registerTransactionErrorRateAlertType({
         results.forEach((result) => {
           const { serviceName, environment, transactionType, errorRate } =
             result;
+          const reasonMessage = formatTransactionErrorRateReason({
+            threshold: ruleParams.threshold,
+            measured: errorRate,
+            asPercent,
+            serviceName,
+            windowSize: ruleParams.windowSize,
+            windowUnit: ruleParams.windowUnit,
+          });
 
+          const relativeViewInAppUrl = getAlertUrlTransaction(
+            serviceName,
+            getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
+            transactionType
+          );
+          const viewInAppUrl = basePath.publicBaseUrl
+            ? new URL(
+                basePath.prepend(relativeViewInAppUrl),
+                basePath.publicBaseUrl
+              ).toString()
+            : relativeViewInAppUrl;
           services
             .alertWithLifecycle({
               id: [
@@ -216,12 +239,7 @@ export function registerTransactionErrorRateAlertType({
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
                 [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
-                [ALERT_REASON]: formatTransactionErrorRateReason({
-                  threshold: ruleParams.threshold,
-                  measured: errorRate,
-                  asPercent,
-                  serviceName,
-                }),
+                [ALERT_REASON]: reasonMessage,
               },
             })
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -231,6 +249,8 @@ export function registerTransactionErrorRateAlertType({
               threshold: ruleParams.threshold,
               triggerValue: asDecimalOrInteger(errorRate),
               interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+              reason: reasonMessage,
+              viewInAppUrl,
             });
         });
 

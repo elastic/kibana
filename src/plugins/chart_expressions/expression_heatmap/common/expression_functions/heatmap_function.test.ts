@@ -7,9 +7,9 @@
  */
 
 import { heatmapFunction } from './heatmap_function';
-import type { HeatmapArguments } from '../../common';
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import type { HeatmapArguments } from '..';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { EXPRESSION_HEATMAP_GRID_NAME, EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
 
 describe('interpreter/functions#heatmap', () => {
@@ -33,6 +33,8 @@ describe('interpreter/functions#heatmap', () => {
       isCellLabelVisible: true,
       isYAxisLabelVisible: true,
       isXAxisLabelVisible: true,
+      isYAxisTitleVisible: true,
+      isXAxisTitleVisible: true,
       type: EXPRESSION_HEATMAP_GRID_NAME,
     },
     palette: {
@@ -67,6 +69,7 @@ describe('interpreter/functions#heatmap', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
     };

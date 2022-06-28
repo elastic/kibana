@@ -61,7 +61,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: true,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -85,7 +85,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: false,
       has_permanent_encryption_key: true,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -107,10 +107,12 @@ describe('health check', () => {
     const [action] = queryAllByText(/Learn more/i);
 
     expect(description.textContent).toMatchInlineSnapshot(
-      `"You must enable API keys to use Alerting. Learn more.(opens in a new tab or window)"`
+      `"You must enable API keys to use Alerting. Learn more.External link(opens in a new tab or window)"`
     );
 
-    expect(action.textContent).toMatchInlineSnapshot(`"Learn more.(opens in a new tab or window)"`);
+    expect(action.textContent).toMatchInlineSnapshot(
+      `"Learn more.External link(opens in a new tab or window)"`
+    );
 
     expect(action.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"`
@@ -121,7 +123,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: false,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -141,12 +143,12 @@ describe('health check', () => {
 
     const description = queryByRole(/banner/i);
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must configure an encryption key to use Alerting. Learn more.(opens in a new tab or window)"`
+      `"You must configure an encryption key to use Alerting. Learn more.External link(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
     expect(action!.textContent).toMatchInlineSnapshot(
-      `"Learn more.(opens in a new tab or window)"`
+      `"Learn more.External link(opens in a new tab or window)"`
     );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alert-action-settings-kb.html#general-alert-action-settings"`
@@ -157,7 +159,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: false,
       has_permanent_encryption_key: false,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -179,12 +181,12 @@ describe('health check', () => {
     const description = queryByText(/You must enable/i);
 
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"You must enable API keys and configure an encryption key to use Alerting. Learn more.(opens in a new tab or window)"`
+      `"You must enable API keys and configure an encryption key to use Alerting. Learn more.External link(opens in a new tab or window)"`
     );
 
     const action = queryByText(/Learn/i);
     expect(action!.textContent).toMatchInlineSnapshot(
-      `"Learn more.(opens in a new tab or window)"`
+      `"Learn more.External link(opens in a new tab or window)"`
     );
     expect(action!.getAttribute('href')).toMatchInlineSnapshot(
       `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-setup.html#alerting-prerequisites"`

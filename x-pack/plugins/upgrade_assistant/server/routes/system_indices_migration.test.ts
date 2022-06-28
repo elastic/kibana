@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
@@ -70,9 +70,7 @@ describe('Migrate system indices API', () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
           .request as jest.Mock
-      ).mockResolvedValue({
-        body: mockedResponse,
-      });
+      ).mockResolvedValue(mockedResponse);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
@@ -113,9 +111,7 @@ describe('Migrate system indices API', () => {
       (
         routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
           .request as jest.Mock
-      ).mockResolvedValue({
-        body: mockedResponse,
-      });
+      ).mockResolvedValue(mockedResponse);
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',

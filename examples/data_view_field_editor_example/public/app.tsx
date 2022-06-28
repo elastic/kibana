@@ -19,10 +19,10 @@ import {
   EuiText,
   DefaultItemAction,
 } from '@elastic/eui';
-import { AppMountParameters } from '../../../src/core/public';
-import { DataPublicPluginStart } from '../../../src/plugins/data/public';
-import type { DataView, DataViewField } from '../../../src/plugins/data_views/public';
-import { IndexPatternFieldEditorStart } from '../../../src/plugins/data_view_field_editor/public';
+import { AppMountParameters } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 
 interface Props {
   dataView?: DataView;

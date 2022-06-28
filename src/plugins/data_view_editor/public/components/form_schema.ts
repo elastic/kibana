@@ -7,13 +7,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fieldValidators } from '../shared_imports';
+import { fieldValidators, ValidationFunc } from '../shared_imports';
 import { INDEX_PATTERN_TYPE } from '../types';
+
+export const singleAstriskValidator = (
+  ...args: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc> => {
+  const [{ value, path }] = args;
+
+  const message = i18n.translate('indexPatternEditor.validations.noSingleAstriskPattern', {
+    defaultMessage: "A single '*' is not an allowed index pattern",
+  });
+
+  return value === '*' ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+};
 
 export const schema = {
   title: {
     label: i18n.translate('indexPatternEditor.editor.form.titleLabel', {
-      defaultMessage: 'Name',
+      defaultMessage: 'Index pattern',
     }),
     defaultValue: '',
     helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
@@ -24,11 +36,20 @@ export const schema = {
       {
         validator: fieldValidators.emptyField(
           i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
-            defaultMessage: 'A name is required.',
+            defaultMessage: 'An Index pattern is required.',
           })
         ),
       },
+      {
+        validator: singleAstriskValidator,
+      },
     ],
+  },
+  name: {
+    label: i18n.translate('indexPatternEditor.editor.form.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+    defaultValue: '',
   },
   timestampField: {
     label: i18n.translate('indexPatternEditor.editor.form.timeFieldLabel', {

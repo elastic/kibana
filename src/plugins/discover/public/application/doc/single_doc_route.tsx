@@ -9,15 +9,16 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useIndexPattern } from '../../utils/use_index_pattern';
+import { useIndexPattern } from '../../hooks/use_index_pattern';
 import { withQueryParams } from '../../utils/with_query_params';
-import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
-import { DiscoverRouteProps } from '../types';
+import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
 import { Doc } from './components/doc';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
-export interface SingleDocRouteProps extends DiscoverRouteProps {
+export interface SingleDocRouteProps {
   /**
    * Document id
    */
@@ -29,12 +30,18 @@ export interface DocUrlParams {
   index: string;
 }
 
-const SingleDoc = (props: SingleDocRouteProps) => {
-  const { id, services } = props;
-  const { chrome, timefilter } = services;
+const SingleDoc = ({ id }: SingleDocRouteProps) => {
+  const services = useDiscoverServices();
+  const { chrome, timefilter, core } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();
   const breadcrumb = useMainRouteBreadcrumb();
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'single-doc',
+    id: indexPatternId,
+  });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -60,13 +67,13 @@ const SingleDoc = (props: SingleDocRouteProps) => {
         title={
           <FormattedMessage
             id="discover.singleDocRoute.errorTitle"
-            defaultMessage="An error occured"
+            defaultMessage="An error occurred"
           />
         }
         body={
           <FormattedMessage
             id="discover.singleDocRoute.errorMessage"
-            defaultMessage="No matching index pattern for id {indexPatternId}"
+            defaultMessage="No matching data view for id {indexPatternId}"
             values={{ indexPatternId }}
           />
         }

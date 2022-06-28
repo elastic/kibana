@@ -7,14 +7,15 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
+import { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
 import {
+  coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,
@@ -162,7 +163,9 @@ describe('Action Log API', () => {
           path.startsWith(ENDPOINT_ACTION_LOG_ROUTE)
         )!;
         await routeHandler(
-          createRouteHandlerContext(esClientMock, savedObjectsClientMock.create()),
+          coreMock.createCustomRequestHandlerContext(
+            createRouteHandlerContext(esClientMock, savedObjectsClientMock.create())
+          ) as SecuritySolutionRequestHandlerContext,
           req,
           mockResponse
         );
@@ -235,7 +238,8 @@ describe('Action Log API', () => {
         hasFleetResponses?: boolean;
         hasResponses?: boolean;
       }) => {
-        esClientMock.asCurrentUser.search = jest.fn().mockImplementationOnce(() => {
+        // @ts-expect-error incomplete types
+        esClientMock.asInternalUser.search.mockResponseImplementationOnce(() => {
           let actions: Results[] = [];
           let fleetActions: Results[] = [];
           let responses: Results[] = [];
@@ -276,12 +280,13 @@ describe('Action Log API', () => {
             ...fleetResponses,
           ]);
 
-          return Promise.resolve(results);
+          return results;
         });
       };
 
       havingErrors = () => {
-        esClientMock.asCurrentUser.search = jest.fn().mockImplementationOnce(() =>
+        esClientMock.asInternalUser.search.mockImplementationOnce(() =>
+          // @ts-expect-error wrong definition
           Promise.resolve(() => {
             throw new Error();
           })

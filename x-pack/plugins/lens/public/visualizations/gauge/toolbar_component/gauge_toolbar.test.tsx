@@ -6,8 +6,8 @@
  */
 
 import React, { FormEvent } from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { ToolbarButton } from 'src/plugins/kibana_react/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';

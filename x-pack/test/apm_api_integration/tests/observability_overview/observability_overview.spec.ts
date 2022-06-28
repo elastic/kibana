@@ -8,7 +8,6 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { roundNumber } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -30,6 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         params: {
           query: {
             ...commonQuery,
+            probability: 1,
             environment: 'ENVIRONMENT_ALL',
             kuery: '',
           },
@@ -104,35 +104,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .instance('instance-c');
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoProdInstance
                   .transaction('GET /api/product/list')
                   .duration(1000)
                   .timestamp(timestamp)
-                  .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_DEV_RATE)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoDevInstance
                   .transaction('GET /api/product/:id')
                   .duration(1000)
                   .timestamp(timestamp)
-                  .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(JAVA_PROD_RATE)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceJavaInstance
                   .transaction('POST /api/product/buy')
                   .duration(1000)
                   .timestamp(timestamp)
-                  .serialize()
               ),
           ]);
         });
@@ -140,7 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         after(() => synthtraceEsClient.clean());
 
         describe('compare throughput values', () => {
-          let throughputValues: PromiseReturnType<typeof getThroughputValues>;
+          let throughputValues: Awaited<ReturnType<typeof getThroughputValues>>;
           before(async () => {
             throughputValues = await getThroughputValues();
           });

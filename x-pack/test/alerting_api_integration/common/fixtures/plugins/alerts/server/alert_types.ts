@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { curry, times } from 'lodash';
-import { ES_TEST_INDEX_NAME } from '../../../../lib';
-import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
   RuleType,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertTypeState,
-  AlertTypeParams,
-} from '../../../../../../../plugins/alerting/server';
+  RuleTypeState,
+  RuleTypeParams,
+} from '@kbn/alerting-plugin/server';
+import { ES_TEST_INDEX_NAME } from '../../../../lib';
+import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',
@@ -53,7 +53,7 @@ function getAlwaysFiringAlertType() {
     groupsToScheduleActionsInSeries: schema.maybe(schema.arrayOf(schema.nullable(schema.string()))),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     groupInSeriesIndex?: number;
   }
   interface InstanceState extends AlertInstanceState {
@@ -63,7 +63,7 @@ function getAlwaysFiringAlertType() {
     instanceContextValue: boolean;
   }
   const result: RuleType<
-    ParamsType & AlertTypeParams,
+    ParamsType & RuleTypeParams,
     never, // Only use if defining useSavedObjectReferences hook
     State,
     InstanceState,
@@ -122,7 +122,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
   }
 
   if (group) {
-    const instance = services.alertInstanceFactory('1').replaceState({ instanceStateValue: true });
+    const instance = services.alertFactory.create('1').replaceState({ instanceStateValue: true });
 
     if (subgroup) {
       instance.scheduleActionsWithSubGroup(group, subgroup, {
@@ -153,7 +153,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
 }
 
 function getCumulativeFiringAlertType() {
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     runCount?: number;
   }
   interface InstanceState extends AlertInstanceState {
@@ -177,8 +177,8 @@ function getCumulativeFiringAlertType() {
       const runCount = (state.runCount || 0) + 1;
 
       times(runCount, (index) => {
-        services
-          .alertInstanceFactory(`instance-${index}`)
+        services.alertFactory
+          .create(`instance-${index}`)
           .replaceState({ instanceStateValue: true })
           .scheduleActions(group);
       });
@@ -197,7 +197,7 @@ function getNeverFiringAlertType() {
     reference: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     globalStateValue: boolean;
   }
   const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
@@ -401,7 +401,7 @@ function getPatternFiringAlertType() {
     reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     patternIndex?: number;
   }
   const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
@@ -446,15 +446,54 @@ function getPatternFiringAlertType() {
       for (const [instanceId, instancePattern] of Object.entries(pattern)) {
         const scheduleByPattern = instancePattern[patternIndex];
         if (scheduleByPattern === true) {
-          services.alertInstanceFactory(instanceId).scheduleActions('default', {
+          services.alertFactory.create(instanceId).scheduleActions('default', {
             ...EscapableStrings,
             deep: DeepContextVariables,
           });
         } else if (typeof scheduleByPattern === 'string') {
-          services
-            .alertInstanceFactory(instanceId)
+          services.alertFactory
+            .create(instanceId)
             .scheduleActionsWithSubGroup('default', scheduleByPattern);
         }
+      }
+
+      return {
+        patternIndex: patternIndex + 1,
+      };
+    },
+  };
+  return result;
+}
+
+function getPatternSuccessOrFailureAlertType() {
+  const paramsSchema = schema.object({
+    pattern: schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()])),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends RuleTypeState {
+    patternIndex?: number;
+  }
+  const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
+    id: 'test.patternSuccessOrFailure',
+    name: 'Test: Succeeding or failing on a Pattern',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor(alertExecutorOptions) {
+      const { state, params } = alertExecutorOptions;
+      const pattern = params.pattern;
+      if (!Array.isArray(pattern)) throw new Error('pattern is not an array');
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex >= pattern.length) {
+        return { patternIndex };
+      }
+
+      if (!pattern[patternIndex]) {
+        throw new Error('Failed to execute alert type');
       }
 
       return {
@@ -471,7 +510,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     pattern: schema.arrayOf(schema.boolean()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State extends AlertTypeState {
+  interface State extends RuleTypeState {
     patternIndex?: number;
   }
   const result: RuleType<ParamsType, never, State, {}, {}, 'default'> = {
@@ -499,7 +538,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         return {};
       }
 
-      services.alertInstanceFactory('alert').scheduleActions('default', {});
+      services.alertFactory.create('alert').scheduleActions('default', {});
 
       // run long if pattern says to
       if (pattern[globalPatternIndex++] === true) {
@@ -555,7 +594,7 @@ function getCancellableRuleType() {
         },
       };
 
-      await services.search.asCurrentUser.search(query as any);
+      await services.scopedClusterClient.asCurrentUser.search(query as any);
 
       if (doLongPostProcessing) {
         await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -636,23 +675,32 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
   };
-  const longRunningAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
-    id: 'test.longRunning',
-    name: 'Test: Long Running',
-    actionGroups: [
-      {
-        id: 'default',
-        name: 'Default',
+  function getLongRunningRuleType() {
+    const paramsSchema = schema.object({
+      delay: schema.maybe(schema.number({ defaultValue: 5000 })),
+    });
+    type ParamsType = TypeOf<typeof paramsSchema>;
+
+    const result: RuleType<ParamsType, {}, {}, {}, {}, 'default'> = {
+      id: 'test.longRunning',
+      name: 'Test: Long Running',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      producer: 'alertsFixture',
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor(ruleExecutorOptions) {
+        const { params } = ruleExecutorOptions;
+        await new Promise((resolve) => setTimeout(resolve, params.delay ?? 5000));
       },
-    ],
-    producer: 'alertsFixture',
-    defaultActionGroupId: 'default',
-    minimumLicenseRequired: 'basic',
-    isExportable: true,
-    async executor() {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    },
-  };
+    };
+    return result;
+  }
   const exampleAlwaysFiringAlertType: RuleType<{}, {}, {}, {}, {}, 'small' | 'medium' | 'large'> = {
     id: 'example.always-firing',
     name: 'Always firing',
@@ -667,6 +715,57 @@ export function defineAlertTypes(
     async executor() {},
     producer: 'alertsFixture',
   };
+  const multipleSearchesRuleType: RuleType<
+    { numSearches: number; delay: string },
+    {},
+    {},
+    {},
+    {},
+    'default'
+  > = {
+    id: 'test.multipleSearches',
+    name: 'Test: MultipleSearches',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+      const numSearches = params.numSearches ?? 1;
+      const delay = params.delay ?? '10s';
+
+      const query = {
+        index: ES_TEST_INDEX_NAME,
+        body: {
+          query: {
+            bool: {
+              filter: {
+                match_all: {},
+              },
+            },
+          },
+          aggs: {
+            delay: {
+              shard_delay: {
+                value: delay,
+              },
+            },
+          },
+        },
+      };
+
+      let i: number = 0;
+      for (i = 0; i < numSearches; ++i) {
+        await services.scopedClusterClient.asCurrentUser.search(query as any);
+      }
+    },
+  };
 
   alerting.registerType(getAlwaysFiringAlertType());
   alerting.registerType(getCumulativeFiringAlertType());
@@ -679,10 +778,12 @@ export function defineAlertTypes(
   alerting.registerType(onlyStateVariablesAlertType);
   alerting.registerType(getPatternFiringAlertType());
   alerting.registerType(throwAlertType);
-  alerting.registerType(longRunningAlertType);
+  alerting.registerType(getLongRunningRuleType());
   alerting.registerType(goldNoopAlertType);
   alerting.registerType(exampleAlwaysFiringAlertType);
+  alerting.registerType(multipleSearchesRuleType);
   alerting.registerType(getLongRunningPatternRuleType());
   alerting.registerType(getLongRunningPatternRuleType(false));
   alerting.registerType(getCancellableRuleType());
+  alerting.registerType(getPatternSuccessOrFailureAlertType());
 }

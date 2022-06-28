@@ -9,7 +9,6 @@ import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 import { getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 
-import { BrowserField } from '../../containers/source';
 import { dragAndDropActions } from '../../store/actions';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
@@ -90,16 +89,16 @@ export const addProviderToTimeline = ({
 };
 
 export const allowTopN = ({
-  browserField,
+  isAggregatable,
+  fieldType,
   fieldName,
   hideTopN,
 }: {
-  browserField: Partial<BrowserField> | undefined;
   fieldName: string;
+  isAggregatable: boolean;
+  fieldType: string;
   hideTopN: boolean;
 }): boolean => {
-  const isAggregatable = browserField?.aggregatable ?? false;
-  const fieldType = browserField?.type ?? '';
   const isAllowedType = [
     'boolean',
     'geo-point',
@@ -139,31 +138,20 @@ export const allowTopN = ({
     'kibana.alert.original_event.timezone',
     'kibana.alert.original_event.type',
     'kibana.alert.original_time',
-    'kibana.alert.parent.depth',
-    'kibana.alert.parent.id',
-    'kibana.alert.parent.index',
-    'kibana.alert.parent.rule',
-    'kibana.alert.parent.type',
     'kibana.alert.rule.created_by',
     'kibana.alert.rule.description',
     'kibana.alert.rule.enabled',
     'kibana.alert.rule.false_positives',
-    'kibana.alert.rule.filters',
     'kibana.alert.rule.from',
     'kibana.alert.rule.uuid',
     'kibana.alert.rule.immutable',
-    'kibana.alert.rule.index',
     'kibana.alert.rule.interval',
-    'kibana.alert.rule.language',
     'kibana.alert.rule.max_signals',
     'kibana.alert.rule.name',
     'kibana.alert.rule.note',
-    'kibana.alert.rule.output_index',
-    'kibana.alert.rule.query',
     'kibana.alert.rule.references',
     'kibana.alert.risk_score',
     'kibana.alert.rule.rule_id',
-    'kibana.alert.rule.saved_id',
     'kibana.alert.severity',
     'kibana.alert.rule.size',
     'kibana.alert.rule.tags',

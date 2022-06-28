@@ -6,12 +6,12 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { unwrapEsResponse } from '../../../../../../observability/server';
-import { APMRouteHandlerResources } from '../../../../routes/typings';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../../../../src/core/types/elasticsearch';
+} from '@kbn/core/types/elasticsearch';
+import { APMRouteHandlerResources } from '../../../../routes/typings';
 import {
   callAsyncWithDebug,
   getDebugBody,
@@ -21,14 +21,16 @@ import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
-export type APMInternalClient = ReturnType<typeof createInternalESClient>;
+export type APMInternalClient = Awaited<
+  ReturnType<typeof createInternalESClient>
+>;
 
-export function createInternalESClient({
+export async function createInternalESClient({
   context,
   debug,
   request,
 }: Pick<APMRouteHandlerResources, 'context' | 'request'> & { debug: boolean }) {
-  const { asInternalUser } = context.core.elasticsearch.client;
+  const { asInternalUser } = (await context.core).elasticsearch.client;
 
   function callEs<T extends { body: any }>(
     operationName: string,
@@ -72,14 +74,18 @@ export function createInternalESClient({
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs(operationName, {
         requestType: 'search',
-        cb: (signal) => asInternalUser.search(params, { signal }),
+        cb: (signal) =>
+          asInternalUser.search(params, {
+            signal,
+            meta: true,
+          }) as Promise<{ body: any }>,
         params,
       });
     },
     index: <T>(operationName: string, params: APMIndexDocumentParams<T>) => {
       return callEs(operationName, {
         requestType: 'index',
-        cb: (signal) => asInternalUser.index(params, { signal }),
+        cb: (signal) => asInternalUser.index(params, { signal, meta: true }),
         params,
       });
     },
@@ -89,7 +95,7 @@ export function createInternalESClient({
     ): Promise<{ result: string }> => {
       return callEs(operationName, {
         requestType: 'delete',
-        cb: (signal) => asInternalUser.delete(params, { signal }),
+        cb: (signal) => asInternalUser.delete(params, { signal, meta: true }),
         params,
       });
     },
@@ -99,7 +105,8 @@ export function createInternalESClient({
     ) => {
       return callEs(operationName, {
         requestType: 'indices.create',
-        cb: (signal) => asInternalUser.indices.create(params, { signal }),
+        cb: (signal) =>
+          asInternalUser.indices.create(params, { signal, meta: true }),
         params,
       });
     },

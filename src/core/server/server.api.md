@@ -7,9 +7,17 @@
 /// <reference types="node" />
 
 import { AddConfigDeprecation } from '@kbn/config';
+import { AnalyticsClient } from '@kbn/analytics-client';
+import { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-server';
+import apm from 'elastic-apm-node';
+import { AppenderConfigType } from '@kbn/core-logging-server';
+import { AwaitedProperties } from '@kbn/utility-types';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
+import type { Client } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { ConditionalType } from '@kbn/config-schema';
 import { ConfigDeprecation } from '@kbn/config';
@@ -18,48 +26,70 @@ import { ConfigDeprecationFactory } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
+import { ContextProviderOpts } from '@kbn/analytics-client';
+import { CoreId } from '@kbn/core-base-common-internal';
 import { DetailedPeerCertificate } from 'tls';
+import { DiscoveredPlugin } from '@kbn/core-base-common';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { Duration } from 'moment';
-import { Duration as Duration_2 } from 'moment-timezone';
 import { Ecs } from '@kbn/logging';
 import { EcsEventCategory } from '@kbn/logging';
 import { EcsEventKind } from '@kbn/logging';
 import { EcsEventOutcome } from '@kbn/logging';
 import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
+import { errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Event as Event_2 } from '@kbn/analytics-client';
+import { EventContext } from '@kbn/analytics-client';
+import { EventType } from '@kbn/analytics-client';
+import { EventTypeOpts } from '@kbn/analytics-client';
 import { IncomingHttpHeaders } from 'http';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import { IShipper } from '@kbn/analytics-client';
 import { Logger } from '@kbn/logging';
+import { LoggerConfigType } from '@kbn/core-logging-server';
+import { LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { LoggerFactory } from '@kbn/logging';
+import { LoggingServiceSetup } from '@kbn/core-logging-server';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { LogRecord } from '@kbn/logging';
-import type { MaybePromise } from '@kbn/utility-types';
+import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginName } from '@kbn/core-base-common';
+import { PluginOpaqueId } from '@kbn/core-base-common';
+import { PluginType } from '@kbn/core-base-common';
 import { Readable } from 'stream';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
-import type { RequestHandlerContext as RequestHandlerContext_2 } from 'src/core/server';
 import { ResponseObject } from '@hapi/hapi';
 import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShallowPromise } from '@kbn/utility-types';
+import { ShipperClassConstructor } from '@kbn/analytics-client';
 import { Stream } from 'stream';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { TransportRequestParams } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/elasticsearch';
+import { TelemetryCounter } from '@kbn/analytics-client';
+import { TelemetryCounterType } from '@kbn/analytics-client';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { URL as URL_2 } from 'url';
 
 export { AddConfigDeprecation }
+
+export { AnalyticsClient }
+
+export { AnalyticsServicePreboot }
+
+export { AnalyticsServiceSetup }
+
+export { AnalyticsServiceStart }
 
 // @public
 export const APP_WRAPPER_CLASS = "kbnAppWrapper";
@@ -73,13 +103,7 @@ export interface AppCategory {
     order?: number;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "RewriteAppenderConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "RollingFileAppenderConfig" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | RewriteAppenderConfig | RollingFileAppenderConfig;
+export { AppenderConfigType }
 
 // @public @deprecated
 export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
@@ -231,6 +255,8 @@ export const config: {
         sniffInterval: Type<false | Duration>;
         sniffOnConnectionFault: Type<boolean>;
         hosts: Type<string | string[]>;
+        maxSockets: Type<number>;
+        compression: Type<boolean>;
         username: Type<string | undefined>;
         password: Type<string | undefined>;
         serviceAccountToken: Type<string | undefined>;
@@ -291,6 +317,8 @@ export { ConfigService }
 
 // @internal
 export type ConfigUsageData = Record<string, any | any[]>;
+
+export { ContextProviderOpts }
 
 // @public
 export interface ContextSetup {
@@ -390,8 +418,7 @@ export interface CoreEnvironmentUsageData {
     };
 }
 
-// @internal (undocumented)
-export type CoreId = symbol;
+export { CoreId }
 
 // @internal
 export interface CoreIncrementCounterParams {
@@ -405,12 +432,40 @@ export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => 
 
 // @public
 export interface CorePreboot {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
+    // (undocumented)
+    analytics: AnalyticsServicePreboot;
     // (undocumented)
     elasticsearch: ElasticsearchServicePreboot;
     // (undocumented)
     http: HttpServicePreboot;
     // (undocumented)
     preboot: PrebootServicePreboot;
+}
+
+// @public
+export interface CoreRequestHandlerContext {
+    // (undocumented)
+    deprecations: {
+        client: DeprecationsClient;
+    };
+    // (undocumented)
+    elasticsearch: {
+        client: IScopedClusterClient;
+    };
+    // (undocumented)
+    savedObjects: {
+        client: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
+        getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+        getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+        getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+    };
+    // (undocumented)
+    uiSettings: {
+        client: IUiSettingsClient;
+    };
 }
 
 // @internal
@@ -423,6 +478,7 @@ export interface CoreServicesUsageData {
             docsDeleted: number;
             storeSizeBytes: number;
             primaryStoreSizeBytes: number;
+            savedObjectsDocsCount: number;
         }[];
         legacyUrlAliases: {
             activeCount: number;
@@ -435,6 +491,10 @@ export interface CoreServicesUsageData {
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
+    // (undocumented)
+    analytics: AnalyticsServiceSetup;
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
@@ -443,6 +503,10 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     coreUsageData: CoreUsageDataSetup;
     // (undocumented)
     deprecations: DeprecationsServiceSetup;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
+    // (undocumented)
+    docLinks: DocLinksServiceSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
     // (undocumented)
@@ -455,6 +519,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     };
     // (undocumented)
     i18n: I18nServiceSetup;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     logging: LoggingServiceSetup;
     // (undocumented)
@@ -469,10 +535,18 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
+    // (undocumented)
+    analytics: AnalyticsServiceStart;
     // (undocumented)
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
     coreUsageData: CoreUsageDataStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
+    // (undocumented)
+    docLinks: DocLinksServiceStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
     // (undocumented)
@@ -798,6 +872,11 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     statusCode: number;
 }
 
+// @public (undocumented)
+export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
+    [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
@@ -849,15 +928,11 @@ export interface DeprecationsServiceSetup {
 // @public
 export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 
-// @public
-export interface DiscoveredPlugin {
-    readonly configPath: ConfigPath;
-    readonly id: PluginName;
-    readonly optionalPlugins: readonly PluginName[];
-    readonly requiredBundles: readonly PluginName[];
-    readonly requiredPlugins: readonly PluginName[];
-    readonly type: PluginType;
-}
+export { DiscoveredPlugin }
+
+export { DocLinksServiceSetup }
+
+export { DocLinksServiceStart }
 
 export { Ecs }
 
@@ -870,14 +945,10 @@ export { EcsEventOutcome }
 export { EcsEventType }
 
 // @public
-export type ElasticsearchClient = Omit<KibanaClient, 'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'> & {
-    transport: {
-        request<TResponse = unknown>(params: TransportRequestParams, options?: TransportRequestOptions): Promise<TransportResult<TResponse>>;
-    };
-};
+export type ElasticsearchClient = Omit<Client, 'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'>;
 
 // @public
-export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
+export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders' | 'maxSockets' | 'compression' | 'sniffOnStart' | 'sniffOnConnectionFault' | 'requestHeadersWhitelist' | 'sniffInterval' | 'hosts' | 'username' | 'password' | 'serviceAccountToken'> & {
     pingTimeout?: ElasticsearchConfig['pingTimeout'] | ClientOptions['pingTimeout'];
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ClientOptions['requestTimeout'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
@@ -889,11 +960,13 @@ export type ElasticsearchClientConfig = Pick<ElasticsearchConfig, 'customHeaders
 export class ElasticsearchConfig {
     constructor(rawConfig: ElasticsearchConfigType);
     readonly apiVersion: string;
+    readonly compression: boolean;
     // Warning: (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
     readonly customHeaders: ElasticsearchConfigType['customHeaders'];
     readonly healthCheckDelay: Duration;
     readonly hosts: string[];
     readonly ignoreVersionMismatch: boolean;
+    readonly maxSockets: number;
     readonly password?: string;
     readonly pingTimeout: Duration;
     readonly requestHeadersWhitelist: string[];
@@ -939,16 +1012,13 @@ export interface ElasticsearchServiceSetup {
     legacy: {
         readonly config$: Observable<ElasticsearchConfig>;
     };
+    setUnauthorizedErrorHandler: (handler: UnauthorizedErrorHandler) => void;
 }
 
 // @public (undocumented)
 export interface ElasticsearchServiceStart {
     readonly client: IClusterClient;
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
-    // @deprecated (undocumented)
-    legacy: {
-        readonly config$: Observable<ElasticsearchConfig>;
-    };
 }
 
 // @public (undocumented)
@@ -969,6 +1039,10 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
+export { Event_2 as Event }
+
+export { EventContext }
+
 // Warning: (ae-missing-release-tag) "EventLoopDelaysMonitor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -979,13 +1053,27 @@ export class EventLoopDelaysMonitor {
     stop(): void;
 }
 
+export { EventType }
+
+export { EventTypeOpts }
+
 // @public (undocumented)
 export interface ExecutionContextSetup {
+    // (undocumented)
+    getAsLabels(): apm.Labels;
     withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
 }
 
 // @public (undocumented)
 export type ExecutionContextStart = ExecutionContextSetup;
+
+// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
+//
+// @public
+export type ExposedToBrowserDescriptor<T> = {
+    [Key in keyof T]?: T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? // can be nested for objects
+    ExposedToBrowserDescriptor<T[Key]> | boolean : boolean;
+};
 
 // @public
 export interface FakeRequest {
@@ -1062,16 +1150,18 @@ export interface HttpAuth {
 
 // @public
 export interface HttpResources {
-    register: <P, Q, B, Context extends RequestHandlerContext_2 = RequestHandlerContext_2>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B, Context>) => void;
+    register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B, Context>) => void;
 }
 
 // @public
 export interface HttpResourcesRenderOptions {
     headers?: ResponseHeaders;
+    // @internal
+    includeExposedConfigKeys?: boolean;
 }
 
 // @public
-export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext_2 = RequestHandlerContext_2> = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
+export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext> = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
 
 // @public
 export type HttpResourcesResponseOptions = HttpResponseOptions;
@@ -1111,8 +1201,6 @@ export interface HttpServicePreboot {
 
 // @public
 export interface HttpServiceSetup {
-    // @deprecated
-    auth: HttpAuth;
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() => IRouter<Context>;
@@ -1123,7 +1211,7 @@ export interface HttpServiceSetup {
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
     registerOnPreResponse: (handler: OnPreResponseHandler) => void;
     registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
-    registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Context>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
+    registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Omit<Context, 'resolve'>>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
 }
 
 // @public (undocumented)
@@ -1155,7 +1243,7 @@ export interface IContextContainer {
 }
 
 // @public
-export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => Promise<Context[ContextName]> | Context[ContextName];
+export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => MaybePromise<Awaited<Context[ContextName]>>;
 
 // @public
 export interface ICspConfig {
@@ -1243,7 +1331,9 @@ export interface IntervalHistogram {
 
 // @public (undocumented)
 export interface IRenderOptions {
-    includeUserSettings?: boolean;
+    // @internal
+    includeExposedConfigKeys?: boolean;
+    isAnonymousPage?: boolean;
     // @internal @deprecated
     vars?: Record<string, any>;
 }
@@ -1266,11 +1356,17 @@ export interface IRouter<Context extends RequestHandlerContext = RequestHandlerC
 // @public
 export type IsAuthenticated = (request: KibanaRequest) => boolean;
 
-// @public (undocumented)
-export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
+// @public
+export interface ISavedObjectsExporter {
+    exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+    exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
+}
 
-// @public (undocumented)
-export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
+// @public
+export interface ISavedObjectsImporter {
+    import(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+}
 
 // @public (undocumented)
 export interface ISavedObjectsPointInTimeFinder<T, A> {
@@ -1290,6 +1386,8 @@ export interface IScopedClusterClient {
     readonly asInternalUser: ElasticsearchClient;
 }
 
+export { IShipper }
+
 // @public
 export interface IUiSettingsClient {
     get: <T = any>(key: string) => Promise<T>;
@@ -1306,12 +1404,13 @@ export interface IUiSettingsClient {
 
 // @public
 export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
-    readonly description: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
+    readonly description?: string;
     readonly url?: string;
-    parent?: KibanaExecutionContext;
+    child?: KibanaExecutionContext;
 };
 
 // @public
@@ -1369,10 +1468,10 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
+    custom: <T extends string | Record<string, any> | Buffer | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
-    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    } | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
     badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
@@ -1393,10 +1492,10 @@ export const kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<string | Error | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Buffer | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
-    }>;
+    } | Stream>;
     redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
@@ -1415,25 +1514,13 @@ export type LifecycleResponseFactory = typeof lifecycleResponseFactory;
 
 export { Logger }
 
-// Warning: (ae-forgotten-export) The symbol "loggerSchema" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type LoggerConfigType = TypeOf<typeof loggerSchema>;
+export { LoggerConfigType }
 
-// @public (undocumented)
-export interface LoggerContextConfigInput {
-    // (undocumented)
-    appenders?: Record<string, AppenderConfigType> | Map<string, AppenderConfigType>;
-    // (undocumented)
-    loggers?: LoggerConfigType[];
-}
+export { LoggerContextConfigInput }
 
 export { LoggerFactory }
 
-// @public
-export interface LoggingServiceSetup {
-    configure(config$: Observable<LoggerContextConfigInput>): void;
-}
+export { LoggingServiceSetup }
 
 export { LogLevel_2 as LogLevel }
 
@@ -1441,12 +1528,13 @@ export { LogMeta }
 
 export { LogRecord }
 
-// Warning: (ae-forgotten-export) The symbol "Maybe" needs to be exported by the entry point index.d.ts
-//
 // @public
 export type MakeUsageFromSchema<T> = {
     [Key in keyof T]?: T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? MakeUsageFromSchema<T[Key]> | boolean : boolean;
 };
+
+// @public
+export const mergeSavedObjectMigrationMaps: (map1: SavedObjectMigrationMap, map2: SavedObjectMigrationMap) => SavedObjectMigrationMap;
 
 // @public
 export interface MetricsServiceSetup {
@@ -1614,6 +1702,8 @@ export interface OpsServerMetrics {
     };
 }
 
+export { OptInConfig }
+
 export { PackageInfo }
 
 // @public
@@ -1631,9 +1721,7 @@ export { Plugin_2 as Plugin }
 export interface PluginConfigDescriptor<T = any> {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     deprecations?: ConfigDeprecationProvider;
-    exposeToBrowser?: {
-        [P in keyof T]?: boolean;
-    };
+    exposeToBrowser?: ExposedToBrowserDescriptor<T>;
     exposeToUsage?: MakeUsageFromSchema<T>;
     schema: PluginConfigSchema<T>;
 }
@@ -1672,6 +1760,7 @@ export interface PluginManifest {
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     readonly configPath: ConfigPath;
     readonly description?: string;
+    readonly enabledOnAnonymousPages?: boolean;
     // @deprecated
     readonly extraPublicDirs?: string[];
     readonly id: PluginName;
@@ -1691,11 +1780,9 @@ export interface PluginManifest {
     readonly version: string;
 }
 
-// @public
-export type PluginName = string;
+export { PluginName }
 
-// @public (undocumented)
-export type PluginOpaqueId = symbol;
+export { PluginOpaqueId }
 
 // @internal (undocumented)
 export interface PluginsServiceSetup {
@@ -1708,11 +1795,7 @@ export interface PluginsServiceStart {
     contracts: Map<PluginName, unknown>;
 }
 
-// @public (undocumented)
-export enum PluginType {
-    preboot = "preboot",
-    standard = "standard"
-}
+export { PluginType }
 
 // @public (undocumented)
 export const pollEsNodesVersion: ({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: PollEsNodesVersionOptions) => Observable<NodesVersionCompatibility>;
@@ -1767,26 +1850,14 @@ export interface RegisterDeprecationsConfig {
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
-export interface RequestHandlerContext {
+export interface RequestHandlerContext extends RequestHandlerContextBase {
     // (undocumented)
-    core: {
-        savedObjects: {
-            client: SavedObjectsClientContract;
-            typeRegistry: ISavedObjectTypeRegistry;
-            getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-            getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-            getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-        };
-        elasticsearch: {
-            client: IScopedClusterClient;
-        };
-        uiSettings: {
-            client: IUiSettingsClient;
-        };
-        deprecations: {
-            client: DeprecationsClient;
-        };
-    };
+    core: Promise<CoreRequestHandlerContext>;
+}
+
+// @public (undocumented)
+export interface RequestHandlerContextBase {
+    resolve: <T extends keyof Omit<this, 'resolve'>>(parts: T[]) => Promise<AwaitedProperties<Pick<this, T>>>;
 }
 
 // @public
@@ -1979,8 +2050,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 
@@ -2217,6 +2290,8 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
+    static createGenericNotFoundEsUnavailableError(type?: string | null, id?: string | null): DecoratedError;
+    // (undocumented)
     static createIndexAliasNotFoundError(alias: string): DecoratedError;
     // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
@@ -2287,15 +2362,17 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
     types: string[];
 }
 
-// @public (undocumented)
-export class SavedObjectsExporter {
+// @internal (undocumented)
+export class SavedObjectsExporter implements ISavedObjectsExporter {
     constructor({ savedObjectsClient, typeRegistry, exportSizeLimit, logger, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         exportSizeLimit: number;
         logger: Logger;
     });
+    // (undocumented)
     exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+    // (undocumented)
     exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
 }
 
@@ -2344,6 +2421,7 @@ export interface SavedObjectsExportTransformContext {
 // @public
 export type SavedObjectsFieldMapping = estypes.MappingProperty & {
     dynamic?: false | 'strict';
+    properties?: Record<estypes.PropertyName, estypes.MappingProperty>;
 };
 
 // @public (undocumented)
@@ -2373,7 +2451,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SearchSortOrder;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -2438,14 +2516,16 @@ export interface SavedObjectsImportConflictError {
     type: 'conflict';
 }
 
-// @public (undocumented)
-export class SavedObjectsImporter {
+// @internal (undocumented)
+export class SavedObjectsImporter implements ISavedObjectsImporter {
     constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         importSizeLimit: number;
     });
-    import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    // (undocumented)
+    import({ readStream, createNewCopies, namespace, overwrite, refresh, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    // (undocumented)
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 }
 
@@ -2479,8 +2559,6 @@ export interface SavedObjectsImportFailure {
         icon?: string;
     };
     overwrite?: boolean;
-    // @deprecated (undocumented)
-    title?: string;
     // (undocumented)
     type: string;
 }
@@ -2510,6 +2588,7 @@ export interface SavedObjectsImportOptions {
     namespace?: string;
     overwrite: boolean;
     readStream: Readable;
+    refresh?: boolean | 'wait_for';
 }
 
 // @public
@@ -2725,6 +2804,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
+    alias_purpose?: 'savedObjectConversion' | 'savedObjectImport';
     alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
@@ -2735,7 +2815,7 @@ export class SavedObjectsSerializer {
     // @internal
     constructor(registry: ISavedObjectTypeRegistry);
     generateRawId(namespace: string | undefined, type: string, id: string): string;
-    generateRawLegacyUrlAliasId(namespace: string, type: string, id: string): string;
+    generateRawLegacyUrlAliasId(namespace: string | undefined, type: string, id: string): string;
     isRawSavedObject(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): boolean;
     rawToSavedObject<T = unknown>(doc: SavedObjectsRawDoc, options?: SavedObjectsRawDocParseOptions): SavedObjectSanitizedDoc<T>;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
@@ -2745,7 +2825,7 @@ export class SavedObjectsSerializer {
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
     getKibanaIndex: () => string;
-    registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
+    registerType: <Attributes extends SavedObjectAttributes = any>(type: SavedObjectsType<Attributes>) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
@@ -2782,6 +2862,7 @@ export interface SavedObjectsType<Attributes = any> {
     migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
     name: string;
     namespaceType: SavedObjectsNamespaceType;
+    schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
 }
 
 // @public
@@ -2842,6 +2923,7 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject {
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    retryOnConflict?: number;
     upsert?: Attributes;
     version?: string;
 }
@@ -2863,6 +2945,15 @@ export class SavedObjectsUtils {
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
+
+// @public
+export interface SavedObjectsValidationMap {
+    // (undocumented)
+    [version: string]: SavedObjectsValidationSpec;
+}
+
+// @public
+export type SavedObjectsValidationSpec = ObjectType;
 
 // Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
 //
@@ -3023,6 +3114,8 @@ export type SharedGlobalConfig = RecursiveReadonly<{
     savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
 
+export { ShipperClassConstructor }
+
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
@@ -3039,6 +3132,10 @@ export interface StatusServiceSetup {
     overall$: Observable<ServiceStatus>;
     set(status$: Observable<ServiceStatus>): void;
 }
+
+export { TelemetryCounter }
+
+export { TelemetryCounterType }
 
 // @public
 export interface UiSettingsParams<T = unknown> {
@@ -3076,6 +3173,49 @@ export interface UiSettingsServiceStart {
 // @public
 export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image' | 'color';
 
+// @public (undocumented)
+export type UnauthorizedError = errors.ResponseError & {
+    statusCode: 401;
+};
+
+// @public
+export type UnauthorizedErrorHandler = (options: UnauthorizedErrorHandlerOptions, toolkit: UnauthorizedErrorHandlerToolkit) => MaybePromise<UnauthorizedErrorHandlerResult>;
+
+// @public (undocumented)
+export interface UnauthorizedErrorHandlerNotHandledResult {
+    // (undocumented)
+    type: 'notHandled';
+}
+
+// @public (undocumented)
+export interface UnauthorizedErrorHandlerOptions {
+    // (undocumented)
+    error: UnauthorizedError;
+    // (undocumented)
+    request: KibanaRequest;
+}
+
+// @public (undocumented)
+export type UnauthorizedErrorHandlerResult = UnauthorizedErrorHandlerRetryResult | UnauthorizedErrorHandlerNotHandledResult;
+
+// @public (undocumented)
+export interface UnauthorizedErrorHandlerResultRetryParams {
+    // (undocumented)
+    authHeaders: AuthHeaders;
+}
+
+// @public (undocumented)
+export interface UnauthorizedErrorHandlerRetryResult extends UnauthorizedErrorHandlerResultRetryParams {
+    // (undocumented)
+    type: 'retry';
+}
+
+// @public
+export interface UnauthorizedErrorHandlerToolkit {
+    notHandled: () => UnauthorizedErrorHandlerNotHandledResult;
+    retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerRetryResult;
+}
+
 // @public
 export interface UserProvidedValues<T = any> {
     // (undocumented)
@@ -3089,10 +3229,10 @@ export const validBodyOutput: readonly ["data", "stream"];
 
 // Warnings were encountered during analysis:
 //
-// src/core/server/elasticsearch/client/types.ts:93:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
+// src/core/server/elasticsearch/client/types.ts:81:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:375:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:377:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:483:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:339:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:341:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:448:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

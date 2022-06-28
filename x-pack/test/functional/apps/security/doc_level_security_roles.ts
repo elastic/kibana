@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const screenshot = getService('screenshots');
+  const security = getService('security');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
 
   describe('dls', function () {
@@ -26,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
+      await security.testUser.setRoles(['cluster_security_manager', 'kibana_admin']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
     });
@@ -75,9 +77,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.contain('EAST');
     });
+
     after('logout', async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+      await security.user.delete('userEast');
+      await security.role.delete('myroleEast');
+      await security.testUser.restoreDefaults();
     });
   });
 }

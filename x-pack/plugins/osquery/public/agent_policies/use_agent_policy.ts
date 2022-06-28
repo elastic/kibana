@@ -21,6 +21,7 @@ export const useAgentPolicy = ({ policyId, skip, silent }: UseAgentPolicy) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return useQuery<any, Error>(
     ['agentPolicy', { policyId }],
     () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
@@ -36,8 +37,6 @@ export const useAgentPolicy = ({ policyId, skip, silent }: UseAgentPolicy) => {
             defaultMessage: 'Error while fetching agent policy details',
           }),
         }),
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
     }
   );
 };

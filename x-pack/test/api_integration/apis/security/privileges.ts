@@ -8,7 +8,7 @@
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
-import { RawKibanaPrivileges } from '../../../../plugins/security/common/model';
+import { RawKibanaPrivileges } from '@kbn/security-plugin/common/model';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -28,7 +28,9 @@ export default function ({ getService }: FtrProviderContext) {
             savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
             maps: ['all', 'read', 'minimal_all', 'minimal_read'],
+            generalCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read'],
+            fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],
             stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],

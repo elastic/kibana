@@ -5,44 +5,53 @@
  * 2.0.
  */
 
-import type { CoreStart } from 'kibana/public';
-import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { EMSSettings } from '@kbn/maps-ems-plugin/common/ems_settings';
+import { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
-import type { EMSSettings } from '../common/ems_settings';
-import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
-
-let kibanaVersion: string;
-export const setKibanaVersion = (version: string) => (kibanaVersion = version);
-export const getKibanaVersion = () => kibanaVersion;
 
 let coreStart: CoreStart;
 let pluginsStart: MapsPluginStartDependencies;
+let mapsEms: MapsEmsPluginPublicStart;
+let emsSettings: EMSSettings;
 export function setStartServices(core: CoreStart, plugins: MapsPluginStartDependencies) {
   coreStart = core;
   pluginsStart = plugins;
+  mapsEms = plugins.mapsEms;
+  emsSettings = mapsEms.createEMSSettings();
 }
+
+let isCloudEnabled = false;
+export function setIsCloudEnabled(enabled: boolean) {
+  isCloudEnabled = enabled;
+}
+export const getIsCloud = () => isCloudEnabled;
 
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
-export const getAutocompleteService = () => pluginsStart.data.autocomplete;
+export const getAutocompleteService = () => pluginsStart.unifiedSearch.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
 export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
-export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
+export const getIndexPatternSelectComponent = () =>
+  pluginsStart.unifiedSearch.ui.IndexPatternSelect;
+export const getSearchBar = () => pluginsStart.unifiedSearch.ui.SearchBar;
 export const getHttp = () => coreStart.http;
+export const getExecutionContext = () => coreStart.executionContext;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getCoreChrome = () => coreStart.chrome;
+export const getDevToolsCapabilities = () => coreStart.application.capabilities.dev_tools;
 export const getMapsCapabilities = () => coreStart.application.capabilities.maps;
 export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize;
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getData = () => pluginsStart.data;
-export const getSavedObjects = () => pluginsStart.savedObjects;
 export const getUiActions = () => pluginsStart.uiActions;
 export const getCore = () => coreStart;
 export const getNavigation = () => pluginsStart.navigation;
@@ -50,10 +59,17 @@ export const getCoreI18n = () => coreStart.i18n;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
+export const getNavigateToUrl = () => coreStart.application.navigateToUrl;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
 export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
+export const getTheme = () => coreStart.theme;
+export const getUsageCollection = () => pluginsStart.usageCollection;
+export const getApplication = () => coreStart.application;
+export const isScreenshotMode = () => {
+  return pluginsStart.screenshotMode ? pluginsStart.screenshotMode.isScreenshotMode() : false;
+};
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;
@@ -63,25 +79,19 @@ export const getMapAppConfig = () => mapAppConfig;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
-// map.* kibana.yml settings from maps_ems plugin that are shared between OSS map visualizations and maps app
-let kibanaCommonConfig: MapsEmsConfig;
-export const setKibanaCommonConfig = (config: MapsEmsConfig) => (kibanaCommonConfig = config);
-export const getKibanaCommonConfig = () => kibanaCommonConfig;
-
-let emsSettings: EMSSettings;
-export const setEMSSettings = (value: EMSSettings) => {
-  emsSettings = value;
+export const getMapsEmsStart: () => MapsEmsPluginPublicStart = () => {
+  return mapsEms;
 };
-export const getEMSSettings = () => {
+
+export const getEMSSettings: () => EMSSettings = () => {
   return emsSettings;
 };
 
-export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
+export const getEmsTileLayerId = () => mapsEms.config.emsTileLayerId;
 
 export const getTilemap = () => {
-  const config = getKibanaCommonConfig();
-  if (config.tilemap) {
-    return config.tilemap;
+  if (mapsEms.config.tilemap) {
+    return mapsEms.config.tilemap;
   } else {
     return {};
   }

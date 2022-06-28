@@ -42,7 +42,7 @@ export interface UseActionCellDataProvider {
   values: string[] | null | undefined;
 }
 
-const getDataProvider = (field: string, id: string, value: string): DataProvider => ({
+export const getDataProvider = (field: string, id: string, value: string): DataProvider => ({
   and: [],
   enabled: true,
   id: escapeDataProviderId(id),
@@ -92,15 +92,17 @@ export const useActionCellDataProvider = ({
         } else if (fieldType === IP_FIELD_TYPE) {
           id = `formatted-ip-data-provider-${contextId}-${field}-${value}-${eventId}`;
           if (isString(value) && !isEmpty(value)) {
+            let addresses = value;
             try {
-              const addresses = JSON.parse(value);
-              if (isArray(addresses)) {
-                valueAsString = addresses.join(',');
-                addresses.forEach((ip) => memo.dataProvider.push(getDataProvider(field, id, ip)));
-              }
+              addresses = JSON.parse(value);
             } catch (_) {
               // Default to keeping the existing string value
             }
+            if (isArray(addresses)) {
+              valueAsString = addresses.join(',');
+              addresses.forEach((ip) => memo.dataProvider.push(getDataProvider(field, id, ip)));
+            }
+            memo.dataProvider.push(getDataProvider(field, id, addresses));
             memo.stringValues.push(valueAsString);
             return memo;
           }

@@ -7,9 +7,8 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-import type { UserFormValues } from '../../../../plugins/security/public/management/users/edit_user/user_form';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings']);
@@ -18,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const security = getService('security');
 
   function isCloudEnvironment() {
     return config.get('servers.elasticsearch.hostname') !== 'localhost';
@@ -31,8 +31,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       roles: ['superuser'],
     };
 
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     before(async () => {
       log.debug('users');
+      await security.testUser.setRoles(['cluster_security_manager']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
@@ -44,7 +49,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // In Cloud default users are defined in file realm, such users aren't exposed through the Users API.
       if (isCloudEnvironment()) {
-        expect(Object.keys(users)).to.eql(['test_user']);
+        expect(users).to.not.have.property('elastic');
+        expect(users).to.not.have.property('kibana_system');
+        expect(users).to.not.have.property('kibana');
       } else {
         expect(users.elastic.roles).to.eql(['superuser']);
         expect(users.elastic.reserved).to.be(true);
@@ -174,9 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return toastCount >= 1;
           });
           const successToast = await toasts.getToastElement(1);
-          expect(await successToast.getVisibleText()).to.be(
-            `Password changed for '${optionalUser.username}'.`
-          );
+          expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
 
         it('of current user when submitting form', async () => {
@@ -195,9 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return toastCount >= 1;
           });
           const successToast = await toasts.getToastElement(1);
-          expect(await successToast.getVisibleText()).to.be(
-            `Password changed for '${optionalUser.username}'.`
-          );
+          expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
       });
 

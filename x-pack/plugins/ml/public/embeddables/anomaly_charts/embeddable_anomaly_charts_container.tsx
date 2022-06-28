@@ -10,6 +10,8 @@ import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elasti
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type {
@@ -23,10 +25,10 @@ import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { ANOMALY_THRESHOLD } from '../../../common';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import { MlLocatorParams } from '../../../common/types/locator';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -38,6 +40,9 @@ export interface EmbeddableAnomalyChartsContainerProps {
   refresh: Observable<any>;
   onInputChange: (input: Partial<AnomalyChartsEmbeddableInput>) => void;
   onOutputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void;
+  onRenderComplete: () => void;
+  onLoading: () => void;
+  onError: (error: Error) => void;
 }
 
 export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
@@ -48,7 +53,17 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   refresh,
   onInputChange,
   onOutputChange,
+  onRenderComplete,
+  onError,
+  onLoading,
 }) => {
+  useEmbeddableExecutionContext<AnomalyChartsEmbeddableInput>(
+    services[0].executionContext,
+    embeddableInput,
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    id
+  );
+
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
     optionValueToThreshold(
@@ -56,7 +71,8 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     )
   );
   const [selectedEntities, setSelectedEntities] = useState<EntityField[] | undefined>();
-  const [{ uiSettings }, { data: dataServices, share, uiActions }] = services;
+  const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
+    services;
   const { timefilter } = dataServices.query.timefilter;
 
   const mlLocator = useMemo(
@@ -93,7 +109,8 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     refresh,
     services,
     chartWidth,
-    severity.val
+    severity.val,
+    { onRenderComplete, onError, onLoading }
   );
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
@@ -183,6 +200,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
+              chartsService={chartsService}
             />
           )}
         </div>

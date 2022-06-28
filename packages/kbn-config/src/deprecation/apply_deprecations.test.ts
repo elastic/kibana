@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DocLinks } from '@kbn/doc-links';
 import { applyDeprecations } from './apply_deprecations';
 import { ConfigDeprecation, ConfigDeprecationContext, ConfigDeprecationWithContext } from './types';
 import { configDeprecationFactory as deprecations } from './deprecation_factory';
@@ -14,6 +15,7 @@ describe('applyDeprecations', () => {
   const context: ConfigDeprecationContext = {
     version: '7.16.2',
     branch: '7.16',
+    docLinks: {} as DocLinks,
   };
 
   const wrapHandler = (
@@ -109,8 +111,8 @@ describe('applyDeprecations', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated', renamed: 'renamed' };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated')),
-      wrapHandler(deprecations.rename('renamed', 'newname')),
+      wrapHandler(deprecations.unused('deprecated', { level: 'critical' })),
+      wrapHandler(deprecations.rename('renamed', 'newname', { level: 'critical' })),
     ]);
 
     expect(migrated).toEqual({ foo: 'bar', newname: 'renamed' });
@@ -131,8 +133,10 @@ describe('applyDeprecations', () => {
     };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated.nested')),
-      wrapHandler(deprecations.rename('nested.from.rename', 'nested.to.renamed')),
+      wrapHandler(deprecations.unused('deprecated.nested', { level: 'critical' })),
+      wrapHandler(
+        deprecations.rename('nested.from.rename', 'nested.to.renamed', { level: 'critical' })
+      ),
     ]);
 
     expect(migrated).toStrictEqual({
@@ -150,7 +154,7 @@ describe('applyDeprecations', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated')),
+      wrapHandler(deprecations.unused('deprecated', { level: 'critical' })),
     ]);
 
     expect(initialConfig).toEqual({ foo: 'bar', deprecated: 'deprecated' });

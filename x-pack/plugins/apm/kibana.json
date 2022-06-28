@@ -16,7 +16,10 @@
     "licensing",
     "observability",
     "ruleRegistry",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "share",
+    "unifiedSearch",
+    "dataViews"
   ],
   "optionalPlugins": [
     "actions",
@@ -24,7 +27,6 @@
     "cloud",
     "fleet",
     "home",
-    "maps",
     "ml",
     "security",
     "spaces",
@@ -33,14 +35,16 @@
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"],
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
   "requiredBundles": [
     "fleet",
-    "home",
     "kibanaReact",
     "kibanaUtils",
-    "maps",
     "ml",
-    "observability"
+    "observability",
+    "esUiShared"
   ]
 }

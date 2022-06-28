@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import {
   createListStream,
@@ -28,7 +28,6 @@ interface SearchResponses {
         total: number;
         hits: Array<{
           _index: string;
-          _type: string;
           _id: string;
           _source: Record<string, unknown>;
         }>;
@@ -37,14 +36,27 @@ interface SearchResponses {
   }>;
 }
 
-function createMockClient(responses: SearchResponses) {
+function createMockClient(responses: SearchResponses, hasDataStreams = false) {
   // TODO: replace with proper mocked client
   const client: any = {
     helpers: {
       scrollSearch: jest.fn(function* ({ index }) {
+        if (hasDataStreams) {
+          index = `.ds-${index}`;
+        }
+
         while (responses[index] && responses[index].length) {
           yield responses[index].shift()!;
         }
+      }),
+    },
+    indices: {
+      get: jest.fn(async ({ index }) => {
+        return { [index]: { data_stream: hasDataStreams && index.substring(4) } };
+      }),
+      getDataStream: jest.fn(async ({ name }) => {
+        if (!hasDataStreams) return { data_streams: [] };
+        return { data_streams: [{ name }] };
       }),
     },
   };
@@ -60,9 +72,9 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
             hits: {
               total: 5,
               hits: [
-                { _index: 'foo', _type: '_doc', _id: '0', _source: {} },
-                { _index: 'foo', _type: '_doc', _id: '1', _source: {} },
-                { _index: 'foo', _type: '_doc', _id: '2', _source: {} },
+                { _index: 'foo', _id: '0', _source: {} },
+                { _index: 'foo', _id: '1', _source: {} },
+                { _index: 'foo', _id: '2', _source: {} },
               ],
             },
           },
@@ -72,8 +84,8 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
             hits: {
               total: 5,
               hits: [
-                { _index: 'foo', _type: '_doc', _id: '3', _source: {} },
-                { _index: 'foo', _type: '_doc', _id: '4', _source: {} },
+                { _index: 'foo', _id: '3', _source: {} },
+                { _index: 'foo', _id: '4', _source: {} },
               ],
             },
           },
@@ -85,8 +97,8 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
             hits: {
               total: 2,
               hits: [
-                { _index: 'bar', _type: '_doc', _id: '0', _source: {} },
-                { _index: 'bar', _type: '_doc', _id: '1', _source: {} },
+                { _index: 'bar', _id: '0', _source: {} },
+                { _index: 'bar', _id: '1', _source: {} },
               ],
             },
           },
@@ -109,7 +121,6 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       createMapStream((record: any) => {
         expect(record).toHaveProperty('type', 'doc');
         expect(record.value.source).toEqual({});
-        expect(record.value.type).toBe('_doc');
         expect(record.value.index).toMatch(/^(foo|bar)$/);
         expect(record.value.id).toMatch(/^\d+$/);
         return `${record.value.index}:${record.value.id}`;
@@ -219,9 +230,38 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
   `);
   });
 
+  it('supports data streams', async () => {
+    const hits = [
+      { _index: '.ds-foo-datastream', _id: '0', _source: {} },
+      { _index: '.ds-foo-datastream', _id: '1', _source: {} },
+    ];
+    const responses = {
+      '.ds-foo-datastream': [{ body: { hits: { hits, total: hits.length } } }],
+    };
+    const client = createMockClient(responses, true);
+
+    const stats = createStats('test', log);
+    const progress = new Progress();
+
+    const results = await createPromiseFromStreams([
+      createListStream(['foo-datastream']),
+      createGenerateDocRecordsStream({
+        client,
+        stats,
+        progress,
+      }),
+      createMapStream((record: any) => {
+        return `${record.value.data_stream}:${record.value.id}`;
+      }),
+      createConcatStream([]),
+    ]);
+
+    expect(results).toEqual(['foo-datastream:0', 'foo-datastream:1']);
+  });
+
   describe('keepIndexNames', () => {
     it('changes .kibana* index names if keepIndexNames is not enabled', async () => {
-      const hits = [{ _index: '.kibana_7.16.0_001', _type: '_doc', _id: '0', _source: {} }];
+      const hits = [{ _index: '.kibana_7.16.0_001', _id: '0', _source: {} }];
       const responses = {
         ['.kibana_7.16.0_001']: [{ body: { hits: { hits, total: hits.length } } }],
       };
@@ -245,7 +285,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
     });
 
     it('does not change non-.kibana* index names if keepIndexNames is not enabled', async () => {
-      const hits = [{ _index: '.foo', _type: '_doc', _id: '0', _source: {} }];
+      const hits = [{ _index: '.foo', _id: '0', _source: {} }];
       const responses = {
         ['.foo']: [{ body: { hits: { hits, total: hits.length } } }],
       };
@@ -269,7 +309,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
     });
 
     it('does not change .kibana* index names if keepIndexNames is enabled', async () => {
-      const hits = [{ _index: '.kibana_7.16.0_001', _type: '_doc', _id: '0', _source: {} }];
+      const hits = [{ _index: '.kibana_7.16.0_001', _id: '0', _source: {} }];
       const responses = {
         ['.kibana_7.16.0_001']: [{ body: { hits: { hits, total: hits.length } } }],
       };

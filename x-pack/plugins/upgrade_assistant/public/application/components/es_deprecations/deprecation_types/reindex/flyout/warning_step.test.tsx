@@ -18,9 +18,7 @@ import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 jest.mock('../../../../../app_context', () => {
-  const { docLinksServiceMock } = jest.requireActual(
-    '../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
-  );
+  const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
 
   return {
     useAppContext: () => {
@@ -40,6 +38,11 @@ describe('WarningsFlyoutStep', () => {
     warnings: [] as ReindexWarning[],
     hideWarningsStep: jest.fn(),
     continueReindex: jest.fn(),
+    meta: {
+      indexName: 'foo',
+      reindexName: 'reindexed-foo',
+      aliases: [],
+    },
   };
 
   it('renders', () => {

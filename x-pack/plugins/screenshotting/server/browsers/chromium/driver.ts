@@ -5,32 +5,25 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { map, truncate } from 'lodash';
-import open from 'opn';
-import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
-import { parse as parseUrl } from 'url';
-import { Logger } from 'src/core/server';
-import type { Layout } from 'src/plugins/screenshot_mode/common';
+import { Headers, Logger } from '@kbn/core/server';
 import {
   KBN_SCREENSHOT_MODE_HEADER,
   ScreenshotModePluginSetup,
-} from '../../../../../../src/plugins/screenshot_mode/server';
-import { Context, SCREENSHOTTING_CONTEXT_KEY } from '../../../common/context';
+} from '@kbn/screenshot-mode-plugin/server';
+import { truncate } from 'lodash';
+import open from 'opn';
+import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
+import { Subject } from 'rxjs';
+import { parse as parseUrl } from 'url';
+import { getDisallowedOutgoingUrlError } from '.';
 import { ConfigType } from '../../config';
+import { Layout } from '../../layouts';
+import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
+import { stripUnsafeHeaders } from './strip_unsafe_headers';
+import { getFooterTemplate, getHeaderTemplate } from './templates';
 
-export interface ConditionalHeadersConditions {
-  protocol: string;
-  hostname: string;
-  port: number;
-  basePath: string;
-}
-
-export interface ConditionalHeaders {
-  headers: Record<string, string>;
-  conditions: ConditionalHeadersConditions;
-}
+export type Context = Record<string, unknown>;
 
 export interface ElementPosition {
   boundingClientRect: {
@@ -46,18 +39,11 @@ export interface ElementPosition {
   };
 }
 
-export interface Viewport {
-  zoom: number;
-  width: number;
-  height: number;
-}
-
 interface OpenOptions {
-  conditionalHeaders: ConditionalHeaders;
   context?: Context;
+  headers: Headers;
   waitForSelector: string;
   timeout: number;
-  layout?: Layout;
 }
 
 interface WaitForSelectorOpts {
@@ -90,25 +76,19 @@ interface InterceptedRequest {
 
 const WAIT_FOR_DELAY_MS: number = 100;
 
-function getDisallowedOutgoingUrlError(interceptedUrl: string) {
-  return new Error(
-    i18n.translate('xpack.screenshotting.chromiumDriver.disallowedOutgoingUrl', {
-      defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}". Failing the request and closing the browser.`,
-      values: { interceptedUrl },
-    })
-  );
-}
-
 /**
  * @internal
  */
 export class HeadlessChromiumDriver {
   private listenersAttached = false;
   private interceptedCount = 0;
+  private screenshottingErrorSubject = new Subject<Error>();
+  readonly screenshottingError$ = this.screenshottingErrorSubject.asObservable();
 
   constructor(
     private screenshotMode: ScreenshotModePluginSetup,
     private config: ConfigType,
+    private basePath: string,
     private readonly page: Page
   ) {}
 
@@ -126,15 +106,9 @@ export class HeadlessChromiumDriver {
   /*
    * Call Page.goto and wait to see the Kibana DOM content
    */
-  async open(
+  public async open(
     url: string,
-    {
-      conditionalHeaders,
-      context,
-      layout,
-      waitForSelector: pageLoadSelector,
-      timeout,
-    }: OpenOptions,
+    { headers, context, waitForSelector: pageLoadSelector, timeout }: OpenOptions,
     logger: Logger
   ): Promise<void> {
     logger.info(`opening url ${url}`);
@@ -148,27 +122,12 @@ export class HeadlessChromiumDriver {
      */
     await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotModeEnabled);
 
-    if (context) {
-      await this.page.evaluateOnNewDocument(
-        (key: string, value: unknown) => {
-          Object.defineProperty(window, key, {
-            configurable: false,
-            writable: true,
-            enumerable: true,
-            value,
-          });
-        },
-        SCREENSHOTTING_CONTEXT_KEY,
-        context
-      );
-    }
-
-    if (layout) {
-      await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotLayout, layout);
+    for (const [key, value] of Object.entries(context ?? {})) {
+      await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotContext, key, value);
     }
 
     await this.page.setRequestInterception(true);
-    this.registerListeners(conditionalHeaders, logger);
+    this.registerListeners(url, headers, logger);
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
 
     if (this.config.browser.chromium.inspect) {
@@ -191,10 +150,117 @@ export class HeadlessChromiumDriver {
     return !this.page.isClosed();
   }
 
-  /*
-   * Call Page.screenshot and return a base64-encoded string of the image
+  /**
+   * Despite having "preserveDrawingBuffer": "true" for WebGL driven canvas elements
+   * we may still get a blank canvas in PDFs. As a further mitigation
+   * we convert WebGL backed canvases to images and inline replace the canvas element.
+   * The visual result is identical.
+   *
+   * The drawback is that we are mutating the page and so if anything were to interact
+   * with it after we ran this function it may lead to issues. Ideally, once Chromium
+   * fixes how PDFs are generated we can remove this code. See:
+   *
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=809065
+   * https://bugs.chromium.org/p/chromium/issues/detail?id=137576
+   *
+   * Idea adapted from: https://github.com/puppeteer/puppeteer/issues/1731#issuecomment-864345938
    */
-  async screenshot(elementPosition: ElementPosition): Promise<Buffer | undefined> {
+  private async workaroundWebGLDrivenCanvases() {
+    const canvases = await this.page.$$('canvas');
+    for (const canvas of canvases) {
+      await canvas.evaluate((thisCanvas: Element) => {
+        if (
+          (thisCanvas as HTMLCanvasElement).getContext('webgl') ||
+          (thisCanvas as HTMLCanvasElement).getContext('webgl2')
+        ) {
+          const newDiv = document.createElement('div');
+          const img = document.createElement('img');
+          img.src = (thisCanvas as HTMLCanvasElement).toDataURL('image/png');
+          newDiv.appendChild(img);
+          thisCanvas.parentNode!.replaceChild(newDiv, thisCanvas);
+        }
+      });
+    }
+  }
+
+  /**
+   * Timeout errors may occur when waiting for data or the brower render events to complete. This mutates the
+   * page, and has the drawback anything were to interact with the page after we ran this function, it may lead
+   * to issues. Ideally, timeout errors wouldn't occur because ES would return pre-loaded results data
+   * statically.
+   */
+  private async injectScreenshottingErrorHeader(error: Error, containerSelector: string) {
+    await this.page.evaluate(
+      (selector: string, text: string) => {
+        let container = document.querySelector(selector);
+        if (!container) {
+          container = document.querySelector('body');
+        }
+
+        const errorBoundary = document.createElement('div');
+        errorBoundary.className = 'euiErrorBoundary';
+
+        const divNode = document.createElement('div');
+        divNode.className = 'euiCodeBlock euiCodeBlock--fontSmall euiCodeBlock--paddingLarge';
+
+        const preNode = document.createElement('pre');
+        preNode.className = 'euiCodeBlock__pre euiCodeBlock__pre--whiteSpacePreWrap';
+
+        const codeNode = document.createElement('code');
+        codeNode.className = 'euiCodeBlock__code';
+
+        errorBoundary.appendChild(divNode);
+        divNode.appendChild(preNode);
+        preNode.appendChild(codeNode);
+        codeNode.appendChild(document.createTextNode(text));
+
+        container?.insertBefore(errorBoundary, container.firstChild);
+      },
+      containerSelector,
+      error.toString()
+    );
+  }
+
+  public async printA4Pdf({
+    title,
+    logo,
+    error,
+  }: {
+    title: string;
+    logo?: string;
+    error?: Error;
+  }): Promise<Buffer> {
+    await this.workaroundWebGLDrivenCanvases();
+    if (error) {
+      await this.injectScreenshottingErrorHeader(error, getPrintLayoutSelectors().screenshot);
+    }
+    return this.page.pdf({
+      format: 'a4',
+      preferCSSPageSize: true,
+      scale: 1,
+      landscape: false,
+      displayHeaderFooter: true,
+      headerTemplate: await getHeaderTemplate({ title }),
+      footerTemplate: await getFooterTemplate({ logo }),
+    });
+  }
+
+  /*
+   * Receive a PNG buffer of the page screenshot from Chromium
+   */
+  public async screenshot({
+    elementPosition,
+    layout,
+    error,
+  }: {
+    elementPosition: ElementPosition;
+    layout: Layout;
+    error?: Error;
+  }): Promise<Buffer | undefined> {
+    if (error) {
+      await this.injectScreenshottingErrorHeader(error, layout.selectors.screenshot);
+    }
+
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
       clip: {
@@ -203,6 +269,7 @@ export class HeadlessChromiumDriver {
         height: boundingClientRect.height,
         width: boundingClientRect.width,
       },
+      captureBeyondViewport: false, // workaround for an internal resize. See: https://github.com/puppeteer/puppeteer/issues/7043
     });
 
     if (Buffer.isBuffer(screenshot)) {
@@ -222,7 +289,7 @@ export class HeadlessChromiumDriver {
     return this.page.evaluate(fn, ...args);
   }
 
-  async waitForSelector(
+  public async waitForSelector(
     selector: string,
     opts: WaitForSelectorOpts,
     context: EvaluateMetaOpts,
@@ -252,14 +319,18 @@ export class HeadlessChromiumDriver {
     await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
-  async setViewport(
-    { width: _width, height: _height, zoom }: Viewport,
+  /**
+   * Setting the viewport is required to ensure that all capture elements are visible: anything not in the
+   * viewport can not be captured.
+   */
+  public async setViewport(
+    { width: _width, height: _height, zoom }: { zoom: number; width: number; height: number },
     logger: Logger
   ): Promise<void> {
     const width = Math.floor(_width);
     const height = Math.floor(_height);
 
-    logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
+    logger.debug(`Setting viewport to: width=${width} height=${height} scaleFactor=${zoom}`);
 
     await this.page.setViewport({
       width,
@@ -269,14 +340,13 @@ export class HeadlessChromiumDriver {
     });
   }
 
-  private registerListeners(conditionalHeaders: ConditionalHeaders, logger: Logger) {
+  private registerListeners(url: string, customHeaders: Headers, logger: Logger) {
     if (this.listenersAttached) {
       return;
     }
 
-    // @ts-ignore
     // FIXME: retrieve the client in open() and  pass in the client
-    const client = this.page._client;
+    const client = this.page.client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -299,23 +369,23 @@ export class HeadlessChromiumDriver {
           requestId,
         });
         this.page.browser().close();
-        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        const error = getDisallowedOutgoingUrlError(interceptedUrl);
+        this.screenshottingErrorSubject.next(error);
+        logger.error(error);
         return;
       }
 
-      if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
+      if (this._shouldUseCustomHeaders(url, interceptedUrl)) {
         logger.trace(`Using custom headers for ${interceptedUrl}`);
-        const headers = map(
-          {
-            ...interceptedRequest.request.headers,
-            ...conditionalHeaders.headers,
-            [KBN_SCREENSHOT_MODE_HEADER]: 'true',
-          },
-          (value, name) => ({
-            name,
-            value,
-          })
-        );
+        const headers = Object.entries({
+          ...interceptedRequest.request.headers,
+          ...stripUnsafeHeaders(customHeaders),
+          [KBN_SCREENSHOT_MODE_HEADER]: 'true',
+        }).flatMap(([name, rawValue]) => {
+          const values = Array.isArray(rawValue) ? rawValue : [rawValue ?? ''];
+
+          return values.map((value) => ({ name, value }));
+        });
 
         try {
           await client.send('Fetch.continueRequest', {
@@ -323,15 +393,7 @@ export class HeadlessChromiumDriver {
             headers,
           });
         } catch (err) {
-          logger.error(
-            i18n.translate(
-              'xpack.screenshotting.chromiumDriver.failedToCompleteRequestUsingHeaders',
-              {
-                defaultMessage: 'Failed to complete a request using headers: {error}',
-                values: { error: err },
-              }
-            )
-          );
+          logger.error(`Failed to complete a request using headers: ${err.message}`);
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
@@ -339,34 +401,29 @@ export class HeadlessChromiumDriver {
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
-          logger.error(
-            i18n.translate('xpack.screenshotting.chromiumDriver.failedToCompleteRequest', {
-              defaultMessage: 'Failed to complete a request: {error}',
-              values: { error: err },
-            })
-          );
+          logger.error(`Failed to complete a request: ${err.message}`);
         }
       }
 
       this.interceptedCount = this.interceptedCount + (isData ? 0 : 1);
     });
 
-    // Even though 3xx redirects go through our request
-    // handler, we should probably inspect responses just to
-    // avoid being bamboozled by some malicious request
     this.page.on('response', (interceptedResponse: puppeteer.HTTPResponse) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
+      const status = interceptedResponse.status();
 
-      if (!interceptedResponse.ok()) {
+      if (status >= 400 && !interceptedResponse.ok()) {
         logger.warn(
-          `Chromium received a non-OK response (${interceptedResponse.status()}) for request ${interceptedUrl}`
+          `Chromium received a non-OK response (${status}) for request ${interceptedUrl}`
         );
       }
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         this.page.browser().close();
-        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        const error = getDisallowedOutgoingUrlError(interceptedUrl);
+        this.screenshottingErrorSubject.next(error);
+        logger.error(error);
         return;
       }
     });
@@ -394,13 +451,27 @@ export class HeadlessChromiumDriver {
     );
   }
 
-  private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
-    const { hostname, protocol, port, pathname } = parseUrl(url);
+  private _shouldUseCustomHeaders(sourceUrl: string, targetUrl: string) {
+    const {
+      hostname: sourceHostname,
+      protocol: sourceProtocol,
+      port: sourcePort,
+    } = parseUrl(sourceUrl);
+    const {
+      hostname: targetHostname,
+      protocol: targetProtocol,
+      port: targetPort,
+      pathname: targetPathname,
+    } = parseUrl(targetUrl);
+
+    if (targetPathname === null) {
+      throw new Error(`URL missing pathname: ${targetUrl}`);
+    }
 
     // `port` is null in URLs that don't explicitly state it,
     // however we can derive the port from the protocol (http/https)
-    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
-    const derivedPort = (() => {
+    // IE: https://feeds.elastic.co/kibana/v8.0.0.json
+    const derivedPort = (protocol: string | null, port: string | null, url: string) => {
       if (port) {
         return port;
       }
@@ -413,36 +484,15 @@ export class HeadlessChromiumDriver {
         return '443';
       }
 
-      return null;
-    })();
-
-    if (derivedPort === null) throw new Error(`URL missing port: ${url}`);
-    if (pathname === null) throw new Error(`URL missing pathname: ${url}`);
+      throw new Error(`URL missing port: ${url}`);
+    };
 
     return (
-      hostname === conditions.hostname &&
-      protocol === `${conditions.protocol}:` &&
-      this._shouldUseCustomHeadersForPort(conditions, derivedPort) &&
-      pathname.startsWith(`${conditions.basePath}/`)
+      sourceHostname === targetHostname &&
+      sourceProtocol === targetProtocol &&
+      derivedPort(sourceProtocol, sourcePort, sourceUrl) ===
+        derivedPort(targetProtocol, targetPort, targetUrl) &&
+      targetPathname.startsWith(`${this.basePath}/`)
     );
-  }
-
-  private _shouldUseCustomHeadersForPort(
-    conditions: ConditionalHeadersConditions,
-    port: string | undefined
-  ) {
-    if (conditions.protocol === 'http' && conditions.port === 80) {
-      return (
-        port === undefined || port === null || port === '' || port === conditions.port.toString()
-      );
-    }
-
-    if (conditions.protocol === 'https' && conditions.port === 443) {
-      return (
-        port === undefined || port === null || port === '' || port === conditions.port.toString()
-      );
-    }
-
-    return port === conditions.port.toString();
   }
 }

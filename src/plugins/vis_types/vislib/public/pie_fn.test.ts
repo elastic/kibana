@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable } from 'src/plugins/expressions';
-import { functionWrapper } from '../../../expressions/common/expression_functions/specs/tests/utils';
+import type { Datatable } from '@kbn/expressions-plugin';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { createPieVisFn } from './pie_fn';
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';
@@ -39,7 +39,7 @@ describe('interpreter/functions#pie', () => {
   const visConfig = {
     type: 'pie',
     addTooltip: true,
-    addLegend: true,
+    legendDisplay: 'show',
     legendPosition: 'right',
     isDonut: true,
     labels: {

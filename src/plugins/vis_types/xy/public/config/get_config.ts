@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ScaleContinuousType } from '@elastic/charts';
+import { Fit, ScaleContinuousType } from '@elastic/charts';
 
-import { Datatable } from '../../../../expressions/public';
-import { BUCKET_TYPES } from '../../../../data/public';
-import { DateHistogramParams } from '../../../../visualizations/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { BUCKET_TYPES } from '@kbn/data-plugin/public';
+import { DateHistogramParams } from '@kbn/visualizations-plugin/public';
 
 import {
   Aspect,
@@ -27,7 +27,8 @@ import { getTooltip } from './get_tooltip';
 import { getLegend } from './get_legend';
 import { getAxis } from './get_axis';
 import { getAspects } from './get_aspects';
-import { ChartType } from '../index';
+import { ChartType } from '..';
+import { getSafeId } from '../utils/accessors';
 
 export function getConfig(
   table: Datatable,
@@ -51,13 +52,17 @@ export function getConfig(
 
   const yAxes: Array<AxisConfig<ScaleContinuousType>> = [];
 
+  // avoid duplicates based on aggId
+  const aspectVisited = new Set();
   params.dimensions.y.forEach((y) => {
     const accessor = y.accessor;
     const aspect = aspects.y.find(({ column }) => column === accessor);
-    const serie = params.seriesParams.find(({ data: { id } }) => id === aspect?.aggId);
+    const aggId = getSafeId(aspect?.aggId);
+    const serie = params.seriesParams.find(({ data: { id } }) => id === aggId);
     const valueAxis = params.valueAxes.find(({ id }) => id === serie?.valueAxis);
-    if (aspect && valueAxis) {
+    if (aspect && valueAxis && !aspectVisited.has(aggId)) {
       yAxes.push(getAxis<YScaleType>(valueAxis, params.grid, aspect, params.seriesParams));
+      aspectVisited.add(aggId);
     }
   });
 
@@ -87,7 +92,7 @@ export function getConfig(
   return {
     // NOTE: downscale ratio to match current vislib implementation
     markSizeRatio: radiusRatio * 0.6,
-    fittingFunction,
+    fittingFunction: fittingFunction ?? Fit.Linear,
     fillOpacity,
     detailedTooltip,
     orderBucketsBySum,

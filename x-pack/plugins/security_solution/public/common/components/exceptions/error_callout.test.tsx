@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getListMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { useDissasociateExceptionList } from '../../../detections/containers/detection_engine/rules/use_dissasociate_exception_list';
 import { ErrorCallout } from './error_callout';
@@ -43,7 +43,10 @@ describe('ErrorCallout', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title').text()
+      wrapper
+        .find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title')
+        .last()
+        .text()
     ).toEqual('Error: error reason (500)');
     expect(wrapper.find('[data-test-subj="errorCalloutMessage"]').at(0).text()).toEqual(
       'Error fetching exception list'
@@ -91,7 +94,10 @@ describe('ErrorCallout', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title').text()
+      wrapper
+        .find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title')
+        .last()
+        .text()
     ).toEqual('Error: not found');
     expect(wrapper.find('[data-test-subj="errorCalloutMessage"]').at(0).text()).toEqual(
       'Error fetching exception list'
@@ -117,7 +123,10 @@ describe('ErrorCallout', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title').text()
+      wrapper
+        .find('[data-test-subj="errorCalloutContainer"] .euiCallOutHeader__title')
+        .last()
+        .text()
     ).toEqual('Error: not found (404)');
     expect(wrapper.find('[data-test-subj="errorCalloutMessage"]').at(0).text()).toEqual(
       'The associated exception list (some_uuid) no longer exists. Please remove the missing exception list to add additional exceptions to the detection rule.'

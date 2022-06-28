@@ -5,8 +5,13 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty } from 'lodash';
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  FiltersOrUndefined,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 
 interface BuildEventsSearchQuery {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -14,12 +19,77 @@ interface BuildEventsSearchQuery {
   from: string;
   to: string;
   filter: estypes.QueryDslQueryContainer;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   size: number;
-  sortOrder?: estypes.SearchSortOrder;
-  searchAfterSortIds: estypes.SearchSortResults | undefined;
+  sortOrder?: estypes.SortOrder;
+  searchAfterSortIds: estypes.SortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
   trackTotalHits?: boolean;
 }
+
+const buildTimeRangeFilter = ({
+  to,
+  from,
+  timestampOverride,
+}: {
+  to: string;
+  from: string;
+  timestampOverride?: string;
+}): estypes.QueryDslQueryContainer => {
+  // If the timestampOverride is provided, documents must either populate timestampOverride with a timestamp in the range
+  // or must NOT populate the timestampOverride field at all and `@timestamp` must fall in the range.
+  // If timestampOverride is not provided, we simply use `@timestamp`
+  return timestampOverride != null
+    ? {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              range: {
+                [timestampOverride]: {
+                  lte: to,
+                  gte: from,
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        lte: to,
+                        gte: from,
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        exists: {
+                          field: timestampOverride,
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    : {
+        range: {
+          '@timestamp': {
+            lte: to,
+            gte: from,
+            format: 'strict_date_optional_time',
+          },
+        },
+      };
+};
 
 export const buildEventsSearchQuery = ({
   aggregations,
@@ -28,6 +98,7 @@ export const buildEventsSearchQuery = ({
   to,
   filter,
   size,
+  runtimeMappings,
   searchAfterSortIds,
   sortOrder,
   timestampOverride,
@@ -41,61 +112,11 @@ export const buildEventsSearchQuery = ({
     format: 'strict_date_optional_time',
   }));
 
-  const rangeFilter: estypes.QueryDslQueryContainer[] =
-    timestampOverride != null
-      ? [
-          {
-            range: {
-              [timestampOverride]: {
-                lte: to,
-                gte: from,
-                format: 'strict_date_optional_time',
-              },
-            },
-          },
-          {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      lte: to,
-                      gte: from,
-                      format: 'strict_date_optional_time',
-                    },
-                  },
-                },
-                {
-                  bool: {
-                    must_not: {
-                      exists: {
-                        field: timestampOverride,
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        ]
-      : [
-          {
-            range: {
-              '@timestamp': {
-                lte: to,
-                gte: from,
-                format: 'strict_date_optional_time',
-              },
-            },
-          },
-        ];
+  const rangeFilter = buildTimeRangeFilter({ to, from, timestampOverride });
 
-  const filterWithTime: estypes.QueryDslQueryContainer[] = [
-    filter,
-    { bool: { filter: [{ bool: { should: [...rangeFilter], minimum_should_match: 1 } }] } },
-  ];
+  const filterWithTime: estypes.QueryDslQueryContainer[] = [filter, rangeFilter];
 
-  const sort: estypes.SearchSort = [];
+  const sort: estypes.Sort = [];
   if (timestampOverride) {
     sort.push({
       [timestampOverride]: {
@@ -113,6 +134,7 @@ export const buildEventsSearchQuery = ({
 
   const searchQuery = {
     allow_no_indices: true,
+    runtime_mappings: runtimeMappings,
     index,
     size,
     ignore_unavailable: true,
@@ -150,4 +172,57 @@ export const buildEventsSearchQuery = ({
     };
   }
   return searchQuery;
+};
+
+export const buildEqlSearchRequest = (
+  query: string,
+  index: string[],
+  from: string,
+  to: string,
+  size: number,
+  filters: FiltersOrUndefined,
+  timestampOverride: TimestampOverrideOrUndefined,
+  exceptionLists: ExceptionListItemSchema[],
+  runtimeMappings: estypes.MappingRuntimeFields | undefined,
+  eventCategoryOverride?: string,
+  timestampField?: string,
+  tiebreakerField?: string
+): estypes.EqlSearchRequest => {
+  const defaultTimeFields = ['@timestamp'];
+  const timestamps =
+    timestampOverride != null ? [timestampOverride, ...defaultTimeFields] : defaultTimeFields;
+  const docFields = timestamps.map((tstamp) => ({
+    field: tstamp,
+    format: 'strict_date_optional_time',
+  }));
+
+  const esFilter = getQueryFilter('', 'eql', filters || [], index, exceptionLists);
+
+  const rangeFilter = buildTimeRangeFilter({ to, from, timestampOverride });
+  const requestFilter: estypes.QueryDslQueryContainer[] = [rangeFilter, esFilter];
+  const fields = [
+    {
+      field: '*',
+      include_unmapped: true,
+    },
+    ...docFields,
+  ];
+  return {
+    index,
+    allow_no_indices: true,
+    body: {
+      size,
+      query,
+      filter: {
+        bool: {
+          filter: requestFilter,
+        },
+      },
+      runtime_mappings: runtimeMappings,
+      timestamp_field: timestampField,
+      event_category_field: eventCategoryOverride,
+      tiebreaker_field: tiebreakerField,
+      fields,
+    },
+  };
 };

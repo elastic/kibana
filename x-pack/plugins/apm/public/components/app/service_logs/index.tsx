@@ -10,10 +10,10 @@ import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { LogStream } from '@kbn/infra-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { LogStream } from '../../../../../infra/public';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 import {
   CONTAINER_ID,
@@ -35,18 +35,20 @@ export function ServiceLogs() {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [environment, kuery, serviceName, start, end]
@@ -88,13 +90,14 @@ export function ServiceLogs() {
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
       query={getInfrastructureKQLFilter(data, serviceName)}
+      showFlyoutAction
     />
   );
 }
 
 export const getInfrastructureKQLFilter = (
   data:
-    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure'>
+    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs'>
     | undefined,
   serviceName: string
 ) => {

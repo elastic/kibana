@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { IndexPattern } from 'src/plugins/data/common';
-import { getSortArray, SortPairArr } from '../../../components/doc_table/lib/get_sort';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { getSortArray, SortPairArr } from '../../../components/doc_table/utils/get_sort';
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next
  * index pattern, returns a new state object
  */
 export function getSwitchIndexPatternAppState(
-  currentIndexPattern: IndexPattern,
-  nextIndexPattern: IndexPattern,
+  currentIndexPattern: DataView,
+  nextIndexPattern: DataView,
   currentColumns: string[],
   currentSort: SortPairArr[],
   modifyColumns: boolean = true,

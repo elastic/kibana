@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { schema } from '@kbn/config-schema';
-import { API_BASE_PATH } from '../../common/constants';
+import {
+  API_BASE_PATH,
+  APPS_WITH_DEPRECATION_LOGS,
+  DEPRECATION_LOGS_ORIGIN_FIELD,
+} from '../../common/constants';
 
 import {
   getDeprecationLoggingStatus,
@@ -25,24 +30,17 @@ export function registerDeprecationLoggingRoutes({
       path: `${API_BASE_PATH}/deprecation_logging`,
       validate: false,
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const result = await getDeprecationLoggingStatus(client);
-          return response.ok({ body: result });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const result = await getDeprecationLoggingStatus(client);
+        return response.ok({ body: result });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 
   router.put(
@@ -54,26 +52,19 @@ export function registerDeprecationLoggingRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const { isEnabled } = request.body as { isEnabled: boolean };
-          return response.ok({
-            body: await setDeprecationLogging(client, isEnabled),
-          });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const { isEnabled } = request.body as { isEnabled: boolean };
+        return response.ok({
+          body: await setDeprecationLogging(client, isEnabled),
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 
   router.get(
@@ -85,44 +76,49 @@ export function registerDeprecationLoggingRoutes({
         }),
       },
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const { body: indexExists } = await client.asCurrentUser.indices.exists({
-            index: DEPRECATION_LOGS_INDEX,
-          });
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const indexExists = await client.asCurrentUser.indices.exists({
+          index: DEPRECATION_LOGS_INDEX,
+        });
 
-          if (!indexExists) {
-            return response.ok({ body: { count: 0 } });
-          }
+        if (!indexExists) {
+          return response.ok({ body: { count: 0 } });
+        }
 
-          const { body } = await client.asCurrentUser.count({
-            index: DEPRECATION_LOGS_INDEX,
-            body: {
-              query: {
-                range: {
-                  '@timestamp': {
-                    gte: request.query.from,
+        const now = moment().toISOString();
+
+        const body = await client.asCurrentUser.count({
+          index: DEPRECATION_LOGS_INDEX,
+          body: {
+            query: {
+              bool: {
+                must: {
+                  range: {
+                    '@timestamp': {
+                      gte: request.query.from,
+                      lte: now,
+                    },
+                  },
+                },
+                must_not: {
+                  terms: {
+                    [DEPRECATION_LOGS_ORIGIN_FIELD]: [...APPS_WITH_DEPRECATION_LOGS],
                   },
                 },
               },
             },
-          });
+          },
+        });
 
-          return response.ok({ body: { count: body.count } });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+        return response.ok({ body: { count: body.count } });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 
   router.delete(
@@ -130,27 +126,20 @@ export function registerDeprecationLoggingRoutes({
       path: `${API_BASE_PATH}/deprecation_logging/cache`,
       validate: false,
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          await client.asCurrentUser.transport.request({
-            method: 'DELETE',
-            path: '/_logging/deprecation_cache',
-          });
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        await client.asCurrentUser.transport.request({
+          method: 'DELETE',
+          path: '/_logging/deprecation_cache',
+        });
 
-          return response.ok({ body: 'ok' });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+        return response.ok({ body: 'ok' });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 }

@@ -18,7 +18,10 @@ import { isNamedNode } from '../tsmorph_utils';
 export const pathsOutsideScopes: { [key: string]: string } = {};
 
 export function isPrivate(node: ParameterDeclaration | ClassMemberTypes): boolean {
-  return node.getModifiers().find((mod) => mod.getText() === 'private') !== undefined;
+  if (Node.isModifierable(node)) {
+    return node.getModifiers().find((mod) => mod.getText() === 'private') !== undefined;
+  }
+  return false;
 }
 
 /**
@@ -43,7 +46,11 @@ export function buildParentApiId(parentName: string, parentsParentApiId?: string
 }
 
 export function getOptsForChild(node: Node, parentOpts: BuildApiDecOpts): BuildApiDecOpts {
-  const name = isNamedNode(node) ? node.getName() : 'Unnamed';
+  const name = Node.isConstructSignatureDeclaration(node)
+    ? 'new'
+    : isNamedNode(node)
+    ? node.getName()
+    : 'Unnamed';
   return getOptsForChildWithName(name, parentOpts);
 }
 

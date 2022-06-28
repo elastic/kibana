@@ -8,13 +8,13 @@
 import { produce } from 'immer';
 import { satisfies } from 'semver';
 import { filter, reduce, mapKeys, each, set, unset, uniq, map, has } from 'lodash';
-import { packSavedObjectType } from '../../../common/types';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
+import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertPackQueriesToSO } from '../pack/utils';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
@@ -27,18 +27,16 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
-      const packageService = osqueryContext.service.getPackageService();
+      const packageService = osqueryContext.service.getPackageService()?.asInternalUser;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-      const packageInfo = await osqueryContext.service.getPackageService()?.getInstallation({
-        savedObjectsClient: internalSavedObjectsClient,
-        pkgName: OSQUERY_INTEGRATION_NAME,
-      });
+      const packageInfo = await packageService?.getInstallation(OSQUERY_INTEGRATION_NAME);
 
       if (packageInfo?.install_version && satisfies(packageInfo?.install_version, '<0.6.0')) {
         try {
@@ -81,6 +79,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                           const { id: queryId, ...query } = stream.compiled_stream;
                           queries[queryId] = query;
                         }
+
                         return queries;
                       },
                       {} as Record<string, unknown>
@@ -102,8 +101,6 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           );
 
           await packageService?.ensureInstalledPackage({
-            esClient,
-            savedObjectsClient: internalSavedObjectsClient,
             pkgName: OSQUERY_INTEGRATION_NAME,
           });
 

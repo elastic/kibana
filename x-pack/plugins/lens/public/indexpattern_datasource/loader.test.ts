@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from 'kibana/public';
+import { HttpHandler } from '@kbn/core/public';
 import { last } from 'lodash';
 import {
   loadInitialState,
@@ -16,8 +16,8 @@ import {
   extractReferences,
   injectReferences,
 } from './loader';
-import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
-import { HttpFetchError } from '../../../../../src/core/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { HttpFetchError } from '@kbn/core/public';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -89,6 +89,14 @@ const indexPattern1 = {
     {
       name: 'dest',
       displayName: 'dest',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      esTypes: ['keyword'],
+    },
+    {
+      name: 'geo.src',
+      displayName: 'geo.src',
       type: 'string',
       aggregatable: true,
       searchable: true,
@@ -206,7 +214,7 @@ function mockIndexPatternsService() {
         },
       ];
     }),
-  } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
 }
 
 describe('loader', () => {
@@ -220,7 +228,7 @@ describe('loader', () => {
             Promise.reject('mockIndexPatternService.get should not have been called')
           ),
           getIdsWithTitle: jest.fn(),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache).toEqual(sampleIndexPatterns);
@@ -293,7 +301,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -349,7 +357,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -498,6 +506,58 @@ describe('loader', () => {
       });
     });
 
+    it('should use the indexPatternId of the visualize trigger chart context, if provided', async () => {
+      const storage = createMockStorage();
+      const state = await loadInitialState({
+        indexPatternsService: mockIndexPatternsService(),
+        storage,
+        initialContext: {
+          layers: [
+            {
+              indexPatternId: '1',
+              timeFieldName: 'timestamp',
+              chartType: 'area',
+              axisPosition: 'left',
+              metrics: [],
+              timeInterval: 'auto',
+            },
+          ],
+          type: 'lnsXY',
+          configuration: {
+            legend: {
+              isVisible: true,
+              position: 'right',
+              shouldTruncate: true,
+              maxLines: true,
+            },
+            gridLinesVisibility: {
+              x: true,
+              yLeft: true,
+              yRight: true,
+            },
+          },
+          savedObjectId: '',
+          isVisualizeAction: true,
+        },
+        options: { isFullEditor: true },
+      });
+
+      expect(state).toMatchObject({
+        currentIndexPatternId: '1',
+        indexPatternRefs: [
+          { id: '1', title: sampleIndexPatterns['1'].title },
+          { id: '2', title: sampleIndexPatterns['2'].title },
+        ],
+        indexPatterns: {
+          '1': sampleIndexPatterns['1'],
+        },
+        layers: {},
+      });
+      expect(storage.set).toHaveBeenCalledWith('lens-settings', {
+        indexPatternId: '1',
+      });
+    });
+
     it('should initialize all the embeddable references without local storage', async () => {
       const savedState: IndexPatternPersistedState = {
         layers: {
@@ -529,7 +589,6 @@ describe('loader', () => {
       const state = await loadInitialState({
         persistedState: savedState,
         references: [
-          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
           { name: 'another-reference', id: 'c', type: 'index-pattern' },
         ],
@@ -580,7 +639,6 @@ describe('loader', () => {
       const state = await loadInitialState({
         persistedState: savedState,
         references: [
-          { name: 'indexpattern-datasource-current-indexpattern', id: '2', type: 'index-pattern' },
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
           { name: 'another-reference', id: 'c', type: 'index-pattern' },
         ],
@@ -635,7 +693,7 @@ describe('loader', () => {
               },
             ];
           }),
-        } as unknown as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
       }
       const savedState: IndexPatternPersistedState = {
         layers: {
@@ -667,11 +725,6 @@ describe('loader', () => {
       const state = await loadInitialState({
         persistedState: savedState,
         references: [
-          {
-            name: 'indexpattern-datasource-current-indexpattern',
-            id: 'conflictId',
-            type: 'index-pattern',
-          },
           { name: 'indexpattern-datasource-layer-layerb', id: 'conflictId', type: 'index-pattern' },
         ],
         indexPatternsService: mockIndexPatternsServiceWithConflict(),
@@ -740,11 +793,6 @@ describe('loader', () => {
       expect(savedObjectReferences).toMatchInlineSnapshot(`
         Array [
           Object {
-            "id": "b",
-            "name": "indexpattern-datasource-current-indexpattern",
-            "type": "index-pattern",
-          },
-          Object {
             "id": "id-index-pattern-a",
             "name": "indexpattern-datasource-layer-a",
             "type": "index-pattern",
@@ -761,13 +809,6 @@ describe('loader', () => {
     it('should restore layers', () => {
       const { savedObjectReferences, state: persistedState } = extractReferences(state);
       expect(injectReferences(persistedState, savedObjectReferences).layers).toEqual(state.layers);
-    });
-
-    it('should restore current index pattern', () => {
-      const { savedObjectReferences, state: persistedState } = extractReferences(state);
-      expect(injectReferences(persistedState, savedObjectReferences).currentIndexPatternId).toEqual(
-        state.currentIndexPatternId
-      );
     });
   });
 
@@ -794,7 +835,9 @@ describe('loader', () => {
       });
 
       expect(setState).toHaveBeenCalledTimes(1);
-      expect(setState.mock.calls[0][0](state)).toMatchObject({
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
+      expect(fn(state)).toMatchObject({
         currentIndexPatternId: '1',
         indexPatterns: {
           '1': {
@@ -1011,7 +1054,8 @@ describe('loader', () => {
       expect(fetchJson).toHaveBeenCalledTimes(3);
       expect(setState).toHaveBeenCalledTimes(1);
 
-      const [fn] = setState.mock.calls[0];
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
       const newState = fn({
         foo: 'bar',
         existingFields: {},
@@ -1095,7 +1139,8 @@ describe('loader', () => {
 
       await syncExistingFields(args);
 
-      const [fn] = setState.mock.calls[0];
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
       const newState = fn({
         foo: 'bar',
         existingFields: {},
@@ -1144,7 +1189,8 @@ describe('loader', () => {
 
       await syncExistingFields(args);
 
-      const [fn] = setState.mock.calls[0];
+      const [fn, options] = setState.mock.calls[0];
+      expect(options).toEqual({ applyImmediately: true });
       const newState = fn({
         foo: 'bar',
         existingFields: {},

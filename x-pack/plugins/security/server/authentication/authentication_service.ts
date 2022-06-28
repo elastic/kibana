@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
+  ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
   IClusterClient,
   KibanaRequest,
   Logger,
   LoggerFactory,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser } from '../../common/model';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { AuditServiceSetup } from '../audit';
 import type { ConfigType } from '../config';
@@ -25,6 +26,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
+import type { UserProfileServiceStart } from '../user_profile';
 import { APIKeys } from './api_keys';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
@@ -35,6 +37,7 @@ import { renderUnauthenticatedPage } from './unauthenticated_page';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
+  elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
   buildNumber: number;
@@ -46,8 +49,12 @@ interface AuthenticationServiceStartParams {
   clusterClient: IClusterClient;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
+  userProfileService: UserProfileServiceStart;
   session: PublicMethodsOf<Session>;
   loggers: LoggerFactory;
+  applicationName: string;
+  kibanaFeatures: KibanaFeature[];
+  isElasticCloudDeployment: () => boolean;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -87,7 +94,7 @@ export class AuthenticationService {
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ config, http, license, buildNumber }: AuthenticationServiceSetupParams) {
+  setup({ config, http, license, buildNumber, elasticsearch }: AuthenticationServiceSetupParams) {
     this.license = license;
 
     // If we cannot automatically authenticate users we should redirect them straight to the login
@@ -216,6 +223,75 @@ export class AuthenticationService {
         },
       });
     });
+
+    elasticsearch.setUnauthorizedErrorHandler(async ({ error, request }, toolkit) => {
+      if (!this.authenticator) {
+        this.logger.error('Authentication sub-system is not fully initialized yet.');
+        return toolkit.notHandled();
+      }
+
+      if (!license.isLicenseAvailable() || !license.isEnabled()) {
+        this.logger.error(
+          `License is not available or does not support security features, re-authentication is not possible (available: ${license.isLicenseAvailable()}, enabled: ${license.isEnabled()}).`
+        );
+        return toolkit.notHandled();
+      }
+
+      if (getErrorStatusCode(error) !== 401) {
+        this.logger.error(
+          `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
+            error
+          )}.`
+        );
+        return toolkit.notHandled();
+      }
+
+      this.logger.debug(
+        `Re-authenticating request due to error: ${getDetailedErrorMessage(error)}`
+      );
+
+      let authenticationResult;
+      const originalHeaders = request.headers;
+      try {
+        // WORKAROUND: Due to BWC reasons Core mutates headers of the original request with authentication
+        // headers returned during authentication stage. We should remove these headers before re-authentication to not
+        // conflict with the HTTP authentication logic. Performance impact is negligible since this is not a hot path.
+        (request.headers as Record<string, unknown>) = Object.fromEntries(
+          Object.entries(originalHeaders).filter(
+            ([headerName]) => headerName.toLowerCase() !== 'authorization'
+          )
+        );
+        authenticationResult = await this.authenticator.reauthenticate(request);
+      } catch (err) {
+        this.logger.error(
+          `Re-authentication failed due to unexpected error: ${getDetailedErrorMessage(err)}.`
+        );
+        throw err;
+      } finally {
+        (request.headers as Record<string, unknown>) = originalHeaders;
+      }
+
+      if (authenticationResult.succeeded()) {
+        if (authenticationResult.authHeaders) {
+          this.logger.debug('Re-authentication succeeded');
+          return toolkit.retry({ authHeaders: authenticationResult.authHeaders });
+        }
+
+        this.logger.error(
+          'Re-authentication succeeded, but authentication headers are not available.'
+        );
+      } else if (authenticationResult.failed()) {
+        this.logger.error(
+          `Re-authentication failed due to: ${getDetailedErrorMessage(authenticationResult.error)}`
+        );
+      } else if (authenticationResult.redirected()) {
+        this.logger.error('Re-authentication failed since redirect is required.');
+      } else {
+        this.logger.error('Re-authentication cannot be handled.');
+      }
+
+      return toolkit.notHandled();
+    });
   }
 
   start({
@@ -223,14 +299,20 @@ export class AuthenticationService {
     config,
     clusterClient,
     featureUsageService,
+    userProfileService,
     http,
     loggers,
     session,
+    applicationName,
+    kibanaFeatures,
+    isElasticCloudDeployment,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
+      applicationName,
+      kibanaFeatures,
     });
 
     /**
@@ -256,9 +338,11 @@ export class AuthenticationService {
       config: { authc: config.authc },
       getCurrentUser,
       featureUsageService,
+      userProfileService,
       getServerBaseURL,
       license: this.license,
       session,
+      isElasticCloudDeployment,
     });
 
     return {

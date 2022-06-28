@@ -9,7 +9,8 @@
 import { CLIEngine } from 'eslint';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { createFailError, ToolingLog } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 
 /**
@@ -36,7 +37,6 @@ export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boole
 
   const failTypes = [];
   if (report.errorCount > 0) failTypes.push('errors');
-  if (report.warningCount > 0) failTypes.push('warning');
 
   if (!failTypes.length) {
     log.success('[eslint] %d files linted successfully', files.length);

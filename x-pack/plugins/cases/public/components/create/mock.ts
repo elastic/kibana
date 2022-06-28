@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasePostRequest, CaseType, ConnectorTypes } from '../../../common/api';
+import { CasePostRequest, CaseSeverity, ConnectorTypes } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { choices } from '../connectors/mock';
 
@@ -13,8 +13,8 @@ export const sampleTags = ['coke', 'pepsi'];
 export const sampleData: CasePostRequest = {
   description: 'what a great description',
   tags: sampleTags,
+  severity: CaseSeverity.LOW,
   title: 'what a cool title',
-  type: CaseType.individual,
   connector: {
     fields: null,
     id: 'none',
@@ -27,7 +27,7 @@ export const sampleData: CasePostRequest = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-export const sampleConnectorData = { loading: false, connectors: [] };
+export const sampleConnectorData = { isLoading: false, data: [] };
 
 export const useGetIncidentTypesResponse = {
   isLoading: false,

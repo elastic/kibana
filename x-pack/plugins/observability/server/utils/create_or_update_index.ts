@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import pRetry from 'p-retry';
-import { Logger, ElasticsearchClient } from 'src/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 
 export type Mappings = Required<estypes.IndicesCreateRequest>['body']['mappings'] &
   Required<estypes.IndicesPutMappingRequest>['body'];
@@ -33,7 +33,7 @@ export async function createOrUpdateIndex({
      */
     await pRetry(
       async () => {
-        const indexExists = (await client.indices.exists({ index })).body;
+        const indexExists = await client.indices.exists({ index });
         const result = indexExists
           ? await updateExistingIndex({
               index,
@@ -46,7 +46,7 @@ export async function createOrUpdateIndex({
               mappings,
             });
 
-        if (!result.body.acknowledged) {
+        if (!result.acknowledged) {
           const bodyWithError: { body?: { error: any } } = result as any;
           const resultError = JSON.stringify(bodyWithError?.body?.error);
           throw new Error(resultError);
@@ -77,7 +77,7 @@ function createNewIndex({
     index,
     body: {
       // auto_expand_replicas: Allows cluster to not have replicas for this index
-      settings: { 'index.auto_expand_replicas': '0-1' },
+      settings: { index: { auto_expand_replicas: '0-1' } },
       mappings,
     },
   });

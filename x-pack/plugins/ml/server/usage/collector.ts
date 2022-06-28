@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { AnomalyResultType } from '../../common/types/anomalies';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../common/types/alerts';
@@ -88,34 +88,37 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
     },
     isReady: () => !!kibanaIndex,
     fetch: async ({ esClient }) => {
-      const result = await esClient.search({
-        index: kibanaIndex,
-        size: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { term: { type: 'alert' } },
-                {
-                  term: {
-                    'alert.alertTypeId': ML_ALERT_TYPES.ANOMALY_DETECTION,
+      const result = await esClient.search(
+        {
+          index: kibanaIndex,
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  { term: { type: 'alert' } },
+                  {
+                    term: {
+                      'alert.alertTypeId': ML_ALERT_TYPES.ANOMALY_DETECTION,
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-          aggs: {
-            count_by_result_type: {
-              terms: {
-                field: 'alert.params.resultType',
-                size: 3,
+            aggs: {
+              count_by_result_type: {
+                terms: {
+                  field: 'alert.params.resultType',
+                  size: 3,
+                },
               },
             },
           },
         },
-      });
+        { maxRetries: 0 }
+      );
 
-      const aggResponse = result.body.aggregations as {
+      const aggResponse = result.aggregations as {
         count_by_result_type: {
           buckets: Array<{
             key: AnomalyResultType;
@@ -132,26 +135,29 @@ export function registerCollector(usageCollection: UsageCollectionSetup, kibanaI
         alert: {
           params: MlAnomalyDetectionJobsHealthRuleParams;
         };
-      }>({
-        index: kibanaIndex,
-        size: 10000,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                { term: { type: 'alert' } },
-                {
-                  term: {
-                    'alert.alertTypeId': ML_ALERT_TYPES.AD_JOBS_HEALTH,
+      }>(
+        {
+          index: kibanaIndex,
+          size: 10000,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  { term: { type: 'alert' } },
+                  {
+                    term: {
+                      'alert.alertTypeId': ML_ALERT_TYPES.AD_JOBS_HEALTH,
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
         },
-      });
+        { maxRetries: 0 }
+      );
 
-      const resultsByCheckType = jobsHealthRuleInstances.body.hits.hits.reduce(
+      const resultsByCheckType = jobsHealthRuleInstances.hits.hits.reduce(
         (acc, curr) => {
           const doc = curr._source;
           if (!doc) return acc;

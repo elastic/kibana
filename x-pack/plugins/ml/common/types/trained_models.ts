@@ -4,17 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
 import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
 import type { XOR } from './common';
-import type { DeploymentState } from '../constants/trained_models';
+import type { DeploymentState, TrainedModelType } from '../constants/trained_models';
 
 export interface IngestStats {
   count: number;
   time_in_millis: number;
   current: number;
   failed: number;
+}
+
+export interface TrainedModelModelSizeStats {
+  model_size_bytes: number;
+  required_native_memory_bytes: number;
 }
 
 export interface TrainedModelStat {
@@ -46,6 +51,7 @@ export interface TrainedModelStat {
     >;
   };
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  model_size_stats?: TrainedModelModelSizeStats;
 }
 
 type TreeNode = object;
@@ -81,14 +87,12 @@ export type PutTrainedModelConfig = {
   }
 >; // compressed_definition and definition are mutually exclusive
 
-export interface TrainedModelConfigResponse {
-  description?: string;
-  created_by: string;
-  create_time: string;
-  default_field_map: Record<string, string>;
-  estimated_heap_memory_usage_bytes: number;
-  estimated_operations: number;
-  license_level: string;
+export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
+  /**
+   * Associated pipelines. Extends response from the ES endpoint.
+   */
+  pipelines?: Record<string, PipelineDefinition> | null;
+
   metadata?: {
     analytics_config: DataFrameAnalyticsConfig;
     input: unknown;
@@ -97,15 +101,11 @@ export interface TrainedModelConfigResponse {
     model_aliases?: string[];
   } & Record<string, unknown>;
   model_id: string;
-  model_type: 'tree_ensemble' | 'pytorch' | 'lang_ident';
+  model_type: TrainedModelType;
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
-  /**
-   * Associated pipelines. Extends response from the ES endpoint.
-   */
-  pipelines?: Record<string, PipelineDefinition> | null;
-}
+};
 
 export interface PipelineDefinition {
   processors?: Array<Record<string, any>>;
@@ -126,7 +126,6 @@ export interface InferenceConfigResponse {
 
 export interface TrainedModelDeploymentStatsResponse {
   model_id: string;
-  model_size_bytes: number;
   inference_threads: number;
   model_threads: number;
   state: DeploymentState;
@@ -153,6 +152,7 @@ export interface TrainedModelDeploymentStatsResponse {
     last_access: number;
     number_of_pending_requests: number;
     start_time: number;
+    throughput_last_minute: number;
   }>;
 }
 
@@ -170,6 +170,7 @@ export interface AllocatedModel {
   state: string;
   model_threads: number;
   model_size_bytes: number;
+  required_native_memory_bytes: number;
   node: {
     /**
      * Not required for rendering in the Nodes overview
@@ -184,6 +185,7 @@ export interface AllocatedModel {
     last_access?: number;
     number_of_pending_requests: number;
     start_time: number;
+    throughput_last_minute: number;
   };
 }
 
@@ -199,6 +201,8 @@ export interface NodeDeploymentStatsResponse {
       total: number;
       jvm: number;
     };
+    /** Max amount of memory available for ML */
+    ml_max_in_bytes: number;
     /** Open anomaly detection jobs + hardcoded overhead */
     anomaly_detection: {
       /** Total size in bytes */
@@ -220,6 +224,6 @@ export interface NodeDeploymentStatsResponse {
 }
 
 export interface NodesOverviewResponse {
-  count: number;
+  _nodes: { total: number; failed: number; successful: number };
   nodes: NodeDeploymentStatsResponse[];
 }

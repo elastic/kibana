@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { Unit } from '@elastic/datemath';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Unit } from '@kbn/datemath';
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
 import {
@@ -17,20 +17,33 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { FieldValueQueryBar } from '../query_bar';
 import * as i18n from './translations';
 import { usePreviewRoute } from './use_preview_route';
 import { PreviewHistogram } from './preview_histogram';
 import { getTimeframeOptions } from './helpers';
-import { CalloutGroup } from './callout_group';
+import { PreviewLogsComponent } from './preview_logs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
 import { FieldValueThreshold } from '../threshold_input';
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+
+const HelpTextComponent = (
+  <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexItem>{i18n.QUERY_PREVIEW_HELP_TEXT}</EuiFlexItem>
+    <EuiFlexItem>{i18n.QUERY_PREVIEW_DISCLAIMER}</EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export interface RulePreviewProps {
   index: string[];
   isDisabled: boolean;
   query: FieldValueQueryBar;
+  dataViewId?: string;
   ruleType: Type;
   threatIndex: string[];
   threatMapping: ThreatMapping;
@@ -38,6 +51,7 @@ export interface RulePreviewProps {
   threshold: FieldValueThreshold;
   machineLearningJobId: string[];
   anomalyThreshold: number;
+  eqlOptions: EqlOptionsSelected;
 }
 
 const Select = styled(EuiSelect)`
@@ -52,6 +66,7 @@ const defaultTimeRange: Unit = 'h';
 
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   index,
+  dataViewId,
   isDisabled,
   query,
   ruleType,
@@ -61,8 +76,11 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   threshold,
   machineLearningJobId,
   anomalyThreshold,
+  eqlOptions,
 }) => {
   const { spaces } = useKibana().services;
+  const { loading: isMlLoading, jobs } = useSecurityJobs(false);
+
   const [spaceId, setSpaceId] = useState('');
   useEffect(() => {
     if (spaces) {
@@ -70,17 +88,29 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     }
   }, [spaces]);
 
+  const areRelaventMlJobsRunning = useMemo(() => {
+    if (ruleType !== 'machine_learning') {
+      return true; // Don't do the expensive logic if we don't need it
+    }
+    if (isMlLoading) {
+      const selectedJobs = jobs.filter(({ id }) => machineLearningJobId.includes(id));
+      return selectedJobs.every((job) => isJobStarted(job.jobState, job.datafeedState));
+    }
+  }, [jobs, machineLearningJobId, ruleType, isMlLoading]);
+
   const [timeFrame, setTimeFrame] = useState<Unit>(defaultTimeRange);
   const {
     addNoiseWarning,
     createPreview,
-    errors,
     isPreviewRequestInProgress,
     previewId,
-    warnings,
+    logs,
+    hasNoiseWarning,
+    isAborted,
   } = usePreviewRoute({
     index,
     isDisabled,
+    dataViewId,
     query,
     threatIndex,
     threatQuery,
@@ -90,6 +120,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
   });
 
   // Resets the timeFrame to default when rule type is changed because not all time frames are supported by all rule types
@@ -97,11 +128,18 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     setTimeFrame(defaultTimeRange);
   }, [ruleType]);
 
+  const { startTransaction } = useStartTransaction();
+
+  const handlePreviewClick = useCallback(() => {
+    startTransaction({ name: SINGLE_RULE_ACTIONS.PREVIEW });
+    createPreview();
+  }, [createPreview, startTransaction]);
+
   return (
     <>
       <EuiFormRow
         label={i18n.QUERY_PREVIEW_LABEL}
-        helpText={i18n.QUERY_PREVIEW_HELP_TEXT}
+        helpText={HelpTextComponent}
         error={undefined}
         isInvalid={false}
         data-test-subj="rule-preview"
@@ -123,8 +161,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
             <PreviewButton
               fill
               isLoading={isPreviewRequestInProgress}
-              isDisabled={isDisabled}
-              onClick={createPreview}
+              isDisabled={isDisabled || !areRelaventMlJobsRunning}
+              onClick={handlePreviewClick}
               data-test-subj="queryPreviewButton"
             >
               {i18n.QUERY_PREVIEW_BUTTON}
@@ -134,20 +172,17 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       </EuiFormRow>
       <EuiSpacer size="s" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
-      {!isPreviewRequestInProgress && previewId && spaceId && query && (
+      {!isPreviewRequestInProgress && previewId && spaceId && (
         <PreviewHistogram
           ruleType={ruleType}
           timeFrame={timeFrame}
           previewId={previewId}
           addNoiseWarning={addNoiseWarning}
           spaceId={spaceId}
-          threshold={threshold}
-          query={query}
           index={index}
         />
       )}
-      <CalloutGroup items={errors} isError />
-      <CalloutGroup items={warnings} />
+      <PreviewLogsComponent logs={logs} hasNoiseWarning={hasNoiseWarning} isAborted={isAborted} />
     </>
   );
 };

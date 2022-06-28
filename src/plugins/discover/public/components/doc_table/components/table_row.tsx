@@ -10,33 +10,31 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { formatFieldValue } from '../../../utils/format_value';
-import { flattenHit } from '../../../../../data/common';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer/doc_viewer';
-import { FilterManager, IndexPattern } from '../../../../../data/public';
+import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { TableCell } from './table_row/table_cell';
-import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
-import { useNavigationProps } from '../../../utils/use_navigation_props';
+import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
+import { useNavigationProps } from '../../../hooks/use_navigation_props';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
-import { ElasticSearchHit } from '../../../types';
+import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 
-export type DocTableRow = ElasticSearchHit & {
+export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;
 };
 
 export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
-  indexPattern: IndexPattern;
-  row: DocTableRow;
+  row: DataTableRecord;
+  indexPattern: DataView;
+  useNewFieldsApi: boolean;
+  fieldsToShow: string[];
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
-  useNewFieldsApi: boolean;
-  hideTimeColumn: boolean;
-  filterManager: FilterManager;
-  addBasePath: (path: string) => string;
-  fieldsToShow: string[];
 }
 
 export const TableRow = ({
@@ -46,23 +44,23 @@ export const TableRow = ({
   indexPattern,
   useNewFieldsApi,
   fieldsToShow,
-  hideTimeColumn,
   onAddColumn,
   onRemoveColumn,
-  filterManager,
-  addBasePath,
 }: TableRowProps) => {
+  const { uiSettings, filterManager, fieldFormats, addBasePath } = useDiscoverServices();
+  const [maxEntries, hideTimeColumn] = useMemo(
+    () => [
+      uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
+      uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
+    ],
+    [uiSettings]
+  );
   const [open, setOpen] = useState(false);
   const docTableRowClassName = classNames('kbnDocTable__row', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'kbnDocTable__row--highlight': row.isAnchor,
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
-  const flattenedRow = useMemo(
-    () => flattenHit(row, indexPattern, { includeIgnoredValues: true }),
-    [indexPattern, row]
-  );
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
 
   // toggle display of the rows details, a full list of the fields from each row
@@ -75,12 +73,13 @@ export const TableRow = ({
     // If we're formatting the _source column, don't use the regular field formatter,
     // but our Discover mechanism to format a hit in a better human-readable way.
     if (fieldName === '_source') {
-      return formatRow(row, indexPattern, fieldsToShow);
+      return formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
     }
 
     const formattedField = formatFieldValue(
-      flattenedRow[fieldName],
-      row,
+      row.flattened[fieldName],
+      row.raw,
+      fieldFormats,
       indexPattern,
       mapping(fieldName)
     );
@@ -94,15 +93,15 @@ export const TableRow = ({
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
       const field = indexPattern.fields.getByName(column);
-      filter(field!, flattenedRow[column], type);
+      filter(field!, row.flattened, type);
     },
-    [filter, flattenedRow, indexPattern.fields]
+    [filter, indexPattern.fields, row.flattened]
   );
 
   const { singleDocProps, surrDocsProps } = useNavigationProps({
     indexPatternId: indexPattern.id!,
-    rowIndex: row._index,
-    rowId: row._id,
+    rowIndex: row.raw._index,
+    rowId: row.raw._id,
     filterManager,
     addBasePath,
     columns,
@@ -142,7 +141,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, indexPattern, fieldsToShow);
+    const formatted = formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
 
     rowCells.push(
       <TableCell
@@ -157,9 +156,9 @@ export const TableRow = ({
     );
   } else {
     columns.forEach(function (column: string) {
-      if (useNewFieldsApi && !mapping(column) && row.fields && !row.fields[column]) {
+      if (useNewFieldsApi && !mapping(column) && row.raw.fields && !row.raw.fields[column]) {
         const innerColumns = Object.fromEntries(
-          Object.entries(row.fields).filter(([key]) => {
+          Object.entries(row.raw.fields).filter(([key]) => {
             return key.indexOf(`${column}.`) === 0;
           })
         );
@@ -169,7 +168,7 @@ export const TableRow = ({
             key={column}
             timefield={false}
             sourcefield={true}
-            formatted={formatTopLevelObject(row, innerColumns, indexPattern)}
+            formatted={formatTopLevelObject(row, innerColumns, indexPattern, maxEntries)}
             filterable={false}
             column={column}
             inlineFilter={inlineFilter}
@@ -181,7 +180,7 @@ export const TableRow = ({
         // We should improve this and show a helpful tooltip why the filter buttons are not
         // there/disabled when there are ignored values.
         const isFilterable = Boolean(
-          mapping(column)?.filterable && filter && !row._ignored?.includes(column)
+          mapping(column)?.filterable && filter && !row.raw._ignored?.includes(column)
         );
         rowCells.push(
           <TableCell

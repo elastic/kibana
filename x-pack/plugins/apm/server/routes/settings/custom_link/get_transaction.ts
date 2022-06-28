@@ -36,8 +36,8 @@ export async function getTransaction({
     apm: {
       events: [ProcessorEvent.transaction as const],
     },
-    size: 1,
     body: {
+      size: 1,
       query: {
         bool: {
           filter: esFilters,

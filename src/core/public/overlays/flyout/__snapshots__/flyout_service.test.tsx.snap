@@ -20,7 +20,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -40,7 +39,7 @@ Array [
 ]
 `;
 
-exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content</span></div></div>"`;
+exports[`FlyoutService openFlyout() renders a flyout to the DOM 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\" aria-label=\\"Close this dialog\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content</span></div></div>"`;
 
 exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 1`] = `
 Array [
@@ -53,9 +52,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -77,9 +76,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -101,7 +100,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -127,9 +125,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -151,9 +149,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -175,7 +173,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -195,4 +192,4 @@ Array [
 ]
 `;
 
-exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content 2</span></div></div>"`;
+exports[`FlyoutService openFlyout() with a currently active flyout replaces the current flyout with a new one 2`] = `"<div data-eui=\\"EuiFlyout\\" role=\\"dialog\\"><button type=\\"button\\" data-test-subj=\\"euiFlyoutCloseButton\\" aria-label=\\"Close this dialog\\"></button><div class=\\"kbnOverlayMountWrapper\\"><span>Flyout content 2</span></div></div>"`;

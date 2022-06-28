@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { SignalsReindexOptions } from '../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { createMigrationIndex } from './create_migration_index';
 
@@ -48,7 +48,7 @@ export const createMigration = async ({
 
   const { size, ...reindexQueryOptions } = reindexOptions;
 
-  const response = await esClient.reindex<{ task: string }>({
+  const response = await esClient.reindex({
     body: {
       dest: { index: migrationIndex },
       source: { index, size },
@@ -97,7 +97,7 @@ export const createMigration = async ({
   return {
     destinationIndex: migrationIndex,
     sourceIndex: index,
-    taskId: String(response.body.task),
+    taskId: String(response.task),
     version,
   };
 };

@@ -17,10 +17,14 @@ import {
 import moment from 'moment';
 
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
+import { VisualReportingSoftDisabledError } from '../../../common/errors';
 
 import type { Job } from '../../lib/job';
 import { useKibana } from '../../shared_imports';
 
+import { sharedI18nTexts } from '../../shared_i18n_texts';
+
+// TODO: Move all of these i18n texts to ./i18n_texts.tsx
 const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
   defaultMessage: 'N/A',
 });
@@ -40,7 +44,7 @@ const createDateFormatter = (format: string, tz: string) => (date: string) => {
 
 export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   const {
-    services: { uiSettings },
+    services: { uiSettings, docLinks },
   } = useKibana();
 
   const timezone =
@@ -50,7 +54,12 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
 
   const formatDate = createDateFormatter(uiSettings.get('dateFormat'), timezone);
 
+  const cpuInPercentage = info.metrics?.pdf?.cpuInPercentage ?? info.metrics?.png?.cpuInPercentage;
+  const memoryInMegabytes =
+    info.metrics?.pdf?.memoryInMegabytes ?? info.metrics?.png?.memoryInMegabytes;
+  const hasCsvRows = info.metrics?.csv?.rows != null;
   const hasScreenshot = USES_HEADLESS_JOB_TYPES.includes(info.jobtype);
+  const hasPdfPagesMetric = info.metrics?.pdf?.pages != null;
 
   const outputInfo = [
     {
@@ -94,6 +103,12 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       }),
       description: info.size?.toString() || NA,
     },
+    hasCsvRows && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.csvRows', {
+        defaultMessage: 'CSV rows',
+      }),
+      description: info.metrics?.csv?.rows?.toString() || NA,
+    },
 
     hasScreenshot && {
       title: i18n.translate('xpack.reporting.listing.infoPanel.dimensionsInfoHeight', {
@@ -111,6 +126,12 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
       description:
         info.layout?.dimensions?.width != null ? Math.ceil(info.layout.dimensions.width) : UNKNOWN,
     },
+    hasPdfPagesMetric && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.pdfPagesInfo', {
+        defaultMessage: 'Pages count',
+      }),
+      description: info.metrics?.pdf?.pages,
+    },
 
     {
       title: i18n.translate('xpack.reporting.listing.infoPanel.processedByInfo', {
@@ -124,6 +145,20 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
         defaultMessage: 'Timeout',
       }),
       description: info.prettyTimeout,
+    },
+
+    cpuInPercentage != null && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.cpuInfo', {
+        defaultMessage: 'CPU usage',
+      }),
+      description: `${cpuInPercentage}%`,
+    },
+
+    memoryInMegabytes != null && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.memoryInfo', {
+        defaultMessage: 'RAM usage',
+      }),
+      description: `${memoryInMegabytes}MB`,
     },
   ].filter(Boolean) as EuiDescriptionListProps['listItems'];
 
@@ -155,19 +190,31 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   ];
 
   const warnings = info.getWarnings();
-  const errored = info.getError();
+  const errored =
+    /*
+     * We link the user to documentation if they hit this error case. Note: this
+     * should only occur on cloud.
+     */
+    info.error_code === VisualReportingSoftDisabledError.code
+      ? sharedI18nTexts.cloud.insufficientMemoryError(
+          docLinks.links.reporting.cloudMinimumRequirements
+        )
+      : info.getError();
 
   return (
     <>
       {Boolean(errored) && (
-        <EuiCallOut
-          title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
-            defaultMessage: 'Report failed',
-          })}
-          color="danger"
-        >
-          {errored}
-        </EuiCallOut>
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
+              defaultMessage: 'No report generated',
+            })}
+            color="danger"
+          >
+            {errored}
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
       )}
       {Boolean(warnings) && (
         <>

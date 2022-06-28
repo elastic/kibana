@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ProcessorEvent } from '../../../common/processor_event';
 import {
+  QueryDslQueryContainer,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  ERROR_LOG_LEVEL,
+  PARENT_ID,
+  SPAN_DURATION,
   TRACE_ID,
   TRANSACTION_DURATION,
-  SPAN_DURATION,
-  PARENT_ID,
-  ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../observability/server';
+import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
 
 export async function getTraceItems(
   traceId: string,
@@ -66,17 +70,26 @@ export async function getTraceItems(
         { _score: { order: 'asc' as const } },
         { [TRANSACTION_DURATION]: { order: 'desc' as const } },
         { [SPAN_DURATION]: { order: 'desc' as const } },
-      ],
+      ] as Sort,
       track_total_hits: true,
     },
   });
 
-  const errorResponse = await errorResponsePromise;
-  const traceResponse = await traceResponsePromise;
+  const [errorResponse, traceResponse, linkedChildrenOfSpanCountBySpanId] =
+    await Promise.all([
+      errorResponsePromise,
+      traceResponsePromise,
+      getLinkedChildrenCountBySpanId({ traceId, setup, start, end }),
+    ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
   const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
 
-  return { exceedsMax, traceDocs, errorDocs };
+  return {
+    exceedsMax,
+    traceDocs,
+    errorDocs,
+    linkedChildrenOfSpanCountBySpanId,
+  };
 }

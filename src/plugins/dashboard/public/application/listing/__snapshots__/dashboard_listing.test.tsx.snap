@@ -22,6 +22,37 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
   title="search by title"
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -74,8 +105,6 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter="\\"search by title\\""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -96,6 +125,13 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
       ]
     }
     tableListTitle="Dashboards"
+    theme={
+      Object {
+        "theme$": Observable {
+          "_subscribe": [Function],
+        },
+      }
+    }
     toastNotifications={
       Object {
         "add": [MockFunction],
@@ -134,6 +170,37 @@ exports[`after fetch initialFilter 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -186,8 +253,6 @@ exports[`after fetch initialFilter 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter="testFilter"
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -208,6 +273,13 @@ exports[`after fetch initialFilter 1`] = `
       ]
     }
     tableListTitle="Dashboards"
+    theme={
+      Object {
+        "theme$": Observable {
+          "_subscribe": [Function],
+        },
+      }
+    }
     toastNotifications={
       Object {
         "add": [MockFunction],
@@ -245,6 +317,37 @@ exports[`after fetch renders all table rows 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -297,8 +400,6 @@ exports[`after fetch renders all table rows 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -319,6 +420,13 @@ exports[`after fetch renders all table rows 1`] = `
       ]
     }
     tableListTitle="Dashboards"
+    theme={
+      Object {
+        "theme$": Observable {
+          "_subscribe": [Function],
+        },
+      }
+    }
     toastNotifications={
       Object {
         "add": [MockFunction],
@@ -356,6 +464,37 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -408,8 +547,6 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -430,6 +567,13 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
       ]
     }
     tableListTitle="Dashboards"
+    theme={
+      Object {
+        "theme$": Observable {
+          "_subscribe": [Function],
+        },
+      }
+    }
     toastNotifications={
       Object {
         "add": [MockFunction],
@@ -467,6 +611,37 @@ exports[`after fetch renders call to action with continue when no dashboards exi
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -530,8 +705,6 @@ exports[`after fetch renders call to action with continue when no dashboards exi
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -552,6 +725,13 @@ exports[`after fetch renders call to action with continue when no dashboards exi
       ]
     }
     tableListTitle="Dashboards"
+    theme={
+      Object {
+        "theme$": Observable {
+          "_subscribe": [Function],
+        },
+      }
+    }
     toastNotifications={
       Object {
         "add": [MockFunction],
@@ -589,6 +769,37 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     createItem={[Function]}
     deleteItems={[Function]}
     editItem={[Function]}
@@ -641,8 +852,6 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={1}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -663,6 +872,13 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
       ]
     }
     tableListTitle="Dashboards"
+    theme={
+      Object {
+        "theme$": Observable {
+          "_subscribe": [Function],
+        },
+      }
+    }
     toastNotifications={
       Object {
         "add": [MockFunction],
@@ -700,6 +916,37 @@ exports[`after fetch showWriteControls 1`] = `
   redirectTo={[MockFunction]}
 >
   <TableListView
+    application={
+      Object {
+        "applications$": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": null,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+        },
+        "currentAppId$": Observable {
+          "source": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+      }
+    }
     emptyPrompt={
       <EuiEmptyPrompt
         body={
@@ -722,8 +969,6 @@ exports[`after fetch showWriteControls 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
-    initialPageSize={20}
-    listingLimit={100}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -744,6 +989,13 @@ exports[`after fetch showWriteControls 1`] = `
       ]
     }
     tableListTitle="Dashboards"
+    theme={
+      Object {
+        "theme$": Observable {
+          "_subscribe": [Function],
+        },
+      }
+    }
     toastNotifications={
       Object {
         "add": [MockFunction],

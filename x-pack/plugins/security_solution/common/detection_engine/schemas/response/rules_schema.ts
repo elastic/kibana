@@ -39,9 +39,12 @@ import { isMlRule } from '../../../machine_learning/helpers';
 import { isThresholdRule } from '../../utils';
 import {
   anomaly_threshold,
+  data_view_id,
   description,
   enabled,
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
   false_positives,
   id,
   immutable,
@@ -62,23 +65,22 @@ import {
   timeline_id,
   timeline_title,
   threshold,
-  ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
   filters,
   meta,
   outcome,
   alias_target_id,
+  alias_purpose,
   note,
   building_block_type,
   license,
   rule_name_override,
   timestamp_override,
   namespace,
-} from '../common/schemas';
+  ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+} from '../common';
 
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
@@ -115,6 +117,9 @@ export const requiredRulesSchema = t.type({
   created_by,
   version,
   exceptions_list: DefaultListArray,
+  related_integrations: RelatedIntegrationArray,
+  required_fields: RequiredFieldArray,
+  setup: SetupGuide,
 });
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
@@ -124,12 +129,17 @@ export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
  * check_type_dependents file for whichever REST flow it is going through.
  */
 export const dependentRulesSchema = t.partial({
+  // All but ML
+  data_view_id,
+
   // query fields
   language,
   query,
 
   // eql only fields
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
 
   // when type = saved_query, saved_id is required
   saved_id,
@@ -167,21 +177,17 @@ export const partialRulesSchema = t.partial({
   license,
   throttle,
   rule_name_override,
-  status: ruleExecutionStatus,
-  status_date,
   timestamp_override,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
   filters,
   meta,
   outcome,
   alias_target_id,
+  alias_purpose,
   index,
   namespace,
   note,
   uuid: id, // Move to 'required' post-migration
+  execution_summary: ruleExecutionSummary,
 });
 
 /**
@@ -241,6 +247,7 @@ export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixe
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
     ];
   } else {
     return [];
@@ -265,6 +272,7 @@ export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.
     return [
       t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
     ];
   } else {
     return [];
@@ -274,11 +282,14 @@ export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.
 export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'eql') {
     return [
+      t.exact(t.partial({ timestamp_field: dependentRulesSchema.props.timestamp_field })),
       t.exact(
         t.partial({ event_category_override: dependentRulesSchema.props.event_category_override })
       ),
+      t.exact(t.partial({ tiebreaker_field: dependentRulesSchema.props.tiebreaker_field })),
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
     ];
   } else {
     return [];
@@ -288,6 +299,7 @@ export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[
 export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'threat_match') {
     return [
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
       t.exact(t.type({ threat_query: dependentRulesSchema.props.threat_query })),
       t.exact(t.type({ threat_index: dependentRulesSchema.props.threat_index })),
       t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),

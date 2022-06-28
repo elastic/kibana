@@ -3,7 +3,7 @@
 exports[`UrlFormatEditor should render normally 1`] = `
 <div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -12,6 +12,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <label
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Type
@@ -28,7 +29,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           class="euiFormControlLayout__childrenWrapper"
         >
           <select
-            class="euiSelect"
+            class="euiSelect euiFormControlLayout--1icons"
             data-test-subj="urlEditorType"
             id="generated-id"
           >
@@ -66,7 +67,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -75,6 +76,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <label
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Open in a new tab
@@ -127,7 +129,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -137,6 +139,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         aria-invalid="false"
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           URL template
@@ -167,8 +170,8 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink euiLink--primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
+          class="euiLink css-102pf9n-euiLink-primary"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
           rel="noopener"
           target="_blank"
         >
@@ -176,10 +179,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
             URL template help
           </span>
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >
@@ -190,7 +194,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -200,6 +204,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         aria-invalid="false"
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Label template
@@ -230,8 +235,8 @@ exports[`UrlFormatEditor should render normally 1`] = `
         id="generated-id-help-0"
       >
         <a
-          class="euiLink euiLink--primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
+          class="euiLink css-102pf9n-euiLink-primary"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
           rel="noopener"
           target="_blank"
         >
@@ -239,10 +244,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
             Label template help
           </span>
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >
@@ -253,7 +259,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -262,6 +268,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <label
         class="euiFormLabel euiFormRow__label"
         for="generated-id"
+        id="generated-id-label"
       >
         <span>
           Samples

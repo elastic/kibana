@@ -7,10 +7,14 @@
 /// <reference types="node" />
 
 import { Action } from 'history';
-import Boom from '@hapi/boom';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { ConfigPath } from '@kbn/config';
-import { DetailedPeerCertificate } from 'tls';
+import { AnalyticsClient } from '@kbn/analytics-client';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { ButtonColor } from '@elastic/eui';
+import { ContextProviderOpts } from '@kbn/analytics-client';
+import { CoreContext } from '@kbn/core-base-browser-internal';
+import { CoreTheme } from '@kbn/core-theme-browser';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { EnvironmentMode } from '@kbn/config';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -19,42 +23,47 @@ import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EuiOverlayMaskProps } from '@elastic/eui';
+import { Event as Event_2 } from '@kbn/analytics-client';
+import { EventContext } from '@kbn/analytics-client';
+import { EventType } from '@kbn/analytics-client';
+import { EventTypeOpts } from '@kbn/analytics-client';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import { IconType } from '@elastic/eui';
-import { IncomingHttpHeaders } from 'http';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import { InjectedMetadataParams } from '@kbn/core-injected-metadata-browser-internal';
+import type { InjectedMetadataSetup } from '@kbn/core-injected-metadata-browser';
+import type { InjectedMetadataStart } from '@kbn/core-injected-metadata-browser';
+import { IShipper } from '@kbn/analytics-client';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
-import { Logger } from '@kbn/logging';
-import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
-import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
-import { PeerCertificate } from 'tls';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
+import { PluginOpaqueId } from '@kbn/core-base-common';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
-import { SchemaTypeError } from '@kbn/config-schema';
-import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import { ShipperClassConstructor } from '@kbn/analytics-client';
+import { TelemetryCounter } from '@kbn/analytics-client';
+import { TelemetryCounterType } from '@kbn/analytics-client';
+import { ThemeServiceSetup } from '@kbn/core-theme-browser';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { TransitionPromptHook } from 'history';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { TransportRequestParams } from '@elastic/elasticsearch';
-import type { TransportResult } from '@elastic/elasticsearch';
 import { Type } from '@kbn/config-schema';
-import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
-import { URL as URL_2 } from 'url';
-import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
 export function __kbnBootstrap__(): Promise<void>;
+
+export { AnalyticsClient }
+
+export { AnalyticsServiceSetup }
+
+export { AnalyticsServiceStart }
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {
@@ -118,7 +127,11 @@ export enum AppLeaveActionType {
 // @public
 export interface AppLeaveConfirmAction {
     // (undocumented)
+    buttonColor?: ButtonColor;
+    // (undocumented)
     callback?: () => void;
+    // (undocumented)
+    confirmButtonText?: string;
     // (undocumented)
     text: string;
     // (undocumented)
@@ -157,7 +170,7 @@ export interface ApplicationStart {
         deepLinkId?: string;
     }): string;
     navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
-    navigateToUrl(url: string): Promise<void>;
+    navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 }
 
 // @public
@@ -172,6 +185,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     // @deprecated
     onAppLeave: (handler: AppLeaveHandler) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
     theme$: Observable<CoreTheme>;
 }
 
@@ -206,16 +220,6 @@ export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'searcha
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 
-// @public @deprecated
-export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
-    // (undocumented)
-    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
-    // (undocumented)
-    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
-    // (undocumented)
-    stop?(): void;
-}
-
 // @public
 export interface Capabilities {
     [key: string]: Record<string, boolean | Record<string, boolean>>;
@@ -248,7 +252,7 @@ export interface ChromeDocTitle {
 // @public (undocumented)
 export interface ChromeHelpExtension {
     appName: string;
-    content?: (element: HTMLDivElement) => () => void;
+    content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
     links?: ChromeHelpExtensionMenuLink[];
 }
 
@@ -283,6 +287,12 @@ export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLi
 
 // @public (undocumented)
 export type ChromeHelpExtensionMenuLink = ChromeHelpExtensionMenuGitHubLink | ChromeHelpExtensionMenuDiscussLink | ChromeHelpExtensionMenuDocumentationLink | ChromeHelpExtensionMenuCustomLink;
+
+// @public (undocumented)
+export interface ChromeHelpMenuActions {
+    // (undocumented)
+    hideHelpMenu: () => void;
+}
 
 // @public (undocumented)
 export interface ChromeNavControl {
@@ -380,35 +390,34 @@ export interface ChromeUserBanner {
     content: MountPoint<HTMLDivElement>;
 }
 
-// @internal (undocumented)
-export interface CoreContext {
-    // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    coreId: CoreId;
-    // (undocumented)
-    env: {
-        mode: Readonly<EnvironmentMode>;
-        packageInfo: Readonly<PackageInfo>;
-    };
-}
+export { ContextProviderOpts }
+
+export { CoreContext }
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
+    // (undocumented)
+    analytics: AnalyticsServiceSetup;
     // (undocumented)
     application: ApplicationSetup;
+    // (undocumented)
+    executionContext: ExecutionContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpSetup;
-    // @deprecated
-    injectedMetadata: {
-        getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    };
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "InjectedMetadataSetup"
+    //
+    // (undocumented)
+    injectedMetadata: InjectedMetadataSetup;
     // (undocumented)
     notifications: NotificationsSetup;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     theme: ThemeServiceSetup;
     // (undocumented)
@@ -417,30 +426,42 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
+    // (undocumented)
+    analytics: AnalyticsServiceStart;
     // (undocumented)
     application: ApplicationStart;
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
     deprecations: DeprecationsServiceStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksStart;
+    // (undocumented)
+    executionContext: ExecutionContextStart;
     // (undocumented)
     fatalErrors: FatalErrorsStart;
     // (undocumented)
     http: HttpStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     i18n: I18nStart;
-    // @deprecated
-    injectedMetadata: {
-        getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    };
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "InjectedMetadataStart"
+    //
+    // (undocumented)
+    injectedMetadata: InjectedMetadataStart;
     // (undocumented)
     notifications: NotificationsStart;
     // (undocumented)
     overlays: OverlayStart;
     // (undocumented)
     savedObjects: SavedObjectsStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     theme: ThemeServiceStart;
     // (undocumented)
@@ -458,15 +479,13 @@ export class CoreSystem {
     // (undocumented)
     start(): Promise<{
         application: InternalApplicationStart;
+        executionContext: ExecutionContextSetup;
     } | undefined>;
     // (undocumented)
     stop(): void;
 }
 
-// @public
-export interface CoreTheme {
-    readonly darkMode: boolean;
-}
+export { CoreTheme }
 
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
@@ -483,349 +502,7 @@ export interface DeprecationsServiceStart {
     resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
 }
 
-// @public (undocumented)
-export interface DocLinksStart {
-    // (undocumented)
-    readonly DOC_LINK_VERSION: string;
-    // (undocumented)
-    readonly ELASTIC_WEBSITE_URL: string;
-    // (undocumented)
-    readonly links: {
-        readonly settings: string;
-        readonly elasticStackGetStarted: string;
-        readonly upgrade: {
-            readonly upgradingElasticStack: string;
-        };
-        readonly apm: {
-            readonly kibanaSettings: string;
-            readonly supportedServiceMaps: string;
-            readonly customLinks: string;
-            readonly droppedTransactionSpans: string;
-            readonly upgrading: string;
-            readonly metaData: string;
-        };
-        readonly canvas: {
-            readonly guide: string;
-        };
-        readonly cloud: {
-            readonly indexManagement: string;
-        };
-        readonly console: {
-            readonly guide: string;
-        };
-        readonly dashboard: {
-            readonly guide: string;
-            readonly drilldowns: string;
-            readonly drilldownsTriggerPicker: string;
-            readonly urlDrilldownTemplateSyntax: string;
-            readonly urlDrilldownVariables: string;
-        };
-        readonly discover: Record<string, string>;
-        readonly filebeat: {
-            readonly base: string;
-            readonly installation: string;
-            readonly configuration: string;
-            readonly elasticsearchOutput: string;
-            readonly elasticsearchModule: string;
-            readonly startup: string;
-            readonly exportedFields: string;
-            readonly suricataModule: string;
-            readonly zeekModule: string;
-        };
-        readonly auditbeat: {
-            readonly base: string;
-            readonly auditdModule: string;
-            readonly systemModule: string;
-        };
-        readonly metricbeat: {
-            readonly base: string;
-            readonly configure: string;
-            readonly httpEndpoint: string;
-            readonly install: string;
-            readonly start: string;
-        };
-        readonly appSearch: {
-            readonly apiRef: string;
-            readonly apiClients: string;
-            readonly apiKeys: string;
-            readonly authentication: string;
-            readonly crawlRules: string;
-            readonly curations: string;
-            readonly duplicateDocuments: string;
-            readonly entryPoints: string;
-            readonly guide: string;
-            readonly indexingDocuments: string;
-            readonly indexingDocumentsSchema: string;
-            readonly logSettings: string;
-            readonly metaEngines: string;
-            readonly precisionTuning: string;
-            readonly relevanceTuning: string;
-            readonly resultSettings: string;
-            readonly searchUI: string;
-            readonly security: string;
-            readonly synonyms: string;
-            readonly webCrawler: string;
-            readonly webCrawlerEventLogs: string;
-        };
-        readonly enterpriseSearch: {
-            readonly configuration: string;
-            readonly licenseManagement: string;
-            readonly mailService: string;
-            readonly usersAccess: string;
-        };
-        readonly workplaceSearch: {
-            readonly apiKeys: string;
-            readonly box: string;
-            readonly confluenceCloud: string;
-            readonly confluenceServer: string;
-            readonly customSources: string;
-            readonly customSourcePermissions: string;
-            readonly documentPermissions: string;
-            readonly dropbox: string;
-            readonly externalIdentities: string;
-            readonly gitHub: string;
-            readonly gettingStarted: string;
-            readonly gmail: string;
-            readonly googleDrive: string;
-            readonly indexingSchedule: string;
-            readonly jiraCloud: string;
-            readonly jiraServer: string;
-            readonly oneDrive: string;
-            readonly permissions: string;
-            readonly salesforce: string;
-            readonly security: string;
-            readonly serviceNow: string;
-            readonly sharePoint: string;
-            readonly slack: string;
-            readonly synch: string;
-            readonly zendesk: string;
-        };
-        readonly heartbeat: {
-            readonly base: string;
-        };
-        readonly libbeat: {
-            readonly getStarted: string;
-        };
-        readonly logstash: {
-            readonly base: string;
-        };
-        readonly functionbeat: {
-            readonly base: string;
-        };
-        readonly winlogbeat: {
-            readonly base: string;
-        };
-        readonly aggs: {
-            readonly composite: string;
-            readonly composite_missing_bucket: string;
-            readonly date_histogram: string;
-            readonly date_range: string;
-            readonly date_format_pattern: string;
-            readonly filter: string;
-            readonly filters: string;
-            readonly geohash_grid: string;
-            readonly histogram: string;
-            readonly ip_range: string;
-            readonly range: string;
-            readonly significant_terms: string;
-            readonly terms: string;
-            readonly terms_doc_count_error: string;
-            readonly avg: string;
-            readonly avg_bucket: string;
-            readonly max_bucket: string;
-            readonly min_bucket: string;
-            readonly sum_bucket: string;
-            readonly cardinality: string;
-            readonly count: string;
-            readonly cumulative_sum: string;
-            readonly derivative: string;
-            readonly geo_bounds: string;
-            readonly geo_centroid: string;
-            readonly max: string;
-            readonly median: string;
-            readonly min: string;
-            readonly moving_avg: string;
-            readonly percentile_ranks: string;
-            readonly serial_diff: string;
-            readonly std_dev: string;
-            readonly sum: string;
-            readonly top_hits: string;
-        };
-        readonly runtimeFields: {
-            readonly overview: string;
-            readonly mapping: string;
-        };
-        readonly scriptedFields: {
-            readonly scriptFields: string;
-            readonly scriptAggs: string;
-            readonly painless: string;
-            readonly painlessApi: string;
-            readonly painlessLangSpec: string;
-            readonly painlessSyntax: string;
-            readonly painlessWalkthrough: string;
-            readonly luceneExpressions: string;
-        };
-        readonly search: {
-            readonly sessions: string;
-            readonly sessionLimits: string;
-        };
-        readonly indexPatterns: {
-            readonly introduction: string;
-            readonly fieldFormattersNumber: string;
-            readonly fieldFormattersString: string;
-            readonly runtimeFields: string;
-        };
-        readonly addData: string;
-        readonly kibana: string;
-        readonly upgradeAssistant: {
-            readonly overview: string;
-            readonly batchReindex: string;
-            readonly remoteReindex: string;
-        };
-        readonly rollupJobs: string;
-        readonly elasticsearch: Record<string, string>;
-        readonly siem: {
-            readonly privileges: string;
-            readonly guide: string;
-            readonly gettingStarted: string;
-            readonly ml: string;
-            readonly ruleChangeLog: string;
-            readonly detectionsReq: string;
-            readonly networkMap: string;
-            readonly troubleshootGaps: string;
-        };
-        readonly securitySolution: {
-            readonly trustedApps: string;
-        };
-        readonly query: {
-            readonly eql: string;
-            readonly kueryQuerySyntax: string;
-            readonly luceneQuerySyntax: string;
-            readonly percolate: string;
-            readonly queryDsl: string;
-        };
-        readonly date: {
-            readonly dateMath: string;
-            readonly dateMathIndexNames: string;
-        };
-        readonly management: Record<string, string>;
-        readonly ml: Record<string, string>;
-        readonly transforms: Record<string, string>;
-        readonly visualize: Record<string, string>;
-        readonly apis: Readonly<{
-            bulkIndexAlias: string;
-            byteSizeUnits: string;
-            createAutoFollowPattern: string;
-            createFollower: string;
-            createIndex: string;
-            createSnapshotLifecyclePolicy: string;
-            createRoleMapping: string;
-            createRoleMappingTemplates: string;
-            createRollupJobsRequest: string;
-            createApiKey: string;
-            createPipeline: string;
-            createTransformRequest: string;
-            cronExpressions: string;
-            executeWatchActionModes: string;
-            indexExists: string;
-            openIndex: string;
-            putComponentTemplate: string;
-            painlessExecute: string;
-            painlessExecuteAPIContexts: string;
-            putComponentTemplateMetadata: string;
-            putSnapshotLifecyclePolicy: string;
-            putIndexTemplateV1: string;
-            putWatch: string;
-            simulatePipeline: string;
-            timeUnits: string;
-            updateTransform: string;
-        }>;
-        readonly observability: Readonly<{
-            guide: string;
-            infrastructureThreshold: string;
-            logsThreshold: string;
-            metricsThreshold: string;
-            monitorStatus: string;
-            monitorUptime: string;
-            tlsCertificate: string;
-            uptimeDurationAnomaly: string;
-        }>;
-        readonly alerting: Record<string, string>;
-        readonly maps: Readonly<{
-            guide: string;
-            importGeospatialPrivileges: string;
-            gdalTutorial: string;
-        }>;
-        readonly monitoring: Record<string, string>;
-        readonly security: Readonly<{
-            apiKeyServiceSettings: string;
-            clusterPrivileges: string;
-            elasticsearchSettings: string;
-            elasticsearchEnableSecurity: string;
-            elasticsearchEnableApiKeys: string;
-            indicesPrivileges: string;
-            kibanaTLS: string;
-            kibanaPrivileges: string;
-            mappingRoles: string;
-            mappingRolesFieldRules: string;
-            runAsPrivilege: string;
-        }>;
-        readonly spaces: Readonly<{
-            kibanaLegacyUrlAliases: string;
-            kibanaDisableLegacyUrlAliasesApi: string;
-        }>;
-        readonly watcher: Record<string, string>;
-        readonly ccs: Record<string, string>;
-        readonly plugins: {
-            azureRepo: string;
-            gcsRepo: string;
-            hdfsRepo: string;
-            s3Repo: string;
-            snapshotRestoreRepos: string;
-            mapperSize: string;
-        };
-        readonly snapshotRestore: Record<string, string>;
-        readonly ingest: Record<string, string>;
-        readonly fleet: Readonly<{
-            beatsAgentComparison: string;
-            guide: string;
-            fleetServer: string;
-            fleetServerAddFleetServer: string;
-            settings: string;
-            settingsFleetServerHostSettings: string;
-            settingsFleetServerProxySettings: string;
-            troubleshooting: string;
-            elasticAgent: string;
-            datastreams: string;
-            datastreamsNamingScheme: string;
-            installElasticAgent: string;
-            installElasticAgentStandalone: string;
-            upgradeElasticAgent: string;
-            upgradeElasticAgent712lower: string;
-            learnMoreBlog: string;
-            apiKeysLearnMore: string;
-            onPremRegistry: string;
-        }>;
-        readonly ecs: {
-            readonly guide: string;
-        };
-        readonly clients: {
-            readonly guide: string;
-            readonly goOverview: string;
-            readonly javaIndex: string;
-            readonly jsIntro: string;
-            readonly netGuide: string;
-            readonly perlGuide: string;
-            readonly phpGuide: string;
-            readonly pythonGuide: string;
-            readonly rubyOverview: string;
-            readonly rustGuide: string;
-        };
-        readonly endpoints: {
-            readonly troubleshooting: string;
-        };
-    };
-}
+export { DocLinksStart }
 
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
 //
@@ -841,6 +518,28 @@ export interface ErrorToastOptions extends ToastOptions {
     title: string;
     toastMessage?: string;
 }
+
+export { Event_2 as Event }
+
+export { EventContext }
+
+export { EventType }
+
+export { EventTypeOpts }
+
+// @public
+export interface ExecutionContextSetup {
+    clear(): void;
+    context$: Observable<KibanaExecutionContext>;
+    get(): KibanaExecutionContext;
+    // Warning: (ae-forgotten-export) The symbol "Labels" needs to be exported by the entry point index.d.ts
+    getAsLabels(): Labels_2;
+    set(c$: KibanaExecutionContext): void;
+    withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
+}
+
+// @public
+export type ExecutionContextStart = ExecutionContextSetup;
 
 // @public
 export interface FatalErrorInfo {
@@ -992,12 +691,7 @@ export interface HttpSetup {
 // @public
 export type HttpStart = HttpSetup;
 
-// @public
-export interface I18nStart {
-    Context: ({ children }: {
-        children: React_2.ReactNode;
-    }) => JSX.Element;
-}
+export { I18nStart }
 
 // Warning: (ae-missing-release-tag) "IAnonymousPaths" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1019,6 +713,7 @@ export interface IBasePath {
 
 // @public
 export interface IExternalUrl {
+    isInternalUrl(relativeOrAbsoluteUrl: string): boolean;
     validateUrl(relativeOrAbsoluteUrl: string): URL | null;
 }
 
@@ -1057,6 +752,8 @@ export interface IHttpResponseInterceptorOverrides<TResponseBody = unknown> {
     readonly response?: Readonly<Response>;
 }
 
+export { IShipper }
+
 // @public
 export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
@@ -1064,7 +761,7 @@ export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' |
 export interface IUiSettingsClient {
     get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
     get: <T = any>(key: string, defaultOverride?: T) => T;
-    getAll: () => Readonly<Record<string, PublicUiSettingsParams_2 & UserProvidedValues_2>>;
+    getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
     getUpdate$: <T = any>() => Observable<{
         key: string;
         newValue: T;
@@ -1081,12 +778,13 @@ export interface IUiSettingsClient {
 
 // @public
 export type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
-    readonly description: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
+    readonly description?: string;
     readonly url?: string;
-    parent?: KibanaExecutionContext;
+    child?: KibanaExecutionContext;
 };
 
 // @public
@@ -1098,7 +796,14 @@ export interface NavigateToAppOptions {
     openInNewTab?: boolean;
     path?: string;
     replace?: boolean;
+    skipAppLeave?: boolean;
     state?: unknown;
+}
+
+// @public
+export interface NavigateToUrlOptions {
+    forceRedirect?: boolean;
+    skipAppLeave?: boolean;
 }
 
 // Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1117,6 +822,8 @@ export interface NotificationsStart {
     // (undocumented)
     toasts: ToastsStart;
 }
+
+export { OptInConfig }
 
 // @public (undocumented)
 export interface OverlayBannersStart {
@@ -1148,6 +855,8 @@ export interface OverlayFlyoutOpenOptions {
     // (undocumented)
     maxWidth?: boolean | number | string;
     onClose?: (flyout: OverlayRef) => void;
+    // (undocumented)
+    outsideClickCloses?: boolean;
     // (undocumented)
     ownFocus?: boolean;
     // (undocumented)
@@ -1230,7 +939,7 @@ interface Plugin_2<TSetup = void, TStart = void, TPluginsSetup extends object = 
 export { Plugin_2 as Plugin }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin_2<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin_2<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema extends object = object> {
@@ -1246,8 +955,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
     readonly opaqueId: PluginOpaqueId;
 }
 
-// @public (undocumented)
-export type PluginOpaqueId = symbol;
+export { PluginOpaqueId }
 
 // @public
 export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'> & {
@@ -1282,6 +990,7 @@ export type ResolveDeprecationResponse = {
 
 // @public
 export interface ResolvedSimpleSavedObject<T = unknown> {
+    alias_purpose?: SavedObjectsResolveResponse['alias_purpose'];
     alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
     outcome: SavedObjectsResolveResponse['outcome'];
     saved_object: SimpleSavedObject<T>;
@@ -1360,8 +1069,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 
@@ -1400,7 +1111,7 @@ export interface SavedObjectsBulkResolveObject {
 // @public (undocumented)
 export interface SavedObjectsBulkResolveResponse<T = unknown> {
     // (undocumented)
-    resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+    resolved_objects: Array<ResolvedSimpleSavedObject<T>>;
 }
 
 // @public (undocumented)
@@ -1424,34 +1135,26 @@ export interface SavedObjectsBulkUpdateOptions {
 }
 
 // @public
-export class SavedObjectsClient {
-    // @internal
-    constructor(http: HttpSetup);
-    bulkCreate: (objects?: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
-    bulkGet: (objects?: Array<{
+export interface SavedObjectsClientContract {
+    bulkCreate(objects: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions): Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkGet(objects: Array<{
         id: string;
         type: string;
-    }>) => Promise<SavedObjectsBatchResponse<unknown>>;
-    bulkResolve: <T = unknown>(objects?: Array<{
+    }>): Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkResolve<T = unknown>(objects: Array<{
         id: string;
         type: string;
-    }>) => Promise<{
-        resolved_objects: ResolvedSimpleSavedObject<T>[];
-    }>;
-    bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
-    create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
+    }>): Promise<SavedObjectsBulkResolveResponse<T>>;
+    bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<T>>;
+    create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
-    delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsClientContract_2['delete']>;
+    delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
-    find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;
-    get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
-    resolve: <T = unknown>(type: string, id: string) => Promise<ResolvedSimpleSavedObject<T>>;
-    update<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+    find<T = unknown, A = unknown>(options: SavedObjectsFindOptions_2): Promise<SavedObjectsFindResponsePublic<T>>;
+    get<T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>>;
+    resolve<T = unknown>(type: string, id: string): Promise<ResolvedSimpleSavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: T, options?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
-
-// @public
-export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
 // @public
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
@@ -1488,7 +1191,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     perPage?: number;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsPitParams" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: No member was found with name "openPointInTimeForType"
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "SavedObjectsClient"
     pit?: SavedObjectsPitParams;
     preference?: string;
     rootSearchFields?: string[];
@@ -1498,7 +1201,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SearchSortOrder;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -1565,8 +1268,6 @@ export interface SavedObjectsImportFailure {
         icon?: string;
     };
     overwrite?: boolean;
-    // @deprecated (undocumented)
-    title?: string;
     // (undocumented)
     type: string;
 }
@@ -1669,6 +1370,7 @@ export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolat
 
 // @public (undocumented)
 export interface SavedObjectsResolveResponse<T = unknown> {
+    alias_purpose?: 'savedObjectConversion' | 'savedObjectImport';
     alias_target_id?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
     saved_object: SavedObject<T>;
@@ -1709,9 +1411,11 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History_2<
     replace: (pathOrLocation: Path | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
 }
 
+export { ShipperClassConstructor }
+
 // @public
 export class SimpleSavedObject<T = unknown> {
-    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion, coreMigrationVersion, namespaces, updated_at: updatedAt, }: SavedObject<T>);
     // (undocumented)
     attributes: T;
     // (undocumented)
@@ -1738,23 +1442,21 @@ export class SimpleSavedObject<T = unknown> {
     // (undocumented)
     type: SavedObject<T>['type'];
     // (undocumented)
+    updatedAt: SavedObject<T>['updated_at'];
+    // (undocumented)
     _version?: SavedObject<T>['version'];
 }
 
 // @public
 export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
-// @public (undocumented)
-export interface ThemeServiceSetup {
-    // (undocumented)
-    theme$: Observable<CoreTheme>;
-}
+export { TelemetryCounter }
 
-// @public (undocumented)
-export interface ThemeServiceStart {
-    // (undocumented)
-    theme$: Observable<CoreTheme>;
-}
+export { TelemetryCounterType }
+
+export { ThemeServiceSetup }
+
+export { ThemeServiceStart }
 
 // Warning: (ae-missing-release-tag) "Toast" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1830,7 +1532,7 @@ export interface UiSettingsParams<T = unknown> {
 // @public (undocumented)
 export interface UiSettingsState {
     // (undocumented)
-    [key: string]: PublicUiSettingsParams_2 & UserProvidedValues_2;
+    [key: string]: PublicUiSettingsParams & UserProvidedValues;
 }
 
 // @public
@@ -1852,6 +1554,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:173:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:202:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

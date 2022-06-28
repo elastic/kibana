@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { UnwrapPromise } from '@kbn/utility-types';
 import type {
   AllActionStates,
   ReindexSourceToTempOpenPit,
@@ -41,9 +40,9 @@ import type {
   CheckUnknownDocumentsState,
   CalculateExcludeFiltersState,
 } from './state';
-import { TransformRawDocs } from './types';
+import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
-import { ElasticsearchClient } from '../../elasticsearch';
+import type { ElasticsearchClient } from '../../elasticsearch';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -53,21 +52,21 @@ type ActionMap = ReturnType<typeof nextActionMap>;
  * E.g. given 'INIT', provides the response type of the action triggered by
  * `next` in the 'INIT' control state.
  */
-export type ResponseType<ControlState extends AllActionStates> = UnwrapPromise<
+export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
 export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   return {
     INIT: (state: InitState) =>
-      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
+      Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatusYellow({ client, index: state.sourceIndex.value }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
         indexName: state.sourceIndex.value,
-        unusedTypesQuery: state.unusedTypesQuery,
+        excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
         knownTypes: state.knownTypes,
       }),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
@@ -99,7 +98,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
          * are no longer used. These saved objects will still be kept in the outdated
          * index for backup purposes, but won't be available in the upgraded index.
          */
-        query: state.unusedTypesQuery,
+        query: state.excludeOnUpgradeQuery,
         batchSize: state.batchSize,
         searchAfter: state.lastHitSortValue,
       }),
@@ -188,7 +187,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         targetIndex: state.sourceIndex.value,
         reindexScript: state.preMigrationScript,
         requireAlias: false,
-        unusedTypesQuery: state.unusedTypesQuery,
+        excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
       }),
     LEGACY_REINDEX_WAIT_FOR_TASK: (state: LegacyReindexWaitForTaskState) =>
       Actions.waitForReindexTask({ client, taskId: state.legacyReindexTaskId, timeout: '60s' }),

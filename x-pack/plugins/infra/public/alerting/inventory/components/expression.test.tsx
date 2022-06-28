@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test/jest';
-// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from 'src/core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
+import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { Expressions, AlertContextMeta, ExpressionRow, defaultExpression } from './expression';
 import { act } from 'react-dom/test-utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
+import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
+import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -37,6 +35,8 @@ const exampleCustomMetric = {
   type: 'custom',
 } as SnapshotCustomMetricInput;
 
+const dataViewMock = dataViewPluginMocks.createStartContract();
+
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
     const ruleParams = {
@@ -54,6 +54,7 @@ describe('Expression', () => {
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
         metadata={currentOptions}
+        dataViews={dataViewMock}
       />
     );
 
@@ -119,6 +120,7 @@ describe('Expression', () => {
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
         metadata={{}}
+        dataViews={dataViewMock}
       />
     );
 
@@ -205,8 +207,11 @@ describe('ExpressionRow', () => {
   it('loads custom metrics passed in through the expression, even with an empty context', async () => {
     const { wrapper } = await setup(expression as InventoryMetricConditions);
     const [valueMatch] =
-      wrapper.html().match('<span class="euiExpression__value">Rate of some.system.field</span>') ??
-      [];
+      wrapper
+        .html()
+        .match(
+          '<span class="euiExpression__value css-xlzuv8-euiExpression__value">Rate of some.system.field</span>'
+        ) ?? [];
     expect(valueMatch).toBeTruthy();
   });
 });

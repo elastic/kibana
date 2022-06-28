@@ -12,5 +12,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_anomalies_table_data'));
     loadTestFile(require.resolve('./get_categorizer_stats'));
     loadTestFile(require.resolve('./get_stopped_partitions'));
+    loadTestFile(require.resolve('./get_category_definition'));
+    loadTestFile(require.resolve('./get_category_examples'));
+    loadTestFile(require.resolve('./max_anomaly_score'));
+    loadTestFile(require.resolve('./get_partition_fields_values'));
   });
 }

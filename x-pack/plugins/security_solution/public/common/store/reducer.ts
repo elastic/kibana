@@ -14,7 +14,7 @@ import { sourcererReducer, sourcererModel } from './sourcerer';
 
 import { HostsPluginReducer } from '../../hosts/store';
 import { NetworkPluginReducer } from '../../network/store';
-import { UebaPluginReducer } from '../../ueba/store';
+import { UsersPluginReducer } from '../../users/store';
 import { TimelinePluginReducer } from '../../timelines/store/timeline';
 
 import { SecuritySubPlugins } from '../../app/types';
@@ -24,9 +24,10 @@ import { AppAction } from './actions';
 import { initDataView, SourcererModel, SourcererScopeName } from './sourcerer/model';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
+import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
-  UebaPluginReducer &
+  UsersPluginReducer &
   NetworkPluginReducer &
   TimelinePluginReducer &
   ManagementPluginReducer;
@@ -36,7 +37,7 @@ export type SubPluginsInitReducer = HostsPluginReducer &
 export const createInitialState = (
   pluginsInitState: Omit<
     SecuritySubPlugins['store']['initialState'],
-    'app' | 'dragAndDrop' | 'inputs' | 'sourcerer'
+    'app' | 'dragAndDrop' | 'inputs' | 'sourcerer' | 'globalUrlParam'
   >,
   {
     defaultDataView,
@@ -100,6 +101,7 @@ export const createInitialState = (
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
     },
+    globalUrlParam: initialGlobalUrlParam,
   };
 
   return preloadedState;
@@ -116,5 +118,6 @@ export const createReducer: (
     dragAndDrop: dragAndDropReducer,
     inputs: inputsReducer,
     sourcerer: sourcererReducer,
+    globalUrlParam: globalUrlParamReducer,
     ...pluginsReducer,
   });

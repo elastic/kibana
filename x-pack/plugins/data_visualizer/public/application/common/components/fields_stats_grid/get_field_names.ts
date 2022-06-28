@@ -6,10 +6,10 @@
  */
 
 import { difference } from 'lodash';
-import { ES_FIELD_TYPES } from '../../../../../../../../src/plugins/data/common';
-import type { FindFileStructureResponse } from '../../../../../../file_upload/common';
-import type { JobFieldType } from '../../../../../common';
-import { JOB_FIELD_TYPES } from '../../../../../common';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { JobFieldType } from '../../../../../common/types';
+import { JOB_FIELD_TYPES } from '../../../../../common/constants';
 export function getFieldNames(results: FindFileStructureResponse) {
   const { mappings, field_stats: fieldStats, column_names: columnNames } = results;
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ConcreteTaskInstance, TaskStatus } from '../../../../../task_manager/server';
+import moment from 'moment';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
 import { SecurityTelemetryTaskConfig } from '../task';
-import { PackagePolicy } from '../../../../../fleet/common/types/models/package_policy';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
 
-/**
- * Creates a mocked Telemetry Events Sender
- */
 export const createMockTelemetryEventsSender = (
-  enableTelemetry?: boolean
+  enableTelemetry?: boolean,
+  canConnect?: boolean
 ): jest.Mocked<TelemetryEventsSender> => {
   return {
     setup: jest.fn(),
@@ -26,18 +26,57 @@ export const createMockTelemetryEventsSender = (
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemetry ?? jest.fn()),
+    isTelemetryServicesReachable: jest.fn().mockReturnValue(canConnect ?? jest.fn()),
     sendIfDue: jest.fn(),
     sendEvents: jest.fn(),
     sendOnDemand: jest.fn(),
   } as unknown as jest.Mocked<TelemetryEventsSender>;
 };
 
+const stubClusterInfo = {
+  name: 'Stub-MacBook-Pro.local',
+  cluster_name: 'elasticsearch',
+  cluster_uuid: '5Pr5PXRQQpGJUTn0czAvKQ',
+  version: {
+    number: '8.0.0-SNAPSHOT',
+    build_type: 'tar',
+    build_hash: '38537ab4a726b42ce8f034aad78d8fca4d4f3e51',
+    build_date: moment().toISOString(),
+    build_snapshot: true,
+    lucene_version: '9.2.0',
+    minimum_wire_compatibility_version: '7.17.0',
+    minimum_index_compatibility_version: '7.0.0',
+  },
+  tagline: 'You Know, for Search',
+};
+
+const stubLicenseInfo = {
+  status: 'active',
+  uid: '4a7dde08-e5f8-4e50-80f8-bc85b72b4934',
+  type: 'trial',
+  issue_date: moment().toISOString(),
+  issue_date_in_millis: 1653299879146,
+  expiry_date: moment().toISOString(),
+  expiry_date_in_millis: 1655891879146,
+  max_nodes: 1000,
+  max_resource_units: null,
+  issued_to: 'elasticsearch',
+  issuer: 'elasticsearch',
+  start_date_in_millis: -1,
+};
+
 export const createMockTelemetryReceiver = (
-  diagnosticsAlert?: unknown
+  diagnosticsAlert?: unknown,
+  emptyTimelineTree?: boolean
 ): jest.Mocked<TelemetryReceiver> => {
+  const processTreeResponse = emptyTimelineTree
+    ? Promise.resolve([])
+    : Promise.resolve(Promise.resolve(stubProcessTree()));
+
   return {
     start: jest.fn(),
-    fetchLicenseInfo: jest.fn(),
+    fetchClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
+    fetchLicenseInfo: jest.fn().mockReturnValue(stubLicenseInfo),
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),
     fetchDiagnosticAlerts: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
@@ -46,12 +85,15 @@ export const createMockTelemetryReceiver = (
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
+    fetchEndpointMetadata: jest.fn(),
+    fetchTimelineEndpointAlerts: jest
+      .fn()
+      .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
+    buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
+    fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 
-/**
- * Creates a mocked package policy
- */
 export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
   return {
     id: jest.fn(),
@@ -65,9 +107,6 @@ export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> => {
   } as unknown as jest.Mocked<PackagePolicy>;
 };
 
-/**
- * Creates a mocked Security Telemetry Task Config
- */
 export const createMockSecurityTelemetryTask = (
   testType?: string,
   testLastTimestamp?: string
@@ -83,9 +122,6 @@ export const createMockSecurityTelemetryTask = (
   } as unknown as jest.Mocked<SecurityTelemetryTaskConfig>;
 };
 
-/**
- * Creates a mocked Task Instance
- */
 export const createMockTaskInstance = (testId: string, testType: string): ConcreteTaskInstance => {
   return {
     id: testId,

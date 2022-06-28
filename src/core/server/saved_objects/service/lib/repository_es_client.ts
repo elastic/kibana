@@ -8,7 +8,7 @@
 
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
-import { ElasticsearchClient } from '../../../elasticsearch/';
+import { ElasticsearchClient } from '../../../elasticsearch';
 import { retryCallCluster } from '../../../elasticsearch/client/retry_call_cluster';
 import { decorateEsError } from './decorate_es_error';
 
@@ -28,7 +28,7 @@ const methods = [
 
 type MethodName = typeof methods[number];
 
-export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName>;
+export type RepositoryEsClient = Pick<ElasticsearchClient, MethodName | 'transport'>;
 
 export function createRepositoryEsClient(client: ElasticsearchClient): RepositoryEsClient {
   return methods.reduce((acc: RepositoryEsClient, key: MethodName) => {

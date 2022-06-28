@@ -6,13 +6,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title><%= options.title || 'Storybook'%></title>
+    <title><%= htmlWebpackPlugin.options.title || 'Storybook'%></title>
 
-    <% if (files.favicon) { %>
-    <link rel="shortcut icon" href="<%= files.favicon%>" />
+    <% if (htmlWebpackPlugin.files.favicon) { %>
+    <link rel="shortcut icon" href="<%= htmlWebpackPlugin.files.favicon%>" />
     <% } %>
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="eui-styles-global" />
 
     <!-- Added for Kibana shared dependencies -->
     <script>
@@ -25,7 +26,7 @@
     <!--                                      -->
 
     <% if (typeof headHtmlSnippet !== 'undefined') { %> <%= headHtmlSnippet %> <% } %> <%
-    files.css.forEach(file => { %>
+    htmlWebpackPlugin.files.css.forEach(file => { %>
     <link href="<%= file %>" rel="stylesheet" />
     <% }); %>
 
@@ -35,6 +36,9 @@
         display: none !important;
       }
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:slnt,wght@-10,300..700;0,300..700&family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
   </head>
   <body>
     <% if (typeof bodyHtmlSnippet !== 'undefined') { %>
@@ -54,7 +58,7 @@
       </script>
     <% } %>
 
-    <% files.js.forEach(file => { %>
+    <% htmlWebpackPlugin.files.js.forEach(file => { %>
       <script src="<%= file %>"></script>
     <% }); %>
   </body>

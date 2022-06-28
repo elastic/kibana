@@ -7,12 +7,12 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Agg } from './agg';
 import { FieldSelect } from './field_select';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { setDataStart } from '../../../services';
-import { dataPluginMock } from '../../../../../../data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('../query_bar_wrapper', () => ({
   QueryBarWrapper: jest.fn(() => null),

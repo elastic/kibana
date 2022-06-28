@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { findAllUnenrolledAgentIds } from './unenroll';
-import { elasticsearchServiceMock } from '../../../../../../../../src/core/server/mocks';
-import { AgentClient } from '../../../../../../fleet/server/services';
+import { AgentClient } from '@kbn/fleet-plugin/server/services';
 import {
   createMockAgentClient,
   createPackagePolicyServiceMock,
-} from '../../../../../../fleet/server/mocks';
-import { Agent, PackagePolicy } from '../../../../../../fleet/common/types/models';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
+} from '@kbn/fleet-plugin/server/mocks';
+import { Agent, PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 
 describe('test find all unenrolled Agent id', () => {
-  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
   let mockAgentClient: jest.Mocked<AgentClient>;
   let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
 
   beforeEach(() => {
-    mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockAgentClient = createMockAgentClient();
     mockPackagePolicyService = createPackagePolicyServiceMock();
   });
@@ -80,11 +76,7 @@ describe('test find all unenrolled Agent id', () => {
         })
       );
     const endpointPolicyIds = ['test-endpoint-policy-id'];
-    const agentIds = await findAllUnenrolledAgentIds(
-      mockAgentClient,
-      mockElasticsearchClient,
-      endpointPolicyIds
-    );
+    const agentIds = await findAllUnenrolledAgentIds(mockAgentClient, endpointPolicyIds);
 
     expect(agentIds).toBeTruthy();
     expect(agentIds).toEqual(['id1', 'id2']);

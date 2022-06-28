@@ -6,15 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
+import { DataView } from '@kbn/data-plugin/common';
 import { IESSource } from '../es_source';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { IField } from '../../fields/field';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
@@ -25,7 +24,7 @@ export interface IESAggSource extends IESSource {
   getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string;
   getMetricFields(): IESAggField[];
   getMetricFieldForName(fieldName: string): IESAggField | null;
-  getValueAggsDsl(indexPattern: IndexPattern): { [key: string]: unknown };
+  getValueAggsDsl(indexPattern: DataView): { [key: string]: unknown };
 }
 
 export abstract class AbstractESAggSource extends AbstractESSource implements IESAggSource {
@@ -43,8 +42,8 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     };
   }
 
-  constructor(descriptor: AbstractESAggSourceDescriptor, inspectorAdapters?: Adapters) {
-    super(descriptor, inspectorAdapters);
+  constructor(descriptor: AbstractESAggSourceDescriptor) {
+    super(descriptor);
     this._metricFields = [];
     if (descriptor.metrics) {
       descriptor.metrics.forEach((aggDescriptor: AggDescriptor) => {
@@ -107,14 +106,18 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     return this.getMetricFields();
   }
 
-  getValueAggsDsl(indexPattern: IndexPattern) {
+  getValueAggsDsl(indexPattern: DataView, metricsFilter?: (metric: IESAggField) => boolean) {
     const valueAggsDsl: { [key: string]: unknown } = {};
-    this.getMetricFields().forEach((esAggMetric) => {
-      const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
-      if (aggDsl) {
-        valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
-      }
-    });
+    this.getMetricFields()
+      .filter((esAggMetric) => {
+        return metricsFilter ? metricsFilter(esAggMetric) : true;
+      })
+      .forEach((esAggMetric) => {
+        const aggDsl = esAggMetric.getValueAggDsl(indexPattern);
+        if (aggDsl) {
+          valueAggsDsl[esAggMetric.getName()] = esAggMetric.getValueAggDsl(indexPattern);
+        }
+      });
     return valueAggsDsl;
   }
 

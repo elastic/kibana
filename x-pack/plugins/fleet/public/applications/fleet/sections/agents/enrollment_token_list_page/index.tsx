@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 
-import { ENROLLMENT_API_KEYS_INDEX } from '../../../constants';
+import { ENROLLMENT_API_KEYS_INDEX, SO_SEARCH_LIMIT } from '../../../constants';
 import { NewEnrollmentTokenModal } from '../../../components';
 import {
   useBreadcrumbs,
@@ -96,7 +96,6 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
                   })
             }
             color="text"
-            isDisabled={state === 'LOADING'}
             onClick={toggleKey}
             iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
           />
@@ -168,7 +167,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   });
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
   });
 
   const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
@@ -269,6 +268,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     },
   ];
 
+  const isLoading =
+    (enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest) ||
+    (agentPoliciesRequest.isLoading && agentPoliciesRequest.isInitialRequest);
+
   return (
     <DefaultLayout section="enrollment_tokens">
       {isModalOpen && (
@@ -312,10 +315,10 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiBasicTable<EnrollmentAPIKey>
-        loading={enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest}
+        loading={isLoading}
         hasActions={true}
         noItemsMessage={
-          enrollmentAPIKeysRequest.isLoading && enrollmentAPIKeysRequest.isInitialRequest ? (
+          isLoading ? (
             <FormattedMessage
               id="xpack.fleet.enrollemntAPIKeyList.loadingTokensMessage"
               defaultMessage="Loading enrollment tokens..."

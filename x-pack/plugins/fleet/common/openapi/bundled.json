@@ -295,7 +295,17 @@
         },
         "operationId": "list-all-packages"
       },
-      "parameters": []
+      "parameters": [
+        {
+          "in": "query",
+          "name": "excludeInstallStatus",
+          "schema": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": "Whether to exclude the install status of each package. Enabling this option will opt in to caching for the response via `cache-control` headers. If you don't need up-to-date installation info for a package, and are querying for a list of available packages, providing this flag can improve performance substantially."
+        }
+      ]
     },
     "/epm/packages/_bulk": {
       "post": {
@@ -621,6 +631,19 @@
                           "type"
                         ]
                       }
+                    },
+                    "_meta": {
+                      "type": "object",
+                      "properties": {
+                        "install_source": {
+                          "type": "string",
+                          "enum": [
+                            "registry",
+                            "upload",
+                            "bundled"
+                          ]
+                        }
+                      }
                     }
                   },
                   "required": [
@@ -645,6 +668,9 @@
                 "type": "object",
                 "properties": {
                   "force": {
+                    "type": "boolean"
+                  },
+                  "ignore_constraints": {
                     "type": "boolean"
                   }
                 }
@@ -1091,6 +1117,59 @@
             "name": "policyId",
             "in": "query",
             "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "kuery",
+            "in": "query",
+            "required": false
+          }
+        ]
+      }
+    },
+    "/agent_status/data": {
+      "get": {
+        "summary": "Agents - Get incoming data",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-agent-data",
+        "parameters": [
+          {
+            "schema": {
+              "type": "array"
+            },
+            "name": "agentsId",
+            "in": "query",
+            "required": true
           }
         ]
       }
@@ -1112,6 +1191,29 @@
           }
         },
         "operationId": "get-agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/kuery"
+          },
+          {
+            "$ref": "#/components/parameters/show_inactive"
+          },
+          {
+            "$ref": "#/components/parameters/show_upgradeable"
+          },
+          {
+            "$ref": "#/components/parameters/sort_field"
+          },
+          {
+            "$ref": "#/components/parameters/sort_order"
+          }
+        ],
         "security": [
           {
             "basicAuth": []
@@ -1175,6 +1277,64 @@
             }
           }
         }
+      }
+    },
+    "/agents/current_upgrades": {
+      "get": {
+        "summary": "Agents - Current Bulk Upgrades",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "actionId": {
+                            "type": "string"
+                          },
+                          "complete": {
+                            "type": "boolean"
+                          },
+                          "nbAgents": {
+                            "type": "number"
+                          },
+                          "nbAgentsAck": {
+                            "type": "number"
+                          },
+                          "version": {
+                            "type": "string"
+                          },
+                          "startTime": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "actionId",
+                          "complete",
+                          "nbAgents",
+                          "nbAgentsAck",
+                          "version",
+                          "startTime"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "agents-current-upgrades"
       }
     },
     "/agents/{agentId}": {
@@ -1241,7 +1401,28 @@
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
-        ]
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_provided_metadata": {
+                    "type": "object"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "delete": {
         "summary": "Agent - Delete",
@@ -2233,7 +2414,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/get_enrollment_api_keys_response"
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/enrollment_api_key"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
                 }
               }
             }
@@ -2537,6 +2726,9 @@
                       },
                       "diff": {
                         "$ref": "#/components/schemas/upgrade_diff"
+                      },
+                      "agent_diff": {
+                        "$ref": "#/components/schemas/upgrade_agent_diff"
                       }
                     },
                     "required": [
@@ -2872,6 +3064,242 @@
           }
         ]
       }
+    },
+    "/agent_download_sources": {
+      "get": {
+        "summary": "Agent Download Sources",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/download_sources"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-download-sources"
+      },
+      "post": {
+        "summary": "Agent Download Sources",
+        "description": "Create a new agent download source",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/download_sources"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "host",
+                  "is_default"
+                ]
+              }
+            }
+          }
+        },
+        "operationId": "post-download-sources"
+      }
+    },
+    "/agent_download_sources/{sourceId}": {
+      "get": {
+        "summary": "Agent Download Sources - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/download_sources"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-one-download-source"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "sourceId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "delete": {
+        "summary": "Agent Download Sources - Delete",
+        "operationId": "delete-download-source",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Agent Download Sources - Update",
+        "operationId": "update-download-source",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "is_default",
+                  "host"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/download_sources"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
+    "/logstash_api_keys": {
+      "post": {
+        "summary": "Generate Logstash API key",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "api_key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "generate-logstash-api-key",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -2909,7 +3337,7 @@
         "required": false,
         "schema": {
           "type": "integer",
-          "default": 50
+          "default": 20
         }
       },
       "page_index": {
@@ -2927,6 +3355,42 @@
         "required": false,
         "schema": {
           "type": "string"
+        }
+      },
+      "show_inactive": {
+        "name": "showInactive",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "show_upgradeable": {
+        "name": "showUpgradeable",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "sort_field": {
+        "name": "sortField",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "sort_order": {
+        "name": "sortOrder",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ]
         }
       }
     },
@@ -3002,9 +3466,14 @@
             ]
           },
           "is_default": {
-            "type": "boolean"
+            "type": "boolean",
+            "deprecated": true
           },
           "is_default_fleet_server": {
+            "type": "boolean",
+            "deprecated": true
+          },
+          "has_fleet_server": {
             "type": "boolean"
           },
           "data_output_id": {
@@ -3449,9 +3918,6 @@
           },
           "path": {
             "type": "string"
-          },
-          "removable": {
-            "type": "boolean"
           }
         },
         "required": [
@@ -3479,7 +3945,8 @@
           "map",
           "lens",
           "ml-module",
-          "security-rule"
+          "security-rule",
+          "csp_rule_template"
         ]
       },
       "elasticsearch_asset_type": {
@@ -3521,7 +3988,15 @@
                 "tls_required",
                 "api_keys",
                 "fleet_admin_user",
-                "fleet_server",
+                "fleet_server"
+              ]
+            }
+          },
+          "missing_optional_features": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
                 "encrypted_saved_object_encryption_key_required"
               ]
             }
@@ -3529,7 +4004,8 @@
         },
         "required": [
           "isReady",
-          "missing_requirements"
+          "missing_requirements",
+          "missing_optional_features"
         ]
       },
       "agent_type": {
@@ -3661,6 +4137,12 @@
           "source_uri": {
             "type": "string"
           },
+          "rollout_duration_seconds": {
+            "type": "number"
+          },
+          "start_time": {
+            "type": "string"
+          },
           "agents": {
             "oneOf": [
               {
@@ -3759,6 +4241,9 @@
         "title": "New agent policy",
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -3777,8 +4262,20 @@
                 "logs"
               ]
             }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
           }
-        }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ]
       },
       "new_package_policy": {
         "title": "New package policy",
@@ -3929,6 +4426,12 @@
               "updated_by": {
                 "type": "string"
               },
+              "data_output_id": {
+                "type": "string"
+              },
+              "monitoring_output_id": {
+                "type": "string"
+              },
               "revision": {
                 "type": "number"
               },
@@ -3966,9 +4469,12 @@
             "type": "string"
           },
           "last_activity_ms": {
-            "type": "string"
+            "type": "number"
           },
           "size_in_bytes": {
+            "type": "number"
+          },
+          "size_in_bytes_formatted": {
             "type": "string"
           },
           "dashboard": {
@@ -4021,30 +4527,6 @@
           "created_at"
         ]
       },
-      "get_enrollment_api_keys_response": {
-        "title": "Bulk install packages response",
-        "type": "object",
-        "properties": {
-          "list": {
-            "type": "array",
-            "deprecated": true,
-            "properties": {
-              "items": {
-                "$ref": "#/components/schemas/enrollment_api_key"
-              }
-            }
-          },
-          "item": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/enrollment_api_key"
-            }
-          }
-        },
-        "required": [
-          "item"
-        ]
-      },
       "upgrade_diff": {
         "title": "Package policy Upgrade dryrun",
         "type": "array",
@@ -4087,6 +4569,118 @@
               ]
             }
           ]
+        }
+      },
+      "full_agent_policy_input_stream": {
+        "title": "Full agent policy input stream",
+        "allOf": [
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "data_stream": {
+                "type": "object",
+                "properties": {
+                  "dataset": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "dataset",
+                  "type"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "data_stream"
+            ]
+          }
+        ]
+      },
+      "full_agent_policy_input": {
+        "title": "Full agent policy input",
+        "allOf": [
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "number"
+              },
+              "type": {
+                "type": "string"
+              },
+              "data_stream": {
+                "type": "object",
+                "properties": {
+                  "namespace": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "namespace"
+                ]
+              },
+              "use_output": {
+                "type": "string"
+              },
+              "meta": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "package": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "version"
+                    ]
+                  }
+                }
+              },
+              "streams": {
+                "$ref": "#/components/schemas/full_agent_policy_input_stream"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "revision",
+              "type",
+              "data_stream",
+              "use_output"
+            ]
+          }
+        ]
+      },
+      "upgrade_agent_diff": {
+        "title": "Package policy Upgrade dryrun",
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/full_agent_policy_input"
+          }
         }
       },
       "update_package_policy": {
@@ -4168,6 +4762,9 @@
           },
           "description": {
             "type": "string"
+          },
+          "force": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -4211,14 +4808,28 @@
           "ca_trusted_fingerprint": {
             "type": "string"
           },
-          "api_key": {
-            "type": "string"
-          },
           "config": {
             "type": "object"
           },
           "config_yaml": {
             "type": "string"
+          },
+          "ssl": {
+            "type": "object",
+            "properties": {
+              "certificate": {
+                "type": "string"
+              },
+              "certificate_authorities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "key": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": [
@@ -4226,6 +4837,30 @@
           "is_default",
           "name",
           "type"
+        ]
+      },
+      "download_sources": {
+        "title": "Download Source",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "is_default",
+          "name",
+          "host"
         ]
       }
     }

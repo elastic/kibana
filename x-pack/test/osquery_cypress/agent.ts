@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosRequestConfig } from 'axios';
 import { ChildProcess, spawn } from 'child_process';
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
 
-interface AgentManagerParams {
+export interface AgentManagerParams {
   user: string;
   password: string;
   kibanaUrl: string;
   esHost: string;
+  esPort: string;
 }
 
 export class AgentManager extends Manager {
@@ -23,19 +24,11 @@ export class AgentManager extends Manager {
   private log: ToolingLog;
   private agentProcess?: ChildProcess;
   private requestOptions: AxiosRequestConfig;
-  constructor(params: AgentManagerParams, log: ToolingLog) {
+  constructor(params: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
     super();
     this.log = log;
     this.params = params;
-    this.requestOptions = {
-      headers: {
-        'kbn-xsrf': 'kibana',
-      },
-      auth: {
-        username: this.params.user,
-        password: this.params.password,
-      },
-    };
+    this.requestOptions = requestOptions;
   }
 
   public async setup() {

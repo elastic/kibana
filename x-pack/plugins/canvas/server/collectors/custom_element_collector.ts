@@ -6,14 +6,14 @@
  */
 
 import { get } from 'lodash';
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { parseExpression } from '@kbn/expressions-plugin/common';
 import { collectFns } from './collector_helpers';
 import {
   TelemetryCollector,
   TelemetryCustomElement,
   TelemetryCustomElementDocument,
 } from '../../types';
-import { parseExpression } from '../../../../../src/plugins/expressions/common';
 
 const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 interface CustomElementSearch {
@@ -152,7 +152,7 @@ const customElementCollector: TelemetryCollector = async function customElementC
     body: { query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } } },
   };
 
-  const { body: esResponse } = await esClient.search<CustomElementSearch>(customElementParams);
+  const esResponse = await esClient.search<CustomElementSearch>(customElementParams);
 
   if (get(esResponse, 'hits.hits.length') > 0) {
     const customElements = esResponse.hits.hits.map((hit) => hit._source![CUSTOM_ELEMENT_TYPE]);

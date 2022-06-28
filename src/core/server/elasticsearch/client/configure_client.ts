@@ -6,17 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Client, Transport, HttpConnection } from '@elastic/elasticsearch';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import type {
-  TransportRequestParams,
-  TransportRequestOptions,
-  TransportResult,
-} from '@elastic/elasticsearch';
-
-import { Logger } from '../../logging';
+import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
+import { createTransport } from './create_transport';
 
 const noop = () => undefined;
 
@@ -33,32 +27,19 @@ export const configureClient = (
     scoped?: boolean;
     getExecutionContext?: () => string | undefined;
   }
-): KibanaClient => {
+): Client => {
   const clientOptions = parseClientOptions(config, scoped);
-  class KibanaTransport extends Transport {
-    request(params: TransportRequestParams, options?: TransportRequestOptions) {
-      const opts: TransportRequestOptions = options || {};
-      const opaqueId = getExecutionContext();
-      if (opaqueId && !opts.opaqueId) {
-        // rewrites headers['x-opaque-id'] if it presents
-        opts.opaqueId = opaqueId;
-      }
-      // Enforce the client to return TransportResult.
-      // It's required for bwc with responses in 7.x version.
-      if (opts.meta === undefined) {
-        opts.meta = true;
-      }
-      return super.request(params, opts) as Promise<TransportResult<any, any>>;
-    }
-  }
+  const KibanaTransport = createTransport({ getExecutionContext });
 
   const client = new Client({
     ...clientOptions,
     Transport: KibanaTransport,
     Connection: HttpConnection,
+    // using ClusterConnectionPool until https://github.com/elastic/elasticsearch-js/issues/1714 is addressed
+    ConnectionPool: ClusterConnectionPool,
   });
 
   instrumentEsQueryAndDeprecationLogger({ logger, client, type });
 
-  return client as KibanaClient;
+  return client;
 };

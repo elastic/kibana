@@ -9,11 +9,11 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '../../../elasticsearch';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '../../../elasticsearch';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { BATCH_SIZE } from './constants';
 
@@ -21,6 +21,7 @@ import { BATCH_SIZE } from './constants';
 export interface ReindexResponse {
   taskId: string;
 }
+
 /** @internal */
 export interface ReindexParams {
   client: ElasticsearchClient;
@@ -32,8 +33,9 @@ export interface ReindexParams {
    * are no longer used. These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  unusedTypesQuery: estypes.QueryDslQueryContainer;
+  excludeOnUpgradeQuery: QueryDslQueryContainer;
 }
+
 /**
  * Reindex documents from the `sourceIndex` into the `targetIndex`. Returns a
  * task ID which can be tracked for progress.
@@ -49,7 +51,7 @@ export const reindex =
     targetIndex,
     reindexScript,
     requireAlias,
-    unusedTypesQuery,
+    excludeOnUpgradeQuery,
   }: ReindexParams): TaskEither.TaskEither<RetryableEsClientError, ReindexResponse> =>
   () => {
     return client
@@ -65,7 +67,7 @@ export const reindex =
             // Set reindex batch size
             size: BATCH_SIZE,
             // Exclude saved object types
-            query: unusedTypesQuery,
+            query: excludeOnUpgradeQuery,
           },
           dest: {
             index: targetIndex,
@@ -85,7 +87,7 @@ export const reindex =
         // Create a task and return task id instead of blocking until complete
         wait_for_completion: false,
       })
-      .then(({ body: { task: taskId } }) => {
+      .then(({ task: taskId }) => {
         return Either.right({ taskId: String(taskId) });
       })
       .catch(catchRetryableEsClientErrors);

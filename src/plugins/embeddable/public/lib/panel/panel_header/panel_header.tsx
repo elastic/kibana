@@ -18,15 +18,16 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { Action } from 'src/plugins/ui_actions/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
-import { uiToReactComponent } from '../../../../../kibana_react/public';
 import { CustomizePanelTitleAction } from '.';
 
 export interface PanelHeaderProps {
   title?: string;
+  index?: number;
   isViewMode: boolean;
   hidePanelTitle: boolean;
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
@@ -114,6 +115,7 @@ function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription)
 
 export function PanelHeader({
   title,
+  index,
   isViewMode,
   hidePanelTitle,
   getActionContextMenuPanel,
@@ -129,7 +131,6 @@ export function PanelHeader({
   const showPanelBar =
     !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle || description;
   const classes = classNames('embPanel__header', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     'embPanel__header--floater': !showPanelBar,
   });
   const placeholderTitle = i18n.translate('embeddableApi.panel.placeholderTitle', {
@@ -159,6 +160,7 @@ export function PanelHeader({
           isViewMode={isViewMode}
           closeContextMenu={closeContextMenu}
           title={title}
+          index={index}
         />
         <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
       </div>
@@ -228,6 +230,7 @@ export function PanelHeader({
           getActionContextMenuPanel={getActionContextMenuPanel}
           closeContextMenu={closeContextMenu}
           title={title}
+          index={index}
         />
       </figcaption>
     </span>

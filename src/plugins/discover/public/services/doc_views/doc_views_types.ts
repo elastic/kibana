@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ComponentType } from 'react';
-import { IndexPattern } from '../../../../data/public';
-import { ElasticSearchHit } from '../../types';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataTableRecord } from '../../types';
+import { IgnoredReason } from '../../utils/get_ignored_reason';
 
 export interface FieldMapping {
   filterable?: boolean;
@@ -26,14 +26,14 @@ export type DocViewFilterFn = (
 ) => void;
 
 export interface DocViewRenderProps {
+  hit: DataTableRecord;
+  indexPattern: DataView;
   columns?: string[];
   filter?: DocViewFilterFn;
-  hit: ElasticSearchHit;
-  indexPattern: IndexPattern;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
-export type DocViewerComponent = ComponentType<DocViewRenderProps>;
+export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,
   renderProps: DocViewRenderProps
@@ -41,7 +41,7 @@ export type DocViewRenderFn = (
 
 export interface BaseDocViewInput {
   order: number;
-  shouldShow?: (hit: ElasticSearchHit) => boolean;
+  shouldShow?: (hit: DataTableRecord) => boolean;
   title: string;
 }
 
@@ -64,3 +64,23 @@ export type DocView = DocViewInput & {
 };
 
 export type DocViewInputFn = () => DocViewInput;
+
+export interface FieldRecordLegacy {
+  action: {
+    isActive: boolean;
+    onFilter?: DocViewFilterFn;
+    onToggleColumn: (field: string) => void;
+    flattenedField: unknown;
+  };
+  field: {
+    displayName: string;
+    field: string;
+    scripted: boolean;
+    fieldType?: string;
+    fieldMapping?: DataViewField;
+  };
+  value: {
+    formattedValue: string;
+    ignored?: IgnoredReason;
+  };
+}

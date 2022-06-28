@@ -9,7 +9,7 @@ import React from 'react';
 import { shallow, mount, ReactWrapper } from 'enzyme';
 
 import '../../../../common/mock/match_media';
-import { RulesPage } from './index';
+import { RulesPage } from '.';
 import { useUserData } from '../../../components/user_info';
 import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
@@ -27,11 +27,31 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+jest.mock('./all/rules_table/rules_table_context');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
+jest.mock('../../../containers/detection_engine/rules/use_find_rules_query');
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../components/user_info');
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+
+    useKibana: () => ({
+      services: {
+        ...actual.useKibana().services,
+        application: {
+          navigateToApp: jest.fn(),
+        },
+      },
+    }),
+    useNavigation: () => ({
+      navigateTo: jest.fn(),
+    }),
+  };
+});
+
 jest.mock('../../../../common/components/toasters', () => {
   const actual = jest.requireActual('../../../../common/components/toasters');
   return {
@@ -54,9 +74,9 @@ jest.mock('../../../containers/detection_engine/rules/api', () => ({
   createPrepackagedRules: jest.fn(),
 }));
 
-jest.mock('../../../components/value_lists_management_modal', () => {
+jest.mock('../../../components/value_lists_management_flyout', () => {
   return {
-    ValueListsModal: jest.fn().mockReturnValue(<div />),
+    ValueListsFlyout: jest.fn().mockReturnValue(<div />),
   };
 });
 

@@ -9,8 +9,8 @@ import moment from 'moment';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { generateData, config } from './generate_data';
 
@@ -38,7 +38,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
-          transactionType: 'request',
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
           ...overrides?.query,

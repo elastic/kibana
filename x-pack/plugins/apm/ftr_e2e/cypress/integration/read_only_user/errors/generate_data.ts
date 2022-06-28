@@ -18,28 +18,61 @@ export function generateData({ from, to }: { from: number; to: number }) {
     .service('opbeans-node', 'production', 'nodejs')
     .instance('opbeans-node-prod-1');
 
-  return [
-    ...range
-      .interval('2m')
-      .rate(1)
-      .flatMap((timestamp, index) => [
-        ...opbeansJava
-          .transaction('GET /apple 🍎 ')
-          .timestamp(timestamp)
-          .duration(1000)
-          .success()
-          .errors(
-            opbeansJava
-              .error(`Error ${index}`, `exception ${index}`)
-              .timestamp(timestamp)
-          )
-          .serialize(),
-        ...opbeansNode
-          .transaction('GET /banana 🍌')
-          .timestamp(timestamp)
-          .duration(500)
-          .success()
-          .serialize(),
-      ]),
-  ];
+  return range
+    .interval('2m')
+    .rate(1)
+    .generator((timestamp, index) => [
+      opbeansJava
+        .transaction('GET /apple 🍎 ')
+        .timestamp(timestamp)
+        .duration(1000)
+        .success()
+        .errors(
+          opbeansJava
+            .error(`Error ${index}`, `exception ${index}`)
+            .timestamp(timestamp)
+        ),
+      opbeansNode
+        .transaction('GET /banana 🍌')
+        .timestamp(timestamp)
+        .duration(500)
+        .success(),
+    ]);
+}
+
+export function generateErrors({
+  from,
+  to,
+  errorCount,
+}: {
+  from: number;
+  to: number;
+  errorCount: number;
+}) {
+  const range = timerange(from, to);
+
+  const opbeansJava = apm
+    .service('opbeans-java', 'production', 'java')
+    .instance('opbeans-java-prod-1')
+    .podId('opbeans-java-prod-1-pod');
+
+  return range
+    .interval('2m')
+    .rate(1)
+    .generator((timestamp, index) => [
+      opbeansJava
+        .transaction('GET /apple 🍎 ')
+        .timestamp(timestamp)
+        .duration(1000)
+        .success()
+        .errors(
+          ...Array(errorCount)
+            .fill(0)
+            .map((_, idx) => {
+              return opbeansJava
+                .error(`Error ${idx}`, `exception ${idx}`)
+                .timestamp(timestamp);
+            })
+        ),
+    ]);
 }

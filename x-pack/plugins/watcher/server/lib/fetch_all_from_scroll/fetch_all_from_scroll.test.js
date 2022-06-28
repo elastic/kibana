@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchAllFromScroll } from './fetch_all_from_scroll';
 
 describe('fetch_all_from_scroll', () => {
@@ -59,8 +59,8 @@ describe('fetch_all_from_scroll', () => {
         };
 
         mockScopedClusterClient.asCurrentUser.scroll
-          .mockResolvedValueOnce({ body: mockResponse1 })
-          .mockResolvedValueOnce({ body: mockResponse2 });
+          .mockResolvedValueOnce(mockResponse1)
+          .mockResolvedValueOnce(mockResponse2);
       });
 
       it('should return the hits from the response', () => {

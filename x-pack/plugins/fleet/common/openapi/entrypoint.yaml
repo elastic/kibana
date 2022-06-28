@@ -49,10 +49,14 @@ paths:
     $ref: paths/agent_status_deprecated.yaml
   /agent_status:
     $ref: paths/agent_status.yaml
+  /agent_status/data:
+    $ref: paths/agent_status@data.yaml
   /agents:
     $ref: paths/agents.yaml
   /agents/bulk_upgrade:
     $ref: paths/agents@bulk_upgrade.yaml
+  /agents/current_upgrades:
+    $ref: paths/agents@current_upgrades.yaml
   '/agents/{agentId}':
     $ref: 'paths/agents@{agent_id}.yaml'
   '/agents/{agentId}/actions':
@@ -104,6 +108,12 @@ paths:
     $ref: paths/outputs.yaml
   /outputs/{outputId}:
     $ref: paths/outputs@{output_id}.yaml
+  /agent_download_sources:
+    $ref: paths/agent_download_sources.yaml
+  /agent_download_sources/{sourceId}:
+    $ref: paths/agent_download_sources@{source_id}.yaml
+  /logstash_api_keys:
+    $ref: paths/logstash_api_keys.yaml
 components:
   securitySchemes:
     basicAuth:

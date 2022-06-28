@@ -10,6 +10,7 @@ import { chunk } from 'lodash';
 import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
+import { errorAggregator } from './utils';
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -24,6 +25,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
             alertWithPersistence: async (alerts, refresh) => {
               const numAlerts = alerts.length;
               logger.debug(`Found ${numAlerts} alerts.`);
+
+              const ruleDataClientWriter = await ruleDataClient.getWriter({
+                namespace: options.spaceId,
+              });
 
               // Only write alerts if:
               // - writing is enabled
@@ -77,7 +82,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }
 
                 if (filteredAlerts.length === 0) {
-                  return { createdAlerts: [] };
+                  return { createdAlerts: [], errors: {} };
                 }
 
                 const augmentedAlerts = filteredAlerts.map((alert) => {
@@ -91,18 +96,16 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   };
                 });
 
-                const response = await ruleDataClient
-                  .getWriter({ namespace: options.spaceId })
-                  .bulk({
-                    body: augmentedAlerts.flatMap((alert) => [
-                      { create: { _id: alert._id } },
-                      alert._source,
-                    ]),
-                    refresh,
-                  });
+                const response = await ruleDataClientWriter.bulk({
+                  body: augmentedAlerts.flatMap((alert) => [
+                    { create: { _id: alert._id } },
+                    alert._source,
+                  ]),
+                  refresh,
+                });
 
                 if (response == null) {
-                  return { createdAlerts: [] };
+                  return { createdAlerts: [], errors: {} };
                 }
 
                 return {
@@ -116,10 +119,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                       };
                     })
                     .filter((_, idx) => response.body.items[idx].create?.status === 201),
+                  errors: errorAggregator(response.body, [409]),
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [] };
+                return { createdAlerts: [], errors: {} };
               }
             },
           },

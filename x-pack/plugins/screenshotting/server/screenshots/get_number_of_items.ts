@@ -5,28 +5,26 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_GETNUMBEROFITEMS, CONTEXT_READMETADATA } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 export const getNumberOfItems = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   timeout: number,
   layout: Layout
 ): Promise<number> => {
-  const span = apm.startSpan('get_number_of_items', 'read');
+  const { kbnLogger } = eventLogger;
+  const spanEnd = eventLogger.logScreenshottingEvent(
+    'get the number of visualization items on the page',
+    Actions.GET_NUMBER_OF_ITEMS,
+    'read'
+  );
+
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
-
-  logger.debug(
-    i18n.translate('xpack.screenshotting.screencapture.logWaitingForElements', {
-      defaultMessage: 'waiting for elements or items count attribute; or not found to interrupt',
-    })
-  );
 
   try {
     // the dashboard is using the `itemsCountAttribute` attribute to let us
@@ -36,7 +34,7 @@ export const getNumberOfItems = async (
       `${renderCompleteSelector},[${itemsCountAttribute}]`,
       { timeout },
       { context: CONTEXT_READMETADATA },
-      logger
+      kbnLogger
     );
 
     // returns the value of the `itemsCountAttribute` if it's there, otherwise
@@ -57,19 +55,15 @@ export const getNumberOfItems = async (
         args: [renderCompleteSelector, itemsCountAttribute],
       },
       { context: CONTEXT_GETNUMBEROFITEMS },
-      logger
+      kbnLogger
     );
   } catch (error) {
-    logger.error(error);
-    throw new Error(
-      i18n.translate('xpack.screenshotting.screencapture.readVisualizationsError', {
-        defaultMessage: `An error occurred when trying to read the page for visualization panel info: {error}`,
-        values: { error },
-      })
-    );
+    kbnLogger.error(error);
+    eventLogger.error(error, Actions.GET_NUMBER_OF_ITEMS);
+    throw error;
   }
 
-  span?.end();
+  spanEnd({ items_count: itemsCount });
 
   return itemsCount;
 };

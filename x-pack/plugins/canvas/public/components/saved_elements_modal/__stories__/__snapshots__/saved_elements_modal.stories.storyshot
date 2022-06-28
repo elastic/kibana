@@ -17,7 +17,6 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -27,7 +26,9 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -38,7 +39,9 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -77,16 +80,18 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="search"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                 </span>
               </div>
             </div>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
           <div
-            className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+            className="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge css-7iihzj-euiPanel-m-transparent"
           >
             <div
               className="euiEmptyPrompt__main"
@@ -98,7 +103,9 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
                   color="subdued"
                   data-euiicon-type="vector"
                   size="xxl"
-                />
+                >
+                  
+                </span>
               </div>
               <div
                 className="euiEmptyPrompt__content"
@@ -107,25 +114,21 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
                   className="euiEmptyPrompt__contentInner"
                 >
                   <h2
-                    className="euiTitle euiTitle--small"
+                    className="euiTitle css-1mr6cet-euiTitle-s"
                   >
                     Add new elements
                   </h2>
-                  <span
-                    className="euiTextColor euiTextColor--subdued"
+                  <div
+                    className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+                  />
+                  <div
+                    className="euiText css-nexvet-euiText-m-euiTextColor-subdued"
                     style={Object {}}
                   >
-                    <div
-                      className="euiSpacer euiSpacer--m"
-                    />
-                    <div
-                      className="euiText euiText--medium"
-                    >
-                      <p>
-                        Group and save workpad elements to create new elements
-                      </p>
-                    </div>
-                  </span>
+                    <p>
+                      Group and save workpad elements to create new elements
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -180,7 +183,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -190,7 +192,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -201,7 +205,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -240,13 +246,15 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="search"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                 </span>
               </div>
             </div>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
           <div
             className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
@@ -255,7 +263,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard css-1mfocz8-euiPanel-grow-m-m-plain-hasShadow-isClickable"
                 onClick={[Function]}
               >
                 <div
@@ -274,7 +282,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiTitle--small euiCard__title"
+                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
                     id="generated-idTitle"
                   >
                     <button
@@ -287,7 +295,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                     </button>
                   </span>
                   <div
-                    className="euiText euiText--small euiCard__description"
+                    className="euiText euiCard__description css-1vkrgyt-euiText-s"
                     id="generated-idDescription"
                   >
                     <p>
@@ -314,7 +322,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Edit element"
                       className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__editButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -326,7 +333,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
-                      />
+                      >
+                        
+                      </span>
                     </button>
                   </span>
                 </div>
@@ -342,7 +351,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Delete element"
                       className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__deleteButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -354,7 +362,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="trash"
                         size="m"
-                      />
+                      >
+                        
+                      </span>
                     </button>
                   </span>
                 </div>
@@ -364,7 +374,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard css-1mfocz8-euiPanel-grow-m-m-plain-hasShadow-isClickable"
                 onClick={[Function]}
               >
                 <div
@@ -383,7 +393,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiTitle--small euiCard__title"
+                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
                     id="generated-idTitle"
                   >
                     <button
@@ -396,7 +406,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                     </button>
                   </span>
                   <div
-                    className="euiText euiText--small euiCard__description"
+                    className="euiText euiCard__description css-1vkrgyt-euiText-s"
                     id="generated-idDescription"
                   >
                     <p>
@@ -423,7 +433,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Edit element"
                       className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__editButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -435,7 +444,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
-                      />
+                      >
+                        
+                      </span>
                     </button>
                   </span>
                 </div>
@@ -451,7 +462,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Delete element"
                       className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__deleteButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -463,7 +473,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="trash"
                         size="m"
-                      />
+                      >
+                        
+                      </span>
                     </button>
                   </span>
                 </div>
@@ -473,7 +485,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard css-1mfocz8-euiPanel-grow-m-m-plain-hasShadow-isClickable"
                 onClick={[Function]}
               >
                 <div
@@ -492,7 +504,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiTitle--small euiCard__title"
+                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
                     id="generated-idTitle"
                   >
                     <button
@@ -505,7 +517,7 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                     </button>
                   </span>
                   <div
-                    className="euiText euiText--small euiCard__description"
+                    className="euiText euiCard__description css-1vkrgyt-euiText-s"
                     id="generated-idDescription"
                   >
                     <p>
@@ -532,7 +544,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Edit element"
                       className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__editButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -544,7 +555,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
-                      />
+                      >
+                        
+                      </span>
                     </button>
                   </span>
                 </div>
@@ -560,7 +573,6 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                       aria-label="Delete element"
                       className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__deleteButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -572,7 +584,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
                         color="inherit"
                         data-euiicon-type="trash"
                         size="m"
-                      />
+                      >
+                        
+                      </span>
                     </button>
                   </span>
                 </div>
@@ -629,7 +643,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
-      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -639,7 +652,9 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -650,7 +665,9 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -671,7 +688,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
-                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+                className="euiFieldSearch euiFormControlLayout--1icons euiFieldSearch--fullWidth euiFieldSearch-isClearable"
                 onChange={[Function]}
                 onKeyUp={[Function]}
                 placeholder="Find element"
@@ -689,7 +706,9 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="search"
                     size="m"
-                  />
+                  >
+                    
+                  </span>
                 </span>
               </div>
               <div
@@ -698,19 +717,22 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                 <button
                   aria-label="Clear input"
                   className="euiFormControlLayoutClearButton"
+                  data-test-subj="clearSearchButton"
                   onClick={[Function]}
                   type="button"
                 >
                   <span
                     className="euiFormControlLayoutClearButton__icon"
                     data-euiicon-type="cross"
-                  />
+                  >
+                    
+                  </span>
                 </button>
               </div>
             </div>
           </div>
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
           <div
             className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
@@ -719,7 +741,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
               className="euiFlexItem canvasElementCard__wrapper"
             >
               <div
-                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+                className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard css-1mfocz8-euiPanel-grow-m-m-plain-hasShadow-isClickable"
                 onClick={[Function]}
               >
                 <div
@@ -738,7 +760,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiTitle--small euiCard__title"
+                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
                     id="generated-idTitle"
                   >
                     <button
@@ -751,7 +773,7 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                     </button>
                   </span>
                   <div
-                    className="euiText euiText--small euiCard__description"
+                    className="euiText euiCard__description css-1vkrgyt-euiText-s"
                     id="generated-idDescription"
                   >
                     <p>
@@ -778,7 +800,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       aria-label="Edit element"
                       className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__editButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -790,7 +811,9 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                         color="inherit"
                         data-euiicon-type="pencil"
                         size="m"
-                      />
+                      >
+                        
+                      </span>
                     </button>
                   </span>
                 </div>
@@ -806,7 +829,6 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                       aria-label="Delete element"
                       className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                       data-test-subj="canvasElementCard__deleteButton"
-                      disabled={false}
                       onBlur={[Function]}
                       onClick={[Function]}
                       onFocus={[Function]}
@@ -818,7 +840,9 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
                         color="inherit"
                         data-euiicon-type="trash"
                         size="m"
-                      />
+                      >
+                        
+                      </span>
                     </button>
                   </span>
                 </div>

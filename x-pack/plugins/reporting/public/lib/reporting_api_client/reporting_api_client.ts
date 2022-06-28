@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-import type { HttpFetchQuery } from 'src/core/public';
-import { HttpSetup, IUiSettingsClient } from 'src/core/public';
+import type { HttpFetchQuery } from '@kbn/core/public';
+import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   API_BASE_GENERATE,
@@ -68,6 +68,10 @@ interface IReportingAPI {
   verifyScreenCapture(): Promise<DiagnoseResponse>;
 }
 
+/**
+ * Client class for interacting with Reporting APIs
+ * @implements IReportingAPI
+ */
 export class ReportingAPIClient implements IReportingAPI {
   private http: HttpSetup;
 
@@ -187,7 +191,10 @@ export class ReportingAPIClient implements IReportingAPI {
 
   public async createImmediateReport(baseParams: BaseParams) {
     const { objectType: _objectType, ...params } = baseParams; // objectType is not needed for immediate download api
-    return this.http.post(`${API_GENERATE_IMMEDIATE}`, { body: JSON.stringify(params) });
+    return this.http.post(`${API_GENERATE_IMMEDIATE}`, {
+      asResponse: true,
+      body: JSON.stringify(params),
+    });
   }
 
   public getDecoratedJobParams<T extends AppParams>(baseParams: T): BaseParams {

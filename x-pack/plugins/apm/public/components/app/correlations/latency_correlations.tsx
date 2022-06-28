@@ -17,13 +17,15 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiTracker } from '../../../../../observability/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
@@ -32,8 +34,8 @@ import { FieldStats } from '../../../../common/correlations/field_stats_types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
-import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
-import { push } from '../../shared/Links/url_helpers';
+import { DurationDistributionChart } from '../../shared/charts/duration_distribution_chart';
+import { push } from '../../shared/links/url_helpers';
 
 import { CorrelationsTable } from './correlations_table';
 import { LatencyCorrelationsHelpPopover } from './latency_correlations_help_popover';
@@ -47,7 +49,20 @@ import { useLatencyCorrelations } from './use_latency_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 import { useTheme } from '../../../hooks/use_theme';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
-import { MIN_TAB_TITLE_HEIGHT } from '../transaction_details/distribution';
+import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+
+export function FallbackCorrelationBadge() {
+  return (
+    <EuiBadge>
+      <FormattedMessage
+        id="xpack.apm.correlations.latencyCorrelations.fallbackCorrelationBadgeMessage"
+        defaultMessage="Very low"
+      />
+    </EuiBadge>
+  );
+}
 
 export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
   const {
@@ -151,6 +166,31 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           },
           sortable: true,
         },
+        {
+          width: '116px',
+          field: 'pValue',
+          name: (
+            <>
+              {i18n.translate(
+                'xpack.apm.correlations.failedTransactions.correlationsTable.impactLabel',
+                {
+                  defaultMessage: 'Impact',
+                }
+              )}
+            </>
+          ),
+          render: (_, { correlation, isFallbackResult }) => {
+            const label = getLatencyCorrelationImpactLabel(
+              correlation,
+              isFallbackResult
+            );
+            return label ? (
+              <EuiBadge color={label.color}>{label.impact}</EuiBadge>
+            ) : null;
+          },
+          sortable: true,
+        },
+
         {
           field: 'fieldName',
           name: i18n.translate(
@@ -308,11 +348,12 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
       <EuiSpacer size="s" />
 
-      <TransactionDistributionChart
+      <DurationDistributionChart
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
         status={status}
+        eventType={ProcessorEvent.transaction}
       />
 
       <EuiSpacer size="s" />

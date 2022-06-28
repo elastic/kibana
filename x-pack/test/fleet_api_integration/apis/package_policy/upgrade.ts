@@ -5,14 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
-
 import {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
-} from '../../../../plugins/fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -135,6 +134,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
 
           const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
@@ -259,6 +259,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
 
           const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
@@ -368,6 +369,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
 
           const [currentPackagePolicy, proposedPackagePolicy] = body[0].diff ?? [];
@@ -476,6 +478,7 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(body.length).to.be(1);
           expect(body[0].diff?.length).to.be(2);
+          expect(body[0].agent_diff?.length).to.be(1);
           expect(body[0].hasErrors).to.be(false);
         });
       });
@@ -841,6 +844,7 @@ export default function (providerContext: FtrProviderContext) {
                 policy_template: 'package_policy_upgrade',
                 type: 'test_input_new_2',
                 enabled: true,
+                vars: {},
                 streams: [
                   {
                     id: 'test-package_policy_upgrade-xxxx',
@@ -850,6 +854,12 @@ export default function (providerContext: FtrProviderContext) {
                       dataset: 'package_policy_upgrade.test_stream_new_2',
                     },
                     vars: {
+                      test_input_new_2_var_1: {
+                        value: 'Test input value 1',
+                      },
+                      test_input_new_2_var_2: {
+                        value: 'Test input value 2',
+                      },
                       test_var_new_2_var_1: {
                         value: 'Test value 1',
                       },
@@ -867,7 +877,6 @@ export default function (providerContext: FtrProviderContext) {
               version: '0.5.0-restructure-inputs',
             },
           });
-
         packagePolicyId = packagePolicyResponse.item.id;
       });
 

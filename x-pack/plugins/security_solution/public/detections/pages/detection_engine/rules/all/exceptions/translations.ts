@@ -86,14 +86,7 @@ export const EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER = i18n.translate(
 export const ALL_EXCEPTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle',
   {
-    defaultMessage: 'Exceptions',
-  }
-);
-
-export const ALL_EXCEPTIONS_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitleDescription',
-  {
-    defaultMessage: 'Exceptions are automatically grouped into exception lists.',
+    defaultMessage: 'Exception lists',
   }
 );
 

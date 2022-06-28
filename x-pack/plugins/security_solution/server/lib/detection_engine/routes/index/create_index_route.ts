@@ -7,7 +7,7 @@
 
 import { chunk, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   transformError,
   getBootstrapIndexExists,
@@ -47,11 +47,12 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const siemClient = context.securitySolution?.getAppClient();
+        const securitySolution = await context.securitySolution;
+        const siemClient = securitySolution?.getAppClient();
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        await createDetectionIndex(context.securitySolution);
+        await createDetectionIndex(securitySolution);
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
         const error = transformError(err);
@@ -67,7 +68,6 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
 export const createDetectionIndex = async (
   context: SecuritySolutionApiRequestHandlerContext
 ): Promise<void> => {
-  const config = context.getConfig();
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const siemClient = context.getAppClient();
   const spaceId = context.getSpaceId();
@@ -77,11 +77,10 @@ export const createDetectionIndex = async (
     context.core.elasticsearch.client.asInternalUser,
     index
   );
-  const { ruleRegistryEnabled } = config.experimentalFeatures;
 
-  // If using the rule registry implementation, we don't want to create new .siem-signals indices -
-  // only create/update resources if there are existing indices
-  if (ruleRegistryEnabled && !indexExists) {
+  // We don't want to create new .siem-signals indices - only create/update
+  // resources if there are existing indices
+  if (!indexExists) {
     return;
   }
 
@@ -141,10 +140,14 @@ const addFieldAliasesToIndices = async ({
   esClient: ElasticsearchClient;
   index: string;
 }) => {
-  const { body: indexMappings } = await esClient.indices.get({ index });
+  const indexMappings = await esClient.indices.get({ index });
   const indicesByVersion: Record<number, string[]> = {};
   const versions: Set<number> = new Set();
   for (const [indexName, mapping] of Object.entries(indexMappings)) {
+    // The `version` tells us which set of backwards compatibility mappings to apply: `version` never changes
+    // and represents what was actually shipped. `aliases_version` tells us if the most up to date backwards
+    // compatibility mappings have already been applied to the index. `aliases_version` DOES get updated when we apply
+    // new compatibility mappings like runtime fields and aliases.
     const version: number = get(mapping.mappings?._meta, 'version') ?? 0;
     const aliasesVersion: number = get(mapping.mappings?._meta, ALIAS_VERSION_FIELD) ?? 0;
     // Only attempt to add backwards compatibility mappings to indices whose names start with the alias
@@ -182,7 +185,7 @@ const addIndexAliases = async ({
   index: string;
   aadIndexAliasName: string;
 }) => {
-  const { body: indices } = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
+  const indices = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
   const aliasActions = {
     actions: Object.keys(indices).map((concreteIndexName) => {
       return {

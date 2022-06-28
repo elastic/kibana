@@ -16,7 +16,11 @@ import {
   containsInvalidItems,
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
-import { isThreatMatchRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
+import {
+  isEqlRule,
+  isThreatMatchRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { FieldValueQueryBar } from '../query_bar';
 import {
@@ -30,6 +34,7 @@ import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
+  EQL_QUERY_REQUIRED,
   INVALID_CUSTOM_QUERY,
   INDEX_HELPER_TEXT,
   THREAT_MATCH_INDEX_HELPER_TEXT,
@@ -54,9 +59,9 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = !isMlRule(formData.ruleType);
+          const skipValidation = isMlRule(formData.ruleType) || formData.dataViewId != null;
 
-          if (!needsValidation) {
+          if (skipValidation) {
             return;
           }
 
@@ -72,6 +77,49 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
+  dataViewTitle: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
+      {
+        defaultMessage: 'Data View',
+      }
+    ),
+    validations: [],
+  },
+  dataViewId: {
+    fieldsToValidateOnChange: ['dataViewId'],
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ path, formData }] = args;
+          // the dropdown defaults the dataViewId to an empty string somehow on render..
+          // need to figure this out.
+          const notEmptyDataViewId = formData.dataViewId != null && formData.dataViewId !== '';
+          const skipValidation =
+            isMlRule(formData.ruleType) ||
+            ((formData.index != null || notEmptyDataViewId) &&
+              !(formData.index != null && notEmptyDataViewId));
+
+          if (skipValidation) {
+            return;
+          }
+
+          return {
+            path,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired',
+              {
+                defaultMessage: 'Please select an available Data View or Index Pattern.',
+              }
+            ),
+          };
+        },
+      },
+    ],
+  },
+  eqlOptions: {},
   queryBar: {
     validations: [
       {
@@ -82,16 +130,14 @@ export const schema: FormSchema<DefineStepRule> = {
           const { query, filters } = value as FieldValueQueryBar;
           const needsValidation = !isMlRule(formData.ruleType);
           if (!needsValidation) {
-            return;
+            return undefined;
           }
-
-          return isEmpty(query.query as string) && isEmpty(filters)
-            ? {
-                code: 'ERR_FIELD_MISSING',
-                path,
-                message: CUSTOM_QUERY_REQUIRED,
-              }
-            : undefined;
+          const isFieldEmpty = isEmpty(query.query as string) && isEmpty(filters);
+          if (!isFieldEmpty) {
+            return undefined;
+          }
+          const message = isEqlRule(formData.ruleType) ? EQL_QUERY_REQUIRED : CUSTOM_QUERY_REQUIRED;
+          return { code: 'ERR_FIELD_MISSING', path, message };
         },
       },
       {
@@ -171,6 +217,34 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       },
     ],
+  },
+  relatedIntegrations: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
+      {
+        defaultMessage: 'Related integrations',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsHelpText',
+      {
+        defaultMessage: 'Integration related to this Rule.',
+      }
+    ),
+  },
+  requiredFields: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsLabel',
+      {
+        defaultMessage: 'Required fields',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsHelpText',
+      {
+        defaultMessage: 'Fields required for this Rule to function.',
+      }
+    ),
   },
   timeline: {
     label: i18n.translate(

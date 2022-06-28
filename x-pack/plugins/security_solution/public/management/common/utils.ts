@@ -7,7 +7,10 @@
 
 import { isEmpty } from 'lodash/fp';
 
-export const parseQueryFilterToKQL = (filter: string, fields: Readonly<string[]>): string => {
+export const parseQueryFilterToKQL = (
+  filter: string | undefined,
+  fields: Readonly<string[]>
+): string => {
   if (!filter) return '';
   const kuery = fields
     .map(
@@ -53,19 +56,22 @@ export const parsePoliciesToKQL = (
  * (string) and returns an unified KQL with and AND
  * The policy list can also contain "unassigned" and "global".
  * @param policies string[] a list of policies ids.
+ * @param excludedPolicies string[] a list of policies ids to exclude.
  * @param kuery string an existing KQL.
  */
 export const parsePoliciesAndFilterToKql = ({
-  policies,
+  policies = [],
+  excludedPolicies = [],
   kuery,
 }: {
   policies?: string[];
+  excludedPolicies?: string[];
   kuery?: string;
 }): string | undefined => {
-  if (!policies || !policies.length) {
-    return kuery;
+  if (policies?.length === 0 && excludedPolicies?.length === 0) {
+    return kuery ? kuery : undefined;
   }
 
-  const policiesKQL = parsePoliciesToKQL(policies, []);
+  const policiesKQL = parsePoliciesToKQL(policies, excludedPolicies);
   return `(${policiesKQL})${kuery ? ` AND (${kuery})` : ''}`;
 };

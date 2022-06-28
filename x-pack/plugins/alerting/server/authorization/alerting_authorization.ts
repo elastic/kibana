@@ -7,14 +7,14 @@
 
 import Boom from '@hapi/boom';
 import { map, mapValues, fromPairs, has } from 'lodash';
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
-import { ALERTS_FEATURE_ID, RuleTypeRegistry } from '../types';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { Space } from '@kbn/spaces-plugin/server';
 import { RegistryRuleType } from '../rule_type_registry';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { Space } from '../../../spaces/server';
+import { ALERTS_FEATURE_ID, RuleTypeRegistry } from '../types';
 import {
   asFiltersByRuleTypeAndConsumer,
   asFiltersBySpaceId,
@@ -30,7 +30,9 @@ export enum ReadOperations {
   Get = 'get',
   GetRuleState = 'getRuleState',
   GetAlertSummary = 'getAlertSummary',
+  GetExecutionLog = 'getExecutionLog',
   Find = 'find',
+  GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
 }
 
 export enum WriteOperations {
@@ -44,6 +46,9 @@ export enum WriteOperations {
   UnmuteAll = 'unmuteAll',
   MuteAlert = 'muteAlert',
   UnmuteAlert = 'unmuteAlert',
+  Snooze = 'snooze',
+  BulkEdit = 'bulkEdit',
+  Unsnooze = 'unsnooze',
 }
 
 export interface EnsureAuthorizedOpts {

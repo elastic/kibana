@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { rollupJobsStore } from '../../../crud_app/store';
 import { JobCreate } from '../../../crud_app/sections';
 
@@ -112,7 +112,11 @@ export const setup = (props) => {
   };
 
   // Misc
-  const getEuiStepsHorizontalActive = () => component.find('.euiStepHorizontal-isSelected').text();
+  const getEuiStepsHorizontalActive = () =>
+    component
+      .findWhere((c) => c.prop('status') === 'selected')
+      .first()
+      .text();
 
   return {
     ...testBed,

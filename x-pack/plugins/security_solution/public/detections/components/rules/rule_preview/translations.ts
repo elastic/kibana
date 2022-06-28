@@ -30,6 +30,13 @@ export const QUERY_PREVIEW_BUTTON = i18n.translate(
   }
 );
 
+export const PREVIEW_TIMEOUT_WARNING = i18n.translate(
+  'xpack.securitySolution.stepDefineRule.previewTimeoutWarning',
+  {
+    defaultMessage: 'Preview timed out after 60 seconds',
+  }
+);
+
 export const QUERY_PREVIEW_SELECT_ARIA = i18n.translate(
   'xpack.securitySolution.stepDefineRule.previewQueryAriaLabel',
   {
@@ -47,7 +54,7 @@ export const QUERY_PREVIEW_LABEL = i18n.translate(
 export const QUERY_PREVIEW_HELP_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewHelpText',
   {
-    defaultMessage: 'Select a timeframe of data to preview query results',
+    defaultMessage: 'Select a timeframe of data to preview query results.',
   }
 );
 
@@ -66,9 +73,9 @@ export const THRESHOLD_QUERY_GRAPH_COUNT = i18n.translate(
 );
 
 export const QUERY_GRAPH_HITS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphHitsTitle',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewTitle',
   {
-    defaultMessage: 'Hits',
+    defaultMessage: 'Rule Preview',
   }
 );
 
@@ -117,25 +124,25 @@ export const QUERY_PREVIEW_ERROR = i18n.translate(
 );
 
 export const QUERY_PREVIEW_DISCLAIMER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimer',
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewDisclaimer',
   {
     defaultMessage:
       'Note: This preview excludes effects of rule exceptions and timestamp overrides.',
   }
 );
 
-export const QUERY_PREVIEW_DISCLAIMER_MAX_SIGNALS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryGraphDisclaimerEql',
+export const PREVIEW_HISTOGRAM_DISCLAIMER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.histogramDisclaimer',
   {
     defaultMessage:
-      'Note: This preview excludes effects of rule exceptions and timestamp overrides, and is limited to 100 results.',
+      'Note: Alerts with multiple event.category values will be counted more than once.',
   }
 );
 
-export const QUERY_PREVIEW_SUBTITLE_LOADING = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSubtitleLoading',
+export const ML_PREVIEW_HISTOGRAM_DISCLAIMER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.mlHistogramDisclaimer',
   {
-    defaultMessage: '...loading',
+    defaultMessage: 'Note: Alerts with multiple host.name values will be counted more than once.',
   }
 );
 
@@ -153,3 +160,44 @@ export const QUERY_PREVIEW_EQL_SEQUENCE_DESCRIPTION = i18n.translate(
       'No histogram is available at this time for EQL sequence queries. You can use the inspect in the top right corner to view query details.',
   }
 );
+
+export const QUERY_PREVIEW_SEE_ALL_ERRORS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSeeAllErrors',
+  {
+    defaultMessage: 'See all errors',
+  }
+);
+
+export const QUERY_PREVIEW_SEE_ALL_WARNINGS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewSeeAllWarnings',
+  {
+    defaultMessage: 'See all warnings',
+  }
+);
+
+export const ACTIONS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.actions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const VIEW_DETAILS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.viewDetailsAriaLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+export const VIEW_DETAILS_FOR_ROW = ({
+  ariaRowindex,
+  columnValues,
+}: {
+  ariaRowindex: number;
+  columnValues: string;
+}) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.queryPreview.viewDetailsForRowAriaLabel', {
+    values: { ariaRowindex, columnValues },
+    defaultMessage:
+      'View details for the alert or event in row {ariaRowindex}, with columns {columnValues}',
+  });

@@ -23,11 +23,10 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
-    // Only superuser can access Fleet for now.
     it.skip('should return a 200 if a user with the fleet all try to access the list', async () => {
       await supertest
         .get(`/api/fleet/agents`)
-        .auth(testUsers.fleet_all.username, testUsers.fleet_all.password)
+        .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
         .expect(200);
     });
 
@@ -38,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(403);
     });
 
-    it('should return the list of agents when requesting as a superuser', async () => {
+    it('should return the list of agents when requesting as admin', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
 
       expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
@@ -71,6 +70,18 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.total).to.eql(1);
       const agent = apiResponse.items[0];
       expect(agent.access_api_key_id).to.eql('api-key-2');
+    });
+
+    it('should return a 200 when given sort options', async () => {
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/agents?sortField=last_checkin&sortOrder=desc`)
+        .expect(200);
+      expect(apiResponse.items.map((agent: { id: string }) => agent.id)).to.eql([
+        'agent4',
+        'agent3',
+        'agent2',
+        'agent1',
+      ]);
     });
   });
 }

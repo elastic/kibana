@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, ElasticsearchClient } from 'kibana/server';
+import { CoreSetup, Logger, ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { getVisualizationCounts } from './visualization_counts';
-import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { getMultitermsCounts } from './multiterms_count';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
@@ -77,7 +77,7 @@ export async function getDailyEvents(
     daily: {
       date_histogram: {
         field: 'lens-ui-telemetry.date',
-        calendar_interval: '1d',
+        calendar_interval: '1d' as const,
         min_doc_count: 1,
       },
       aggs: {
@@ -113,23 +113,23 @@ export async function getDailyEvents(
     },
   };
 
-  const { body: metrics } = await esClient.search<
-    ESSearchResponse<unknown, { body: { aggs: typeof aggs } }>
-  >({
-    index: kibanaIndex,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'lens-ui-telemetry' } },
-            { range: { 'lens-ui-telemetry.date': { gte: 'now-90d/d' } } },
-          ],
+  const metrics = await esClient.search<ESSearchResponse<unknown, { body: { aggs: typeof aggs } }>>(
+    {
+      index: kibanaIndex,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'lens-ui-telemetry' } },
+              { range: { 'lens-ui-telemetry.date': { gte: 'now-90d/d' } } },
+            ],
+          },
         },
+        aggs,
       },
-      aggs,
-    },
-    size: 0,
-  });
+      size: 0,
+    }
+  );
 
   const byDateByType: Record<string, Record<string, number>> = {};
   const suggestionsByDate: Record<string, Record<string, number>> = {};

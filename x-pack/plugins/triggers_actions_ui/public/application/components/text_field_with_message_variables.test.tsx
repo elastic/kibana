@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TextFieldWithMessageVariables } from './text_field_with_message_variables';
 
 describe('TextFieldWithMessageVariables', () => {
@@ -30,10 +30,7 @@ describe('TextFieldWithMessageVariables', () => {
     const wrapper = mountWithIntl(<TextFieldWithMessageVariables {...props} />);
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper
-      .find('[data-test-subj="variableMenuButton-0-templated-name"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().simulate('click');
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{myVar}}', props.index);
@@ -54,10 +51,7 @@ describe('TextFieldWithMessageVariables', () => {
     );
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper
-      .find('[data-test-subj="variableMenuButton-0-templated-name"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().simulate('click');
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{{myVar}}}', props.index);

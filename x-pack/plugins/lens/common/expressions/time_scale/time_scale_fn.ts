@@ -7,15 +7,8 @@
 
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import {
-  buildResultColumns,
-  ExecutionContext,
-} from '../../../../../../src/plugins/expressions/common';
-import {
-  calculateBounds,
-  getDateHistogramMetaDataByDatatableColumn,
-  parseInterval,
-} from '../../../../../../src/plugins/data/common';
+import { buildResultColumns, Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
+import { calculateBounds, DatatableUtilitiesService, parseInterval } from '@kbn/data-plugin/common';
 import type { TimeScaleExpressionFunction, TimeScaleUnit, TimeScaleArgs } from './types';
 
 const unitInMs: Record<TimeScaleUnit, number> = {
@@ -27,6 +20,9 @@ const unitInMs: Record<TimeScaleUnit, number> = {
 
 export const timeScaleFn =
   (
+    getDatatableUtilities: (
+      context: ExecutionContext
+    ) => DatatableUtilitiesService | Promise<DatatableUtilitiesService>,
     getTimezone: (context: ExecutionContext) => string | Promise<string>
   ): TimeScaleExpressionFunction['fn'] =>
   async (
@@ -62,7 +58,8 @@ export const timeScaleFn =
     }
 
     const targetUnitInMs = unitInMs[targetUnit];
-    const timeInfo = getDateHistogramMetaDataByDatatableColumn(dateColumnDefinition, {
+    const datatableUtilities = await getDatatableUtilities(context);
+    const timeInfo = datatableUtilities.getDateHistogramMeta(dateColumnDefinition, {
       timeZone: await getTimezone(context),
     });
     const intervalDuration = timeInfo?.interval && parseInterval(timeInfo.interval);
@@ -76,38 +73,45 @@ export const timeScaleFn =
     }
     // the datemath plugin always parses dates by using the current default moment time zone.
     // to use the configured time zone, we are switching just for the bounds calculation.
+
+    // The code between this call and the reset in the finally block is not allowed to get async,
+    // otherwise the timezone setting can leak out of this function.
     const defaultTimezone = moment().zoneName();
-    moment.tz.setDefault(timeInfo.timeZone);
+    let result: Datatable;
+    try {
+      moment.tz.setDefault(timeInfo.timeZone);
 
-    const timeBounds = timeInfo.timeRange && calculateBounds(timeInfo.timeRange);
+      const timeBounds = timeInfo.timeRange && calculateBounds(timeInfo.timeRange);
 
-    const result = {
-      ...input,
-      columns: resultColumns,
-      rows: input.rows.map((row) => {
-        const newRow = { ...row };
+      result = {
+        ...input,
+        columns: resultColumns,
+        rows: input.rows.map((row) => {
+          const newRow = { ...row };
 
-        let startOfBucket = moment(row[dateColumnId]);
-        let endOfBucket = startOfBucket.clone().add(intervalDuration);
-        if (timeBounds && timeBounds.min) {
-          startOfBucket = moment.max(startOfBucket, timeBounds.min);
-        }
-        if (timeBounds && timeBounds.max) {
-          endOfBucket = moment.min(endOfBucket, timeBounds.max);
-        }
-        const bucketSize = endOfBucket.diff(startOfBucket);
-        const factor = bucketSize / targetUnitInMs;
+          let startOfBucket = moment(row[dateColumnId]);
+          let endOfBucket = startOfBucket.clone().add(intervalDuration);
+          if (timeBounds && timeBounds.min) {
+            startOfBucket = moment.max(startOfBucket, timeBounds.min);
+          }
+          if (timeBounds && timeBounds.max) {
+            endOfBucket = moment.min(endOfBucket, timeBounds.max);
+          }
+          const bucketSize = endOfBucket.diff(startOfBucket);
+          const factor = bucketSize / targetUnitInMs;
 
-        const currentValue = newRow[inputColumnId];
-        if (currentValue != null) {
-          newRow[outputColumnId] = Number(currentValue) / factor;
-        }
+          const currentValue = newRow[inputColumnId];
+          if (currentValue != null) {
+            newRow[outputColumnId] = Number(currentValue) / factor;
+          }
 
-        return newRow;
-      }),
-    };
-    // reset default moment timezone
-    moment.tz.setDefault(defaultTimezone);
+          return newRow;
+        }),
+      };
+    } finally {
+      // reset default moment timezone
+      moment.tz.setDefault(defaultTimezone);
+    }
 
     return result;
   };

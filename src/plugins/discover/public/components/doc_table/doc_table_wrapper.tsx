@@ -8,35 +8,30 @@
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TableHeader } from './components/table_header/table_header';
-import { FORMATS_UI_SETTINGS } from '../../../../field_formats/common';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SAMPLE_SIZE_SETTING,
-  SHOW_MULTIFIELDS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../common';
-import { getServices } from '../../kibana_services';
+import { SHOW_MULTIFIELDS } from '../../../common';
 import { SortOrder } from './components/table_header/helpers';
-import { DocTableRow, TableRow } from './components/table_row';
+import { TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { DataTableRecord } from '../../types';
 
 export interface DocTableProps {
   /**
    * Rows of classic table
    */
-  rows: DocTableRow[];
+  rows: DataTableRecord[];
   /**
    * Columns of classic table
    */
   columns: string[];
   /**
-   * Current IndexPattern
+   * Current DataView
    */
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   /**
    * Current sorting
    */
@@ -85,9 +80,8 @@ export interface DocTableProps {
 
 export interface DocTableRenderProps {
   columnLength: number;
-  rows: DocTableRow[];
-  sampleSize: number;
-  renderRows: (row: DocTableRow[]) => JSX.Element[];
+  rows: DataTableRecord[];
+  renderRows: (row: DataTableRecord[]) => JSX.Element[];
   renderHeader: () => JSX.Element;
   onSkipBottomButtonClick: () => void;
 }
@@ -122,26 +116,8 @@ export const DocTableWrapper = forwardRef(
     }: DocTableWrapperProps,
     ref
   ) => {
-    const [
-      defaultSortOrder,
-      hideTimeColumn,
-      isShortDots,
-      sampleSize,
-      showMultiFields,
-      filterManager,
-      addBasePath,
-    ] = useMemo(() => {
-      const services = getServices();
-      return [
-        services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
-        services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-        services.uiSettings.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE),
-        services.uiSettings.get(SAMPLE_SIZE_SETTING, 500),
-        services.uiSettings.get(SHOW_MULTIFIELDS, false),
-        services.filterManager,
-        services.addBasePath,
-      ];
-    }, []);
+    const { uiSettings } = useDiscoverServices();
+    const showMultiFields = useMemo(() => uiSettings.get(SHOW_MULTIFIELDS, false), [uiSettings]);
 
     const onSkipBottomButtonClick = useCallback(async () => {
       // delay scrolling to after the rows have been rendered
@@ -158,7 +134,7 @@ export const DocTableWrapper = forwardRef(
     const fieldsToShow = useMemo(
       () =>
         getFieldsToShow(
-          indexPattern.fields.map((field: IndexPatternField) => field.name),
+          indexPattern.fields.map((field: DataViewField) => field.name),
           indexPattern,
           showMultiFields
         ),
@@ -169,62 +145,33 @@ export const DocTableWrapper = forwardRef(
       () => (
         <TableHeader
           columns={columns}
-          defaultSortOrder={defaultSortOrder}
-          hideTimeColumn={hideTimeColumn}
           indexPattern={indexPattern}
-          isShortDots={isShortDots}
           onChangeSortOrder={onSort}
           onMoveColumn={onMoveColumn}
           onRemoveColumn={onRemoveColumn}
           sortOrder={sort as SortOrder[]}
         />
       ),
-      [
-        columns,
-        defaultSortOrder,
-        hideTimeColumn,
-        indexPattern,
-        isShortDots,
-        onMoveColumn,
-        onRemoveColumn,
-        onSort,
-        sort,
-      ]
+      [columns, indexPattern, onMoveColumn, onRemoveColumn, onSort, sort]
     );
 
     const renderRows = useCallback(
-      (rowsToRender: DocTableRow[]) => {
+      (rowsToRender: DataTableRecord[]) => {
         return rowsToRender.map((current) => (
           <TableRow
-            key={`${current._index}${current._type ?? ''}${current._id}${current._score}${
-              current._version
-            }${current._routing}`}
+            key={`${current.id}${current.raw._score}${current.raw._version}`}
             columns={columns}
             filter={onFilter}
             indexPattern={indexPattern}
             row={current}
             useNewFieldsApi={useNewFieldsApi}
-            hideTimeColumn={hideTimeColumn}
+            fieldsToShow={fieldsToShow}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
-            filterManager={filterManager}
-            addBasePath={addBasePath}
-            fieldsToShow={fieldsToShow}
           />
         ));
       },
-      [
-        columns,
-        onFilter,
-        indexPattern,
-        useNewFieldsApi,
-        hideTimeColumn,
-        onAddColumn,
-        onRemoveColumn,
-        filterManager,
-        addBasePath,
-        fieldsToShow,
-      ]
+      [columns, onFilter, indexPattern, useNewFieldsApi, fieldsToShow, onAddColumn, onRemoveColumn]
     );
 
     return (
@@ -241,7 +188,6 @@ export const DocTableWrapper = forwardRef(
           render({
             columnLength: columns.length,
             rows,
-            sampleSize,
             onSkipBottomButtonClick,
             renderHeader,
             renderRows,

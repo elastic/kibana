@@ -7,10 +7,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
-import { catchError, first, tap } from 'rxjs/operators';
+import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
+import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { from } from 'rxjs';
+import { firstValueFrom, from } from 'rxjs';
+import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -25,8 +26,7 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
-import { SearchUsage, searchUsageObserver } from '../../collectors';
+import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import {
   getDefaultSearchParams,
   getShardTimeout,
@@ -68,9 +68,13 @@ export const enhancedEsSearchStrategyProvider = (
             ...request.params,
           };
       const { body, headers } = id
-        ? await client.asyncSearch.get({ ...params, id }, { signal: options.abortSignal })
+        ? await client.asyncSearch.get(
+            { ...params, id },
+            { signal: options.abortSignal, meta: true }
+          )
         : await client.asyncSearch.submit(params, {
             signal: options.abortSignal,
+            meta: true,
           });
 
       const response = shimHitsTotal(body.response, options);
@@ -103,7 +107,7 @@ export const enhancedEsSearchStrategyProvider = (
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-    const legacyConfig = await legacyConfig$.pipe(first()).toPromise();
+    const legacyConfig = await firstValueFrom(legacyConfig$);
     const { body, index, ...params } = request.params!;
     const method = 'POST';
     const path = encodeURI(`/${index}/_rollup_search`);
@@ -124,6 +128,7 @@ export const enhancedEsSearchStrategyProvider = (
         },
         {
           signal: options?.abortSignal,
+          meta: true,
         }
       );
 

@@ -13,12 +13,13 @@ import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState } from '../../../utils/route/types';
 import { CONSTANTS } from '../../url_state/constants';
-import { TabNavigationComponent } from './';
+import { TabNavigationComponent } from '.';
 import { TabNavigationProps } from './types';
+import { SecurityPageName } from '../../../../app/types';
 
 jest.mock('../../link_to');
 jest.mock('../../../lib/kibana/kibana_react', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana/kibana_react');
+  const originalModule = jest.requireActual('../../../lib/kibana/kibana_react');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -51,13 +52,20 @@ const hostName = 'siem-window';
 
 describe('Table Navigation', () => {
   const mockHasMlUserPermissions = true;
+  const mockRiskyHostEnabled = true;
+
   const mockProps: TabNavigationProps & RouteSpyState = {
-    pageName: 'hosts',
+    pageName: SecurityPageName.hosts,
     pathName: '/hosts',
-    detailName: undefined,
+    detailName: hostName,
     search: '',
     tabName: HostsTableType.authentications,
-    navTabs: navTabsHostDetails(hostName, mockHasMlUserPermissions),
+    navTabs: navTabsHostDetails({
+      hostName,
+      hasMlUserPermissions: mockHasMlUserPermissions,
+      isRiskyHostsEnabled: mockRiskyHostEnabled,
+    }),
+
     [CONSTANTS.timerange]: {
       global: {
         [CONSTANTS.timerange]: {
@@ -82,7 +90,6 @@ describe('Table Navigation', () => {
     },
     [CONSTANTS.appQuery]: { query: 'host.name:"siem-es"', language: 'kuery' },
     [CONSTANTS.filters]: [],
-    [CONSTANTS.sourcerer]: {},
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',
@@ -118,5 +125,23 @@ describe('Table Navigation', () => {
     expect(firstTab.props().href).toBe(
       `/app/securitySolutionUI/hosts/siem-window/authentications${SEARCH_QUERY}`
     );
+  });
+
+  test('it renders a EuiBetaBadge only on the sessions tab', () => {
+    Object.keys(HostsTableType).forEach((tableType) => {
+      if (tableType !== HostsTableType.sessions) {
+        const wrapper = mount(<TabNavigationComponent {...mockProps} />);
+
+        const betaBadge = wrapper.find(
+          `EuiTab[data-test-subj="navigation-${tableType}"] EuiBetaBadge`
+        );
+
+        if (tableType === HostsTableType.sessions) {
+          expect(betaBadge).toBeTruthy();
+        } else {
+          expect(betaBadge).toEqual({});
+        }
+      }
+    });
   });
 });

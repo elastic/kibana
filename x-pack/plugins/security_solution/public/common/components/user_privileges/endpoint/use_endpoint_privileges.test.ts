@@ -8,8 +8,8 @@
 import { act, renderHook, RenderHookResult, RenderResult } from '@testing-library/react-hooks';
 import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useEndpointPrivileges } from './use_endpoint_privileges';
-import { securityMock } from '../../../../../../security/public/mocks';
-import { AuthenticatedUser } from '../../../../../../security/common';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { licenseService } from '../../../hooks/use_license';
 import { getEndpointPrivilegesInitialStateMock } from './mocks';
 import { EndpointPrivileges } from '../../../../../common/endpoint/types';
@@ -34,7 +34,6 @@ describe('When using useEndpointPrivileges hook', () => {
   let authenticatedUser: AuthenticatedUser;
   let result: RenderResult<EndpointPrivileges>;
   let unmount: ReturnType<typeof renderHook>['unmount'];
-  let releaseFleetAuthz: () => void;
   let render: () => RenderHookResult<void, EndpointPrivileges>;
 
   beforeEach(() => {
@@ -45,14 +44,6 @@ describe('When using useEndpointPrivileges hook', () => {
     (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
 
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-
-    // Add a daly to fleet service that provides authz information
-    const fleetAuthz = useKibana().services.fleet!.authz;
-
-    // Add a delay to the fleet Authz promise to test out the `loading` property
-    useKibana().services.fleet!.authz = new Promise((resolve) => {
-      releaseFleetAuthz = () => resolve(fleetAuthz);
-    });
 
     render = () => {
       const hookRenderResponse = renderHook(() => useEndpointPrivileges());
@@ -78,7 +69,6 @@ describe('When using useEndpointPrivileges hook', () => {
 
     // Release the API response
     await act(async () => {
-      releaseFleetAuthz();
       await useKibana().services.fleet!.authz;
     });
 

@@ -16,7 +16,8 @@ export interface TabbedGridData {
 }
 interface SelectOptions {
   isAnchorRow?: boolean;
-  rowIndex: number;
+  rowIndex?: number;
+  renderMoreRows?: boolean;
 }
 
 export class DataGridService extends FtrService {
@@ -72,7 +73,7 @@ export class DataGridService extends FtrService {
    * Returns an array of data grid headers names
    */
   public async getHeaders() {
-    const header = await this.testSubjects.find('dataGridWrapper > dataGridHeader');
+    const header = await this.testSubjects.find('euiDataGridBody > dataGridHeader');
     const $ = await header.parseDomContent();
     return $('.euiDataGridHeaderCell__content')
       .toArray()
@@ -86,7 +87,7 @@ export class DataGridService extends FtrService {
    */
   public async getCellElement(rowIndex: number = 0, columnIndex: number = 0) {
     return await this.find.byCssSelector(
-      `[data-test-subj="dataGridWrapper"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${columnIndex}"]`
+      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${columnIndex}"][data-gridcell-row-index="${rowIndex}"]`
     );
   }
 
@@ -95,8 +96,11 @@ export class DataGridService extends FtrService {
     return Number(await grid.getAttribute('data-document-number'));
   }
 
-  public async getFields() {
-    const cells = await this.find.allByCssSelector('.euiDataGridRowCell');
+  public async getFields(options?: SelectOptions) {
+    const selector = options?.isAnchorRow
+      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      : '.euiDataGridRowCell';
+    const cells = await this.find.allByCssSelector(selector);
 
     const rows: string[][] = [];
     let rowIdx = -1;
@@ -117,20 +121,50 @@ export class DataGridService extends FtrService {
     return await this.testSubjects.find(selector);
   }
 
-  public async getBodyRows(): Promise<WebElementWrapper[][]> {
-    return this.getDocTableRows();
+  public async getBodyRows(options?: SelectOptions): Promise<WebElementWrapper[][]> {
+    return this.getDocTableRows(options);
+  }
+
+  public async getRowsText(renderMoreRows?: boolean) {
+    // open full screen mode
+    if (renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
+    }
+
+    const table = await this.getTable('docTable');
+    const rows = await table.findAllByCssSelector('.euiDataGridRow');
+
+    const rowsText = [];
+    for (const row of rows) {
+      rowsText.push((await row.getVisibleText()).replace(/[\r\n]/gm, ''));
+    }
+
+    // close full screen mode
+    if (renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
+    }
+    return rowsText;
   }
 
   /**
    * Returns an array of rows (which are array of cells)
    */
-  public async getDocTableRows() {
-    const table = await this.getTable();
+  public async getDocTableRows(options?: SelectOptions) {
+    // open full screen mode
+    if (options?.renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
+    }
+
+    const table = await this.getTable('docTable');
+
     if (!table) {
       return [];
     }
 
-    const cells = await table.findAllByCssSelector('.euiDataGridRowCell');
+    const selector = options?.isAnchorRow
+      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      : '.euiDataGridRowCell';
+    const cells = await table.findAllByCssSelector(selector);
 
     const rows: WebElementWrapper[][] = [];
     let rowIdx = -1;
@@ -141,6 +175,11 @@ export class DataGridService extends FtrService {
       }
       rows[rowIdx].push(cell);
     }
+
+    // close full screen mode
+    if (options?.renderMoreRows) {
+      await this.testSubjects.click('dataGridFullScreenButton');
+    }
     return rows;
   }
 
@@ -148,14 +187,17 @@ export class DataGridService extends FtrService {
    * Returns an array of cells for that row
    */
   public async getRow(options: SelectOptions): Promise<WebElementWrapper[]> {
-    return (await this.getBodyRows())[options.rowIndex];
+    return (await this.getBodyRows(options))[options.rowIndex || 0];
   }
 
   public async clickRowToggle(
     options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
   ): Promise<void> {
     const row = await this.getRow(options);
-    const toggle = await row[0];
+    const testSubj = options.isAnchorRow
+      ? '~docTableExpandToggleColumnAnchor'
+      : '~docTableExpandToggleColumn';
+    const toggle = await row[0].findByTestSubject(testSubj);
     await toggle.click();
   }
 
@@ -174,7 +216,8 @@ export class DataGridService extends FtrService {
 
     const textArr = [];
     for (const cell of result) {
-      textArr.push(await cell.getVisibleText());
+      const textContent = await cell.getAttribute('textContent');
+      textArr.push(textContent.trim());
     }
     return Promise.resolve(textArr);
   }
@@ -182,8 +225,16 @@ export class DataGridService extends FtrService {
   public async getRowActions(
     options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
   ): Promise<WebElementWrapper[]> {
-    const detailsRow = (await this.getDetailsRows())[options.rowIndex];
+    const detailsRow = (await this.getDetailsRows())[options.rowIndex || 0];
     return await detailsRow.findAllByTestSubject('~docTableRowAction');
+  }
+
+  public async getAnchorDetailsRow(): Promise<WebElementWrapper> {
+    const table = await this.getTable();
+
+    return await table.findByCssSelector(
+      '[data-test-subj~="docTableAnchorRow"] + [data-test-subj~="docTableDetailsRow"]'
+    );
   }
 
   public async openColMenuByField(field: string) {
@@ -220,6 +271,17 @@ export class DataGridService extends FtrService {
     }
     await this.find.clickByButtonText('Remove column');
   }
+
+  public async clickCopyColumnValues(field: string) {
+    await this.openColMenuByField(field);
+    await this.find.clickByButtonText('Copy column');
+  }
+
+  public async clickCopyColumnName(field: string) {
+    await this.openColMenuByField(field);
+    await this.find.clickByButtonText('Copy name');
+  }
+
   public async getDetailsRow(): Promise<WebElementWrapper> {
     const detailRows = await this.getDetailsRows();
     return detailRows[0];

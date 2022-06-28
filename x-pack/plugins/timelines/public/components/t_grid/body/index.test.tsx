@@ -23,7 +23,8 @@ import { defaultColumnHeaderType } from '../../../store/t_grid/defaults';
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
-    columnType: 'number',
+    columnType: 'date',
+    esTypes: ['date'],
     sortDirection: Direction.desc,
   },
 ];
@@ -95,6 +96,10 @@ describe('Body', () => {
     indexNames: [''],
   };
 
+  beforeEach(() => {
+    mockDispatch.mockReset();
+  });
+
   describe('rendering', () => {
     test('it renders the body data grid', () => {
       const wrapper = mount(
@@ -122,7 +127,7 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('div.euiDataGrid__overflow').first().exists()).toEqual(true);
+      expect(wrapper.find('div.euiDataGrid__virtualized').first().exists()).toEqual(true);
     });
 
     test('it renders events', () => {

@@ -7,16 +7,12 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayRef } from 'src/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
-import {
-  createKibanaReactContext,
-  toMountPoint,
-  IndexPattern,
-  DataPublicPluginStart,
-} from './shared_imports';
+import { createKibanaReactContext, toMountPoint, DataPublicPluginStart } from './shared_imports';
 
 import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
@@ -49,6 +45,7 @@ export const getEditorOpener =
       onCancel = () => {},
       defaultTypeIsRollup = false,
       requireTimestampField = false,
+      showEmptyPrompt = true,
     }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -57,7 +54,7 @@ export const getEditorOpener =
         }
       };
 
-      const onSaveIndexPattern = (indexPattern: IndexPattern) => {
+      const onSaveIndexPattern = (indexPattern: DataView) => {
         closeEditor();
 
         if (onSave) {
@@ -77,9 +74,11 @@ export const getEditorOpener =
                 }}
                 defaultTypeIsRollup={defaultTypeIsRollup}
                 requireTimestampField={requireTimestampField}
+                showEmptyPrompt={showEmptyPrompt}
               />
             </I18nProvider>
-          </KibanaReactContextProvider>
+          </KibanaReactContextProvider>,
+          { theme$: core.theme.theme$ }
         ),
         {
           hideCloseButton: true,

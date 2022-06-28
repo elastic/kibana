@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../../common';
-import { AxisExtentConfig, XYLayerConfig } from '../../common/expressions';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../src/plugins/field_formats/common';
+import {
+  getDataBounds,
+  validateAxisDomain,
+  validateZeroInclusivityExtent,
+} from '../shared_components';
+import { XYDataLayerConfig } from './types';
 
 interface FormattedMetric {
   layer: string;
@@ -33,7 +36,26 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(layers: XYLayerConfig[], tables?: Record<string, Datatable>) {
+export function getXDomain(layers: XYDataLayerConfig[] = [], tables?: Record<string, Datatable>) {
+  const dataBounds = layers.reduce(
+    (bounds, layer) => {
+      const tableBounds = getDataBounds(layer.layerId, tables, layer.xAccessor);
+      if (tableBounds) {
+        return {
+          min: Math.min(bounds.min, tableBounds.min),
+          max: Math.max(bounds.max, tableBounds.max),
+        };
+      }
+      return bounds;
+    },
+    { min: Infinity, max: -Infinity }
+  );
+  if (isFinite(dataBounds.min) && isFinite(dataBounds.max)) {
+    return dataBounds;
+  }
+}
+
+export function groupAxesByType(layers: XYDataLayerConfig[], tables?: Record<string, Datatable>) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -97,7 +119,7 @@ export function groupAxesByType(layers: XYLayerConfig[], tables?: Record<string,
 }
 
 export function getAxesConfiguration(
-  layers: XYLayerConfig[],
+  layers: XYDataLayerConfig[],
   shouldRotate: boolean,
   tables?: Record<string, Datatable>,
   formatFactory?: FormatFactory
@@ -128,15 +150,8 @@ export function getAxesConfiguration(
 }
 
 export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
-  const inclusiveZeroError =
-    extent &&
-    hasBarOrArea &&
-    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
-      (extent.upperBound !== undefined && extent.upperBound) < 0);
-  const boundaryError =
-    extent &&
-    extent.lowerBound !== undefined &&
-    extent.upperBound !== undefined &&
-    extent.upperBound <= extent.lowerBound;
-  return { inclusiveZeroError, boundaryError };
+  return {
+    inclusiveZeroError: hasBarOrArea && !validateZeroInclusivityExtent(extent),
+    boundaryError: !validateAxisDomain(extent),
+  };
 }

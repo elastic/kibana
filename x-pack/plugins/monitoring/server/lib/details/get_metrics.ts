@@ -6,32 +6,47 @@
  */
 
 import moment from 'moment';
-import { checkParam } from '../error_missing_required';
-import { getSeries } from './get_series';
-import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
-import { getTimezone } from '../get_timezone';
+import { INDEX_PATTERN_TYPES } from '../../../common/constants';
+import { TimeRange } from '../../../common/http_api/shared';
 import { LegacyRequest } from '../../types';
+import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
+import { checkParam } from '../error_missing_required';
+import { getTimezone } from '../get_timezone';
+import { getSeries } from './get_series';
 
-type Metric = string | { keys: string | string[]; name: string };
+export interface NamedMetricDescriptor {
+  keys: string | string[];
+  name: string;
+}
+
+export type SimpleMetricDescriptor = string;
+
+export type MetricDescriptor = SimpleMetricDescriptor | NamedMetricDescriptor;
+
+export function isNamedMetricDescriptor(
+  metricDescriptor: MetricDescriptor
+): metricDescriptor is NamedMetricDescriptor {
+  return (metricDescriptor as NamedMetricDescriptor).name !== undefined;
+}
 
 // TODO: Switch to an options object argument here
 export async function getMetrics(
-  req: LegacyRequest,
-  indexPattern: string,
-  metricSet: Metric[] = [],
+  req: LegacyRequest<unknown, unknown, { timeRange: TimeRange }>,
+  moduleType: INDEX_PATTERN_TYPES,
+  metricSet: MetricDescriptor[] = [],
   filters: Array<Record<string, any>> = [],
   metricOptions: Record<string, any> = {},
   numOfBuckets: number = 0,
   groupBy: string | Record<string, any> | null = null
 ) {
-  checkParam(indexPattern, 'indexPattern in details/getMetrics');
+  checkParam(moduleType, 'moduleType in details/getMetrics');
   checkParam(metricSet, 'metricSet in details/getMetrics');
 
-  const config = req.server.config();
+  const config = req.server.config;
   // TODO: Pass in req parameters as explicit function parameters
   let min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
-  const minIntervalSeconds = Number(config.get('monitoring.ui.min_interval_seconds'));
+  const minIntervalSeconds = config.ui.min_interval_seconds;
   const bucketSize = calculateTimeseriesInterval(min, max, minIntervalSeconds);
   const timezone = await getTimezone(req);
 
@@ -41,7 +56,7 @@ export async function getMetrics(
   }
 
   return Promise.all(
-    metricSet.map((metric: Metric) => {
+    metricSet.map((metric: MetricDescriptor) => {
       // metric names match the literal metric name, but they can be supplied in groups or individually
       let metricNames;
 
@@ -53,7 +68,7 @@ export async function getMetrics(
 
       return Promise.all(
         metricNames.map((metricName) => {
-          return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, {
+          return getSeries(req, moduleType, metricName, metricOptions, filters, groupBy, {
             min,
             max,
             bucketSize,

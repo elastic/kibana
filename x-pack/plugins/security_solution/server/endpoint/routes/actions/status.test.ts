@@ -7,14 +7,14 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
+import { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
@@ -114,7 +114,7 @@ describe('Endpoint Action Status', () => {
         responses: MockResponse[],
         endpointResponses?: MockEndpointResponse[]
       ) => {
-        esClientMock.asCurrentUser.search = jest.fn().mockImplementation((req) => {
+        esClientMock.asInternalUser.search.mockResponseImplementation((req = {}) => {
           const size = req.size ? req.size : 10;
           const items: any[] =
             req.index === '.fleet-actions'
@@ -124,9 +124,9 @@ describe('Endpoint Action Status', () => {
               : responses.splice(0, size);
 
           if (items.length > 0) {
-            return Promise.resolve(mockSearchResult(items.map((x) => x.build())));
+            return mockSearchResult(items.map((x) => x.build()));
           } else {
-            return Promise.resolve(mockSearchResult());
+            return mockSearchResult();
           }
         });
       };
@@ -505,7 +505,7 @@ describe('Endpoint Action Status', () => {
         responses: MockResponse[],
         endpointResponses?: MockEndpointResponse[]
       ) => {
-        esClientMock.asCurrentUser.search = jest.fn().mockImplementation((req) => {
+        esClientMock.asInternalUser.search.mockResponseImplementation((req = {}) => {
           const size = req.size ? req.size : 10;
           const items: any[] =
             req.index === '.fleet-actions'
@@ -515,9 +515,9 @@ describe('Endpoint Action Status', () => {
               : responses.splice(0, size);
 
           if (items.length > 0) {
-            return Promise.resolve(mockSearchResult(items.map((x) => x.build())));
+            return mockSearchResult(items.map((x) => x.build()));
           } else {
-            return Promise.resolve(mockSearchResult());
+            return mockSearchResult();
           }
         });
       };

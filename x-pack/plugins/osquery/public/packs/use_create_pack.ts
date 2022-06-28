@@ -13,6 +13,7 @@ import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { IQueryPayload } from './types';
 
 interface UseCreatePackProps {
   withRedirect?: boolean;
@@ -29,7 +30,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
 
   return useMutation(
     (payload) =>
-      http.post<any>('/internal/osquery/packs', {
+      http.post<IQueryPayload>('/internal/osquery/packs', {
         body: JSON.stringify(payload),
       }),
     {
@@ -42,6 +43,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
         }
+
         toasts.addSuccess(
           i18n.translate('xpack.osquery.newPack.successToastMessageText', {
             defaultMessage: 'Successfully created "{packName}" pack',

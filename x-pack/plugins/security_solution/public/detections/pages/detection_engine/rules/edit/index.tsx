@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
@@ -29,7 +30,6 @@ import {
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../components/user_info';
-import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
@@ -57,6 +57,9 @@ import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common/constants';
+import { HeaderPage } from '../../../../../common/components/header_page';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -73,6 +76,7 @@ const EditRulePageComponent: FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+  const { data: dataServices } = useKibana().services;
   const { navigateToApp } = useKibana().services.application;
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
@@ -101,6 +105,22 @@ const EditRulePageComponent: FC = () => {
     return stepData.data != null && !stepIsValid(stepData);
   });
   const [{ isLoading, isSaved }, setRule] = useUpdateRule();
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
+    };
+    fetchDataViews();
+  }, [dataServices.dataViews]);
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
   const setFormHook = useCallback(
     <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
@@ -136,6 +156,7 @@ const EditRulePageComponent: FC = () => {
                   isUpdateView
                   defaultValues={defineStep.data}
                   setForm={setFormHook}
+                  kibanaDataViews={dataViewOptions}
                 />
               )}
               <EuiSpacer />
@@ -224,8 +245,11 @@ const EditRulePageComponent: FC = () => {
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
+      dataViewOptions,
     ]
   );
+
+  const { startTransaction } = useStartTransaction();
 
   const onSubmit = useCallback(async () => {
     const activeStepData = await formHooks.current[activeStep]();
@@ -243,6 +267,7 @@ const EditRulePageComponent: FC = () => {
       stepIsValid(schedule) &&
       stepIsValid(actions)
     ) {
+      startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
       setRule({
         ...formatRule<UpdateRulesSchema>(
           define.data,
@@ -265,6 +290,7 @@ const EditRulePageComponent: FC = () => {
     scheduleStep,
     setRule,
     setStepData,
+    startTransaction,
   ]);
 
   useEffect(() => {
@@ -351,7 +377,7 @@ const EditRulePageComponent: FC = () => {
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup direction="row" justifyContent="spaceAround">
           <MaxWidthEuiFlexItem>
-            <DetectionEngineHeaderPage
+            <HeaderPage
               backOptions={{
                 path: getRuleDetailsUrl(ruleId ?? ''),
                 text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,

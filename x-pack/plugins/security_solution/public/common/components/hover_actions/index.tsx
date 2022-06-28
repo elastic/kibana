@@ -11,8 +11,8 @@ import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
+import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
-import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
 
@@ -82,7 +82,8 @@ const StyledHoverActionsContainer = styled.div<{
 
 const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
   min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
-  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
+  padding: ${(props) => `0 ${props.theme.eui.euiSizeS}`};
+  position: relative;
 `;
 
 interface Props {
@@ -95,7 +96,10 @@ interface Props {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
+  fieldType: string;
+  isAggregatable: boolean;
   goGetTimelineId?: (args: boolean) => void;
+  hideAddToTimeline?: boolean;
   hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
@@ -134,8 +138,11 @@ export const HoverActions: React.FC<Props> = React.memo(
     enableOverflowButton = false,
     applyWidthAndPadding = true,
     field,
+    fieldType,
+    isAggregatable,
     goGetTimelineId,
     isObjectArray,
+    hideAddToTimeline = false,
     hideTopN = false,
     onFilterAdded,
     ownFocus,
@@ -216,7 +223,10 @@ export const HoverActions: React.FC<Props> = React.memo(
       draggableId,
       enableOverflowButton: enableOverflowButton && !isCaseView,
       field,
+      fieldType,
+      isAggregatable,
       handleHoverActionClicked,
+      hideAddToTimeline,
       hideTopN,
       isCaseView,
       isObjectArray,

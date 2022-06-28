@@ -9,19 +9,19 @@ import { Observable, of, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { merge } from 'lodash';
 import uuid from 'uuid';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
   HealthStatus,
   MonitoringStats,
   RawMonitoringStats,
   summarizeMonitoringStats,
 } from '../monitoring';
-import { ServiceStatusLevels, Logger } from 'src/core/server';
+import { ServiceStatusLevels, Logger } from '@kbn/core/server';
 import { configSchema, TaskManagerConfig } from '../config';
 import { calculateHealthStatusMock } from '../lib/calculate_health_status.mock';
 import { FillPoolResult } from '../lib/fill_pool';
@@ -36,10 +36,8 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockClusterClient = (response: any) => {
   const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-    body: response,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResponse(response as any);
 
   const mockClusterClient = elasticsearchServiceMock.createClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);

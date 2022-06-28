@@ -6,7 +6,7 @@
  */
 
 import './toolbar.scss';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -17,13 +17,18 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import type { PieVisualizationState, SharedPieLayerState } from '../../common/expressions';
+import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../common';
 import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
-import { ToolbarPopover, LegendSettingsPopover, useDebouncedValue } from '../shared_components';
-import { PalettePicker } from '../shared_components';
+import {
+  ToolbarPopover,
+  LegendSettingsPopover,
+  useDebouncedValue,
+  PalettePicker,
+} from '../shared_components';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 
@@ -34,21 +39,21 @@ const legendOptions: Array<{
 }> = [
   {
     id: 'pieLegendDisplay-default',
-    value: 'default',
+    value: LegendDisplay.DEFAULT,
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.auto', {
       defaultMessage: 'Auto',
     }),
   },
   {
     id: 'pieLegendDisplay-show',
-    value: 'show',
+    value: LegendDisplay.SHOW,
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.show', {
       defaultMessage: 'Show',
     }),
   },
   {
     id: 'pieLegendDisplay-hide',
-    value: 'hide',
+    value: LegendDisplay.HIDE,
     label: i18n.translate('xpack.lens.pieChart.legendVisibility.hide', {
       defaultMessage: 'Hide',
     }),
@@ -68,6 +73,10 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     emptySizeRatioOptions,
     isDisabled: isToolbarPopoverDisabled,
   } = PartitionChartsMeta[state.shape].toolbarPopover;
+
+  const legendSize = layer.legendSize;
+
+  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const onStateChange = useCallback(
     (part: Record<string, unknown>) => {
@@ -123,6 +132,11 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     [onStateChange]
   );
 
+  const onLegendSizeChange = useCallback(
+    (val) => onStateChange({ legendSize: val }),
+    [onStateChange]
+  );
+
   const onValueInLegendChange = useCallback(() => {
     onStateChange({
       showValuesInLegend: !shouldShowValuesInLegend(layer, state.shape),
@@ -147,7 +161,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   ).truncateText;
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
@@ -174,7 +188,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           </EuiFormRow>
         ) : null}
 
-        {numberOptions.length ? (
+        {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
           <EuiFormRow
             label={i18n.translate('xpack.lens.pieChart.numberLabels', {
               defaultMessage: 'Values',
@@ -184,8 +198,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           >
             <EuiSuperSelect
               compressed
-              disabled={layer.categoryDisplay === 'hide'}
-              valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
+              valueOfSelected={layer.numberDisplay}
               options={numberOptions}
               onChange={onNumberDisplayChange}
             />
@@ -244,13 +257,16 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         onValueInLegendChange={onValueInLegendChange}
         position={layer.legendPosition}
         onPositionChange={onLegendPositionChange}
-        renderNestedLegendSwitch
-        nestedLegend={!!layer.nestedLegend}
+        renderNestedLegendSwitch={!PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch}
+        nestedLegend={Boolean(layer.nestedLegend)}
         onNestedLegendChange={onNestedLegendChange}
         shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
         onTruncateLegendChange={onTruncateLegendChange}
         maxLines={layer?.legendMaxLines}
         onMaxLinesChange={onLegendMaxLinesChange}
+        legendSize={legendSize}
+        onLegendSizeChange={onLegendSizeChange}
+        showAutoLegendSizeOption={hadAutoLegendSize}
       />
     </EuiFlexGroup>
   );
@@ -291,14 +307,12 @@ export function DimensionEditor(
   }
 ) {
   return (
-    <>
-      <PalettePicker
-        palettes={props.paletteService}
-        activePalette={props.state.palette}
-        setPalette={(newPalette) => {
-          props.setState({ ...props.state, palette: newPalette });
-        }}
-      />
-    </>
+    <PalettePicker
+      palettes={props.paletteService}
+      activePalette={props.state.palette}
+      setPalette={(newPalette) => {
+        props.setState({ ...props.state, palette: newPalette });
+      }}
+    />
   );
 }

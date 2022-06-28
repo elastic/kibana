@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { NotificationsStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,
@@ -17,7 +17,6 @@ import {
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
 } from '../../services/embeddable';
-import { NotificationsStart } from '../../../../../core/public';
 import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
@@ -79,9 +78,6 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
       type: embeddable.type,
       explicitInput: { ...newInput, title: embeddable.getTitle() },
     };
-    // since by value visualizations should not have default titles, unlinking a visualization should remove
-    // the library title from the attributes.
-    _.unset(newPanel, 'explicitInput.attributes.title');
     dashboard.replacePanel(panelToReplace, newPanel, true);
 
     const title = dashboardUnlinkFromLibraryAction.getSuccessMessage(

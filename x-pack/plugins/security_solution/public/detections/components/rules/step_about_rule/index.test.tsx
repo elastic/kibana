@@ -10,7 +10,7 @@ import { mount, shallow } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
 import { act } from '@testing-library/react';
 
-import { stubIndexPattern } from 'src/plugins/data/common/stubs';
+import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
@@ -31,6 +31,7 @@ const mockTheme = getMockTheme({
   },
 });
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -44,8 +45,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-// Failing with rule registry enabled
-describe.skip('StepAboutRuleComponent', () => {
+describe('StepAboutRuleComponent', () => {
   let formHook: RuleStepsFormHooks[RuleStep.aboutRule] | null = null;
   const setFormHook = <K extends keyof RuleStepsFormHooks>(
     step: K,
@@ -149,14 +149,19 @@ describe.skip('StepAboutRuleComponent', () => {
       </ThemeProvider>
     );
 
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
+      .first()
+      .simulate('change', { target: { value: 'Test description text' } });
+    wrapper
+      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
+      .first()
+      .simulate('change', { target: { value: 'Test name text' } });
+
     await act(async () => {
       if (!formHook) {
         throw new Error('Form hook not set, but tests depend on it');
       }
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutThreatIndicatorPath"] input')
-        .first()
-        .simulate('change', { target: { value: '' } });
 
       const result = await formHook();
       expect(result?.isValid).toEqual(true);

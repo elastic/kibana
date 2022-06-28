@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { buildEventsSearchQuery } from './build_events_query';
+import { buildEqlSearchRequest, buildEventsSearchQuery } from './build_events_query';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+
+const emptyFilter = {
+  bool: {
+    must: [],
+    filter: [],
+    should: [],
+    must_not: [],
+  },
+};
 
 describe('create_signals', () => {
   test('it builds a now-5m up to today filter', () => {
@@ -17,6 +27,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -29,25 +40,12 @@ describe('create_signals', () => {
             filter: [
               {},
               {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m',
+                    lte: 'today',
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
               {
@@ -87,6 +85,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -100,13 +99,22 @@ describe('create_signals', () => {
               {},
               {
                 bool: {
-                  filter: [
+                  should: [
+                    {
+                      range: {
+                        'event.ingested': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
+                      },
+                    },
                     {
                       bool: {
-                        should: [
+                        filter: [
                           {
                             range: {
-                              'event.ingested': {
+                              '@timestamp': {
                                 gte: 'now-5m',
                                 lte: 'today',
                                 format: 'strict_date_optional_time',
@@ -115,33 +123,18 @@ describe('create_signals', () => {
                           },
                           {
                             bool: {
-                              filter: [
-                                {
-                                  range: {
-                                    '@timestamp': {
-                                      gte: 'now-5m',
-                                      lte: 'today',
-                                      format: 'strict_date_optional_time',
-                                    },
-                                  },
+                              must_not: {
+                                exists: {
+                                  field: 'event.ingested',
                                 },
-                                {
-                                  bool: {
-                                    must_not: {
-                                      exists: {
-                                        field: 'event.ingested',
-                                      },
-                                    },
-                                  },
-                                },
-                              ],
+                              },
                             },
                           },
                         ],
-                        minimum_should_match: 1,
                       },
                     },
                   ],
+                  minimum_should_match: 1,
                 },
               },
               {
@@ -192,6 +185,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortId],
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -204,25 +198,12 @@ describe('create_signals', () => {
             filter: [
               {},
               {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m',
+                    lte: 'today',
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
               {
@@ -263,6 +244,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortIdNumber],
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -275,25 +257,12 @@ describe('create_signals', () => {
             filter: [
               {},
               {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m',
+                    lte: 'today',
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
               {
@@ -333,6 +302,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -345,25 +315,12 @@ describe('create_signals', () => {
             filter: [
               {},
               {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m',
+                    lte: 'today',
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
               {
@@ -410,6 +367,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
+      runtimeMappings: undefined,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -422,25 +380,12 @@ describe('create_signals', () => {
             filter: [
               {},
               {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        minimum_should_match: 1,
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
-                              },
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                range: {
+                  '@timestamp': {
+                    gte: 'now-5m',
+                    lte: 'today',
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
               {
@@ -488,6 +433,7 @@ describe('create_signals', () => {
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
       trackTotalHits: false,
+      runtimeMappings: undefined,
     });
     expect(query.track_total_hits).toEqual(false);
   });
@@ -503,6 +449,7 @@ describe('create_signals', () => {
       timestampOverride: undefined,
       sortOrder: 'desc',
       trackTotalHits: false,
+      runtimeMappings: undefined,
     });
     expect(query.body.sort[0]).toEqual({
       '@timestamp': {
@@ -522,6 +469,7 @@ describe('create_signals', () => {
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
       sortOrder: 'desc',
+      runtimeMappings: undefined,
     });
     expect(query.body.sort[0]).toEqual({
       'event.ingested': {
@@ -534,6 +482,345 @@ describe('create_signals', () => {
         order: 'desc',
         unmapped_type: 'date',
       },
+    });
+  });
+
+  describe('buildEqlSearchRequest', () => {
+    test('should build a basic request with time range', () => {
+      const request = buildEqlSearchRequest(
+        'process where true',
+        ['testindex1', 'testindex2'],
+        'now-5m',
+        'now',
+        100,
+        undefined,
+        undefined,
+        [],
+        undefined,
+        undefined
+      );
+      expect(request).toEqual({
+        allow_no_indices: true,
+        index: ['testindex1', 'testindex2'],
+        body: {
+          size: 100,
+          query: 'process where true',
+          runtime_mappings: undefined,
+          filter: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+                emptyFilter,
+              ],
+            },
+          },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+        },
+      });
+    });
+
+    test('should build a request with timestamp and event category overrides', () => {
+      const request = buildEqlSearchRequest(
+        'process where true',
+        ['testindex1', 'testindex2'],
+        'now-5m',
+        'now',
+        100,
+        undefined,
+        'event.ingested',
+        [],
+        undefined,
+        'event.other_category',
+        undefined
+      );
+      expect(request).toEqual({
+        allow_no_indices: true,
+        index: ['testindex1', 'testindex2'],
+        body: {
+          event_category_field: 'event.other_category',
+          size: 100,
+          query: 'process where true',
+          runtime_mappings: undefined,
+          filter: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        range: {
+                          'event.ingested': {
+                            lte: 'now',
+                            gte: 'now-5m',
+                            format: 'strict_date_optional_time',
+                          },
+                        },
+                      },
+                      {
+                        bool: {
+                          filter: [
+                            {
+                              range: {
+                                '@timestamp': {
+                                  lte: 'now',
+                                  gte: 'now-5m',
+                                  format: 'strict_date_optional_time',
+                                },
+                              },
+                            },
+                            {
+                              bool: {
+                                must_not: {
+                                  exists: {
+                                    field: 'event.ingested',
+                                  },
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                emptyFilter,
+              ],
+            },
+          },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: 'event.ingested',
+              format: 'strict_date_optional_time',
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+        },
+      });
+    });
+
+    test('should build a request with exceptions', () => {
+      const request = buildEqlSearchRequest(
+        'process where true',
+        ['testindex1', 'testindex2'],
+        'now-5m',
+        'now',
+        100,
+        undefined,
+        undefined,
+        [getExceptionListItemSchemaMock()],
+        undefined,
+        undefined
+      );
+      expect(request).toEqual({
+        allow_no_indices: true,
+        index: ['testindex1', 'testindex2'],
+        body: {
+          size: 100,
+          query: 'process where true',
+          runtime_mappings: undefined,
+          filter: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must: [],
+                    filter: [],
+                    should: [],
+                    must_not: [
+                      {
+                        bool: {
+                          should: [
+                            {
+                              bool: {
+                                filter: [
+                                  {
+                                    nested: {
+                                      path: 'some.parentField',
+                                      query: {
+                                        bool: {
+                                          minimum_should_match: 1,
+                                          should: [
+                                            {
+                                              match_phrase: {
+                                                'some.parentField.nested.field': 'some value',
+                                              },
+                                            },
+                                          ],
+                                        },
+                                      },
+                                      score_mode: 'none',
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      minimum_should_match: 1,
+                                      should: [
+                                        {
+                                          match_phrase: {
+                                            'some.not.nested.field': 'some value',
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+        },
+      });
+    });
+
+    test('should build a request with filters', () => {
+      const filters = [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'exists',
+            key: 'process.name',
+            value: 'exists',
+          },
+          query: {
+            exists: {
+              field: 'process.name',
+            },
+          },
+        },
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'host.name',
+            params: {
+              query: 'Host-b4d9hu1a56',
+            },
+          },
+          query: {
+            match_phrase: {
+              'host.name': 'Host-b4d9hu1a56',
+            },
+          },
+        },
+      ];
+      const request = buildEqlSearchRequest(
+        'process where true',
+        ['testindex1', 'testindex2'],
+        'now-5m',
+        'now',
+        100,
+        filters,
+        undefined,
+        [],
+        undefined
+      );
+      expect(request).toEqual({
+        allow_no_indices: true,
+        index: ['testindex1', 'testindex2'],
+        body: {
+          size: 100,
+          query: 'process where true',
+          filter: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must: [],
+                    filter: [
+                      {
+                        exists: {
+                          field: 'process.name',
+                        },
+                      },
+                      {
+                        match_phrase: {
+                          'host.name': 'Host-b4d9hu1a56',
+                        },
+                      },
+                    ],
+                    should: [],
+                    must_not: [],
+                  },
+                },
+              ],
+            },
+          },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+        },
+      });
     });
   });
 });

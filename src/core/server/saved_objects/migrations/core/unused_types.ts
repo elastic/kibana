@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * Types that are no longer registered and need to be removed
@@ -29,15 +29,19 @@ export const REMOVED_TYPES: string[] = [
   'tsvb-validation-telemetry',
   // replaced by osquery-manager-usage-metric
   'osquery-usage-metric',
+  // Was removed in 8.1 https://github.com/elastic/kibana/issues/91265
+  'siem-detection-engine-rule-status',
   // Was removed in 7.16
   'timelion-sheet',
+  // Removed in 8.3 https://github.com/elastic/kibana/issues/127745
+  'ui-counter',
 ].sort();
 
 // When migrating from the outdated index we use a read query which excludes
 // saved objects which are no longer used. These saved objects will still be
 // kept in the outdated index for backup purposes, but won't be available in
 // the upgraded index.
-export const excludeUnusedTypesQuery: estypes.QueryDslQueryContainer = {
+export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
   bool: {
     must_not: [
       ...REMOVED_TYPES.map((typeName) => ({

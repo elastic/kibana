@@ -5,38 +5,40 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { buildEqlSearchRequest } from '../../../../../common/detection_engine/get_query_filter';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
-import { isOutdated } from '../../migrations/helpers';
-import { getIndexVersion } from '../../routes/index/get_index_version';
-import { MIN_EQL_RULE_INDEX_VERSION } from '../../routes/index/get_signals_template';
-import { getInputIndex } from '../get_input_output_index';
 
 import {
   BulkCreate,
   WrapHits,
   WrapSequences,
-  EqlSignalSearchResponse,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
-  SimpleHit,
+  SignalSource,
 } from '../types';
 import { createSearchAfterReturnType, makeFloatString } from '../utils';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
 import { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
 
 export const eqlExecutor = async ({
+  inputIndex,
+  runtimeMappings,
   completeRule,
   tuple,
   exceptionItems,
@@ -44,19 +46,19 @@ export const eqlExecutor = async ({
   services,
   version,
   logger,
-  searchAfterSize,
   bulkCreate,
   wrapHits,
   wrapSequences,
 }: {
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<EqlRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   experimentalFeatures: ExperimentalFeatures;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   logger: Logger;
-  searchAfterSize: number;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
@@ -71,62 +73,34 @@ export const eqlExecutor = async ({
       );
       result.warning = true;
     }
-    if (!experimentalFeatures.ruleRegistryEnabled) {
-      try {
-        const signalIndexVersion = await getIndexVersion(
-          services.scopedClusterClient.asCurrentUser,
-          ruleParams.outputIndex
-        );
-        if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
-          throw new Error(
-            `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
-          );
-        }
-      } catch (err) {
-        if (err.statusCode === 403) {
-          throw new Error(
-            `EQL based rules require the user that created it to have the view_index_metadata, read, and write permissions for index: ${ruleParams.outputIndex}`
-          );
-        } else {
-          throw err;
-        }
-      }
-    }
-    const inputIndex = await getInputIndex({
-      experimentalFeatures,
-      services,
-      version,
-      index: ruleParams.index,
-    });
 
     const request = buildEqlSearchRequest(
       ruleParams.query,
       inputIndex,
       tuple.from.toISOString(),
       tuple.to.toISOString(),
-      searchAfterSize,
+      completeRule.ruleParams.maxSignals,
+      ruleParams.filters,
       ruleParams.timestampOverride,
       exceptionItems,
-      ruleParams.eventCategoryOverride
+      runtimeMappings,
+      ruleParams.eventCategoryOverride,
+      ruleParams.timestampField,
+      ruleParams.tiebreakerField
     );
 
     const eqlSignalSearchStart = performance.now();
-    logger.debug(
-      `EQL query request path: ${request.path}, method: ${request.method}, body: ${JSON.stringify(
-        request.body
-      )}`
-    );
+    logger.debug(`EQL query request: ${JSON.stringify(request)}`);
 
-    // TODO: fix this later
-    const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
+    const response = await services.scopedClusterClient.asCurrentUser.eql.search<SignalSource>(
       request
-    )) as TransportResult<EqlSignalSearchResponse>;
+    );
 
     const eqlSignalSearchEnd = performance.now();
     const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
     result.searchAfterTimes = [eqlSearchDuration];
 
-    let newSignals: SimpleHit[] | undefined;
+    let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
     if (response.hits.sequences !== undefined) {
       newSignals = wrapSequences(response.hits.sequences, buildReasonMessageForEqlAlert);
     } else if (response.hits.events !== undefined) {

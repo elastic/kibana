@@ -6,7 +6,7 @@
  */
 
 import './dimension_editor.scss';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
+import ReactDOM from 'react-dom';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import type { GenericIndexPatternColumn } from '../indexpattern';
@@ -52,11 +53,13 @@ import {
   formulaOperationName,
   DimensionEditorTabs,
   CalloutWarning,
-  LabelInput,
   DimensionEditorTab,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
+import { NameInput } from '../../shared_components';
+import { ParamEditorProps } from '../operations/definitions';
+import { WrappingHelpPopover } from '../help_popover';
 
 const operationPanels = getOperationDisplay();
 
@@ -92,6 +95,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
     savedObjectsClient: props.savedObjectsClient,
     http: props.http,
     storage: props.storage,
+    unifiedSearch: props.unifiedSearch,
+    dataViews: props.dataViews,
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
@@ -226,6 +231,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
   const [timeShiftedFocused, setTimeShiftFocused] = useState(false);
+  const helpPopoverContainer = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    return () => {
+      if (helpPopoverContainer.current) {
+        ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+        document.body.removeChild(helpPopoverContainer.current);
+      }
+    };
+  }, []);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
@@ -307,6 +321,45 @@ export function DimensionEditor(props: DimensionEditorProps) {
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
         [`aria-pressed`]: isActive,
+        extraAction: operationDefinitionMap[operationType].helpComponent
+          ? {
+              color: 'primary',
+              onClick: (e) => {
+                if (!helpPopoverContainer.current) {
+                  const container = document.createElement('div');
+                  helpPopoverContainer.current = container;
+                  document.body.appendChild(container);
+                  const HelpComponent = operationDefinitionMap[operationType].helpComponent!;
+                  const element = (
+                    <WrappingHelpPopover
+                      button={e.target as HTMLElement}
+                      isOpen={true}
+                      title={operationDefinitionMap[operationType].helpComponentTitle}
+                      closePopover={() => {
+                        if (helpPopoverContainer.current) {
+                          ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+                          document.body.removeChild(helpPopoverContainer.current);
+                          helpPopoverContainer.current = null;
+                        }
+                      }}
+                    >
+                      <HelpComponent />
+                    </WrappingHelpPopover>
+                  );
+                  ReactDOM.render(element, helpPopoverContainer.current);
+                } else {
+                  ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+                  document.body.removeChild(helpPopoverContainer.current);
+                  helpPopoverContainer.current = null;
+                }
+              },
+              iconType: 'documentation',
+              iconSize: 's',
+              'aria-label': i18n.translate('xpack.lens.indexPattern.helpLabel', {
+                defaultMessage: 'Function help',
+              }),
+            }
+          : undefined,
         onClick() {
           if (
             ['none', 'fullReference', 'managedReference'].includes(
@@ -405,9 +458,44 @@ export function DimensionEditor(props: DimensionEditorProps) {
     !currentFieldIsInvalid &&
     !incompleteInfo &&
     selectedColumn &&
-    isQuickFunction(selectedColumn.operationType);
+    isQuickFunction(selectedColumn.operationType) &&
+    ParamEditor;
+
+  const shouldDisplayReferenceEditor =
+    !incompleteInfo &&
+    selectedColumn &&
+    'references' in selectedColumn &&
+    selectedOperationDefinition?.input === 'fullReference';
+
+  const shouldDisplayFieldInput =
+    !selectedColumn ||
+    selectedOperationDefinition?.input === 'field' ||
+    (incompleteOperation && operationDefinitionMap[incompleteOperation]?.input === 'field') ||
+    temporaryQuickFunction;
 
   const FieldInputComponent = selectedOperationDefinition?.renderFieldInput || FieldInput;
+
+  const paramEditorProps: ParamEditorProps<GenericIndexPatternColumn> = {
+    layer: state.layers[layerId],
+    layerId,
+    activeData: props.activeData,
+    updateLayer: (setter) => {
+      if (temporaryQuickFunction) {
+        setTemporaryState('none');
+      }
+      setStateWrapper(setter, { forceRender: temporaryQuickFunction });
+    },
+    columnId,
+    currentColumn: state.layers[layerId].columns[columnId],
+    dateRange,
+    indexPattern: currentIndexPattern,
+    operationDefinitionMap,
+    toggleFullscreen,
+    isFullscreen,
+    setIsCloseable,
+    paramEditorCustomProps,
+    ...services,
+  };
 
   const quickFunctions = (
     <>
@@ -431,10 +519,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       </div>
 
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
-        {!incompleteInfo &&
-        selectedColumn &&
-        'references' in selectedColumn &&
-        selectedOperationDefinition?.input === 'fullReference' ? (
+        {shouldDisplayReferenceEditor ? (
           <>
             {selectedColumn.references.map((referenceId, index) => {
               const validation = selectedOperationDefinition.requiredReferences[index];
@@ -478,10 +563,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           </>
         ) : null}
 
-        {!selectedColumn ||
-        selectedOperationDefinition?.input === 'field' ||
-        (incompleteOperation && operationDefinitionMap[incompleteOperation]?.input === 'field') ||
-        temporaryQuickFunction ? (
+        {shouldDisplayFieldInput ? (
           <FieldInputComponent
             layer={state.layers[layerId]}
             selectedColumn={selectedColumn as FieldBasedIndexPatternColumn}
@@ -510,122 +592,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           />
         ) : null}
 
-        {shouldDisplayExtraOptions && ParamEditor && (
-          <ParamEditor
-            layer={state.layers[layerId]}
-            layerId={layerId}
-            activeData={props.activeData}
-            updateLayer={(setter) => {
-              if (temporaryQuickFunction) {
-                setTemporaryState('none');
-              }
-              setStateWrapper(setter, { forceRender: temporaryQuickFunction });
-            }}
-            columnId={columnId}
-            currentColumn={state.layers[layerId].columns[columnId]}
-            dateRange={dateRange}
-            indexPattern={currentIndexPattern}
-            operationDefinitionMap={operationDefinitionMap}
-            toggleFullscreen={toggleFullscreen}
-            isFullscreen={isFullscreen}
-            setIsCloseable={setIsCloseable}
-            paramEditorCustomProps={paramEditorCustomProps}
-            {...services}
-          />
-        )}
-
-        {!currentFieldIsInvalid && !incompleteInfo && selectedColumn && (
-          <AdvancedOptions
-            options={[
-              {
-                title: i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
-                  defaultMessage: 'Normalize by unit',
-                }),
-                dataTestSubj: 'indexPattern-time-scaling-enable',
-                onClick: () => {
-                  setStateWrapper(
-                    setTimeScaling(columnId, state.layers[layerId], DEFAULT_TIME_SCALE)
-                  );
-                },
-                showInPopover: Boolean(
-                  operationDefinitionMap[selectedColumn.operationType].timeScalingMode &&
-                    operationDefinitionMap[selectedColumn.operationType].timeScalingMode !==
-                      'disabled' &&
-                    Object.values(state.layers[layerId].columns).some(
-                      (col) => col.operationType === 'date_histogram'
-                    ) &&
-                    !selectedColumn.timeScale
-                ),
-                inlineElement: (
-                  <TimeScaling
-                    selectedColumn={selectedColumn}
-                    columnId={columnId}
-                    layer={state.layers[layerId]}
-                    updateLayer={setStateWrapper}
-                  />
-                ),
-              },
-              {
-                title: i18n.translate('xpack.lens.indexPattern.filterBy.label', {
-                  defaultMessage: 'Filter by',
-                }),
-                dataTestSubj: 'indexPattern-filter-by-enable',
-                onClick: () => {
-                  setFilterByOpenInitally(true);
-                  setStateWrapper(setFilter(columnId, state.layers[layerId], defaultFilter));
-                },
-                showInPopover: Boolean(
-                  operationDefinitionMap[selectedColumn.operationType].filterable &&
-                    !selectedColumn.filter
-                ),
-                inlineElement:
-                  operationDefinitionMap[selectedColumn.operationType].filterable &&
-                  selectedColumn.filter ? (
-                    <Filtering
-                      indexPattern={currentIndexPattern}
-                      selectedColumn={selectedColumn}
-                      columnId={columnId}
-                      layer={state.layers[layerId]}
-                      updateLayer={setStateWrapper}
-                      isInitiallyOpen={filterByOpenInitially}
-                    />
-                  ) : null,
-              },
-              {
-                title: i18n.translate('xpack.lens.indexPattern.timeShift.label', {
-                  defaultMessage: 'Time shift',
-                }),
-                dataTestSubj: 'indexPattern-time-shift-enable',
-                onClick: () => {
-                  setTimeShiftFocused(true);
-                  setStateWrapper(setTimeShift(columnId, state.layers[layerId], ''));
-                },
-                showInPopover: Boolean(
-                  operationDefinitionMap[selectedColumn.operationType].shiftable &&
-                    selectedColumn.timeShift === undefined &&
-                    (currentIndexPattern.timeFieldName ||
-                      Object.values(state.layers[layerId].columns).some(
-                        (col) => col.operationType === 'date_histogram'
-                      ))
-                ),
-                inlineElement:
-                  operationDefinitionMap[selectedColumn.operationType].shiftable &&
-                  selectedColumn.timeShift !== undefined ? (
-                    <TimeShift
-                      indexPattern={currentIndexPattern}
-                      selectedColumn={selectedColumn}
-                      columnId={columnId}
-                      layer={state.layers[layerId]}
-                      updateLayer={setStateWrapper}
-                      isFocused={timeShiftedFocused}
-                      activeData={props.activeData}
-                      layerId={layerId}
-                    />
-                  ) : null,
-              },
-            ]}
-          />
-        )}
+        {shouldDisplayExtraOptions && <ParamEditor {...paramEditorProps} />}
       </div>
     </>
   );
@@ -727,6 +694,30 @@ export function DimensionEditor(props: DimensionEditorProps) {
     },
   ];
 
+  const defaultLabel = useMemo(
+    () =>
+      String(
+        selectedColumn &&
+          operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+            selectedColumn,
+            state.indexPatterns[state.layers[layerId].indexPatternId],
+            state.layers[layerId].columns
+          )
+      ),
+    [layerId, selectedColumn, state.indexPatterns, state.layers]
+  );
+
+  const shouldDisplayAdvancedOptions =
+    !isFullscreen &&
+    !currentFieldIsInvalid &&
+    !incompleteInfo &&
+    selectedColumn &&
+    temporaryState === 'none' &&
+    selectedOperationDefinition &&
+    (selectedOperationDefinition.timeScalingMode ||
+      selectedOperationDefinition.filterable ||
+      selectedOperationDefinition.shiftable);
+
   return (
     <div id={columnId}>
       {hasTabs ? <DimensionEditorTabs tabs={tabs} /> : null}
@@ -736,11 +727,116 @@ export function DimensionEditor(props: DimensionEditorProps) {
       />
       {TabContent}
 
+      {shouldDisplayAdvancedOptions && (
+        <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
+          <AdvancedOptions
+            options={[
+              {
+                title: i18n.translate('xpack.lens.indexPattern.timeScale.enableTimeScale', {
+                  defaultMessage: 'Normalize by unit',
+                }),
+                dataTestSubj: 'indexPattern-time-scaling-enable',
+                onClick: () => {
+                  setStateWrapper(
+                    setTimeScaling(columnId, state.layers[layerId], DEFAULT_TIME_SCALE)
+                  );
+                },
+                showInPopover: Boolean(
+                  selectedOperationDefinition.timeScalingMode &&
+                    selectedOperationDefinition.timeScalingMode !== 'disabled' &&
+                    Object.values(state.layers[layerId].columns).some(
+                      (col) => col.operationType === 'date_histogram'
+                    ) &&
+                    !selectedColumn.timeScale
+                ),
+                inlineElement: selectedOperationDefinition.timeScalingMode ? (
+                  <TimeScaling
+                    selectedColumn={selectedColumn}
+                    columnId={columnId}
+                    layer={state.layers[layerId]}
+                    updateLayer={setStateWrapper}
+                  />
+                ) : null,
+              },
+              {
+                title: i18n.translate('xpack.lens.indexPattern.filterBy.label', {
+                  defaultMessage: 'Filter by',
+                }),
+                dataTestSubj: 'indexPattern-filter-by-enable',
+                onClick: () => {
+                  setFilterByOpenInitally(true);
+                  setStateWrapper(setFilter(columnId, state.layers[layerId], defaultFilter));
+                },
+                showInPopover: Boolean(
+                  selectedOperationDefinition.filterable && !selectedColumn.filter
+                ),
+                inlineElement:
+                  selectedOperationDefinition.filterable && selectedColumn.filter ? (
+                    <Filtering
+                      indexPattern={currentIndexPattern}
+                      selectedColumn={selectedColumn}
+                      columnId={columnId}
+                      layer={state.layers[layerId]}
+                      updateLayer={setStateWrapper}
+                      isInitiallyOpen={filterByOpenInitially}
+                      helpMessage={
+                        selectedOperationDefinition.filterable &&
+                        typeof selectedOperationDefinition.filterable !== 'boolean'
+                          ? selectedOperationDefinition.filterable.helpMessage
+                          : null
+                      }
+                    />
+                  ) : null,
+              },
+              {
+                title: i18n.translate('xpack.lens.indexPattern.timeShift.label', {
+                  defaultMessage: 'Time shift',
+                }),
+                dataTestSubj: 'indexPattern-time-shift-enable',
+                onClick: () => {
+                  setTimeShiftFocused(true);
+                  setStateWrapper(setTimeShift(columnId, state.layers[layerId], ''));
+                },
+                showInPopover: Boolean(
+                  selectedOperationDefinition.shiftable &&
+                    selectedColumn.timeShift === undefined &&
+                    (currentIndexPattern.timeFieldName ||
+                      Object.values(state.layers[layerId].columns).some(
+                        (col) => col.operationType === 'date_histogram'
+                      ))
+                ),
+                inlineElement:
+                  selectedOperationDefinition.shiftable &&
+                  selectedColumn.timeShift !== undefined ? (
+                    <TimeShift
+                      datatableUtilities={services.data.datatableUtilities}
+                      indexPattern={currentIndexPattern}
+                      selectedColumn={selectedColumn}
+                      columnId={columnId}
+                      layer={state.layers[layerId]}
+                      updateLayer={setStateWrapper}
+                      isFocused={timeShiftedFocused}
+                      activeData={props.activeData}
+                      layerId={layerId}
+                    />
+                  ) : null,
+              },
+              ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.(
+                paramEditorProps
+              ) || []),
+            ]}
+          />
+        </div>
+      )}
+
       {!isFullscreen && !currentFieldIsInvalid && (
         <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded  lnsIndexPatternDimensionEditor__section--collapseNext">
           {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
-            <LabelInput
+            <NameInput
+              // re-render the input from scratch to obtain new "initial value" if the underlying default label changes
+              key={defaultLabel}
               value={selectedColumn.label}
+              defaultValue={defaultLabel}
               onChange={(value) => {
                 updateLayer({
                   columns: {

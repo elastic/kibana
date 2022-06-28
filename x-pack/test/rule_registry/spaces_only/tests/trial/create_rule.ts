@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -17,6 +18,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { omit } from 'lodash';
+import { Rule } from '@kbn/alerting-plugin/common';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   getAlertsTargetIndices,
@@ -28,7 +30,6 @@ import {
   deleteAlert,
 } from '../../../common/lib/helpers';
 import { AlertDef, AlertParams } from '../../../common/types';
-import { Alert } from '../../../../../plugins/alerting/common';
 import { APM_METRIC_INDEX_NAME } from '../../../common/constants';
 import { obsOnly } from '../../../common/lib/authentication/users';
 
@@ -38,7 +39,8 @@ const SPACE_ID = 'space1';
 export default function registryRulesApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
 
-  describe('Rule Registry API', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
+  describe.skip('Rule Registry API', () => {
     describe('with write permissions', () => {
       it('does not bootstrap indices on plugin startup', async () => {
         const { body: targetIndices } = await getAlertsTargetIndices(getService, obsOnly, SPACE_ID);
@@ -56,7 +58,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
 
       describe('when creating a rule', () => {
         let createResponse: {
-          alert: Alert;
+          alert: Rule;
           status: number;
         };
         before(async () => {
@@ -187,7 +189,14 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
 
           const alertEvent = afterViolatingDataResponse.hits.hits[0].fields as Record<string, any>;
 
-          const exclude = ['@timestamp', ALERT_START, ALERT_UUID, ALERT_RULE_UUID, VERSION];
+          const exclude = [
+            '@timestamp',
+            ALERT_START,
+            ALERT_UUID,
+            ALERT_RULE_EXECUTION_UUID,
+            ALERT_RULE_UUID,
+            VERSION,
+          ];
 
           const toCompare = omit(alertEvent, exclude);
 

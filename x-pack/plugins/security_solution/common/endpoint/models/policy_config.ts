@@ -24,6 +24,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       malware: {
         mode: ProtectionModes.prevent,
+        blocklist: true,
       },
       ransomware: {
         mode: ProtectionModes.prevent,
@@ -70,6 +71,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       malware: {
         mode: ProtectionModes.prevent,
+        blocklist: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
@@ -102,9 +104,11 @@ export const policyFactory = (): PolicyConfig => {
         process: true,
         file: true,
         network: true,
+        session_data: false,
       },
       malware: {
         mode: ProtectionModes.prevent,
+        blocklist: true,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
@@ -145,6 +149,13 @@ export const policyFactoryWithoutPaidFeatures = (
     ...policy,
     windows: {
       ...policy.windows,
+      advanced:
+        policy.windows.advanced === undefined
+          ? undefined
+          : {
+              ...policy.windows.advanced,
+              rollback: undefined,
+            },
       ransomware: {
         mode: ProtectionModes.off,
         supported: false,

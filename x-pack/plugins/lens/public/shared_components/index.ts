@@ -9,11 +9,23 @@ export type { ToolbarPopoverProps } from './toolbar_popover';
 export { ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend_settings_popover';
 export { PalettePicker } from './palette_picker';
+export { RangeInputField } from './range_input_field';
+export {
+  BucketAxisBoundsControl,
+  validateAxisDomain,
+  validateZeroInclusivityExtent,
+  hasNumericHistogramDimension,
+  getDataBounds,
+  axisExtentConfigToExpression,
+} from './axis_extent';
 export { TooltipWrapper } from './tooltip_wrapper';
 export * from './coloring';
 export { useDebouncedValue } from './debounced_value';
 export * from './helpers';
 export { LegendActionPopover } from './legend_action_popover';
+export { NameInput } from './name_input';
 export { ValueLabelsSettings } from './value_labels_settings';
+export { AxisTitleSettings } from './axis_title_settings';
+export { DimensionEditorSection } from './dimension_section';
 export * from './static_header';
 export * from './vis_label';

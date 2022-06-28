@@ -31,7 +31,7 @@ export const closePit =
         body: { id: pitId },
       })
       .then((response) => {
-        if (!response.body.succeeded) {
+        if (!response.succeeded) {
           throw new Error(`Failed to close PointInTime with id: ${pitId}`);
         }
         return Either.right({});

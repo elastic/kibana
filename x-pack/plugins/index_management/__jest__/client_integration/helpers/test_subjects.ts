@@ -21,6 +21,7 @@ export type TestSubjects =
   | 'deleteTemplatesConfirmation'
   | 'documentationLink'
   | 'emptyPrompt'
+  | 'forcemergeIndexMenuButton'
   | 'filterList.filterItem'
   | 'ilmPolicyLink'
   | 'includeStatsSwitch'
@@ -61,4 +62,5 @@ export type TestSubjects =
   | 'unfreezeIndexMenuButton'
   | 'updateEditIndexSettingsButton'
   | 'updateIndexSettingsErrorCallout'
-  | 'viewButton';
+  | 'viewButton'
+  | 'detailPanelTabSelected';

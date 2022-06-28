@@ -25,7 +25,7 @@ exports[`Storyshots Home Home Page 1`] = `
             className="euiFlexItem"
           >
             <h1
-              className="euiTitle euiTitle--large"
+              className="euiTitle css-1bexacr-euiTitle-l"
             >
               Canvas
             </h1>
@@ -59,7 +59,9 @@ exports[`Storyshots Home Home Page 1`] = `
                       color="inherit"
                       data-euiicon-type="plusInCircleFilled"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                     <span
                       className="euiButton__text"
                     >
@@ -75,10 +77,10 @@ exports[`Storyshots Home Home Page 1`] = `
           className="euiPageHeaderContent__bottom"
         >
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
           />
           <div
-            className="euiTabs euiTabs--large euiTabs--condensed"
+            className="euiTabs euiTabs--large"
             role="tablist"
           >
             <button
@@ -117,7 +119,7 @@ exports[`Storyshots Home Home Page 1`] = `
       </div>
     </header>
     <div
-      className="euiPanel euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--borderRadiusNone"
+      className="euiPanel euiPanel--plain euiPageContent euiPageContent--borderRadiusNone css-10ffim0-euiPanel-grow-none-plain"
       role="main"
     >
       <div
@@ -135,7 +137,9 @@ exports[`Storyshots Home Home Page 1`] = `
             className="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <span
-              className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+              aria-label="Loading"
+              className="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+              role="progressbar"
             />
           </div>
         </div>

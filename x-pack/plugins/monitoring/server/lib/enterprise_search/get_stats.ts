@@ -6,30 +6,36 @@
  */
 
 import moment from 'moment';
+import { TimeRange } from '../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
-import { checkParam } from '../error_missing_required';
+import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import {
   entSearchAggFilterPath,
-  entSearchUuidsAgg,
   entSearchAggResponseHandler,
+  entSearchUuidsAgg,
 } from './_enterprise_search_stats';
 
 export async function getStats(
-  req: LegacyRequest,
-  entSearchIndexPattern: string,
+  req: LegacyRequest<unknown, unknown, { ccs?: string; timeRange: TimeRange }>,
   clusterUuid: string
 ) {
-  checkParam(entSearchIndexPattern, 'entSearchIndexPattern in getStats');
-
-  const config = req.server.config();
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const maxBucketSize = config.ui.max_bucket_size;
+
+  // just get the legacy pattern since no integration exists yet
+  const indexPattern = getLegacyIndexPattern({
+    moduleType: 'enterprisesearch',
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+  });
 
   const params = {
-    index: entSearchIndexPattern,
+    index: indexPattern,
     filter_path: entSearchAggFilterPath,
     size: 0,
     ignore_unavailable: true,
@@ -39,7 +45,7 @@ export async function getStats(
         end,
         uuid: clusterUuid,
       }),
-      aggs: entSearchUuidsAgg(maxBucketSize!),
+      aggs: entSearchUuidsAgg(maxBucketSize),
     },
   };
 

@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');
 
-      await checkSampleDashboardLoaded();
+      await checkSampleDashboardLoaded('xyVisChart');
 
       // load URL to restore a saved session
       await PageObjects.searchSessionsManagement.goTo();
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      await checkSampleDashboardLoaded();
+      await checkSampleDashboardLoaded('xyVisChart');
 
       // Check that session is restored
       await searchSessions.expectState('restored');
@@ -83,11 +83,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // HELPERS
 
-  async function checkSampleDashboardLoaded() {
+  async function checkSampleDashboardLoaded(visualizationContainer?: string) {
     log.debug('Checking no error labels');
     await testSubjects.missingOrFail('embeddableErrorLabel');
     log.debug('Checking charts rendered');
-    await elasticChart.waitForRenderComplete('lnsVisualizationContainer');
+    await elasticChart.waitForRenderComplete(visualizationContainer ?? 'lnsVisualizationContainer');
     log.debug('Checking saved searches rendered');
     await dashboardExpect.savedSearchRowCount(11);
     log.debug('Checking input controls rendered');
@@ -98,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await find.existsByCssSelector('.vgaVis__view')).to.be(true);
     log.debug('Checking map rendered');
     await dashboardPanelActions.openInspectorByTitle('[Flights] Origin Time Delayed');
+    await inspector.openInspectorView('inspectorViewChooserRequests');
     const requestStats = await inspector.getTableData();
     const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
     expect(totalHits).to.equal('0');

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
 import type { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getFieldEditorOpener } from './open_editor';
@@ -30,10 +30,7 @@ export class IndexPatternFieldEditorPlugin
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const { fieldFormatEditors } = this.formatEditorService.start();
-    const {
-      application: { capabilities },
-      http,
-    } = core;
+    const { http } = core;
     const { data, usageCollection, dataViews, fieldFormats } = plugins;
     const openDeleteModal = getFieldDeleteModalOpener({
       core,
@@ -53,9 +50,7 @@ export class IndexPatternFieldEditorPlugin
       }),
       openDeleteModal,
       userPermissions: {
-        editIndexPattern: () => {
-          return capabilities.management.kibana.indexPatterns;
-        },
+        editIndexPattern: () => dataViews.getCanSaveSync(),
       },
       DeleteRuntimeFieldProvider: getDeleteFieldProvider(openDeleteModal),
     };

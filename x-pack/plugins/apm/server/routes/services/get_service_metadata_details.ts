@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   AGENT,
   CLOUD,
   CLOUD_AVAILABILITY_ZONE,
+  CLOUD_REGION,
   CLOUD_MACHINE_TYPE,
+  CLOUD_SERVICE_NAME,
   CONTAINER_ID,
   HOST,
   KUBERNETES,
@@ -18,9 +21,10 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
+  FAAS_ID,
+  FAAS_TRIGGER_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
-import { rangeQuery } from '../../../../observability/server';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
@@ -50,11 +54,18 @@ export interface ServiceMetadataDetails {
     totalNumberInstances?: number;
     type?: ContainerType;
   };
+  serverless?: {
+    type?: string;
+    functionNames?: string[];
+    faasTriggerTypes?: string[];
+  };
   cloud?: {
     provider?: string;
     availabilityZones?: string[];
+    regions?: string[];
     machineTypes?: string[];
     projectName?: string;
+    serviceName?: string;
   };
 }
 
@@ -104,9 +115,33 @@ export async function getServiceMetadataDetails({
             size: 10,
           },
         },
+        regions: {
+          terms: {
+            field: CLOUD_REGION,
+            size: 10,
+          },
+        },
+        cloudServices: {
+          terms: {
+            field: CLOUD_SERVICE_NAME,
+            size: 1,
+          },
+        },
         machineTypes: {
           terms: {
             field: CLOUD_MACHINE_TYPE,
+            size: 10,
+          },
+        },
+        faasTriggerTypes: {
+          terms: {
+            field: FAAS_TRIGGER_TYPE,
+            size: 10,
+          },
+        },
+        faasFunctionNames: {
+          terms: {
+            field: FAAS_ID,
             size: 10,
           },
         },
@@ -153,11 +188,28 @@ export async function getServiceMetadataDetails({
         }
       : undefined;
 
+  const serverlessDetails =
+    !!response.aggregations?.faasTriggerTypes?.buckets.length && cloud
+      ? {
+          type: cloud.service?.name,
+          functionNames: response.aggregations?.faasFunctionNames.buckets
+            .map((bucket) => getLambdaFunctionNameFromARN(bucket.key as string))
+            .filter((name) => name),
+          faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
+            (bucket) => bucket.key as string
+          ),
+        }
+      : undefined;
+
   const cloudDetails = cloud
     ? {
         provider: cloud.provider,
         projectName: cloud.project?.name,
+        serviceName: cloud.service?.name,
         availabilityZones: response.aggregations?.availabilityZones.buckets.map(
+          (bucket) => bucket.key as string
+        ),
+        regions: response.aggregations?.regions.buckets.map(
           (bucket) => bucket.key as string
         ),
         machineTypes: response.aggregations?.machineTypes.buckets.map(
@@ -169,6 +221,12 @@ export async function getServiceMetadataDetails({
   return {
     service: serviceMetadataDetails,
     container: containerDetails,
+    serverless: serverlessDetails,
     cloud: cloudDetails,
   };
+}
+
+function getLambdaFunctionNameFromARN(arn: string) {
+  // Lambda function ARN example: arn:aws:lambda:us-west-2:123456789012:function:my-function
+  return arn.split(':')[6] || '';
 }

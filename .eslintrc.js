@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+const Path = require('path');
+const Fs = require('fs');
+
+const globby = require('globby');
+
 const APACHE_2_0_LICENSE_HEADER = `
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -89,22 +94,32 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+const KBN_HANDLEBARS_HEADER = `
+/*
+ * Elasticsearch B.V licenses this file to you under the MIT License.
+ * See \`packages/kbn-handlebars/LICENSE\` for more information.
+ */
+`;
+
+const KBN_HANDLEBARS_HANDLEBARS_HEADER = `
+/*
+  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+  * and may include modifications made by Elasticsearch B.V.
+  * Elasticsearch B.V. licenses this file to you under the MIT License.
+  * See \`packages/kbn-handlebars/LICENSE\` for more information.
+  */
+`;
+
+const packagePkgJsons = globby.sync('*/package.json', {
+  cwd: Path.resolve(__dirname, 'packages'),
+  absolute: true,
+});
+
 /** Packages which should not be included within production code. */
-const DEV_PACKAGES = [
-  'kbn-babel-code-parser',
-  'kbn-dev-utils',
-  'kbn-cli-dev-mode',
-  'kbn-docs-utils',
-  'kbn-es*',
-  'kbn-eslint*',
-  'kbn-optimizer',
-  'kbn-plugin-generator',
-  'kbn-plugin-helpers',
-  'kbn-pm',
-  'kbn-storybook',
-  'kbn-telemetry-tools',
-  'kbn-test',
-];
+const DEV_PACKAGES = packagePkgJsons.flatMap((path) => {
+  const pkg = JSON.parse(Fs.readFileSync(path, 'utf8'));
+  return pkg.kibana && pkg.kibana.devOnly ? Path.dirname(Path.basename(path)) : [];
+});
 
 /** Directories (at any depth) which include dev-only code. */
 const DEV_DIRECTORIES = [
@@ -226,16 +241,12 @@ const RESTRICTED_IMPORTS = [
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
   },
-  {
-    name: '@kbn/io-ts-utils',
-    message: `Import directly from @kbn/io-ts-utils/{method} submodules`,
-  },
 ];
 
 module.exports = {
   root: true,
 
-  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
+  extends: ['plugin:@elastic/eui/recommended', '@kbn/eslint-config'],
 
   overrides: [
     /**
@@ -279,12 +290,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: [
-        '**/*.{js,mjs,ts,tsx}',
-        '!plugins/**/*',
-        '!packages/elastic-datemath/**/*',
-        '!packages/elastic-eslint-config-kibana/**/*',
-      ],
+      files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -303,6 +309,8 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -314,8 +322,8 @@ module.exports = {
      */
     {
       files: [
-        'packages/elastic-datemath/**/*.{js,mjs,ts,tsx}',
-        'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-eslint-config/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/eslint/require-license-header': [
@@ -335,6 +343,8 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -374,6 +384,8 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -403,6 +415,8 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -428,6 +442,8 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -453,6 +469,66 @@ module.exports = {
               OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * @kbn/handlebars package requires special license headers
+     */
+    {
+      files: ['packages/kbn-handlebars/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: KBN_HANDLEBARS_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['packages/kbn-handlebars/src/upstream/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: KBN_HANDLEBARS_HANDLEBARS_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -581,35 +657,12 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/test/performance/**/*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
         'import/no-named-as-default-member': 'off',
         'import/no-named-as-default': 'off',
-      },
-    },
-
-    /**
-     * Files that are allowed to import webpack-specific stuff
-     */
-    {
-      files: [
-        '**/public/**/*.js',
-        'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
-      ],
-      settings: {
-        // instructs import/no-extraneous-dependencies to treat certain modules
-        // as core modules, even if they aren't listed in package.json
-        'import/core-modules': ['plugins'],
-
-        'import/resolver': {
-          '@kbn/eslint-import-resolver-kibana': {
-            forceNode: false,
-            rootPackageName: 'kibana',
-            kibanaPath: '.',
-            pluginMap: {},
-          },
-        },
       },
     },
 
@@ -700,7 +753,6 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
@@ -857,12 +909,13 @@ module.exports = {
     },
 
     /**
-     * APM and Observability overrides
+     * APM, UX and Observability overrides
      */
     {
       files: [
         'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -874,7 +927,10 @@ module.exports = {
           },
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
+        'react-hooks/exhaustive-deps': [
+          'error',
+          { additionalHooks: '^(useFetcher|useProgressiveFetcher)$' },
+        ],
       },
     },
     {
@@ -885,6 +941,31 @@ module.exports = {
           {
             namedComponents: 'function-declaration',
             unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
+    {
+      // require explicit return types in route handlers for performance reasons
+      files: ['x-pack/plugins/apm/server/**/route.ts'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': [
+          'error',
+          {
+            allowTypedFunctionExpressions: false,
+          },
+        ],
+      },
+    },
+
+    {
+      // disable imports from legacy uptime plugin
+      files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['**/legacy_uptime/*'],
           },
         ],
       },
@@ -975,6 +1056,13 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
             patterns: ['*legacy*'],
+            paths: [
+              {
+                name: 'react-router-dom',
+                importNames: ['Route'],
+                message: "import { Route } from '@kbn/kibana-react-plugin/public'",
+              },
+            ],
           },
         ],
       },
@@ -1072,6 +1160,13 @@ module.exports = {
         'symbol-description': 'error',
         'vars-on-top': 'error',
         '@typescript-eslint/no-duplicate-imports': ['error'],
+      },
+    },
+    {
+      files: ['x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}'],
+      excludedFiles: ['x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      rules: {
+        'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
     },
 
@@ -1258,132 +1353,6 @@ module.exports = {
     },
 
     /**
-     * Metrics entities overrides. These rules below are maintained and owned by
-     * the people within the security-solution-platform team. Please see ping them
-     * or check with them if you are encountering issues, have suggestions, or would
-     * like to add, change, or remove any particular rule. Linters, Typescript, and rules
-     * evolve and change over time just like coding styles, so please do not hesitate to
-     * reach out.
-     */
-    {
-      // front end and common typescript and javascript files only
-      files: [
-        'x-pack/plugins/metrics_entities/public/**/*.{js,mjs,ts,tsx}',
-        'x-pack/plugins/metrics_entities/common/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'import/no-nodejs-modules': 'error',
-        'no-restricted-imports': [
-          'error',
-          {
-            // prevents UI code from importing server side code and then webpack including it when doing builds
-            patterns: ['**/server/*'],
-          },
-        ],
-      },
-    },
-    {
-      // typescript and javascript for front and back end
-      files: ['x-pack/plugins/metrics_entities/**/*.{js,mjs,ts,tsx}'],
-      plugins: ['eslint-plugin-node'],
-      env: {
-        jest: true,
-      },
-      rules: {
-        'accessor-pairs': 'error',
-        'array-callback-return': 'error',
-        'no-array-constructor': 'error',
-        complexity: 'error',
-        'consistent-return': 'error',
-        'func-style': ['error', 'expression'],
-        'import/order': [
-          'error',
-          {
-            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-            'newlines-between': 'always',
-          },
-        ],
-        'sort-imports': [
-          'error',
-          {
-            ignoreDeclarationSort: true,
-          },
-        ],
-        'node/no-deprecated-api': 'error',
-        'no-bitwise': 'error',
-        'no-continue': 'error',
-        'no-dupe-keys': 'error',
-        'no-duplicate-case': 'error',
-        'no-duplicate-imports': 'error',
-        'no-empty-character-class': 'error',
-        'no-empty-pattern': 'error',
-        'no-ex-assign': 'error',
-        'no-extend-native': 'error',
-        'no-extra-bind': 'error',
-        'no-extra-boolean-cast': 'error',
-        'no-extra-label': 'error',
-        'no-func-assign': 'error',
-        'no-implicit-globals': 'error',
-        'no-implied-eval': 'error',
-        'no-invalid-regexp': 'error',
-        'no-inner-declarations': 'error',
-        'no-lone-blocks': 'error',
-        'no-multi-assign': 'error',
-        'no-misleading-character-class': 'error',
-        'no-new-symbol': 'error',
-        'no-obj-calls': 'error',
-        'no-param-reassign': ['error', { props: true }],
-        'no-process-exit': 'error',
-        'no-prototype-builtins': 'error',
-        'no-return-await': 'error',
-        'no-self-compare': 'error',
-        'no-shadow-restricted-names': 'error',
-        'no-sparse-arrays': 'error',
-        'no-this-before-super': 'error',
-        // rely on typescript
-        'no-undef': 'off',
-        'no-unreachable': 'error',
-        'no-unsafe-finally': 'error',
-        'no-useless-call': 'error',
-        'no-useless-catch': 'error',
-        'no-useless-concat': 'error',
-        'no-useless-computed-key': 'error',
-        'no-useless-escape': 'error',
-        'no-useless-rename': 'error',
-        'no-useless-return': 'error',
-        'no-void': 'error',
-        'one-var-declaration-per-line': 'error',
-        'prefer-object-spread': 'error',
-        'prefer-promise-reject-errors': 'error',
-        'prefer-rest-params': 'error',
-        'prefer-spread': 'error',
-        'prefer-template': 'error',
-        'require-atomic-updates': 'error',
-        'symbol-description': 'error',
-        'vars-on-top': 'error',
-        '@typescript-eslint/explicit-member-accessibility': 'error',
-        '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-useless-constructor': 'error',
-        '@typescript-eslint/unified-signatures': 'error',
-        '@typescript-eslint/explicit-function-return-type': 'error',
-        '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
-        'no-template-curly-in-string': 'error',
-        'sort-keys': 'error',
-        'prefer-destructuring': 'error',
-        'no-restricted-imports': [
-          'error',
-          {
-            // prevents code from importing files that contain the name "legacy" within their name. This is a mechanism
-            // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
-            // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it has valid uses.
-            patterns: ['*legacy*'],
-          },
-        ],
-      },
-    },
-    /**
      * Alerting Services overrides
      */
     {
@@ -1473,6 +1442,12 @@ module.exports = {
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
+        'sort-keys': 1, // warning
+        '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
+        ],
       },
     },
     {
@@ -1553,14 +1528,6 @@ module.exports = {
     {
       files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
-      rules: {
-        'import/no-unresolved': [
-          'error',
-          {
-            ignore: ['!!raw-loader.+.svg$'],
-          },
-        ],
-      },
     },
     {
       files: ['x-pack/plugins/canvas/public/**/*.js'],
@@ -1569,7 +1536,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-ui-shared-deps-src/src/flot_charts/**/*.js'],
+      files: ['packages/kbn-flot-charts/lib/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1597,6 +1564,20 @@ module.exports = {
       plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
+        'padding-line-between-statements': [
+          'error',
+          {
+            blankLine: 'always',
+            prev: ['block-like'],
+            next: ['*'],
+          },
+          {
+            blankLine: 'always',
+            prev: ['*'],
+            next: ['return'],
+          },
+        ],
+        'padded-blocks': ['error', 'always'],
         'arrow-body-style': ['error', 'as-needed'],
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
@@ -1613,28 +1594,6 @@ module.exports = {
         'react-perf/jsx-no-new-array-as-prop': 'error',
         'react-perf/jsx-no-new-function-as-prop': 'error',
         'react/jsx-no-bind': 'error',
-      },
-    },
-
-    /**
-     * Prettier disables all conflicting rules, listing as last override so it takes precedence
-     */
-    {
-      files: ['**/*'],
-      rules: {
-        ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
-      },
-    },
-    /**
-     * Enterprise Search Prettier override
-     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
-     */
-    {
-      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
-      rules: {
-        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
 
@@ -1750,6 +1709,35 @@ module.exports = {
       ],
       rules: {
         '@kbn/eslint/no_export_all': 'error',
+      },
+    },
+
+    {
+      files: ['packages/kbn-type-summarizer/**/*.ts'],
+      rules: {
+        'no-bitwise': 'off',
+      },
+    },
+
+    /**
+     * Prettier disables all conflicting rules, listing as last override so it takes precedence
+     */
+    {
+      files: ['**/*'],
+      rules: {
+        ...require('eslint-config-prettier').rules,
+        ...require('eslint-config-prettier/react').rules,
+        ...require('eslint-config-prettier/@typescript-eslint').rules,
+      },
+    },
+    /**
+     * Enterprise Search Prettier override
+     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
   ],

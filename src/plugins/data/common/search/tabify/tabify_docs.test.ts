@@ -7,11 +7,11 @@
  */
 
 import { tabifyDocs, flattenHit } from './tabify_docs';
-import { IndexPattern, DataView } from '../..';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
-import { stubbedSavedObjectIndexPattern } from '../../../../data_views/common/data_view.stub';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 
 class MockFieldFormatter {}
 
@@ -71,7 +71,7 @@ describe('tabify_docs', () => {
         },
         indexPattern
       );
-      const expectedOrder = ['_abc', 'date', 'name', 'zzz', '_id', '_routing', '_score', '_type'];
+      const expectedOrder = ['_abc', 'date', 'name', 'zzz', '_id', '_routing', '_score'];
       expect(Object.keys(response)).toEqual(expectedOrder);
       expect(Object.entries(response).map(([key]) => key)).toEqual(expectedOrder);
     });
@@ -127,7 +127,7 @@ describe('tabify_docs', () => {
       getDefaultInstance: (id: string) => ({ toJSON: () => ({ id }) }),
     };
 
-    const index = new IndexPattern({
+    const index = new DataView({
       spec: {
         id: 'test-index',
         fields: {
@@ -179,7 +179,7 @@ describe('tabify_docs', () => {
     it('combines meta fields from index pattern', () => {
       const table = tabifyDocs(response, index);
       expect(table.columns.map((col) => col.id)).toEqual(
-        expect.arrayContaining(['_id', '_index', '_score', '_type'])
+        expect.arrayContaining(['_id', '_index', '_score'])
       );
     });
 

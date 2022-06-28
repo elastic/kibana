@@ -34,7 +34,7 @@ describe('SourceLogic', () => {
 
   const contentSource = fullContentSources[0];
 
-  const defaultValues = {
+  const DEFAULT_VALUES = {
     contentSource: {},
     contentItems: [],
     dataLoading: true,
@@ -58,15 +58,18 @@ describe('SourceLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(SourceLogic.values).toEqual(defaultValues);
+    expect(SourceLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
     it('setContentSource', () => {
       SourceLogic.actions.setContentSource(contentSource);
 
-      expect(SourceLogic.values.contentSource).toEqual(contentSource);
-      expect(SourceLogic.values.dataLoading).toEqual(false);
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        contentSource,
+        dataLoading: false,
+      });
     });
 
     it('onUpdateSourceName', () => {
@@ -74,9 +77,13 @@ describe('SourceLogic', () => {
       SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.onUpdateSourceName(NAME);
 
-      expect(SourceLogic.values.contentSource).toEqual({
-        ...contentSource,
-        name: NAME,
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        dataLoading: false,
+        contentSource: {
+          ...contentSource,
+          name: NAME,
+        },
       });
       expect(flashSuccessToast).toHaveBeenCalled();
     });
@@ -84,9 +91,12 @@ describe('SourceLogic', () => {
     it('setSearchResults', () => {
       SourceLogic.actions.setSearchResults(searchServerResponse);
 
-      expect(SourceLogic.values.contentItems).toEqual(contentItems);
-      expect(SourceLogic.values.contentMeta).toEqual(meta);
-      expect(SourceLogic.values.sectionLoading).toEqual(false);
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        contentItems,
+        contentMeta: meta,
+        sectionLoading: false,
+      });
     });
 
     it('setContentFilterValue', () => {
@@ -95,14 +105,22 @@ describe('SourceLogic', () => {
       SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.setContentFilterValue(VALUE);
 
-      expect(SourceLogic.values.contentMeta).toEqual({
-        ...meta,
-        page: {
-          ...meta.page,
-          current: DEFAULT_META.page.current,
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        dataLoading: false,
+        sectionLoading: false,
+        contentItems,
+        contentSource,
+
+        contentMeta: {
+          ...meta,
+          page: {
+            ...meta.page,
+            current: DEFAULT_META.page.current,
+          },
         },
+        contentFilterValue: VALUE,
       });
-      expect(SourceLogic.values.contentFilterValue).toEqual(VALUE);
     });
 
     it('setActivePage', () => {
@@ -110,11 +128,16 @@ describe('SourceLogic', () => {
       SourceLogic.actions.setSearchResults(searchServerResponse);
       SourceLogic.actions.setActivePage(PAGE);
 
-      expect(SourceLogic.values.contentMeta).toEqual({
-        ...meta,
-        page: {
-          ...meta.page,
-          current: PAGE,
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        contentItems,
+        sectionLoading: false,
+        contentMeta: {
+          ...meta,
+          page: {
+            ...meta.page,
+            current: PAGE,
+          },
         },
       });
     });
@@ -124,13 +147,19 @@ describe('SourceLogic', () => {
       SourceLogic.actions.removeContentSource(contentSource.id);
       SourceLogic.actions.setButtonNotLoading();
 
-      expect(SourceLogic.values.buttonLoading).toEqual(false);
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        buttonLoading: false,
+      });
     });
 
     it('showDiagnosticDownloadButton', () => {
       SourceLogic.actions.showDiagnosticDownloadButton();
 
-      expect(SourceLogic.values.diagnosticDownloadButtonVisible).toEqual(true);
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        diagnosticDownloadButtonVisible: true,
+      });
     });
   });
 

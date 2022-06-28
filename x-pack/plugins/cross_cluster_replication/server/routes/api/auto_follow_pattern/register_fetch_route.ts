@@ -23,12 +23,10 @@ export const registerFetchRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
-        const {
-          body: { patterns },
-        } = await client.asCurrentUser.ccr.getAutoFollowPattern();
+        const { patterns } = await client.asCurrentUser.ccr.getAutoFollowPattern();
         return response.ok({
           body: {
             // @ts-expect-error Once #98266 is merged, test this again.

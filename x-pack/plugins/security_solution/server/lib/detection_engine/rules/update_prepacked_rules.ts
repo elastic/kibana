@@ -6,40 +6,20 @@
  */
 
 import { chunk } from 'lodash/fp';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { RulesClient, PartialAlert } from '../../../../../alerting/server';
+import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../common/constants';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 import { legacyMigrate } from './utils';
-
-/**
- * How many rules to update at a time is set to 50 from errors coming from
- * the slow environments such as cloud when the rule updates are > 100 we were
- * seeing timeout issues.
- *
- * Since there is not timeout options at the alerting API level right now, we are
- * at the mercy of the Elasticsearch server client/server default timeouts and what
- * we are doing could be considered a workaround to not being able to increase the timeouts.
- *
- * However, other bad effects and saturation of connections beyond 50 makes this a "noisy neighbor"
- * if we don't limit its number of connections as we increase the number of rules that can be
- * installed at a time.
- *
- * Lastly, we saw weird issues where Chrome on upstream 408 timeouts will re-call the REST route
- * which in turn could create additional connections we want to avoid.
- *
- * See file import_rules_route.ts for another area where 50 was chosen, therefore I chose
- * 50 here to mimic it as well. If you see this re-opened or what similar to it, consider
- * reducing the 50 above to a lower number.
- *
- * See the original ticket here:
- * https://github.com/elastic/kibana/issues/94418
- */
-export const UPDATE_CHUNK_SIZE = 50;
+import { deleteRules } from './delete_rules';
+import { PrepackagedRulesError } from '../routes/rules/add_prepackaged_rules_route';
+import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
+import { createRules } from './create_rules';
+import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
 /**
  * Updates the prepackaged rules given a set of rules and output index.
@@ -47,29 +27,24 @@ export const UPDATE_CHUNK_SIZE = 50;
  * avoid being a "noisy neighbor".
  * @param rulesClient Alerting client
  * @param spaceId Current user spaceId
- * @param ruleStatusClient Rule execution log client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  */
 export const updatePrepackagedRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
-  spaceId: string,
-  ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
-  isRuleRegistryEnabled: boolean
+  ruleExecutionLog: IRuleExecutionLogForRoutes
 ): Promise<void> => {
-  const ruleChunks = chunk(UPDATE_CHUNK_SIZE, rules);
+  const ruleChunks = chunk(MAX_RULES_TO_UPDATE_IN_PARALLEL, rules);
   for (const ruleChunk of ruleChunks) {
     const rulePromises = createPromises(
       rulesClient,
       savedObjectsClient,
-      spaceId,
-      ruleStatusClient,
       ruleChunk,
       outputIndex,
-      isRuleRegistryEnabled
+      ruleExecutionLog
     );
     await Promise.all(rulePromises);
   }
@@ -79,7 +54,6 @@ export const updatePrepackagedRules = async (
  * Creates promises of the rules and returns them.
  * @param rulesClient Alerting client
  * @param spaceId Current user spaceId
- * @param ruleStatusClient Rule execution log client
  * @param rules The rules to apply the update for
  * @param outputIndex The output index to apply the update to.
  * @returns Promise of what was updated.
@@ -87,18 +61,18 @@ export const updatePrepackagedRules = async (
 export const createPromises = (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
-  spaceId: string,
-  ruleStatusClient: IRuleExecutionLogClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
-  isRuleRegistryEnabled: boolean
-): Array<Promise<PartialAlert<RuleParams> | null>> => {
+  ruleExecutionLog: IRuleExecutionLogForRoutes
+): Array<Promise<PartialRule<RuleParams> | null>> => {
   return rules.map(async (rule) => {
     const {
       author,
       building_block_type: buildingBlockType,
       description,
+      timestamp_field: timestampField,
       event_category_override: eventCategoryOverride,
+      tiebreaker_field: tiebreakerField,
       false_positives: falsePositives,
       from,
       query,
@@ -109,12 +83,16 @@ export const createPromises = (
       filters: filtersObject,
       rule_id: ruleId,
       index,
+      data_view_id: dataViewId,
       interval,
       max_signals: maxSignals,
+      related_integrations: relatedIntegrations,
+      required_fields: requiredFields,
       risk_score: riskScore,
       risk_score_mapping: riskScoreMapping,
       rule_name_override: ruleNameOverride,
       name,
+      setup,
       severity,
       severity_mapping: severityMapping,
       tags,
@@ -143,7 +121,6 @@ export const createPromises = (
     } = rule;
 
     const existingRule = await readRules({
-      isRuleRegistryEnabled,
       rulesClient,
       ruleId,
       id: undefined,
@@ -158,61 +135,140 @@ export const createPromises = (
       rule: existingRule,
     });
 
-    // Note: we do not pass down enabled as we do not want to suddenly disable
-    // or enable rules on the user when they were not expecting it if a rule updates
-    return patchRules({
-      rulesClient,
-      savedObjectsClient,
-      author,
-      buildingBlockType,
-      description,
-      eventCategoryOverride,
-      falsePositives,
-      from,
-      query,
-      language,
-      license,
-      outputIndex,
-      rule: migratedRule,
-      savedId,
-      spaceId,
-      ruleStatusClient,
-      meta,
-      filters,
-      index,
-      interval,
-      maxSignals,
-      riskScore,
-      riskScoreMapping,
-      ruleNameOverride,
-      name,
-      severity,
-      severityMapping,
-      tags,
-      timestampOverride,
-      to,
-      type,
-      threat,
-      threshold,
-      threatFilters,
-      threatIndex,
-      threatIndicatorPath,
-      threatQuery,
-      threatMapping,
-      threatLanguage,
-      concurrentSearches,
-      itemsPerSearch,
-      references,
-      version,
-      note,
-      anomalyThreshold,
-      enabled: undefined,
-      timelineId,
-      timelineTitle,
-      machineLearningJobId,
-      exceptionsList,
-      throttle,
-      actions: undefined,
-    });
+    if (!migratedRule) {
+      throw new PrepackagedRulesError(`Failed to find rule ${ruleId}`, 500);
+    }
+
+    // If we're trying to change the type of a prepackaged rule, we need to delete the old one
+    // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
+    // and exception lists from the old rule
+    if (type !== migratedRule.params.type) {
+      await deleteRules({
+        ruleId: migratedRule.id,
+        rulesClient,
+        ruleExecutionLog,
+      });
+
+      return (await createRules({
+        id: migratedRule.id,
+        rulesClient,
+        anomalyThreshold,
+        author,
+        buildingBlockType,
+        description,
+        enabled: migratedRule.enabled, // Enabled comes from existing rule
+        timestampField,
+        eventCategoryOverride,
+        tiebreakerField,
+        falsePositives,
+        from,
+        immutable: true, // At the moment we force all prepackaged rules to be immutable
+        query,
+        language,
+        license,
+        machineLearningJobId,
+        outputIndex,
+        savedId,
+        timelineId,
+        timelineTitle,
+        meta,
+        filters,
+        ruleId,
+        index,
+        dataViewId,
+        interval,
+        maxSignals,
+        relatedIntegrations,
+        requiredFields,
+        riskScore,
+        riskScoreMapping,
+        ruleNameOverride,
+        name,
+        setup,
+        severity,
+        severityMapping,
+        tags,
+        to,
+        type,
+        threat,
+        threatFilters,
+        threatMapping,
+        threatLanguage,
+        concurrentSearches,
+        itemsPerSearch,
+        threatQuery,
+        threatIndex,
+        threatIndicatorPath,
+        threshold,
+        throttle: migratedRule.throttle, // Throttle comes from the existing rule
+        timestampOverride,
+        references,
+        note,
+        version,
+        // The exceptions list passed in to this function has already been merged with the exceptions list of
+        // the existing rule
+        exceptionsList,
+        actions: migratedRule.actions.map(transformAlertToRuleAction), // Actions come from the existing rule
+      })) as PartialRule<RuleParams>; // TODO: Replace AddPrepackagedRulesSchema with type specific rules schema so we can clean up these types
+    } else {
+      // Note: we do not pass down enabled as we do not want to suddenly disable
+      // or enable rules on the user when they were not expecting it if a rule updates
+      return patchRules({
+        rulesClient,
+        author,
+        buildingBlockType,
+        description,
+        timestampField,
+        eventCategoryOverride,
+        tiebreakerField,
+        falsePositives,
+        from,
+        query,
+        language,
+        license,
+        outputIndex,
+        rule: migratedRule,
+        savedId,
+        meta,
+        filters,
+        index,
+        interval,
+        maxSignals,
+        relatedIntegrations,
+        requiredFields,
+        riskScore,
+        riskScoreMapping,
+        ruleNameOverride,
+        name,
+        setup,
+        severity,
+        severityMapping,
+        tags,
+        timestampOverride,
+        to,
+        type,
+        threat,
+        threshold,
+        threatFilters,
+        threatIndex,
+        threatIndicatorPath,
+        threatQuery,
+        threatMapping,
+        threatLanguage,
+        concurrentSearches,
+        itemsPerSearch,
+        references,
+        version,
+        note,
+        anomalyThreshold,
+        enabled: undefined,
+        timelineId,
+        timelineTitle,
+        machineLearningJobId,
+        exceptionsList,
+        throttle,
+        actions: undefined,
+      });
+    }
   });
 };

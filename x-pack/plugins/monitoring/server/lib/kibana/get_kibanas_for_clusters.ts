@@ -6,10 +6,12 @@
  */
 
 import { chain, find } from 'lodash';
-import { LegacyRequest, Cluster, Bucket } from '../../types';
-import { checkParam } from '../error_missing_required';
+import { Globals } from '../../static_globals';
+import { Bucket, Cluster, LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
+import { isKibanaStatusStale } from './is_kibana_status_stale';
 
 /*
  * Get high-level info for Kibanas in a set of clusters
@@ -24,28 +26,34 @@ import { KibanaClusterMetric } from '../metrics';
  *  - number of instances
  *  - combined health
  */
-export function getKibanasForClusters(
-  req: LegacyRequest,
-  kbnIndexPattern: string,
-  clusters: Cluster[]
-) {
-  checkParam(kbnIndexPattern, 'kbnIndexPattern in kibana/getKibanasForClusters');
-
-  const config = req.server.config();
+export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], ccs?: string) {
+  const config = req.server.config;
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
+
+  const moduleType = 'kibana';
+  const type = 'kibana_stats';
+  const dataset = 'stats';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    dataset,
+    ccs,
+  });
 
   return Promise.all(
     clusters.map((cluster) => {
       const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
       const metric = KibanaClusterMetric.getMetricFields();
       const params = {
-        index: kbnIndexPattern,
+        index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
         body: {
           query: createQuery({
-            types: ['stats', 'kibana_stats'],
+            type,
+            dsDataset: `${moduleType}.${dataset}`,
+            metricset: dataset,
             start,
             end,
             clusterUuid,
@@ -55,7 +63,7 @@ export function getKibanasForClusters(
             kibana_uuids: {
               terms: {
                 field: 'kibana_stats.kibana.uuid',
-                size: config.get('monitoring.ui.max_bucket_size'),
+                size: config.ui.max_bucket_size,
               },
               aggs: {
                 latest_report: {
@@ -67,6 +75,11 @@ export function getKibanasForClusters(
                     },
                   },
                   aggs: {
+                    last_seen: {
+                      max: {
+                        field: 'kibana_stats.timestamp',
+                      },
+                    },
                     response_time_max: {
                       max: {
                         field: 'kibana_stats.response_times.max',
@@ -178,6 +191,7 @@ export function getKibanasForClusters(
         let responseTime = 0;
         let memorySize = 0;
         let memoryLimit = 0;
+        let someStatusIsStale = true;
 
         // if the cluster has kibana instances at all
         if (kibanaUuids.length) {
@@ -197,6 +211,8 @@ export function getKibanasForClusters(
           responseTime = aggregations.response_time_max?.value;
           memorySize = aggregations.memory_rss?.value;
           memoryLimit = aggregations.memory_heap_size_limit?.value;
+
+          someStatusIsStale = kibanaUuids.some(hasStaleStatus);
         }
 
         return {
@@ -204,6 +220,7 @@ export function getKibanasForClusters(
           stats: {
             uuids: kibanaUuids.map(({ key }: Bucket) => key),
             status,
+            some_status_is_stale: someStatusIsStale,
             requests_total: requestsTotal,
             concurrent_connections: connections,
             response_time_max: responseTime,
@@ -215,4 +232,20 @@ export function getKibanasForClusters(
       });
     })
   );
+}
+
+function hasStaleStatus(kibana: any) {
+  const buckets: any[] = kibana?.latest_report?.buckets ?? [];
+
+  if (buckets.length === 0) {
+    return true;
+  }
+
+  const lastSeenTimestamp: string | null = buckets[0]?.last_seen?.value_as_string ?? null;
+
+  if (lastSeenTimestamp === null) {
+    return true;
+  }
+
+  return isKibanaStatusStale(lastSeenTimestamp);
 }

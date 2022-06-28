@@ -22,6 +22,7 @@ import {
 
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { schema } from '@kbn/config-schema';
 import {
   SavedObjectsType,
   SavedObject,
@@ -43,7 +44,7 @@ import {
   SavedObjectsCreatePointInTimeFinderOptions,
 } from './point_in_time_finder';
 import { ALL_NAMESPACES_STRING } from './utils';
-import { loggerMock } from '../../../logging/logger.mock';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   SavedObjectsRawDocSource,
   SavedObjectsSerializer,
@@ -74,7 +75,7 @@ import {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
-} from 'kibana/server';
+} from '../../..';
 import { InternalBulkResolveError } from './internal_bulk_resolve';
 
 const { nodeTypes } = esKuery;
@@ -225,7 +226,16 @@ describe('SavedObjectsRepository', () => {
   const registry = new SavedObjectTypeRegistry();
   registry.registerType(createType('config'));
   registry.registerType(createType('index-pattern'));
-  registry.registerType(createType('dashboard'));
+  registry.registerType(
+    createType('dashboard', {
+      schemas: {
+        '8.0.0-testing': schema.object({
+          title: schema.maybe(schema.string()),
+          otherField: schema.maybe(schema.string()),
+        }),
+      },
+    })
+  );
   registry.registerType(createType(CUSTOM_INDEX_TYPE, { indexPattern: 'custom' }));
   registry.registerType(createType(NAMESPACE_AGNOSTIC_TYPE, { namespaceType: 'agnostic' }));
   registry.registerType(createType(MULTI_NAMESPACE_TYPE, { namespaceType: 'multiple' }));
@@ -463,9 +473,7 @@ describe('SavedObjectsRepository', () => {
       options?: SavedObjectsCreateOptions
     ) => {
       const response = getMockBulkCreateResponse(objects, options?.namespace);
-      client.bulk.mockResolvedValue(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-      );
+      client.bulk.mockResponse(response);
       return await savedObjectsRepository.bulkCreate(objects, options);
     };
 
@@ -828,9 +836,7 @@ describe('SavedObjectsRepository', () => {
         } else {
           response = getMockBulkCreateResponse([obj1, obj2]);
         }
-        client.bulk.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
+        client.bulk.mockResponseOnce(response);
 
         const objects = [obj1, obj, obj2];
         const result = await savedObjectsRepository.bulkCreate(objects);
@@ -931,9 +937,7 @@ describe('SavedObjectsRepository', () => {
           },
         ]);
         const bulkResponse = getMockBulkCreateResponse([o1, o5]);
-        client.bulk.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(bulkResponse)
-        );
+        client.bulk.mockResponseOnce(bulkResponse);
 
         const options = { overwrite: true };
         const result = await savedObjectsRepository.bulkCreate(objects, options);
@@ -970,6 +974,28 @@ describe('SavedObjectsRepository', () => {
           error: { error: 'Oh no, a bulk error!' },
         };
         await bulkCreateError(obj3, true, expectedErrorResult);
+      });
+
+      it(`returns errors for any bulk objects with invalid schemas`, async () => {
+        const response = getMockBulkCreateResponse([obj3]);
+        client.bulk.mockResponseOnce(response);
+
+        const result = await savedObjectsRepository.bulkCreate([
+          obj3,
+          // @ts-expect-error - Title should be a string and is intentionally malformed for testing
+          { ...obj3, id: 'three-again', attributes: { title: 123 } },
+        ]);
+        expect(client.bulk).toHaveBeenCalledTimes(1); // only called once for the valid object
+        expect(result.saved_objects).toEqual([
+          expect.objectContaining(obj3),
+          expect.objectContaining({
+            error: new Error(
+              '[attributes.title]: expected value of type [string] but got [number]: Bad Request'
+            ),
+            id: 'three-again',
+            type: 'dashboard',
+          }),
+        ]);
       });
     });
 
@@ -1055,9 +1081,7 @@ describe('SavedObjectsRepository', () => {
         };
         const objects = [obj1, obj, obj2];
         const response = getMockBulkCreateResponse([obj1, obj2]);
-        client.bulk.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
+        client.bulk.mockResponseOnce(response);
         const result = await savedObjectsRepository.bulkCreate(objects);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
@@ -1073,9 +1097,7 @@ describe('SavedObjectsRepository', () => {
         //        of the document when it actually does not, forcing to cast to any as BulkResponse
         //        does not contains _source
         const response = getMockBulkCreateResponse([obj1, obj2], namespace) as any;
-        client.bulk.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
+        client.bulk.mockResponseOnce(response);
 
         // Bulk create one object with id unspecified, and one with id specified
         const result = await savedObjectsRepository.bulkCreate([{ ...obj1, id: undefined }, obj2], {
@@ -1148,9 +1170,7 @@ describe('SavedObjectsRepository', () => {
       );
     const bulkGetSuccess = async (objects: SavedObject[], options?: SavedObjectsBaseOptions) => {
       const response = getMockMgetResponse(objects, options?.namespace);
-      client.mget.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-      );
+      client.mget.mockResponseOnce(response);
       const result = await bulkGet(objects, options);
       expect(client.mget).toHaveBeenCalledTimes(1);
       return result;
@@ -1328,7 +1348,7 @@ describe('SavedObjectsRepository', () => {
     describe('returns', () => {
       const expectSuccessResult = (
         { type, id }: TypeIdTuple,
-        doc: estypes.MgetHit<SavedObjectsRawDocSource>
+        doc: estypes.GetGetResult<SavedObjectsRawDocSource>
       ) => ({
         type,
         id,
@@ -1356,8 +1376,14 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           saved_objects: [
-            expectSuccessResult(obj1, response.docs[0]),
-            expectSuccessResult(obj2, response.docs[1]),
+            expectSuccessResult(
+              obj1,
+              response.docs[0] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
+            expectSuccessResult(
+              obj2,
+              response.docs[1] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
           ],
         });
       });
@@ -1377,9 +1403,15 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           saved_objects: [
-            expectSuccessResult(obj1, response.docs[0]),
+            expectSuccessResult(
+              obj1,
+              response.docs[0] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
             expectError(obj),
-            expectSuccessResult(obj2, response.docs[1]),
+            expectSuccessResult(
+              obj2,
+              response.docs[1] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
           ],
         });
       });
@@ -1505,14 +1537,10 @@ describe('SavedObjectsRepository', () => {
       const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
       if (multiNamespaceObjects?.length) {
         const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
-        client.mget.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
+        client.mget.mockResponseOnce(response);
       }
       const response = getMockBulkUpdateResponse(objects, options, includeOriginId);
-      client.bulk.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-      );
+      client.bulk.mockResponseOnce(response);
       const result = await savedObjectsRepository.bulkUpdate(objects, options);
       expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
       return result;
@@ -1660,20 +1688,6 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it(`defaults to the version of the existing document for multi-namespace types`, async () => {
-        // only multi-namespace documents are obtained using a pre-flight mget request
-        const objects = [
-          { ...obj1, type: MULTI_NAMESPACE_ISOLATED_TYPE },
-          { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE },
-        ];
-        await bulkUpdateSuccess(objects);
-        const overrides = {
-          if_seq_no: mockVersionProps._seq_no,
-          if_primary_term: mockVersionProps._primary_term,
-        };
-        expectClientCallArgsAction(objects, { method: 'update', overrides });
-      });
-
       it(`defaults to no version for types that are not multi-namespace`, async () => {
         const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
         await bulkUpdateSuccess(objects);
@@ -1731,12 +1745,6 @@ describe('SavedObjectsRepository', () => {
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
-        const overrides = {
-          // bulkUpdate uses a preflight `get` request for multi-namespace saved objects, and specifies that version on `update`
-          // we aren't testing for this here, but we need to include Jest assertions so this test doesn't fail
-          if_primary_term: expect.any(Number),
-          if_seq_no: expect.any(Number),
-        };
         const _obj1 = { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE };
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
 
@@ -1744,7 +1752,7 @@ describe('SavedObjectsRepository', () => {
         expectClientCallArgsAction([_obj1], { method: 'update', getId });
         client.bulk.mockClear();
         await bulkUpdateSuccess([_obj2], { namespace });
-        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides });
+        expectClientCallArgsAction([_obj2], { method: 'update', getId });
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
@@ -1752,7 +1760,7 @@ describe('SavedObjectsRepository', () => {
         expectClientCallArgsAction([_obj1], { method: 'update', getId });
         client.bulk.mockClear();
         await bulkUpdateSuccess([{ ..._obj2, namespace }]);
-        expectClientCallArgsAction([_obj2], { method: 'update', getId, overrides });
+        expectClientCallArgsAction([_obj2], { method: 'update', getId });
       });
     });
 
@@ -1779,9 +1787,7 @@ describe('SavedObjectsRepository', () => {
           mockGetBulkOperationError.mockReturnValueOnce(undefined);
           mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error as Payload);
         }
-        client.bulk.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(mockResponse)
-        );
+        client.bulk.mockResponseOnce(mockResponse);
 
         const result = await savedObjectsRepository.bulkUpdate(objects);
         expect(client.bulk).toHaveBeenCalled();
@@ -1802,16 +1808,10 @@ describe('SavedObjectsRepository', () => {
         mgetResponse: estypes.MgetResponse,
         mgetOptions?: { statusCode?: number }
       ) => {
-        client.mget.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(mgetResponse, {
-            statusCode: mgetOptions?.statusCode,
-          })
-        );
+        client.mget.mockResponseOnce(mgetResponse, { statusCode: mgetOptions?.statusCode });
 
         const bulkResponse = getMockBulkUpdateResponse([obj1, obj2], { namespace });
-        client.bulk.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(bulkResponse)
-        );
+        client.bulk.mockResponseOnce(bulkResponse);
 
         const result = await savedObjectsRepository.bulkUpdate([obj1, _obj, obj2], options);
         expect(client.bulk).toHaveBeenCalled();
@@ -1920,9 +1920,7 @@ describe('SavedObjectsRepository', () => {
         };
         const objects = [obj1, obj, obj2];
         const mockResponse = getMockBulkUpdateResponse(objects);
-        client.bulk.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(mockResponse)
-        );
+        client.bulk.mockResponseOnce(mockResponse);
 
         const result = await savedObjectsRepository.bulkUpdate(objects);
         expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -2104,12 +2102,14 @@ describe('SavedObjectsRepository', () => {
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
         return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
       });
-      client.create.mockImplementation((params) =>
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
-          _id: params.id,
-          ...mockVersionProps,
-        } as estypes.CreateResponse)
-      );
+      client.create.mockResponseImplementation((params) => {
+        return {
+          body: {
+            _id: params.id,
+            ...mockVersionProps,
+          } as estypes.CreateResponse,
+        };
+      });
     });
 
     const type = 'index-pattern';
@@ -2540,6 +2540,15 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).not.toHaveBeenCalled();
       });
 
+      it(`throws when schema validation fails`, async () => {
+        await expect(
+          savedObjectsRepository.create('dashboard', { title: 123 })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"[attributes.title]: expected value of type [string] but got [number]: Bad Request"`
+        );
+        expect(client.create).not.toHaveBeenCalled();
+      });
+
       it(`throws when there is a conflict from preflightCheckForCreate`, async () => {
         mockPreflightCheckForCreate.mockResolvedValueOnce([
           { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, error: { type: 'unresolvableConflict' } }, // error type and metadata dont matter
@@ -2666,15 +2675,11 @@ describe('SavedObjectsRepository', () => {
       if (registry.isMultiNamespace(type)) {
         const mockGetResponse =
           mockGetResponseValue ?? getMockGetResponse({ type, id }, options?.namespace);
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(mockGetResponse)
-        );
+        client.get.mockResponseOnce(mockGetResponse);
       }
-      client.delete.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
-          result: 'deleted',
-        } as estypes.DeleteResponse)
-      );
+      client.delete.mockResponseOnce({
+        result: 'deleted',
+      } as estypes.DeleteResponse);
       const result = await savedObjectsRepository.delete(type, id, options);
       expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
       return result;
@@ -2698,14 +2703,14 @@ describe('SavedObjectsRepository', () => {
         expect(client.delete).toHaveBeenCalledTimes(1);
       });
 
-      it(`includes the version of the existing document when using a multi-namespace type`, async () => {
+      it(`does not includes the version of the existing document when using a multi-namespace type`, async () => {
         await deleteSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, id);
         const versionProperties = {
           if_seq_no: mockVersionProps._seq_no,
           if_primary_term: mockVersionProps._primary_term,
         };
         expect(client.delete).toHaveBeenCalledWith(
-          expect.objectContaining(versionProperties),
+          expect.not.objectContaining(versionProperties),
           expect.anything()
         );
       });
@@ -2968,9 +2973,7 @@ describe('SavedObjectsRepository', () => {
       namespace: string,
       options?: SavedObjectsDeleteByNamespaceOptions
     ) => {
-      client.updateByQuery.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(mockUpdateResults)
-      );
+      client.updateByQuery.mockResponseOnce(mockUpdateResults);
       const result = await savedObjectsRepository.deleteByNamespace(namespace, options);
       expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
       expect(client.updateByQuery).toHaveBeenCalledTimes(1);
@@ -3042,11 +3045,9 @@ describe('SavedObjectsRepository', () => {
     const updatedCount = 42;
 
     const removeReferencesToSuccess = async (options = defaultOptions) => {
-      client.updateByQuery.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
-          updated: updatedCount,
-        })
-      );
+      client.updateByQuery.mockResponseOnce({
+        updated: updatedCount,
+      });
       return await savedObjectsRepository.removeReferencesTo(type, id, options);
     };
 
@@ -3171,15 +3172,13 @@ describe('SavedObjectsRepository', () => {
 
     describe('errors', () => {
       it(`throws when ES returns failures`, async () => {
-        client.updateByQuery.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise({
-            updated: 7,
-            failures: [
-              { id: 'failure' } as estypes.BulkIndexByScrollFailure,
-              { id: 'another-failure' } as estypes.BulkIndexByScrollFailure,
-            ],
-          })
-        );
+        client.updateByQuery.mockResponseOnce({
+          updated: 7,
+          failures: [
+            { id: 'failure' } as estypes.BulkIndexByScrollFailure,
+            { id: 'another-failure' } as estypes.BulkIndexByScrollFailure,
+          ],
+        });
 
         await expect(
           savedObjectsRepository.removeReferencesTo(type, id, defaultOptions)
@@ -3267,11 +3266,7 @@ describe('SavedObjectsRepository', () => {
     const namespace = 'foo-namespace';
 
     const findSuccess = async (options: SavedObjectsFindOptions, namespace?: string) => {
-      client.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          generateSearchResults(namespace)
-        )
-      );
+      client.search.mockResponseOnce(generateSearchResults(namespace));
       const result = await savedObjectsRepository.find(options);
       expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
       expect(client.search).toHaveBeenCalledTimes(1);
@@ -3763,9 +3758,7 @@ describe('SavedObjectsRepository', () => {
         },
         options?.namespace
       );
-      client.get.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-      );
+      client.get.mockResponseOnce(response);
       const result = await savedObjectsRepository.get(type, id, options);
       expect(client.get).toHaveBeenCalledTimes(1);
       return result;
@@ -3979,31 +3972,32 @@ describe('SavedObjectsRepository', () => {
       if (isMultiNamespace) {
         const response =
           mockGetResponseValue ?? getMockGetResponse({ type, id }, options?.namespace);
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
-        );
+        client.get.mockResponseOnce(response);
       }
-      client.update.mockImplementation((params) =>
-        elasticsearchClientMock.createSuccessTransportRequestPromise({
-          _id: params.id,
-          ...mockVersionProps,
-          _index: '.kibana',
-          get: {
-            found: true,
-            _source: {
-              type,
-              ...mockTimestampFields,
-              [type]: {
-                ...fields.reduce((acc, field) => {
-                  acc[typeof field === 'string' ? field : field.fieldName] = 8468;
-                  return acc;
-                }, {} as Record<string, number>),
-                defaultIndex: 'logstash-*',
+
+      client.update.mockResponseImplementation((params) => {
+        return {
+          body: {
+            _id: params.id,
+            ...mockVersionProps,
+            _index: '.kibana',
+            get: {
+              found: true,
+              _source: {
+                type,
+                ...mockTimestampFields,
+                [type]: {
+                  ...fields.reduce((acc, field) => {
+                    acc[typeof field === 'string' ? field : field.fieldName] = 8468;
+                    return acc;
+                  }, {} as Record<string, number>),
+                  defaultIndex: 'logstash-*',
+                },
               },
             },
-          },
-        } as estypes.UpdateResponse)
-      );
+          } as estypes.UpdateResponse,
+        };
+      });
 
       const result = await savedObjectsRepository.incrementCounter(type, id, fields, options);
       expect(client.get).toHaveBeenCalledTimes(isMultiNamespace ? 1 : 0);
@@ -4292,26 +4286,28 @@ describe('SavedObjectsRepository', () => {
 
     describe('returns', () => {
       it(`formats the ES response`, async () => {
-        client.update.mockImplementation((params) =>
-          elasticsearchClientMock.createSuccessTransportRequestPromise({
-            _id: params.id,
-            ...mockVersionProps,
-            _index: '.kibana',
-            get: {
-              found: true,
-              _source: {
-                type: 'config',
-                ...mockTimestampFields,
-                config: {
-                  buildNum: 8468,
-                  apiCallsCount: 100,
-                  defaultIndex: 'logstash-*',
+        client.update.mockResponseImplementation((params) => {
+          return {
+            body: {
+              _id: params.id,
+              ...mockVersionProps,
+              _index: '.kibana',
+              get: {
+                found: true,
+                _source: {
+                  type: 'config',
+                  ...mockTimestampFields,
+                  config: {
+                    buildNum: 8468,
+                    apiCallsCount: 100,
+                    defaultIndex: 'logstash-*',
+                  },
+                  originId,
                 },
-                originId,
               },
-            },
-          } as estypes.UpdateResponse)
-        );
+            } as estypes.UpdateResponse,
+          };
+        });
 
         const response = await savedObjectsRepository.incrementCounter(
           'config',
@@ -4397,26 +4393,24 @@ describe('SavedObjectsRepository', () => {
       options?: SavedObjectsUpdateOptions,
       includeOriginId?: boolean
     ) => {
-      client.update.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          {
-            _id: `${type}:${id}`,
-            ...mockVersionProps,
-            result: 'updated',
-            // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
-            get: {
-              _source: {
-                namespaces: [options?.namespace ?? 'default'],
-                namespace: options?.namespace,
+      client.update.mockResponseOnce(
+        {
+          _id: `${type}:${id}`,
+          ...mockVersionProps,
+          result: 'updated',
+          // don't need the rest of the source for test purposes, just the namespace and namespaces attributes
+          get: {
+            _source: {
+              namespaces: [options?.namespace ?? 'default'],
+              namespace: options?.namespace,
 
-                // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
-                // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
-                ...(includeOriginId && { originId }),
-              },
+              // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
+              // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
+              ...(includeOriginId && { originId }),
             },
-          } as estypes.UpdateResponse,
-          { statusCode: 200 }
-        )
+          },
+        } as estypes.UpdateResponse,
+        { statusCode: 200 }
       );
     };
 
@@ -4434,12 +4428,7 @@ describe('SavedObjectsRepository', () => {
       if (registry.isMultiNamespace(type)) {
         const mockGetResponse =
           mockGetResponseValue ?? getMockGetResponse({ type, id }, options?.namespace);
-        client.get.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { ...mockGetResponse },
-            { statusCode: 200 }
-          )
-        );
+        client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
       }
       mockUpdateResponse(type, id, options, includeOriginId);
       const result = await savedObjectsRepository.update(type, id, attributes, options);
@@ -4596,14 +4585,14 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it(`defaults to the version of the existing document when type is multi-namespace`, async () => {
+      it(`does not default to the version of the existing document when type is multi-namespace`, async () => {
         await updateSuccess(MULTI_NAMESPACE_ISOLATED_TYPE, id, attributes, { references });
         const versionProperties = {
           if_seq_no: mockVersionProps._seq_no,
           if_primary_term: mockVersionProps._primary_term,
         };
         expect(client.update).toHaveBeenCalledWith(
-          expect.objectContaining(versionProperties),
+          expect.not.objectContaining(versionProperties),
           expect.anything()
         );
       });
@@ -4614,6 +4603,35 @@ describe('SavedObjectsRepository', () => {
         });
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({ if_seq_no: 100, if_primary_term: 200 }),
+          expect.anything()
+        );
+      });
+
+      it('default to a `retry_on_conflict` setting of `3` when `version` is not provided', async () => {
+        await updateSuccess(type, id, attributes, {});
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ retry_on_conflict: 3 }),
+          expect.anything()
+        );
+      });
+
+      it('default to a `retry_on_conflict` setting of `0` when `version` is provided', async () => {
+        await updateSuccess(type, id, attributes, {
+          version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
+        });
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ retry_on_conflict: 0, if_seq_no: 100, if_primary_term: 200 }),
+          expect.anything()
+        );
+      });
+
+      it('accepts a `retryOnConflict` option', async () => {
+        await updateSuccess(type, id, attributes, {
+          version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
+          retryOnConflict: 42,
+        });
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ retry_on_conflict: 42, if_seq_no: 100, if_primary_term: 200 }),
           expect.anything()
         );
       });
@@ -4841,9 +4859,7 @@ describe('SavedObjectsRepository', () => {
 
     const generateResults = (id?: string) => ({ id: id || 'id' });
     const successResponse = async (type: string, options?: SavedObjectsOpenPointInTimeOptions) => {
-      client.openPointInTime.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(generateResults())
-      );
+      client.openPointInTime.mockResponseOnce(generateResults());
       const result = await savedObjectsRepository.openPointInTimeForType(type, options);
       expect(client.openPointInTime).toHaveBeenCalledTimes(1);
       return result;
@@ -4932,9 +4948,7 @@ describe('SavedObjectsRepository', () => {
   describe('#closePointInTime', () => {
     const generateResults = () => ({ succeeded: true, num_freed: 3 });
     const successResponse = async (id: string) => {
-      client.closePointInTime.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(generateResults())
-      );
+      client.closePointInTime.mockResponseOnce(generateResults());
       const result = await savedObjectsRepository.closePointInTime(id);
       expect(client.closePointInTime).toHaveBeenCalledTimes(1);
       return result;
@@ -4962,9 +4976,7 @@ describe('SavedObjectsRepository', () => {
     describe('returns', () => {
       it(`returns response body from ES`, async () => {
         const results = generateResults();
-        client.closePointInTime.mockResolvedValueOnce(
-          elasticsearchClientMock.createSuccessTransportRequestPromise(results)
-        );
+        client.closePointInTime.mockResponseOnce(results);
         const response = await savedObjectsRepository.closePointInTime('abc123');
         expect(response).toEqual(results);
       });

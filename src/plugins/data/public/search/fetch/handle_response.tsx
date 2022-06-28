@@ -9,13 +9,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { IKibanaSearchResponse } from 'src/plugins/data/common';
-import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
-import { toMountPoint } from '../../../../kibana_react/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { IKibanaSearchResponse } from '../../../common';
+import { ShardFailureOpenModalButton } from '../../shard_failure_modal';
 import { getNotifications } from '../../services';
 import type { SearchRequest } from '..';
 
-export function handleResponse(request: SearchRequest, response: IKibanaSearchResponse) {
+export function handleResponse(
+  request: SearchRequest,
+  response: IKibanaSearchResponse,
+  theme: ThemeServiceStart
+) {
   const { rawResponse } = response;
 
   if (rawResponse.timed_out) {
@@ -45,8 +50,14 @@ export function handleResponse(request: SearchRequest, response: IKibanaSearchRe
       <>
         {description}
         <EuiSpacer size="s" />
-        <ShardFailureOpenModalButton request={request.body} response={rawResponse} title={title} />
-      </>
+        <ShardFailureOpenModalButton
+          request={request.body}
+          response={rawResponse}
+          theme={theme}
+          title={title}
+        />
+      </>,
+      { theme$: theme.theme$ }
     );
 
     getNotifications().toasts.addWarning({ title, text });

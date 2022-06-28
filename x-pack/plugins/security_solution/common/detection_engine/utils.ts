@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, capitalize } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import type {
   EntriesArray,
@@ -16,7 +16,7 @@ import type {
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import { RuleExecutionStatus, Threshold, ThresholdNormalized } from './schemas/common/schemas';
+import { Threshold, ThresholdNormalized } from './schemas/common';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -37,12 +37,14 @@ export const hasEqlSequenceQuery = (ruleQuery: string | undefined): boolean => {
   return false;
 };
 
+// these functions should be typeguards and accept an entire rule.
 export const isEqlRule = (ruleType: Type | undefined): boolean => ruleType === 'eql';
 export const isThresholdRule = (ruleType: Type | undefined): boolean => ruleType === 'threshold';
 export const isQueryRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'query' || ruleType === 'saved_query';
 export const isThreatMatchRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'threat_match';
+export const isMlRule = (ruleType: Type | undefined): boolean => ruleType === 'machine_learning';
 
 export const normalizeThresholdField = (
   thresholdField: string | string[] | null | undefined
@@ -64,20 +66,3 @@ export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormali
 
 export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
   Array.isArray(value) ? value : [value];
-
-export const getRuleStatusText = (
-  value: RuleExecutionStatus | null | undefined
-): RuleExecutionStatus | null =>
-  value === RuleExecutionStatus['partial failure']
-    ? RuleExecutionStatus.warning
-    : value != null
-    ? value
-    : null;
-
-export const getCapitalizedRuleStatusText = (
-  value: RuleExecutionStatus | null | undefined
-): string | null => {
-  const status = getRuleStatusText(value);
-
-  return status != null ? capitalize(status) : null;
-};

@@ -11,15 +11,15 @@ import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
-import type { IUiSettingsClient } from 'kibana/public';
-import type {
-  Vis,
-  VisualizeEmbeddableContract,
-} from '../../../../../../plugins/visualizations/public';
-import { KibanaContextProvider } from '../../../../../../plugins/kibana_react/public';
-import { Storage } from '../../../../../../plugins/kibana_utils/public';
+import { css } from '@emotion/react';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import type { TimeRange } from '../../../../../../plugins/data/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { EditorRenderProps } from '@kbn/visualizations-plugin/public';
 import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types';
 
 // @ts-expect-error
@@ -32,7 +32,6 @@ import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
 import type { TimeseriesVisParams } from '../../types';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
-import type { EditorRenderProps } from '../../../../../visualize/public';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
@@ -46,6 +45,7 @@ export interface TimeseriesEditorProps {
   query: EditorRenderProps['query'];
   uiState: EditorRenderProps['uiState'];
   vis: Vis<TimeseriesVisParams>;
+  defaultIndexPattern?: DataView;
 }
 
 interface TimeseriesEditorState {
@@ -178,6 +178,12 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       return null;
     }
 
+    const tsvbEditorStyles = css`
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+    `;
+
     return (
       <KibanaContextProvider
         services={{
@@ -187,7 +193,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
           ...getCoreStart(),
         }}
       >
-        <div className="tvbEditor" data-test-subj="tvbVisEditor">
+        <div css={tsvbEditorStyles} data-test-subj="tvbVisEditor">
           {!this.props.vis.params.use_kibana_indexes && <UseIndexPatternModeCallout />}
           <div className="tvbEditor--hideForReporting">
             <VisPicker currentVisType={model.type} onChange={this.handleChange} />
@@ -216,6 +222,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
               visData$={this.visData$}
               onChange={this.handleChange}
               getConfig={this.getConfig}
+              defaultIndexPattern={this.props.defaultIndexPattern}
             />
           </div>
         </div>
@@ -236,6 +243,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
 
   componentWillUnmount() {
     this.updateVisState.cancel();
+    this.abortControllerFetchFields?.abort();
     this.props.eventEmitter.off('updateEditor', this.updateModel);
   }
 

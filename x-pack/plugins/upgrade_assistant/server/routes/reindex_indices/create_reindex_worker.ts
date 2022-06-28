@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchServiceStart,
-  Logger,
-  SavedObjectsClient,
-} from '../../../../../../src/core/server';
+import { ElasticsearchServiceStart, Logger, SavedObjectsClient } from '@kbn/core/server';
 
-import { LicensingPluginSetup } from '../../../../licensing/server';
-import { SecurityPluginStart } from '../../../../security/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { ReindexWorker } from '../../lib/reindexing';
 import { CredentialStore } from '../../lib/reindexing/credential_store';
 
@@ -34,5 +30,5 @@ export function createReindexWorker({
   security,
 }: CreateReindexWorker) {
   const esClient = elasticsearchService.client;
-  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing, security);
+  return ReindexWorker.create(savedObjects, credentialStore, esClient, logger, licensing, security);
 }

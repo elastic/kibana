@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { LicenseService } from '../../../license';
-import { FleetAuthz } from '../../../../../fleet/common';
 import { EndpointAuthz } from '../../types/authz';
+import { MaybeImmutable } from '../../types';
 
 /**
  * Used by both the server and the UI to generate the Authorization for access to Endpoint related
@@ -15,13 +16,15 @@ import { EndpointAuthz } from '../../types/authz';
  *
  * @param licenseService
  * @param fleetAuthz
+ * @param userRoles
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
-  fleetAuthz: FleetAuthz
+  fleetAuthz: FleetAuthz | undefined, // TODO: Remove `undefined` type when `fleetAuthz` is needed and used.
+  userRoles: MaybeImmutable<string[]>
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
-  const hasAllAccessToFleet = fleetAuthz.fleet.all;
+  const hasAllAccessToFleet = userRoles.includes('superuser');
 
   return {
     canAccessFleet: hasAllAccessToFleet,
@@ -29,6 +32,9 @@ export const calculateEndpointAuthz = (
     canCreateArtifactsByPolicy: hasAllAccessToFleet && isPlatinumPlusLicense,
     canIsolateHost: isPlatinumPlusLicense && hasAllAccessToFleet,
     canUnIsolateHost: hasAllAccessToFleet,
+    canKillProcess: hasAllAccessToFleet && isPlatinumPlusLicense,
+    canSuspendProcess: hasAllAccessToFleet && isPlatinumPlusLicense,
+    canGetRunningProcesses: hasAllAccessToFleet && isPlatinumPlusLicense,
   };
 };
 
@@ -39,5 +45,8 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canCreateArtifactsByPolicy: false,
     canIsolateHost: false,
     canUnIsolateHost: true,
+    canKillProcess: false,
+    canSuspendProcess: false,
+    canGetRunningProcesses: false,
   };
 };

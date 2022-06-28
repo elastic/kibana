@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { APP_ID } from '../../../plugins/maps/common/constants';
+import { APP_ID } from '@kbn/maps-plugin/common/constants';
 import { FtrService } from '../ftr_provider_context';
 
 function escapeLayerName(layerName: string) {
@@ -64,7 +64,7 @@ export class GisPageObject extends FtrService {
     this.log.debug(`enterFullScreen`);
     await this.testSubjects.click('mapsFullScreenMode');
     await this.retry.try(async () => {
-      await this.testSubjects.exists('exitFullScreenModeLogo');
+      await this.testSubjects.exists('exitFullScreenModeButton');
     });
     await this.waitForLayersToLoad();
   }
@@ -72,9 +72,9 @@ export class GisPageObject extends FtrService {
   // TODO combine with dashboard full screen into a service
   async existFullScreen() {
     this.log.debug(`existFullScreen`);
-    const isFullScreen = await this.testSubjects.exists('exitFullScreenModeLogo');
+    const isFullScreen = await this.testSubjects.exists('exitFullScreenModeButton');
     if (isFullScreen) {
-      await this.testSubjects.click('exitFullScreenModeLogo');
+      await this.testSubjects.click('exitFullScreenModeButton');
     }
   }
 
@@ -156,13 +156,13 @@ export class GisPageObject extends FtrService {
     await this.renderable.waitForRender();
   }
 
-  async saveMap(name: string, redirectToOrigin = true, tags?: string[]) {
+  async saveMap(name: string, redirectToOrigin = true, saveAsNew = true, tags?: string[]) {
     await this.testSubjects.click('mapSaveButton');
     await this.testSubjects.setValue('savedObjectTitle', name);
     await this.visualize.setSaveModalValues(name, {
       addToDashboard: false,
       redirectToOrigin,
-      saveAsNew: true,
+      saveAsNew,
     });
     if (tags) {
       await this.testSubjects.click('savedObjectTagSelector');
@@ -193,6 +193,14 @@ export class GisPageObject extends FtrService {
 
   async expectMissingAddLayerButton() {
     await this.testSubjects.missingOrFail('addLayerButton');
+  }
+
+  async expectMissingToolsControl() {
+    await this.testSubjects.missingOrFail('mapToolsControlPopover');
+  }
+
+  async expectExistsToolsControl() {
+    await this.testSubjects.existOrFail('mapToolsControlPopover');
   }
 
   async expectExistAddLayerButton() {
@@ -332,6 +340,18 @@ export class GisPageObject extends FtrService {
     }
   }
 
+  async getLayerTocTooltipMsg(layerName: string) {
+    const escapedDisplayName = escapeLayerName(layerName);
+    await this.retry.try(async () => {
+      await this.testSubjects.moveMouseTo(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
+      const isOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+      if (!isOpen) {
+        throw new Error('layer TOC tooltip not open');
+      }
+    });
+    return await this.testSubjects.getVisibleText('layerTocTooltip');
+  }
+
   async openLayerPanel(layerName: string) {
     this.log.debug(`Open layer panel, layer: ${layerName}`);
     await this.openLayerTocActionsPanel(layerName);
@@ -379,14 +399,6 @@ export class GisPageObject extends FtrService {
     return await this.testSubjects.exists(
       `layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`
     );
-  }
-
-  async hasFilePickerLoadedFile(fileName: string) {
-    this.log.debug(`Has file picker loaded file ${fileName}`);
-    const filePickerText = await this.find.byCssSelector('.euiFilePicker__promptText');
-    const filePickerTextContent = await filePickerText.getVisibleText();
-
-    return fileName === filePickerTextContent;
   }
 
   /*
@@ -449,62 +461,6 @@ export class GisPageObject extends FtrService {
     }
   }
 
-  async importFileButtonEnabled() {
-    this.log.debug(`Check "Import file" button enabled`);
-    const importFileButton = await this.testSubjects.find('importFileButton');
-    const isDisabled = await importFileButton.getAttribute('disabled');
-    return !isDisabled;
-  }
-
-  async importLayerReadyForAdd() {
-    this.log.debug(`Wait until import complete`);
-    await this.testSubjects.find('indexRespCopyButton', 5000);
-    let layerAddReady = false;
-    await this.retry.waitForWithTimeout('Add layer button ready', 2000, async () => {
-      layerAddReady = await this.importFileButtonEnabled();
-      return layerAddReady;
-    });
-    return layerAddReady;
-  }
-
-  async clickImportFileButton() {
-    this.log.debug(`Click "Import file" button`);
-    await this.testSubjects.click('importFileButton');
-  }
-
-  async setIndexName(indexName: string) {
-    this.log.debug(`Set index name to: ${indexName}`);
-    await this.testSubjects.setValue('fileUploadIndexNameInput', indexName);
-  }
-
-  async setIndexType(indexType: string) {
-    this.log.debug(`Set index type to: ${indexType}`);
-    await this.testSubjects.selectValue('fileImportIndexSelect', indexType);
-  }
-
-  async indexTypeOptionExists(indexType: string) {
-    this.log.debug(`Check index type "${indexType}" available`);
-    return await this.find.existsByCssSelector(
-      `select[data-test-subj="fileImportIndexSelect"] > option[value="${indexType}"]`
-    );
-  }
-
-  async clickCopyButton(dataTestSubj: string): Promise<string> {
-    this.log.debug(`Click ${dataTestSubj} copy button`);
-
-    await this.testSubjects.click(dataTestSubj);
-
-    return await this.browser.getClipboardValue();
-  }
-
-  async getIndexResults() {
-    return JSON.parse(await this.clickCopyButton('indexRespCopyButton'));
-  }
-
-  async getIndexPatternResults() {
-    return JSON.parse(await this.clickCopyButton('indexPatternRespCopyButton'));
-  }
-
   async setLayerQuery(layerName: string, query: string) {
     await this.openLayerPanel(layerName);
     await this.testSubjects.click('mapLayerPanelOpenFilterEditorButton');
@@ -559,17 +515,9 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click('emsBoundaries');
   }
 
-  async selectGeoJsonUploadSource() {
-    this.log.debug(`Select upload geojson source`);
-    await this.testSubjects.click('uploadGeoJson');
-  }
-
-  async uploadJsonFileForIndexing(path: string) {
-    await this.common.setFileInputPath(path);
-    this.log.debug(`File selected`);
-
-    await this.header.waitUntilLoadingHasFinished();
-    await this.waitForLayersToLoad();
+  async selectFileUploadCard() {
+    this.log.debug(`Select upload file card`);
+    await this.testSubjects.click('uploadFile');
   }
 
   async selectVectorLayer(vectorLayerName: string) {
@@ -604,11 +552,11 @@ export class GisPageObject extends FtrService {
   }
 
   async exitFullScreenLogoButtonExists() {
-    return await this.testSubjects.exists('exitFullScreenModeLogo');
+    return await this.testSubjects.exists('exitFullScreenModeButton');
   }
 
   async getExitFullScreenLogoButton() {
-    return await this.testSubjects.find('exitFullScreenModeLogo');
+    return await this.testSubjects.find('exitFullScreenModeButton');
   }
 
   async clickExitFullScreenTextButton() {
@@ -660,6 +608,7 @@ export class GisPageObject extends FtrService {
   }
 
   async _getResponse(requestName: string) {
+    await this.inspector.openInspectorView('inspectorViewChooserRequests');
     if (requestName) {
       await this.testSubjects.click('inspectorRequestChooser');
       await this.testSubjects.click(`inspectorRequestChooser${requestName}`);

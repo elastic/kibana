@@ -21,20 +21,6 @@ export const SW_REQUIRED_APP_ID_TEXT = i18n.translate(
   }
 );
 
-export const SW_REQUIRED_FIELD_MAPPINGS_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredFieldMappingsText',
-  {
-    defaultMessage: 'Field mappings are required.',
-  }
-);
-
-export const SW_REQUIRED_API_TOKEN_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredApiTokenText',
-  {
-    defaultMessage: 'An API token is required.',
-  }
-);
-
 export const SW_GET_APPLICATION_API_ERROR = (id: string | null) =>
   i18n.translate(
     'xpack.triggersActionsUI.components.builtinActionTypes.swimlane.unableToGetApplicationMessage',
@@ -55,13 +41,6 @@ export const SW_API_URL_TEXT_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.apiUrlTextFieldLabel',
   {
     defaultMessage: 'API Url',
-  }
-);
-
-export const SW_API_URL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.requiredApiUrlTextField',
-  {
-    defaultMessage: 'URL is required.',
   }
 );
 
@@ -93,24 +72,10 @@ export const SW_MAPPING_TITLE_TEXT_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const SW_ALERT_SOURCE_FIELD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceFieldLabel',
-  {
-    defaultMessage: 'Alert source',
-  }
-);
-
 export const SW_SEVERITY_FIELD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.severityFieldLabel',
   {
     defaultMessage: 'Severity',
-  }
-);
-
-export const SW_MAPPING_DESCRIPTION_TEXT_FIELD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.mappingDescriptionTextFieldLabel',
-  {
-    defaultMessage: 'Used to specify the field names in the Swimlane Application',
   }
 );
 
@@ -156,37 +121,15 @@ export const SW_DESCRIPTION_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const SW_REMEMBER_VALUE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.rememberValueLabel',
-  { defaultMessage: 'Remember this value. You must reenter it each time you edit the connector.' }
-);
-
-export const SW_REENTER_VALUE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.reenterValueLabel',
-  { defaultMessage: 'This key is encrypted. Please reenter a value for this field.' }
-);
-
 export const SW_CONFIGURE_CONNECTION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.configureConnectionLabel',
   { defaultMessage: 'Configure API Connection' }
-);
-
-export const SW_RETRIEVE_CONFIGURATION_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.retrieveConfigurationLabel',
-  { defaultMessage: 'Configure Fields' }
 );
 
 export const SW_CONNECTOR_TYPE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.connectorType',
   {
     defaultMessage: 'Connector Type',
-  }
-);
-
-export const SW_FIELD_MAPPING_IS_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.mappingFieldRequired',
-  {
-    defaultMessage: 'Field mapping is required.',
   }
 );
 
@@ -202,13 +145,6 @@ export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
   {
     defaultMessage:
       'This connector cannot be selected because it is missing the required alert field mappings. You can edit this connector to add required field mappings or select a connector of type Alerts.',
-  }
-);
-
-export const SW_REQUIRED_ALERT_SOURCE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAlertSource',
-  {
-    defaultMessage: 'Alert source is required.',
   }
 );
 

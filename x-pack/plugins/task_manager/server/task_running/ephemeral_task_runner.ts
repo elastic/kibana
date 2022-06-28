@@ -15,7 +15,7 @@ import apm from 'elastic-apm-node';
 import uuid from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
 import { identity } from 'lodash';
-import { Logger, ExecutionContextStart } from '../../../../../src/core/server';
+import { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Middleware } from '../lib/middleware';
 import { asOk, asErr, eitherAsync, Result } from '../lib/result_type';
@@ -304,6 +304,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   public async cancel() {
     const { task } = this;
     if (task?.cancel) {
+      // it will cause the task state of "running" to be cleared
       this.task = undefined;
       return task.cancel();
     }

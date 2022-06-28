@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreStart, Logger } from 'kibana/server';
+import { CoreStart, Logger } from '@kbn/core/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
-import { AlertsConfig } from '../config';
+} from '@kbn/task-manager-plugin/server';
+import { AlertingConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';
 import { getAlertingHealthStatus } from './get_health';
@@ -30,11 +30,11 @@ export function initializeAlertingHealth(
 
 export async function scheduleAlertingHealthCheck(
   logger: Logger,
-  config: Promise<AlertsConfig>,
+  config: AlertingConfig,
   taskManager: TaskManagerStartContract
 ) {
   try {
-    const interval = (await config).healthCheck.interval;
+    const interval = config.healthCheck.interval;
     await taskManager.ensureScheduled({
       id: HEALTH_TASK_ID,
       taskType: HEALTH_TASK_TYPE,

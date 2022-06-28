@@ -23,13 +23,29 @@
     "alerting",
     "cases",
     "data",
+    "dataViews",
     "features",
     "inspector",
     "ruleRegistry",
     "timelines",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "inspector",
+    "unifiedSearch",
+    "sharedUX"
   ],
   "ui": true,
   "server": true,
-  "requiredBundles": ["data", "kibanaReact", "kibanaUtils"]
+  "requiredBundles": [
+    "unifiedSearch",
+    "data",
+    "dataViews",
+    "embeddable",
+    "kibanaReact",
+    "kibanaUtils",
+    "lens",
+    "usageCollection"
+  ],
+  "extraPublicDirs": [
+    "common"
+  ]
 }

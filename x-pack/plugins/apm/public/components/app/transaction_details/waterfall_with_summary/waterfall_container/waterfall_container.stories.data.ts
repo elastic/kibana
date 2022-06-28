@@ -7,7 +7,7 @@
 
 import type { Location } from 'history';
 import type { ApmUrlParams } from '../../../../../context/url_params_context/types';
-import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 
 export const location = {
   pathname: '/services/opbeans-go/transactions/view',
@@ -225,6 +225,9 @@ export const simpleTrace = {
       },
       timestamp: {
         us: 1584975868787052,
+      },
+      faas: {
+        coldstart: true,
       },
     },
     {
@@ -527,6 +530,7 @@ export const simpleTrace = {
   ],
   exceedsMax: false,
   errorDocs: [],
+  linkedChildrenOfSpanCountBySpanId: {},
 } as TraceAPIResponse;
 
 export const manyChildrenWithSameLength = {
@@ -4123,6 +4127,7 @@ export const manyChildrenWithSameLength = {
       },
     },
   ],
+  linkedChildrenOfSpanCountBySpanId: {},
 } as TraceAPIResponse;
 
 export const traceWithErrors = {
@@ -4713,6 +4718,7 @@ export const traceWithErrors = {
       },
     },
   ],
+  linkedChildrenOfSpanCountBySpanId: {},
 } as unknown as TraceAPIResponse;
 
 export const traceChildStartBeforeParent = {
@@ -5208,6 +5214,7 @@ export const traceChildStartBeforeParent = {
   ],
   exceedsMax: false,
   errorDocs: [],
+  linkedChildrenOfSpanCountBySpanId: {},
 } as TraceAPIResponse;
 
 export const inferredSpans = {
@@ -5862,4 +5869,5 @@ export const inferredSpans = {
   ],
   exceedsMax: false,
   errorDocs: [],
+  linkedChildrenOfSpanCountBySpanId: {},
 } as TraceAPIResponse;

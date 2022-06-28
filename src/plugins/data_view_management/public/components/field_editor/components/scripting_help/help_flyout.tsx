@@ -9,14 +9,14 @@
 import React from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
 
+import { DataView } from '@kbn/data-views-plugin/public';
 import { ScriptingSyntax } from './scripting_syntax';
 import { TestScript } from './test_script';
 
 import { ExecuteScript } from '../../types';
-import { IndexPattern } from '../../../../../../data/public';
 
 interface ScriptingHelpFlyoutProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   lang: string;
   name?: string;
   script?: string;

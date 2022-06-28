@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { embeddableFunctionFactory } from './embeddable';
 import { savedLens } from './saved_lens';
 import { savedMap } from './saved_map';
@@ -16,6 +16,7 @@ export interface InitializeArguments {
   embeddablePersistableStateService: {
     extract: EmbeddableStart['extract'];
     inject: EmbeddableStart['inject'];
+    getAllMigrations: EmbeddableStart['getAllMigrations'];
   };
 }
 

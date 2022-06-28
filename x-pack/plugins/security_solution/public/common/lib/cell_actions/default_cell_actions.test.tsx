@@ -8,13 +8,13 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import type {
   BrowserFields,
   TimelineNonEcsData,
-} from '../../../../../timelines/common/search_strategy';
-import { TGridCellAction } from '../../../../../timelines/common/types';
+} from '@kbn/timelines-plugin/common/search_strategy';
+import { TGridCellAction } from '@kbn/timelines-plugin/common/types';
 import { Ecs } from '../../../../common/ecs';
 import { ColumnHeaderType } from '../../../timelines/store/timeline/model';
 
-import { defaultCellActions, EmptyComponent } from './default_cell_actions';
-import { COLUMNS_WITH_LINKS } from './helpers';
+import { defaultCellActions } from './default_cell_actions';
+import { COLUMNS_WITH_LINKS, EmptyComponent } from './helpers';
 
 describe('default cell actions', () => {
   const browserFields: BrowserFields = {};
@@ -53,7 +53,6 @@ describe('default cell actions', () => {
     });
 
     expect(columnsWithCellActions[0]?.cellActions?.length).toEqual(5);
-    expect(columnsWithCellActions[0]?.cellActions![4]).toEqual(EmptyComponent);
   });
 
   const columnHeadersToTest = COLUMNS_WITH_LINKS.map((c) => [

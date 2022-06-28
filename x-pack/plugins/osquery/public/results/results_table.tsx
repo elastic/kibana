@@ -18,12 +18,14 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiIconTip,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
-import { pagePathGetters } from '../../../fleet/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
@@ -46,6 +48,7 @@ interface ResultsTableComponentProps {
   agentIds?: string[];
   endDate?: string;
   startDate?: string;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -53,6 +56,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   agentIds,
   startDate,
   endDate,
+  addToTimeline,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -105,7 +109,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const { data: allResultsData, isFetched } = useAllResults({
+  const { data: allResultsData, isLoading } = useAllResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -189,6 +193,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           // @ts-expect-error update types
           acc[value?.field] = [...(acc[value?.field] ?? []), key];
         }
+
         return acc;
       },
       {},
@@ -232,15 +237,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   useEffect(() => {
-    if (!allResultsData?.edges) {
+    if (!allResultsData?.columns.length) {
       return;
     }
 
-    const fields = [
-      'agent.name',
-      ...ecsMappingColumns.sort(),
-      ...keys(allResultsData?.edges[0]?.fields || {}).sort(),
-    ];
+    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...allResultsData?.columns];
 
     const newColumns = fields.reduce(
       (acc, fieldName) => {
@@ -272,20 +273,25 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             });
             seen.add(fieldName);
           }
+
           return acc;
         }
 
         if (fieldName.startsWith('osquery.')) {
           const displayAsText = fieldName.split('.')[1];
+          const hasNumberType = fields.includes(`${fieldName}.number`);
           if (!seen.has(displayAsText)) {
+            const id = hasNumberType ? fieldName + '.number' : fieldName;
             data.push({
-              id: fieldName,
+              id,
               displayAsText,
               display: getHeaderDisplay(displayAsText),
               defaultSortDirection: Direction.asc,
+              ...(hasNumberType ? { schema: 'numeric' } : {}),
             });
             seen.add(displayAsText);
           }
+
           return acc;
         }
 
@@ -298,11 +304,36 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       !isEqual(map('id', currentColumns), map('id', newColumns)) ? newColumns : currentColumns
     );
     setVisibleColumns(map('id', newColumns));
-  }, [allResultsData?.edges, ecsMappingColumns, getHeaderDisplay]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
+
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+    const data = allResultsData?.edges;
+    if (addToTimeline && data) {
+      return [
+        {
+          id: 'timeline',
+          width: 38,
+          headerCellRender: () => null,
+          rowCellRender: (actionProps) => {
+            const { visibleRowIndex } = actionProps as EuiDataGridCellValueElementProps & {
+              visibleRowIndex: number;
+            };
+            const eventId = data[visibleRowIndex]?._id;
+
+            return addToTimeline({ query: ['_id', eventId], isIcon: true });
+          },
+        },
+      ];
+    }
+
+    return [];
+  }, [addToTimeline, allResultsData?.edges]);
 
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
+      showFullScreenSelector: !addToTimeline,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -317,10 +348,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             endDate={endDate}
             startDate={startDate}
           />
+          {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
         </>
       ),
     }),
-    [actionId, endDate, startDate]
+    [actionId, addToTimeline, endDate, startDate]
   );
 
   useEffect(
@@ -328,26 +360,50 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       setIsLive(() => {
         if (!agentIds?.length || expired) return false;
 
-        return !!(aggregations.totalResponded !== agentIds?.length);
+        return !!(
+          aggregations.totalResponded !== agentIds?.length ||
+          allResultsData?.totalCount !== aggregations?.totalRowCount ||
+          (allResultsData?.totalCount && !allResultsData?.edges.length)
+        );
       }),
-    [agentIds?.length, aggregations.failed, aggregations.totalResponded, expired]
+    [
+      agentIds?.length,
+      aggregations.totalResponded,
+      aggregations?.totalRowCount,
+      allResultsData?.edges.length,
+      allResultsData?.totalCount,
+      expired,
+    ]
   );
 
   if (!hasActionResultsPrivileges) {
     return (
-      <EuiCallOut title="Missing privileges" color="danger" iconType="alert">
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
+            defaultMessage="Permission denied"
+          />
+        }
+        color="danger"
+        iconType="alert"
+      >
         <p>
-          {'Your user role doesn’t have index read permissions on the '}
-          <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>
-          {
-            'index. Access to this index is required to view osquery results. Administrators can update role permissions in Stack Management > Roles.'
-          }
+          <FormattedMessage
+            id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
+            defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            values={{
+              read: <EuiCode>read</EuiCode>,
+              logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
+            }}
+          />
         </p>
       </EuiCallOut>
     );
   }
 
-  if (!isFetched) {
+  if (isLoading) {
     return <EuiLoadingContent lines={5} />;
   }
 
@@ -355,20 +411,21 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     <>
       {isLive && <EuiProgress color="primary" size="xs" />}
 
-      {isFetched && !allResultsData?.edges.length && !aggregations?.totalRowCount ? (
+      {!allResultsData?.edges.length ? (
         <>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
           <EuiSpacer />
         </>
       ) : (
-        // @ts-expect-error update types
         <DataContext.Provider value={allResultsData?.edges}>
           <EuiDataGrid
+            data-test-subj="osqueryResultsTable"
             aria-label="Osquery results"
             columns={columns}
             columnVisibility={columnVisibility}
             rowCount={allResultsData?.totalCount ?? 0}
             renderCellValue={renderCellValue}
+            leadingControlColumns={leadingControlColumns}
             sorting={tableSorting}
             pagination={tablePagination}
             height="500px"

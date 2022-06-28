@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { AggregationsDateInterval } from '@elastic/elasticsearch/lib/api/types';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '../../../../observability/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 
 interface Options {
   environment: string;
@@ -33,8 +34,7 @@ interface Options {
   transactionName?: string;
   start: number;
   end: number;
-  intervalString: string;
-  bucketSize: number;
+  offset?: string;
 }
 
 export async function getThroughput({
@@ -47,10 +47,21 @@ export async function getThroughput({
   transactionName,
   start,
   end,
-  intervalString,
-  bucketSize,
+  offset,
 }: Options) {
   const { apmEventClient } = setup;
+
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
+
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
+    start: startWithOffset,
+    end: endWithOffset,
+    searchAggregatedTransactions,
+  });
 
   const params = {
     apm: {
@@ -66,7 +77,7 @@ export async function getThroughput({
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
-            ...rangeQuery(start, end),
+            ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...termQuery(TRANSACTION_NAME, transactionName),
@@ -79,11 +90,11 @@ export async function getThroughput({
             field: '@timestamp',
             fixed_interval: intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
             throughput: {
-              rate: { unit: 'minute' as AggregationsDateInterval },
+              rate: { unit: 'minute' as const },
             },
           },
         },

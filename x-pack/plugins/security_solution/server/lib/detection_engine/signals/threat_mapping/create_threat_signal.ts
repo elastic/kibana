@@ -37,10 +37,12 @@ export const createThreatSignal = async ({
   tuple,
   type,
   wrapHits,
+  runtimeMappings,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
+    entryKey: 'value',
   });
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
@@ -85,11 +87,11 @@ export const createThreatSignal = async ({
       logger,
       pageSize: searchAfterSize,
       services,
-      signalsIndex: outputIndex,
       sortOrder: 'desc',
       trackTotalHits: false,
       tuple,
       wrapHits,
+      runtimeMappings,
     });
 
     logger.debug(

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandler, RouteConfig } from '../../../../../src/core/server';
-import { coreMock } from '../../../../../src/core/server/mocks';
-import type { AuthenticatedUser, CheckPrivilegesPayload } from '../../../security/server';
-import type { CheckPrivilegesResponse } from '../../../security/server/authorization/types';
-import type { CheckPrivilegesDynamically } from '../../../security/server/authorization/check_privileges_dynamically';
+import type { IRouter, RequestHandler, RouteConfig } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import type { AuthenticatedUser, CheckPrivilegesPayload } from '@kbn/security-plugin/server';
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin/server/authorization/types';
+import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
+
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';
@@ -19,7 +20,10 @@ import { makeRouterWithFleetAuthz } from './security';
 function getCheckPrivilegesMockedImplementation(kibanaRoles: string[]) {
   return (checkPrivileges: CheckPrivilegesPayload) => {
     const kibana = ((checkPrivileges?.kibana ?? []) as string[]).map((role: string) => {
-      return { authorized: kibanaRoles.includes(role) };
+      return {
+        privilege: role,
+        authorized: kibanaRoles.includes(role),
+      };
     });
 
     return Promise.resolve({
@@ -43,7 +47,7 @@ describe('FleetAuthzRouter', () => {
       path: '/api/fleet/test',
     },
   }: {
-    security?: {
+    security: {
       roles?: string[];
       pluginEnabled?: boolean;
       licenseEnabled?: boolean;
@@ -58,27 +62,22 @@ describe('FleetAuthzRouter', () => {
 
     const mockContext = createAppContextStartContractMock();
     // @ts-expect-error type doesn't properly respect deeply mocked keys
-    mockContext.securityStart?.authz.actions.api.get.mockImplementation((priv) => `api:${priv}`);
+    mockContext.securityStart.authz.actions.api.get.mockImplementation((priv) => `api:${priv}`);
 
-    if (!pluginEnabled) {
-      mockContext.securitySetup = undefined;
-      mockContext.securityStart = undefined;
-    } else {
-      mockContext.securityStart?.authc.getCurrentUser.mockReturnValue({
-        username: 'foo',
-        roles,
-      } as unknown as AuthenticatedUser);
+    mockContext.securityStart.authc.getCurrentUser.mockReturnValue({
+      username: 'foo',
+      roles,
+    } as unknown as AuthenticatedUser);
 
-      mockContext.securitySetup?.license.isEnabled.mockReturnValue(licenseEnabled);
-      if (licenseEnabled) {
-        mockContext.securityStart?.authz.mode.useRbacForRequest.mockReturnValue(true);
-      }
+    mockContext.securitySetup.license.isEnabled.mockReturnValue(licenseEnabled);
+    if (licenseEnabled) {
+      mockContext.securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
+    }
 
-      if (checkPrivilegesDynamically) {
-        mockContext.securityStart?.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-          checkPrivilegesDynamically
-        );
-      }
+    if (checkPrivilegesDynamically) {
+      mockContext.securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        checkPrivilegesDynamically
+      );
     }
 
     appContextService.start(mockContext);
@@ -122,7 +121,7 @@ describe('FleetAuthzRouter', () => {
   it('does not allow security plugin to be disabled', async () => {
     expect(
       await runTest({
-        security: { pluginEnabled: false },
+        security: { pluginEnabled: false, licenseEnabled: false },
         routeConfig: {
           fleetAuthz: { fleet: { all: true } },
         },
@@ -146,14 +145,6 @@ describe('FleetAuthzRouter', () => {
       path: '/api/fleet/test',
       fleetAuthz: { fleet: { setup: true } },
     };
-    it('allow users with superuser role', async () => {
-      expect(
-        await runTest({
-          security: { roles: ['superuser'] },
-          routeConfig,
-        })
-      ).toEqual('ok');
-    });
 
     it('allow users with fleet-setup role', async () => {
       mockCheckPrivileges.mockImplementation(
@@ -178,45 +169,11 @@ describe('FleetAuthzRouter', () => {
     });
   });
 
-  describe('with superuser privileges', () => {
-    const routeConfig = {
-      path: '/api/fleet/test',
-      fleetAuthz: { integrations: { uploadPackages: true } },
-    };
-    it('allow users with superuser role', async () => {
-      expect(
-        await runTest({
-          security: { roles: ['superuser'] },
-          routeConfig,
-        })
-      ).toEqual('ok');
-    });
-
-    it('do not allow users without superuser role', async () => {
-      mockCheckPrivileges.mockImplementation(getCheckPrivilegesMockedImplementation([]));
-      expect(
-        await runTest({
-          security: { checkPrivilegesDynamically: mockCheckPrivileges },
-          routeConfig,
-        })
-      ).toEqual('forbidden');
-    });
-  });
-
   describe('with fleet role', () => {
     const routeConfig = {
       path: '/api/fleet/test',
       fleetAuthz: { integrations: { readPackageInfo: true } },
     };
-
-    it('allow users with superuser role', async () => {
-      expect(
-        await runTest({
-          security: { roles: ['superuser'] },
-          routeConfig,
-        })
-      ).toEqual('ok');
-    });
 
     it('allow users with all required fleet authz role', async () => {
       mockCheckPrivileges.mockImplementation(

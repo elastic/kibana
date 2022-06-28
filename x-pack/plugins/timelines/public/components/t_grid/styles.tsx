@@ -10,6 +10,7 @@ import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-g
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { TimelineEventsType } from '../../../common/types/timeline';
+import type { ViewSelection } from './event_rendered_view/selector';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
@@ -184,7 +185,7 @@ export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
-  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
   width: ${({ width }) =>
     width != null
@@ -193,7 +194,7 @@ export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
 
   > button.euiButtonIcon,
   > .euiToolTipAnchor > button.euiButtonIcon {
-    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+    margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};
   }
 `;
 
@@ -285,12 +286,12 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding-left: ${({ theme }) => theme.eui.paddingSizes.m};
+  padding-left: ${({ theme }) => theme.eui.euiSizeM};
   .euiAccordion + div {
     background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
-    padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
+    padding: 0 ${({ theme }) => theme.eui.euiSizeS};
     border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-    border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
+    border-radius: ${({ theme }) => theme.eui.euiSizeXS};
   }
 `;
 
@@ -351,7 +352,7 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
-  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
   width: ${({ width }) =>
     width != null
@@ -359,7 +360,7 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
       : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 
   button.euiButtonIcon {
-    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+    margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};
   }
 `;
 
@@ -466,7 +467,8 @@ export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
   display: ${({ $visible = true }) => ($visible ? 'flex' : 'none')};
 `;
 
-export const UpdatedFlexGroup = styled(EuiFlexGroup)`
+export const UpdatedFlexGroup = styled(EuiFlexGroup)<{ $view?: ViewSelection }>`
+  ${({ $view, theme }) => ($view === 'gridView' ? `margin-right: ${theme.eui.euiSizeXL};` : '')}
   position: absolute;
   z-index: ${({ theme }) => theme.eui.euiZLevel1};
   right: 0px;
@@ -480,6 +482,6 @@ export const AlertCount = styled.span`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   border-right: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
-  padding-right: ${({ theme }) => theme.eui.paddingSizes.m};
+  margin-right: ${({ theme }) => theme.eui.euiSizeS};
+  padding-right: ${({ theme }) => theme.eui.euiSizeM};
 `;

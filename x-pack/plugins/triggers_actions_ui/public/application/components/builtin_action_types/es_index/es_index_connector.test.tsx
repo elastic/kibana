@@ -6,44 +6,63 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
-import { EsIndexActionConnector } from '../types';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { screen, fireEvent, waitFor, render } from '@testing-library/react';
 import IndexActionConnectorFields from './es_index_connector';
 import { EuiComboBox, EuiSwitch, EuiSwitchEvent, EuiSelect } from '@elastic/eui';
+import { AppMockRenderer, ConnectorFormTestProvider, createAppMockRenderer } from '../test_utils';
+import userEvent from '@testing-library/user-event';
+
 jest.mock('../../../../common/lib/kibana');
 
+jest.mock('lodash', () => {
+  const module = jest.requireActual('lodash');
+  return {
+    ...module,
+    debounce: (fn: () => unknown) => fn,
+  };
+});
+
 jest.mock('../../../../common/index_controls', () => ({
-  firstFieldOption: jest.fn(),
+  firstFieldOption: {
+    text: 'Select a field',
+    value: '',
+  },
   getFields: jest.fn(),
   getIndexOptions: jest.fn(),
-  getIndexPatterns: jest.fn(),
 }));
 
-const { getIndexPatterns } = jest.requireMock('../../../../common/index_controls');
-getIndexPatterns.mockResolvedValueOnce([
+const { getIndexOptions } = jest.requireMock('../../../../common/index_controls');
+
+getIndexOptions.mockResolvedValueOnce([
   {
-    id: 'indexPattern1',
-    attributes: {
-      title: 'indexPattern1',
-    },
-  },
-  {
-    id: 'indexPattern2',
-    attributes: {
-      title: 'indexPattern2',
-    },
+    label: 'indexOption',
+    options: [
+      { label: 'indexPattern1', value: 'indexPattern1' },
+      { label: 'indexPattern2', value: 'indexPattern2' },
+    ],
   },
 ]);
 
 const { getFields } = jest.requireMock('../../../../common/index_controls');
 
-async function setup(props: any) {
-  const wrapper = mountWithIntl(<IndexActionConnectorFields {...props} />);
+async function setup(actionConnector: any) {
+  const wrapper = mountWithIntl(
+    <ConnectorFormTestProvider connector={actionConnector}>
+      <IndexActionConnectorFields
+        readOnly={false}
+        isEdit={false}
+        registerPreSubmitValidator={() => {}}
+      />
+    </ConnectorFormTestProvider>
+  );
+
   await act(async () => {
     await nextTick();
     wrapper.update();
   });
+
   return wrapper;
 }
 
@@ -59,22 +78,17 @@ function setupGetFieldsResponse(getFieldsWithDateMapping: boolean) {
     },
   ]);
 }
-describe('IndexActionConnectorFields renders', () => {
+
+describe('IndexActionConnectorFields', () => {
   test('renders correctly when creating connector', async () => {
-    const props = {
-      action: {
-        actionTypeId: '.index',
-        config: {},
-        secrets: {},
-      } as EsIndexActionConnector,
-      editActionConfig: () => {},
-      editActionSecrets: () => {},
-      errors: { index: [] },
-      readOnly: false,
-      setCallbacks: () => {},
-      isEdit: false,
+    const connector = {
+      actionTypeId: '.index',
+      config: {},
+      secrets: {},
     };
-    const wrapper = mountWithIntl(<IndexActionConnectorFields {...props} />);
+
+    setupGetFieldsResponse(false);
+    const wrapper = await setup(connector);
 
     expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
@@ -90,34 +104,41 @@ describe('IndexActionConnectorFields renders', () => {
     // time field switch should show up if index has date type field mapping
     setupGetFieldsResponse(true);
     await act(async () => {
-      indexComboBox.prop('onChange')!([{ label: 'selection' }]);
+      indexComboBox.prop('onChange')!([{ label: 'selection', value: 'selection' }]);
       await nextTick();
       wrapper.update();
     });
+
+    wrapper.update();
     expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeFalsy();
 
+    // time field switch should show up if index has date type field mapping
     // time field switch should go away if index does not has date type field mapping
     setupGetFieldsResponse(false);
     await act(async () => {
-      indexComboBox.prop('onChange')!([{ label: 'selection' }]);
+      indexComboBox.prop('onChange')!([{ label: 'selection', value: 'selection' }]);
       await nextTick();
       wrapper.update();
     });
+
     expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeFalsy();
 
     // time field dropdown should show up if index has date type field mapping and time switch is clicked
     setupGetFieldsResponse(true);
     await act(async () => {
-      indexComboBox.prop('onChange')!([{ label: 'selection' }]);
+      indexComboBox.prop('onChange')!([{ label: 'selection', value: 'selection' }]);
       await nextTick();
       wrapper.update();
     });
+
     expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
+
     const timeFieldSwitch = wrapper
       .find(EuiSwitch)
       .filter('[data-test-subj="hasTimeFieldCheckbox"]');
+
     await act(async () => {
       timeFieldSwitch.prop('onChange')!({
         target: { checked: true },
@@ -125,26 +146,25 @@ describe('IndexActionConnectorFields renders', () => {
       await nextTick();
       wrapper.update();
     });
-    expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeTruthy();
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeTruthy();
+    });
   });
 
   test('renders correctly when editing connector - no date type field mapping', async () => {
     const indexName = 'index-no-date-fields';
     const props = {
-      action: {
-        name: 'Index Connector for Index With No Date Type',
-        actionTypeId: '.index',
-        config: {
-          index: indexName,
-          refresh: false,
-        },
-        secrets: {},
-      } as EsIndexActionConnector,
-      editActionConfig: () => {},
-      editActionSecrets: () => {},
-      errors: { index: [] },
-      readOnly: false,
+      name: 'Index Connector for Index With No Date Type',
+      actionTypeId: '.index',
+      config: {
+        index: indexName,
+        refresh: false,
+      },
+      secrets: {},
     };
+
     setupGetFieldsResponse(false);
     const wrapper = await setup(props);
 
@@ -167,20 +187,15 @@ describe('IndexActionConnectorFields renders', () => {
   test('renders correctly when editing connector - refresh set to true', async () => {
     const indexName = 'index-no-date-fields';
     const props = {
-      action: {
-        name: 'Index Connector for Index With No Date Type',
-        actionTypeId: '.index',
-        config: {
-          index: indexName,
-          refresh: true,
-        },
-        secrets: {},
-      } as EsIndexActionConnector,
-      editActionConfig: () => {},
-      editActionSecrets: () => {},
-      errors: { index: [] },
-      readOnly: false,
+      name: 'Index Connector for Index With No Date Type',
+      actionTypeId: '.index',
+      config: {
+        index: indexName,
+        refresh: true,
+      },
+      secrets: {},
     };
+
     setupGetFieldsResponse(false);
     const wrapper = await setup(props);
 
@@ -201,27 +216,24 @@ describe('IndexActionConnectorFields renders', () => {
   test('renders correctly when editing connector - with date type field mapping but no time field selected', async () => {
     const indexName = 'index-no-date-fields';
     const props = {
-      action: {
-        name: 'Index Connector for Index With No Date Type',
-        actionTypeId: '.index',
-        config: {
-          index: indexName,
-          refresh: false,
-        },
-        secrets: {},
-      } as EsIndexActionConnector,
-      editActionConfig: () => {},
-      editActionSecrets: () => {},
-      errors: { index: [] },
-      readOnly: false,
+      name: 'Index Connector for Index With No Date Type',
+      actionTypeId: '.index',
+      config: {
+        index: indexName,
+        refresh: false,
+      },
+      secrets: {},
     };
+
     setupGetFieldsResponse(true);
     const wrapper = await setup(props);
 
-    expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeFalsy();
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeFalsy();
+    });
 
     const indexComboBox = wrapper
       .find(EuiComboBox)
@@ -240,28 +252,25 @@ describe('IndexActionConnectorFields renders', () => {
   test('renders correctly when editing connector - with date type field mapping and selected time field', async () => {
     const indexName = 'index-no-date-fields';
     const props = {
-      action: {
-        name: 'Index Connector for Index With No Date Type',
-        actionTypeId: '.index',
-        config: {
-          index: indexName,
-          refresh: false,
-          executionTimeField: 'test1',
-        },
-        secrets: {},
-      } as EsIndexActionConnector,
-      editActionConfig: () => {},
-      editActionSecrets: () => {},
-      errors: { index: [] },
-      readOnly: false,
+      name: 'Index Connector for Index With No Date Type',
+      actionTypeId: '.index',
+      config: {
+        index: indexName,
+        refresh: false,
+        executionTimeField: 'test1',
+      },
     };
+
     setupGetFieldsResponse(true);
     const wrapper = await setup(props);
 
-    expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeTruthy();
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeTruthy();
+    });
 
     const indexComboBox = wrapper
       .find(EuiComboBox)
@@ -280,5 +289,174 @@ describe('IndexActionConnectorFields renders', () => {
       .find(EuiSelect)
       .filter('[data-test-subj="executionTimeFieldSelect"]');
     expect(timeFieldSelect.prop('value')).toEqual('test1');
+  });
+
+  test('fetches index names on index combobox input change', async () => {
+    const mockIndexName = 'test-index';
+    const connector = {
+      actionTypeId: '.index',
+      name: 'index',
+      isDeprecated: false,
+      config: {},
+      secrets: {},
+    };
+
+    render(
+      <ConnectorFormTestProvider connector={connector}>
+        <IndexActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const indexComboBox = await screen.findByTestId('connectorIndexesComboBox');
+
+    // time field switch should show up if index has date type field mapping
+    setupGetFieldsResponse(true);
+
+    fireEvent.click(indexComboBox);
+
+    await act(async () => {
+      const event = { target: { value: mockIndexName } };
+      fireEvent.change(screen.getByRole('combobox'), event);
+    });
+
+    expect(getIndexOptions).toHaveBeenCalledTimes(1);
+    expect(getIndexOptions).toHaveBeenCalledWith(expect.anything(), mockIndexName);
+    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(screen.getByText('indexPattern1')).toBeInTheDocument();
+    expect(screen.getByText('indexPattern2')).toBeInTheDocument();
+  });
+
+  describe('Validation', () => {
+    let appMockRenderer: AppMockRenderer;
+    const onSubmit = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRenderer = createAppMockRenderer();
+    });
+
+    test('connector validation succeeds when connector config is valid', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: 'test_es_index',
+          refresh: false,
+          executionTimeField: '1',
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.index',
+          config: {
+            index: 'test_es_index',
+            refresh: false,
+            executionTimeField: '1',
+          },
+          id: 'test',
+          isDeprecated: false,
+          __internal__: {
+            hasTimeFieldCheckbox: true,
+          },
+          name: 'es_index',
+        },
+        isValid: true,
+      });
+    });
+
+    test('connector validation succeeds when connector config is valid with minimal config', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: 'test_es_index',
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.index',
+          config: {
+            index: 'test_es_index',
+            refresh: false,
+          },
+          id: 'test',
+          isDeprecated: false,
+          name: 'es_index',
+        },
+        isValid: true,
+      });
+    });
+
+    test('connector validation fails when index is empty', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: '',
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {},
+        isValid: false,
+      });
+    });
   });
 });

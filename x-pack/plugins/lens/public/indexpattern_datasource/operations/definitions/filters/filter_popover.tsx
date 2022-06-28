@@ -9,9 +9,9 @@ import './filter_popover.scss';
 
 import React from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
+import type { Query } from '@kbn/es-query';
 import { FilterValue, defaultLabel, isQueryValid } from '.';
 import { IndexPattern } from '../../../types';
-import { Query } from '../../../../../../../../src/plugins/data/public';
 import { LabelInput } from '../shared_components';
 import { QueryInput } from '../../../query_input';
 
@@ -19,14 +19,14 @@ export const FilterPopover = ({
   filter,
   setFilter,
   indexPattern,
-  Button,
+  button,
   isOpen,
   triggerClose,
 }: {
   filter: FilterValue;
   setFilter: Function;
   indexPattern: IndexPattern;
-  Button: React.FunctionComponent;
+  button: React.ReactChild;
   isOpen: boolean;
   triggerClose: () => void;
 }) => {
@@ -78,12 +78,13 @@ export const FilterPopover = ({
       isOpen={isOpen}
       ownFocus
       closePopover={() => triggerClose()}
-      button={<Button />}
+      button={button}
     >
       <QueryInput
         isInvalid={!isQueryValid(filter.input, indexPattern)}
         value={filter.input}
         indexPatternTitle={indexPattern.title}
+        disableAutoFocus
         onChange={setFilterQuery}
         onSubmit={() => {
           if (inputRef.current) inputRef.current.focus();

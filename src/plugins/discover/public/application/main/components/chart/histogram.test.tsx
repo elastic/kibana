@@ -5,15 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import { DataCharts$ } from '../../utils/use_saved_search';
+import { DataCharts$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { Chart } from './point_series';
 import { DiscoverHistogram } from './histogram';
 import React from 'react';
-import * as hooks from '../../utils/use_data_state';
+import * as hooks from '../../hooks/use_data_state';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { GetStateReturn } from '../../services/discover_state';
 
 const chartData = {
   xAxisOrderedValues: [
@@ -54,7 +56,7 @@ const chartData = {
   ],
 } as unknown as Chart;
 
-function getProps(fetchStatus: FetchStatus) {
+function mountComponent(fetchStatus: FetchStatus) {
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -72,11 +74,23 @@ function getProps(fetchStatus: FetchStatus) {
 
   const timefilterUpdateHandler = jest.fn();
 
-  return {
+  const props = {
     savedSearchData$: charts$,
-    services,
     timefilterUpdateHandler,
+    stateContainer: {
+      appStateContainer: {
+        getState: () => ({
+          interval: 'auto',
+        }),
+      },
+    } as unknown as GetStateReturn,
   };
+
+  return mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverHistogram {...props} />
+    </KibanaContextProvider>
+  );
 }
 
 describe('Histogram', () => {
@@ -90,7 +104,7 @@ describe('Histogram', () => {
         scale: 1,
       },
     }));
-    const component = mountWithIntl(<DiscoverHistogram {...getProps(FetchStatus.COMPLETE)} />);
+    const component = mountComponent(FetchStatus.COMPLETE);
     expect(component.find('[data-test-subj="discoverChart"]').exists()).toBe(true);
   });
 
@@ -99,7 +113,7 @@ describe('Histogram', () => {
       fetchStatus: FetchStatus.ERROR,
       error: new Error('Loading error'),
     }));
-    const component = mountWithIntl(<DiscoverHistogram {...getProps(FetchStatus.ERROR)} />);
+    const component = mountComponent(FetchStatus.ERROR);
     expect(component.find('[data-test-subj="discoverChart"]').exists()).toBe(false);
     expect(component.find('.dscHistogram__errorChartContainer').exists()).toBe(true);
     expect(component.find('.dscHistogram__errorChart__text').get(1).props.children).toBe(
@@ -112,7 +126,7 @@ describe('Histogram', () => {
       fetchStatus: FetchStatus.LOADING,
       chartData: null,
     }));
-    const component = mountWithIntl(<DiscoverHistogram {...getProps(FetchStatus.LOADING)} />);
+    const component = mountComponent(FetchStatus.LOADING);
     expect(component.find('[data-test-subj="discoverChart"]').exists()).toBe(true);
     expect(component.find('.dscChart__loading').exists()).toBe(true);
   });

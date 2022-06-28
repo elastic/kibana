@@ -7,8 +7,7 @@
  */
 
 import { Assign } from '@kbn/utility-types';
-import { DatatableColumn } from 'src/plugins/expressions';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   aggAvg,
   aggBucketAvg,
@@ -57,6 +56,7 @@ import {
   AggParamsMax,
   AggParamsMedian,
   AggParamsSinglePercentile,
+  AggParamsSinglePercentileRank,
   AggParamsMin,
   AggParamsMovingAvg,
   AggParamsPercentileRanks,
@@ -68,6 +68,7 @@ import {
   AggParamsSum,
   AggParamsTerms,
   AggParamsMultiTerms,
+  AggParamsRareTerms,
   AggParamsTopHit,
   aggPercentileRanks,
   aggPercentiles,
@@ -78,6 +79,7 @@ import {
   aggSum,
   aggTerms,
   aggMultiTerms,
+  aggRareTerms,
   aggTopHit,
   AggTypesRegistry,
   AggTypesRegistrySetup,
@@ -86,15 +88,20 @@ import {
   CreateAggConfigParams,
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
-  AggConfig,
   aggFilteredMetric,
   aggSinglePercentile,
-} from './';
+  aggSinglePercentileRank,
+  AggConfigsOptions,
+} from '.';
 import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
+import { AggParamsSignificantText } from './buckets/significant_text';
+import { AggParamsTopMetrics } from './metrics/top_metrics';
+import { aggTopMetrics } from './metrics/top_metrics_fn';
+import { AggParamsCount } from './metrics';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
-export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
+export type { CreateAggConfigParams, IAggConfigs, AggConfigsOptions } from './agg_configs';
 export type { IAggType } from './agg_type';
 export type { AggParam, AggParamOption } from './agg_params';
 export type { IFieldParamType } from './param_types';
@@ -108,14 +115,10 @@ export interface AggsCommonSetup {
 
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
-  datatableUtilities: {
-    getIndexPattern: (column: DatatableColumn) => Promise<IndexPattern | undefined>;
-    getAggConfig: (column: DatatableColumn) => Promise<AggConfig | undefined>;
-    isFilterable: (column: DatatableColumn) => boolean;
-  };
   createAggConfigs: (
-    indexPattern: IndexPattern,
-    configStates?: CreateAggConfigParams[]
+    indexPattern: DataView,
+    configStates?: CreateAggConfigParams[],
+    options?: Partial<AggConfigsOptions>
   ) => InstanceType<typeof AggConfigs>;
   types: ReturnType<AggTypesRegistry['start']>;
 }
@@ -158,22 +161,25 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.FILTER]: AggParamsFilter;
   [BUCKET_TYPES.FILTERS]: AggParamsFilters;
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
+  [BUCKET_TYPES.SIGNIFICANT_TEXT]: AggParamsSignificantText;
   [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
   [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
+  [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
   [BUCKET_TYPES.DIVERSIFIED_SAMPLER]: AggParamsDiversifiedSampler;
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
-  [METRIC_TYPES.COUNT]: BaseAggParams;
+  [METRIC_TYPES.COUNT]: AggParamsCount;
   [METRIC_TYPES.GEO_BOUNDS]: AggParamsGeoBounds;
   [METRIC_TYPES.GEO_CENTROID]: AggParamsGeoCentroid;
   [METRIC_TYPES.MAX]: AggParamsMax;
   [METRIC_TYPES.MEDIAN]: AggParamsMedian;
   [METRIC_TYPES.SINGLE_PERCENTILE]: AggParamsSinglePercentile;
+  [METRIC_TYPES.SINGLE_PERCENTILE_RANK]: AggParamsSinglePercentileRank;
   [METRIC_TYPES.MIN]: AggParamsMin;
   [METRIC_TYPES.STD_DEV]: AggParamsStdDeviation;
   [METRIC_TYPES.SUM]: AggParamsSum;
@@ -189,6 +195,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
   [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiff;
   [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
+  [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetrics;
 }
 
 /**
@@ -207,6 +214,7 @@ export interface AggFunctionsMapping {
   aggDateHistogram: ReturnType<typeof aggDateHistogram>;
   aggTerms: ReturnType<typeof aggTerms>;
   aggMultiTerms: ReturnType<typeof aggMultiTerms>;
+  aggRareTerms: ReturnType<typeof aggRareTerms>;
   aggAvg: ReturnType<typeof aggAvg>;
   aggBucketAvg: ReturnType<typeof aggBucketAvg>;
   aggBucketMax: ReturnType<typeof aggBucketMax>;
@@ -222,6 +230,7 @@ export interface AggFunctionsMapping {
   aggMax: ReturnType<typeof aggMax>;
   aggMedian: ReturnType<typeof aggMedian>;
   aggSinglePercentile: ReturnType<typeof aggSinglePercentile>;
+  aggSinglePercentileRank: ReturnType<typeof aggSinglePercentileRank>;
   aggMin: ReturnType<typeof aggMin>;
   aggMovingAvg: ReturnType<typeof aggMovingAvg>;
   aggPercentileRanks: ReturnType<typeof aggPercentileRanks>;
@@ -230,4 +239,5 @@ export interface AggFunctionsMapping {
   aggStdDeviation: ReturnType<typeof aggStdDeviation>;
   aggSum: ReturnType<typeof aggSum>;
   aggTopHit: ReturnType<typeof aggTopHit>;
+  aggTopMetrics: ReturnType<typeof aggTopMetrics>;
 }

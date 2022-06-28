@@ -6,14 +6,14 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 import { setupEnvironment } from '../../helpers';
 import { initTestBed } from '../init_test_bed';
-import { getDefaultHotPhasePolicy, POLICY_NAME } from '../constants';
+import { getDefaultHotPhasePolicy, POLICY_NAME, POLICY_MANAGED_BY_ES } from '../constants';
 
 describe('<EditPolicy /> edit warning', () => {
   let testBed: TestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -21,14 +21,13 @@ describe('<EditPolicy /> edit warning', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
 
     const { component } = testBed;
@@ -38,7 +37,7 @@ describe('<EditPolicy /> edit warning', () => {
   test('no edit warning for a new policy', async () => {
     httpRequestsMockHelpers.setLoadPolicies([]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { exists, component } = testBed;
     component.update();
@@ -48,11 +47,24 @@ describe('<EditPolicy /> edit warning', () => {
   test('an edit warning is shown for an existing policy', async () => {
     httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(POLICY_NAME)]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { exists, component } = testBed;
     component.update();
     expect(exists('editWarning')).toBe(true);
+  });
+
+  test('an edit warning callout is shown for an existing, managed policy', async () => {
+    httpRequestsMockHelpers.setLoadPolicies([POLICY_MANAGED_BY_ES]);
+
+    await act(async () => {
+      testBed = await initTestBed(httpSetup);
+    });
+    const { exists, component } = testBed;
+    component.update();
+
+    expect(exists('editWarning')).toBe(true);
+    expect(exists('editManagedPolicyCallOut')).toBe(true);
   });
 
   test('no indices link if no indices', async () => {
@@ -60,7 +72,7 @@ describe('<EditPolicy /> edit warning', () => {
       { ...getDefaultHotPhasePolicy(POLICY_NAME), indices: [] },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { exists, component } = testBed;
     component.update();
@@ -72,7 +84,7 @@ describe('<EditPolicy /> edit warning', () => {
       { ...getDefaultHotPhasePolicy(POLICY_NAME), indexTemplates: [] },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { exists, component } = testBed;
     component.update();
@@ -87,7 +99,7 @@ describe('<EditPolicy /> edit warning', () => {
       },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { component, find } = testBed;
     component.update();
@@ -102,7 +114,7 @@ describe('<EditPolicy /> edit warning', () => {
       },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { component, find } = testBed;
     component.update();
@@ -117,7 +129,7 @@ describe('<EditPolicy /> edit warning', () => {
       },
     ]);
     await act(async () => {
-      testBed = await initTestBed();
+      testBed = await initTestBed(httpSetup);
     });
     const { component, find, exists } = testBed;
     component.update();

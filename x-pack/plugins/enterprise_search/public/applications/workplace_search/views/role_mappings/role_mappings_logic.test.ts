@@ -13,7 +13,7 @@ import {
 
 import { groups } from '../../__mocks__/groups.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { elasticsearchUsers } from '../../../shared/role_mapping/__mocks__/elasticsearch_users';
 
@@ -116,13 +116,6 @@ describe('RoleMappingsLogic', () => {
 
         expect(RoleMappingsLogic.values.elasticsearchUser).toEqual(emptyUser);
       });
-    });
-
-    it('setRoleMappings', () => {
-      RoleMappingsLogic.actions.setRoleMappings({ roleMappings: [wsRoleMapping] });
-
-      expect(RoleMappingsLogic.values.roleMappings).toEqual([wsRoleMapping]);
-      expect(RoleMappingsLogic.values.dataLoading).toEqual(false);
     });
 
     describe('setElasticsearchUser', () => {
@@ -283,7 +276,10 @@ describe('RoleMappingsLogic', () => {
   describe('listeners', () => {
     describe('enableRoleBasedAccess', () => {
       it('calls API and sets values', async () => {
-        const setRoleMappingsSpy = jest.spyOn(RoleMappingsLogic.actions, 'setRoleMappings');
+        const initializeRoleMappingsSpy = jest.spyOn(
+          RoleMappingsLogic.actions,
+          'initializeRoleMappings'
+        );
         http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
         RoleMappingsLogic.actions.enableRoleBasedAccess();
 
@@ -293,7 +289,7 @@ describe('RoleMappingsLogic', () => {
           '/internal/workplace_search/org/role_mappings/enable_role_based_access'
         );
         await nextTick();
-        expect(setRoleMappingsSpy).toHaveBeenCalledWith(mappingsServerProps);
+        expect(initializeRoleMappingsSpy).toHaveBeenCalled();
       });
 
       itShowsServerErrorAsFlashMessage(http.post, () => {

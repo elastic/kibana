@@ -5,7 +5,7 @@
   ],
   "description": "Identifies when an AWS Route Table has been created.",
   "false_positives": [
-    "Route Table being created may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Route Table being created from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.  Automated processes that uses Terraform may lead to false positives."
+    "Route Tables may be created by a system or network administrators. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Route Table creation by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule. Automated processes that use Terraform may lead to false positives."
   ],
   "from": "now-60m",
   "index": [
@@ -19,7 +19,7 @@
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "query": "event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.action:(CreateRoute or CreateRouteTable) and \nevent.outcome:success\n",
   "references": [
-    "https://docs.datadoghq.com/security_platform/default_rules/cloudtrail-aws-route-table-modified/",
+    "https://docs.datadoghq.com/security_platform/default_rules/aws-ec2-route-table-modified/",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRoute.html",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateRouteTable"
   ],
@@ -47,5 +47,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

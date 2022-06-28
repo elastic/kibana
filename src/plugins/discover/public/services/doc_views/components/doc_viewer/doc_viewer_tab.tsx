@@ -11,8 +11,6 @@ import { isEqual } from 'lodash';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
 import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views_types';
-import { getServices } from '../../../../kibana_services';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 
 interface Props {
   id: number;
@@ -44,8 +42,8 @@ export class DocViewerTab extends React.Component<Props, State> {
 
   shouldComponentUpdate(nextProps: Props, nextState: State) {
     return (
-      nextProps.renderProps.hit._id !== this.props.renderProps.hit._id ||
-      !isEqual(nextProps.renderProps.hit.highlight, this.props.renderProps.hit.highlight) ||
+      nextProps.renderProps.hit.id !== this.props.renderProps.hit.id ||
+      !isEqual(nextProps.renderProps.hit.raw.highlight, this.props.renderProps.hit.raw.highlight) ||
       nextProps.id !== this.props.id ||
       !isEqual(nextProps.renderProps.columns, this.props.renderProps.columns) ||
       nextState.hasError
@@ -67,11 +65,7 @@ export class DocViewerTab extends React.Component<Props, State> {
 
     // doc view is provided by a react component
     if (Component) {
-      return (
-        <KibanaContextProvider services={{ uiSettings: getServices().uiSettings }}>
-          <Component {...renderProps} />
-        </KibanaContextProvider>
-      );
+      return <Component {...renderProps} />;
     }
 
     return (

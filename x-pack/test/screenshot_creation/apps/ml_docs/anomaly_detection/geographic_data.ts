@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
-import { ECOMMERCE_INDEX_PATTERN, LOGS_INDEX_PATTERN } from '../index';
+import { ECOMMERCE_INDEX_PATTERN, LOGS_INDEX_PATTERN } from '..';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
@@ -229,7 +229,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(ecommerceGeoJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(ecommerceGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
@@ -260,7 +259,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(weblogGeoJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(weblogGeoJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
@@ -268,7 +266,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('select swim lane tile');
       const cells = await ml.swimLane.getCells(overallSwimLaneTestSubj);
       const sampleCell1 = cells[11];
-      const sampleCell2 = cells[12];
+      const sampleCell2 = cells[cells.length - 1];
       await ml.swimLane.selectCells(overallSwimLaneTestSubj, {
         x1: sampleCell1.x + cellSize,
         y1: sampleCell1.y + cellSize,
@@ -283,6 +281,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // clickFitToData only works with displayed legend
       await maps.openLegend();
       await maps.clickFitToData();
+      await ml.anomalyExplorer.scrollChartsContainerIntoView();
       await maps.closeLegend();
 
       await mlScreenshots.takeScreenshot(

@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { isEqual, cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
+import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
+import {
+  Filter,
+  FilterStateStore,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Query,
+} from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -18,24 +25,21 @@ import {
   StateContainer,
   syncState,
   withNotifyOnErrors,
-} from '../../../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 import {
   connectToQueryState,
   DataPublicPluginStart,
-  esFilters,
-  Filter,
   FilterManager,
-  IndexPattern,
-  Query,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
-} from '../../../../../data/public';
-import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
+} from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
+import { cleanupUrlState } from '../utils/cleanup_url_state';
 
 export interface AppState {
   /**
@@ -82,6 +86,17 @@ export interface AppState {
    * Hide mini distribution/preview charts when in Field Statistics mode
    */
   hideAggregatedPreview?: boolean;
+  /**
+   * Document explorer row height option
+   */
+  rowHeight?: number;
+}
+
+export interface AppStateUrl extends Omit<AppState, 'sort'> {
+  /**
+   * Necessary to take care of legacy links [fieldName,direction]
+   */
+  sort?: string[][] | [string, string];
 }
 
 interface GetStateParams {
@@ -124,7 +139,7 @@ export interface GetStateReturn {
    * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     filterManager: FilterManager,
     data: DataPublicPluginStart
   ) => () => void;
@@ -185,17 +200,7 @@ export function getState({
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
-  const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
-
-  if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
-    appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
-  }
-
-  if (appStateFromUrl?.sort && !appStateFromUrl.sort.length) {
-    // If there's an empty array given in the URL, the sort prop should be removed
-    // This allows the sort prop to be overwritten with the default sorting
-    delete appStateFromUrl.sort;
-  }
+  const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
 
   let initialAppState = handleSourceColumnState(
     {
@@ -251,7 +256,7 @@ export function getState({
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     initializeAndSync: (
-      indexPattern: IndexPattern,
+      indexPattern: DataView,
       filterManager: FilterManager,
       data: DataPublicPluginStart
     ) => {
@@ -273,7 +278,7 @@ export function getState({
         data.query,
         appStateContainer,
         {
-          filters: esFilters.FilterStateStore.APP_STATE,
+          filters: FilterStateStore.APP_STATE,
           query: true,
         }
       );
@@ -312,13 +317,13 @@ export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newS
 /**
  * Helper function to compare 2 different filter states
  */
-export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
+export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
   if (!filtersA && !filtersB) {
     return true;
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return esFilters.compareFilters(filtersA, filtersB, esFilters.COMPARE_ALL_OPTIONS);
+  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
 }
 
 /**

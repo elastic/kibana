@@ -18,7 +18,7 @@ import {
 } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { createStore } from '../../../common/store';
-import { kibanaObservable } from '../../../../../timelines/public/mock';
+import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
 import { sourcererPaths } from '../../../common/containers/sourcerer';
 
 jest.mock('react-router-dom', () => {
@@ -30,15 +30,19 @@ jest.mock('../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../common/lib/kibana');
   return {
     ...originalModule,
-    useKibana: jest
-      .fn()
-      .mockReturnValue({ services: { http: { basePath: { prepend: jest.fn() } } } }),
+    useKibana: jest.fn().mockReturnValue({
+      services: { theme: { theme$: {} }, http: { basePath: { prepend: jest.fn() } } },
+    }),
     useUiSetting$: jest.fn().mockReturnValue([]),
   };
 });
 
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
+}));
+
+jest.mock('../../../common/containers/sourcerer/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
 jest.mock('react-reverse-portal', () => ({

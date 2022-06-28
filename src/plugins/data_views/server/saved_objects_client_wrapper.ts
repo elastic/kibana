@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
-import {
-  SavedObjectsClientCommon,
-  SavedObjectsClientCommonFindArgs,
-  DataViewSavedObjectConflictError,
-} from '../common';
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import { SavedObjectsClientCommon, SavedObjectsClientCommonFindArgs } from '../common/types';
+import { DataViewSavedObjectConflictError } from '../common/errors';
 
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;
@@ -42,6 +39,6 @@ export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommo
     return await this.savedObjectClient.create(type, attributes, options);
   }
   delete(type: string, id: string) {
-    return this.savedObjectClient.delete(type, id);
+    return this.savedObjectClient.delete(type, id, { force: true });
   }
 }

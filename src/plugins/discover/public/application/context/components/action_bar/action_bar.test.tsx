@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ActionBar, ActionBarProps } from './action_bar';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../services/constants';
@@ -78,6 +78,18 @@ describe('Test Discover Context ActionBar for successor | predecessor records', 
           'No documents older than the anchor could be found.'
         );
       }
+    });
+
+    test(`${type}: Load button disabled when defaultStepSize is 0`, () => {
+      const wrapperWhenZeroStep = mountWithIntl(<ActionBar {...props} defaultStepSize={0} />);
+      const inputWhenZeroStep = findTestSubject(wrapperWhenZeroStep, `${type}CountPicker`);
+      const btnWhenZeroStep = findTestSubject(wrapperWhenZeroStep, `${type}LoadMoreButton`);
+      expect(btnWhenZeroStep.props().disabled).toBe(true);
+      btnWhenZeroStep.simulate('click');
+      expect(onChangeCount).toHaveBeenCalledTimes(0);
+      inputWhenZeroStep.simulate('change', { target: { valueAsNumber: 3 } });
+      btnWhenZeroStep.simulate('click');
+      expect(onChangeCount).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -11,14 +11,15 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
+import type { Query } from '@kbn/es-query';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { queryFilterToAst } from '@kbn/data-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { updateColumnParam } from '../../layer_helpers';
-import type { OperationDefinition } from '../index';
+import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
 import type { IndexPattern } from '../../../types';
-import type { AggFunctionsMapping, Query } from '../../../../../../../../src/plugins/data/public';
-import { queryFilterToAst } from '../../../../../../../../src/plugins/data/common';
-import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
 import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
 
 const generateId = htmlIdGenerator();
@@ -264,7 +265,7 @@ export const FilterList = ({
                 setFilter={(f: FilterValue) => {
                   onChangeValue(f.id, f.input, f.label);
                 }}
-                Button={() => (
+                button={
                   <EuiLink
                     className="lnsFiltersOperation__popoverButton"
                     data-test-subj="indexPattern-filters-existingFilterTrigger"
@@ -276,7 +277,7 @@ export const FilterList = ({
                   >
                     {filter.label || filter.input.query || defaultLabel}
                   </EuiLink>
-                )}
+                }
               />
             </DraggableBucketContainer>
           );

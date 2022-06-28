@@ -12,34 +12,42 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { esFilters } from '../../../../data/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
-import { IndexPattern, IndexPatternField } from '../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
-import { getServices } from '../../kibana_services';
 import { AppState, isEqualFilters } from './services/context_state';
-import { useColumns } from '../../utils/use_data_grid_columns';
-import { useContextAppState } from './utils/use_context_app_state';
-import { useContextAppFetch } from './utils/use_context_app_fetch';
+import { useColumns } from '../../hooks/use_data_grid_columns';
+import { useContextAppState } from './hooks/use_context_app_state';
+import { useContextAppFetch } from './hooks/use_context_app_fetch';
 import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
 export interface ContextAppProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   anchorId: string;
 }
 
 export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
-  const services = getServices();
-  const { uiSettings, capabilities, indexPatterns, navigation, filterManager } = services;
+  const services = useDiscoverServices();
+  const { uiSettings, capabilities, indexPatterns, navigation, filterManager, core } = services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'context',
+    id: indexPattern.id || '',
+  });
 
   /**
    * Context app state
@@ -56,7 +64,6 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
       indexPattern,
       appState,
       useNewFieldsApi,
-      services,
     });
   /**
    * Reset state when anchor changes
@@ -89,7 +96,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     fetchContextRows,
     fetchAllRows,
     fetchSurroundingRows,
-    fetchedState.anchor._id,
+    fetchedState.anchor.id,
   ]);
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
@@ -104,21 +111,15 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const rows = useMemo(
     () => [
       ...(fetchedState.predecessors || []),
-      ...(fetchedState.anchor._id ? [fetchedState.anchor] : []),
+      ...(fetchedState.anchor.id ? [fetchedState.anchor] : []),
       ...(fetchedState.successors || []),
     ],
     [fetchedState.predecessors, fetchedState.anchor, fetchedState.successors]
   );
 
   const addFilter = useCallback(
-    async (field: IndexPatternField | string, values: unknown, operation: string) => {
-      const newFilters = esFilters.generateFilters(
-        filterManager,
-        field,
-        values,
-        operation,
-        indexPattern.id!
-      );
+    async (field: DataViewField | string, values: unknown, operation: string) => {
+      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern);
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
         const fieldName = typeof field === 'string' ? field : field.name;
@@ -133,7 +134,8 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     return {
       appName: 'context',
       showSearchBar: true,
-      showQueryBar: false,
+      showQueryBar: true,
+      showQueryInput: false,
       showFilterBar: true,
       showSaveQuery: false,
       showDatePicker: false,
@@ -142,17 +144,34 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     };
   };
 
+  const contextAppTitle = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    contextAppTitle.current?.focus();
+  }, []);
+
   return (
     <Fragment>
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
         <ContextErrorMessage status={fetchedState.anchorStatus} />
       ) : (
         <Fragment>
+          <h1
+            id="contextAppTitle"
+            className="euiScreenReaderOnly"
+            data-test-subj="discoverContextAppTitle"
+            tabIndex={-1}
+            ref={contextAppTitle}
+          >
+            {i18n.translate('discover.context.pageTitle', {
+              defaultMessage: 'Documents surrounding #{anchorId}',
+              values: { anchorId },
+            })}
+          </h1>
           <TopNavMenu {...getNavBarProps()} />
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageContent paddingSize="s" className="dscDocsContent">
               <EuiSpacer size="s" />
-              <EuiText>
+              <EuiText data-test-subj="contextDocumentSurroundingHeader">
                 <strong>
                   <FormattedMessage
                     id="discover.context.contextOfTitle"
@@ -163,7 +182,6 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
               </EuiText>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
-                services={services}
                 indexPattern={indexPattern}
                 useNewFieldsApi={useNewFieldsApi}
                 isLegacy={isLegacy}

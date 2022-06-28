@@ -10,8 +10,8 @@ import axios from 'axios';
 import { createExternalServiceITOM } from './service_itom';
 import * as utils from '../lib/axios_utils';
 import { ExternalServiceITOM } from './types';
-import { Logger } from '../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { snExternalServiceConfig } from './config';
 import { itomEventParams, serviceNowChoices } from './mocks';
@@ -35,15 +35,16 @@ describe('ServiceNow SIR service', () => {
   let service: ExternalServiceITOM;
 
   beforeEach(() => {
-    service = createExternalServiceITOM(
-      {
-        config: { apiUrl: 'https://example.com/' },
+    service = createExternalServiceITOM({
+      credentials: {
+        config: { apiUrl: 'https://example.com/', isOAuth: false },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
       configurationUtilities,
-      snExternalServiceConfig['.servicenow-itom']
-    ) as ExternalServiceITOM;
+      serviceConfig: snExternalServiceConfig['.servicenow-itom'],
+      axiosInstance: axios,
+    }) as ExternalServiceITOM;
   });
 
   beforeEach(() => {
@@ -83,7 +84,7 @@ describe('ServiceNow SIR service', () => {
         axios,
         logger,
         configurationUtilities,
-        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=em_event^element=severity&sysparm_fields=label,value,dependent_value,element',
+        url: 'https://example.com/api/now/table/sys_choice?sysparm_query=name=task^ORname=em_event^element=severity^language=en&sysparm_fields=label,value,dependent_value,element',
       });
     });
   });

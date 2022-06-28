@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { Privileges } from '../../../../../common/types/privileges';
-import { isPopulatedObject } from '../../../../../common/shared_imports';
 
 export interface Capabilities {
   canGetTransform: boolean;
@@ -18,6 +18,7 @@ export interface Capabilities {
   canStartStopTransform: boolean;
   canCreateTransformAlerts: boolean;
   canUseTransformAlerts: boolean;
+  canResetTransform: boolean;
 }
 
 export type Privilege = [string, string];
@@ -88,6 +89,12 @@ export function createCapabilityFailureMessage(
     case 'canDeleteTransform':
       message = i18n.translate('xpack.transform.capability.noPermission.deleteTransformTooltip', {
         defaultMessage: 'You do not have permission to delete transforms.',
+      });
+      break;
+
+    case 'canResetTransform':
+      message = i18n.translate('xpack.transform.capability.noPermission.resetTransformTooltip', {
+        defaultMessage: 'You do not have permission to reset transforms.',
       });
       break;
 

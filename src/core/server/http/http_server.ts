@@ -19,9 +19,10 @@ import {
 import agent from 'elastic-apm-node';
 
 import type { Duration } from 'moment';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { Logger, LoggerFactory } from '../logging';
+import apm from 'elastic-apm-node';
+import type { Logger, LoggerFactory } from '@kbn/logging';
 import { HttpConfig } from './http_config';
 import type { InternalExecutionContextSetup } from '../execution_context';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
@@ -42,7 +43,7 @@ import {
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
-import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
+import { AuthHeadersStorage, IAuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
@@ -71,7 +72,7 @@ export interface HttpServerSetup {
   registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
-  getAuthHeaders: GetAuthHeaders;
+  authRequestHeaders: IAuthHeadersStorage;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
 }
@@ -171,7 +172,7 @@ export class HttpServer {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
       },
-      getAuthHeaders: this.authRequestHeaders.get,
+      authRequestHeaders: this.authRequestHeaders,
       getServerInfo: () => ({
         name: config.name,
         hostname: config.host,
@@ -222,7 +223,7 @@ export class HttpServer {
     if (hasStarted) {
       this.log.debug('stopping http server');
 
-      const shutdownTimeout = await this.shutdownTimeout$.pipe(take(1)).toPromise();
+      const shutdownTimeout = await firstValueFrom(this.shutdownTimeout$.pipe(take(1)));
       await this.server.stop({ timeout: shutdownTimeout.asMilliseconds() });
 
       this.log.debug(`http server stopped`);
@@ -338,7 +339,11 @@ export class HttpServer {
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
-      if (parentContext) executionContext?.set(parentContext);
+
+      if (executionContext && parentContext) {
+        executionContext.set(parentContext);
+        apm.addLabels(executionContext.getAsLabels());
+      }
 
       executionContext?.setRequestId(requestId);
 

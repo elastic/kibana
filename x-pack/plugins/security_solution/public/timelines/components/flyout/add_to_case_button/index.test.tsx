@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -47,20 +48,20 @@ describe('AddToCaseButton', () => {
 
   it('navigates to the correct path without id', async () => {
     const here = jest.fn();
-    useKibanaMock().services.cases.getAllCasesSelectorModal = here.mockImplementation(
+    useKibanaMock().services.cases.ui.getAllCasesSelectorModal = here.mockImplementation(
       ({ onRowClick }) => {
         onRowClick();
         return <></>;
       }
     );
     (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
+    userEvent.click(screen.getByTestId('attach-timeline-case-button'));
+    userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/create',
@@ -69,20 +70,20 @@ describe('AddToCaseButton', () => {
   });
 
   it('navigates to the correct path with id', async () => {
-    useKibanaMock().services.cases.getAllCasesSelectorModal = jest
+    useKibanaMock().services.cases.ui.getAllCasesSelectorModal = jest
       .fn()
       .mockImplementation(({ onRowClick }) => {
         onRowClick({ id: 'case-id' });
         return <></>;
       });
     (useDeepEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
-    const wrapper = mount(
+    render(
       <TestProviders>
         <AddToCaseButton timelineId={'timeline-1'} />
       </TestProviders>
     );
-    wrapper.find(`[data-test-subj="attach-timeline-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="attach-timeline-existing-case"]`).first().simulate('click');
+    userEvent.click(screen.getByTestId('attach-timeline-case-button'));
+    userEvent.click(screen.getByTestId('attach-timeline-existing-case'));
 
     expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       path: '/case-id',

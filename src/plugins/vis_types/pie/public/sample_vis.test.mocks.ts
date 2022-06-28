@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { LegendDisplay } from '@kbn/expression-partition-vis-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
+
 export const samplePieVis = {
   type: {
     name: 'pie',
@@ -24,7 +27,7 @@ export const samplePieVis = {
       defaults: {
         type: 'pie',
         addTooltip: true,
-        addLegend: true,
+        legendDisplay: LegendDisplay.SHOW,
         legendPosition: 'right',
         isDonut: true,
         nestedLegend: true,
@@ -43,6 +46,7 @@ export const samplePieVis = {
       },
     },
     editorConfig: {
+      enableDataViewChange: true,
       collections: {
         legendPositions: [
           {
@@ -93,7 +97,9 @@ export const samplePieVis = {
               '!filter',
               '!sampler',
               '!diversified_sampler',
+              '!rare_terms',
               '!multi_terms',
+              '!significant_text',
             ],
             editor: false,
             params: [],
@@ -111,7 +117,9 @@ export const samplePieVis = {
               '!filter',
               '!sampler',
               '!diversified_sampler',
+              '!rare_terms',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {
@@ -134,8 +142,9 @@ export const samplePieVis = {
   params: {
     type: 'pie',
     addTooltip: true,
-    addLegend: true,
+    legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
+    legendSize: LegendSize.LARGE,
     isDonut: true,
     labels: {
       show: true,

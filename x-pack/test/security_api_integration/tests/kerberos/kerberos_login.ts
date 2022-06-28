@@ -97,9 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // If browser and Kibana can successfully negotiate this HTML won't rendered, but if not
         // users will see a proper `Unauthenticated` page.
-        expect(spnegoResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
+        expect(spnegoResponse.headers['content-security-policy']).to.be.a('string');
         expect(spnegoResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
@@ -159,6 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
             authentication_provider: { type: 'kerberos', name: 'kerberos' },
             authentication_type: 'token',
+            elastic_cloud_user: false,
           });
       });
 
@@ -373,6 +372,55 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(nonAjaxResponse.headers['www-authenticate']).to.be(undefined);
+      });
+
+      describe('post-authentication stage', () => {
+        for (const client of ['start-contract', 'request-context', 'custom']) {
+          it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
+            this.timeout(60000);
+
+            // Access token expiration is set to 15s for API integration tests.
+            // Let's tell test endpoint to wait 30s after authentication and try to make a request to Elasticsearch
+            // triggering token refresh logic.
+            const response = await supertest
+              .post('/authentication/slow/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', sessionCookie.cookieString())
+              .send({ duration: '30s', client })
+              .expect(200);
+
+            const newSessionCookies = response.headers['set-cookie'];
+            expect(newSessionCookies).to.have.length(1);
+
+            const refreshedCookie = parseCookie(newSessionCookies[0])!;
+            checkCookieIsSet(refreshedCookie);
+
+            // The second new cookie with fresh pair of access and refresh tokens should work.
+            await supertest
+              .get('/internal/security/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', refreshedCookie.cookieString())
+              .expect(200);
+
+            expect(response.headers['www-authenticate']).to.be(undefined);
+          });
+
+          it(`expired access token should be automatically refreshed by the ${client} client even for multiple concurrent requests`, async function () {
+            this.timeout(60000);
+
+            // Send 5 concurrent requests with a cookie that contains an expired access token.
+            await Promise.all(
+              Array.from({ length: 5 }).map((value, index) =>
+                supertest
+                  .post(`/authentication/slow/me?a=${index}`)
+                  .set('kbn-xsrf', 'xxx')
+                  .set('Cookie', sessionCookie.cookieString())
+                  .send({ duration: '30s', client })
+                  .expect(200)
+              )
+            );
+          });
+        }
       });
     });
 

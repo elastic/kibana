@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ColumnHeaderOptions } from '../../../common/types';
 import type { TGridModel, TGridModelSettings } from './model';
 
@@ -42,16 +42,19 @@ export interface TimelineState {
 }
 
 export enum TimelineId {
+  usersPageEvents = 'users-page-events',
+  usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
+  hostsPageSessions = 'hosts-page-sessions-v2',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
-  uebaPageExternalAlerts = 'ueba-page-external-alerts',
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+  kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
 export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {

@@ -23,17 +23,15 @@ export const registerFetchRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
-        const {
-          body: { follower_indices: followerIndices },
-        } = await client.asCurrentUser.ccr.followInfo({ index: '_all' });
+        const { follower_indices: followerIndices } = await client.asCurrentUser.ccr.followInfo({
+          index: '_all',
+        });
 
         const {
-          body: {
-            follow_stats: { indices: followerIndicesStats },
-          },
+          follow_stats: { indices: followerIndicesStats },
         } = await client.asCurrentUser.ccr.stats();
 
         const followerIndicesStatsMap = followerIndicesStats.reduce((map: any, stats: any) => {

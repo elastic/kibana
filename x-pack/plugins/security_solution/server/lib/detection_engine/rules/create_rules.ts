@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { SanitizedAlert } from '../../../../../alerting/common';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
-import { addTags } from './add_tags';
-import { PartialFilter, RuleTypeParams } from '../types';
+import { PartialFilter } from '../types';
 import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const createRules = async ({
@@ -30,7 +29,9 @@ export const createRules = async ({
   buildingBlockType,
   description,
   enabled,
+  timestampField,
   eventCategoryOverride,
+  tiebreakerField,
   falsePositives,
   from,
   query,
@@ -45,13 +46,17 @@ export const createRules = async ({
   ruleId,
   immutable,
   index,
+  dataViewId,
   interval,
   maxSignals,
+  relatedIntegrations,
+  requiredFields,
   riskScore,
   riskScoreMapping,
   ruleNameOverride,
   outputIndex,
   name,
+  setup,
   severity,
   severityMapping,
   tags,
@@ -75,13 +80,16 @@ export const createRules = async ({
   version,
   exceptionsList,
   actions,
-  isRuleRegistryEnabled,
-}: CreateRulesOptions): Promise<SanitizedAlert<RuleTypeParams>> => {
+  id,
+}: CreateRulesOptions): Promise<SanitizedRule<RuleTypeParams>> => {
   const rule = await rulesClient.create<RuleTypeParams>({
+    options: {
+      id,
+    },
     data: {
       name,
-      tags: addTags(tags, ruleId, immutable),
-      alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[type] : SIGNALS_ID,
+      tags,
+      alertTypeId: ruleTypeMappings[type],
       consumer: SERVER_APP_ID,
       params: {
         anomalyThreshold,
@@ -90,7 +98,10 @@ export const createRules = async ({
         description,
         ruleId,
         index,
+        dataViewId,
+        timestampField,
         eventCategoryOverride,
+        tiebreakerField,
         falsePositives,
         from,
         immutable,
@@ -107,9 +118,12 @@ export const createRules = async ({
           : undefined,
         filters,
         maxSignals,
+        relatedIntegrations,
+        requiredFields,
         riskScore,
         riskScoreMapping,
         ruleNameOverride,
+        setup,
         severity,
         severityMapping,
         threat,

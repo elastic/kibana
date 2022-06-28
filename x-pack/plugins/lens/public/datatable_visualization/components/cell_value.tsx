@@ -6,8 +6,8 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import classNames from 'classnames';
 import type { FormatFactory } from '../../../common';
 import { getOriginalId } from '../../../common/expressions';
@@ -26,13 +26,9 @@ export const createGridCell = (
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, minMaxByColumnId, getColorForValue } = useContext(DataContext);
-    const rowValue = table?.rows[rowIndex][columnId];
+    const rowValue = table?.rows[rowIndex]?.[columnId];
     const content = formatters[columnId]?.convert(rowValue, 'html');
     const currentAlignment = alignments && alignments[columnId];
-    const alignmentClassName = `lnsTableCell--${currentAlignment}`;
-    const className = classNames(alignmentClassName, {
-      lnsTableCell: !fitRowToContent,
-    });
 
     const { colorMode, palette } =
       columnConfig.columns.find(({ columnId: id }) => id === columnId) || {};
@@ -80,7 +76,10 @@ export const createGridCell = (
          */
         dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
         data-test-subj="lnsTableCellContent"
-        className={className}
+        className={classNames({
+          'lnsTableCell--multiline': fitRowToContent,
+          [`lnsTableCell--${currentAlignment}`]: true,
+        })}
       />
     );
   };

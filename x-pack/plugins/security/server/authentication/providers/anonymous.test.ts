@@ -7,8 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import type { ScopeableRequest } from 'src/core/server';
-import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+import type { ScopeableRequest } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
@@ -79,9 +79,7 @@ describe('AnonymousAuthenticationProvider', () => {
       describe('`login` method', () => {
         it('succeeds if credentials are valid, and creates session and authHeaders', async () => {
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-            securityMock.createApiResponse({ body: user })
-          );
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(
@@ -164,9 +162,7 @@ describe('AnonymousAuthenticationProvider', () => {
           const request = httpServerMock.createKibanaRequest({ headers: {} });
 
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-            securityMock.createApiResponse({ body: user })
-          );
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(provider.authenticate(request, {})).resolves.toEqual(
@@ -180,9 +176,7 @@ describe('AnonymousAuthenticationProvider', () => {
           const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
 
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-            securityMock.createApiResponse({ body: user })
-          );
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(provider.authenticate(request, {})).resolves.toEqual(
@@ -198,9 +192,7 @@ describe('AnonymousAuthenticationProvider', () => {
           const request = httpServerMock.createKibanaRequest({ headers: {} });
 
           const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-            securityMock.createApiResponse({ body: user })
-          );
+          mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
           await expect(provider.authenticate(request)).resolves.toEqual(
@@ -244,9 +236,7 @@ describe('AnonymousAuthenticationProvider', () => {
             const request = httpServerMock.createKibanaRequest({ headers: {} });
 
             const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-            mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
-              securityMock.createApiResponse({ body: user })
-            );
+            mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
             mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
             await expect(provider.authenticate(request, {})).resolves.toEqual(

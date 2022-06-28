@@ -8,7 +8,7 @@
 
 /* eslint max-len: 0 */
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 
 export const getSavedObjects = (): SavedObject[] => [
   {
@@ -249,7 +249,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Part of count() / overall_sum(count())',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1': {
                     customLabel: true,
@@ -258,7 +258,7 @@ export const getSavedObjects = (): SavedObject[] => [
                     label: 'Part of count() / overall_sum(count())',
                     operationType: 'count',
                     scale: 'ratio',
-                    sourceField: 'Records',
+                    sourceField: '___records___',
                   },
                   'b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2': {
                     customLabel: true,
@@ -370,6 +370,7 @@ export const getSavedObjects = (): SavedObject[] => [
     migrationVersion: {},
     attributes: {
       title: 'kibana_sample_data_logs',
+      name: 'Kibana Sample Data Logs',
       timeFieldName: 'timestamp',
       fieldFormatMap: '{"hour_of_day":{}}',
       runtimeFieldMap:

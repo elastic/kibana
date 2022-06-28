@@ -8,7 +8,7 @@
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
 import { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import type { Filter } from '@kbn/es-query';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
@@ -24,7 +24,7 @@ import { ESQuery } from '../../../../../common/typed_json';
  */
 export const isNoisy = (hits: number, timeframe: Unit): boolean => {
   if (timeframe === 'h') {
-    return hits > 20;
+    return hits > 1;
   } else if (timeframe === 'd') {
     return hits / 24 > 1;
   } else if (timeframe === 'w') {
@@ -206,19 +206,24 @@ export const getIsRulePreviewDisabled = ({
   isQueryBarValid,
   isThreatQueryBarValid,
   index,
+  dataViewId,
   threatIndex,
   threatMapping,
   machineLearningJobId,
+  queryBar,
 }: {
   ruleType: Type;
   isQueryBarValid: boolean;
   isThreatQueryBarValid: boolean;
   index: string[];
+  dataViewId: string | undefined;
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
+  queryBar: FieldValueQueryBar;
 }) => {
-  if (!isQueryBarValid || index.length === 0) return true;
+  if (!isQueryBarValid || ((index == null || index.length === 0) && dataViewId == null))
+    return true;
   if (ruleType === 'threat_match') {
     if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (
@@ -231,6 +236,9 @@ export const getIsRulePreviewDisabled = ({
   }
   if (ruleType === 'machine_learning') {
     return machineLearningJobId.length === 0;
+  }
+  if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
+    return queryBar.query.query.length === 0;
   }
   return false;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
@@ -18,12 +18,13 @@ import { getPendingActionCounts } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
- * Registers routes for checking status of endpoints based on pending actions
+ * Registers routes for checking status of actions
  */
 export function registerActionStatusRoutes(
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) {
+  // Summary of action status for a given list of endpoints
   router.get(
     {
       path: ACTION_STATUS_ROUTE,
@@ -47,7 +48,7 @@ export const actionStatusRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const agentIDs: string[] = Array.isArray(req.query.agent_ids)
       ? [...new Set(req.query.agent_ids)]
       : [req.query.agent_ids];

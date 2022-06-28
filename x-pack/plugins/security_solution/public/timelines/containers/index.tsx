@@ -12,14 +12,13 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataView, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESQuery } from '../../../common/typed_json';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/common';
 
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { timelineActions } from '../../timelines/store/timeline';
+import { timelineActions } from '../store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import {
@@ -75,6 +74,7 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   : TimelineEventsAllStrategyResponse;
 
 export interface UseTimelineEventsProps {
+  dataViewId: string | null;
   docValueFields?: DocValueFields[];
   endDate: string;
   eqlOptions?: EqlOptionsSelected;
@@ -95,11 +95,12 @@ const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
 const ID = 'timelineEventsQuery';
-export const initSortDefault = [
+export const initSortDefault: TimelineRequestSortField[] = [
   {
     field: '@timestamp',
     direction: Direction.asc,
-    type: 'number',
+    type: 'date',
+    esTypes: ['date'],
   },
 ];
 
@@ -127,6 +128,7 @@ const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
 });
 
 export const useTimelineEvents = ({
+  dataViewId,
   docValueFields,
   endDate,
   eqlOptions = undefined,
@@ -207,10 +209,7 @@ export const useTimelineEvents = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addError, addWarning } = useAppToasts();
-
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
+  const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
@@ -227,6 +226,8 @@ export const useTimelineEvents = ({
             strategy:
               request.language === 'eql' ? 'timelineEqlSearchStrategy' : 'timelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
+            // we only need the id to throw better errors
+            indexPattern: { id: dataViewId } as unknown as DataView,
           })
           .subscribe({
             next: (response) => {
@@ -265,9 +266,7 @@ export const useTimelineEvents = ({
             },
             error: (msg) => {
               setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_TIMELINE_EVENTS,
-              });
+              data.search.showError(msg);
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -321,19 +320,16 @@ export const useTimelineEvents = ({
       skip,
       id,
       data.search,
+      dataViewId,
       setUpdated,
       addWarning,
-      addError,
       refetchGrid,
       wrappedLoadPage,
     ]
   );
 
   useEffect(() => {
-    if (
-      skipQueryForDetectionsPage(id, indexNames, ruleRegistryEnabled) ||
-      indexNames.length === 0
-    ) {
+    if (skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
       return;
     }
 
@@ -395,10 +391,7 @@ export const useTimelineEvents = ({
           activeTimeline.setActivePage(newActivePage);
         }
       }
-      if (
-        !skipQueryForDetectionsPage(id, indexNames, ruleRegistryEnabled) &&
-        !deepEqual(prevRequest, currentRequest)
-      ) {
+      if (!skipQueryForDetectionsPage(id, indexNames) && !deepEqual(prevRequest, currentRequest)) {
         return currentRequest;
       }
       return prevRequest;
@@ -414,7 +407,6 @@ export const useTimelineEvents = ({
     id,
     language,
     limit,
-    ruleRegistryEnabled,
     startDate,
     sort,
     fields,

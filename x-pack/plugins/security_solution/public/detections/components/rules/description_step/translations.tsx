@@ -97,3 +97,24 @@ export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
     defaultMessage: 'Results aggregated by',
   }
 );
+
+export const EQL_EVENT_CATEGORY_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.eqlEventCategoryFieldLabel',
+  {
+    defaultMessage: 'Event category field',
+  }
+);
+
+export const EQL_TIEBREAKER_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.eqlTiebreakerFieldLabel',
+  {
+    defaultMessage: 'Tiebreaker field',
+  }
+);
+
+export const EQL_TIMESTAMP_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.eqlTimestampFieldLabel',
+  {
+    defaultMessage: 'Timestamp field',
+  }
+);

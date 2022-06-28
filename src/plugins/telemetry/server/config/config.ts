@@ -8,7 +8,7 @@
 
 import { schema, TypeOf, Type } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
   schema.literal('prod'),
@@ -18,13 +18,8 @@ const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   allowChangingOptInStatus: schema.boolean({ defaultValue: true }),
-  optIn: schema.conditional(
-    schema.siblingRef('allowChangingOptInStatus'),
-    schema.literal(false),
-    schema.maybe(schema.literal(true)),
-    schema.boolean({ defaultValue: true }),
-    { defaultValue: true }
-  ),
+  hidePrivacyStatement: schema.boolean({ defaultValue: false }),
+  optIn: schema.boolean({ defaultValue: true }),
   // `config` is used internally and not intended to be set
   config: schema.string({ defaultValue: getConfigPath() }),
   banner: schema.boolean({ defaultValue: true }),
@@ -44,11 +39,24 @@ export type TelemetryConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   schema: configSchema,
   exposeToBrowser: {
-    enabled: true,
     banner: true,
     allowChangingOptInStatus: true,
     optIn: true,
     sendUsageFrom: true,
     sendUsageTo: true,
+    hidePrivacyStatement: true,
   },
+  deprecations: () => [
+    (cfg) => {
+      if (cfg.telemetry?.enabled === false) {
+        return {
+          set: [
+            { path: 'telemetry.optIn', value: false },
+            { path: 'telemetry.allowChangingOptInStatus', value: false },
+          ],
+          unset: [{ path: 'telemetry.enabled' }],
+        };
+      }
+    },
+  ],
 };

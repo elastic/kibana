@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { IndexPattern, ISearchSource } from '../../../../data/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import { getSortForSearchSource } from '../../components/doc_table';
-import { SortPairArr } from '../../components/doc_table/lib/get_sort';
+import { SortPairArr } from '../../components/doc_table/utils/get_sort';
 
 export const updateSearchSource = (
   searchSource: ISearchSource,
-  indexPattern: IndexPattern | undefined,
+  indexPattern: DataView | undefined,
   sort: (SortPairArr[] & string[][]) | undefined,
   useNewFieldsApi: boolean,
   defaults: {

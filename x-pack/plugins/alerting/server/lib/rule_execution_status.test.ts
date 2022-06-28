@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { AlertExecutionStatusErrorReasons } from '../types';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  ActionsCompletion,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
+} from '../types';
 import {
   executionStatusFromState,
   executionStatusFromError,
@@ -14,40 +18,100 @@ import {
   ruleExecutionStatusFromRaw,
 } from './rule_execution_status';
 import { ErrorWithReason } from './error_with_reason';
+import { translations } from '../constants/translations';
+import { RuleRunMetrics, RuleRunMetricsStore } from './rule_run_metrics_store';
 
 const MockLogger = loggingSystemMock.create().get();
+const executionMetrics = {
+  numSearches: 1,
+  esSearchDurationMs: 10,
+  totalSearchDurationMs: 20,
+  numberOfTriggeredActions: 32,
+  numberOfGeneratedActions: 11,
+  numberOfActiveAlerts: 2,
+  numberOfNewAlerts: 3,
+  numberOfRecoveredAlerts: 13,
+  triggeredActionsStatus: ActionsCompletion.COMPLETE,
+};
 
 describe('RuleExecutionStatus', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
+  function testExpectedMetrics(received: RuleRunMetrics, expected: RuleRunMetrics) {
+    expect(received.numSearches).toEqual(expected.numSearches);
+    expect(received.totalSearchDurationMs).toEqual(expected.totalSearchDurationMs);
+    expect(received.esSearchDurationMs).toEqual(expected.esSearchDurationMs);
+    expect(received.numberOfTriggeredActions).toEqual(expected.numberOfTriggeredActions);
+    expect(received.numberOfGeneratedActions).toEqual(expected.numberOfGeneratedActions);
+    expect(received.numberOfActiveAlerts).toEqual(expected.numberOfActiveAlerts);
+    expect(received.numberOfRecoveredAlerts).toEqual(expected.numberOfRecoveredAlerts);
+    expect(received.numberOfNewAlerts).toEqual(expected.numberOfNewAlerts);
+    expect(received.triggeredActionsStatus).toEqual(expected.triggeredActionsStatus);
+  }
+
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
-      const status = executionStatusFromState({});
+      const emptyRuleRunState = new RuleRunMetricsStore().getMetrics();
+      const { status, metrics } = executionStatusFromState({ metrics: emptyRuleRunState });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
+      expect(status.warning).toBe(undefined);
+
+      testExpectedMetrics(metrics!, emptyRuleRunState);
     });
 
     test('task state with no instances', () => {
-      const status = executionStatusFromState({ alertInstances: {} });
+      const { status, metrics } = executionStatusFromState({
+        alertInstances: {},
+        metrics: executionMetrics,
+      });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
+      expect(status.warning).toBe(undefined);
+
+      testExpectedMetrics(metrics!, executionMetrics);
     });
 
     test('task state with one instance', () => {
-      const status = executionStatusFromState({ alertInstances: { a: {} } });
+      const { status, metrics } = executionStatusFromState({
+        alertInstances: { a: {} },
+        metrics: executionMetrics,
+      });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('active');
       expect(status.error).toBe(undefined);
+      expect(status.warning).toBe(undefined);
+
+      testExpectedMetrics(metrics!, executionMetrics);
+    });
+
+    test('task state with warning', () => {
+      const { status, metrics } = executionStatusFromState({
+        alertInstances: { a: {} },
+        metrics: { ...executionMetrics, triggeredActionsStatus: ActionsCompletion.PARTIAL },
+      });
+      checkDateIsNearNow(status.lastExecutionDate);
+      expect(status.warning).toEqual({
+        message: translations.taskRunner.warning.maxExecutableActions,
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+      });
+      expect(status.status).toBe('warning');
+      expect(status.error).toBe(undefined);
+
+      testExpectedMetrics(metrics!, {
+        ...executionMetrics,
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
     });
   });
 
   describe('executionStatusFromError()', () => {
     test('error with no reason', () => {
-      const status = executionStatusFromError(new Error('boo!'));
+      const { status, metrics } = executionStatusFromError(new Error('boo!'));
       expect(status.status).toBe('error');
       expect(status.error).toMatchInlineSnapshot(`
         Object {
@@ -55,11 +119,12 @@ describe('RuleExecutionStatus', () => {
           "reason": "unknown",
         }
       `);
+      expect(metrics).toBeNull();
     });
 
     test('error with a reason', () => {
-      const status = executionStatusFromError(
-        new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, new Error('hoo!'))
+      const { status, metrics } = executionStatusFromError(
+        new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, new Error('hoo!'))
       );
       expect(status.status).toBe('error');
       expect(status.error).toMatchInlineSnapshot(`
@@ -68,13 +133,14 @@ describe('RuleExecutionStatus', () => {
           "reason": "execute",
         }
       `);
+      expect(metrics).toBeNull();
     });
   });
 
   describe('ruleExecutionStatusToRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z');
     const status = 'ok';
-    const reason = AlertExecutionStatusErrorReasons.Decrypt;
+    const reason = RuleExecutionStatusErrorReasons.Decrypt;
     const error = { reason, message: 'wops' };
 
     test('status without an error', () => {
@@ -84,6 +150,7 @@ describe('RuleExecutionStatus', () => {
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
+          "warning": null,
         }
       `);
     });
@@ -99,6 +166,7 @@ describe('RuleExecutionStatus', () => {
           "lastDuration": 0,
           "lastExecutionDate": "2020-09-03T16:26:58.000Z",
           "status": "ok",
+          "warning": null,
         }
       `);
     });
@@ -111,6 +179,24 @@ describe('RuleExecutionStatus', () => {
         "lastDuration": 1234,
         "lastExecutionDate": "2020-09-03T16:26:58.000Z",
         "status": "ok",
+        "warning": null,
+      }
+    `);
+    });
+
+    test('status with a alerts and actions counts', () => {
+      expect(
+        ruleExecutionStatusToRaw({
+          lastExecutionDate: date,
+          status,
+        })
+      ).toMatchInlineSnapshot(`
+      Object {
+        "error": null,
+        "lastDuration": 0,
+        "lastExecutionDate": "2020-09-03T16:26:58.000Z",
+        "status": "ok",
+        "warning": null,
       }
     `);
     });
@@ -119,7 +205,7 @@ describe('RuleExecutionStatus', () => {
   describe('ruleExecutionStatusFromRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z').toISOString();
     const status = 'active';
-    const reason = AlertExecutionStatusErrorReasons.Execute;
+    const reason = RuleExecutionStatusErrorReasons.Execute;
     const error = { reason, message: 'wops' };
 
     test('no input', () => {
@@ -144,6 +230,7 @@ describe('RuleExecutionStatus', () => {
       checkDateIsNearNow(result.lastExecutionDate);
       expect(result.status).toBe('unknown');
       expect(result.error).toBe(undefined);
+      expect(result.warning).toBe(undefined);
       expect(MockLogger.debug).toBeCalledWith(
         'invalid ruleExecutionStatus lastExecutionDate "an invalid date" in raw rule rule-id'
       );

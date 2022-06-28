@@ -8,9 +8,9 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { DataView, flattenHit } from '../../../data/common';
-import { MAX_DOC_FIELDS_DISPLAYED } from '../../common';
-import { getServices } from '../kibana_services';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { DataTableRecord } from '../types';
 import { formatFieldValue } from './format_value';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
@@ -26,18 +26,20 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
  * @param fieldsToShow A list of fields that should be included in the document summary.
  */
 export function formatHit(
-  hit: estypes.SearchHit,
+  hit: DataTableRecord,
   dataView: DataView,
-  fieldsToShow: string[]
+  fieldsToShow: string[],
+  maxEntries: number,
+  fieldFormats: FieldFormatsStart
 ): FormattedHit {
-  const cached = formattedHitCache.get(hit);
+  const cached = formattedHitCache.get(hit.raw);
   if (cached) {
     return cached;
   }
 
-  const highlights = hit.highlight ?? {};
+  const highlights = hit.raw.highlight ?? {};
   // Flatten the object using the flattenHit implementation we use across Discover for flattening documents.
-  const flattened = flattenHit(hit, dataView, { includeIgnoredValues: true, source: true });
+  const flattened = hit.flattened;
 
   const highlightPairs: Array<[fieldName: string, formattedValue: string]> = [];
   const sourcePairs: Array<[fieldName: string, formattedValue: string]> = [];
@@ -50,7 +52,13 @@ export function formatHit(
     const displayKey = dataView.fields.getByName(key)?.displayName;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     // Format the raw value using the regular field formatters for that field
-    const formattedValue = formatFieldValue(val, hit, dataView, dataView.fields.getByName(key));
+    const formattedValue = formatFieldValue(
+      val,
+      hit.raw,
+      fieldFormats,
+      dataView,
+      dataView.fields.getByName(key)
+    );
     // If the field was a mapped field, we validate it against the fieldsToShow list, if not
     // we always include it into the result.
     if (displayKey) {
@@ -61,7 +69,6 @@ export function formatHit(
       pairs.push([key, formattedValue]);
     }
   });
-  const maxEntries = getServices().uiSettings.get<number>(MAX_DOC_FIELDS_DISPLAYED);
   const pairs = [...highlightPairs, ...sourcePairs];
   const formatted =
     // If document has more formatted fields than configured via MAX_DOC_FIELDS_DISPLAYED we cut
@@ -78,6 +85,6 @@ export function formatHit(
             '',
           ] as const,
         ];
-  formattedHitCache.set(hit, formatted);
+  formattedHitCache.set(hit.raw, formatted);
   return formatted;
 }

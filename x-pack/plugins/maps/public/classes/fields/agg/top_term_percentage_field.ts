@@ -23,8 +23,13 @@ export class TopTermPercentageField implements IESAggField {
   }
 
   supportsFieldMetaFromLocalData(): boolean {
-    // Elasticsearch vector tile search API does not support top term metric
-    return false;
+    if (this.getSource().isMvt()) {
+      // Elasticsearch vector tile search API does not support top term metric so meta tile does not contain any values
+      return false;
+    } else {
+      // field meta can be extracted from local data when field is geojson source
+      return true;
+    }
   }
 
   getSource(): IVectorSource {
@@ -77,15 +82,15 @@ export class TopTermPercentageField implements IESAggField {
     return false;
   }
 
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+  async getExtendedStatsFieldMetaRequest(): Promise<null> {
     return null;
   }
 
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<null> {
     return null;
   }
 
-  async getCategoricalFieldMetaRequest(): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(): Promise<null> {
     return null;
   }
 

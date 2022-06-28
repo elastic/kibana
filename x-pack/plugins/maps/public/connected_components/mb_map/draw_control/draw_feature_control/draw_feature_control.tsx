@@ -6,16 +6,15 @@
  */
 
 import React, { Component } from 'react';
-import { Map as MbMap, Point as MbPoint } from '@kbn/mapbox-gl';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Position } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import * as jsts from 'jsts';
-import { MapMouseEvent } from '@kbn/mapbox-gl';
+import type { Map as MbMap, MapMouseEvent, PointLike } from '@kbn/mapbox-gl';
 import { getToasts } from '../../../../kibana_services';
-import { DrawControl } from '../';
+import { DrawControl } from '../draw_control';
 import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common/constants';
 import { ILayer } from '../../../../classes/layers/layer';
 import { EXCLUDE_CENTROID_FEATURES } from '../../../../classes/util/mb_filter_expressions';
@@ -29,9 +28,8 @@ export interface ReduxStateProps {
 }
 
 export interface ReduxDispatchProps {
-  addNewFeatureToIndex: (geometry: Geometry | Position[]) => void;
+  addNewFeatureToIndex: (geometries: Array<Geometry | Position[]>) => void;
   deleteFeatureFromIndex: (featureId: string) => void;
-  disableDrawState: () => void;
 }
 
 export interface OwnProps {
@@ -43,6 +41,7 @@ type Props = ReduxStateProps & ReduxDispatchProps & OwnProps;
 export class DrawFeatureControl extends Component<Props, {}> {
   _onDraw = async (e: { features: Feature[] }, mbDrawControl: MapboxDraw) => {
     try {
+      const geometries: Array<Geometry | Position[]> = [];
       e.features.forEach((feature: Feature) => {
         const { geometry } = geoJSONReader.read(feature);
         if (!geometry.isSimple() || !geometry.isValid()) {
@@ -58,9 +57,13 @@ export class DrawFeatureControl extends Component<Props, {}> {
             this.props.drawMode === DRAW_MODE.DRAW_POINTS
               ? feature.geometry.coordinates
               : feature.geometry;
-          this.props.addNewFeatureToIndex(featureGeom);
+          geometries.push(featureGeom);
         }
       });
+
+      if (geometries.length) {
+        this.props.addNewFeatureToIndex(geometries);
+      }
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawFeatureControl.unableToCreateFeature', {
@@ -71,7 +74,6 @@ export class DrawFeatureControl extends Component<Props, {}> {
         })
       );
     } finally {
-      this.props.disableDrawState();
       try {
         mbDrawControl.deleteAll();
       } catch (_e) {
@@ -81,11 +83,12 @@ export class DrawFeatureControl extends Component<Props, {}> {
   };
 
   _onClick = async (event: MapMouseEvent, drawControl?: MapboxDraw) => {
-    const mbLngLatPoint: MbPoint = event.point;
+    const mbLngLatPoint: PointLike = event.point;
     // Currently feature deletion is the only onClick handling
     if (!this.props.editLayer || this.props.drawShape !== DRAW_SHAPE.DELETE) {
       return;
     }
+
     const mbEditLayerIds = this.props.editLayer
       .getMbLayerIds()
       .filter((mbLayerId) => !!this.props.mbMap.getLayer(mbLayerId));
@@ -99,7 +102,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
         x: mbLngLatPoint.x + PADDING,
         y: mbLngLatPoint.y + PADDING,
       },
-    ] as [MbPoint, MbPoint];
+    ] as [PointLike, PointLike];
     const selectedFeatures = this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbEditLayerIds,
       filter: ['all', EXCLUDE_CENTROID_FEATURES],

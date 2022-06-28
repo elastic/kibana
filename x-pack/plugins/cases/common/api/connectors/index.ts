@@ -7,7 +7,15 @@
 
 import * as rt from 'io-ts';
 
-import { ActionResult, ActionType } from '../../../../actions/common';
+import type { ActionType } from '@kbn/actions-plugin/common';
+/**
+ * ActionResult type from the common folder is outdated.
+ * The type from server is not exported properly so we
+ * disable the linting for the moment
+ */
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ActionResult } from '@kbn/actions-plugin/server/types';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
 import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
@@ -73,7 +81,7 @@ const ConnectorNoneTypeFieldsRt = rt.type({
   fields: rt.null,
 });
 
-export const noneConnectorId: string = 'none';
+export const NONE_CONNECTOR_ID: string = 'none';
 
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorJiraTypeFieldsRt,
@@ -87,9 +95,13 @@ export const ConnectorTypeFieldsRt = rt.union([
 /**
  * This type represents the connector's format when it is encoded within a user action.
  */
-export const CaseUserActionConnectorRt = rt.intersection([
-  rt.type({ name: rt.string }),
-  ConnectorTypeFieldsRt,
+export const CaseUserActionConnectorRt = rt.union([
+  rt.intersection([ConnectorJiraTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorNoneTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorResilientTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorServiceNowITSMTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorServiceNowSIRTypeFieldsRt, rt.type({ name: rt.string })]),
+  rt.intersection([ConnectorSwimlaneTypeFieldsRt, rt.type({ name: rt.string })]),
 ]);
 
 export const CaseConnectorRt = rt.intersection([

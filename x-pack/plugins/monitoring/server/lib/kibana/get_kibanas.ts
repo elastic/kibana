@@ -6,16 +6,14 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
-import { createQuery } from '../create_query';
-// @ts-ignore
-import { calculateAvailability } from '../calculate_availability';
-// @ts-ignore
-import { KibanaMetric } from '../metrics';
+import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
+import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { createQuery } from '../create_query';
+import { KibanaMetric } from '../metrics';
+import { buildKibanaInfo, KibanaInfo } from './build_kibana_info';
+import { isKibanaStatusStale } from './is_kibana_status_stale';
 
 interface Kibana {
   process?: {
@@ -36,14 +34,9 @@ interface Kibana {
     total?: number;
   };
   concurrent_connections?: number;
-  kibana?: {
-    transport_address?: string;
-    name?: string;
-    host?: string;
-    uuid?: string;
-    status?: string;
-  };
-  availability: boolean;
+  kibana?: KibanaInfo;
+  statusIsStale: boolean;
+  lastSeenTimestamp: string;
 }
 
 /*
@@ -57,24 +50,28 @@ interface Kibana {
  *  - requests
  *  - response times
  */
-export async function getKibanas(
-  req: LegacyRequest,
-  kbnIndexPattern: string,
-  { clusterUuid }: { clusterUuid: string }
-) {
-  checkParam(kbnIndexPattern, 'kbnIndexPattern in getKibanas');
-
-  const config = req.server.config();
+export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterUuid: string }) {
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-
+  const moduleType = 'kibana';
+  const type = 'kibana_stats';
+  const dataset = 'stats';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
   const params = {
-    index: kbnIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    index: indexPatterns,
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     body: {
       query: createQuery({
-        types: ['kibana_stats', 'stats'],
+        type,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,
@@ -98,15 +95,15 @@ export async function getKibanas(
         'kibana_stats.requests.total',
         'kibana.stats.request.total',
         'kibana_stats.kibana.transport_address',
-        'kibana.kibana.transport_address',
+        'kibana.stats.transport_address',
         'kibana_stats.kibana.name',
-        'kibana.kibana.name',
+        'kibana.stats.name',
         'kibana_stats.kibana.host',
-        'kibana.kibana.host',
+        'kibana.stats.host.name',
         'kibana_stats.kibana.uuid',
-        'kibana.kibana.uuid',
+        'service.id',
         'kibana_stats.kibana.status',
-        'kibana.kibana.status',
+        'kibana.stats.status',
         'kibana_stats.concurrent_connections',
         'kibana.stats.concurrent_connections',
       ],
@@ -117,12 +114,14 @@ export async function getKibanas(
   const response: ElasticsearchResponse = await callWithRequest(req, 'search', params);
   const instances = response.hits?.hits ?? [];
 
-  return instances.map((hit) => {
+  return instances.map((hit: ElasticsearchResponseHit) => {
     const legacyStats = hit._source.kibana_stats;
     const mbStats = hit._source.kibana?.stats;
 
+    const lastSeenTimestamp = hit._source['@timestamp'] ?? hit._source.timestamp;
+
     const kibana: Kibana = {
-      kibana: hit._source.kibana?.kibana ?? legacyStats?.kibana,
+      kibana: buildKibanaInfo(hit),
       concurrent_connections:
         mbStats?.concurrent_connections ?? legacyStats?.concurrent_connections,
       process: {
@@ -144,7 +143,8 @@ export async function getKibanas(
       requests: {
         total: mbStats?.request?.total ?? legacyStats?.requests?.total,
       },
-      availability: calculateAvailability(hit._source['@timestamp'] ?? hit._source.timestamp),
+      statusIsStale: isKibanaStatusStale(lastSeenTimestamp),
+      lastSeenTimestamp,
     };
     return kibana;
   });

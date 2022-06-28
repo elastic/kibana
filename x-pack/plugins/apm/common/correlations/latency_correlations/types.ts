@@ -10,14 +10,15 @@ import { FieldStats } from '../field_stats_types';
 
 export interface LatencyCorrelation extends FieldValuePair {
   correlation: number;
-  histogram: HistogramItem[];
+  histogram?: HistogramItem[];
   ksTest: number;
+  isFallbackResult?: boolean;
 }
 
 export interface LatencyCorrelationsResponse {
   ccsWarning: boolean;
   overallHistogram?: HistogramItem[];
-  percentileThresholdValue?: number;
+  percentileThresholdValue?: number | null;
   latencyCorrelations?: LatencyCorrelation[];
   fieldStats?: FieldStats[];
 }

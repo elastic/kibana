@@ -13,19 +13,32 @@ export {
   ILLEGAL_CHARACTERS,
   validateDataView,
 } from '../common/lib';
-export { onRedirectNoIndexPattern } from './data_views';
 
-export type { IIndexPatternFieldList, TypeMeta } from '../common';
-export { IndexPatternField, DataViewField } from '../common';
-
-export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
+export type {
+  DataViewSpec,
+  FieldSpec,
+  DataViewAttributes,
+  SavedObjectsClientCommon,
+} from '../common';
 export {
-  IndexPatternsService,
-  IndexPattern,
-  DataViewsApiClient,
-  DataViewsService,
-  DataView,
-} from './data_views';
+  DataViewField,
+  DataViewType,
+  DataViewSavedObjectConflictError,
+  META_FIELDS,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  getFieldSubtypeMulti,
+  getFieldSubtypeNested,
+} from '../common';
+
+export type { DataViewsPublicSetupDependencies, DataViewsPublicStartDependencies } from './types';
+
+export type {
+  DataViewsServicePublic,
+  DataViewsServicePublicDeps,
+} from './data_views_service_public';
+export { DataViewsApiClient, DataViewsService, DataView } from './data_views';
+export type { DataViewListItem } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 
@@ -39,7 +52,13 @@ export function plugin() {
   return new DataViewsPublicPlugin();
 }
 
-export type { DataViewsPublicPluginSetup, DataViewsPublicPluginStart } from './types';
+export type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+  DataViewsContract,
+  HasDataViewsResponse,
+  IndicesViaSearchResponse,
+} from './types';
 
 // Export plugin after all other imports
-export type { DataViewsPublicPlugin as DataPlugin };
+export type { DataViewsPublicPlugin as DataViewsPlugin };

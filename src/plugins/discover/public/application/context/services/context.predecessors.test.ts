@@ -8,13 +8,14 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import { IndexPattern, SortDirection } from 'src/plugins/data/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
+import { Query } from '@kbn/es-query';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { setServices } from '../../../kibana_services';
-import { Query } from '../../../../../data/public';
-import { DiscoverServices } from '../../../build_services';
-import { EsHitRecord, EsHitRecordList } from '../../types';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataTableRecord, EsHitRecord } from '../../../types';
+import { buildDataTableRecord, buildDataTableRecordList } from '../../../utils/build_data_record';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -29,13 +30,15 @@ interface Timestamp {
 }
 
 describe('context predecessors', function () {
+  let dataPluginMock: DataPublicPluginStart;
   let fetchPredecessors: (
     timeValIso: string,
     timeValNr: number,
     tieBreakerField: string,
     tieBreakerValue: number,
     size: number
-  ) => Promise<EsHitRecordList>;
+  ) => Promise<DataTableRecord[]>;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
   const indexPattern = {
@@ -43,38 +46,43 @@ describe('context predecessors', function () {
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
-  } as unknown as IndexPattern;
+    fields: {
+      getByName: jest.fn(),
+    },
+  } as unknown as DataView;
 
   describe('function fetchPredecessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
-
-      setServices({
-        data: {
-          search: {
-            searchSource: {
-              createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
-            },
+      dataPluginMock = {
+        search: {
+          searchSource: {
+            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
           },
         },
-      } as unknown as DiscoverServices);
+      } as unknown as DataPublicPluginStart;
 
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
-        const anchor = {
-          _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
-          },
-          sort: [timeValNr, tieBreakerValue],
-        };
+        const anchor = buildDataTableRecord(
+          {
+            _source: {
+              [indexPattern.timeFieldName!]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
+          } as EsHitRecord,
+          indexPattern,
+          true
+        );
 
         return fetchSurroundingDocs(
           SurrDocType.PREDECESSORS,
           indexPattern,
-          anchor as EsHitRecord,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           size,
-          []
+          [],
+          dataPluginMock
         );
       };
     });
@@ -89,9 +97,11 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
-        (hits: EsHitRecordList) => {
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
+        (hits) => {
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
+          );
         }
       );
     });
@@ -106,7 +116,7 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 6).then(
-        (hits: EsHitRecordList) => {
+        (hits) => {
           const intervals: Timestamp[] = mockSearchSource.setField.args
             .filter(([property]: string) => property === 'query')
             .map(([, { query }]: [string, { query: Query }]) =>
@@ -121,8 +131,9 @@ describe('context predecessors', function () {
           // should have ended with a half-open interval
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'gte']);
           expect(intervals.length).toBeGreaterThan(1);
-
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
+          );
         }
       );
     });
@@ -136,7 +147,7 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_1000, MS_PER_DAY * 1000, '_doc', 0, 3).then(
-        (hits: EsHitRecordList) => {
+        (hits) => {
           const intervals: Timestamp[] = mockSearchSource.setField.args
             .filter(([property]: string) => property === 'query')
             .map(([, { query }]: [string, { query: Query }]) => {
@@ -155,17 +166,18 @@ describe('context predecessors', function () {
           // should have stopped before reaching MS_PER_DAY * 1700
           expect(moment(last(intervals)?.lte).valueOf()).toBeLessThan(MS_PER_DAY * 1700);
           expect(intervals.length).toBeGreaterThan(1);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
+
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), indexPattern)
+          );
         }
       );
     });
 
     it('should return an empty array when no hits were found', function () {
-      return fetchPredecessors(ANCHOR_TIMESTAMP_3, MS_PER_DAY * 3, '_doc', 0, 3).then(
-        (hits: EsHitRecordList) => {
-          expect(hits).toEqual([]);
-        }
-      );
+      return fetchPredecessors(ANCHOR_TIMESTAMP_3, MS_PER_DAY * 3, '_doc', 0, 3).then((hits) => {
+        expect(hits).toEqual([]);
+      });
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
@@ -192,32 +204,35 @@ describe('context predecessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
-      setServices({
-        data: {
-          search: {
-            searchSource: {
-              createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
-            },
+      dataPluginMock = {
+        search: {
+          searchSource: {
+            createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
           },
         },
-      } as unknown as DiscoverServices);
+      } as unknown as DataPublicPluginStart;
 
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
-        const anchor = {
-          _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
-          },
-          sort: [timeValNr, tieBreakerValue],
-        };
+        const anchor = buildDataTableRecord(
+          {
+            _source: {
+              [indexPattern.timeFieldName!]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
+          } as EsHitRecord,
+          indexPattern,
+          true
+        );
 
         return fetchSurroundingDocs(
           SurrDocType.PREDECESSORS,
           indexPattern,
-          anchor as EsHitRecord,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           size,
           [],
+          dataPluginMock,
           true
         );
       };
@@ -233,13 +248,15 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
-        (hits: EsHitRecordList) => {
+        (hits) => {
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
-          expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
+          expect(hits).toEqual(
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 3), indexPattern)
+          );
         }
       );
     });

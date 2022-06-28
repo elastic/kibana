@@ -8,7 +8,7 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { get, has, isPlainObject } from 'lodash';
 import type { Filter, FilterMeta } from './types';
-import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
+import type { DataViewFieldBase, DataViewBase } from '../../es_query';
 import { getConvertedValueForField } from './get_converted_value_for_field';
 
 export type PhraseFilterValue = string | number | boolean;
@@ -93,9 +93,9 @@ export const getPhraseFilterValue = (
  * @public
  */
 export const buildPhraseFilter = (
-  field: IndexPatternFieldBase,
+  field: DataViewFieldBase,
   value: PhraseFilterValue,
-  indexPattern: IndexPatternBase
+  indexPattern: DataViewBase
 ): PhraseFilter | ScriptedPhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 
@@ -117,7 +117,7 @@ export const buildPhraseFilter = (
 };
 
 /** @internal */
-export const getPhraseScript = (field: IndexPatternFieldBase, value: PhraseFilterValue) => {
+export const getPhraseScript = (field: DataViewFieldBase, value: PhraseFilterValue) => {
   const convertedValue = getConvertedValueForField(field, value);
   const script = buildInlineScriptForPhraseFilter(field);
 
@@ -141,7 +141,7 @@ export const getPhraseScript = (field: IndexPatternFieldBase, value: PhraseFilte
  * @param {object} scriptedField A Field object representing a scripted field
  * @returns {string} The inline script string
  */
-export const buildInlineScriptForPhraseFilter = (scriptedField: IndexPatternFieldBase) => {
+export const buildInlineScriptForPhraseFilter = (scriptedField: DataViewFieldBase) => {
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (scriptedField.lang === 'painless') {
     return (

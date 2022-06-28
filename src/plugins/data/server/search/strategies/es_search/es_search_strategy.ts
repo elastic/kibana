@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { from, Observable } from 'rxjs';
-import { first, tap } from 'rxjs/operators';
-import type { Logger, SharedGlobalConfig } from 'kibana/server';
+import { firstValueFrom, from, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
+import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
-import type { SearchUsage } from '../../collectors';
+import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
-import { searchUsageObserver } from '../../collectors/usage';
-import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
+import { searchUsageObserver } from '../../collectors/search/usage';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -30,14 +30,14 @@ export const esSearchStrategyProvider = (
    */
   search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
     // Only default index pattern type is supported here.
-    // See data_enhanced for other type support.
+    // See ese for other type support.
     if (request.indexType) {
       throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
     const search = async () => {
       try {
-        const config = await config$.pipe(first()).toPromise();
+        const config = await firstValueFrom(config$);
         // @ts-expect-error params fall back to any, but should be valid SearchRequest params
         const { terminateAfter, ...requestParams } = request.params ?? {};
         const params = {
@@ -46,7 +46,7 @@ export const esSearchStrategyProvider = (
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
           ...requestParams,
         };
-        const { body } = await esClient.asCurrentUser.search(params, {
+        const body = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,
         });
         const response = shimHitsTotal(body, options);

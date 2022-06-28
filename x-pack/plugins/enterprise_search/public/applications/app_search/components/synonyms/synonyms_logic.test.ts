@@ -12,13 +12,13 @@ import {
 } from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { SYNONYMS_PAGE_META } from './constants';
 
-import { SynonymsLogic } from './';
+import { SynonymsLogic } from '.';
 
 describe('SynonymsLogic', () => {
   const { mount } = new LogicMounter(SynonymsLogic);

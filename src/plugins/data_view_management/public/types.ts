@@ -8,34 +8,46 @@
 
 import {
   ChromeStart,
-  ApplicationStart,
   IUiSettingsClient,
   OverlayStart,
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
-} from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ManagementAppMountParams } from '../../management/public';
-import { IndexPatternManagementStart } from './index';
-import { KibanaReactContextValue } from '../../kibana_react/public';
-import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
-import { DataViewEditorStart } from '../../data_view_editor/public';
+  ApplicationStart,
+  ThemeServiceStart,
+} from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { IndexPatternManagementStart } from '.';
 
 export interface IndexPatternManagmentContext {
-  chrome: ChromeStart;
   application: ApplicationStart;
+  chrome: ChromeStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
   overlays: OverlayStart;
   http: HttpSetup;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
+  fieldFormats: FieldFormatsStart;
+  spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export type IndexPatternManagmentContextValue =

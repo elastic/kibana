@@ -8,8 +8,8 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
-import { AppLeaveHandler, AppMountParameters } from '../../../../../../src/core/public';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
 import { UseUrlState } from '../../common/components/url_state';
@@ -22,7 +22,8 @@ import {
 import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
-
+import { ConsoleManager } from '../../management/components/console/components/console_manager';
+import { useSyncGlobalQueryString } from '../../common/utils/global_query_string';
 interface HomePageProps {
   children: React.ReactNode;
   onAppLeave: (handler: AppLeaveHandler) => void;
@@ -35,7 +36,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   setHeaderActionMenu,
 }) => {
   const { pathname } = useLocation();
-
+  useSyncGlobalQueryString();
   useInitSourcerer(getScopeFromPath(pathname));
 
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
@@ -48,14 +49,16 @@ const HomePageComponent: React.FC<HomePageProps> = ({
 
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
-      <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
-      <DragDropContextWrapper browserFields={browserFields}>
-        <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-        <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
-          {children}
-        </SecuritySolutionTemplateWrapper>
-      </DragDropContextWrapper>
-      <HelpMenu />
+      <ConsoleManager>
+        <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
+        <DragDropContextWrapper browserFields={browserFields}>
+          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+          <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
+            {children}
+          </SecuritySolutionTemplateWrapper>
+        </DragDropContextWrapper>
+        <HelpMenu />
+      </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );
 };

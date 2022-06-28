@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'src/core/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 
+import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { UiActionsStart } from '../../services/ui_actions';
 import { RefreshInterval, TimeRange, Query, Filter } from '../../services/data';
 import {
@@ -47,7 +47,6 @@ import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
-import { ControlGroupContainer } from '../../../../presentation_util/public';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
@@ -79,6 +78,7 @@ export interface InheritedChildInput extends IndexSignature {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 }
 
@@ -106,6 +106,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
   };
+
+  public async getPanelTitles(): Promise<string[]> {
+    const titles: string[] = [];
+    const ids: string[] = Object.keys(this.getInput().panels);
+    for (const panelId of ids) {
+      await this.untilEmbeddableLoaded(panelId);
+      const child: IEmbeddable<EmbeddableInput, EmbeddableOutput> = this.getChild(panelId);
+      const title = child.getTitle();
+      if (title) {
+        titles.push(title);
+      }
+    }
+    return titles;
+  }
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -263,12 +277,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
+    const controlsEnabled = this.services.presentationUtil.labsService.isProjectEnabled(
+      'labs:dashboard:dashboardControls'
+    );
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <KibanaThemeProvider theme$={this.services.theme.theme$}>
             <this.services.presentationUtil.ContextProvider>
-              <DashboardViewport container={this} controlGroup={this.controlGroup} />
+              <DashboardViewport
+                controlsEnabled={controlsEnabled}
+                container={this}
+                controlGroup={this.controlGroup}
+              />
             </this.services.presentationUtil.ContextProvider>
           </KibanaThemeProvider>
         </KibanaContextProvider>
@@ -293,6 +314,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       filters,
       searchSessionId,
       syncColors,
+      syncTooltips,
       executionContext,
     } = this.input;
     let combinedFilters = filters;
@@ -309,6 +331,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       id,
       searchSessionId,
       syncColors,
+      syncTooltips,
       executionContext,
     };
   }

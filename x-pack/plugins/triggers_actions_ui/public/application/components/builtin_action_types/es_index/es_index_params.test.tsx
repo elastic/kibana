@@ -6,12 +6,25 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '../../../../types';
+import { MockCodeEditor } from '../../../code_editor.mock';
+
+const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('../../../../common/lib/kibana');
+
+jest.mock(kibanaReactPath, () => {
+  const original = jest.requireActual(kibanaReactPath);
+  return {
+    ...original,
+    CodeEditor: (props: any) => {
+      return <MockCodeEditor {...props} />;
+    },
+  };
+});
 
 const actionConnector = {
   actionTypeId: '.index',
@@ -20,6 +33,7 @@ const actionConnector = {
   },
   id: 'es index connector',
   isPreconfigured: false,
+  isDeprecated: false,
   name: 'test name',
   secrets: {},
 };
@@ -31,6 +45,7 @@ const preconfiguredActionConnector = {
   },
   id: AlertHistoryEsIndexConnectorId,
   isPreconfigured: true,
+  isDeprecated: false,
   name: 'Alert history Elasticsearch index',
   secrets: {},
 };
@@ -149,7 +164,7 @@ describe('IndexParamsFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="preconfiguredDocumentToIndex"]').length > 0).toBeTruthy();
 
-    wrapper.find('EuiLink[data-test-subj="resetDefaultIndex"]').simulate('click');
+    wrapper.find('EuiLink[data-test-subj="resetDefaultIndex"]').find('button').simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();

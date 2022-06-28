@@ -10,11 +10,6 @@ import { last } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import React, { useMemo, useCallback } from 'react';
-import { DataFormatPicker } from './data_format_picker';
-import { createTextHandler } from './lib/create_text_handler';
-import { checkIfNumericMetric } from './lib/check_if_numeric_metric';
-import { YesNo } from './yes_no';
-import { IndexPattern } from './index_pattern';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -23,9 +18,16 @@ import {
   EuiFormRow,
   EuiCode,
   EuiHorizontalRule,
+  useEuiTheme,
 } from '@elastic/eui';
+import { DataFormatPicker } from './data_format_picker';
+import { createTextHandler } from './lib/create_text_handler';
+import { checkIfNumericMetric } from './lib/check_if_numeric_metric';
+import { YesNo } from './yes_no';
+import { IndexPattern } from './index_pattern';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_query_bar_with_ignore_global_filter';
 import { DATA_FORMATTERS } from '../../../common/enums';
+import { tsvbEditorRowStyles } from '../styles/common.styles';
 
 export const SeriesConfig = (props) => {
   const defaults = { offset_time: '', value_template: '{{value}}' };
@@ -43,8 +45,22 @@ export const SeriesConfig = (props) => {
   );
   const isKibanaIndexPattern = props.panel.use_kibana_indexes || seriesIndexPattern === '';
 
+  const { indexPatternForQuery, onChange } = props;
+  const onChangeOverride = useCallback(
+    (partialState) => {
+      const stateUpdate = { ...partialState };
+      const isEnabling = partialState.override_index_pattern;
+      if (isEnabling && !model.series_index_pattern) {
+        stateUpdate.series_index_pattern = indexPatternForQuery;
+      }
+      onChange(stateUpdate);
+    },
+    [model.series_index_pattern, indexPatternForQuery, onChange]
+  );
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <div className="tvbAggRow">
+    <div css={tsvbEditorRowStyles(euiTheme)}>
       <EuiFlexGroup gutterSize="s">
         <DataFormatPicker
           formatterValue={model.formatter}
@@ -126,12 +142,13 @@ export const SeriesConfig = (props) => {
             <YesNo
               value={model.override_index_pattern}
               name="override_index_pattern"
-              onChange={props.onChange}
+              onChange={onChangeOverride}
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
           <IndexPattern
+            baseIndexPattern={indexPatternForQuery}
             onChange={props.onChange}
             model={props.model}
             fields={props.fields}

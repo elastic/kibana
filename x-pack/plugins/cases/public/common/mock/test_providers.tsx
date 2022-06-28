@@ -5,54 +5,125 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
 import React from 'react';
-import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 
-import { DEFAULT_FEATURES, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
-import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
+import {
+  createKibanaContextProviderMock,
+  createStartServicesMock,
+} from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
+import { StartServices } from '../../types';
+import { ReleasePhase } from '../../components/types';
 
-interface Props {
+interface TestProviderProps {
   children: React.ReactNode;
   userCanCrud?: boolean;
   features?: CasesFeatures;
   owner?: string[];
+  releasePhase?: ReleasePhase;
 }
+type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({
+const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
   owner = [SECURITY_SOLUTION_OWNER],
   userCanCrud = true,
+  releasePhase = 'ga',
 }) => {
-  /**
-   * The empty object at the beginning avoids the mutation
-   * of the DEFAULT_FEATURES object
-   */
-  const featuresOptions = merge({}, DEFAULT_FEATURES, features);
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider value={{ features: featuresOptions, owner, userCanCrud }}>
-            {children}
-          </CasesProvider>
+          <QueryClientProvider client={queryClient}>
+            <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
+          </QueryClientProvider>
         </ThemeProvider>
       </MockKibanaContextProvider>
     </I18nProvider>
   );
 };
+TestProvidersComponent.displayName = 'TestProviders';
 
 export const TestProviders = React.memo(TestProvidersComponent);
+
+export interface AppMockRenderer {
+  render: UiRender;
+  coreStart: StartServices;
+  queryClient: QueryClient;
+  AppWrapper: React.FC<{ children: React.ReactElement }>;
+}
+export const testQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+export const createAppMockRenderer = ({
+  features,
+  owner = [SECURITY_SOLUTION_OWNER],
+  userCanCrud = true,
+  releasePhase = 'ga',
+}: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
+  const services = createStartServicesMock();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <QueryClientProvider client={queryClient}>
+            <CasesProvider value={{ features, owner, userCanCrud, releasePhase }}>
+              {children}
+            </CasesProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+  AppWrapper.displayName = 'AppWrapper';
+  const render: UiRender = (ui, options) => {
+    return reactRender(ui, {
+      wrapper: AppWrapper,
+      ...options,
+    });
+  };
+  return {
+    coreStart: services,
+    queryClient,
+    render,
+    AppWrapper,
+  };
+};
 
 export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => ({
   path: 'path',

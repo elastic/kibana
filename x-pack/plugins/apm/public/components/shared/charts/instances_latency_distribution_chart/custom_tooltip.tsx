@@ -9,7 +9,7 @@ import { TooltipInfo } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
 import {
   asTransactionRate,
@@ -156,7 +156,7 @@ function MultipleInstanceCustomTooltip({
               </div>
               <div
                 className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.paddingSizes.s }}
+                style={{ paddingLeft: theme.eui.euiSizeS }}
               >
                 <span className="echTooltip__label">{latencyLabel}</span>
                 <span className="echTooltip__value">
@@ -176,7 +176,7 @@ function MultipleInstanceCustomTooltip({
               </div>
               <div
                 className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.paddingSizes.s }}
+                style={{ paddingLeft: theme.eui.euiSizeS }}
               >
                 <span className="echTooltip__label">{throughputLabel}</span>
                 <span className="echTooltip__value">
@@ -211,7 +211,7 @@ export function CustomTooltip(
       ) : (
         <SingleInstanceCustomTooltip {...props} />
       )}
-      <div style={{ padding: theme.eui.paddingSizes.xs }}>
+      <div style={{ padding: theme.eui.euiSizeXS }}>
         <EuiIcon type="filter" /> {clickToFilterDescription}
       </div>
     </div>

@@ -5,22 +5,33 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { API_USAGE_COUNTER_TYPE } from '../../common/constants';
 import { ReportingCore } from '..';
-import { LevelLogger } from '../lib';
-import { registerDeprecationsRoutes } from './deprecations';
+import { registerDeprecationsRoutes } from './deprecations/deprecations';
 import { registerDiagnosticRoutes } from './diagnostic';
 import {
   registerGenerateCsvFromSavedObjectImmediate,
   registerJobGenerationRoutes,
-  registerLegacy,
 } from './generate';
 import { registerJobInfoRoutes } from './management';
 
-export function registerRoutes(reporting: ReportingCore, logger: LevelLogger) {
+export function incrementApiUsageCounter(
+  method: string,
+  path: string,
+  usageCounter: UsageCounter | undefined
+) {
+  usageCounter?.incrementCounter({
+    counterName: `${method} ${path}`,
+    counterType: API_USAGE_COUNTER_TYPE,
+  });
+}
+
+export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDeprecationsRoutes(reporting, logger);
   registerDiagnosticRoutes(reporting, logger);
   registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
   registerJobGenerationRoutes(reporting, logger);
-  registerLegacy(reporting, logger);
   registerJobInfoRoutes(reporting);
 }

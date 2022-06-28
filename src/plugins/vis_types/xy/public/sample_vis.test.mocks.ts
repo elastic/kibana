@@ -5,6 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { LegendSize } from '@kbn/visualizations-plugin/common';
+
 export const sampleAreaVis = {
   type: {
     name: 'area',
@@ -105,6 +108,7 @@ export const sampleAreaVis = {
       },
     },
     editorConfig: {
+      enableDataViewChange: true,
       optionTabs: [
         {
           name: 'advanced',
@@ -155,7 +159,9 @@ export const sampleAreaVis = {
               '!filter',
               '!sampler',
               '!diversified_sampler',
+              '!rare_terms',
               '!multi_terms',
+              '!significant_text',
             ],
             editor: false,
             params: [],
@@ -172,7 +178,9 @@ export const sampleAreaVis = {
               '!filter',
               '!sampler',
               '!diversified_sampler',
+              '!rare_terms',
               '!multi_terms',
+              '!significant_text',
             ],
             editor: false,
             params: [],
@@ -189,7 +197,9 @@ export const sampleAreaVis = {
               '!filter',
               '!sampler',
               '!diversified_sampler',
+              '!rare_terms',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {
@@ -276,6 +286,7 @@ export const sampleAreaVis = {
     addTooltip: true,
     addLegend: true,
     legendPosition: 'top',
+    legendSize: LegendSize.SMALL,
     times: [],
     addTimeMarker: false,
     truncateLegend: true,

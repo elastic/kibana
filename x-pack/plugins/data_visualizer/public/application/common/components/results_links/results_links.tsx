@@ -9,16 +9,26 @@ import React, { FC, useState, useEffect } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiCard, EuiIcon } from '@elastic/eui';
-import {
-  DISCOVER_APP_URL_GENERATOR,
-  DiscoverUrlGeneratorState,
-} from '../../../../../../../../src/plugins/discover/public';
-import { TimeRange, RefreshInterval } from '../../../../../../../../src/plugins/data/public';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
-import type { FileUploadPluginStart } from '../../../../../../file_upload/public';
+import type { TimeRange } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/public';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import { flatten } from 'lodash';
+import { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import { isDefined } from '../../util/is_defined';
 
 type LinkType = 'file' | 'index';
+
+export interface GetAdditionalLinksParams {
+  dataViewId: string;
+  dataViewTitle?: string;
+  globalState?: any;
+}
+
+export type GetAdditionalLinks = Array<
+  (params: GetAdditionalLinksParams) => Promise<ResultLink[] | undefined>
+>;
 
 export interface ResultLink {
   id: string;
@@ -28,17 +38,17 @@ export interface ResultLink {
   description: string;
   getUrl(params?: any): Promise<string>;
   canDisplay(params?: any): Promise<boolean>;
-  dataTestSubj?: string;
+  'data-test-subj'?: string;
 }
 
 interface Props {
   fieldStats: FindFileStructureResponse['field_stats'];
   index: string;
-  indexPatternId: string;
+  dataViewId: string;
   timeFieldName?: string;
-  createIndexPattern: boolean;
+  createDataView: boolean;
   showFilebeatFlyout(): void;
-  additionalLinks: ResultLink[];
+  getAdditionalLinks?: GetAdditionalLinks;
 }
 
 interface GlobalState {
@@ -51,19 +61,17 @@ const RECHECK_DELAY_MS = 3000;
 export const ResultsLinks: FC<Props> = ({
   fieldStats,
   index,
-  indexPatternId,
+  dataViewId,
   timeFieldName,
-  createIndexPattern,
+  createDataView,
   showFilebeatFlyout,
-  additionalLinks,
+  getAdditionalLinks,
 }) => {
   const {
     services: {
       fileUpload,
       application: { getUrlForApp, capabilities },
-      share: {
-        urlGenerators: { getUrlGenerator },
-      },
+      discover,
     },
   } = useDataVisualizerKibana();
 
@@ -75,60 +83,54 @@ export const ResultsLinks: FC<Props> = ({
 
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
-  const [indexPatternManagementLink, setIndexPatternManagementLink] = useState('');
-  const [generatedLinks, setGeneratedLinks] = useState<Record<string, string>>({});
+  const [dataViewsManagementLink, setDataViewsManagementLink] = useState('');
+  const [asyncHrefCards, setAsyncHrefCards] = useState<LinkCardProps[]>();
 
   useEffect(() => {
     let unmounted = false;
 
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
-      if (!isDiscoverAvailable) {
+      if (!isDiscoverAvailable) return;
+      if (!discover.locator) {
+        // eslint-disable-next-line no-console
+        console.error('Discover locator not available');
         return;
       }
-
-      const state: DiscoverUrlGeneratorState = {
-        indexPatternId,
-      };
-
-      if (globalState?.time) {
-        state.timeRange = globalState.time;
-      }
-
-      let discoverUrlGenerator;
-      try {
-        discoverUrlGenerator = getUrlGenerator(DISCOVER_APP_URL_GENERATOR);
-      } catch (error) {
-        // ignore error thrown when url generator is not available
-      }
-
-      if (!discoverUrlGenerator) {
-        return;
-      }
-      const discoverUrl = await discoverUrlGenerator.createUrl(state);
-      if (!unmounted) {
-        setDiscoverLink(discoverUrl);
-      }
+      const discoverUrl = await discover.locator.getUrl({
+        indexPatternId: dataViewId,
+        timeRange: globalState?.time ? globalState.time : undefined,
+      });
+      if (unmounted) return;
+      setDiscoverLink(discoverUrl);
     };
 
     getDiscoverUrl();
 
-    Promise.all(
-      additionalLinks.map(async ({ canDisplay, getUrl }) => {
-        if ((await canDisplay({ indexPatternId })) === false) {
-          return null;
-        }
-        return getUrl({ globalState, indexPatternId });
-      })
-    ).then((urls) => {
-      const linksById = urls.reduce((acc, url, i) => {
-        if (url !== null) {
-          acc[additionalLinks[i].id] = url;
-        }
-        return acc;
-      }, {} as Record<string, string>);
-      setGeneratedLinks(linksById);
-    });
+    if (Array.isArray(getAdditionalLinks)) {
+      Promise.all(
+        getAdditionalLinks.map(async (asyncCardGetter) => {
+          const results = await asyncCardGetter({
+            dataViewId,
+          });
+          if (Array.isArray(results)) {
+            return await Promise.all(
+              results.map(async (c) => ({
+                ...c,
+                canDisplay: await c.canDisplay(),
+                href: await c.getUrl(),
+              }))
+            );
+          }
+        })
+      ).then((cards) => {
+        setAsyncHrefCards(
+          flatten(cards)
+            .filter(isDefined)
+            .filter((d) => d.canDisplay === true)
+        );
+      });
+    }
 
     if (!unmounted) {
       setIndexManagementLink(
@@ -136,9 +138,9 @@ export const ResultsLinks: FC<Props> = ({
       );
 
       if (capabilities.indexPatterns.save === true) {
-        setIndexPatternManagementLink(
+        setDataViewsManagementLink(
           getUrlForApp('management', {
-            path: `/kibana/indexPatterns${createIndexPattern ? `/patterns/${indexPatternId}` : ''}`,
+            path: `/kibana/dataViews${createDataView ? `/dataView/${dataViewId}` : ''}`,
           })
         );
       }
@@ -148,7 +150,7 @@ export const ResultsLinks: FC<Props> = ({
       unmounted = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPatternId, getUrlGenerator, JSON.stringify(globalState)]);
+  }, [dataViewId, discover, JSON.stringify(globalState)]);
 
   useEffect(() => {
     updateTimeValues();
@@ -203,7 +205,7 @@ export const ResultsLinks: FC<Props> = ({
 
   return (
     <EuiFlexGroup gutterSize="l">
-      {createIndexPattern && discoverLink && (
+      {createDataView && discoverLink && (
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
@@ -235,7 +237,7 @@ export const ResultsLinks: FC<Props> = ({
         </EuiFlexItem>
       )}
 
-      {indexPatternManagementLink && (
+      {dataViewsManagementLink && (
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
@@ -246,7 +248,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            href={indexPatternManagementLink}
+            href={dataViewsManagementLink}
           />
         </EuiFlexItem>
       )}
@@ -264,16 +266,15 @@ export const ResultsLinks: FC<Props> = ({
           onClick={showFilebeatFlyout}
         />
       </EuiFlexItem>
-      {additionalLinks
-        .filter(({ id }) => generatedLinks[id] !== undefined)
-        .map((link) => (
+      {Array.isArray(asyncHrefCards) &&
+        asyncHrefCards.map((link) => (
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"
               title={link.title}
               description={link.description}
-              href={generatedLinks[link.id]}
+              href={link.href}
             />
           </EuiFlexItem>
         ))}

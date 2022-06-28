@@ -9,10 +9,19 @@ export BUILDKITE_TOKEN
 
 echo '--- Install buildkite dependencies'
 cd '.buildkite'
-retry 5 15 yarn install --production --pure-lockfile
-cd -
+retry 5 15 npm ci
+cd ..
 
+echo '--- Agent Debug/SSH Info'
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
+
+if [[ "$(curl -is metadata.google.internal || true)" ]]; then
+  echo ""
+  echo "To SSH into this agent, run:"
+  echo "gcloud compute ssh --tunnel-through-iap --project elastic-kibana-ci --zone \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone)\" \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/name)\""
+  echo ""
+fi
+
 
 echo '--- Job Environment Setup'
 
@@ -39,6 +48,15 @@ echo '--- Job Environment Setup'
   ES_SNAPSHOT_MANIFEST="$ES_SNAPSHOT_MANIFEST" node scripts/functional_tests_server.js
   \`\`\`
 EOF
+  fi
+}
+
+# If a custom manifest isn't specified, then use the default one that we resolve earlier in the build
+{
+  if [[ ! "${ES_SNAPSHOT_MANIFEST:-}" ]]; then
+    ES_SNAPSHOT_MANIFEST=${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST_DEFAULT --default '')}
+    export ES_SNAPSHOT_MANIFEST
+    echo "Using default ES Snapshot Manifest: $ES_SNAPSHOT_MANIFEST"
   fi
 }
 
@@ -69,6 +87,9 @@ EOF
 GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
 
+KIBANA_CI_GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibana-ci-github)
+export KIBANA_CI_GITHUB_TOKEN
+
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
 
@@ -77,6 +98,27 @@ export KIBANA_DOCKER_USERNAME
 
 KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
 export KIBANA_DOCKER_PASSWORD
+
+EC_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-cloud-deploy)"
+export EC_API_KEY
+
+SYNTHETICS_SERVICE_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
+export SYNTHETICS_SERVICE_USERNAME
+
+SYNTHETICS_SERVICE_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
+export SYNTHETICS_SERVICE_PASSWORD
+
+SYNTHETICS_SERVICE_MANIFEST="$(retry 5 5 vault read -field=manifest secret/kibana-issues/dev/kibana-ci-synthetics-credentials)"
+export SYNTHETICS_SERVICE_MANIFEST
+
+SYNTHETICS_REMOTE_KIBANA_USERNAME="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"
+export SYNTHETICS_REMOTE_KIBANA_USERNAME
+
+SYNTHETICS_REMOTE_KIBANA_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"
+export SYNTHETICS_REMOTE_KIBANA_PASSWORD
+
+SYNTHETICS_REMOTE_KIBANA_URL=${SYNTHETICS_REMOTE_KIBANA_URL-"$(retry 5 5 vault read -field=url secret/kibana-issues/dev/kibana-ci-synthetics-remote-credentials)"}
+export SYNTHETICS_REMOTE_KIBANA_URL
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {
@@ -92,6 +134,10 @@ export KIBANA_DOCKER_PASSWORD
 
 KIBANA_BUILDBUDDY_CI_API_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibana-buildbuddy-ci-api-key)
 export KIBANA_BUILDBUDDY_CI_API_KEY
+
+BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
+export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
+retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
 
 # By default, all steps should set up these things to get a full environment before running
 # It can be skipped for pipeline upload steps though, to make job start time a little faster

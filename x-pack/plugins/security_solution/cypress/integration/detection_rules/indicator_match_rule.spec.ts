@@ -35,7 +35,6 @@ import {
   CUSTOM_QUERY_DETAILS,
   DEFINITION_DETAILS,
   FALSE_POSITIVES_DETAILS,
-  getDetails,
   INDEX_PATTERNS_DETAILS,
   INDICATOR_INDEX_PATTERNS,
   INDICATOR_INDEX_QUERY,
@@ -56,29 +55,20 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeline';
+import { investigateFirstAlertInTimeline } from '../../tasks/alerts';
 import {
-  goToManageAlertsDetectionRules,
-  investigateFirstAlertInTimeline,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import {
-  changeRowsPerPageTo100,
   duplicateFirstRule,
   duplicateSelectedRules,
   duplicateRuleFromMenu,
-  filterByCustomRules,
-  goToCreateNewRule,
   goToRuleDetails,
-  waitForRulesTableToBeLoaded,
   selectNumberOfRules,
   checkDuplicatedRule,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
-import { cleanKibana, reload } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
-  createAndActivateRule,
+  createAndEnableRule,
   fillAboutRuleAndContinue,
   fillDefineIndicatorMatchRuleAndContinue,
   fillIndexAndIndicatorIndexPattern,
@@ -109,13 +99,13 @@ import {
   SCHEDULE_LOOKBACK_AMOUNT_INPUT,
   SCHEDULE_LOOKBACK_UNITS_INPUT,
 } from '../../screens/create_new_rule';
-import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
+import { goBackToRuleDetails } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { goBackToAllRulesTable } from '../../tasks/rule_details';
+import { login, visit, visitWithoutDateRange } from '../../tasks/login';
+import { goBackToAllRulesTable, getDetails } from '../../tasks/rule_details';
 
-import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
-const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d"';
+import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../urls/navigation';
+const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -130,6 +120,7 @@ describe('indicator match', () => {
       cleanKibana();
       esArchiverLoad('threat_indicator');
       esArchiverLoad('suspicious_source_event');
+      login();
     });
     after(() => {
       esArchiverUnload('threat_indicator');
@@ -137,8 +128,8 @@ describe('indicator match', () => {
     });
 
     describe('Creating new indicator match rules', () => {
-      beforeEach(() => {
-        loginAndWaitForPageWithoutDateRange(RULE_CREATION);
+      before(() => {
+        visitWithoutDateRange(RULE_CREATION);
         selectIndicatorMatchType();
       });
 
@@ -161,6 +152,11 @@ describe('indicator match', () => {
       });
 
       describe('Indicator index patterns', () => {
+        before(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+        });
+
         it('Contains a predefined index pattern', () => {
           getIndicatorIndicatorIndex().should('have.text', getThreatIndexPatterns().join(''));
         });
@@ -177,6 +173,11 @@ describe('indicator match', () => {
       });
 
       describe('custom query input', () => {
+        before(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+        });
+
         it('Has a default set of *:*', () => {
           getCustomQueryInput().should('have.text', '*:*');
         });
@@ -188,6 +189,10 @@ describe('indicator match', () => {
       });
 
       describe('custom indicator query input', () => {
+        before(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
+        });
         it(`Has a default set of ${DEFAULT_THREAT_MATCH_QUERY}`, () => {
           getCustomIndicatorQueryInput().should('have.text', DEFAULT_THREAT_MATCH_QUERY);
         });
@@ -200,6 +205,8 @@ describe('indicator match', () => {
 
       describe('Indicator mapping', () => {
         beforeEach(() => {
+          visitWithoutDateRange(RULE_CREATION);
+          selectIndicatorMatchType();
           fillIndexAndIndicatorIndexPattern(
             getNewThreatIndicatorRule().index,
             getNewThreatIndicatorRule().indicatorIndexPattern
@@ -393,6 +400,7 @@ describe('indicator match', () => {
 
       describe('Schedule', () => {
         it('IM rule has 1h time interval and lookback by default', () => {
+          visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
           fillAboutRuleAndContinue(getNewThreatIndicatorRule());
@@ -407,35 +415,23 @@ describe('indicator match', () => {
 
     describe('Generating signals', () => {
       beforeEach(() => {
-        cleanKibana();
-        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
+        deleteAlertsAndRules();
       });
 
-      it('Creates and activates a new Indicator Match rule', () => {
-        waitForAlertsPanelToBeLoaded();
-        waitForAlertsIndexToBeCreated();
-        goToManageAlertsDetectionRules();
-        waitForRulesTableToBeLoaded();
-        goToCreateNewRule();
+      it('Creates and enables a new Indicator Match rule', () => {
+        visitWithoutDateRange(RULE_CREATION);
         selectIndicatorMatchType();
         fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
         fillAboutRuleAndContinue(getNewThreatIndicatorRule());
         fillScheduleRuleAndContinue(getNewThreatIndicatorRule());
-        createAndActivateRule();
+        createAndEnableRule();
 
         cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
-
-        changeRowsPerPageTo100();
 
         cy.get(RULES_TABLE).then(($table) => {
           cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
         });
 
-        filterByCustomRules();
-
-        cy.get(RULES_TABLE).then(($table) => {
-          cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-        });
         cy.get(RULE_NAME).should('have.text', getNewThreatIndicatorRule().name);
         cy.get(RISK_SCORE).should('have.text', getNewThreatIndicatorRule().riskScore);
         cy.get(SEVERITY).should('have.text', getNewThreatIndicatorRule().severity);
@@ -511,15 +507,12 @@ describe('indicator match', () => {
         cy.get(ALERT_RISK_SCORE).first().should('have.text', getNewThreatIndicatorRule().riskScore);
       });
 
-      it.skip('Investigate alert in timeline', () => {
+      it('Investigate alert in timeline', () => {
         const accessibilityText = `Press enter for options, or press space to begin dragging.`;
 
         loadPrepackagedTimelineTemplates();
-
-        goToManageAlertsDetectionRules();
         createCustomIndicatorRule(getNewThreatIndicatorRule());
-
-        reload();
+        visit(DETECTIONS_RULE_MANAGEMENT_URL);
         goToRuleDetails();
         waitForAlertsToPopulate();
         investigateFirstAlertInTimeline();
@@ -540,22 +533,20 @@ describe('indicator match', () => {
             getNewThreatIndicatorRule().indicatorMappingField
           }${accessibilityText}matched${getNewThreatIndicatorRule().indicatorMappingField}${
             getNewThreatIndicatorRule().atomic
-          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}`
+          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}provided` +
+            ` byfeed.nameAbuseCH malware${accessibilityText}`
         );
       });
     });
 
     describe('Duplicates the indicator rule', () => {
       beforeEach(() => {
-        cleanKibana();
-        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-        goToManageAlertsDetectionRules();
+        deleteAlertsAndRules();
         createCustomIndicatorRule(getNewThreatIndicatorRule());
-        reload();
+        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       });
 
       it('Allows the rule to be duplicated from the table', () => {
-        waitForKibana();
         duplicateFirstRule();
         goBackToRuleDetails();
         goBackToAllRulesTable();
@@ -563,19 +554,16 @@ describe('indicator match', () => {
       });
 
       it("Allows the rule to be duplicated from the table's bulk actions", () => {
-        waitForKibana();
         selectNumberOfRules(1);
         duplicateSelectedRules();
         checkDuplicatedRule();
       });
 
       it('Allows the rule to be duplicated from the edit screen', () => {
-        waitForKibana();
         goToRuleDetails();
         duplicateRuleFromMenu();
         goBackToRuleDetails();
         goBackToAllRulesTable();
-        reload();
         checkDuplicatedRule();
       });
     });

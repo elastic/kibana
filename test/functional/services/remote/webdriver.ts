@@ -12,7 +12,7 @@ import Fs from 'fs';
 import * as Rx from 'rxjs';
 import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
@@ -39,6 +39,7 @@ const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
 const browserBinaryPath: string = process.env.TEST_BROWSER_BINARY_PATH as string;
 const remoteDebug: string = process.env.TEST_REMOTE_DEBUG as string;
 const certValidation: string = process.env.NODE_TLS_REJECT_UNAUTHORIZED as string;
+const noCache: string = process.env.TEST_DISABLE_CACHE as string;
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
@@ -116,6 +117,11 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
 
   if (browserBinaryPath) {
     options.setChromeBinaryPath(browserBinaryPath);
+  }
+
+  if (noCache === '1') {
+    options.addArguments('disk-cache-size', '0');
+    options.addArguments('disk-cache-dir', '/dev/null');
   }
 
   const prefs = new logging.Preferences();
@@ -291,12 +297,12 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
-    const { KBN_NETWORK_TEST_PROFILE = 'DEFAULT' } = process.env;
+    const { KBN_NETWORK_TEST_PROFILE = 'CLOUD_USER' } = process.env;
 
     const profile =
       KBN_NETWORK_TEST_PROFILE in Object.keys(NETWORK_PROFILES)
         ? KBN_NETWORK_TEST_PROFILE
-        : 'DEFAULT';
+        : 'CLOUD_USER';
 
     const {
       DOWNLOAD: downloadThroughput,
@@ -306,8 +312,15 @@ async function attemptToCreateCommand(
 
     // Only chrome supports this option.
     log.debug(
-      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput}kbps down, ${uploadThroughput}kbps up, ${latency} ms latency.`
+      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput} B/s down, ${uploadThroughput} B/s up, ${latency} ms latency.`
     );
+
+    if (noCache) {
+      // @ts-expect-error
+      await session.sendDevToolsCommand('Network.setCacheDisabled', {
+        cacheDisabled: true,
+      });
+    }
 
     // @ts-expect-error
     session.setNetworkConditions({
@@ -351,39 +364,41 @@ export async function initWebDriver(
   }
 
   let attempt = 1;
-  return await Rx.race(
-    Rx.timer(2 * MINUTE).pipe(
-      map(() => {
-        throw new Error('remote failed to start within 2 minutes');
-      })
-    ),
-
+  return await Rx.firstValueFrom(
     Rx.race(
-      Rx.defer(async () => {
-        const command = await attemptToCreateCommand(log, browserType, lifecycle, config);
-        if (!command) {
-          throw new Error('remote creation aborted');
-        }
-        return command;
-      }),
-      Rx.timer(30 * SECOND).pipe(
+      Rx.timer(2 * MINUTE).pipe(
         map(() => {
-          throw new Error('remote failed to start within 30 seconds');
+          throw new Error('remote failed to start within 2 minutes');
+        })
+      ),
+
+      Rx.race(
+        Rx.defer(async () => {
+          const command = await attemptToCreateCommand(log, browserType, lifecycle, config);
+          if (!command) {
+            throw new Error('remote creation aborted');
+          }
+          return command;
+        }),
+        Rx.timer(30 * SECOND).pipe(
+          map(() => {
+            throw new Error('remote failed to start within 30 seconds');
+          })
+        )
+      ).pipe(
+        catchError((error, resubscribe) => {
+          log.warning('Failure while creating webdriver instance');
+          log.warning(error);
+
+          if (attempt > 5) {
+            throw new Error('out of retry attempts');
+          }
+
+          attempt += 1;
+          log.warning('...retrying in 15 seconds...');
+          return Rx.concat(sleep$(15000), resubscribe);
         })
       )
-    ).pipe(
-      catchError((error, resubscribe) => {
-        log.warning('Failure while creating webdriver instance');
-        log.warning(error);
-
-        if (attempt > 5) {
-          throw new Error('out of retry attempts');
-        }
-
-        attempt += 1;
-        log.warning('...retrying in 15 seconds...');
-        return Rx.concat(sleep$(15000), resubscribe);
-      })
     )
-  ).toPromise();
+  );
 }

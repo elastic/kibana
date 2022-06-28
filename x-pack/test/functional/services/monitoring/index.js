@@ -24,6 +24,7 @@ export { MonitoringLogstashOverviewProvider } from './logstash_overview';
 export { MonitoringLogstashNodesProvider } from './logstash_nodes';
 export { MonitoringLogstashNodeDetailProvider } from './logstash_node_detail';
 export { MonitoringLogstashPipelinesProvider } from './logstash_pipelines';
+export { MonitoringLogstashPipelineViewerProvider } from './logstash_pipeline_viewer';
 export { MonitoringLogstashSummaryStatusProvider } from './logstash_summary_status';
 export { MonitoringKibanaOverviewProvider } from './kibana_overview';
 export { MonitoringKibanaInstancesProvider } from './kibana_instances';

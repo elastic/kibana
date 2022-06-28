@@ -7,7 +7,7 @@
 
 import type { ConfigType } from '../../../config';
 
-interface Viewport {
+interface WindowSize {
   height: number;
   width: number;
 }
@@ -16,12 +16,17 @@ type Proxy = ConfigType['browser']['chromium']['proxy'];
 
 interface LaunchArgs {
   userDataDir: string;
-  viewport?: Viewport;
+  windowSize?: WindowSize;
   disableSandbox?: boolean;
   proxy: Proxy;
 }
 
-export const args = ({ userDataDir, disableSandbox, viewport, proxy: proxyConfig }: LaunchArgs) => {
+export const args = ({
+  userDataDir,
+  disableSandbox,
+  windowSize,
+  proxy: proxyConfig,
+}: LaunchArgs) => {
   const flags = [
     // Disable built-in Google Translate service
     '--disable-translate',
@@ -50,11 +55,11 @@ export const args = ({ userDataDir, disableSandbox, viewport, proxy: proxyConfig
     `--mainFrameClipsContent=false`,
   ];
 
-  if (viewport) {
+  if (windowSize) {
     // NOTE: setting the window size does NOT set the viewport size: viewport and window size are different.
     // The viewport may later need to be resized depending on the position of the clip area.
     // These numbers come from the job parameters, so this is a close guess.
-    flags.push(`--window-size=${Math.floor(viewport.width)},${Math.floor(viewport.height)}`);
+    flags.push(`--window-size=${Math.floor(windowSize.width)},${Math.floor(windowSize.height)}`);
   }
 
   if (proxyConfig.enabled) {

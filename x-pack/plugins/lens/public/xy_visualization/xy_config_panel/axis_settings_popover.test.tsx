@@ -6,10 +6,21 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
 import { ToolbarPopover } from '../../shared_components';
 import { layerTypes } from '../../../common';
+import { ShallowWrapper } from 'enzyme';
+
+function getRangeInputComponent(component: ShallowWrapper) {
+  return component
+    .find('[testSubjPrefix="lnsXY"]')
+    .shallow()
+    .find('RangeInputField')
+    .shallow()
+    .find('EuiFormControlLayoutDelimited')
+    .shallow();
+}
 
 describe('Axes Settings', () => {
   let props: AxisSettingsPopoverProps;
@@ -31,7 +42,6 @@ describe('Axes Settings', () => {
       areTickLabelsVisible: true,
       areGridlinesVisible: true,
       isAxisTitleVisible: true,
-      toggleAxisTitleVisibility: jest.fn(),
       toggleTickLabelsVisibility: jest.fn(),
       toggleGridlinesVisibility: jest.fn(),
       hasBarOrAreaOnAxis: false,
@@ -44,18 +54,6 @@ describe('Axes Settings', () => {
   it('should disable the popover if the isDisabled property is true', () => {
     const component = shallow(<AxisSettingsPopover {...props} isDisabled />);
     expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
-  });
-
-  it('should show the axes title on the corresponding input text', () => {
-    const component = shallow(<AxisSettingsPopover {...props} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').prop('value')).toBe(
-      'My custom X axis title'
-    );
-  });
-
-  it('should disable the input text if the switch is off', () => {
-    const component = shallow(<AxisSettingsPopover {...props} isAxisTitleVisible={false} />);
-    expect(component.find('[data-test-subj="lnsxAxisTitle"]').prop('disabled')).toBe(true);
   });
 
   it('has the tickLabels switch on by default', () => {
@@ -101,11 +99,9 @@ describe('Axes Settings', () => {
     expect(props.setOrientation).toHaveBeenCalled();
   });
 
-  it('should disable the orientation group if the tickLabels are set to not visible', () => {
+  it('should hide the orientation group if the tickLabels are set to not visible', () => {
     const component = shallow(<AxisSettingsPopover {...props} areTickLabelsVisible={false} />);
-    expect(
-      component.find('[data-test-subj="lnsXY_axisOrientation_groups"]').prop('isDisabled')
-    ).toEqual(true);
+    expect(component.exists('[data-test-subj="lnsXY_axisOrientation_groups"]')).toEqual(false);
   });
 
   it('hides the endzone visibility flag if no setter is passed in', () => {
@@ -126,17 +122,66 @@ describe('Axes Settings', () => {
       expect(component.find('[data-test-subj="lnsXY_axisBounds_groups"]').length).toBe(0);
     });
 
-    it('renders bound inputs if mode is custom', () => {
+    it('renders 3 options for metric bound inputs', () => {
       const setSpy = jest.fn();
       const component = shallow(
         <AxisSettingsPopover
           {...props}
+          axis="yLeft"
           extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
           setExtent={setSpy}
         />
       );
-      const lower = component.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
-      const upper = component.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
+      const boundInput = component.find('[testSubjPrefix="lnsXY"]').shallow();
+      const buttonGroup = boundInput.find('[data-test-subj="lnsXY_axisBounds_groups"]');
+      expect(buttonGroup.prop('options')).toHaveLength(3);
+    });
+
+    it('renders metric (y) bound inputs if mode is custom', () => {
+      const setSpy = jest.fn();
+      const component = shallow(
+        <AxisSettingsPopover
+          {...props}
+          axis="yLeft"
+          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
+          setExtent={setSpy}
+        />
+      );
+      const rangeInput = getRangeInputComponent(component);
+      const lower = rangeInput.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
+      const upper = rangeInput.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
+      expect(lower.prop('value')).toEqual(123);
+      expect(upper.prop('value')).toEqual(456);
+    });
+
+    it('renders 2 options for metric bound inputs', () => {
+      const setSpy = jest.fn();
+      const component = shallow(
+        <AxisSettingsPopover
+          {...props}
+          axis="x"
+          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
+          setExtent={setSpy}
+        />
+      );
+      const boundInput = component.find('[testSubjPrefix="lnsXY"]').shallow();
+      const buttonGroup = boundInput.find('[data-test-subj="lnsXY_axisBounds_groups"]');
+      expect(buttonGroup.prop('options')).toHaveLength(2);
+    });
+
+    it('renders bucket (x) bound inputs if mode is custom', () => {
+      const setSpy = jest.fn();
+      const component = shallow(
+        <AxisSettingsPopover
+          {...props}
+          axis="x"
+          extent={{ mode: 'custom', lowerBound: 123, upperBound: 456 }}
+          setExtent={setSpy}
+        />
+      );
+      const rangeInput = getRangeInputComponent(component);
+      const lower = rangeInput.find('[data-test-subj="lnsXY_axisExtent_lowerBound"]');
+      const upper = rangeInput.find('[data-test-subj="lnsXY_axisExtent_upperBound"]');
       expect(lower.prop('value')).toEqual(123);
       expect(upper.prop('value')).toEqual(456);
     });

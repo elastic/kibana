@@ -38,8 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/86602
-    describe.skip('query', function () {
+    describe('query', function () {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
@@ -84,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
+        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime} (interval: Auto - 3 hours)`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
@@ -96,8 +95,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.start).to.be('Sep 21, 2015 @ 12:00:00.000');
         expect(time.end).to.be('Sep 21, 2015 @ 15:00:00.000');
         await retry.waitForWithTimeout(
-          'doc table to contain the right search result',
-          1000,
+          'table to contain the right search result',
+          3000,
           async () => {
             const rowData = await PageObjects.discover.getDocTableField(1);
             log.debug(`The first timestamp value in doc table: ${rowData}`);
@@ -121,8 +120,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           return actualCount === expectedCount;
         });
-        const prevRowData = await PageObjects.discover.getDocTableField(1);
-        log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
+        let prevRowData = '';
+        // to make sure the table is already rendered
+        await retry.try(async () => {
+          prevRowData = await PageObjects.discover.getDocTableField(1);
+          log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
+        });
+
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete after being brushed', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from '../../../../../../src/core/server';
+import { SavedObject } from '@kbn/core/server';
 import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import { InfraSources } from './sources';
 
@@ -109,6 +109,14 @@ describe('the InfraSources lib', () => {
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
+  alerting: {
+    inventory_threshold: {
+      group_by_page_size: 10000,
+    },
+    metric_threshold: {
+      group_by_page_size: 10000,
+    },
+  },
   enabled: true,
   inventory: {
     compositeSize: 2000,

@@ -6,18 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
+import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
+import { getAlertUrlErrorCount } from '../../../common/utils/formatters';
 import {
   AlertType,
   APM_SERVER_FEATURE_ID,
@@ -31,11 +33,10 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-import { termQuery } from '../../../../observability/server';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -52,6 +53,7 @@ export function registerErrorCountAlertType({
   logger,
   ruleDataClient,
   config$,
+  basePath,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -74,19 +76,21 @@ export function registerErrorCountAlertType({
           apmActionVariables.threshold,
           apmActionVariables.triggerValue,
           apmActionVariables.interval,
+          apmActionVariables.reason,
+          apmActionVariables.viewInAppUrl,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: async ({ services, params }) => {
-        const config = await config$.pipe(take(1)).toPromise();
+        const config = await firstValueFrom(config$);
         const ruleParams = params;
+
         const indices = await getApmIndices({
           config,
           savedObjectsClient: services.savedObjectsClient,
         });
-
         const searchParams = {
           index: indices.error,
           size: 0,
@@ -139,6 +143,25 @@ export function registerErrorCountAlertType({
           .filter((result) => result.errorCount >= ruleParams.threshold)
           .forEach((result) => {
             const { serviceName, environment, errorCount } = result;
+            const alertReason = formatErrorCountReason({
+              serviceName,
+              threshold: ruleParams.threshold,
+              measured: errorCount,
+              windowSize: ruleParams.windowSize,
+              windowUnit: ruleParams.windowUnit,
+            });
+
+            const relativeViewInAppUrl = getAlertUrlErrorCount(
+              serviceName,
+              getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT]
+            );
+
+            const viewInAppUrl = basePath.publicBaseUrl
+              ? new URL(
+                  basePath.prepend(relativeViewInAppUrl),
+                  basePath.publicBaseUrl
+                ).toString()
+              : relativeViewInAppUrl;
 
             services
               .alertWithLifecycle({
@@ -151,11 +174,7 @@ export function registerErrorCountAlertType({
                   [PROCESSOR_EVENT]: ProcessorEvent.error,
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
-                  [ALERT_REASON]: formatErrorCountReason({
-                    serviceName,
-                    threshold: ruleParams.threshold,
-                    measured: errorCount,
-                  }),
+                  [ALERT_REASON]: alertReason,
                 },
               })
               .scheduleActions(alertTypeConfig.defaultActionGroupId, {
@@ -164,6 +183,8 @@ export function registerErrorCountAlertType({
                 threshold: ruleParams.threshold,
                 triggerValue: errorCount,
                 interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+                reason: alertReason,
+                viewInAppUrl,
               });
           });
 

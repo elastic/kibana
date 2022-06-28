@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
 import { RenderWizardArguments } from '../layer_wizard_registry';
 import { EMSFileSelect } from '../../../../components/ems_file_select';
@@ -59,15 +59,15 @@ interface State {
   leftSource: BOUNDARIES_SOURCE;
   leftEmsFileId: string | null;
   leftEmsFields: Array<EuiComboBoxOptionOption<string>>;
-  leftIndexPattern: IndexPattern | null;
-  leftGeoFields: IndexPatternField[];
-  leftJoinFields: IndexPatternField[];
+  leftIndexPattern: DataView | null;
+  leftGeoFields: DataViewField[];
+  leftJoinFields: DataViewField[];
   leftGeoField: string | null;
   leftEmsJoinField: string | null;
   leftElasticsearchJoinField: string | null;
   rightIndexPatternId: string;
   rightIndexPatternTitle: string | null;
-  rightTermsFields: IndexPatternField[];
+  rightTermsFields: DataViewField[];
   rightJoinField: string | null;
 }
 
@@ -121,10 +121,15 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   };
 
   _loadEmsFileFields = async () => {
-    const emsFileLayers = await getEmsFileLayers();
-    const emsFileLayer = emsFileLayers.find((fileLayer: FileLayer) => {
-      return fileLayer.getId() === this.state.leftEmsFileId;
-    });
+    let emsFileLayer: FileLayer | undefined;
+    try {
+      const emsFileLayers = await getEmsFileLayers();
+      emsFileLayer = emsFileLayers.find((fileLayer: FileLayer) => {
+        return fileLayer.getId() === this.state.leftEmsFileId;
+      });
+    } catch (error) {
+      // ignore error, lack of EMS file layers will be surfaced in EMS file select
+    }
 
     if (!this._isMounted || !emsFileLayer) {
       return;
@@ -157,7 +162,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     );
   };
 
-  _onLeftIndexPatternChange = (indexPattern: IndexPattern) => {
+  _onLeftIndexPatternChange = (indexPattern: DataView) => {
     this.setState(
       {
         leftIndexPattern: indexPattern,

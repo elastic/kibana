@@ -20,7 +20,7 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ChartContainer,
   LoadingState,
@@ -44,9 +44,10 @@ import { Color, colorTransformer } from '../../../../../common/color_palette';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
-} from '../../../../../common/http_api/log_alerts/';
+} from '../../../../../common/http_api/log_alerts';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 
 const GROUP_LIMIT = 5;
 
@@ -126,6 +127,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
 }) => {
   const { uiSettings } = useKibana().services;
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const timezone = useKibanaTimeZoneSetting();
 
   const {
     getChartPreviewData,
@@ -242,6 +244,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               },
             }}
             color={!isGrouped ? colorTransformer(Color.color0) : undefined}
+            timeZone={timezone}
           />
           {showThreshold && threshold ? (
             <LineAnnotation

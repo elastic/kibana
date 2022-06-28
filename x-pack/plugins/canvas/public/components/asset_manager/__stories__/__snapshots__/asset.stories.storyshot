@@ -12,7 +12,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset css-2969qh-euiPanel-grow-m-s-plain-hasShadow"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
@@ -29,10 +29,10 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         </figure>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
-        className="euiText euiText--extraSmall eui-textBreakAll"
+        className="euiText eui-textBreakAll css-1utxlgq-euiText-xs"
       >
         <p
           className="eui-textBreakAll"
@@ -42,7 +42,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
           </strong>
           <br />
           <span
-            className="euiTextColor euiTextColor--subdued"
+            className="css-xv0fhq-euiTextColor-subdued"
             style={Object {}}
           >
             <small>
@@ -54,7 +54,7 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
         </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"
@@ -70,7 +70,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             <button
               aria-label="Create image element"
               className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -82,7 +81,9 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 color="inherit"
                 data-euiicon-type="vector"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -104,7 +105,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               <button
                 aria-label="Download"
                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                disabled={false}
                 type="button"
               >
                 <span
@@ -113,7 +113,9 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                   color="inherit"
                   data-euiicon-type="sortDown"
                   size="m"
-                />
+                >
+                  
+                </span>
               </button>
             </div>
           </span>
@@ -136,7 +138,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               <button
                 aria-label="Copy id to clipboard"
                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                disabled={false}
                 type="button"
               >
                 <span
@@ -145,7 +146,9 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                   color="inherit"
                   data-euiicon-type="copyClipboard"
                   size="m"
-                />
+                >
+                  
+                </span>
               </button>
             </div>
           </span>
@@ -161,7 +164,6 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             <button
               aria-label="Delete"
               className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -173,7 +175,9 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -195,7 +199,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow canvasAsset"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall canvasAsset css-2969qh-euiPanel-grow-m-s-plain-hasShadow"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
@@ -212,10 +216,10 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         </figure>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
-        className="euiText euiText--extraSmall eui-textBreakAll"
+        className="euiText eui-textBreakAll css-1utxlgq-euiText-xs"
       >
         <p
           className="eui-textBreakAll"
@@ -225,7 +229,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
           </strong>
           <br />
           <span
-            className="euiTextColor euiTextColor--subdued"
+            className="css-xv0fhq-euiTextColor-subdued"
             style={Object {}}
           >
             <small>
@@ -237,7 +241,7 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
         </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--s"
+        className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow"
@@ -253,7 +257,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             <button
               aria-label="Create image element"
               className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -265,7 +268,9 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 color="inherit"
                 data-euiicon-type="vector"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>
@@ -287,7 +292,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               <button
                 aria-label="Download"
                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                disabled={false}
                 type="button"
               >
                 <span
@@ -296,7 +300,9 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                   color="inherit"
                   data-euiicon-type="sortDown"
                   size="m"
-                />
+                >
+                  
+                </span>
               </button>
             </div>
           </span>
@@ -319,7 +325,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               <button
                 aria-label="Copy id to clipboard"
                 className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                disabled={false}
                 type="button"
               >
                 <span
@@ -328,7 +333,9 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                   color="inherit"
                   data-euiicon-type="copyClipboard"
                   size="m"
-                />
+                >
+                  
+                </span>
               </button>
             </div>
           </span>
@@ -344,7 +351,6 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             <button
               aria-label="Delete"
               className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
-              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
@@ -356,7 +362,9 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              />
+              >
+                
+              </span>
             </button>
           </span>
         </div>

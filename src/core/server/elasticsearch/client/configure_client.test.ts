@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
-jest.mock('./log_query_and_deprecation.ts', () => ({
+jest.mock('./log_query_and_deprecation', () => ({
   __esModule: true,
   instrumentEsQueryAndDeprecationLogger: jest.fn(),
 }));
 
-import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import {
+  parseClientOptionsMock,
+  createTransportMock,
+  ClientMock,
+} from './configure_client.test.mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
@@ -75,6 +80,51 @@ describe('configureClient', () => {
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining(parsedOptions));
+    expect(client).toBe(ClientMock.mock.results[0].value);
+  });
+
+  it('calls `createTransport` with the correct parameters', () => {
+    const getExecutionContext = jest.fn();
+    configureClient(config, { logger, type: 'test', scoped: false, getExecutionContext });
+
+    expect(createTransportMock).toHaveBeenCalledTimes(1);
+    expect(createTransportMock).toHaveBeenCalledWith({ getExecutionContext });
+
+    createTransportMock.mockClear();
+
+    configureClient(config, { logger, type: 'test', scoped: true, getExecutionContext });
+
+    expect(createTransportMock).toHaveBeenCalledTimes(1);
+    expect(createTransportMock).toHaveBeenCalledWith({ getExecutionContext });
+  });
+
+  it('constructs a client using the Transport returned by `createTransport`', () => {
+    const mockedTransport = { mockTransport: true };
+    createTransportMock.mockReturnValue(mockedTransport);
+
+    const client = configureClient(config, { logger, type: 'test', scoped: false });
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        Transport: mockedTransport,
+      })
+    );
+    expect(client).toBe(ClientMock.mock.results[0].value);
+  });
+
+  it('constructs a client using `ClusterConnectionPool` for `ConnectionPool` ', () => {
+    const mockedTransport = { mockTransport: true };
+    createTransportMock.mockReturnValue(mockedTransport);
+
+    const client = configureClient(config, { logger, type: 'test', scoped: false });
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ConnectionPool: ClusterConnectionPool,
+      })
+    );
     expect(client).toBe(ClientMock.mock.results[0].value);
   });
 

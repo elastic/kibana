@@ -440,6 +440,7 @@ export const getVis = (bucketType: string) => {
         },
       },
       editorConfig: {
+        enableDataViewChange: true,
         collections: {
           legendPositions: [
             {
@@ -632,6 +633,7 @@ export const getVis = (bucketType: string) => {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -648,6 +650,7 @@ export const getVis = (bucketType: string) => {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -664,6 +667,7 @@ export const getVis = (bucketType: string) => {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {
@@ -716,6 +720,7 @@ export const getVis = (bucketType: string) => {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -732,6 +737,7 @@ export const getVis = (bucketType: string) => {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -748,6 +754,7 @@ export const getVis = (bucketType: string) => {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {
@@ -771,6 +778,7 @@ export const getVis = (bucketType: string) => {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -787,6 +795,7 @@ export const getVis = (bucketType: string) => {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [],
           },
@@ -803,6 +812,7 @@ export const getVis = (bucketType: string) => {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {

@@ -49,22 +49,15 @@ export const TabNavigationComponent: React.FC<
         setBreadcrumbs(
           {
             detailName,
-            filters: urlState.filters,
             flowTarget,
             navTabs,
             pageName,
             pathName,
-            query: urlState.query,
-            savedQuery: urlState.savedQuery,
             search,
-            sourcerer: urlState.sourcerer,
             state,
             tabName,
-            timeline: urlState.timeline,
-            timerange: urlState.timerange,
           },
           chrome,
-          getUrlForApp,
           navigateToUrl
         );
       }
@@ -74,7 +67,6 @@ export const TabNavigationComponent: React.FC<
       pathName,
       search,
       navTabs,
-      urlState,
       state,
       detailName,
       flowTarget,
@@ -92,7 +84,6 @@ export const TabNavigationComponent: React.FC<
         navTabs={navTabs}
         pageName={pageName}
         pathName={pathName}
-        sourcerer={urlState.sourcerer}
         savedQuery={urlState.savedQuery}
         tabName={tabName}
         timeline={urlState.timeline}

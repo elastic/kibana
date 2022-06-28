@@ -12,13 +12,13 @@ import {
 } from '../../../__mocks__/kea_logic';
 import { mockEngineValues } from '../../__mocks__';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
 import { ActiveField } from './types';
 
-import { SearchUILogic } from './';
+import { SearchUILogic } from '.';
 
 describe('SearchUILogic', () => {
   const { mount } = new LogicMounter(SearchUILogic);

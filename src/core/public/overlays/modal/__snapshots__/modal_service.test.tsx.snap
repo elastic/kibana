@@ -19,9 +19,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -43,9 +43,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -67,7 +67,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -90,7 +89,7 @@ Array [
 ]
 `;
 
-exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `"<div data-eui=\\"EuiFocusTrap\\"><div class=\\"euiModal euiModal--maxWidth-default euiModal--confirmation\\" tabindex=\\"0\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon\\" type=\\"button\\" aria-label=\\"Closes this modal window\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button><div class=\\"euiModal__flex\\"><div class=\\"euiModalBody\\"><div class=\\"euiModalBody__overflow\\"><div class=\\"euiText euiText--medium\\" data-test-subj=\\"confirmModalBodyText\\"><div class=\\"kbnOverlayMountWrapper\\"><span>Modal content</span></div></div></div></div><div class=\\"euiModalFooter\\"><button class=\\"euiButtonEmpty euiButtonEmpty--primary\\" type=\\"button\\" data-test-subj=\\"confirmModalCancelButton\\"><span class=\\"euiButtonContent euiButtonEmpty__content\\"><span class=\\"euiButtonEmpty__text\\">Cancel</span></span></button><button class=\\"euiButton euiButton--primary euiButton--fill\\" type=\\"button\\" data-test-subj=\\"confirmModalConfirmButton\\"><span class=\\"euiButtonContent euiButton__content\\"><span class=\\"euiButton__text\\">Confirm</span></span></button></div></div></div></div>"`;
+exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `"<div data-eui=\\"EuiFocusTrap\\"><div class=\\"euiModal euiModal--maxWidth-default euiModal--confirmation\\" tabindex=\\"0\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon\\" type=\\"button\\" aria-label=\\"Closes this modal window\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button><div class=\\"euiModal__flex\\"><div class=\\"euiModalBody\\"><div class=\\"euiModalBody__overflow\\"><div class=\\"euiText eui-styles-1lo1kz-euiText-m\\" data-test-subj=\\"confirmModalBodyText\\"><div class=\\"kbnOverlayMountWrapper\\"><span>Modal content</span></div></div></div></div><div class=\\"euiModalFooter\\"><button class=\\"euiButtonEmpty euiButtonEmpty--primary\\" type=\\"button\\" data-test-subj=\\"confirmModalCancelButton\\"><span class=\\"euiButtonContent euiButtonEmpty__content\\"><span class=\\"euiButtonEmpty__text\\">Cancel</span></span></button><button class=\\"euiButton euiButton--primary euiButton--fill\\" type=\\"button\\" data-test-subj=\\"confirmModalConfirmButton\\"><span class=\\"euiButtonContent euiButton__content\\"><span class=\\"euiButton__text\\">Confirm</span></span></button></div></div></div></div>"`;
 
 exports[`ModalService openConfirm() renders a string confirm message 1`] = `
 Array [
@@ -103,9 +102,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -125,9 +124,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -152,9 +151,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -172,9 +171,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -199,7 +198,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -219,7 +217,7 @@ Array [
 ]
 `;
 
-exports[`ModalService openConfirm() renders a string confirm message 2`] = `"<div data-eui=\\"EuiFocusTrap\\"><div class=\\"euiModal euiModal--maxWidth-default euiModal--confirmation\\" tabindex=\\"0\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon\\" type=\\"button\\" aria-label=\\"Closes this modal window\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button><div class=\\"euiModal__flex\\"><div class=\\"euiModalBody\\"><div class=\\"euiModalBody__overflow\\"><div class=\\"euiText euiText--medium\\" data-test-subj=\\"confirmModalBodyText\\"><p>Some message</p></div></div></div><div class=\\"euiModalFooter\\"><button class=\\"euiButtonEmpty euiButtonEmpty--primary\\" type=\\"button\\" data-test-subj=\\"confirmModalCancelButton\\"><span class=\\"euiButtonContent euiButtonEmpty__content\\"><span class=\\"euiButtonEmpty__text\\">Cancel</span></span></button><button class=\\"euiButton euiButton--primary euiButton--fill\\" type=\\"button\\" data-test-subj=\\"confirmModalConfirmButton\\"><span class=\\"euiButtonContent euiButton__content\\"><span class=\\"euiButton__text\\">Confirm</span></span></button></div></div></div></div>"`;
+exports[`ModalService openConfirm() renders a string confirm message 2`] = `"<div data-eui=\\"EuiFocusTrap\\"><div class=\\"euiModal euiModal--maxWidth-default euiModal--confirmation\\" tabindex=\\"0\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon\\" type=\\"button\\" aria-label=\\"Closes this modal window\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button><div class=\\"euiModal__flex\\"><div class=\\"euiModalBody\\"><div class=\\"euiModalBody__overflow\\"><div class=\\"euiText eui-styles-1lo1kz-euiText-m\\" data-test-subj=\\"confirmModalBodyText\\"><p>Some message</p></div></div></div><div class=\\"euiModalFooter\\"><button class=\\"euiButtonEmpty euiButtonEmpty--primary\\" type=\\"button\\" data-test-subj=\\"confirmModalCancelButton\\"><span class=\\"euiButtonContent euiButtonEmpty__content\\"><span class=\\"euiButtonEmpty__text\\">Cancel</span></span></button><button class=\\"euiButton euiButton--primary euiButton--fill\\" type=\\"button\\" data-test-subj=\\"confirmModalConfirmButton\\"><span class=\\"euiButtonContent euiButton__content\\"><span class=\\"euiButton__text\\">Confirm</span></span></button></div></div></div></div>"`;
 
 exports[`ModalService openConfirm() with a currently active confirm replaces the current confirm with the new one 1`] = `
 Array [
@@ -232,9 +230,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -254,9 +252,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -279,9 +277,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -303,9 +301,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -323,9 +321,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -346,9 +344,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -370,7 +368,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -396,9 +393,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -418,9 +415,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -443,9 +440,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -467,9 +464,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -487,9 +484,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -510,9 +507,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -534,7 +531,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -565,9 +561,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -587,9 +583,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -612,9 +608,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -636,9 +632,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -656,9 +652,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -679,9 +675,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -703,7 +699,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -729,9 +724,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -751,9 +746,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -776,9 +771,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -800,9 +795,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -820,9 +815,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -843,9 +838,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -867,7 +862,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -899,7 +893,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -932,9 +925,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -956,9 +949,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -980,7 +973,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -1006,9 +998,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -1030,9 +1022,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -1054,7 +1046,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -1085,9 +1076,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -1109,9 +1100,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -1133,7 +1124,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }
@@ -1159,9 +1149,9 @@ Array [
               Array [
                 Object {
                   "children": <CoreThemeProvider
+                    globalStyles={false}
                     theme$={
                       Observable {
-                        "_isScalar": false,
                         "_subscribe": [Function],
                       }
                     }
@@ -1183,9 +1173,9 @@ Array [
               Object {
                 "type": "return",
                 "value": <CoreThemeProvider
+                  globalStyles={false}
                   theme$={
                     Observable {
-                      "_isScalar": false,
                       "_subscribe": [Function],
                     }
                   }
@@ -1207,7 +1197,6 @@ Array [
       theme={
         Object {
           "theme$": Observable {
-            "_isScalar": false,
             "_subscribe": [Function],
           },
         }

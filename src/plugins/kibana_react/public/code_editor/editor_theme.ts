@@ -8,10 +8,7 @@
 
 import { monaco } from '@kbn/monaco';
 
-import {
-  euiLightVars as lightTheme,
-  euiDarkVars as darkTheme,
-} from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 
 // NOTE: For talk around where this theme information will ultimately live,
 // please see this discuss issue: https://github.com/elastic/kibana/issues/43814
@@ -79,6 +76,8 @@ export function createTheme(
       { token: 'keyword.json', foreground: euiTheme.euiColorPrimary },
       { token: 'keyword.flow', foreground: euiTheme.euiColorWarning },
       { token: 'keyword.flow.scss', foreground: euiTheme.euiColorPrimary },
+      // Monaco editor supports strikethrough font style only starting from 0.32.0.
+      { token: 'keyword.deprecated', foreground: euiTheme.euiColorAccent },
 
       { token: 'operator.scss', foreground: euiTheme.euiColorDarkShade },
       { token: 'operator.sql', foreground: euiTheme.euiColorMediumShade },

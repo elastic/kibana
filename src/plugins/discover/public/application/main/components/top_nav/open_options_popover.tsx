@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { CoreTheme, I18nStart } from 'kibana/public';
+import { CoreTheme, I18nStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -23,9 +23,10 @@ import {
 } from '@elastic/eui';
 import './open_options_popover.scss';
 import { Observable } from 'rxjs';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { DiscoverServices } from '../../../../build_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
-import { getServices } from '../../../../kibana_services';
-import { KibanaThemeProvider } from '../../../../../../kibana_react/public';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -39,7 +40,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
   const {
     core: { uiSettings },
     addBasePath,
-  } = getServices();
+  } = useDiscoverServices();
   const isLegacy = uiSettings.get(DOC_TABLE_LEGACY);
 
   const mode = isLegacy
@@ -50,8 +51,14 @@ export function OptionsPopover(props: OptionsPopoverProps) {
         defaultMessage: 'Document Explorer',
       });
 
+  const { anchorElement, onClose: originalOnClose } = props;
+  const closePopover = useCallback(() => {
+    originalOnClose();
+    anchorElement?.focus();
+  }, [anchorElement, originalOnClose]);
+
   return (
-    <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={props.onClose} isOpen>
+    <EuiWrappingPopover ownFocus button={props.anchorElement} closePopover={closePopover} isOpen>
       <div className="dscOptionsPopover">
         <EuiText color="subdued" size="s">
           <p>
@@ -128,10 +135,12 @@ export function openOptionsPopover({
   I18nContext,
   anchorElement,
   theme$,
+  services,
 }: {
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
   theme$: Observable<CoreTheme>;
+  services: DiscoverServices;
 }) {
   if (isOpen) {
     onClose();
@@ -143,9 +152,11 @@ export function openOptionsPopover({
 
   const element = (
     <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <OptionsPopover onClose={onClose} anchorElement={anchorElement} />
-      </KibanaThemeProvider>
+      <KibanaContextProvider services={services}>
+        <KibanaThemeProvider theme$={theme$}>
+          <OptionsPopover onClose={onClose} anchorElement={anchorElement} />
+        </KibanaThemeProvider>
+      </KibanaContextProvider>
     </I18nContext>
   );
   ReactDOM.render(element, container);

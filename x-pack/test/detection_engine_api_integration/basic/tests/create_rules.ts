@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -89,6 +89,9 @@ export default ({ getService }: FtrProviderContext) => {
           name: 'Simple Rule Query',
           query: 'user.name: root or user.name: admin',
           references: [],
+          related_integrations: [],
+          required_fields: [],
+          setup: '',
           severity: 'high',
           severity_mapping: [],
           updated_by: 'elastic',

@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import * as i18n from '../translations';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 
@@ -29,6 +29,7 @@ describe('ExceptionsViewerItems', () => {
         showEmpty
         showNoResults={false}
         isInitLoading={false}
+        disableActions={false}
         exceptions={[]}
         loadingItemIds={[]}
         commentsAccordionId="comments-accordion-id"
@@ -39,7 +40,7 @@ describe('ExceptionsViewerItems', () => {
 
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="exceptionsContainer"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').text()).toEqual(
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').last().text()).toEqual(
       i18n.EXCEPTION_EMPTY_PROMPT_TITLE
     );
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptBody"]').text()).toEqual(
@@ -54,6 +55,7 @@ describe('ExceptionsViewerItems', () => {
           showEmpty={false}
           showNoResults
           isInitLoading={false}
+          disableActions={false}
           exceptions={[]}
           loadingItemIds={[]}
           commentsAccordionId="comments-accordion-id"
@@ -65,7 +67,7 @@ describe('ExceptionsViewerItems', () => {
 
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="exceptionsContainer"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').text()).toEqual('');
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').last().text()).toEqual('');
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptBody"]').text()).toEqual(
       i18n.EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY
     );
@@ -78,6 +80,7 @@ describe('ExceptionsViewerItems', () => {
           showEmpty={false}
           showNoResults={false}
           isInitLoading={false}
+          disableActions={false}
           exceptions={[getExceptionListItemSchemaMock()]}
           loadingItemIds={[]}
           commentsAccordionId="comments-accordion-id"
@@ -98,6 +101,7 @@ describe('ExceptionsViewerItems', () => {
           showEmpty={false}
           showNoResults={false}
           isInitLoading={true}
+          disableActions={false}
           exceptions={[]}
           loadingItemIds={[]}
           commentsAccordionId="comments-accordion-id"
@@ -122,6 +126,7 @@ describe('ExceptionsViewerItems', () => {
           showEmpty={false}
           showNoResults={false}
           isInitLoading={false}
+          disableActions={false}
           exceptions={[exception1, exception2]}
           loadingItemIds={[]}
           commentsAccordionId="comments-accordion-id"
@@ -147,6 +152,7 @@ describe('ExceptionsViewerItems', () => {
           showEmpty={false}
           showNoResults={false}
           isInitLoading={false}
+          disableActions={false}
           exceptions={[exception1, exception2]}
           loadingItemIds={[]}
           commentsAccordionId="comments-accordion-id"
@@ -172,6 +178,7 @@ describe('ExceptionsViewerItems', () => {
           showEmpty={false}
           showNoResults={false}
           isInitLoading={false}
+          disableActions={false}
           exceptions={[getExceptionListItemSchemaMock()]}
           loadingItemIds={[]}
           commentsAccordionId="comments-accordion-id"

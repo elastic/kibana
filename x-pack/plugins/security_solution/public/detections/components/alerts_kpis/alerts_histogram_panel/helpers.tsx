@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
@@ -16,19 +17,22 @@ const EMPTY_ALERTS_DATA: HistogramData[] = [];
 export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggregation> | null) => {
   const groupBuckets: AlertsGroupBucket[] =
     alertsData?.aggregations?.alertsByGrouping?.buckets ?? [];
-  return groupBuckets.reduce<HistogramData[]>((acc, { key: group, alerts }) => {
-    const alertsBucket: AlertsBucket[] = alerts.buckets ?? [];
+  return groupBuckets.reduce<HistogramData[]>(
+    (acc, { key_as_string: keyAsString, key: group, alerts }) => {
+      const alertsBucket: AlertsBucket[] = alerts.buckets ?? [];
 
-    return [
-      ...acc,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      ...alertsBucket.map(({ key, doc_count }: AlertsBucket) => ({
-        x: key,
-        y: doc_count,
-        g: group,
-      })),
-    ];
-  }, EMPTY_ALERTS_DATA);
+      return [
+        ...acc,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        ...alertsBucket.map(({ key, doc_count }: AlertsBucket) => ({
+          x: key,
+          y: doc_count,
+          g: keyAsString ?? group.toString(),
+        })),
+      ];
+    },
+    EMPTY_ALERTS_DATA
+  );
 };
 
 export const getAlertsHistogramQuery = (
@@ -37,7 +41,8 @@ export const getAlertsHistogramQuery = (
   to: string,
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
-  }>
+  }>,
+  runtimeMappings?: MappingRuntimeFields
 ) => {
   return {
     aggs: {
@@ -79,6 +84,7 @@ export const getAlertsHistogramQuery = (
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
   };
 };
 

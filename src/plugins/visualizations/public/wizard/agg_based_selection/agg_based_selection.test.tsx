@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
 import { AggBasedSelection } from './agg_based_selection';
 
@@ -77,7 +77,7 @@ describe('AggBasedSelection', () => {
         onVisTypeSelected={jest.fn()}
       />
     );
-    const aggBasedGroupCard = wrapper.find('[data-test-subj="goBackLink"]').at(0);
+    const aggBasedGroupCard = wrapper.find('[data-test-subj="goBackLink"]').last();
     aggBasedGroupCard.simulate('click');
     expect(toggleGroups).toHaveBeenCalled();
   });

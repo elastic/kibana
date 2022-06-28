@@ -134,6 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
                   },
                 ],
                 influencers: [],
+                model_prune_window: '30d',
               },
             },
           },
@@ -173,12 +174,12 @@ export default ({ getService }: FtrProviderContext) => {
     requestBody: object,
     expectedResponsecode: number
   ): Promise<any> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post('/api/ml/jobs/jobs_summary')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(requestBody)
-      .expect(expectedResponsecode);
+      .send(requestBody);
+    ml.api.assertResponseStatusCode(expectedResponsecode, status, body);
 
     return body;
   }
@@ -196,8 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
     return groupIds.sort();
   }
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/121686
-  describe.skip('jobs_summary', function () {
+  describe('jobs_summary', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -304,7 +304,10 @@ export default ({ getService }: FtrProviderContext) => {
             if (expectedJob.fullJob) {
               expect(actualJob).to.have.property('fullJob');
               expect(actualJob.fullJob).to.have.property('analysis_config');
-              expect(actualJob.fullJob.analysis_config).to.eql(expectedJob.fullJob.analysis_config);
+              // only validate the expected parts of the analysis_config, ignore additional fields
+              for (const [key, value] of Object.entries(expectedJob.fullJob.analysis_config)) {
+                expect(actualJob.fullJob.analysis_config).to.have.property(key).eql(value);
+              }
             } else {
               expect(actualJob).not.to.have.property('fullJob');
             }

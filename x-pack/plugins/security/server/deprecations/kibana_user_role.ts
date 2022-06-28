@@ -10,14 +10,14 @@ import type {
   SecurityGetUserResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { i18n } from '@kbn/i18n';
 import type {
   DeprecationsDetails,
   DeprecationsServiceSetup,
   ElasticsearchClient,
   Logger,
   PackageInfo,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 import type { SecurityLicense } from '../../common';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -75,7 +75,7 @@ async function getUsersDeprecations(
 ): Promise<DeprecationsDetails[]> {
   let users: SecurityGetUserResponse;
   try {
-    users = (await client.security.getUser()).body;
+    users = await client.security.getUser();
   } catch (err) {
     if (getErrorStatusCode(err) === 403) {
       logger.warn(
@@ -139,7 +139,7 @@ async function getRoleMappingsDeprecations(
 ): Promise<DeprecationsDetails[]> {
   let roleMappings: SecurityGetRoleMappingResponse;
   try {
-    roleMappings = (await client.security.getRoleMapping()).body;
+    roleMappings = await client.security.getRoleMapping();
   } catch (err) {
     if (getErrorStatusCode(err) === 403) {
       logger.warn(

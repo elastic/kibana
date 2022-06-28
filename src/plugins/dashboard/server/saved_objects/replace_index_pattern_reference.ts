@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-plugin/common';
 
 export const replaceIndexPatternReference: SavedObjectMigrationFn<any, any> = (doc) => ({
   ...doc,
   references: Array.isArray(doc.references)
     ? doc.references.map((reference) => {
         if (reference.type === 'index_pattern') {
-          reference.type = INDEX_PATTERN_SAVED_OBJECT_TYPE;
+          reference.type = DATA_VIEW_SAVED_OBJECT_TYPE;
         }
         return reference;
       })

@@ -16,6 +16,7 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { usePageUrlState } from '../../util/url_state';
@@ -23,16 +24,10 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { ExpandedRow } from './expanded_row';
-import {
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-  useRefreshAnalyticsList,
-} from '../../data_frame_analytics/common';
 import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
 import { useRefresh } from '../../routing/use_refresh';
 
 export type NodeItem = NodeDeploymentStatsResponse;
@@ -56,7 +51,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const { displayErrorToast } = useToastNotificationService();
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const [items, setItems] = useState<NodeItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
@@ -80,7 +75,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       });
 
       setIsLoading(false);
-      refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
     } catch (e) {
       displayErrorToast(
         e,
@@ -88,6 +82,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
           defaultMessage: 'Nodes fetch failed',
         })
       );
+      setIsLoading(false);
     }
   }, [itemIdToExpandedRowMap]);
 
@@ -128,6 +123,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       name: i18n.translate('xpack.ml.trainedModels.nodesList.nodeNameHeader', {
         defaultMessage: 'Name',
       }),
+      width: '200px',
       sortable: true,
       truncateText: true,
       'data-test-subj': 'mlNodesTableColumnName',
@@ -163,6 +159,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
         label: i18n.translate('xpack.ml.trainedModels.nodesList.totalAmountLabel', {
           defaultMessage: 'Total machine learning nodes',
         }),
+        'data-test-subj': 'mlTotalNodesCount',
       },
     };
   }, [items]);
@@ -183,12 +180,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
     },
   };
 
-  // Subscribe to the refresh observable to trigger reloading the model list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: fetchNodesData,
-  });
-
   useEffect(
     function updateOnTimerRefresh() {
       fetchNodesData();
@@ -201,7 +192,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   }
 
   return (
-    <>
+    <div data-test-subj={'mlNodesOverviewPanel'}>
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         {nodesStats && (
@@ -230,6 +221,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
           data-test-subj={isLoading ? 'mlNodesTable loading' : 'mlNodesTable loaded'}
         />
       </div>
-    </>
+    </div>
   );
 };

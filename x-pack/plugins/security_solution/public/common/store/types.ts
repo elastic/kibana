@@ -7,7 +7,7 @@
 
 import { Dispatch, Action, Middleware, CombinedState } from 'redux';
 
-import { CoreStart } from '../../../../../../src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { StartPlugins } from '../../types';
 import { AppAction } from './actions';
 import { Immutable } from '../../../common/endpoint/types';
@@ -18,18 +18,21 @@ import { HostsPluginState } from '../../hosts/store';
 import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
-import { UebaPluginState } from '../../ueba/store';
 import { ManagementPluginState } from '../../management';
+import { UsersPluginState } from '../../users/store';
+import { GlobalUrlParam } from './global_url_param';
 
 export type StoreState = HostsPluginState &
+  UsersPluginState &
   NetworkPluginState &
-  UebaPluginState &
+  UsersPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
     dragAndDrop: DragAndDropState;
     inputs: InputsState;
     sourcerer: SourcererState;
+    globalUrlParam: GlobalUrlParam;
   };
 /**
  * The redux `State` type for the Security App.

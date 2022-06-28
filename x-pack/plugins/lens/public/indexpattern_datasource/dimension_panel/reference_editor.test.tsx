@@ -9,10 +9,12 @@ import React from 'react';
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
-import { mountWithIntl as mount } from '@kbn/test/jest';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { OperationMetadata } from '../../types';
 import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
 import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
@@ -54,6 +56,8 @@ describe('reference editor', () => {
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
       data: {} as DataPublicPluginStart,
+      unifiedSearch: {} as UnifiedSearchPublicPluginStart,
+      dataViews: dataViewPluginMocks.createStartContract(),
       dimensionGroups: [],
       isFullscreen: false,
       toggleFullscreen: jest.fn(),

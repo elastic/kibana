@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Datatable } from '../../../expressions/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { VisParams } from './types';
 
 export const visData = {
@@ -59,6 +59,86 @@ export const visData = {
       'col-0-2': 1632733200000,
       'col-1-3': 206750,
       'col-2-1': 5362.68306010929,
+    },
+  ],
+} as Datatable;
+
+export const visDataPercentile = {
+  type: 'datatable',
+  columns: [
+    {
+      id: 'col-0-1.1',
+      name: '1st percentile of bytes',
+      meta: {
+        type: 'number',
+        field: 'bytes',
+        index: 'kibana_sample_data_logs',
+      },
+    },
+    {
+      id: 'col-1-1.5',
+      name: '5th percentile of bytes',
+      meta: {
+        type: 'number',
+        field: 'bytes',
+        index: 'kibana_sample_data_logs',
+      },
+    },
+    {
+      id: 'col-2-1.25',
+      name: '25th percentile of bytes',
+      meta: {
+        type: 'number',
+        field: 'bytes',
+        index: 'kibana_sample_data_logs',
+      },
+    },
+    {
+      id: 'col-3-1.50',
+      name: '50th percentile of bytes',
+      meta: {
+        type: 'number',
+        field: 'bytes',
+        index: 'kibana_sample_data_logs',
+      },
+    },
+    {
+      id: 'col-4-1.75',
+      name: '75th percentile of bytes',
+      meta: {
+        type: 'number',
+        field: 'bytes',
+        index: 'kibana_sample_data_logs',
+      },
+    },
+    {
+      id: 'col-5-1.95',
+      name: '95th percentile of bytes',
+      meta: {
+        type: 'number',
+        field: 'bytes',
+        index: 'kibana_sample_data_logs',
+      },
+    },
+    {
+      id: 'col-6-1.99',
+      name: '99th percentile of bytes',
+      meta: {
+        type: 'number',
+        field: 'bytes',
+        index: 'kibana_sample_data_logs',
+      },
+    },
+  ],
+  rows: [
+    {
+      'col-0-1.1': 0,
+      'col-1-1.5': 0,
+      'col-2-1.25': 1741.5,
+      'col-3-1.50': 4677,
+      'col-4-1.75': 5681.5,
+      'col-5-1.95': 6816,
+      'col-6-1.99': 6816,
     },
   ],
 } as Datatable;

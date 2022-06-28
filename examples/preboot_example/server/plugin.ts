@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CorePreboot, PrebootPlugin, PluginInitializerContext } from 'src/core/server';
+import type { CorePreboot, PrebootPlugin, PluginInitializerContext } from '@kbn/core/server';
 import fs from 'fs/promises';
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
@@ -114,7 +114,7 @@ export class PrebootExamplePlugin implements PrebootPlugin {
 
           try {
             return response.ok({
-              body: (await scopedClient.asCurrentUser.security.authenticate()).body,
+              body: await scopedClient.asCurrentUser.security.authenticate(),
             });
           } catch (err) {
             return response.customError({ statusCode: 500, body: getDetailedErrorMessage(err) });

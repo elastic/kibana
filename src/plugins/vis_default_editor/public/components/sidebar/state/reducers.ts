@@ -8,8 +8,8 @@
 
 import { cloneDeep } from 'lodash';
 
-import { Vis } from 'src/plugins/visualizations/public';
-import { AggGroupNames, DataPublicPluginStart } from '../../../../../data/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { AggGroupNames, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EditorStateActionTypes } from './constants';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';
 import { EditorAction } from './actions';
@@ -48,7 +48,7 @@ const createEditorStateReducer =
       }
 
       case EditorStateActionTypes.DISCARD_CHANGES: {
-        return initEditorState(action.payload);
+        return initEditorState(action.payload.vis);
       }
 
       case EditorStateActionTypes.CHANGE_AGG_TYPE: {
@@ -58,7 +58,7 @@ const createEditorStateReducer =
           if (agg.id === aggId) {
             agg.type = value;
 
-            return agg.toJSON();
+            return agg.serialize();
           }
 
           return agg;
@@ -78,7 +78,7 @@ const createEditorStateReducer =
 
         const newAggs = state.data.aggs!.aggs.map((agg) => {
           if (agg.id === aggId) {
-            const parsedAgg = agg.toJSON();
+            const parsedAgg = agg.serialize();
 
             return {
               ...parsedAgg,
@@ -169,7 +169,7 @@ const createEditorStateReducer =
 
         const newAggs = state.data.aggs!.aggs.map((agg) => {
           if (agg.id === aggId) {
-            const parsedAgg = agg.toJSON();
+            const parsedAgg = agg.serialize();
 
             return {
               ...parsedAgg,

@@ -11,14 +11,14 @@ import {
   mockFlashMessageHelpers,
 } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { EngineDetails, EngineTypes } from '../engine/types';
 
-import { EnginesLogic } from './';
+import { EnginesLogic } from '.';
 
 describe('EnginesLogic', () => {
   const { mount } = new LogicMounter(EnginesLogic);

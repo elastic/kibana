@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
-import { LicensingPluginStart } from '../../../licensing/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 interface StartBasicArg {
   acknowledge: boolean;
@@ -16,7 +16,7 @@ interface StartBasicArg {
 
 export async function startBasic({ acknowledge, client, licensing }: StartBasicArg) {
   try {
-    const { body: response } = await client.asCurrentUser.license.postStartBasic({ acknowledge });
+    const response = await client.asCurrentUser.license.postStartBasic({ acknowledge });
     const { basic_was_started: basicWasStarted } = response;
     if (basicWasStarted) {
       await licensing.refresh();

@@ -11,7 +11,7 @@ import path from 'path';
 import { extractCodeMessages } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
-import { createFailError, isFailError } from '@kbn/dev-utils';
+import { createFailError, isFailError } from '@kbn/dev-cli-errors';
 
 function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
@@ -55,6 +55,7 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     '**/dist/**',
     '**/target/**',
     '**/vendor/**',
+    '**/build/**',
     '**/*.test.{js,jsx,ts,tsx}',
     '**/*.d.ts',
   ].concat(additionalIgnore);

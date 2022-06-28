@@ -12,12 +12,12 @@ import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreSetup } from 'src/core/public';
-import { wrapWithTheme } from '../../../kibana_react/public';
-import { ManagementAppMountParams } from '../../../management/public';
+import { CoreSetup } from '@kbn/core/public';
+import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
-import { getAllowedTypes } from './../lib';
+import { getAllowedTypes } from '../lib';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
@@ -33,7 +33,7 @@ const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle',
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
 const SavedObjectsTablePage = lazy(() => import('./saved_objects_table_page'));
 export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
-  const [coreStart, { data, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
+  const [coreStart, { data, dataViews, savedObjectsTaggingOss, spaces: spacesApi }, pluginStart] =
     await core.getStartServices();
   const { capabilities } = coreStart.application;
   const { element, history, setBreadcrumbs } = mountParams;
@@ -79,6 +79,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
                     taggingApi={savedObjectsTaggingOss?.getTaggingApi()}
                     spacesApi={spacesApi}
                     dataStart={data}
+                    dataViewsApi={dataViews}
                     actionRegistry={pluginStart.actions}
                     columnRegistry={pluginStart.columns}
                     allowedTypes={allowedObjectTypes}

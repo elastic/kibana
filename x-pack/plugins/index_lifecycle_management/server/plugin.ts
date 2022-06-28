@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
-import { IScopedClusterClient } from 'kibana/server';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import { Index as IndexWithoutIlm } from '../../index_management/common/types';
+import { Index as IndexWithoutIlm } from '@kbn/index-management-plugin/common/types';
 import { PLUGIN } from '../common/constants';
 import { Index } from '../common/types';
 import { Dependencies } from './types';
@@ -26,9 +26,7 @@ const indexLifecycleDataEnricher = async (
     return [];
   }
 
-  const {
-    body: { indices: ilmIndicesData },
-  } = await client.asCurrentUser.ilm.explainLifecycle({
+  const { indices: ilmIndicesData } = await client.asCurrentUser.ilm.explainLifecycle({
     index: '*',
   });
   // @ts-expect-error IndexLifecyclePolicy is not compatible with IlmExplainLifecycleResponse
@@ -100,5 +98,6 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
   }
 
   start() {}
+
   stop() {}
 }

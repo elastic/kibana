@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { Logger, KibanaRequest, RequestHandlerContext } from 'kibana/server';
-import { ExceptionListClient } from '../../lists/server';
+import { memoize } from 'lodash';
 
+import { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+
+import { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import { ConfigType } from './config';
-import { RuleExecutionLogClient } from './lib/detection_engine/rule_execution_log/rule_execution_log_client';
+import { ruleExecutionLogForRoutesFactory } from './lib/detection_engine/rule_execution_log';
 import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -28,7 +30,7 @@ import {
   getEndpointAuthzInitialState,
 } from '../common/endpoint/service/authz';
 import { licenseService } from './lib/license';
-import { FleetAuthz } from '../../fleet/common';
+import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 
 export interface IRequestContextFactory {
   create(
@@ -42,6 +44,7 @@ interface ConstructorOptions {
   logger: Logger;
   core: SecuritySolutionPluginCoreSetupDependencies;
   plugins: SecuritySolutionPluginSetupDependencies;
+  endpointAppContextService: EndpointAppContextService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -56,7 +59,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, logger, core, plugins } = options;
+    const { config, logger, core, plugins, endpointAppContextService } = options;
     const { lists, ruleRegistry, security } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
@@ -71,11 +74,14 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     // If Fleet is enabled, then get its Authz
     if (startPlugins.fleet) {
-      fleetAuthz = context.fleet?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
+      fleetAuthz =
+        (await context.fleet)?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
     }
 
+    const coreContext = await context.core;
+
     return {
-      core: context.core,
+      core: coreContext,
 
       get endpointAuthz(): Immutable<EndpointAuthz> {
         // Lazy getter of endpoint Authz. No point in defining it if it is never used.
@@ -84,7 +90,8 @@ export class RequestContextFactory implements IRequestContextFactory {
           if (!startPlugins.fleet) {
             endpointAuthz = getEndpointAuthzInitialState();
           } else {
-            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz);
+            const userRoles = security?.authc.getCurrentUser(request)?.roles ?? [];
+            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
           }
         }
 
@@ -101,14 +108,13 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
-      getExecutionLogClient: () =>
-        new RuleExecutionLogClient({
-          underlyingClient: config.ruleExecutionLog.underlyingClient,
-          savedObjectsClient: context.core.savedObjects.client,
-          eventLogService: plugins.eventLog,
-          eventLogClient: startPlugins.eventLog.getClient(request),
-          logger,
-        }),
+      getRuleExecutionLog: memoize(() =>
+        ruleExecutionLogForRoutesFactory(
+          coreContext.savedObjects.client,
+          startPlugins.eventLog.getClient(request),
+          logger
+        )
+      ),
 
       getExceptionListClient: () => {
         if (!lists) {
@@ -116,11 +122,14 @@ export class RequestContextFactory implements IRequestContextFactory {
         }
 
         const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
-        return new ExceptionListClient({
-          savedObjectsClient: context.core.savedObjects.client,
-          user: username,
-        });
+        return lists.getExceptionListClient(coreContext.savedObjects.client, username);
       },
+
+      getInternalFleetServices: memoize(() => endpointAppContextService.getInternalFleetServices()),
+
+      getScopedFleetServices: memoize((req: KibanaRequest) =>
+        endpointAppContextService.getScopedFleetServices(req)
+      ),
     };
   }
 }

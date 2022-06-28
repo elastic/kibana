@@ -7,38 +7,35 @@
  */
 
 import React from 'react';
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
-import { setServices } from '../../kibana_services';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { DocTableWrapper, DocTableWrapperProps } from './doc_table_wrapper';
-import { DocTableRow } from './components/table_row';
+import { DocTableWrapper } from './doc_table_wrapper';
 import { discoverServiceMock } from '../../__mocks__/services';
-
-const mountComponent = (props: DocTableWrapperProps) => {
-  return mountWithIntl(<DocTableWrapper {...props} />);
-};
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../../utils/build_data_record';
+import { EsHitRecord } from '../../types';
 
 describe('Doc table component', () => {
-  let defaultProps: DocTableWrapperProps;
-
-  const initDefaults = (rows?: DocTableRow[]) => {
-    defaultProps = {
+  const mountComponent = (rows?: EsHitRecord[]) => {
+    const props = {
       columns: ['_source'],
       indexPattern: indexPatternMock,
-      rows: rows || [
-        {
-          _index: 'mock_index',
-          _id: '1',
-          _score: 1,
-          _type: '_doc',
-          fields: [
-            {
-              timestamp: '2020-20-01T12:12:12.123',
-            },
-          ],
-          _source: { message: 'mock_message', bytes: 20 },
-        },
-      ],
+      rows: (
+        rows || [
+          {
+            _index: 'mock_index',
+            _id: '1',
+            _score: 1,
+            fields: [
+              {
+                timestamp: '2020-20-01T12:12:12.123',
+              },
+            ],
+            _source: { message: 'mock_message', bytes: 20 },
+          } as EsHitRecord,
+        ]
+      ).map((row) => buildDataTableRecord(row, indexPatternMock)),
+
       sort: [['order_date', 'desc']],
       isLoading: false,
       searchDescription: '',
@@ -54,21 +51,23 @@ describe('Doc table component', () => {
       },
     };
 
-    setServices(discoverServiceMock);
+    return mountWithIntl(
+      <KibanaContextProvider services={discoverServiceMock}>
+        <DocTableWrapper {...props} />
+      </KibanaContextProvider>
+    );
   };
 
   it('should render infinite table correctly', () => {
-    initDefaults();
-    const component = mountComponent(defaultProps);
-    expect(findTestSubject(component, defaultProps.dataTestSubj).exists()).toBeTruthy();
+    const component = mountComponent();
+    expect(findTestSubject(component, 'discoverDocTable').exists()).toBeTruthy();
     expect(findTestSubject(component, 'docTable').exists()).toBeTruthy();
     expect(component.find('.kbnDocTable__error').exists()).toBeFalsy();
   });
 
   it('should render error fallback if rows array is empty', () => {
-    initDefaults([]);
-    const component = mountComponent(defaultProps);
-    expect(findTestSubject(component, defaultProps.dataTestSubj).exists()).toBeTruthy();
+    const component = mountComponent([]);
+    expect(findTestSubject(component, 'discoverDocTable').exists()).toBeTruthy();
     expect(findTestSubject(component, 'docTable').exists()).toBeFalsy();
     expect(component.find('.kbnDocTable__error').exists()).toBeTruthy();
   });

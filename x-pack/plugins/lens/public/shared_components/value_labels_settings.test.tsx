@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ValueLabelsSettings, VisualOptionsProps } from './value_labels_settings';
 
 describe('Value labels Settings', () => {
@@ -38,7 +38,7 @@ describe('Value labels Settings', () => {
   });
 
   it('should render the passed value if given', () => {
-    const component = shallow(<ValueLabelsSettings {...props} valueLabels="inside" />);
+    const component = shallow(<ValueLabelsSettings {...props} valueLabels="show" />);
     expect(
       component.find('[data-test-subj="lens-value-labels-visibility-btn"]').prop('idSelected')
     ).toEqual(`value_labels_inside`);

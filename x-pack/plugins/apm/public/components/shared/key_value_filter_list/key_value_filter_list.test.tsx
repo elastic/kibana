@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { KeyValueFilterList } from './';
+import { KeyValueFilterList } from '.';
 import {
   expectTextsInDocument,
   renderWithTheme,
-} from '../../../utils/testHelpers';
+} from '../../../utils/test_helpers';
 import { fireEvent } from '@testing-library/react';
 
 describe('KeyValueFilterList', () => {

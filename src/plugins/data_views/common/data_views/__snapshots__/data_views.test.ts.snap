@@ -40,7 +40,8 @@ Object {
   },
   "fields": Object {},
   "id": "id",
-  "intervalName": undefined,
+  "name": "Kibana *",
+  "namespaces": undefined,
   "runtimeFieldMap": Object {
     "aRuntimeField": Object {
       "script": Object {

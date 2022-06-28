@@ -135,11 +135,21 @@ exports[`FieldIcon renders known field types keyword is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types match_only_text is rendered 1`] = `
+<EuiToken
+  aria-label="match_only_text"
+  className="kbnFieldIcon"
+  iconType="tokenString"
+  size="s"
+  title="match_only_text"
+/>
+`;
+
 exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
 <EuiToken
   aria-label="murmur3"
   className="kbnFieldIcon"
-  iconType="tokenFile"
+  iconType="tokenSearchType"
   size="s"
   title="murmur3"
 />
@@ -192,6 +202,16 @@ exports[`FieldIcon renders known field types text is rendered 1`] = `
   iconType="tokenString"
   size="s"
   title="text"
+/>
+`;
+
+exports[`FieldIcon renders known field types version is rendered 1`] = `
+<EuiToken
+  aria-label="version"
+  className="kbnFieldIcon"
+  iconType="tokenTag"
+  size="s"
+  title="version"
 />
 `;
 

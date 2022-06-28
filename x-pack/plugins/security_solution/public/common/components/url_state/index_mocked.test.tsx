@@ -16,7 +16,10 @@ import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { useLocation } from 'react-router-dom';
-import { MANAGEMENT_PATH } from '../../../../common/constants';
+import { DASHBOARDS_PATH, MANAGEMENT_PATH } from '../../../../common/constants';
+import { links } from '../../links/app_links';
+import { updateAppLinks } from '../../links';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -45,7 +48,29 @@ jest.mock('react-redux', () => {
   };
 });
 
+const mockedUseIsGroupedNavigationEnabled = jest.fn();
+jest.mock('../navigation/helpers', () => ({
+  useIsGroupedNavigationEnabled: () => mockedUseIsGroupedNavigationEnabled(),
+}));
+
 describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {
+  beforeAll(() => {
+    mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
+    updateAppLinks(links, {
+      experimentalFeatures: allowedExperimentalValues,
+      capabilities: {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        actions: { show: true, crud: true },
+        siem: {
+          show: true,
+          crud: true,
+        },
+      },
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
     jest.resetAllMocks();
@@ -63,6 +88,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       const wrapper = mount(
@@ -101,7 +127,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?query=(language:kuery,query:'host.name:%22siem-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
         state: '',
       });
     });
@@ -117,6 +143,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       const wrapper = mount(
@@ -135,7 +162,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?query=(language:kuery,query:'host.name:%22siem-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+          "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
         state: '',
       });
     });
@@ -151,6 +178,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       const wrapper = mount(
@@ -170,47 +198,13 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))&timeline=(id:hello_timeline_id,isOpen:!t)",
+          "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))&timeline=(id:hello_timeline_id,isOpen:!t)",
         state: '',
       });
     });
 
-    test('sourcerer redux state updates the url', () => {
-      mockProps = getMockPropsObj({
-        page: CONSTANTS.networkPage,
-        examplePath: '/network',
-        namespaceLower: 'network',
-        pageName: SecurityPageName.network,
-        detailName: undefined,
-      }).noSearch.undefinedQuery;
-
-      (useLocation as jest.Mock).mockReturnValue({
-        pathname: mockProps.pathName,
-      });
-
-      const wrapper = mount(
-        <HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />
-      );
-      const newUrlState = {
-        ...mockProps.urlState,
-        sourcerer: ['cool', 'patterns'],
-      };
-
-      wrapper.setProps({
-        hookProps: { ...mockProps, urlState: newUrlState, isInitializing: false },
-      });
-      wrapper.update();
-
-      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
-        hash: '',
-        pathname: '/network',
-        search:
-          "?sourcerer=!(cool,patterns)&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
-        state: '',
-      });
-    });
-
-    test("administration page doesn't has query string", () => {
+    test("administration page doesn't has query string when grouped nav disabled", () => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
       mockProps = getMockPropsObj({
         page: CONSTANTS.networkPage,
         examplePath: '/network',
@@ -260,6 +254,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: mockProps.pathName,
+        search: mockProps.search,
       });
 
       const wrapper = mount(
@@ -271,6 +266,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
       (useLocation as jest.Mock).mockReturnValue({
         pathname: updatedMockProps.pathName,
+        search: mockProps.search,
       });
 
       wrapper.setProps({
@@ -281,7 +277,86 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: MANAGEMENT_PATH,
-        search: '?',
+        search: mockProps.search,
+        state: '',
+      });
+    });
+
+    test("dashboards page doesn't has query string when grouped nav enabled", () => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(true);
+      mockProps = getMockPropsObj({
+        page: CONSTANTS.networkPage,
+        examplePath: '/network',
+        namespaceLower: 'network',
+        pageName: SecurityPageName.network,
+        detailName: undefined,
+      }).noSearch.definedQuery;
+
+      const urlState = {
+        ...mockProps.urlState,
+        [CONSTANTS.appQuery]: getFilterQuery(),
+        [CONSTANTS.timerange]: {
+          global: {
+            [CONSTANTS.timerange]: {
+              from: '2020-07-07T08:20:18.966Z',
+              fromStr: 'now-24h',
+              kind: 'relative',
+              to: '2020-07-08T08:20:18.966Z',
+              toStr: 'now',
+            },
+            linkTo: ['timeline'],
+          },
+          timeline: {
+            [CONSTANTS.timerange]: {
+              from: '2020-07-07T08:20:18.966Z',
+              fromStr: 'now-24h',
+              kind: 'relative',
+              to: '2020-07-08T08:20:18.966Z',
+              toStr: 'now',
+            },
+            linkTo: ['global'],
+          },
+        },
+      };
+
+      const updatedMockProps = {
+        ...getMockPropsObj({
+          ...mockProps,
+          page: CONSTANTS.unknown,
+          examplePath: DASHBOARDS_PATH,
+          namespaceLower: 'dashboards',
+          pageName: SecurityPageName.dashboardsLanding,
+          detailName: undefined,
+        }).noSearch.definedQuery,
+        urlState,
+      };
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+        search: mockProps.search,
+      });
+
+      const wrapper = mount(
+        <HookWrapper
+          hookProps={{ ...mockProps, urlState }}
+          hook={(args) => useUrlStateHooks(args)}
+        />
+      );
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: updatedMockProps.pathName,
+        search: mockProps.search,
+      });
+
+      wrapper.setProps({
+        hookProps: updatedMockProps,
+      });
+
+      wrapper.update();
+      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
+        hash: '',
+        pathname: DASHBOARDS_PATH,
+        search: mockProps.search,
         state: '',
       });
     });
@@ -298,6 +373,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
             (useLocation as jest.Mock).mockReturnValue({
               pathname: mockProps.pathName,
+              search: mockProps.search,
             });
 
             mount(<HookWrapper hookProps={mockProps} hook={(args) => useUrlStateHooks(args)} />);
@@ -306,7 +382,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
               hash: '',
               pathname: examplePath,
               search:
-                "?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+                "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
               state: '',
             });
           }
@@ -330,6 +406,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
           (useLocation as jest.Mock).mockReturnValue({
             pathname: mockProps.pathName,
+            search: mockProps.search,
           });
 
           const wrapper = mount(
@@ -337,11 +414,12 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           );
 
           expect(mockHistory.replace.mock.calls[0][0].search).toEqual(
-            "?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
+            "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
           );
 
           (useLocation as jest.Mock).mockReturnValue({
             pathname: updatedProps.pathName,
+            search: mockProps.search,
           });
 
           wrapper.setProps({ hookProps: updatedProps });
@@ -349,7 +427,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           wrapper.update();
 
           expect(mockHistory.replace.mock.calls[1][0].search).toEqual(
-            "?query=(language:kuery,query:'host.name:%22siem-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
+            "?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
           );
         });
 
@@ -375,6 +453,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
 
           (useLocation as jest.Mock).mockReturnValue({
             pathname: mockProps.pathName,
+            search: mockProps.search,
           });
 
           const wrapper = mount(
@@ -382,11 +461,12 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           );
 
           expect(mockHistory.replace.mock.calls[0][0].search).toEqual(
-            "?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
+            "?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))"
           );
 
           (useLocation as jest.Mock).mockReturnValue({
             pathname: updatedMockProps.pathName,
+            search: mockProps.search,
           });
 
           wrapper.setProps({ hookProps: updatedMockProps });

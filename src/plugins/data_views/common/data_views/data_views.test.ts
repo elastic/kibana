@@ -8,7 +8,7 @@
 
 import { defaults } from 'lodash';
 import { DataViewsService, DataView } from '.';
-import { fieldFormatsMock } from '../../../field_formats/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
@@ -32,6 +32,7 @@ const savedObject = {
   version: 'version',
   attributes: {
     title: 'kibana-*',
+    name: 'Kibana *',
     timeFieldName: '@timestamp',
     fields: '[]',
     sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
@@ -54,7 +55,7 @@ describe('IndexPatterns', () => {
   const uiSettings = {
     get: () => Promise.resolve(false),
     getAll: () => {},
-    set: () => () => {},
+    set: jest.fn(),
     remove: jest.fn(),
   } as any as UiSettingsCommon;
   const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
@@ -101,6 +102,7 @@ describe('IndexPatterns', () => {
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(true),
+      getCanSaveAdvancedSettings: () => Promise.resolve(true),
     });
 
     indexPatternsNoAccess = new DataViewsService({
@@ -112,6 +114,7 @@ describe('IndexPatterns', () => {
       onError: () => {},
       onRedirectNoIndexPattern: () => {},
       getCanSave: () => Promise.resolve(false),
+      getCanSaveAdvancedSettings: () => Promise.resolve(false),
     });
   });
 
@@ -158,7 +161,7 @@ describe('IndexPatterns', () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title', 'type', 'typeMeta'],
+      fields: ['title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
   });
@@ -233,6 +236,31 @@ describe('IndexPatterns', () => {
 
     await indexPatterns.create({ title });
     expect(indexPatterns.refreshFields).toBeCalled();
+    expect(indexPattern.id).toBeDefined();
+    expect(indexPattern.isPersisted()).toBe(false);
+  });
+
+  test('createSavedObject', async () => {
+    const title = 'kibana-*';
+    const version = '8.4.0';
+    const dataView = await indexPatterns.create({ title }, true);
+
+    savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({
+      ...savedObject,
+      id: dataView.id,
+      version,
+      attributes: {
+        ...savedObject.attributes,
+        title: dataView.title,
+      },
+    });
+
+    const indexPattern = await indexPatterns.createSavedObject(dataView);
+    expect(indexPattern).toBeInstanceOf(DataView);
+    expect(indexPattern.id).toBe(dataView.id);
+    expect(indexPattern.title).toBe(title);
+    expect(indexPattern.isPersisted()).toBe(true);
   });
 
   test('find', async () => {
@@ -308,9 +336,15 @@ describe('IndexPatterns', () => {
   });
 
   describe('getDefaultDataView', () => {
-    test('gets default data view', async () => {
+    beforeEach(() => {
       indexPatterns.clearCache();
-      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
+
+    test('gets default data view', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
       // make sure we're not pulling from cache
@@ -319,22 +353,15 @@ describe('IndexPatterns', () => {
     });
 
     test('returns undefined if no data views exist', async () => {
-      savedObjectsClient.find = jest.fn(
-        () => Promise.resolve([]) as Promise<Array<SavedObject<any>>>
-      );
-      savedObjectsClient.get = jest.fn(() => Promise.resolve(undefined) as Promise<any>);
-      indexPatterns.clearCache();
-      expect(await indexPatterns.getDefaultDataView()).toBeUndefined();
+      uiSettings.get = jest.fn().mockResolvedValue('foo');
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+
+      expect(await indexPatterns.getDefaultDataView()).toBeNull();
     });
 
     test("default doesn't exist, grabs another data view", async () => {
-      indexPatterns.clearCache();
-      jest.clearAllMocks();
-      uiSettings.get = jest.fn().mockResolvedValue(['bar']);
-
-      savedObjectsClient.find = jest.fn(
-        () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
-      );
+      uiSettings.get = jest.fn().mockResolvedValue('foo');
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
 
       savedObjectsClient.get = jest.fn().mockResolvedValue({
         id: 'bar',
@@ -349,6 +376,58 @@ describe('IndexPatterns', () => {
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);
       expect(uiSettings.remove).toBeCalledTimes(1);
+      expect(uiSettings.set).toBeCalledTimes(1);
+    });
+
+    test("when default exists, it isn't overridden with first data view", async () => {
+      uiSettings.get = jest.fn().mockResolvedValue('id2');
+
+      savedObjectsClient.find = jest.fn().mockResolvedValue([
+        { id: 'id1', version: 'a', attributes: { title: 'title' } },
+        { id: 'id2', version: 'a', attributes: { title: 'title' } },
+      ]);
+
+      savedObjectsClient.get = jest
+        .fn()
+        .mockImplementation((type: string, id: string) =>
+          Promise.resolve({ id, version: 'a', attributes: { title: 'title' } })
+        );
+
+      const defaultDataViewResult = await indexPatterns.getDefaultDataView();
+      expect(defaultDataViewResult).toBeInstanceOf(DataView);
+      expect(defaultDataViewResult?.id).toBe('id2');
+
+      // make sure we're not pulling from cache
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(uiSettings.remove).toBeCalledTimes(0);
+      expect(uiSettings.set).toBeCalledTimes(0);
+    });
+
+    test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
+      savedObjectsClient.find = jest.fn().mockResolvedValue([
+        {
+          id: 'id1',
+          version: 'a',
+          attributes: { title: '1' },
+        },
+        {
+          id: 'id2',
+          version: 'a',
+          attributes: { title: '2' },
+        },
+      ]);
+
+      savedObjectsClient.get = jest
+        .fn()
+        .mockImplementation((type: string, id: string) =>
+          Promise.resolve({ id, version: 'a', attributes: { title: '1' } })
+        );
+
+      const defaultDataViewResult = await indexPatternsNoAccess.getDefaultDataView();
+      expect(defaultDataViewResult).toBeInstanceOf(DataView);
+      expect(defaultDataViewResult?.id).toBe('id1');
+      expect(uiSettings.set).toBeCalledTimes(0);
     });
   });
 });

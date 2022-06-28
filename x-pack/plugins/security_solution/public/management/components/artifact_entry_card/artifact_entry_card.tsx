@@ -12,7 +12,7 @@ import { CardSubHeader } from './components/card_sub_header';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 import { AnyArtifact, MenuItemPropsByPolicyId } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { CardContainerPanel } from './components/card_container_panel';
 import { CardSectionPanel } from './components/card_section_panel';
 import { CardComments } from './components/card_comments';
@@ -91,7 +91,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
 
           {!hideComments ? (
             <>
-              <EuiSpacer size="l" />
+              {hideDescription && <EuiSpacer size="l" />}
               <CardComments comments={artifact.comments} data-test-subj={getTestId('comments')} />
             </>
           ) : null}

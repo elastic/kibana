@@ -7,7 +7,7 @@
  */
 
 import { FunctionTypeNode, Node } from 'ts-morph';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { buildClassDec } from './build_class_dec';
 import { buildFunctionDec } from './build_function_dec';
 import { isNamedNode } from '../tsmorph_utils';
@@ -65,12 +65,17 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
     Node.isMethodSignature(node) ||
     Node.isFunctionDeclaration(node) ||
     Node.isMethodDeclaration(node) ||
+    Node.isConstructSignatureDeclaration(node) ||
     Node.isConstructorDeclaration(node)
   ) {
     return buildFunctionDec(node, {
       ...opts,
       // Use "Constructor" if applicable, instead of the default "Unnamed"
-      name: Node.isConstructorDeclaration(node) ? 'Constructor' : node.getName() || 'Unnamed',
+      name: Node.isConstructSignatureDeclaration(node)
+        ? 'new'
+        : Node.isConstructorDeclaration(node)
+        ? 'Constructor'
+        : node.getName() || 'Unnamed',
     });
   } else if (
     Node.isPropertySignature(node) ||
@@ -80,7 +85,7 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
     Node.isVariableDeclaration(node)
   ) {
     return buildVariableDec(node, opts);
-  } else if (Node.isTypeLiteralNode(node)) {
+  } else if (Node.isTypeLiteral(node)) {
     return buildTypeLiteralDec(node, opts);
   }
 

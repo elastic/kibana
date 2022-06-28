@@ -7,10 +7,11 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
+import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
   DataViewField,
   DataView,
@@ -51,7 +52,7 @@ export interface Props {
   apiService: ApiService;
   /** Field format */
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
 }
 
@@ -157,7 +158,7 @@ export const FieldEditorFlyoutContentContainer = ({
           dataView.deleteFieldFormat(updatedField.name);
         }
 
-        await dataViews.updateSavedObject(dataView).then(() => {
+        const afterSave = () => {
           const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
             defaultMessage: "Saved '{fieldName}'",
             values: { fieldName: updatedField.name },
@@ -165,6 +166,15 @@ export const FieldEditorFlyoutContentContainer = ({
           notifications.toasts.addSuccess(message);
           setIsSaving(false);
           onSave(editedField);
+        };
+
+        if (!dataView.isPersisted()) {
+          afterSave();
+          return;
+        }
+
+        await dataViews.updateSavedObject(dataView).then(() => {
+          afterSave();
         });
       } catch (e) {
         const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {

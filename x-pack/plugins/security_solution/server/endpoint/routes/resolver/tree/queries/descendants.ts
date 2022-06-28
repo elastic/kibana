@@ -6,16 +6,16 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/elasticsearch';
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
+import { NodeID, TimeRange, docValueFields, validIDs } from '../utils';
 
 interface DescendantsParams {
   schema: ResolverSchema;
   indexPatterns: string | string[];
   timeRange: TimeRange;
+  isInternalRequest: boolean;
 }
 
 /**
@@ -26,11 +26,14 @@ export class DescendantsQuery {
   private readonly indexPatterns: string | string[];
   private readonly timeRange: TimeRange;
   private readonly docValueFields: JsonValue[];
-  constructor({ schema, indexPatterns, timeRange }: DescendantsParams) {
+  private readonly isInternalRequest: boolean;
+
+  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: DescendantsParams) {
     this.docValueFields = docValueFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
+    this.isInternalRequest = isInternalRequest;
   }
 
   private query(nodes: NodeID[], size: number): JsonObject {
@@ -198,14 +201,16 @@ export class DescendantsQuery {
       return [];
     }
 
-    let response: TransportResult<estypes.SearchResponse<unknown>>;
+    const esClient = this.isInternalRequest ? client.asInternalUser : client.asCurrentUser;
+
+    let response: estypes.SearchResponse<unknown>;
     if (this.schema.ancestry) {
-      response = await client.asCurrentUser.search({
+      response = await esClient.search({
         body: this.queryWithAncestryArray(validNodes, this.schema.ancestry, limit),
         index: this.indexPatterns,
       });
     } else {
-      response = await client.asCurrentUser.search({
+      response = await esClient.search({
         body: this.query(validNodes, limit),
         index: this.indexPatterns,
       });
@@ -220,6 +225,6 @@ export class DescendantsQuery {
      * So the schema fields are flattened ('process.parent.entity_id')
      */
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    return response.body.hits.hits.map((hit) => hit.fields);
+    return response.hits.hits.map((hit) => hit.fields);
   }
 }

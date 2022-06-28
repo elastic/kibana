@@ -19,19 +19,17 @@ import {
   EuiFieldText,
   EuiComboBox,
 } from '@elastic/eui';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import { CustomizablePalette, PaletteRegistry, FIXED_PROGRESSION } from '@kbn/coloring';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
+
 import {
-  CustomizablePalette,
   applyPaletteParams,
   defaultPaletteParams,
-  FIXED_PROGRESSION,
-  getStopsForFixedMode,
   useDebouncedValue,
   PalettePanelContainer,
   findMinMaxByColumnId,
-} from '../../shared_components/';
+} from '../../shared_components';
 import type { ColumnState } from '../../../common/expressions';
 import {
   isNumericFieldForDatatable,
@@ -42,6 +40,7 @@ import {
 } from '../../../common/expressions';
 
 import './dimension_editor.scss';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -130,6 +129,17 @@ export function TableDimensionEditor(
 
   return (
     <>
+      {props.groupId === 'rows' && (
+        <CollapseSetting
+          value={column.collapseFn || ''}
+          onChange={(collapseFn: string) => {
+            setState({
+              ...state,
+              columns: updateColumnWith(state, accessor, { collapseFn }),
+            });
+          }}
+        />
+      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -352,7 +362,7 @@ export function TableDimensionEditor(
                 <EuiFlexItem>
                   <EuiColorPaletteDisplay
                     data-test-subj="lnsDatatable_dynamicColoring_palette"
-                    palette={getStopsForFixedMode(displayStops, activePalette.params?.colorStops)}
+                    palette={displayStops.map(({ color }) => color)}
                     type={FIXED_PROGRESSION}
                     onClick={() => {
                       setIsPaletteOpen(!isPaletteOpen);

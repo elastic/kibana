@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import semver from 'semver';
 import {
   CORRELATION_EVENT_TABLE_CELL,
   DATA_PROVIDERS,
@@ -17,7 +18,6 @@ import {
   NOTE_DESCRIPTION,
   NOTE_PREVIEW,
   NOTES_TAB_BUTTON,
-  PINNED_EVENT_TABLE_CELL,
   PINNED_TAB_BUTTON,
   PROCESS_KPI,
   QUERY_EVENT_TABLE_CELL,
@@ -38,13 +38,13 @@ import {
   TIMELINES_PINNED_EVENT_COUNT,
 } from '../../../screens/timelines';
 
-import { loginAndWaitForPageWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   closeTimeline,
   deleteTimeline,
   goToCorrelationTab,
   goToNotesTab,
-  goToPinnedTab,
+  setKibanaTimezoneToUTC,
 } from '../../../tasks/timeline';
 import { expandNotes, importTimeline, openTimeline } from '../../../tasks/timelines';
 
@@ -54,9 +54,10 @@ const timeline = '7_15_timeline.ndjson';
 const username = 'elastic';
 
 const timelineDetails = {
-  dateStart: 'Oct 11, 2020 @ 00:00:00.000',
-  dateEnd: 'Oct 11, 2030 @ 17:13:15.851',
+  dateStart: 'Oct 10, 2020 @ 22:00:00.000',
+  dateEnd: 'Oct 11, 2030 @ 15:13:15.851',
   queryTab: 'Query4',
+  queryTabAlt: 'Query2',
   correlationTab: 'Correlation',
   analyzerTab: 'Analyzer',
   notesTab: 'Notes2',
@@ -74,7 +75,7 @@ const detectionAlert = {
 };
 
 const event = {
-  timestamp: 'Nov 4, 2021 @ 11:09:29.438',
+  timestamp: 'Nov 4, 2021 @ 10:09:29.438',
   message: '—',
   eventCategory: 'file',
   eventAction: 'initial_scan',
@@ -86,8 +87,10 @@ const event = {
 
 describe('Import timeline after upgrade', () => {
   before(() => {
-    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    login();
+    visitWithoutDateRange(TIMELINES_URL);
     importTimeline(timeline);
+    setKibanaTimezoneToUTC();
   });
 
   after(() => {
@@ -118,6 +121,11 @@ describe('Import timeline after upgrade', () => {
   });
 
   it('Displays the correct timeline details inside the query tab', () => {
+    let expectedQueryTab = timelineDetails.queryTab;
+    if (semver.lt(Cypress.env('ORIGINAL_VERSION'), '7.10.0')) {
+      expectedQueryTab = timelineDetails.queryTabAlt;
+    }
+
     openTimeline();
 
     cy.readFile(`cypress/fixtures/${timeline}`).then((file) => {
@@ -142,7 +150,7 @@ describe('Import timeline after upgrade', () => {
         'have.text',
         timelineJson.kqlQuery.filterQuery.kuery.expression
       );
-      cy.get(QUERY_TAB_BUTTON).should('have.text', timelineDetails.queryTab);
+      cy.get(QUERY_TAB_BUTTON).should('have.text', expectedQueryTab);
       cy.get(TIMELINE_CORRELATION_TAB).should('have.text', timelineDetails.correlationTab);
       cy.get(GRAPH_TAB_BUTTON).should('have.text', timelineDetails.analyzerTab).and('be.disabled');
       cy.get(NOTES_TAB_BUTTON).should('have.text', timelineDetails.notesTab);
@@ -189,17 +197,5 @@ describe('Import timeline after upgrade', () => {
       cy.get(NOTE_DESCRIPTION).invoke('text').should('match', descriptionRegex);
       cy.get(NOTE_PREVIEW).last().invoke('text').should('match', noteRegex);
     });
-  });
-
-  it('Displays the correct timeline details inside the pinned tab', () => {
-    goToPinnedTab();
-
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(1).should('contain', detectionAlert.message);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(2).should('contain', detectionAlert.eventCategory);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(3).should('contain', detectionAlert.eventAction);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(4).should('contain', detectionAlert.hostName);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(5).should('contain', detectionAlert.sourceIp);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(6).should('contain', detectionAlert.destinationIp);
-    cy.get(PINNED_EVENT_TABLE_CELL).eq(7).should('contain', detectionAlert.userName);
   });
 });

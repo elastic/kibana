@@ -25,10 +25,11 @@ import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
-import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
-import { getFieldTypeName } from './lib/get_field_type_name';
+import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
 
 function wrapOnDot(str?: string) {
@@ -58,13 +59,14 @@ const FieldInfoIcon: React.FC = memo(() => (
   </EuiToolTip>
 ));
 
-const DiscoverFieldTypeIcon: React.FC<{ field: IndexPatternField }> = memo(({ field }) => {
-  // If it's a string type, we want to distinguish between keyword and text
-  const tempType = field.type === 'string' && field.esTypes ? field.esTypes[0] : field.type;
-  return <FieldIcon type={tempType} label={getFieldTypeName(tempType)} scripted={field.scripted} />;
+const DiscoverFieldTypeIcon: React.FC<{ field: DataViewField }> = memo(({ field }) => {
+  const typeForIcon = getTypeForFieldIcon(field);
+  return (
+    <FieldIcon type={typeForIcon} label={getFieldTypeName(typeForIcon)} scripted={field.scripted} />
+  );
 });
 
-const FieldName: React.FC<{ field: IndexPatternField }> = memo(({ field }) => {
+const FieldName: React.FC<{ field: DataViewField }> = memo(({ field }) => {
   const title =
     field.displayName !== field.name
       ? i18n.translate('discover.field.title', {
@@ -84,10 +86,10 @@ const FieldName: React.FC<{ field: IndexPatternField }> = memo(({ field }) => {
 });
 
 interface ActionButtonProps {
-  field: IndexPatternField;
+  field: DataViewField;
   isSelected?: boolean;
   alwaysShow: boolean;
-  toggleDisplay: (field: IndexPatternField) => void;
+  toggleDisplay: (field: DataViewField) => void;
 }
 
 const ActionButton: React.FC<ActionButtonProps> = memo(
@@ -162,7 +164,7 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
 
 interface MultiFieldsProps {
   multiFields: NonNullable<DiscoverFieldProps['multiFields']>;
-  toggleDisplay: (field: IndexPatternField) => void;
+  toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
 }
 
@@ -208,11 +210,11 @@ export interface DiscoverFieldProps {
   /**
    * The displayed field
    */
-  field: IndexPatternField;
+  field: DataViewField;
   /**
    * The currently selected index pattern
    */
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   /**
    * Callback to add/select the field
    */
@@ -220,7 +222,7 @@ export interface DiscoverFieldProps {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback to remove/deselect a the field
    * @param fieldName
@@ -229,7 +231,7 @@ export interface DiscoverFieldProps {
   /**
    * Retrieve details data for the field
    */
-  getDetails: (field: IndexPatternField) => FieldDetails;
+  getDetails: (field: DataViewField) => FieldDetails;
   /**
    * Determines whether the field is selected
    */
@@ -241,16 +243,16 @@ export interface DiscoverFieldProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 
-  multiFields?: Array<{ field: IndexPatternField; isSelected: boolean }>;
+  multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
 
   /**
-   * Callback to edit a runtime field from index pattern
+   * Callback to edit a field from data view
    * @param fieldName name of the field to edit
    */
   onEditField?: (fieldName: string) => void;
 
   /**
-   * Callback to delete a runtime field from index pattern
+   * Callback to delete a runtime field from data view
    * @param fieldName name of the field to delete
    */
   onDeleteField?: (fieldName: string) => void;
@@ -279,7 +281,7 @@ function DiscoverFieldComponent({
   const [infoIsOpen, setOpen] = useState(false);
 
   const toggleDisplay = useCallback(
-    (f: IndexPatternField) => {
+    (f: DataViewField) => {
       if (selected) {
         onRemoveField(f.name);
       } else {

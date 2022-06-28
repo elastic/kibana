@@ -8,13 +8,24 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison, { RisonValue } from 'rison-node';
-import React, { useEffect, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { escapeKuery } from '@kbn/es-query';
+import React, { FC, useEffect, useMemo, useState } from 'react';
+import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiProgress,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
+import { getInitialAnomaliesLayers } from '../../../maps/util';
 import {
   formatHumanReadableDateTimeSeconds,
   timeFormatter,
@@ -26,50 +37,116 @@ import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_util
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 // @ts-ignore
-import { escapeDoubleQuotes } from '../../explorer/explorer_utils';
+import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
 import { isCategorizationAnomaly, isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { checkPermission } from '../../capabilities/check_capabilities';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { CustomUrlAnomalyRecordDoc, KibanaUrlConfig } from '../../../../common/types/custom_urls';
-import { TimeRangeBounds } from '../../util/time_buckets';
-import { MlKibanaReactContextValue } from '../../contexts/kibana';
+import type {
+  CustomUrlAnomalyRecordDoc,
+  KibanaUrlConfig,
+} from '../../../../common/types/custom_urls';
+import type { TimeRangeBounds } from '../../util/time_buckets';
+import { useMlKibana } from '../../contexts/kibana';
 // @ts-ignore
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
-import { AnomaliesTableRecord } from '../../../../common/types/anomalies';
+import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 
 interface LinksMenuProps {
   anomaly: AnomaliesTableRecord;
   bounds: TimeRangeBounds;
+  showMapsLink: boolean;
   showViewSeriesLink: boolean;
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
   showRuleEditorFlyout: (anomaly: AnomaliesTableRecord) => void;
-  kibana: MlKibanaReactContextValue;
+  onItemClick: () => void;
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [openInDiscoverUrl, setOpenInDiscoverUrl] = useState<string | undefined>();
+  const [discoverUrlError, setDiscoverUrlError] = useState<string | undefined>();
+
+  const isCategorizationAnomalyRecord = isCategorizationAnomaly(props.anomaly);
+
+  const closePopover = props.onItemClick;
+
+  const kibana = useMlKibana();
+  const {
+    services: { data, share, application },
+  } = kibana;
+
+  const getMapsLink = async (anomaly: AnomaliesTableRecord) => {
+    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
+    const anomalyBucketStartMoment = moment(anomaly.time).tz(getDateFormatTz());
+    const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
+    const anomalyBucketEnd = anomalyBucketStartMoment
+      .add(anomaly.source.bucket_span, 'seconds')
+      .subtract(1, 'ms')
+      .toISOString();
+    const timeRange = data.query.timefilter.timefilter.getTime();
+
+    // Set 'from' in timeRange to start bucket time for the specific anomaly
+    timeRange.from = anomalyBucketStart;
+    timeRange.to = anomalyBucketEnd;
+
+    const locator = share.url.locators.get(MAPS_APP_LOCATOR);
+    const location = await locator?.getLocation({
+      initialLayers,
+      timeRange,
+      ...(anomaly.entityName && anomaly.entityValue
+        ? {
+            query: {
+              language: SEARCH_QUERY_LANGUAGE.KUERY,
+              query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}`,
+            },
+          }
+        : {}),
+    });
+    return location;
+  };
 
   useEffect(() => {
     let unmounted = false;
-    const generateDiscoverUrl = async () => {
-      const {
-        services: { share },
-      } = props.kibana;
-      const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+    const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
-      if (!discoverLocator) {
-        // eslint-disable-next-line no-console
-        console.error('No locator for Discover detected');
-        return;
+    if (!discoverLocator) {
+      const discoverLocatorMissing = i18n.translate(
+        'xpack.ml.anomaliesTable.linksMenu.discoverLocatorMissingErrorMessage',
+        {
+          defaultMessage: 'No locator for Discover detected',
+        }
+      );
+
+      if (!unmounted) {
+        setDiscoverUrlError(discoverLocatorMissing);
       }
+      return;
+    }
 
+    const getDataViewId = async () => {
       const job = mlJobService.getJob(props.anomaly.jobId);
-
       const index = job.datafeed_config.indices[0];
+
+      const dataViewId = await getDataViewIdFromName(index);
+
+      // If data view doesn't exist for some reasons
+      if (!dataViewId && !unmounted) {
+        const autoGeneratedDiscoverLinkError = i18n.translate(
+          'xpack.ml.anomaliesTable.linksMenu.autoGeneratedDiscoverLinkErrorMessage',
+          {
+            defaultMessage: `Unable to link to Discover; no data view exists for index '{index}'`,
+            values: { index },
+          }
+        );
+
+        setDiscoverUrlError(autoGeneratedDiscoverLinkError);
+      }
+      return dataViewId;
+    };
+
+    const generateDiscoverUrl = async () => {
       const interval = props.interval;
-      const dataViewId = (await getDataViewIdFromName(index)) || index;
+
+      const dataViewId = await getDataViewId();
       const record = props.anomaly.source;
 
       const earliestMoment = moment(record.timestamp).startOf(interval);
@@ -125,18 +202,16 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
     };
 
-    if (!isCategorizationAnomaly(props.anomaly)) {
+    if (!isCategorizationAnomalyRecord) {
       generateDiscoverUrl();
+    } else {
+      getDataViewId();
     }
 
     return () => {
       unmounted = true;
     };
   }, [JSON.stringify(props.anomaly)]);
-
-  const onButtonClick = () => setPopoverOpen(!isPopoverOpen);
-
-  const closePopover = () => setPopoverOpen(false);
 
   const openCustomUrl = (customUrl: KibanaUrlConfig) => {
     const { anomaly, interval, isAggregatedData } = props;
@@ -151,7 +226,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const configuredUrlValue = customUrl.url_value;
     const timeRangeInterval =
       customUrl.time_range !== undefined ? parseInterval(customUrl.time_range) : null;
-    const basePath = props.kibana.services.http.basePath.get();
+    const basePath = kibana.services.http.basePath.get();
 
     if (configuredUrlValue.includes('$earliest$')) {
       let earliestMoment = moment(timestamp);
@@ -213,7 +288,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         .catch((resp) => {
           // eslint-disable-next-line no-console
           console.log('openCustomUrl(): error loading categoryDefinition:', resp);
-          const { toasts } = props.kibana.services.notifications;
+          const { toasts } = kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToOpenLinkErrorMessage', {
               defaultMessage:
@@ -233,9 +308,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const viewSeries = async () => {
-    const {
-      services: { share },
-    } = props.kibana;
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
     const record = props.anomaly.source;
@@ -319,7 +391,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     if (job === undefined) {
       // eslint-disable-next-line no-console
       console.log(`viewExamples(): no job found with ID: ${props.anomaly.jobId}`);
-      const { toasts } = props.kibana.services.notifications;
+      const { toasts } = kibana.services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.anomaliesTable.linksMenu.unableToViewExamplesErrorMessage', {
           defaultMessage: 'Unable to view examples as no details could be found for job ID {jobId}',
@@ -346,7 +418,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         `viewExamples(): error finding type of field ${categorizationFieldName} in indices:`,
         datafeedIndices
       );
-      const { toasts } = props.kibana.services.notifications;
+      const { toasts } = kibana.services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage', {
           defaultMessage:
@@ -371,7 +443,10 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           // index configured in the datafeed. If a Kibana data view has not been created
           // for this index, then the user will see a warning message on the Discover tab advising
           // them that no matching data view has been configured.
-          const dataViewId = (await getDataViewIdFromName(index)) ?? index;
+          const dataViewId = await getDataViewIdFromName(index);
+
+          // We should not redirect to Discover if data view doesn't exist
+          if (!dataViewId) return;
 
           let query = null;
           // Build query using categorization regex (if keyword type) or terms (if text type).
@@ -425,7 +500,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           const _a = rison.encode(appStateProps);
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
-          const { basePath } = props.kibana.services.http;
+          const { basePath } = kibana.services.http;
           let path = basePath.get();
           path += '/app/discover#/';
           path += '?_g=' + _g;
@@ -435,7 +510,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         .catch((resp) => {
           // eslint-disable-next-line no-console
           console.log('viewExamples(): error loading categoryDefinition:', resp);
-          const { toasts } = props.kibana.services.notifications;
+          const { toasts } = kibana.services.notifications;
           toasts.addDanger(
             i18n.translate('xpack.ml.anomaliesTable.linksMenu.loadingDetailsErrorMessage', {
               defaultMessage:
@@ -471,6 +546,164 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const { anomaly, showViewSeriesLink } = props;
   const canConfigureRules = isRuleSupported(anomaly.source) && checkPermission('canUpdateJob');
 
+  const contextMenuItems = useMemo(() => {
+    const items = [];
+    if (anomaly.customUrls !== undefined) {
+      anomaly.customUrls.forEach((customUrl, index) => {
+        items.push(
+          <EuiContextMenuItem
+            key={`custom_url_${index}`}
+            icon="popout"
+            onClick={() => {
+              closePopover();
+              openCustomUrl(customUrl);
+            }}
+            data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
+          >
+            {customUrl.url_name}
+          </EuiContextMenuItem>
+        );
+      });
+    }
+
+    if (application.capabilities.discover?.show && !isCategorizationAnomalyRecord) {
+      // Add item from the start, but disable it during the URL generation.
+      const isLoading = discoverUrlError === undefined && openInDiscoverUrl === undefined;
+
+      items.push(
+        <EuiContextMenuItem
+          key={`auto_raw_data_url`}
+          icon="discoverApp"
+          disabled={discoverUrlError !== undefined || isLoading}
+          href={openInDiscoverUrl}
+          data-test-subj={`mlAnomaliesListRowAction_viewInDiscoverButton`}
+        >
+          {discoverUrlError ? (
+            <EuiToolTip content={discoverUrlError}>
+              <FormattedMessage
+                id="xpack.ml.anomaliesTable.linksMenu.viewInDiscover"
+                defaultMessage="View in Discover"
+              />
+            </EuiToolTip>
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewInDiscover"
+              defaultMessage="View in Discover"
+            />
+          )}
+          {isLoading ? <EuiProgress size={'xs'} color={'accent'} /> : null}
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (showViewSeriesLink === true) {
+      if (anomaly.isTimeSeriesViewRecord) {
+        items.push(
+          <EuiContextMenuItem
+            key="view_series"
+            icon="visLine"
+            onClick={() => {
+              closePopover();
+              viewSeries();
+            }}
+            data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
+              defaultMessage="View series"
+            />
+          </EuiContextMenuItem>
+        );
+      }
+
+      if (anomaly.isGeoRecord === true) {
+        items.push(
+          <EuiContextMenuItem
+            key="view_in_maps"
+            icon="gisApp"
+            onClick={async () => {
+              const mapsLink = await getMapsLink(anomaly);
+              await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
+            }}
+            data-test-subj="mlAnomaliesListRowActionViewInMapsButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewInMapsLabel"
+              defaultMessage="View in Maps"
+            />
+          </EuiContextMenuItem>
+        );
+      }
+    }
+
+    if (application.capabilities.discover?.show && isCategorizationAnomalyRecord) {
+      items.push(
+        <EuiContextMenuItem
+          key="view_examples"
+          icon="popout"
+          onClick={() => {
+            closePopover();
+            viewExamples();
+          }}
+          data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
+          disabled={discoverUrlError !== undefined}
+        >
+          {discoverUrlError !== undefined ? (
+            <EuiToolTip content={discoverUrlError}>
+              <FormattedMessage
+                id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
+                defaultMessage="View examples"
+              />
+            </EuiToolTip>
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
+              defaultMessage="View examples"
+            />
+          )}
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (canConfigureRules) {
+      items.push(
+        <EuiContextMenuItem
+          key="create_rule"
+          icon="controlsHorizontal"
+          onClick={() => {
+            closePopover();
+            props.showRuleEditorFlyout(anomaly);
+          }}
+          data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
+            defaultMessage="Configure job rules"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+    return items;
+  }, [
+    openInDiscoverUrl,
+    discoverUrlError,
+    viewExamples,
+    viewSeries,
+    canConfigureRules,
+    isCategorizationAnomalyRecord,
+  ]);
+
+  return (
+    <EuiContextMenuPanel items={contextMenuItems} data-test-subj="mlAnomaliesListRowActionsMenu" />
+  );
+};
+
+export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  const onButtonClick = setPopoverOpen.bind(null, !isPopoverOpen);
+  const closePopover = setPopoverOpen.bind(null, false);
+
   const button = (
     <EuiButtonIcon
       size="s"
@@ -479,115 +712,23 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       iconType="gear"
       aria-label={i18n.translate('xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel', {
         defaultMessage: 'Select action for anomaly at {time}',
-        values: { time: formatHumanReadableDateTimeSeconds(anomaly.time) },
+        values: { time: formatHumanReadableDateTimeSeconds(props.anomaly.time) },
       })}
       data-test-subj="mlAnomaliesListRowActionsButton"
     />
   );
 
-  const items = [];
-  if (anomaly.customUrls !== undefined) {
-    anomaly.customUrls.forEach((customUrl, index) => {
-      items.push(
-        <EuiContextMenuItem
-          key={`custom_url_${index}`}
-          icon="popout"
-          onClick={() => {
-            closePopover();
-            openCustomUrl(customUrl);
-          }}
-          data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
-        >
-          {customUrl.url_name}
-        </EuiContextMenuItem>
-      );
-    });
-  }
-
-  if (openInDiscoverUrl) {
-    items.push(
-      <EuiContextMenuItem
-        key={`auto_raw_data_url`}
-        icon="discoverApp"
-        href={openInDiscoverUrl}
-        data-test-subj={`mlAnomaliesListRowAction_viewInDiscoverButton`}
-      >
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.linksMenu.viewInDiscover"
-          defaultMessage="View in Discover"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  if (showViewSeriesLink === true && anomaly.isTimeSeriesViewRecord === true) {
-    items.push(
-      <EuiContextMenuItem
-        key="view_series"
-        icon="visLine"
-        onClick={() => {
-          closePopover();
-          viewSeries();
-        }}
-        data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
-      >
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
-          defaultMessage="View series"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  if (isCategorizationAnomaly(anomaly)) {
-    items.push(
-      <EuiContextMenuItem
-        key="view_examples"
-        icon="popout"
-        onClick={() => {
-          closePopover();
-          viewExamples();
-        }}
-        data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
-      >
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
-          defaultMessage="View examples"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  if (canConfigureRules) {
-    items.push(
-      <EuiContextMenuItem
-        key="create_rule"
-        icon="controlsHorizontal"
-        onClick={() => {
-          closePopover();
-          props.showRuleEditorFlyout(anomaly);
-        }}
-        data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
-      >
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
-          defaultMessage="Configure job rules"
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />
-    </EuiPopover>
+    <div>
+      <EuiPopover
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <LinksMenuUI {...props} onItemClick={closePopover} />
+      </EuiPopover>
+    </div>
   );
 };
-
-export const LinksMenu = withKibana(LinksMenuUI);

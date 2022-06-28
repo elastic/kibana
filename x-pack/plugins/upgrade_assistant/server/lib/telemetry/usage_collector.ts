@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, ElasticsearchServiceStart } from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ElasticsearchClient, ElasticsearchServiceStart } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { UpgradeAssistantTelemetry } from '../../../common/types';
 import {
   isDeprecationLogIndexingEnabled,
@@ -15,7 +15,7 @@ import {
 
 async function getDeprecationLoggingStatusValue(esClient: ElasticsearchClient): Promise<boolean> {
   try {
-    const { body: loggerDeprecationCallResult } = await esClient.cluster.getSettings({
+    const loggerDeprecationCallResult = await esClient.cluster.getSettings({
       include_defaults: true,
     });
 

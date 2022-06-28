@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APMConfig } from '..';
 import {
   ArtifactsSchema,
   TutorialsCategory,
   TutorialSchema,
-} from '../../../../../src/plugins/home/server';
-import { CloudSetup } from '../../../cloud/server';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
+} from '@kbn/home-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { APMConfig } from '..';
+import { APM_STATIC_DATA_VIEW_ID } from '../../common/data_view_constants';
 import { getApmDataViewAttributes } from '../routes/data_view/get_apm_data_view_attributes';
 import { getApmDataViewTitle } from '../routes/data_view/get_apm_data_view_title';
 import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
@@ -42,7 +42,7 @@ export const tutorialProvider =
     const dataViewTitle = getApmDataViewTitle(apmIndices);
     const savedObjects = [
       {
-        id: APM_STATIC_INDEX_PATTERN_ID,
+        id: APM_STATIC_DATA_VIEW_ID,
         attributes: getApmDataViewAttributes(dataViewTitle),
         type: 'index-pattern',
       },
@@ -114,7 +114,7 @@ It allows you to monitor the performance of thousands of applications in real ti
         'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',
         {
           defaultMessage:
-            'An APM index pattern is required for some features in the APM UI.',
+            'An APM data view is required for some features in the APM UI.',
         }
       ),
     } as TutorialSchema;

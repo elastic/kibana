@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
-  ListArray,
+  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { legacyMigrate } from '../../../rules/utils';
 import { PartialFilter } from '../../../types';
-import { createBulkErrorObject, ImportRuleResponse, BulkError } from '../../utils';
+import { createBulkErrorObject, ImportRuleResponse } from '../../utils';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { createRules } from '../../../rules/create_rules';
 import { readRules } from '../../../rules/read_rules';
 import { patchRules } from '../../../rules/patch_rules';
 import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { MlAuthz } from '../../../../machine_learning/authz';
-import { throwHttpError } from '../../../../machine_learning/validation';
-import { RulesClient } from '../../../../../../../../plugins/alerting/server';
-import { IRuleExecutionLogClient } from '../../../rule_execution_log';
-import { ExceptionListClient } from '../../../../../../../../plugins/lists/server';
+import { throwAuthzError } from '../../../../machine_learning/validation';
+import { checkRuleExceptionReferences } from './check_rule_exception_references';
 
 export type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -35,31 +35,40 @@ export interface RuleExceptionsPromiseFromStreams {
 /**
  * Takes rules to be imported and either creates or updates rules
  * based on user overwrite preferences
+ * @param ruleChunks {array} - rules being imported
+ * @param rulesResponseAcc {array} - the accumulation of success and
+ * error messages gathered through the rules import logic
+ * @param mlAuthz {object}
+ * @param overwriteRules {boolean} - whether to overwrite existing rules
+ * with imported rules if their rule_id matches
+ * @param rulesClient {object}
+ * @param savedObjectsClient {object}
+ * @param exceptionsClient {object}
+ * @param spaceId {string} - space being used during import
+ * @param existingLists {object} - all exception lists referenced by
+ * rules that were found to exist
+ * @returns {Promise} an array of error and success messages from import
  */
 export const importRules = async ({
   ruleChunks,
   rulesResponseAcc,
   mlAuthz,
   overwriteRules,
-  isRuleRegistryEnabled,
   rulesClient,
-  ruleStatusClient,
   savedObjectsClient,
   exceptionsClient,
   spaceId,
-  signalsIndex,
+  existingLists,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
-  ruleStatusClient: IRuleExecutionLogClient;
   savedObjectsClient: SavedObjectsClientContract;
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
-  signalsIndex: string;
+  existingLists: Record<string, ExceptionListSchema>;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
 
@@ -92,7 +101,9 @@ export const importRules = async ({
                 building_block_type: buildingBlockType,
                 description,
                 enabled,
+                timestamp_field: timestampField,
                 event_category_override: eventCategoryOverride,
+                tiebreaker_field: tiebreakerField,
                 false_positives: falsePositives,
                 from,
                 immutable,
@@ -106,12 +117,16 @@ export const importRules = async ({
                 filters: filtersRest,
                 rule_id: ruleId,
                 index,
+                data_view_id: dataViewId,
                 interval,
                 max_signals: maxSignals,
+                related_integrations: relatedIntegrations,
+                required_fields: requiredFields,
                 risk_score: riskScore,
                 risk_score_mapping: riskScoreMapping,
                 rule_name_override: ruleNameOverride,
                 name,
+                setup,
                 severity,
                 severity_mapping: severityMapping,
                 tags,
@@ -134,15 +149,13 @@ export const importRules = async ({
                 timeline_title: timelineTitle,
                 throttle,
                 version,
-                exceptions_list: exceptionsList,
                 actions,
               } = parsedRule;
 
               try {
-                const [exceptionErrors, exceptions] = await checkExceptions({
-                  ruleId,
-                  exceptionsClient,
-                  exceptions: exceptionsList,
+                const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
+                  rule: parsedRule,
+                  existingLists,
                 });
 
                 importRuleResponse = [...importRuleResponse, ...exceptionErrors];
@@ -151,9 +164,8 @@ export const importRules = async ({
                 const language =
                   !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined; // TODO: Fix these either with an is conversion or by better typing them within io-ts
                 const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-                throwHttpError(await mlAuthz.validateRuleType(type));
+                throwAuthzError(await mlAuthz.validateRuleType(type));
                 const rule = await readRules({
-                  isRuleRegistryEnabled,
                   rulesClient,
                   ruleId,
                   id: undefined,
@@ -161,14 +173,15 @@ export const importRules = async ({
 
                 if (rule == null) {
                   await createRules({
-                    isRuleRegistryEnabled,
                     rulesClient,
                     anomalyThreshold,
                     author,
                     buildingBlockType,
                     description,
                     enabled,
+                    timestampField,
                     eventCategoryOverride,
+                    tiebreakerField,
                     falsePositives,
                     from,
                     immutable,
@@ -176,7 +189,7 @@ export const importRules = async ({
                     language,
                     license,
                     machineLearningJobId,
-                    outputIndex: signalsIndex,
+                    outputIndex: '',
                     savedId,
                     timelineId,
                     timelineTitle,
@@ -184,12 +197,16 @@ export const importRules = async ({
                     filters,
                     ruleId,
                     index,
+                    dataViewId,
                     interval,
                     maxSignals,
                     name,
+                    relatedIntegrations,
+                    requiredFields,
                     riskScore,
                     riskScoreMapping,
                     ruleNameOverride,
+                    setup,
                     severity,
                     severityMapping,
                     tags,
@@ -225,14 +242,13 @@ export const importRules = async ({
                   });
                   await patchRules({
                     rulesClient,
-                    savedObjectsClient,
                     author,
                     buildingBlockType,
-                    spaceId,
-                    ruleStatusClient,
                     description,
                     enabled,
+                    timestampField,
                     eventCategoryOverride,
+                    tiebreakerField,
                     falsePositives,
                     from,
                     query,
@@ -246,12 +262,16 @@ export const importRules = async ({
                     filters,
                     rule: migratedRule,
                     index,
+                    dataViewId,
                     interval,
                     maxSignals,
+                    relatedIntegrations,
+                    requiredFields,
                     riskScore,
                     riskScoreMapping,
                     ruleNameOverride,
                     name,
+                    setup,
                     severity,
                     severityMapping,
                     tags,
@@ -311,82 +331,4 @@ export const importRules = async ({
 
     return importRuleResponse;
   }
-};
-
-// TODO: Batch this upfront and send down to check against
-export const checkExceptions = async ({
-  ruleId,
-  exceptions,
-  exceptionsClient,
-}: {
-  ruleId: string;
-  exceptions: ListArray;
-  exceptionsClient: ExceptionListClient | undefined;
-}): Promise<[BulkError[], ListArray]> => {
-  let ruleExceptions: ListArray = [];
-  let errors: BulkError[] = [];
-
-  if (!exceptions.length || exceptionsClient == null) {
-    return [[], exceptions];
-  }
-  for await (const exception of exceptions) {
-    const { list_id: listId, namespace_type: namespaceType } = exception;
-    const list = await exceptionsClient.getExceptionList({
-      id: undefined,
-      listId,
-      namespaceType,
-    });
-
-    if (list != null) {
-      ruleExceptions = [...ruleExceptions, { ...exception, id: list.id }];
-    } else {
-      // if exception is not found remove link
-      errors = [
-        ...errors,
-        createBulkErrorObject({
-          ruleId,
-          statusCode: 400,
-          message: `Rule with rule_id: "${ruleId}" references a non existent exception list of list_id: "${listId}". Reference has been removed.`,
-        }),
-      ];
-    }
-  }
-
-  return [errors, ruleExceptions];
-};
-
-export const importRuleExceptions = async ({
-  exceptions,
-  exceptionsClient,
-  overwrite,
-  maxExceptionsImportSize,
-}: {
-  exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
-  exceptionsClient: ExceptionListClient | undefined;
-  overwrite: boolean;
-  maxExceptionsImportSize: number;
-}) => {
-  if (exceptionsClient == null) {
-    return {
-      success: true,
-      errors: [],
-      successCount: 0,
-    };
-  }
-
-  const {
-    errors,
-    success,
-    success_count: successCount,
-  } = await exceptionsClient.importExceptionListAndItemsAsArray({
-    exceptionsToImport: exceptions,
-    overwrite,
-    maxExceptionsImportSize,
-  });
-
-  return {
-    errors,
-    success,
-    successCount,
-  };
 };

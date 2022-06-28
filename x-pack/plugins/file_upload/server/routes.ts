@@ -6,15 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
-import { CoreSetup, Logger } from 'src/core/server';
-import {
-  MAX_FILE_SIZE_BYTES,
-  IngestPipelineWrapper,
-  InputData,
-  Mappings,
-  Settings,
-} from '../common';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
+import { MAX_FILE_SIZE_BYTES } from '../common/constants';
+import type { IngestPipelineWrapper, InputData, Mappings, Settings } from '../common/types';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';
@@ -55,7 +50,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       validate: {
         query: schema.object({
           indexName: schema.maybe(schema.string()),
-          checkCreateIndexPattern: schema.boolean(),
+          checkCreateDataView: schema.boolean(),
           checkHasManagePipeline: schema.boolean(),
         }),
       },
@@ -63,13 +58,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     async (context, request, response) => {
       try {
         const [, pluginsStart] = await coreSetup.getStartServices();
-        const { indexName, checkCreateIndexPattern, checkHasManagePipeline } = request.query;
+        const { indexName, checkCreateDataView, checkHasManagePipeline } = request.query;
 
         const { hasImportPermission } = await checkFileUploadPrivileges({
           authorization: pluginsStart.security?.authz,
           request,
           indexName,
-          checkCreateIndexPattern,
+          checkCreateDataView,
           checkHasManagePipeline,
         });
 
@@ -107,11 +102,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const result = await analyzeFile(
-          context.core.elasticsearch.client,
-          request.body,
-          request.query
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const result = await analyzeFile(esClient, request.body, request.query);
         return response.ok({ body: result });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -147,6 +139,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;
+        const esClient = (await context.core).elasticsearch.client;
 
         // `id` being `undefined` tells us that this is a new import due to create a new index.
         // follow-up import calls to just add additional data will include the `id` of the created
@@ -156,7 +149,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         }
 
         const result = await importData(
-          context.core.elasticsearch.client,
+          esClient,
           id,
           index,
           settings,
@@ -187,8 +180,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const { body: indexExists } =
-          await context.core.elasticsearch.client.asCurrentUser.indices.exists(request.body);
+        const esClient = (await context.core).elasticsearch.client;
+        const indexExists = await esClient.asCurrentUser.indices.exists(request.body);
         return response.ok({ body: { exists: indexExists } });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -229,8 +222,9 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     async (context, request, response) => {
       try {
         const { index, timeFieldName, query, runtimeMappings } = request.body;
+        const esClient = (await context.core).elasticsearch.client;
         const resp = await getTimeFieldRange(
-          context.core.elasticsearch.client,
+          esClient,
           index,
           timeFieldName,
           query,

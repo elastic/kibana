@@ -7,24 +7,24 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../../data/common';
-import type { DiscoverServices } from '../../../../build_services';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   ErrorEmbeddable,
   IEmbeddable,
   isErrorEmbeddable,
-} from '../../../../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { SavedSearch } from '../../../../services/saved_searches';
 import type { GetStateReturn } from '../../services/discover_state';
-import { DataRefetch$ } from '../../utils/use_saved_search';
+import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   savedSearch?: SavedSearch;
   query?: Query;
   visibleFieldNames?: string[];
@@ -33,7 +33,9 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
+  fieldsToFetch?: string[];
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -57,10 +59,6 @@ export interface FieldStatisticsTableProps {
    */
   searchTitle?: string;
   /**
-   * Discover plugin services
-   */
-  services: DiscoverServices;
-  /**
    * Optional saved search
    */
   savedSearch?: SavedSearch;
@@ -79,7 +77,7 @@ export interface FieldStatisticsTableProps {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Metric tracking function
    * @param metricType
@@ -87,11 +85,13 @@ export interface FieldStatisticsTableProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   savedSearchRefetch$?: DataRefetch$;
+  availableFields$?: AvailableFields$;
+  searchSessionId?: string;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
-    services,
+    availableFields$,
     indexPattern,
     savedSearch,
     query,
@@ -101,8 +101,9 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     onAddFilter,
     trackUiMetric,
     savedSearchRefetch$,
+    searchSessionId,
   } = props;
-  const { uiSettings } = services;
+  const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>
@@ -128,26 +129,46 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         embeddable.updateInput({ lastReloadRequestTime: Date.now() });
       }
     });
+
+    const fields = availableFields$?.subscribe(() => {
+      if (embeddable && !isErrorEmbeddable(embeddable) && !availableFields$?.getValue().error) {
+        embeddable.updateInput({ fieldsToFetch: availableFields$?.getValue().fields });
+      }
+    });
+
     return () => {
       sub?.unsubscribe();
       refetch?.unsubscribe();
+      fields?.unsubscribe();
     };
-  }, [embeddable, stateContainer, savedSearchRefetch$]);
+  }, [embeddable, stateContainer, savedSearchRefetch$, availableFields$]);
 
   useEffect(() => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
-        indexPattern,
+        dataView: indexPattern,
         savedSearch,
         query,
         filters,
         visibleFieldNames: columns,
         onAddFilter,
+        sessionId: searchSessionId,
+        fieldsToFetch: availableFields$?.getValue().fields,
       });
       embeddable.reload();
     }
-  }, [embeddable, indexPattern, savedSearch, query, columns, filters, onAddFilter]);
+  }, [
+    embeddable,
+    indexPattern,
+    savedSearch,
+    query,
+    columns,
+    filters,
+    onAddFilter,
+    searchSessionId,
+    availableFields$,
+  ]);
 
   useEffect(() => {
     if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
@@ -158,7 +179,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
 
       embeddable.reload();
     }
-  }, [showPreviewByDefault, uiSettings, embeddable]);
+  }, [showPreviewByDefault, embeddable]);
 
   useEffect(() => {
     let unmounted = false;
@@ -172,7 +193,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
-            indexPattern,
+            dataView: indexPattern,
             savedSearch,
             query,
             showPreviewByDefault,
@@ -203,7 +224,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       // Clean up embeddable upon unmounting
       embeddable?.destroy();
     };
-  }, [embeddable, embeddableRoot, uiSettings, trackUiMetric]);
+  }, [embeddable, embeddableRoot, trackUiMetric]);
 
   return (
     <div

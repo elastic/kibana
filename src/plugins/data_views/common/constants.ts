@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/**
+ * All runtime field types.
+ * @public
+ */
 export const RUNTIME_FIELD_TYPES = [
   'keyword',
   'long',
@@ -14,6 +18,7 @@ export const RUNTIME_FIELD_TYPES = [
   'ip',
   'boolean',
   'geo_point',
+  'composite',
 ] as const;
 
 /**
@@ -22,21 +27,26 @@ export const RUNTIME_FIELD_TYPES = [
  * Should be revised after https://github.com/elastic/kibana/issues/82851 is fixed
  * For more background see: https://github.com/elastic/kibana/issues/107020
  */
-export const FLEET_ASSETS_TO_IGNORE = {
+export const DEFAULT_ASSETS_TO_IGNORE = {
   LOGS_INDEX_PATTERN: 'logs-*',
-  METRICS_INDEX_PATTERN: 'metrics-*',
   LOGS_DATA_STREAM_TO_IGNORE: 'logs-elastic_agent', // ignore ds created by Fleet server itself
-  METRICS_DATA_STREAM_TO_IGNORE: 'metrics-elastic_agent', // ignore ds created by Fleet server itself
-  METRICS_ENDPOINT_INDEX_TO_IGNORE: 'metrics-endpoint.metadata_current_default', // ignore index created by Fleet endpoint package installed by default in Cloud
+  ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE: 'logs-enterprise_search.api-default', // ignore ds created by enterprise search
 };
 
+/**
+ * UiSettings key for metaFields list.
+ * @public
+ */
 export const META_FIELDS = 'metaFields';
 
-/** @public **/
+/**
+ * Data view saved object type.
+ * @public
+ */
 export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
 
 /**
- * @deprecated Use DATA_VIEW_SAVED_OBJECT_TYPE. All index pattern interfaces were renamed.
+ * Data views plugin name.
+ * @public
  */
-
-export const INDEX_PATTERN_SAVED_OBJECT_TYPE = DATA_VIEW_SAVED_OBJECT_TYPE;
+export const PLUGIN_NAME = 'DataViews';

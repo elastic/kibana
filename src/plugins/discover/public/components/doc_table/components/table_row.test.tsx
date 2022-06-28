@@ -7,30 +7,51 @@
  */
 
 import React from 'react';
-import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
+import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { TableRow, TableRowProps } from './table_row';
-import { setDocViewsRegistry, setServices } from '../../../kibana_services';
-import { createFilterManagerMock } from '../../../../../data/public/query/filter_manager/filter_manager.mock';
-import { DiscoverServices } from '../../../build_services';
+import { setDocViewsRegistry } from '../../../kibana_services';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
-import { uiSettingsMock } from '../../../__mocks__/ui_settings';
 import { DocViewsRegistry } from '../../../services/doc_views/doc_views_registry';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
-jest.mock('../lib/row_formatter', () => {
-  const originalModule = jest.requireActual('../lib/row_formatter');
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { EsHitRecord } from '../../../types';
+
+jest.mock('../utils/row_formatter', () => {
+  const originalModule = jest.requireActual('../utils/row_formatter');
   return {
     ...originalModule,
-    formatRow: () => <span>mocked_document_cell</span>,
+    formatRow: () => {
+      return <span data-test-subj="document-column-test">mocked_document_cell</span>;
+    },
   };
 });
 
 const mountComponent = (props: TableRowProps) => {
   return mountWithIntl(
-    <table>
-      <tbody>
-        <TableRow {...props} />
-      </tbody>
-    </table>
+    <KibanaContextProvider
+      services={{
+        ...discoverServiceMock,
+        uiSettings: {
+          get: (key: string) => {
+            if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
+              return true;
+            } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
+              return 100;
+            }
+          },
+        },
+      }}
+    >
+      <table>
+        <tbody>
+          <TableRow {...props} />
+        </tbody>
+      </table>
+    </KibanaContextProvider>
   );
 };
 
@@ -45,32 +66,23 @@ const mockHit = {
     },
   ],
   _source: { message: 'mock_message', bytes: 20 },
-};
+} as unknown as EsHitRecord;
 
 const mockFilterManager = createFilterManagerMock();
 
 describe('Doc table row component', () => {
-  let mockInlineFilter;
-  let defaultProps: TableRowProps;
+  const mockInlineFilter = jest.fn();
+  const defaultProps = {
+    columns: ['_source'],
+    filter: mockInlineFilter,
+    indexPattern: indexPatternWithTimefieldMock,
+    row: buildDataTableRecord(mockHit, indexPatternWithTimefieldMock),
+    useNewFieldsApi: true,
+    filterManager: mockFilterManager,
+    addBasePath: (path: string) => path,
+  } as unknown as TableRowProps;
 
   beforeEach(() => {
-    mockInlineFilter = jest.fn();
-
-    defaultProps = {
-      columns: ['_source'],
-      filter: mockInlineFilter,
-      indexPattern: indexPatternWithTimefieldMock,
-      row: mockHit,
-      useNewFieldsApi: true,
-      filterManager: mockFilterManager,
-      addBasePath: (path: string) => path,
-      hideTimeColumn: true,
-    } as unknown as TableRowProps;
-
-    setServices({
-      uiSettings: uiSettingsMock,
-    } as unknown as DiscoverServices);
-
     setDocViewsRegistry(new DocViewsRegistry());
   });
 

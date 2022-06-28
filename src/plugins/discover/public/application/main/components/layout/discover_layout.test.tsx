@@ -8,61 +8,56 @@
 
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
-import { IndexPattern, IndexPatternAttributes } from '../../../../../../data/common';
-import { SavedObject } from '../../../../../../../core/types';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
+import { SavedObject } from '@kbn/core/types';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
+  AvailableFields$,
   DataCharts$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-} from '../../utils/use_saved_search';
+} from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { RequestAdapter } from '../../../../../../inspector';
+import { RequestAdapter } from '@kbn/inspector-plugin';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
-import { ElasticSearchHit } from '../../../../types';
-
-jest.mock('../../../../kibana_services', () => ({
-  ...jest.requireActual('../../../../kibana_services'),
-  getServices: () => ({
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-    },
-    uiSettings: {
-      get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
-    },
-  }),
-}));
+import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { DiscoverServices } from '../../../../build_services';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): DiscoverLayoutProps {
+function mountComponent(
+  indexPattern: DataView,
+  prevSidebarClosed?: boolean,
+  mountOptions: { attachTo?: HTMLElement } = {}
+) {
   const searchSourceMock = createSearchSourceMock({});
-  const services = discoverServiceMock;
+  const services = {
+    ...discoverServiceMock,
+    storage: new LocalStorageMock({
+      [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
+    }) as unknown as Storage,
+  } as unknown as DiscoverServices;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-  services.storage.get = (key: string) => {
-    if (key === SIDEBAR_CLOSED_KEY) {
-      return wasSidebarClosed;
-    }
   };
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown as Array<SavedObject<IndexPatternAttributes>>;
+  }) as unknown as Array<SavedObject<DataViewAttributes>>;
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -71,8 +66,13 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits as ElasticSearchHit[],
+    result: esHits.map((esHit) => buildDataTableRecord(esHit, indexPattern)),
   }) as DataDocuments$;
+
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -133,9 +133,10 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     documents$,
     totalHits$,
     charts$,
+    availableFields$,
   };
 
-  return {
+  const props = {
     indexPattern,
     indexPatternList,
     inspectorAdapters: { requests: new RequestAdapter() },
@@ -147,45 +148,61 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     savedSearchData$,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-    services,
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: {
+      setAppState: () => {},
+      appStateContainer: {
+        getState: () => ({
+          interval: 'auto',
+        }),
+      },
+    } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
+
+  return mountWithIntl(
+    <KibanaContextProvider services={services}>
+      <DiscoverLayout {...(props as DiscoverLayoutProps)} />
+    </KibanaContextProvider>,
+    mountOptions
+  );
 }
 
 describe('Discover component', () => {
   test('selected index pattern without time field displays no chart toggle', () => {
-    const component = mountWithIntl(<DiscoverLayout {...getProps(indexPatternMock)} />);
+    const component = mountComponent(indexPatternMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
 
   test('selected index pattern with time field displays chart toggle', () => {
-    const component = mountWithIntl(
-      <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
-    );
+    const component = mountComponent(indexPatternWithTimefieldMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+  });
+
+  test('the saved search title h1 gains focus on navigate', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const component = mountComponent(indexPatternWithTimefieldMock, undefined, {
+      attachTo: container,
+    });
+    expect(
+      component.find('[data-test-subj="discoverSavedSearchTitle"]').getDOMNode()
+    ).toHaveFocus();
   });
 
   describe('sidebar', () => {
     test('should be opened if discover:sidebarClosed was not set', () => {
-      const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock)} />
-      );
+      const component = mountComponent(indexPatternWithTimefieldMock, undefined);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be opened if discover:sidebarClosed is false', () => {
-      const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, false)} />
-      );
+      const component = mountComponent(indexPatternWithTimefieldMock, false);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
     test('should be closed if discover:sidebarClosed is true', () => {
-      const component = mountWithIntl(
-        <DiscoverLayout {...getProps(indexPatternWithTimefieldMock, true)} />
-      );
+      const component = mountComponent(indexPatternWithTimefieldMock, true);
       expect(component.find(DiscoverSidebar).length).toBe(0);
     });
   });

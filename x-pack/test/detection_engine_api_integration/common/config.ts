@@ -31,7 +31,7 @@ const enabledActionTypes = [
   'test.rate-limit',
 ];
 
-export function createTestConfig(name: string, options: CreateTestConfigOptions) {
+export function createTestConfig(options: CreateTestConfigOptions, testFiles?: string[]) {
   const { license = 'trial', ssl = false } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -47,7 +47,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles,
       servers,
       services,
       junit: {
@@ -74,7 +74,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.ruleRegistry.write.cache.enabled=false',
           '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'previewTelemetryUrlEnabled',
+          ])}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

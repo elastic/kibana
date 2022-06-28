@@ -5,128 +5,32 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import type { SearchRequest } from 'src/plugins/data/public';
+import type { Logger } from '@kbn/core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TransportResult } from '@elastic/elasticsearch';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
+  ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX,
-  failedFleetActionErrorCode,
+  ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
 } from '../../../common/endpoint/constants';
-import { SecuritySolutionRequestHandlerContext } from '../../types';
-import {
+import type { SecuritySolutionRequestHandlerContext } from '../../types';
+import type {
   ActivityLog,
-  ActivityLogAction,
-  EndpointActivityLogAction,
-  ActivityLogActionResponse,
-  EndpointActivityLogActionResponse,
-  ActivityLogItemTypes,
   EndpointAction,
   LogsEndpointAction,
-  EndpointActionResponse,
-  LogsEndpointActionResponse,
-  ActivityLogEntry,
 } from '../../../common/endpoint/types';
-import { doesLogsEndpointActionsIndexExist } from '../utils';
+import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
+import { getDateFilters } from '../services/actions/utils';
+import { ACTION_REQUEST_INDICES, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
 
-const actionsIndices = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_INDEX];
-const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX];
-export const logsEndpointActionsRegex = new RegExp(`(^\.ds-\.logs-endpoint\.actions-default-).+`);
-export const logsEndpointResponsesRegex = new RegExp(
-  `(^\.ds-\.logs-endpoint\.action\.responses-default-).+`
-);
 const queryOptions = {
   headers: {
     'X-elastic-product-origin': 'fleet',
   },
   ignore: [404],
-};
-
-const getDateFilters = ({ startDate, endDate }: { startDate: string; endDate: string }) => {
-  return [
-    { range: { '@timestamp': { gte: startDate } } },
-    { range: { '@timestamp': { lte: endDate } } },
-  ];
-};
-
-export const getUniqueLogData = (activityLogEntries: ActivityLogEntry[]): ActivityLogEntry[] => {
-  // find the error responses for actions that didn't make it to fleet index
-  const onlyResponsesForFleetErrors = activityLogEntries
-    .filter(
-      (e) =>
-        e.type === ActivityLogItemTypes.RESPONSE &&
-        e.item.data.error?.code === failedFleetActionErrorCode
-    )
-    .map(
-      (e: ActivityLogEntry) => (e.item.data as LogsEndpointActionResponse).EndpointActions.action_id
-    );
-
-  // all actions and responses minus endpoint actions.
-  const nonEndpointActionsDocs = activityLogEntries.filter(
-    (e) => e.type !== ActivityLogItemTypes.ACTION
-  );
-
-  // only endpoint actions that match the error responses
-  const onlyEndpointActionsDocWithoutFleetActions = activityLogEntries
-    .filter((e) => e.type === ActivityLogItemTypes.ACTION)
-    .filter((e: ActivityLogEntry) =>
-      onlyResponsesForFleetErrors.includes(
-        (e.item.data as LogsEndpointAction).EndpointActions.action_id
-      )
-    );
-
-  // join the error actions and the rest
-  return [...nonEndpointActionsDocs, ...onlyEndpointActionsDocWithoutFleetActions];
-};
-
-export const categorizeResponseResults = ({
-  results,
-}: {
-  results: Array<estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>>;
-}): Array<ActivityLogActionResponse | EndpointActivityLogActionResponse> => {
-  return results?.length
-    ? results?.map((e) => {
-        const isResponseDoc: boolean = matchesIndexPattern({
-          regexPattern: logsEndpointResponsesRegex,
-          index: e._index,
-        });
-        return isResponseDoc
-          ? {
-              type: ActivityLogItemTypes.RESPONSE,
-              item: { id: e._id, data: e._source as LogsEndpointActionResponse },
-            }
-          : {
-              type: ActivityLogItemTypes.FLEET_RESPONSE,
-              item: { id: e._id, data: e._source as EndpointActionResponse },
-            };
-      })
-    : [];
-};
-
-export const categorizeActionResults = ({
-  results,
-}: {
-  results: Array<estypes.SearchHit<EndpointAction | LogsEndpointAction>>;
-}): Array<ActivityLogAction | EndpointActivityLogAction> => {
-  return results?.length
-    ? results?.map((e) => {
-        const isActionDoc: boolean = matchesIndexPattern({
-          regexPattern: logsEndpointActionsRegex,
-          index: e._index,
-        });
-        return isActionDoc
-          ? {
-              type: ActivityLogItemTypes.ACTION,
-              item: { id: e._id, data: e._source as LogsEndpointAction },
-            }
-          : {
-              type: ActivityLogItemTypes.FLEET_ACTION,
-              item: { id: e._id, data: e._source as EndpointAction },
-            };
-      })
-    : [];
 };
 
 export const getTimeSortedData = (data: ActivityLog['data']): ActivityLog['data'] => {
@@ -170,7 +74,7 @@ export const getActionRequestsResult = async ({
   });
 
   const actionsSearchQuery: SearchRequest = {
-    index: hasLogsEndpointActionsIndex ? actionsIndices : AGENT_ACTIONS_INDEX,
+    index: hasLogsEndpointActionsIndex ? ACTION_REQUEST_INDICES : AGENT_ACTIONS_INDEX,
     size,
     from,
     body: {
@@ -191,10 +95,10 @@ export const getActionRequestsResult = async ({
 
   let actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    actionRequests = await esClient.search(actionsSearchQuery, queryOptions);
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    actionRequests = await esClient.search(actionsSearchQuery, { ...queryOptions, meta: true });
     const actionIds = actionRequests?.body?.hits?.hits?.map((e) => {
-      return logsEndpointActionsRegex.test(e._index)
+      return e._index.includes(ENDPOINT_ACTIONS_DS)
         ? (e._source as LogsEndpointAction).EndpointActions.action_id
         : (e._source as EndpointAction).action_id;
     });
@@ -231,11 +135,13 @@ export const getActionResponsesResult = async ({
   const hasLogsEndpointActionResponsesIndex = await doesLogsEndpointActionsIndexExist({
     context,
     logger,
-    indexName: ENDPOINT_ACTION_RESPONSES_INDEX,
+    indexName: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   });
 
   const responsesSearchQuery: SearchRequest = {
-    index: hasLogsEndpointActionResponsesIndex ? responseIndices : AGENT_ACTIONS_RESULTS_INDEX,
+    index: hasLogsEndpointActionResponsesIndex
+      ? ACTION_RESPONSE_INDICES
+      : AGENT_ACTIONS_RESULTS_INDEX,
     size: 1000,
     body: {
       query: {
@@ -248,19 +154,11 @@ export const getActionResponsesResult = async ({
 
   let actionResponses: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    actionResponses = await esClient.search(responsesSearchQuery, queryOptions);
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    actionResponses = await esClient.search(responsesSearchQuery, { ...queryOptions, meta: true });
   } catch (error) {
     logger.error(error);
     throw error;
   }
   return actionResponses;
 };
-
-const matchesIndexPattern = ({
-  regexPattern,
-  index,
-}: {
-  regexPattern: RegExp;
-  index: string;
-}): boolean => regexPattern.test(index);

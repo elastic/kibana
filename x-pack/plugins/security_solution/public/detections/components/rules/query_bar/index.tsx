@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { FilterManager, SavedQuery } from '../../../../../../../../src/plugins/data/public';
+import { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 
 import { BrowserFields } from '../../../../common/containers/source';
 import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
@@ -29,7 +29,7 @@ import * as i18n from './translations';
 export interface FieldValueQueryBar {
   filters: Filter[];
   query: Query;
-  saved_id?: string;
+  saved_id: string | null;
 }
 interface QueryBarDefineRuleProps {
   browserFields: BrowserFields;
@@ -46,22 +46,7 @@ interface QueryBarDefineRuleProps {
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
 
-const StyledEuiFormRow = styled(EuiFormRow)`
-  .kbnTypeahead__items {
-    max-height: 45vh !important;
-  }
-  .globalQueryBar {
-    padding: 4px 0px 0px 0px;
-    .kbnQueryBar {
-      & > div:first-child {
-        margin: 0px 0px 0px 4px;
-      }
-      &__wrap {
-        z-index: 0;
-      }
-    }
-  }
-`;
+const StyledEuiFormRow = styled(EuiFormRow)``;
 
 // TODO need to add disabled in the SearchBar
 
@@ -191,7 +176,7 @@ export const QueryBarDefineRule = ({
               query: '',
               language: 'kuery',
             },
-            saved_id: undefined,
+            saved_id: null,
           });
         }
       }
@@ -225,7 +210,7 @@ export const QueryBarDefineRule = ({
             ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
             : newFilters,
         query: newQuery,
-        saved_id: undefined,
+        saved_id: null,
       });
     },
     [browserFields, indexPattern, setFieldValue]
@@ -282,6 +267,7 @@ export const QueryBarDefineRule = ({
                 savedQuery={savedQuery}
                 onSavedQuery={onSavedQuery}
                 hideSavedQuery={false}
+                displayStyle="inPage"
               />
             </div>
           )}

@@ -12,8 +12,8 @@ import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
+import type { TimeRange } from '@kbn/es-query';
 import { epochToKbnDateFormat, getInterval, getTicks } from './time_utils';
-import { TimeRange } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
 
@@ -23,6 +23,7 @@ export interface Props {
   isTimesliderOpen: boolean;
   timeRange: TimeRange;
   waitForTimesliceToLoad$: Observable<void>;
+  updateGlobalTimeRange: (timeslice: number[]) => void;
 }
 
 interface State {
@@ -181,6 +182,21 @@ class KeyedTimeslider extends Component<Props, State> {
           <div className="mapTimeslider__timeWindow">
             <EuiText size="s">{prettyPrintTimeslice(this.state.timeslice)}</EuiText>
           </div>
+
+          <EuiButtonIcon
+            onClick={() => {
+              this.props.updateGlobalTimeRange(this.state.timeslice);
+            }}
+            iconType="calendar"
+            aria-label={i18n.translate('xpack.maps.timeslider.setGlobalTime', {
+              defaultMessage: 'Set global time to {timeslice}',
+              values: { timeslice: prettyPrintTimeslice(this.state.timeslice) },
+            })}
+            title={i18n.translate('xpack.maps.timeslider.setGlobalTime', {
+              defaultMessage: 'Set global time to {timeslice}',
+              values: { timeslice: prettyPrintTimeslice(this.state.timeslice) },
+            })}
+          />
 
           <div className="mapTimeslider__innerPanel">
             <div className="mapTimeslider__controls">

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeatmapIcon } from '../../../../../src/plugins/chart_expressions/expression_heatmap/public';
+import { HeatmapIcon } from '@kbn/expression-heatmap-plugin/public';
 
 export const LENS_HEATMAP_RENDERER = 'lens_heatmap_renderer';
 
@@ -26,7 +26,7 @@ export const CHART_NAMES = {
     shapeType: CHART_SHAPES.HEATMAP,
     icon: HeatmapIcon,
     label: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
-      defaultMessage: 'Heatmap',
+      defaultMessage: 'Heat map',
     }),
     groupLabel,
   },

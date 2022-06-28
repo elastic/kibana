@@ -8,30 +8,24 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  CommentsResponse,
   CommentType,
   AttributesTypeUser,
   AttributesTypeAlerts,
-} from '../../../../../../plugins/cases/common/api';
+  CaseStatuses,
+} from '@kbn/cases-plugin/common/api';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
   postCommentUserReq,
   postCommentAlertReq,
-  postCollectionReq,
-  postCommentGenAlertReq,
   getPostCaseRequest,
 } from '../../../../common/lib/mock';
 import {
-  createCaseAction,
-  createSubCase,
   deleteAllCaseItems,
-  deleteCaseAction,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
@@ -41,6 +35,7 @@ import {
   removeServerGeneratedPropertiesFromUserAction,
   removeServerGeneratedPropertiesFromSavedObject,
   superUserSpace1Auth,
+  updateCase,
 } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
@@ -93,7 +88,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(comment).to.eql({
           type: postCommentUserReq.type,
           comment: postCommentUserReq.comment,
-          associationType: 'case',
           created_by: defaultUser,
           pushed_at: null,
           pushed_by: null,
@@ -122,7 +116,6 @@ export default ({ getService }: FtrProviderContext): void => {
           alertId: postCommentAlertReq.alertId,
           index: postCommentAlertReq.index,
           rule: postCommentAlertReq.rule,
-          associationType: 'case',
           created_by: defaultUser,
           pushed_at: null,
           pushed_by: null,
@@ -146,16 +139,18 @@ export default ({ getService }: FtrProviderContext): void => {
         const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
         expect(commentUserAction).to.eql({
-          action_field: ['comment'],
+          type: 'comment',
           action: 'create',
-          action_by: defaultUser,
-          new_value: `{"comment":"${postCommentUserReq.comment}","type":"${postCommentUserReq.type}","owner":"securitySolutionFixture"}`,
-          new_val_connector_id: null,
-          old_value: null,
-          old_val_connector_id: null,
-          case_id: `${postedCase.id}`,
-          comment_id: `${patchedCase.comments![0].id}`,
-          sub_case_id: '',
+          created_by: defaultUser,
+          payload: {
+            comment: {
+              comment: postCommentUserReq.comment,
+              type: postCommentUserReq.type,
+              owner: 'securitySolutionFixture',
+            },
+          },
+          case_id: postedCase.id,
+          comment_id: patchedCase.comments![0].id,
           owner: 'securitySolutionFixture',
         });
       });
@@ -269,34 +264,29 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('400s when case is missing', async () => {
+      it('404s when the case does not exist', async () => {
         await createComment({
           supertest,
           caseId: 'not-exists',
-          params: {
-            // @ts-expect-error
-            bad: 'comment',
-          },
-          expectedHttpCode: 400,
+          params: postCommentUserReq,
+          expectedHttpCode: 404,
         });
       });
 
       it('400s when adding an alert to a closed case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
+        await updateCase({
+          supertest,
+          params: {
             cases: [
               {
                 id: postedCase.id,
                 version: postedCase.version,
-                status: 'closed',
+                status: CaseStatuses.closed,
               },
             ],
-          })
-          .expect(200);
+          },
+        });
 
         await createComment({
           supertest,
@@ -306,34 +296,57 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      it.skip('400s when adding an alert to a collection case', async () => {
-        const postedCase = await createCase(supertest, postCollectionReq);
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentAlertReq,
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('400s when adding a generated alert to an individual case', async () => {
+      it('400s when attempting to add more than 1K alerts to a case', async () => {
+        const alerts = [...Array(1001).keys()].map((num) => `test-${num}`);
         const postedCase = await createCase(supertest, postCaseReq);
-
-        await supertest
-          .post(`${CASES_URL}/${postedCase.id}/comments`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentGenAlertReq)
-          .expect(400);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: { ...postCommentAlertReq, alertId: alerts, index: alerts },
+          expectedHttpCode: 400,
+        });
       });
 
-      it('should return a 400 when passing the subCaseId', async () => {
-        const { body } = await supertest
-          .post(`${CASES_URL}/case-id/comments?subCaseId=value`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(400);
-        expect(body.message).to.contain('subCaseId');
+      it('400s when attempting to add an alert to a case that already has 1K alerts', async () => {
+        const alerts = [...Array(1000).keys()].map((num) => `test-${num}`);
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: { ...postCommentAlertReq, alertId: alerts, index: alerts },
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: { ...postCommentAlertReq, alertId: 'test-id', index: 'test-index' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when the case already has alerts and the sum of existing and new alerts exceed 1k', async () => {
+        const alerts = [...Array(1200).keys()].map((num) => `test-${num}`);
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            ...postCommentAlertReq,
+            alertId: alerts.slice(0, 500),
+            index: alerts.slice(0, 500),
+          },
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            ...postCommentAlertReq,
+            alertId: alerts.slice(500),
+            index: alerts.slice(500),
+          },
+          expectedHttpCode: 400,
+        });
       });
     });
 
@@ -349,78 +362,28 @@ export default ({ getService }: FtrProviderContext): void => {
         await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
-      it('should change the status of the alert if sync alert is on', async () => {
-        const rule = getRuleForSignalTesting(['auditbeat-*']);
-        const postedCase = await createCase(supertest, postCaseReq);
-
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                status: 'in-progress',
-              },
-            ],
-          })
-          .expect(200);
-
-        const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
-        await waitForSignalsToBePresent(supertest, log, 1, [id]);
-        const signals = await getSignalsByIds(supertest, log, [id]);
-
-        const alert = signals.hits.hits[0];
-        expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
-
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: {
-            alertId: alert._id,
-            index: alert._index,
-            rule: {
-              id: 'id',
-              name: 'name',
-            },
-            owner: 'securitySolutionFixture',
-            type: CommentType.alert,
-          },
-        });
-
-        await es.indices.refresh({ index: alert._index });
-
-        const { body: updatedAlert } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getQuerySignalIds([alert._id]))
-          .expect(200);
-
-        expect(updatedAlert.hits.hits[0]._source[ALERT_WORKFLOW_STATUS]).eql('acknowledged');
-      });
-
-      it('should NOT change the status of the alert if sync alert is off', async () => {
+      const bulkCreateAlertsAndVerifyAlertStatus = async (
+        syncAlerts: boolean,
+        expectedAlertStatus: string
+      ) => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const postedCase = await createCase(supertest, {
           ...postCaseReq,
-          settings: { syncAlerts: false },
+          settings: { syncAlerts },
         });
 
-        await supertest
-          .patch(CASES_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
+        await updateCase({
+          supertest,
+          params: {
             cases: [
               {
                 id: postedCase.id,
                 version: postedCase.version,
-                status: 'in-progress',
+                status: CaseStatuses['in-progress'],
               },
             ],
-          })
-          .expect(200);
+          },
+        });
 
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, log, id);
@@ -453,18 +416,24 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getQuerySignalIds([alert._id]))
           .expect(200);
 
-        expect(updatedAlert.hits.hits[0]._source[ALERT_WORKFLOW_STATUS]).eql('open');
+        expect(updatedAlert.hits.hits[0]._source[ALERT_WORKFLOW_STATUS]).eql(expectedAlertStatus);
+      };
+
+      it('should change the status of the alert if sync alert is on', async () => {
+        await bulkCreateAlertsAndVerifyAlertStatus(true, 'acknowledged');
+      });
+
+      it('should NOT change the status of the alert if sync alert is off', async () => {
+        await bulkCreateAlertsAndVerifyAlertStatus(false, 'open');
       });
     });
 
     describe('alert format', () => {
-      type AlertComment = CommentType.alert | CommentType.generatedAlert;
+      type AlertComment = CommentType.alert;
 
       for (const [alertId, index, type] of [
         ['1', ['index1', 'index2'], CommentType.alert],
         [['1', '2'], 'index', CommentType.alert],
-        ['1', ['index1', 'index2'], CommentType.generatedAlert],
-        [['1', '2'], 'index', CommentType.generatedAlert],
       ]) {
         it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
@@ -496,39 +465,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
-    });
-
-    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-    describe.skip('sub case comments', () => {
-      let actionID: string;
-      before(async () => {
-        actionID = await createCaseAction(supertest);
-      });
-      after(async () => {
-        await deleteCaseAction(supertest, actionID);
-      });
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
-      });
-
-      it('posts a new comment for a sub case', async () => {
-        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-        // create another sub case just to make sure we get the right comments
-        await createSubCase({ supertest, actionID });
-        await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
-          .set('kbn-xsrf', 'true')
-          .send(postCommentUserReq)
-          .expect(200);
-
-        const { body: subCaseComments }: { body: CommentsResponse } = await supertest
-          .get(`${CASES_URL}/${caseInfo.id}/comments/_find?subCaseId=${caseInfo.subCases![0].id}`)
-          .send()
-          .expect(200);
-        expect(subCaseComments.total).to.be(2);
-        expect(subCaseComments.comments[0].type).to.be(CommentType.generatedAlert);
-        expect(subCaseComments.comments[1].type).to.be(CommentType.user);
-      });
     });
 
     describe('rbac', () => {

@@ -29,12 +29,18 @@
       "actionId": {
         "type": "keyword"
       },
+      "consumer": {
+        "type": "keyword"
+      },
       "params": {
         "enabled": false,
         "type": "object"
       },
       "apiKey": {
         "type": "binary"
+      },
+      "executionId": {
+        "type": "keyword"
       },
       "relatedSavedObjects": {
         "enabled": false,

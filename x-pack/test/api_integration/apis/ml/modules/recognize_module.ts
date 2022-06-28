@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_auth', 'siem_auditbeat', 'siem_auditbeat_auth'],
+        moduleIds: ['security_auth'],
       },
     },
     {
@@ -94,13 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: [
-          'security_auth',
-          'security_network',
-          'security_windows',
-          'siem_winlogbeat',
-          'siem_winlogbeat_auth',
-        ],
+        moduleIds: ['security_auth', 'security_network', 'security_windows_v3'],
       },
     },
     {
@@ -129,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['auditbeat_process_hosts_ecs', 'security_linux', 'siem_auditbeat'],
+        moduleIds: ['security_linux_v3'],
       },
     },
     {
@@ -139,7 +133,12 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_auth', 'security_linux', 'security_network', 'security_windows'],
+        moduleIds: [
+          'security_auth',
+          'security_linux_v3',
+          'security_network',
+          'security_windows_v3',
+        ],
       },
     },
     {
@@ -149,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['metricbeat_system_ecs', 'security_linux'],
+        moduleIds: ['metricbeat_system_ecs', 'security_linux_v3'],
       },
     },
     {
@@ -169,7 +168,7 @@ export default ({ getService }: FtrProviderContext) => {
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['security_linux'], // the metrics ui modules don't define a query and can't be recognized
+        moduleIds: ['security_linux_v3'], // the metrics ui modules don't define a query and can't be recognized
       },
     },
     {
@@ -205,11 +204,11 @@ export default ({ getService }: FtrProviderContext) => {
   ];
 
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`/api/ml/modules/recognize/${indexPattern}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(rspCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }

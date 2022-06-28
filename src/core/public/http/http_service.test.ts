@@ -10,10 +10,11 @@
 import fetchMock from 'fetch-mock/es5/client';
 import { loadingServiceMock } from './http_service.test.mocks';
 
-import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { HttpService } from './http_service';
 import { Observable } from 'rxjs';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 
 describe('interceptors', () => {
   afterEach(() => fetchMock.restore());
@@ -22,9 +23,10 @@ describe('interceptors', () => {
     fetchMock.get('*', {});
     const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
     const fatalErrors = fatalErrorsServiceMock.createSetupContract();
+    const executionContext = executionContextServiceMock.createSetupContract();
     const httpService = new HttpService();
 
-    const setup = httpService.setup({ fatalErrors, injectedMetadata });
+    const setup = httpService.setup({ fatalErrors, injectedMetadata, executionContext });
     const setupInterceptor = jest.fn();
     setup.intercept({ request: setupInterceptor });
 
@@ -47,7 +49,8 @@ describe('#setup()', () => {
     const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
     const fatalErrors = fatalErrorsServiceMock.createSetupContract();
     const httpService = new HttpService();
-    httpService.setup({ fatalErrors, injectedMetadata });
+    const executionContext = executionContextServiceMock.createSetupContract();
+    httpService.setup({ fatalErrors, injectedMetadata, executionContext });
     const loadingServiceSetup = loadingServiceMock.setup.mock.results[0].value;
     // We don't verify that this Observable comes from Fetch#getLoadingCount$() to avoid complex mocking
     expect(loadingServiceSetup.addLoadingCountSource).toHaveBeenCalledWith(expect.any(Observable));
@@ -59,7 +62,8 @@ describe('#stop()', () => {
     const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
     const fatalErrors = fatalErrorsServiceMock.createSetupContract();
     const httpService = new HttpService();
-    httpService.setup({ fatalErrors, injectedMetadata });
+    const executionContext = executionContextServiceMock.createSetupContract();
+    httpService.setup({ fatalErrors, injectedMetadata, executionContext });
     httpService.start();
     httpService.stop();
     expect(loadingServiceMock.stop).toHaveBeenCalled();

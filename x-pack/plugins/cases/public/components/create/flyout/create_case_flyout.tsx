@@ -9,14 +9,22 @@ import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
+import { QueryClientProvider } from 'react-query';
 import * as i18n from '../translations';
 import { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
+import { UseCreateAttachments } from '../../../containers/use_create_attachments';
+import { CaseAttachments } from '../../../types';
+import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface CreateCaseFlyoutProps {
-  afterCaseCreated?: (theCase: Case) => Promise<void>;
-  onClose: () => void;
-  onSuccess: (theCase: Case) => Promise<void>;
+  afterCaseCreated?: (
+    theCase: Case,
+    createAttachments: UseCreateAttachments['createAttachments']
+  ) => Promise<void>;
+  onClose?: () => void;
+  onSuccess?: (theCase: Case) => Promise<void>;
+  attachments?: CaseAttachments;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -52,7 +60,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 
       && .euiFlyoutBody__overflowContent {
         display: block;
-        padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 70px;
+        padding: ${theme.eui.euiSizeL} ${theme.eui.euiSizeL} 70px;
         height: auto;
       }
     `}
@@ -63,33 +71,38 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess }) => (
-    <>
-      <GlobalStyle />
-      <StyledFlyout
-        onClose={onClose}
-        data-test-subj="create-case-flyout"
-        // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
-        maskProps={{ className: maskOverlayClassName }}
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2>{i18n.CREATE_TITLE}</h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <StyledEuiFlyoutBody>
-          <FormWrapper>
-            <CreateCaseForm
-              afterCaseCreated={afterCaseCreated}
-              onCancel={onClose}
-              onSuccess={onSuccess}
-              withSteps={false}
-            />
-          </FormWrapper>
-        </StyledEuiFlyoutBody>
-      </StyledFlyout>
-    </>
-  )
+  ({ afterCaseCreated, onClose, onSuccess, attachments }) => {
+    const handleCancel = onClose || function () {};
+    const handleOnSuccess = onSuccess || async function () {};
+    return (
+      <QueryClientProvider client={casesQueryClient}>
+        <GlobalStyle />
+        <StyledFlyout
+          onClose={onClose}
+          data-test-subj="create-case-flyout"
+          // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
+          maskProps={{ className: maskOverlayClassName }}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>{i18n.CREATE_CASE_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <StyledEuiFlyoutBody>
+            <FormWrapper>
+              <CreateCaseForm
+                afterCaseCreated={afterCaseCreated}
+                attachments={attachments}
+                onCancel={handleCancel}
+                onSuccess={handleOnSuccess}
+                withSteps={false}
+              />
+            </FormWrapper>
+          </StyledEuiFlyoutBody>
+        </StyledFlyout>
+      </QueryClientProvider>
+    );
+  }
 );
 
 CreateCaseFlyout.displayName = 'CreateCaseFlyout';

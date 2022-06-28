@@ -67,10 +67,10 @@ export const registerValidateIndexPatternRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client: clusterClient } = context.core.elasticsearch;
+      const { client: clusterClient } = (await context.core).elasticsearch;
       try {
         const { indexPattern } = request.params;
-        const [{ body: fieldCapabilities }, { body: rollupIndexCapabilities }] = await Promise.all([
+        const [fieldCapabilities, rollupIndexCapabilities] = await Promise.all([
           clusterClient.asCurrentUser.fieldCaps({ index: indexPattern, fields: '*' }),
           clusterClient.asCurrentUser.rollup.getRollupIndexCaps({ index: indexPattern }),
         ]);

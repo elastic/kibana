@@ -7,7 +7,7 @@
  */
 
 import { getStateDefaults } from './get_state_defaults';
-import { createSearchSourceMock, dataPluginMock } from '../../../../../data/public/mocks';
+import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiSettingsMock } from '../../../__mocks__/ui_settings';
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
@@ -36,6 +36,7 @@ describe('getStateDefaults', () => {
         "index": "index-pattern-with-timefield-id",
         "interval": "auto",
         "query": undefined,
+        "rowHeight": undefined,
         "savedQuery": undefined,
         "sort": Array [
           Array [
@@ -68,6 +69,7 @@ describe('getStateDefaults', () => {
         "index": "the-index-pattern-id",
         "interval": "auto",
         "query": undefined,
+        "rowHeight": undefined,
         "savedQuery": undefined,
         "sort": Array [],
         "viewMode": undefined,

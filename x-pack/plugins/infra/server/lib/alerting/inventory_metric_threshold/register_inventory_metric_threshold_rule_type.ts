@@ -6,41 +6,45 @@
  */
 
 import { schema, Type } from '@kbn/config-schema';
-import { Unit } from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '../../../../../alerting/server';
+import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import {
+  Comparator,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+} from '../../../../common/alerting/metrics';
+import {
+  SnapshotCustomAggregation,
+  SNAPSHOT_CUSTOM_AGGREGATIONS,
+} from '../../../../common/http_api/snapshot_api';
+import {
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeKeys,
+} from '../../../../common/inventory_models/types';
+import { InfraBackendLibs } from '../../infra_types';
+import {
+  alertStateActionVariableDescription,
+  groupActionVariableDescription,
+  metricActionVariableDescription,
+  reasonActionVariableDescription,
+  thresholdActionVariableDescription,
+  timestampActionVariableDescription,
+  valueActionVariableDescription,
+  viewInAppUrlActionVariableDescription,
+} from '../common/messages';
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
   FIRED_ACTIONS_ID,
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
-import { InfraBackendLibs } from '../../infra_types';
-import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
-import {
-  groupActionVariableDescription,
-  alertStateActionVariableDescription,
-  reasonActionVariableDescription,
-  timestampActionVariableDescription,
-  valueActionVariableDescription,
-  metricActionVariableDescription,
-  thresholdActionVariableDescription,
-} from '../common/messages';
-import {
-  SnapshotMetricTypeKeys,
-  SnapshotMetricType,
-  InventoryItemType,
-} from '../../../../common/inventory_models/types';
-import {
-  SNAPSHOT_CUSTOM_AGGREGATIONS,
-  SnapshotCustomAggregation,
-} from '../../../../common/http_api/snapshot_api';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
   comparator: oneOfLiterals(Object.values(Comparator)) as Type<Comparator>,
-  timeUnit: schema.string() as Type<Unit>,
+  timeUnit: schema.string() as Type<TimeUnitChar>,
   timeSize: schema.number(),
   metric: oneOfLiterals(Object.keys(SnapshotMetricTypeKeys)) as Type<SnapshotMetricType>,
   warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
@@ -82,6 +86,7 @@ export async function registerMetricInventoryThresholdRuleType(
       ),
     },
     defaultActionGroupId: FIRED_ACTIONS_ID,
+    doesSetRecoveryContext: true,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
     producer: 'infrastructure',
     minimumLicenseRequired: 'basic',
@@ -96,6 +101,7 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
+        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
       ],
     },
   });

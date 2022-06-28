@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { debounce } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { EuiSpacer, Query } from '@elastic/eui';
+import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   SavedObjectsClientContract,
@@ -19,10 +19,11 @@ import {
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
-} from 'src/core/public';
-import { RedirectAppLinks } from '../../../../kibana_react/public';
-import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
-import { IndexPatternsContract } from '../../../../data/public';
+} from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import {
   parseQuery,
@@ -49,7 +50,6 @@ import {
   DeleteConfirmModal,
   ExportModal,
 } from './components';
-import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
 interface ExportAllOption {
   id: string;
@@ -61,7 +61,7 @@ export interface SavedObjectsTableProps {
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
+  dataViews: DataViewsContract;
   taggingApi?: SavedObjectsTaggingApi;
   http: HttpStart;
   search: DataPublicPluginStart['search'];
@@ -78,6 +78,7 @@ export interface SavedObjectsTableState {
   totalCount: number;
   page: number;
   perPage: number;
+  sort: CriteriaWithPagination<SavedObjectWithMetadata>['sort'];
   savedObjects: SavedObjectWithMetadata[];
   savedObjectCounts: Record<string, number>;
   activeQuery: Query;
@@ -114,6 +115,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       totalCount: 0,
       page: 0,
       perPage: props.perPageConfig || 50,
+      sort: {
+        field: 'updated_at',
+        direction: 'desc',
+      },
       savedObjects: [],
       savedObjectCounts: props.allowedTypes.reduce((typeToCountMap, type) => {
         typeToCountMap[type.name] = 0;
@@ -211,7 +216,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   debouncedFindObjects = debounce(async () => {
-    const { activeQuery: query, page, perPage } = this.state;
+    const { activeQuery: query, page, perPage, sort } = this.state;
     const { notifications, http, allowedTypes, taggingApi } = this.props;
     const { queryText, visibleTypes, selectedTags } = parseQuery(query, allowedTypes);
 
@@ -228,9 +233,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       fields: ['id'],
       type: searchTypes,
     };
-    if (findOptions.type.length > 1) {
-      findOptions.sortField = 'type';
-    }
+    findOptions.sortField = sort?.field;
+    findOptions.sortOrder = sort?.direction;
 
     findOptions.hasReference = getTagFindReferences({ selectedTags, taggingApi });
 
@@ -352,7 +356,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     );
   };
 
-  onTableChange = async (table: any) => {
+  onTableChange = async (table: CriteriaWithPagination<SavedObjectWithMetadata>) => {
     const { index: page, size: perPage } = table.page || {};
 
     this.setState(
@@ -360,6 +364,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         page,
         perPage,
         selectedSavedObjects: [],
+        sort: table.sort,
       },
       this.fetchAllSavedObjects
     );
@@ -513,7 +518,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const indexPatterns = selectedSavedObjects.filter((object) => object.type === 'index-pattern');
     if (indexPatterns.length) {
-      await this.props.indexPatterns.clearCache();
+      await this.props.dataViews.clearCache();
     }
 
     const deletes = selectedSavedObjects
@@ -557,7 +562,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.hideImportFlyout}
         done={this.finishImport}
         http={this.props.http}
-        indexPatterns={this.props.indexPatterns}
+        dataViews={this.props.dataViews}
         newIndexPatternUrl={newIndexPatternUrl}
         basePath={this.props.http.basePath}
         search={this.props.search}
@@ -653,6 +658,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       filteredItemCount,
       isSearching,
       savedObjectCounts,
+      sort,
     } = this.state;
     const { http, taggingApi, allowedTypes, applications } = this.props;
 
@@ -700,6 +706,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}
             pageSize={perPage}
+            sort={sort}
             items={savedObjects}
             totalItemCount={filteredItemCount}
             isSearching={isSearching}

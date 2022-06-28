@@ -12,22 +12,15 @@ import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
-import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { DiscoverServices } from '../../build_services';
-import { getDocId } from './discover_grid_document_selection';
-import { ElasticSearchHit } from '../../types';
-
-jest.mock('../../kibana_services', () => ({
-  ...jest.requireActual('../../kibana_services'),
-  getServices: () => jest.requireActual('../../__mocks__/services').discoverServiceMock,
-}));
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { discoverServiceMock } from '../../__mocks__/services';
+import { buildDataTableRecord } from '../../utils/build_data_record';
+import { getDocId } from '../../utils/get_doc_id';
+import { EsHitRecord } from '../../types';
 
 function getProps() {
-  const servicesMock = {
-    uiSettings: uiSettingsMock,
-  } as DiscoverServices;
   return {
     ariaLabelledBy: '',
     columns: [],
@@ -40,11 +33,10 @@ function getProps() {
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
-    rows: esHits,
+    rows: esHits.map((hit) => buildDataTableRecord(hit, indexPatternMock)),
     sampleSize: 30,
     searchDescription: '',
     searchTitle: '',
-    services: servicesMock,
     setExpandedDoc: jest.fn(),
     settings: {},
     showTimeCol: true,
@@ -54,7 +46,13 @@ function getProps() {
 }
 
 function getComponent() {
-  return mountWithIntl(<DiscoverGrid {...getProps()} />);
+  const Proxy = (props: DiscoverGridProps) => (
+    <KibanaContextProvider services={discoverServiceMock}>
+      <DiscoverGrid {...props} />
+    </KibanaContextProvider>
+  );
+
+  return mountWithIntl(<Proxy {...getProps()} />);
 }
 
 function getSelectedDocNr(component: ReactWrapper<DiscoverGridProps>) {
@@ -77,7 +75,7 @@ function getDisplayedDocNr(component: ReactWrapper<DiscoverGridProps>) {
 
 async function toggleDocSelection(
   component: ReactWrapper<DiscoverGridProps>,
-  document: ElasticSearchHit
+  document: EsHitRecord
 ) {
   act(() => {
     const docId = getDocId(document);
@@ -142,7 +140,6 @@ describe('DiscoverGrid', () => {
             _index: 'i',
             _id: '6',
             _score: 1,
-            _type: '_doc',
             _source: {
               date: '2020-20-02T12:12:12.128',
               name: 'test6',
@@ -150,7 +147,7 @@ describe('DiscoverGrid', () => {
               bytes: 50,
             },
           },
-        ],
+        ].map((row) => buildDataTableRecord(row, indexPatternMock)),
       });
       expect(getDisplayedDocNr(component)).toBe(1);
       expect(getSelectedDocNr(component)).toBe(0);

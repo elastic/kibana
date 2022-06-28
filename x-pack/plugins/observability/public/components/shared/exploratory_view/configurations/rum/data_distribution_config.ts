@@ -45,7 +45,7 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getRumDistributionConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.DISTRIBUTION,
     defaultSeriesType: 'line',
@@ -74,10 +74,21 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
       },
       LABEL_FIELDS_FILTER,
     ],
-    breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    breakdownFields: [
+      USER_AGENT_NAME,
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
+      SERVICE_NAME,
+    ],
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
     metricOptions: [
-      { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
+      {
+        label: PAGE_LOAD_TIME_LABEL,
+        id: TRANSACTION_DURATION,
+        field: TRANSACTION_DURATION,
+        showPercentileAnnotations: true,
+      },
       {
         label: BACKEND_TIME_LABEL,
         id: TRANSACTION_TIME_TO_FIRST_BYTE,
@@ -90,8 +101,8 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
       { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
     ],
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
+      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: {
       ...FieldLabels,

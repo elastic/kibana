@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
+
 import expect from '@kbn/expect';
 
+import type {
+  LatencyCorrelation,
+  LatencyCorrelationsResponse,
+} from '@kbn/apm-plugin/common/correlations/latency_correlations/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import type { LatencyCorrelationsResponse } from '../../../../plugins/apm/common/correlations/latency_correlations/types';
 
 // These tests go through the full sequence of queries required
 // to get the final results for a latency correlation analysis.
@@ -30,7 +35,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles the empty state', async () => {
         const overallDistributionResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/latency/overall_distribution',
+          endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
           params: {
             body: {
               ...getOptions(),
@@ -45,7 +50,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         const fieldCandidatesResponse = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/correlations/field_candidates',
+          endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
           params: {
             query: getOptions(),
           },
@@ -57,7 +62,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         const fieldValuePairsResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/field_value_pairs',
+          endpoint: 'POST /internal/apm/correlations/field_value_pairs/transactions',
           params: {
             body: {
               ...getOptions(),
@@ -72,7 +77,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         const significantCorrelationsResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/significant_correlations',
+          endpoint: 'POST /internal/apm/correlations/significant_correlations/transactions',
           params: {
             body: {
               ...getOptions(),
@@ -105,10 +110,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'trial', archives: ['8.0.0'] },
     () => {
       // putting this into a single `it` because the responses depend on each other
-      // flaky: https://github.com/elastic/kibana/issues/118023
-      it.skip('runs queries and returns results', async () => {
+      it('runs queries and returns results', async () => {
         const overallDistributionResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/latency/overall_distribution',
+          endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
           params: {
             body: {
               ...getOptions(),
@@ -123,7 +127,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         const fieldCandidatesResponse = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/correlations/field_candidates',
+          endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
           params: {
             query: getOptions(),
           },
@@ -141,7 +145,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
 
         const fieldValuePairsResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/field_value_pairs',
+          endpoint: 'POST /internal/apm/correlations/field_value_pairs/transactions',
           params: {
             body: {
               ...getOptions(),
@@ -161,36 +165,60 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           `Expected field value pairs length to be '379', got '${fieldValuePairsResponse.body?.fieldValuePairs.length}'`
         );
 
-        const significantCorrelationsResponse = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/significant_correlations',
-          params: {
-            body: {
-              ...getOptions(),
-              fieldValuePairs: fieldValuePairsResponse.body?.fieldValuePairs,
+        // This replicates the code used in the `useLatencyCorrelations` hook to chunk requests for correlation analysis.
+        // Tests turned out to be flaky and occasionally overload ES with a `search_phase_execution_exception`
+        // when all 379 field value pairs from above are queried in parallel.
+        // The chunking sends 10 field value pairs with each request to the Kibana API endpoint.
+        // Kibana itself will then run those 10 requests in parallel against ES.
+        const latencyCorrelations: LatencyCorrelation[] = [];
+        let ccsWarning = false;
+        const chunkSize = 10;
+
+        const fieldValuePairChunks = chunk(
+          fieldValuePairsResponse.body?.fieldValuePairs,
+          chunkSize
+        );
+
+        for (const fieldValuePairChunk of fieldValuePairChunks) {
+          const significantCorrelations = await apmApiClient.readUser({
+            endpoint: 'POST /internal/apm/correlations/significant_correlations/transactions',
+            params: {
+              body: {
+                ...getOptions(),
+                fieldValuePairs: fieldValuePairChunk,
+              },
             },
-          },
-        });
+          });
 
-        expect(significantCorrelationsResponse.status).to.eql(
-          200,
-          `Expected status to be '200', got '${significantCorrelationsResponse.status}'`
-        );
+          expect(significantCorrelations.status).to.eql(
+            200,
+            `Expected status to be '200', got '${significantCorrelations.status}'`
+          );
 
-        // Loaded fractions and totalDocCount of 1244.
-        expect(significantCorrelationsResponse.body?.totalDocCount).to.eql(
-          1244,
-          `Expected 1244 total doc count, got ${significantCorrelationsResponse.body?.totalDocCount}.`
-        );
+          // Loaded fractions and totalDocCount of 1244.
+          expect(significantCorrelations.body?.totalDocCount).to.eql(
+            1244,
+            `Expected 1244 total doc count, got ${significantCorrelations.body?.totalDocCount}.`
+          );
+
+          if (significantCorrelations.body?.latencyCorrelations.length > 0) {
+            latencyCorrelations.push(...significantCorrelations.body?.latencyCorrelations);
+          }
+
+          if (significantCorrelations.body?.ccsWarning) {
+            ccsWarning = true;
+          }
+        }
 
         const fieldsToSample = new Set<string>();
-        if (significantCorrelationsResponse.body?.latencyCorrelations.length > 0) {
-          significantCorrelationsResponse.body?.latencyCorrelations.forEach((d) => {
+        if (latencyCorrelations.length > 0) {
+          latencyCorrelations.forEach((d) => {
             fieldsToSample.add(d.fieldName);
           });
         }
 
         const failedtransactionsFieldStats = await apmApiClient.readUser({
-          endpoint: 'POST /internal/apm/correlations/field_stats',
+          endpoint: 'POST /internal/apm/correlations/field_stats/transactions',
           params: {
             body: {
               ...getOptions(),
@@ -200,10 +228,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         const finalRawResponse: LatencyCorrelationsResponse = {
-          ccsWarning: significantCorrelationsResponse.body?.ccsWarning,
+          ccsWarning,
           percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
           overallHistogram: overallDistributionResponse.body?.overallHistogram,
-          latencyCorrelations: significantCorrelationsResponse.body?.latencyCorrelations,
+          latencyCorrelations,
           fieldStats: failedtransactionsFieldStats.body?.stats,
         };
 
@@ -226,7 +254,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(correlation?.fieldValue).to.be('success');
         expect(correlation?.correlation).to.be(0.6275246559191225);
         expect(correlation?.ksTest).to.be(4.806503252860024e-13);
-        expect(correlation?.histogram.length).to.be(101);
+        expect(correlation?.histogram?.length).to.be(101);
 
         const fieldStats = finalRawResponse?.fieldStats?.[0];
         expect(typeof fieldStats).to.be('object');

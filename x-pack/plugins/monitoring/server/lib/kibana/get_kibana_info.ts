@@ -6,24 +6,26 @@
  */
 
 import { merge } from 'lodash';
-// @ts-ignore
-import { checkParam, MissingRequiredError } from '../error_missing_required';
-// @ts-ignore
-import { calculateAvailability } from '../calculate_availability';
-import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { Globals } from '../../static_globals';
+import { LegacyRequest } from '../../types';
+import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { MissingRequiredError } from '../error_missing_required';
+import { buildKibanaInfo } from './build_kibana_info';
+import { isKibanaStatusStale } from './is_kibana_status_stale';
 
 export function handleResponse(resp: ElasticsearchResponse) {
-  const legacySource = resp.hits?.hits[0]?._source.kibana_stats;
-  const mbSource = resp.hits?.hits[0]?._source.kibana?.stats;
-  const kibana = resp.hits?.hits[0]?._source.kibana?.kibana ?? legacySource?.kibana;
-  const availabilityTimestamp =
-    resp.hits?.hits[0]?._source['@timestamp'] ?? legacySource?.timestamp;
-  if (!availabilityTimestamp) {
+  const hit = resp.hits?.hits[0];
+  const legacySource = hit?._source.kibana_stats;
+  const mbSource = hit?._source.kibana?.stats;
+  const lastSeenTimestamp = hit?._source['@timestamp'] ?? legacySource?.timestamp;
+  if (!lastSeenTimestamp) {
     throw new MissingRequiredError('timestamp');
   }
-  return merge(kibana, {
-    availability: calculateAvailability(availabilityTimestamp),
+
+  return merge(buildKibanaInfo(hit!), {
+    statusIsStale: isKibanaStatusStale(lastSeenTimestamp),
+    lastSeenTimestamp,
     os_memory_free: mbSource?.os?.memory?.free_in_bytes ?? legacySource?.os?.memory?.free_in_bytes,
     uptime: mbSource?.process?.uptime?.ms ?? legacySource?.process?.uptime_in_millis,
   });
@@ -31,24 +33,29 @@ export function handleResponse(resp: ElasticsearchResponse) {
 
 export function getKibanaInfo(
   req: LegacyRequest,
-  kbnIndexPattern: string,
   { clusterUuid, kibanaUuid }: { clusterUuid: string; kibanaUuid: string }
 ) {
-  checkParam(kbnIndexPattern, 'kbnIndexPattern in getKibanaInfo');
-
+  const moduleType = 'kibana';
+  const indexPatterns = getNewIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+  });
   const params = {
-    index: kbnIndexPattern,
+    index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
     filter_path: [
       'hits.hits._source.kibana_stats.kibana',
-      'hits.hits._source.kibana.kibana',
+      'hits.hits._source.kibana.stats',
       'hits.hits._source.kibana_stats.os.memory.free_in_bytes',
       'hits.hits._source.kibana.stats.os.memory.free_in_bytes',
       'hits.hits._source.kibana_stats.process.uptime_in_millis',
       'hits.hits._source.kibana.stats.process.uptime.ms',
       'hits.hits._source.kibana_stats.timestamp',
       'hits.hits._source.@timestamp',
+      'hits.hits._source.service.id',
+      'hits.hits._source.service.version',
     ],
     body: {
       query: {

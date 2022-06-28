@@ -32,8 +32,11 @@ import { version } from '@kbn/securitysolution-io-ts-types';
 import {
   id,
   index,
+  data_view_id,
   filters,
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
   building_block_type,
   note,
   license,
@@ -60,21 +63,17 @@ import {
   enabled,
   outcome,
   alias_target_id,
+  alias_purpose,
   updated_at,
   updated_by,
   created_at,
   created_by,
-  ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
   namespace,
-  last_gap,
-  bulk_create_time_durations,
-  search_after_time_durations,
-} from '../common/schemas';
+  ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+} from '../common';
 
 export const createSchema = <
   Required extends t.Props,
@@ -157,6 +156,7 @@ const baseParams = {
     license,
     outcome,
     alias_target_id,
+    alias_purpose,
     output_index,
     timeline_id,
     timeline_title,
@@ -215,8 +215,11 @@ const eqlRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
+    timestamp_field,
     event_category_override,
+    tiebreaker_field,
   },
   defaultable: {},
 };
@@ -225,7 +228,7 @@ const {
   patch: eqlPatchParams,
   response: eqlResponseParams,
 } = buildAPISchemas(eqlRuleParams);
-export { eqlCreateParams };
+export { eqlCreateParams, eqlResponseParams };
 
 const threatMatchRuleParams = {
   required: {
@@ -237,6 +240,7 @@ const threatMatchRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     saved_id,
     threat_filters,
@@ -262,6 +266,7 @@ const queryRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     saved_id,
   },
@@ -287,6 +292,7 @@ const savedQueryRuleParams = {
     // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
     // if the saved object gets deleted for some reason
     index,
+    data_view_id,
     query,
     filters,
   },
@@ -310,6 +316,7 @@ const thresholdRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     saved_id,
   },
@@ -418,17 +425,18 @@ const responseRequiredFields = {
   updated_by,
   created_at,
   created_by,
+
+  // NOTE: For now, Related Integrations, Required Fields and Setup Guide are supported for prebuilt
+  // rules only. We don't want to allow users to edit these 3 fields via the API. If we added them
+  // to baseParams.defaultable, they would become a part of the request schema as optional fields.
+  // This is why we add them here, in order to add them only to the response schema.
+  related_integrations: RelatedIntegrationArray,
+  required_fields: RequiredFieldArray,
+  setup: SetupGuide,
 };
+
 const responseOptionalFields = {
-  status: ruleExecutionStatus,
-  status_date,
-  last_success_at,
-  last_success_message,
-  last_failure_at,
-  last_failure_message,
-  last_gap,
-  bulk_create_time_durations,
-  search_after_time_durations,
+  execution_summary: ruleExecutionSummary,
 };
 
 export const fullResponseSchema = t.intersection([
@@ -439,8 +447,15 @@ export const fullResponseSchema = t.intersection([
 ]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
 
+export interface RulePreviewLogs {
+  errors: string[];
+  warnings: string[];
+  startedAt?: string;
+  duration: number;
+}
+
 export interface PreviewResponse {
   previewId: string | undefined;
-  errors: string[] | undefined;
-  warnings: string[] | undefined;
+  logs: RulePreviewLogs[] | undefined;
+  isAborted: boolean | undefined;
 }

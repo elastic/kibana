@@ -7,8 +7,8 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { Logger } from 'src/core/server';
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { RawKibanaPrivileges } from '../../common/model';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
@@ -115,10 +115,10 @@ const registerPrivilegesWithClusterTest = (
 
       // ES returns an empty object if we don't have any privileges
       if (!existingPrivileges) {
-        return { body: {} };
+        return {};
       }
 
-      return { body: existingPrivileges };
+      return existingPrivileges;
     }) as any);
     mockClusterClient.asInternalUser.security.putPrivileges.mockImplementation((async () => {
       if (throwErrorWhenPuttingPrivileges) {

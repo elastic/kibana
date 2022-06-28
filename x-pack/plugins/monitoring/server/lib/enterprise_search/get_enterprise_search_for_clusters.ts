@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { TimeRange } from '../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest, Cluster } from '../../types';
-import { checkParam } from '../error_missing_required';
-import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
+import { Globals } from '../../static_globals';
+import { Cluster, LegacyRequest } from '../../types';
+import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
 import { EnterpriseSearchMetric } from '../metrics';
+import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import {
   entSearchAggFilterPath,
   entSearchAggResponseHandler,
@@ -26,25 +28,26 @@ function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
 }
 
 export function getEnterpriseSearchForClusters(
-  req: LegacyRequest,
-  entSearchIndexPattern: string,
-  clusters: Cluster[]
+  req: LegacyRequest<unknown, unknown, { timeRange?: TimeRange }>,
+  clusters: Cluster[],
+  ccs: string
 ) {
-  checkParam(
-    entSearchIndexPattern,
-    'entSearchIndexPattern in enterprise_earch/getEnterpriseSearchForClusters'
-  );
+  const start = req.payload.timeRange?.min;
+  const end = req.payload.timeRange?.max;
+  const config = req.server.config;
+  const maxBucketSize = config.ui.max_bucket_size;
 
-  const start = req.payload.timeRange.min;
-  const end = req.payload.timeRange.max;
-  const config = req.server.config();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const indexPatterns = getLegacyIndexPattern({
+    moduleType: 'enterprisesearch',
+    ccs,
+    config: Globals.app.config,
+  });
 
   return Promise.all(
     clusters.map(async (cluster) => {
       const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
       const params = {
-        index: entSearchIndexPattern,
+        index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
         filter_path: entSearchAggFilterPath,
@@ -55,7 +58,7 @@ export function getEnterpriseSearchForClusters(
             uuid: clusterUuid,
             metric: EnterpriseSearchMetric.getMetricFields(),
           }),
-          aggs: entSearchUuidsAgg(maxBucketSize!),
+          aggs: entSearchUuidsAgg(maxBucketSize),
         },
       };
 

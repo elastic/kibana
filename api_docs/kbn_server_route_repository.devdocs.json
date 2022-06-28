@@ -1,0 +1,535 @@
+{
+  "id": "@kbn/server-route-repository",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.createServerRouteFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "createServerRouteFactory",
+        "description": [],
+        "signature": [
+          "() => <TEndpoint extends string, TReturnType, TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " | undefined = undefined>(route: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<TEndpoint, TRouteParamsRT, TRouteHandlerResources, TReturnType, TRouteCreateOptions>) => Record<TEndpoint, ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<TEndpoint, TRouteParamsRT, TRouteHandlerResources, TReturnType, TRouteCreateOptions>>"
+        ],
+        "path": "packages/kbn-server-route-repository/src/create_server_route_factory.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.decodeRequestParams",
+        "type": "Function",
+        "tags": [],
+        "label": "decodeRequestParams",
+        "description": [],
+        "signature": [
+          "(params: KibanaRequestParams, paramsRt: T) => ",
+          "OutputOf",
+          "<T>"
+        ],
+        "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.decodeRequestParams.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "KibanaRequestParams"
+            ],
+            "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.decodeRequestParams.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "paramsRt",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/kbn-server-route-repository/src/decode_request_params.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.formatRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "formatRequest",
+        "description": [],
+        "signature": [
+          "(endpoint: string, pathParams: Record<string, any>) => { method: Method; pathname: string; }"
+        ],
+        "path": "packages/kbn-server-route-repository/src/format_request.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.formatRequest.$1",
+            "type": "string",
+            "tags": [],
+            "label": "endpoint",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-server-route-repository/src/format_request.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.formatRequest.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "pathParams",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "packages/kbn-server-route-repository/src/format_request.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.parseEndpoint",
+        "type": "Function",
+        "tags": [],
+        "label": "parseEndpoint",
+        "description": [],
+        "signature": [
+          "(endpoint: string) => { method: Method; pathname: string; }"
+        ],
+        "path": "packages/kbn-server-route-repository/src/parse_endpoint.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.parseEndpoint.$1",
+            "type": "string",
+            "tags": [],
+            "label": "endpoint",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-server-route-repository/src/parse_endpoint.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.RouteState",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouteState",
+        "description": [],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.RouteState.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[endpoint: string]: any",
+            "description": [],
+            "signature": [
+              "[endpoint: string]:  any"
+            ],
+            "path": "packages/kbn-server-route-repository/src/typings.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.ClientRequestParamsOf",
+        "type": "Type",
+        "tags": [],
+        "label": "ClientRequestParamsOf",
+        "description": [],
+        "signature": [
+          "TServerRouteRepository[TEndpoint] extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<any, infer TRouteParamsRT, any, any, ",
+          "ServerRouteCreateOptions",
+          "> ? TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " ? ClientRequestParamsOfType<TRouteParamsRT> : {} : never"
+        ],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.DecodedRequestParamsOf",
+        "type": "Type",
+        "tags": [],
+        "label": "DecodedRequestParamsOf",
+        "description": [],
+        "signature": [
+          "TServerRouteRepository[TEndpoint] extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<any, infer TRouteParamsRT, any, any, ",
+          "ServerRouteCreateOptions",
+          "> ? TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " ? DecodedRequestParamsOfType<TRouteParamsRT> : {} : never"
+        ],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.EndpointOf",
+        "type": "Type",
+        "tags": [],
+        "label": "EndpointOf",
+        "description": [],
+        "signature": [
+          "keyof TServerRouteRepository"
+        ],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.ReturnOf",
+        "type": "Type",
+        "tags": [],
+        "label": "ReturnOf",
+        "description": [],
+        "signature": [
+          "TServerRouteRepository[TEndpoint] extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<any, any, any, infer TReturnType, ",
+          "ServerRouteCreateOptions",
+          "> ? TReturnType : never"
+        ],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.RouteParamsRT",
+        "type": "Type",
+        "tags": [],
+        "label": "RouteParamsRT",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "Type",
+          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>, \"encode\" | \"asEncoder\"> & { encode: ",
+          "Encode",
+          "<any, any>; asEncoder: () => ",
+          "Encoder",
+          "<any, any>; }"
+        ],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.RouteRepositoryClient",
+        "type": "Type",
+        "tags": [],
+        "label": "RouteRepositoryClient",
+        "description": [],
+        "signature": [
+          "<TEndpoint extends keyof TServerRouteRepository>(endpoint: TEndpoint, ...args: MaybeOptionalArgs<",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ClientRequestParamsOf",
+            "text": "ClientRequestParamsOf"
+          },
+          "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions>) => Promise<",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ReturnOf",
+            "text": "ReturnOf"
+          },
+          "<TServerRouteRepository, TEndpoint>>"
+        ],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.RouteRepositoryClient.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "endpoint",
+            "description": [],
+            "signature": [
+              "TEndpoint"
+            ],
+            "path": "packages/kbn-server-route-repository/src/typings.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.RouteRepositoryClient.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "RequiredKeys",
+              "<",
+              {
+                "pluginId": "@kbn/server-route-repository",
+                "scope": "common",
+                "docId": "kibKbnServerRouteRepositoryPluginApi",
+                "section": "def-common.ClientRequestParamsOf",
+                "text": "ClientRequestParamsOf"
+              },
+              "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions> extends never ? [] | [",
+              {
+                "pluginId": "@kbn/server-route-repository",
+                "scope": "common",
+                "docId": "kibKbnServerRouteRepositoryPluginApi",
+                "section": "def-common.ClientRequestParamsOf",
+                "text": "ClientRequestParamsOf"
+              },
+              "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions] : [",
+              {
+                "pluginId": "@kbn/server-route-repository",
+                "scope": "common",
+                "docId": "kibKbnServerRouteRepositoryPluginApi",
+                "section": "def-common.ClientRequestParamsOf",
+                "text": "ClientRequestParamsOf"
+              },
+              "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions]"
+            ],
+            "path": "packages/kbn-server-route-repository/src/typings.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.ServerRoute",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerRoute",
+        "description": [],
+        "signature": [
+          "{ endpoint: TEndpoint; params?: TRouteParamsRT | undefined; handler: ({}: TRouteHandlerResources & (TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " ? DecodedRequestParamsOfType<TRouteParamsRT> : {})) => Promise<TReturnType>; } & TRouteCreateOptions"
+        ],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.ServerRouteRepository",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerRouteRepository",
+        "description": [],
+        "signature": [
+          "{ [x: string]: ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<string, ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " | undefined, any, any, Record<string, any>>; }"
+        ],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-common.routeValidationObject",
+        "type": "Object",
+        "tags": [],
+        "label": "routeValidationObject",
+        "description": [],
+        "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.routeValidationObject.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "// `body` can be null, but `validate` expects non-nullable types\n// if any validation is defined. Not having validation currently\n// means we don't get the payload. See\n// https://github.com/elastic/kibana/issues/50179"
+            ],
+            "signature": [
+              "Type",
+              "<Readonly<{} & {}> | null>"
+            ],
+            "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.routeValidationObject.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "ObjectType",
+              "<{}>"
+            ],
+            "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-common.routeValidationObject.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "ObjectType",
+              "<{}>"
+            ],
+            "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

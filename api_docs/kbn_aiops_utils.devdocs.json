@@ -1,0 +1,540 @@
+{
+  "id": "@kbn/aiops-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.streamFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "streamFactory",
+        "description": [
+          "\nOverload to set up a string based response stream with support\nfor gzip compression depending on provided request headers.\n"
+        ],
+        "signature": [
+          "(headers: Headers) => StreamFactoryReturnType<T>"
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "- Request headers."
+            ],
+            "signature": [
+              "Headers"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object with stream attributes and methods."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.streamFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "streamFactory",
+        "description": [
+          "\nSets up a response stream with support for gzip compression depending on provided\nrequest headers. Any non-string data pushed to the stream will be stream as NDJSON.\n"
+        ],
+        "signature": [
+          "(headers: Headers) => StreamFactoryReturnType<T>"
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "- Request headers."
+            ],
+            "signature": [
+              "Headers"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object with stream attributes and methods."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.useFetchStream",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetchStream",
+        "description": [],
+        "signature": [
+          "(endpoint: `${BasePath}${I[\"endpoint\"]}`, body: I[\"body\"]) => UseFetchStreamReturnType<string, React.ReducerAction<I[\"reducer\"]>>"
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.useFetchStream.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "endpoint",
+            "description": [],
+            "signature": [
+              "`${BasePath}${I[\"endpoint\"]}`"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.useFetchStream.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "I[\"body\"]"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.useFetchStream",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetchStream",
+        "description": [],
+        "signature": [
+          "(endpoint: `${BasePath}${I[\"endpoint\"]}`, body: I[\"body\"], options: { reducer: I[\"reducer\"]; initialState: React.ReducerState<I[\"reducer\"]>; }) => UseFetchStreamReturnType<React.ReducerState<I[\"reducer\"]>, React.ReducerAction<I[\"reducer\"]>>"
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.useFetchStream.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "endpoint",
+            "description": [],
+            "signature": [
+              "`${BasePath}${I[\"endpoint\"]}`"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.useFetchStream.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "I[\"body\"]"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.useFetchStream.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/aiops-utils",
+                "id": "def-common.useFetchStream.$3.reducer",
+                "type": "Function",
+                "tags": [],
+                "label": "reducer",
+                "description": [],
+                "signature": [
+                  "I[\"reducer\"]"
+                ],
+                "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/aiops-utils",
+                    "id": "def-common.useFetchStream.$3.reducer.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "prevState",
+                    "description": [],
+                    "signature": [
+                      "S"
+                    ],
+                    "path": "node_modules/@types/react/index.d.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/aiops-utils",
+                    "id": "def-common.useFetchStream.$3.reducer.$2",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "action",
+                    "description": [],
+                    "signature": [
+                      "A"
+                    ],
+                    "path": "node_modules/@types/react/index.d.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/aiops-utils",
+                "id": "def-common.useFetchStream.$3.initialState",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "initialState",
+                "description": [],
+                "signature": [
+                  "I[\"reducer\"] extends React.Reducer<infer S, any> ? S : never"
+                ],
+                "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.useFetchStream",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetchStream",
+        "description": [
+          "\nCustom hook to receive streaming data.\n"
+        ],
+        "signature": [
+          "(endpoint: `${BasePath}${I[\"endpoint\"]}`, body: I[\"body\"], options: { reducer: I[\"reducer\"]; initialState: React.ReducerState<I[\"reducer\"]>; } | undefined) => UseFetchStreamReturnType<React.ReducerState<I[\"reducer\"]>, React.ReducerAction<I[\"reducer\"]>>"
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.useFetchStream.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "endpoint",
+            "description": [
+              "- API endpoint including Kibana base path."
+            ],
+            "signature": [
+              "`${BasePath}${I[\"endpoint\"]}`"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.useFetchStream.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "- API request body."
+            ],
+            "signature": [
+              "I[\"body\"]"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.useFetchStream.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/aiops-utils",
+                "id": "def-common.useFetchStream.$3.reducer",
+                "type": "Function",
+                "tags": [],
+                "label": "reducer",
+                "description": [],
+                "signature": [
+                  "I[\"reducer\"]"
+                ],
+                "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+                "deprecated": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/aiops-utils",
+                    "id": "def-common.useFetchStream.$3.reducer.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "prevState",
+                    "description": [],
+                    "signature": [
+                      "S"
+                    ],
+                    "path": "node_modules/@types/react/index.d.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/aiops-utils",
+                    "id": "def-common.useFetchStream.$3.reducer.$2",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "action",
+                    "description": [],
+                    "signature": [
+                      "A"
+                    ],
+                    "path": "node_modules/@types/react/index.d.ts",
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/aiops-utils",
+                "id": "def-common.useFetchStream.$3.initialState",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "initialState",
+                "description": [],
+                "signature": [
+                  "I[\"reducer\"] extends React.Reducer<infer S, any> ? S : never"
+                ],
+                "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [
+          "An object with streaming data and methods act on the stream."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.UseFetchStreamCustomReducerParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseFetchStreamCustomReducerParams",
+        "description": [
+          "\nCustom hook type definition of the base params for an NDJSON stream with custom reducer."
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.UseFetchStreamCustomReducerParams.endpoint",
+            "type": "string",
+            "tags": [],
+            "label": "endpoint",
+            "description": [],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.UseFetchStreamCustomReducerParams.body",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.UseFetchStreamCustomReducerParams.reducer",
+            "type": "Function",
+            "tags": [],
+            "label": "reducer",
+            "description": [],
+            "signature": [
+              "(prevState: any, action: any) => any"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/aiops-utils",
+                "id": "def-common.UseFetchStreamCustomReducerParams.reducer.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "prevState",
+                "description": [],
+                "signature": [
+                  "S"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/aiops-utils",
+                "id": "def-common.UseFetchStreamCustomReducerParams.reducer.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "action",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.UseFetchStreamParamsDefault",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseFetchStreamParamsDefault",
+        "description": [
+          "\nCustom hook type definition of the base params for a string base stream without a custom reducer."
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.UseFetchStreamParamsDefault.endpoint",
+            "type": "string",
+            "tags": [],
+            "label": "endpoint",
+            "description": [],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.UseFetchStreamParamsDefault.body",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "object"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.UseFetchStreamParamsDefault.reducer",
+            "type": "Function",
+            "tags": [],
+            "label": "reducer",
+            "description": [],
+            "signature": [
+              "(prevState: string, action: StringReducerPayload) => string"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/use_fetch_stream.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/aiops-utils",
+                "id": "def-common.UseFetchStreamParamsDefault.reducer.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "prevState",
+                "description": [],
+                "signature": [
+                  "S"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/aiops-utils",
+                "id": "def-common.UseFetchStreamParamsDefault.reducer.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "action",
+                "description": [],
+                "signature": [
+                  "A"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -11,8 +11,6 @@ import type {
   AGENT_TYPE_TEMPORARY,
 } from '../../constants';
 
-import type { FullAgentPolicy } from './agent_policy';
-
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
   | typeof AGENT_TYPE_PERMANENT
@@ -36,12 +34,20 @@ export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
   | 'SETTINGS'
-  | 'POLICY_REASSIGN';
+  | 'POLICY_REASSIGN'
+  | 'CANCEL';
 
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
+  ack_data?: any;
   sent_at?: string;
+  agents: string[];
+  created_at?: string;
+  id?: string;
+  expiration?: string;
+  start_time?: string;
+  minimum_execution_duration?: number;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -49,40 +55,9 @@ export interface AgentAction extends NewAgentAction {
   data?: any;
   sent_at?: string;
   id: string;
-  agent_id: string;
   created_at: string;
   ack_data?: any;
 }
-
-export interface AgentPolicyAction extends NewAgentAction {
-  id: string;
-  type: AgentActionType;
-  data: {
-    policy: FullAgentPolicy;
-  };
-  policy_id: string;
-  policy_revision: number;
-  created_at: string;
-  ack_data?: any;
-}
-
-interface CommonAgentActionSOAttributes {
-  type: AgentActionType;
-  sent_at?: string;
-  timestamp?: string;
-  created_at: string;
-  data?: string;
-  ack_data?: string;
-}
-
-export type AgentActionSOAttributes = CommonAgentActionSOAttributes & {
-  agent_id: string;
-};
-export type AgentPolicyActionSOAttributes = CommonAgentActionSOAttributes & {
-  policy_id: string;
-  policy_revision: number;
-};
-export type BaseAgentActionSOAttributes = AgentActionSOAttributes | AgentPolicyActionSOAttributes;
 
 export interface AgentMetadata {
   [x: string]: any;
@@ -104,6 +79,7 @@ interface AgentBase {
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
+  tags?: string[];
 }
 
 export interface Agent extends AgentBase {
@@ -111,10 +87,20 @@ export interface Agent extends AgentBase {
   access_api_key?: string;
   status?: AgentStatus;
   packages: string[];
+  sort?: Array<number | string | null>;
 }
 
 export interface AgentSOAttributes extends AgentBase {
   packages?: string[];
+}
+
+export interface CurrentUpgrade {
+  actionId: string;
+  complete: boolean;
+  nbAgents: number;
+  nbAgentsAck: number;
+  version: string;
+  startTime?: string;
 }
 
 // Generated from FleetServer schema.json
@@ -216,6 +202,10 @@ export interface FleetServerAgent {
    * The last acknowledged action sequence number for the Elastic Agent
    */
   action_seq_no?: number;
+  /**
+   * A list of tags used for organizing/filtering agents
+   */
+  tags?: string[];
 }
 /**
  * An Elastic Agent metadata
@@ -268,6 +258,17 @@ export interface FleetServerAgentAction {
    * The Agent IDs the action is intended for. No support for json.RawMessage with the current generator. Could be useful to lazy parse the agent ids
    */
   agents?: string[];
+
+  /**
+   * Date when the agent should execute that agent. This field could be altered by Fleet server for progressive rollout of the action.
+   */
+  start_time?: string;
+
+  /**
+   * Minimun execution duration in seconds, used for progressive rollout of the action.
+   */
+  minimum_execution_duration?: number;
+
   /**
    * The opaque payload.
    */

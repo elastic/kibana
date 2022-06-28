@@ -1566,8 +1566,6 @@ export const mockTgridModel: TGridModel = {
   selectAll: false,
   id: 'ef579e40-jibber-jabber',
   indexNames: [],
-  isAddToExistingCaseOpen: false,
-  isCreateNewCaseOpen: false,
   isLoading: false,
   isSelectAllChecked: false,
   kqlQuery: {
@@ -1582,10 +1580,12 @@ export const mockTgridModel: TGridModel = {
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ],
   title: 'Test rule',
   version: '1',
+  timelineType: 'default',
 };

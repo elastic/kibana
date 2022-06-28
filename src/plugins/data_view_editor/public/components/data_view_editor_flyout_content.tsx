@@ -10,9 +10,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import memoizeOne from 'memoize-one';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 import {
-  IndexPatternSpec,
+  DataView,
+  DataViewSpec,
   Form,
   useForm,
   useFormData,
@@ -38,6 +40,7 @@ import {
   TimestampField,
   TypeField,
   TitleField,
+  NameField,
   schema,
   Footer,
   AdvancedParamsContent,
@@ -45,22 +48,29 @@ import {
   PreviewPanel,
   RollupBetaWarning,
 } from '.';
+import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
 
 export interface Props {
   /**
    * Handler for the "save" footer button
    */
-  onSave: (indexPatternSpec: IndexPatternSpec) => void;
+  onSave: (dataViewSpec: DataViewSpec) => void;
   /**
    * Handler for the "cancel" footer button
    */
   onCancel: () => void;
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
+  editData?: DataView;
+  showEmptyPrompt?: boolean;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
   defaultMessage: 'Create data view',
+});
+
+const editorTitleEditMode = i18n.translate('indexPatternEditor.titleEditMode', {
+  defaultMessage: 'Edit data view',
 });
 
 const IndexPatternEditorFlyoutContentComponent = ({
@@ -68,14 +78,29 @@ const IndexPatternEditorFlyoutContentComponent = ({
   onCancel,
   defaultTypeIsRollup,
   requireTimestampField = false,
+  editData,
+  showEmptyPrompt = true,
 }: Props) => {
   const {
-    services: { http, dataViews, uiSettings, searchClient },
+    services: { http, dataViews, uiSettings, searchClient, overlays },
   } = useKibana<DataViewEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
+    // Prefill with data if editData exists
     defaultValue: {
       type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+      ...(editData
+        ? {
+            title: editData.title,
+            id: editData.id,
+            name: editData.name,
+            ...(editData.timeFieldName
+              ? {
+                  timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
+                }
+              : {}),
+          }
+        : {}),
     },
     schema,
     onSubmit: async (formData, isValid) => {
@@ -83,10 +108,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
         return;
       }
 
-      const indexPatternStub: IndexPatternSpec = {
+      const indexPatternStub: DataViewSpec = {
         title: formData.title,
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
+        name: formData.name,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
@@ -99,7 +125,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      await onSave(indexPatternStub);
+      if (editData && editData.title !== formData.title) {
+        editDataViewModal({
+          dataViewName: formData.name || formData.title,
+          overlays,
+          onEdit: async () => {
+            await onSave(indexPatternStub);
+          },
+        });
+      } else {
+        await onSave(indexPatternStub);
+      }
     },
   });
 
@@ -142,26 +178,27 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isRollupIndex: () => false,
       pattern: '*',
       showAllIndices: allowHidden,
-      searchClient,
     }).then((dataSources) => {
       setAllSources(dataSources);
       const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
       setMatchedIndices(matchedSet);
       setIsLoadingSources(false);
     });
-  }, [http, allowHidden, searchClient]);
+  }, [http, allowHidden]);
 
   // loading list of index patterns
   useEffect(() => {
     loadSources();
     const getTitles = async () => {
-      const indexPatternTitles = await dataViews.getTitles();
+      const indexPatternTitles = await dataViews.getTitles(editData ? true : false);
 
-      setExistingIndexPatterns(indexPatternTitles);
+      setExistingIndexPatterns(
+        editData ? indexPatternTitles.filter((v) => v !== editData.title) : indexPatternTitles
+      );
       setIsLoadingIndexPatterns(false);
     };
     getTitles();
-  }, [http, dataViews, loadSources]);
+  }, [http, dataViews, editData, loadSources]);
 
   // loading rollup info
   useEffect(() => {
@@ -200,7 +237,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         }
 
         const fields = await ensureMinimumTime(dataViews.getFieldsForWildcard(getFieldsOptions));
-        timestampOptions = extractTimeFields(fields, requireTimestampField);
+        timestampOptions = extractTimeFields(fields as DataViewField[], requireTimestampField);
       }
       if (currentLoadingTimestampFieldsIdx === currentLoadingTimestampFieldsRef.current) {
         setIsLoadingTimestampFields(false);
@@ -218,11 +255,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isLoadingMatchedIndices,
     ]
   );
-
-  useEffect(() => {
-    loadTimestampFieldOptions(title);
-    getFields().timestampField?.setValue('');
-  }, [loadTimestampFieldOptions, title, getFields]);
 
   const reloadMatchedIndices = useCallback(
     async (newTitle: string) => {
@@ -273,9 +305,27 @@ const IndexPatternEditorFlyoutContentComponent = ({
     [http, allowHidden, allSources, type, rollupIndicesCapabilities, searchClient, isLoadingSources]
   );
 
+  // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
+  useEffect(() => {
+    if (editData) {
+      loadSources();
+      reloadMatchedIndices(editData.title);
+    }
+    // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editData]);
+
+  useEffect(() => {
+    loadTimestampFieldOptions(editData ? editData.title : title);
+    if (!editData) getFields().timestampField?.setValue('');
+    // We use the below eslint-disable as adding editData as a dependency create an infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadTimestampFieldOptions, title, getFields]);
+
   const onTypeChange = useCallback(
     (newType) => {
       form.setFieldValue('title', '');
+      form.setFieldValue('name', '');
       form.setFieldValue('timestampField', '');
       if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
         form.setFieldValue('allowHidden', false);
@@ -295,7 +345,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
     <>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <TypeField onChange={onTypeChange} />
@@ -316,15 +366,26 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   return (
-    <EmptyPrompts onCancel={onCancel} allSources={allSources} loadSources={loadSources}>
+    <EmptyPrompts
+      onCancel={onCancel}
+      allSources={allSources}
+      loadSources={loadSources}
+      showEmptyPrompt={showEmptyPrompt}
+    >
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
         <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
           <EuiTitle data-test-subj="flyoutTitle">
-            <h2>{editorTitle}</h2>
+            <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
           </EuiTitle>
           <Form form={form} className="indexPatternEditor__form">
             {indexPatternTypeSelect}
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <NameField editData={editData} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem>
                 <TitleField
@@ -336,7 +397,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="m" />
+            <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem>
                 <TimestampField
@@ -348,12 +409,16 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <AdvancedParamsContent disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP} />
+            <AdvancedParamsContent
+              disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
+              disableId={!!editData}
+            />
           </Form>
           <Footer
             onCancel={onCancel}
             onSubmit={() => form.submit()}
             submitDisabled={form.isSubmitted && !form.isValid}
+            isEdit={!!editData}
           />
         </FlyoutPanels.Item>
         <FlyoutPanels.Item>
@@ -406,7 +471,6 @@ const loadMatchedIndices = memoizeOne(
         isRollupIndex,
         pattern: query,
         showAllIndices: allowHidden,
-        searchClient,
       });
       indexRequests.push(exactMatchedQuery);
       // provide default value when not making a request for the partialMatchQuery
@@ -417,14 +481,12 @@ const loadMatchedIndices = memoizeOne(
         isRollupIndex,
         pattern: query,
         showAllIndices: allowHidden,
-        searchClient,
       });
       const partialMatchQuery = getIndices({
         http,
         isRollupIndex,
         pattern: `${query}*`,
         showAllIndices: allowHidden,
-        searchClient,
       });
 
       indexRequests.push(exactMatchQuery);

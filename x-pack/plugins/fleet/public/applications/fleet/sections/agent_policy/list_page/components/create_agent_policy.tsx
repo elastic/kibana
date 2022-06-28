@@ -26,14 +26,14 @@ import {
 
 import { dataTypes } from '../../../../../../../common';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
-import { useCapabilities, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
+import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
 `;
 
-interface Props extends EuiFlyoutProps {
+interface Props extends Omit<EuiFlyoutProps, 'onClose'> {
   onClose: (createdAgentPolicy?: AgentPolicy) => void;
 }
 
@@ -43,12 +43,11 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>({
     name: '',
     description: '',
     namespace: 'default',
-    is_default: undefined,
     monitoring_enabled: Object.values(dataTypes),
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -115,7 +114,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           <EuiButton
             fill
             isLoading={isLoading}
-            isDisabled={!hasWriteCapabilites || isLoading || Object.keys(validation).length > 0}
+            isDisabled={!hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0}
             onClick={async () => {
               setIsLoading(true);
               try {
@@ -147,6 +146,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                 );
               }
             }}
+            data-test-subj="createAgentPolicyFlyoutBtn"
           >
             <FormattedMessage
               id="xpack.fleet.createAgentPolicy.submitButtonLabel"

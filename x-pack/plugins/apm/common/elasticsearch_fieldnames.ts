@@ -13,6 +13,7 @@ export const CLOUD_MACHINE_TYPE = 'cloud.machine.type';
 export const CLOUD_ACCOUNT_ID = 'cloud.account.id';
 export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
+export const CLOUD_SERVICE_NAME = 'cloud.service.name';
 
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
@@ -40,7 +41,6 @@ export const USER_AGENT_NAME = 'user_agent.name';
 export const DESTINATION_ADDRESS = 'destination.address';
 
 export const OBSERVER_HOSTNAME = 'observer.hostname';
-export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 
@@ -73,6 +73,10 @@ export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT =
 
 export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM =
   'span.destination.service.response_time.sum.us';
+
+export const SPAN_LINKS = 'span.links';
+export const SPAN_LINKS_TRACE_ID = 'span.links.trace.id';
+export const SPAN_LINKS_SPAN_ID = 'span.links.span.id';
 
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
@@ -152,3 +156,7 @@ export const PROFILE_ALLOC_OBJECTS = 'profile.alloc_objects.count';
 export const PROFILE_ALLOC_SPACE = 'profile.alloc_space.bytes';
 export const PROFILE_INUSE_OBJECTS = 'profile.inuse_objects.count';
 export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
+
+export const FAAS_ID = 'faas.id';
+export const FAAS_COLDSTART = 'faas.coldstart';
+export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';

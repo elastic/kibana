@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectUnsanitizedDoc } from 'src/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
 import type { UsageStats } from '../../usage_stats';
 import { migrateTo7141 } from './usage_stats_migrations';

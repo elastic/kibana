@@ -9,18 +9,20 @@ jest.mock('../../routes/security');
 jest.mock('./crud');
 jest.mock('./status');
 
-import type { ElasticsearchClient } from '../../../../../../src/core/server';
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+
 import { FleetUnauthorizedError } from '../../errors';
 
-import { checkSuperuser } from '../../routes/security';
+import { getAuthzFromRequest } from '../../routes/security';
+import type { FleetAuthz } from '../../../common';
 
 import type { AgentClient } from './agent_service';
 import { AgentServiceImpl } from './agent_service';
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 
-const mockCheckSuperuser = checkSuperuser as jest.Mock<boolean>;
+const mockGetAuthzFromRequest = getAuthzFromRequest as jest.Mock<Promise<FleetAuthz>>;
 const mockGetAgentsByKuery = getAgentsByKuery as jest.Mock;
 const mockGetAgentById = getAgentById as jest.Mock;
 const mockGetAgentStatusById = getAgentStatusById as jest.Mock;
@@ -37,7 +39,30 @@ describe('AgentService', () => {
         elasticsearchServiceMock.createElasticsearchClient()
       ).asScoped(httpServerMock.createKibanaRequest());
 
-      beforeEach(() => mockCheckSuperuser.mockReturnValue(false));
+      beforeEach(() =>
+        mockGetAuthzFromRequest.mockReturnValue(
+          Promise.resolve({
+            fleet: {
+              all: false,
+              setup: false,
+              readEnrollmentTokens: false,
+              readAgentPolicies: false,
+            },
+            integrations: {
+              readPackageInfo: false,
+              readInstalledPackages: false,
+              installPackages: false,
+              upgradePackages: false,
+              uploadPackages: false,
+              removePackages: false,
+              readPackageSettings: false,
+              writePackageSettings: false,
+              readIntegrationPolicies: false,
+              writeIntegrationPolicies: false,
+            },
+          })
+        )
+      );
 
       it('rejects on listAgents', async () => {
         await expect(agentClient.listAgents({ showInactive: true })).rejects.toThrowError(
@@ -78,7 +103,30 @@ describe('AgentService', () => {
         httpServerMock.createKibanaRequest()
       );
 
-      beforeEach(() => mockCheckSuperuser.mockReturnValue(true));
+      beforeEach(() =>
+        mockGetAuthzFromRequest.mockReturnValue(
+          Promise.resolve({
+            fleet: {
+              all: true,
+              setup: true,
+              readEnrollmentTokens: true,
+              readAgentPolicies: true,
+            },
+            integrations: {
+              readPackageInfo: true,
+              readInstalledPackages: true,
+              installPackages: true,
+              upgradePackages: true,
+              uploadPackages: true,
+              removePackages: true,
+              readPackageSettings: true,
+              writePackageSettings: true,
+              readIntegrationPolicies: true,
+              writeIntegrationPolicies: true,
+            },
+          })
+        )
+      );
 
       expectApisToCallServicesSuccessfully(mockEsClient, agentClient);
     });
@@ -101,7 +149,9 @@ function expectApisToCallServicesSuccessfully(
     await expect(agentClient.listAgents({ showInactive: true })).resolves.toEqual(
       'getAgentsByKuery success'
     );
-    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, { showInactive: true });
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, {
+      showInactive: true,
+    });
   });
 
   test('client.getAgent calls getAgentById and returns results', async () => {

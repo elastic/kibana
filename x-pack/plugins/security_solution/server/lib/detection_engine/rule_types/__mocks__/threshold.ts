@@ -24,7 +24,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { TypeOfFieldMap } from '../../../../../../rule_registry/common/field_map';
+import { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ANCHOR_DATE } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
@@ -155,10 +155,6 @@ export const sampleThresholdAlert = {
       type: 'query',
       threat: [],
       version: 1,
-      status: 'succeeded',
-      status_date: '2020-02-22T16:47:50.047Z',
-      last_success_at: '2020-02-22T16:47:50.047Z',
-      last_success_message: 'succeeded',
       max_signals: 100,
       language: 'kuery',
       rule_id: 'f88a544c-1d4e-4652-ae2a-c953b38da5d0',

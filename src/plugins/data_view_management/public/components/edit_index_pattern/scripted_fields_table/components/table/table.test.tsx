@@ -9,11 +9,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { Table } from '../table';
+import { Table } from '.';
 import { ScriptedFieldItem } from '../../types';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 
 const items: ScriptedFieldItem[] = [
   { name: '1', lang: 'painless', script: '', isUserEditable: true },
@@ -21,7 +21,7 @@ const items: ScriptedFieldItem[] = [
 ];
 
 describe('Table', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: DataView;
 
   beforeEach(() => {
     indexPattern = getIndexPatternMock({

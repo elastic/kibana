@@ -5,7 +5,7 @@
   ],
   "description": "Identifies when an AWS Route Table has been modified or deleted.",
   "false_positives": [
-    "Route Table could be modified or deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Route Table being modified from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule.  Also automated processes that uses Terraform may lead to false positives."
+    "Route Table could be modified or deleted by a system administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Route Table being modified from unfamiliar users should be investigated. If known behavior is causing false positives, it can be exempted from the rule. Also automated processes that use Terraform may lead to false positives."
   ],
   "from": "now-60m",
   "index": [
@@ -20,7 +20,7 @@
   "query": "event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.action:(ReplaceRoute or ReplaceRouteTableAssociation or\nDeleteRouteTable or DeleteRoute or DisassociateRouteTable) and event.outcome:success\n",
   "references": [
     "https://github.com/easttimor/aws-incident-response#network-routing",
-    "https://docs.datadoghq.com/security_platform/default_rules/cloudtrail-aws-route-table-modified",
+    "https://docs.datadoghq.com/security_platform/default_rules/aws-ec2-route-table-modified/",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ReplaceRoute.html",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ReplaceRouteTableAssociation",
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DeleteRouteTable.html",
@@ -51,5 +51,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

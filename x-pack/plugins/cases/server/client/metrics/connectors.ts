@@ -5,17 +5,41 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common/api';
-import { MetricsHandler } from './types';
+import { SingleCaseMetricsResponse } from '../../../common/api';
+import { Operations } from '../../authorization';
+import { createCaseError } from '../../common/error';
+import { SingleCaseBaseHandler } from './single_case_base_handler';
+import { SingleCaseBaseHandlerCommonOptions } from './types';
 
-export class Connectors implements MetricsHandler {
-  public getFeatures(): Set<string> {
-    return new Set(['connectors']);
+export class Connectors extends SingleCaseBaseHandler {
+  constructor(options: SingleCaseBaseHandlerCommonOptions) {
+    super(options, ['connectors']);
   }
 
-  public async compute(): Promise<CaseMetricsResponse> {
-    return {
-      connectors: { total: 0 },
-    };
+  public async compute(): Promise<SingleCaseMetricsResponse> {
+    const { unsecuredSavedObjectsClient, authorization, userActionService, logger } =
+      this.options.clientArgs;
+
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.getUserActionMetrics
+    );
+
+    const uniqueConnectors = await userActionService.getUniqueConnectors({
+      unsecuredSavedObjectsClient,
+      caseId: this.caseId,
+      filter: authorizationFilter,
+    });
+
+    try {
+      return {
+        connectors: { total: uniqueConnectors.length },
+      };
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to retrieve total connectors metrics for case id: ${this.caseId}: ${error}`,
+        error,
+        logger,
+      });
+    }
   }
 }

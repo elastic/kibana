@@ -6,6 +6,7 @@
  */
 
 import { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
+import { isInvalidTag } from '../../../common/utils/validators';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import {
   FIELD_TYPES,
@@ -16,6 +17,7 @@ import {
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
+import { SEVERITY_TITLE } from '../severity/translations';
 const { emptyField, maxLengthField } = fieldValidators;
 
 export const schemaTags = {
@@ -25,7 +27,16 @@ export const schemaTags = {
   labelAppend: OptionalFieldLabel,
   validations: [
     {
-      validator: emptyField(i18n.TAGS_EMPTY_ERROR),
+      validator: ({ value }: { value: string | string[] }) => {
+        if (
+          (!Array.isArray(value) && isInvalidTag(value)) ||
+          (Array.isArray(value) && value.length > 0 && value.find(isInvalidTag))
+        ) {
+          return {
+            message: i18n.TAGS_EMPTY_ERROR,
+          };
+        }
+      },
       type: VALIDATION_TYPES.ARRAY_ITEM,
       isBlocking: false,
     },
@@ -73,6 +84,9 @@ export const schema: FormSchema<FormProps> = {
     ],
   },
   tags: schemaTags,
+  severity: {
+    label: SEVERITY_TITLE,
+  },
   connectorId: {
     type: FIELD_TYPES.SUPER_SELECT,
     label: i18n.CONNECTORS,

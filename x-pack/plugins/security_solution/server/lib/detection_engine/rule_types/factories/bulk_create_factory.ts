@@ -6,19 +6,24 @@
  */
 
 import { performance } from 'perf_hooks';
+import { isEmpty } from 'lodash';
 
-import { Logger } from 'kibana/server';
-import { BaseHit } from '../../../../../common/detection_engine/types';
+import { Logger } from '@kbn/core/server';
+import { PersistenceAlertService } from '@kbn/rule-registry-plugin/server';
+import { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import { BuildRuleMessage } from '../../signals/rule_messages';
 import { makeFloatString } from '../../signals/utils';
 import { RefreshTypes } from '../../types';
-import { PersistenceAlertService } from '../../../../../../rule_registry/server';
+import {
+  BaseFieldsLatest,
+  WrappedFieldsLatest,
+} from '../../../../../common/detection_engine/schemas/alerts';
 
-export interface GenericBulkCreateResponse<T> {
+export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
   bulkCreateDuration: string;
   createdItemsCount: number;
-  createdItems: Array<T & { _id: string; _index: string }>;
+  createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
 }
 
@@ -29,8 +34,8 @@ export const bulkCreateFactory =
     buildRuleMessage: BuildRuleMessage,
     refreshForBulkCreate: RefreshTypes
   ) =>
-  async <T extends Record<string, unknown>>(
-    wrappedDocs: Array<BaseHit<T>>
+  async <T extends BaseFieldsLatest>(
+    wrappedDocs: Array<WrappedFieldsLatest<T>>
   ): Promise<GenericBulkCreateResponse<T>> => {
     if (wrappedDocs.length === 0) {
       return {
@@ -44,7 +49,7 @@ export const bulkCreateFactory =
 
     const start = performance.now();
 
-    const { createdAlerts } = await alertWithPersistence(
+    const { createdAlerts, errors } = await alertWithPersistence(
       wrappedDocs.map((doc) => ({
         _id: doc._id,
         // `fields` should have already been merged into `doc._source`
@@ -61,11 +66,24 @@ export const bulkCreateFactory =
       )
     );
 
-    return {
-      errors: [],
-      success: true,
-      bulkCreateDuration: makeFloatString(end - start),
-      createdItemsCount: createdAlerts.length,
-      createdItems: createdAlerts,
-    };
+    if (!isEmpty(errors)) {
+      logger.debug(
+        buildRuleMessage(`[-] bulkResponse had errors with responses of: ${JSON.stringify(errors)}`)
+      );
+      return {
+        errors: Object.keys(errors),
+        success: false,
+        bulkCreateDuration: makeFloatString(end - start),
+        createdItemsCount: createdAlerts.length,
+        createdItems: createdAlerts,
+      };
+    } else {
+      return {
+        errors: [],
+        success: true,
+        bulkCreateDuration: makeFloatString(end - start),
+        createdItemsCount: createdAlerts.length,
+        createdItems: createdAlerts,
+      };
+    }
   };

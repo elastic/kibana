@@ -10,16 +10,16 @@ import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { AddFilter, Table, Header, DeleteFilterConfirmationModal } from './components';
-import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { SourceFiltersTableFilter } from './types';
 
 export interface SourceFiltersTableProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   filterFilter: string;
   fieldWildcardMatcher: Function;
   onAddOrRemoveFilter?: Function;
-  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
 }
 
 export interface SourceFiltersTableState {

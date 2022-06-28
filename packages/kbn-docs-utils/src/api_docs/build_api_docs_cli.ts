@@ -9,12 +9,14 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import { run, CiStatsReporter, createFlagError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginMetaInfo } from './types';
+import { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
 import { findPlugins } from './find_plugins';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
@@ -22,6 +24,8 @@ import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
 import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 import { collectApiStatsForPlugin } from './stats';
+import { countEslintDisableLine, EslintDisableCounts } from './count_eslint_disable';
+import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -62,15 +66,20 @@ export function runBuildApiDocsCli() {
         // Delete all files except the README that warns about the auto-generated nature of
         // the folder.
         const files = Fs.readdirSync(outputFolder);
-        files.forEach((file) => {
-          if (file.indexOf('README.md') < 0) {
-            Fs.rmSync(Path.resolve(outputFolder, file));
-          }
-        });
+        await Promise.all(
+          files
+            .filter((file) => file.indexOf('README.md') < 0)
+            .map(
+              (file) =>
+                new Promise<void>((resolve, reject) =>
+                  Fs.rm(Path.resolve(outputFolder, file), (err) => (err ? reject(err) : resolve()))
+                )
+            )
+        );
       }
       const collectReferences = flags.references as boolean;
 
-      const { pluginApiMap, missingApiItems, unReferencedDeprecations, referencedDeprecations } =
+      const { pluginApiMap, missingApiItems, unreferencedDeprecations, referencedDeprecations } =
         getPluginApiMap(project, plugins, log, {
           collectReferences,
           pluginFilter: pluginFilter as string[],
@@ -78,17 +87,19 @@ export function runBuildApiDocsCli() {
 
       const reporter = CiStatsReporter.fromEnv(log);
 
-      const allPluginStats = plugins.reduce((acc, plugin) => {
+      const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
+      for (const plugin of plugins) {
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
-        acc[id] = {
+
+        allPluginStats[id] = {
+          ...(await countEslintDisableLine(plugin.directory)),
           ...collectApiStatsForPlugin(pluginApi, missingApiItems, referencedDeprecations),
           owner: plugin.manifest.owner,
           description: plugin.manifest.description,
           isPlugin: plugin.isPlugin,
         };
-        return acc;
-      }, {} as { [key: string]: PluginMetaInfo });
+      }
 
       writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
 
@@ -106,6 +117,12 @@ export function runBuildApiDocsCli() {
         const pluginTeam = plugin.manifest.owner.name;
 
         reporter.metrics([
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Unreferenced deprecated APIs',
+            value: unreferencedDeprecations[id] ? unreferencedDeprecations[id].length : 0,
+          },
           {
             id,
             meta: { pluginTeam },
@@ -135,6 +152,24 @@ export function runBuildApiDocsCli() {
             meta: { pluginTeam },
             group: 'References to deprecated APIs',
             value: pluginStats.deprecatedAPIsReferencedCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'ESLint disabled line counts',
+            value: pluginStats.eslintDisableLineCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'ESLint disabled in files',
+            value: pluginStats.eslintDisableFileCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Total ESLint disabled count',
+            value: pluginStats.eslintDisableFileCount + pluginStats.eslintDisableLineCount,
           },
         ]);
 
@@ -221,10 +256,11 @@ export function runBuildApiDocsCli() {
           log.info(`Plugin ${pluginApi.id} has no public API.`);
         }
         writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+        writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
         writeDeprecationDocByApi(
           outputFolder,
           referencedDeprecations,
-          unReferencedDeprecations,
+          unreferencedDeprecations,
           log
         );
       });
@@ -254,10 +290,13 @@ function getTsProject(repoPath: string) {
   const xpackTsConfig = `${repoPath}/tsconfig.json`;
   const project = new Project({
     tsConfigFilePath: xpackTsConfig,
+    // We'll use the files added below instead.
+    skipAddingFilesFromTsConfig: true,
   });
-  project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
-  project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
-  project.addSourceFilesAtPaths(`${repoPath}/packages/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/x-pack/packages/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/src/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
   project.resolveSourceFileDependencies();
   return project;
 }

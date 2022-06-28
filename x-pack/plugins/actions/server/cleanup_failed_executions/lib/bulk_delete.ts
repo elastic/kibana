@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 
@@ -18,9 +18,12 @@ export async function bulkDelete(
     return;
   }
 
-  return await esClient.bulk({
-    body: ids.map((id) => ({
-      delete: { _index: index, _id: id },
-    })),
-  });
+  return await esClient.bulk(
+    {
+      body: ids.map((id) => ({
+        delete: { _index: index, _id: id },
+      })),
+    },
+    { meta: true }
+  );
 }

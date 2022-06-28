@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { StartServicesAccessor } from 'kibana/server';
-import { Logger } from 'src/core/server';
-import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
+import { StartServicesAccessor, Logger } from '@kbn/core/server';
+import { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -36,7 +35,7 @@ import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delet
 import { performBulkActionRoute } from '../lib/detection_engine/routes/rules/perform_bulk_action_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
-import { findRuleStatusInternalRoute } from '../lib/detection_engine/routes/rules/find_rule_status_internal_route';
+import { getRuleExecutionEventsRoute } from '../lib/detection_engine/routes/rules/get_rule_execution_events_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import {
   createTimelinesRoute,
@@ -58,7 +57,7 @@ import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
 import { SetupPlugins, StartPlugins } from '../plugin';
 import { ConfigType } from '../config';
-import { TelemetryEventsSender } from '../lib/telemetry/sender';
+import { ITelemetryEventsSender } from '../lib/telemetry/sender';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { previewRulesRoute } from '../lib/detection_engine/routes/rules/preview_rules_route';
 import {
@@ -67,14 +66,17 @@ import {
 } from '../lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/routes/rules/legacy_create_legacy_notification';
-import { createSourcererDataViewRoute } from '../lib/sourcerer/routes';
+import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
+import { ITelemetryReceiver } from '../lib/telemetry/receiver';
+import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
+import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
-  telemetrySender: TelemetryEventsSender,
+  telemetrySender: ITelemetryEventsSender,
   ml: SetupPlugins['ml'],
   ruleDataService: RuleDataPluginService,
   logger: Logger,
@@ -82,17 +84,17 @@ export const initRoutes = (
   ruleOptions: CreateRuleOptions,
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  previewRuleDataClient: IRuleDataClient
+  previewRuleDataClient: IRuleDataClient,
+  previewTelemetryReceiver: ITelemetryReceiver
 ) => {
-  const isRuleRegistryEnabled = ruleDataClient != null;
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
-  // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(router, ml, isRuleRegistryEnabled);
-  readRulesRoute(router, logger, isRuleRegistryEnabled);
-  updateRulesRoute(router, ml, isRuleRegistryEnabled);
-  patchRulesRoute(router, ml, isRuleRegistryEnabled);
-  deleteRulesRoute(router, isRuleRegistryEnabled);
-  findRulesRoute(router, logger, isRuleRegistryEnabled);
+  // All REST rule creation, deletion, updating, etc
+  createRulesRoute(router, ml);
+  readRulesRoute(router, logger);
+  updateRulesRoute(router, ml);
+  patchRulesRoute(router, ml);
+  deleteRulesRoute(router);
+  findRulesRoute(router, logger);
   previewRulesRoute(
     router,
     config,
@@ -100,24 +102,29 @@ export const initRoutes = (
     security,
     ruleOptions,
     securityRuleTypeOptions,
-    previewRuleDataClient
+    previewRuleDataClient,
+    getStartServices
   );
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
   legacyCreateLegacyNotificationRoute(router, logger);
 
   addPrepackedRulesRoute(router);
-  getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
-  createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  deleteRulesBulkRoute(router, isRuleRegistryEnabled);
-  performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
+  getPrepackagedRulesStatusRoute(router, config, security);
+  createRulesBulkRoute(router, ml, logger);
+  updateRulesBulkRoute(router, ml, logger);
+  patchRulesBulkRoute(router, ml, logger);
+  deleteRulesBulkRoute(router, logger);
+  performBulkActionRoute(router, ml, logger);
+
+  getRuleExecutionEventsRoute(router);
+
+  getInstalledIntegrationsRoute(router, logger);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);
-  importRulesRoute(router, config, ml, isRuleRegistryEnabled);
-  exportRulesRoute(router, config, logger, isRuleRegistryEnabled);
+  importRulesRoute(router, config, ml);
+  exportRulesRoute(router, config, logger);
 
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
@@ -133,8 +140,6 @@ export const initRoutes = (
 
   persistNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
-
-  findRuleStatusInternalRoute(router);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
@@ -153,11 +158,18 @@ export const initRoutes = (
   deleteIndexRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
-  readTagsRoute(router, isRuleRegistryEnabled);
+  readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
   readPrivilegesRoute(router, hasEncryptionKey);
 
   // Sourcerer API to generate default pattern
   createSourcererDataViewRoute(router, getStartServices);
+  getSourcererDataViewRoute(router, getStartServices);
+
+  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  if (previewTelemetryUrlEnabled) {
+    // telemetry preview endpoint for e2e integration tests only at the moment.
+    telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
+  }
 };

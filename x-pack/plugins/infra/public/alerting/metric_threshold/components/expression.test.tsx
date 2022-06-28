@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
-import { coreMock as mockCoreMock } from 'src/core/public/mocks';
-import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { Expressions } from './expression';
 import { act } from 'react-dom/test-utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
+import { Comparator } from '../../../../common/alerting/metrics';
+import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
+import { Expressions } from './expression';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -27,6 +27,8 @@ jest.mock('../../../hooks/use_kibana', () => ({
     services: mockCoreMock.createStart(),
   }),
 }));
+
+const dataViewMock = dataViewPluginMocks.createStartContract();
 
 describe('Expression', () => {
   async function setup(currentOptions: {
@@ -52,6 +54,7 @@ describe('Expression', () => {
         metadata={{
           currentOptions,
         }}
+        dataViews={dataViewMock}
       />
     );
 

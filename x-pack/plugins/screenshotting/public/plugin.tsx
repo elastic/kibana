@@ -5,38 +5,45 @@
  * 2.0.
  */
 
-import type { Plugin } from 'src/core/public';
-import { ContextStorage } from './context_storage';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
+import { SCREENSHOTTING_APP_ID } from '../common';
+import { App, ScreenshotModeContext } from './app';
 
-/**
- * Setup public contract.
- */
-export interface ScreenshottingSetup {
-  /**
-   * Gathers screenshot context that has been set on the backend.
-   */
-  getContext: ContextStorage['get'];
+interface SetupDeps {
+  expressions: ExpressionsSetup;
+  screenshotMode: ScreenshotModePluginSetup;
 }
 
-/**
- * Start public contract.
- */
-export type ScreenshottingStart = ScreenshottingSetup;
+export class ScreenshottingPlugin implements Plugin<void, void, SetupDeps> {
+  setup({ application }: CoreSetup, { screenshotMode }: SetupDeps) {
+    if (!screenshotMode.isScreenshotMode()) {
+      return;
+    }
 
-export class ScreenshottingPlugin implements Plugin<ScreenshottingSetup, ScreenshottingStart> {
-  private contextStorage = new ContextStorage();
+    application.register({
+      id: SCREENSHOTTING_APP_ID,
+      title: 'Screenshotting Expressions Renderer',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      chromeless: true,
 
-  setup(): ScreenshottingSetup {
-    return {
-      getContext: () => this.contextStorage.get(),
-    };
+      mount: async ({ element }: AppMountParameters) => {
+        ReactDOM.render(
+          <ScreenshotModeContext.Provider value={screenshotMode}>
+            <App />
+          </ScreenshotModeContext.Provider>,
+          element
+        );
+        return () => ReactDOM.unmountComponentAtNode(element);
+      },
+    });
   }
 
-  start(): ScreenshottingStart {
-    return {
-      getContext: () => this.contextStorage.get(),
-    };
-  }
+  start() {}
 
   stop() {}
 }

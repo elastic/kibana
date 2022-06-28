@@ -13,7 +13,7 @@ import {
 } from '../../../../common/lib';
 import { ComponentTemplateFromEs } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
   name: schema.string(),
@@ -24,20 +24,19 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
   router.get(
     { path: addBasePath('/component_templates'), validate: false },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
-        const {
-          body: { component_templates: componentTemplates },
-        } = await client.asCurrentUser.cluster.getComponentTemplate();
+        const { component_templates: componentTemplates } =
+          await client.asCurrentUser.cluster.getComponentTemplate();
 
-        const {
-          body: { index_templates: indexTemplates },
-        } = await client.asCurrentUser.indices.getIndexTemplate();
+        const { index_templates: indexTemplates } =
+          await client.asCurrentUser.indices.getIndexTemplate();
 
         const body = componentTemplates.map((componentTemplate: ComponentTemplateFromEs) => {
           const deserializedComponentTemplateListItem = deserializeComponentTemplateList(
             componentTemplate,
+            // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
             indexTemplates
           );
           return deserializedComponentTemplateListItem;
@@ -59,21 +58,20 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
       },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { name } = request.params;
 
       try {
-        const {
-          body: { component_templates: componentTemplates },
-        } = await client.asCurrentUser.cluster.getComponentTemplate({
-          name,
-        });
+        const { component_templates: componentTemplates } =
+          await client.asCurrentUser.cluster.getComponentTemplate({
+            name,
+          });
 
-        const {
-          body: { index_templates: indexTemplates },
-        } = await client.asCurrentUser.indices.getIndexTemplate();
+        const { index_templates: indexTemplates } =
+          await client.asCurrentUser.indices.getIndexTemplate();
 
         return response.ok({
+          // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
           body: deserializeComponentTemplate(componentTemplates[0], indexTemplates),
         });
       } catch (error) {

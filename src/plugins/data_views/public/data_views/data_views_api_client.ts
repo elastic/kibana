@@ -6,15 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
-import { GetFieldsOptions, IDataViewsApiClient, GetFieldsOptionsTimePattern } from '../../common';
+import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
+/**
+ * Data Views API Client - client implementation
+ */
 export class DataViewsApiClient implements IDataViewsApiClient {
   private http: HttpSetup;
 
+  /**
+   * constructor
+   * @param http http dependency
+   */
   constructor(http: HttpSetup) {
     this.http = http;
   }
@@ -37,28 +44,25 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
   }
 
-  getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
-    const { pattern, lookBack, metaFields } = options;
-
-    const url = this._getUrl(['_fields_for_time_pattern']);
-
-    return this._request(url, {
-      pattern,
-      look_back: lookBack,
-      meta_fields: metaFields,
-    }).then((resp: any) => resp.fields);
-  }
-
-  getFieldsForWildcard({ pattern, metaFields, type, rollupIndex, allowNoIndex }: GetFieldsOptions) {
+  /**
+   * Get field list for a given index pattern
+   * @param options options for fields request
+   */
+  getFieldsForWildcard(options: GetFieldsOptions) {
+    const { pattern, metaFields, type, rollupIndex, allowNoIndex, filter } = options;
     return this._request(this._getUrl(['_fields_for_wildcard']), {
       pattern,
       meta_fields: metaFields,
       type,
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
+      filter,
     }).then((resp: any) => resp.fields || []);
   }
 
+  /**
+   * Does a user created data view exist?
+   */
   async hasUserIndexPattern(): Promise<boolean> {
     const response = await this._request<{ result: boolean }>(
       this._getUrl(['has_user_index_pattern'])

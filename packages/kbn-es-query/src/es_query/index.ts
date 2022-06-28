@@ -7,14 +7,13 @@
  */
 
 export { migrateFilter } from './migrate_filter';
+export type { EsQueryFiltersConfig } from './from_filters';
 export type { EsQueryConfig } from './build_es_query';
 export { buildEsQuery } from './build_es_query';
 export { buildQueryFromFilters } from './from_filters';
 export { luceneStringToDsl } from './lucene_string_to_dsl';
 export { decorateQuery } from './decorate_query';
 export type {
-  IndexPatternBase,
-  IndexPatternFieldBase,
   IFieldSubType,
   BoolQuery,
   DataViewBase,

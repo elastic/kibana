@@ -4,49 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Unit } from '@elastic/datemath';
-import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiSpacer,
-  EuiText,
-  EuiFormRow,
+  EuiAccordion,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiToolTip,
-  EuiIcon,
   EuiFieldSearch,
-  EuiAccordion,
-  EuiPanel,
+  EuiFormRow,
+  EuiIcon,
   EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
-import { Comparator, Aggregators } from '../../../../common/alerting/metrics';
-import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {
+  ForLastExpression,
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
-} from '../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
-
-import { ExpressionRow } from './expression_row';
-import { MetricExpression, AlertParams, AlertContextMeta } from '../types';
+import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-
+import { ExpressionRow } from './expression_row';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
-export const QUERY_INVALID = Symbol('QUERY_INVALID');
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
 const defaultExpression = {
@@ -68,7 +64,7 @@ export const Expressions: React.FC<Props> = (props) => {
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit | undefined>('m');
+  const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
@@ -170,7 +166,7 @@ export const Expressions: React.FC<Props> = (props) => {
           ...c,
           timeUnit: tu,
         })) || [];
-      setTimeUnit(tu as Unit);
+      setTimeUnit(tu as TimeUnitChar);
       setRuleParams('criteria', criteria as AlertParams['criteria']);
     },
     [ruleParams.criteria, setRuleParams]
@@ -254,11 +250,6 @@ export const Expressions: React.FC<Props> = (props) => {
   const handleFieldSearchChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
     [onFilterChange]
-  );
-
-  const areAllAggsRate = useMemo(
-    () => ruleParams.criteria?.every((c) => c.aggType === Aggregators.RATE),
-    [ruleParams.criteria]
   );
 
   const hasGroupBy = useMemo(
@@ -389,31 +380,6 @@ export const Expressions: React.FC<Props> = (props) => {
             }
             checked={ruleParams.alertOnNoData}
             onChange={(e) => setRuleParams('alertOnNoData', e.target.checked)}
-          />
-          <EuiCheckbox
-            id="metrics-alert-partial-buckets-toggle"
-            label={
-              <>
-                {i18n.translate('xpack.infra.metrics.alertFlyout.shouldDropPartialBuckets', {
-                  defaultMessage: 'Drop partial buckets when evaluating data',
-                })}{' '}
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.infra.metrics.alertFlyout.dropPartialBucketsHelpText',
-                    {
-                      defaultMessage:
-                        "Enable this to drop the most recent bucket of evaluation data if it's less than {timeSize}{timeUnit}.",
-                      values: { timeSize, timeUnit },
-                    }
-                  )}
-                >
-                  <EuiIcon type="questionInCircle" color="subdued" />
-                </EuiToolTip>
-              </>
-            }
-            checked={areAllAggsRate || ruleParams.shouldDropPartialBuckets}
-            disabled={areAllAggsRate}
-            onChange={(e) => setRuleParams('shouldDropPartialBuckets', e.target.checked)}
           />
         </EuiPanel>
       </EuiAccordion>

@@ -7,28 +7,28 @@
 
 import {
   CoreSetup,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   Logger,
   KibanaRequest,
   CoreStart,
-} from 'src/core/server';
-import { IRuleDataClient } from '../../../rule_registry/server';
-import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
-import type { RacApiRequestHandlerContext } from '../../../rule_registry/server';
-import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
+} from '@kbn/core/server';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { APMConfig } from '..';
 import {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from '../types';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
-import { UxUIFilters } from '../../typings/ui_filters';
+import { UxUIFilters } from '../../common/ux_ui_filter';
 
-export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
+export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   rac: RacApiRequestHandlerContext;
-}
+}>;
 
 export interface APMRouteCreateOptions {
   options: {

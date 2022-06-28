@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common';
@@ -14,7 +13,10 @@ import type { GetDataStreamsResponse } from '../../../common';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
+import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
+
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
+
 interface ESDataStreamInfo {
   name: string;
   timestamp_field: {
@@ -36,16 +38,10 @@ interface ESDataStreamInfo {
   hidden: boolean;
 }
 
-interface ESDataStreamStats {
-  data_stream: string;
-  backing_indices: number;
-  store_size_bytes: number;
-  maximum_timestamp: number;
-}
-
 export const getListHandler: RequestHandler = async (context, request, response) => {
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const { savedObjects, elasticsearch } = await context.core;
+  const esClient = elasticsearch.client.asCurrentUser;
 
   const body: GetDataStreamsResponse = {
     data_streams: [],
@@ -54,21 +50,17 @@ export const getListHandler: RequestHandler = async (context, request, response)
   try {
     // Get matching data streams, their stats, and package SOs
     const [
-      {
-        body: { data_streams: dataStreamsInfo },
-      },
-      {
-        body: { data_streams: dataStreamStats },
-      },
+      { data_streams: dataStreamsInfo },
+      { data_streams: dataStreamStats },
       packageSavedObjects,
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
-      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN }),
-      getPackageSavedObjects(context.core.savedObjects.client),
+      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN, human: true }),
+      getPackageSavedObjects(savedObjects.client),
     ]);
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
-    const dataStreamsStatsByName = keyBy<ESDataStreamStats>(dataStreamStats, 'data_stream');
+    const dataStreamsStatsByName = keyBy(dataStreamStats, 'data_stream');
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
@@ -91,7 +83,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       allDashboards[pkgSavedObject.id] = dashboards;
       return allDashboards;
     }, {});
-    const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
+    const allDashboardSavedObjectsResponse = await savedObjects.client.bulkGet<{
       title?: string;
     }>(
       Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>
@@ -130,77 +122,32 @@ export const getListHandler: RequestHandler = async (context, request, response)
         package_version: '',
         last_activity_ms: dataStream.maximum_timestamp, // overridden below if maxIngestedTimestamp agg returns a result
         size_in_bytes: dataStream.store_size_bytes,
+        // `store_size` should be available from ES due to ?human=true flag
+        // but fallback to bytes just in case
+        size_in_bytes_formatted: dataStream.store_size || `${dataStream.store_size_bytes}b`,
         dashboards: [],
+        serviceDetails: null,
       };
 
-      // Query backing indices to extract data stream dataset, namespace, and type values
-      const {
-        body: { aggregations: dataStreamAggs },
-      } = await esClient.search({
-        index: dataStream.name,
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                {
-                  exists: {
-                    field: 'data_stream.namespace',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'data_stream.dataset',
-                  },
-                },
-              ],
-            },
-          },
-          aggs: {
-            maxIngestedTimestamp: {
-              max: {
-                field: 'event.ingested',
-              },
-            },
-            dataset: {
-              terms: {
-                field: 'data_stream.dataset',
-                size: 1,
-              },
-            },
-            namespace: {
-              terms: {
-                field: 'data_stream.namespace',
-                size: 1,
-              },
-            },
-            type: {
-              terms: {
-                field: 'data_stream.type',
-                size: 1,
-              },
-            },
-          },
-        },
-      });
-
-      const { maxIngestedTimestamp } = dataStreamAggs as Record<
-        string,
-        estypes.AggregationsValueAggregate
-      >;
-      const { dataset, namespace, type } = dataStreamAggs as Record<
-        string,
-        estypes.AggregationsMultiBucketAggregate<{ key?: string; value?: number }>
-      >;
+      const { maxIngested, namespace, dataset, type, serviceNames, environments } =
+        await getDataStreamsQueryMetadata({ dataStreamName: dataStream.name, esClient });
 
       // some integrations e.g custom logs don't have event.ingested
-      if (maxIngestedTimestamp?.value) {
-        dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
+      if (maxIngested) {
+        dataStreamResponse.last_activity_ms = maxIngested;
       }
 
-      dataStreamResponse.dataset = dataset.buckets[0]?.key || '';
-      dataStreamResponse.namespace = namespace.buckets[0]?.key || '';
-      dataStreamResponse.type = type.buckets[0]?.key || '';
+      if (serviceNames?.length === 1) {
+        const serviceDetails = {
+          serviceName: serviceNames[0],
+          environment: environments?.length === 1 ? environments[0] : 'ENVIRONMENT_ALL',
+        };
+        dataStreamResponse.serviceDetails = serviceDetails;
+      }
+
+      dataStreamResponse.dataset = dataset;
+      dataStreamResponse.namespace = namespace;
+      dataStreamResponse.type = type;
 
       // Find package saved object
       const pkgName = dataStreamResponse.package;

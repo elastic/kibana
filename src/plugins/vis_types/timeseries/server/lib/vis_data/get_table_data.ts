@@ -14,16 +14,18 @@ import { handleErrorResponse } from './handle_error_response';
 import { processBucket } from './table/process_bucket';
 
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
-import { extractFieldLabel } from '../../../common/fields_utils';
+import { getFieldsForTerms, getMultiFieldLabel } from '../../../common/fields_utils';
 import { isAggSupported } from './helpers/check_aggs';
-import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
+import { isConfigurationFeatureEnabled } from '../../../common/check_ui_restrictions';
+import { FilterCannotBeAppliedError, PivotNotSelectedForTableError } from '../../../common/errors';
 
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesRequestServices,
   VisTypeTimeseriesVisDataRequest,
 } from '../../types';
-import type { Panel } from '../../../common/types';
+import type { Panel, DataResponseMeta } from '../../../common/types';
+import type { EsSearchRequest } from '../search_strategies';
 
 export async function getTableData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -31,80 +33,99 @@ export async function getTableData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await services.cachedIndexPatternFetcher(
-    panel.index_pattern,
-    !panel.use_kibana_indexes
-  );
-
-  const strategy = await services.searchStrategyRegistry.getViableStrategy(
-    requestContext,
-    req,
-    panelIndex
-  );
-
-  if (!strategy) {
-    throw new Error(
-      i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
-        defaultMessage: 'Search strategy was not defined',
-      })
-    );
-  }
-
-  const { searchStrategy, capabilities } = strategy;
-
-  const extractFields = createFieldsFetcher(req, {
-    indexPatternsService: services.indexPatternsService,
-    cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
-    searchStrategy,
-    capabilities,
-  });
-
-  const calculatePivotLabel = async () => {
-    if (panel.pivot_id && panelIndex.indexPattern?.id) {
-      const fields = await extractFields({ id: panelIndex.indexPattern.id });
-
-      return extractFieldLabel(fields, panel.pivot_id);
-    }
-    return panel.pivot_id;
-  };
-
-  const meta = {
-    type: panel.type,
-    uiRestrictions: capabilities.uiRestrictions,
-  };
-
+  let meta: DataResponseMeta | undefined;
   const handleError = handleErrorResponse(panel);
 
   try {
-    if (isEntireTimeRangeMode(panel)) {
-      panel.series.forEach((column) => {
-        isAggSupported(column.metrics);
-      });
+    const panelIndex = await services.cachedIndexPatternFetcher(
+      panel.index_pattern,
+      !panel.use_kibana_indexes
+    );
+
+    const strategy = await services.searchStrategyRegistry.getViableStrategy(
+      requestContext,
+      req,
+      panelIndex
+    );
+
+    if (!strategy) {
+      throw new Error(
+        i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
+          defaultMessage: 'Search strategy was not defined',
+        })
+      );
     }
 
-    const body = await buildTableRequest({
-      req,
-      panel,
-      esQueryConfig: services.esQueryConfig,
-      seriesIndex: panelIndex,
+    const { searchStrategy, capabilities } = strategy;
+
+    const extractFields = createFieldsFetcher(req, {
+      indexPatternsService: services.indexPatternsService,
+      cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
+      searchStrategy,
       capabilities,
-      uiSettings: services.uiSettings,
-      buildSeriesMetaParams: () =>
-        services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
     });
 
-    const [resp] = await searchStrategy.search(requestContext, req, [
+    const calculatePivotLabel = async () => {
+      const pivotIds = getFieldsForTerms(panel.pivot_id);
+
+      if (pivotIds.length) {
+        const fields = panelIndex.indexPattern?.id
+          ? await extractFields({ id: panelIndex.indexPattern.id })
+          : [];
+
+        return getMultiFieldLabel(pivotIds, fields);
+      }
+    };
+
+    meta = {
+      type: panel.type,
+      uiRestrictions: capabilities.uiRestrictions,
+      trackedEsSearches: {},
+    };
+
+    panel.series.forEach((series) => {
+      isAggSupported(series.metrics, capabilities);
+      if (series.filter?.query && !isConfigurationFeatureEnabled('filter', capabilities)) {
+        throw new FilterCannotBeAppliedError();
+      }
+    });
+
+    if (!getFieldsForTerms(panel.pivot_id).length) {
+      throw new PivotNotSelectedForTableError();
+    }
+
+    const searches: EsSearchRequest[] = [
       {
+        index: panelIndex.indexPatternString,
         body: {
-          ...body,
+          ...(await buildTableRequest({
+            req,
+            panel,
+            esQueryConfig: services.esQueryConfig,
+            seriesIndex: panelIndex,
+            capabilities,
+            uiSettings: services.uiSettings,
+            buildSeriesMetaParams: () =>
+              services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
+          })),
           runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
         },
-        index: panelIndex.indexPatternString,
+        trackingEsSearchMeta: {
+          requestId: panel.id,
+          requestLabel: i18n.translate('visTypeTimeseries.tableRequest.label', {
+            defaultMessage: 'Table: {id}',
+            values: {
+              id: panel.id,
+            },
+          }),
+        },
       },
-    ]);
+    ];
+
+    const data = await searchStrategy.search(requestContext, req, searches, meta.trackedEsSearches);
 
     const buckets = get(
-      resp.rawResponse ? resp.rawResponse : resp,
+      data[0].rawResponse ? data[0].rawResponse : data[0],
       'aggregations.pivot.buckets',
       []
     );
@@ -112,7 +133,7 @@ export async function getTableData(
     const series = await Promise.all(buckets.map(processBucket({ panel, extractFields })));
 
     return {
-      ...meta,
+      ...(meta || {}),
       pivot_label: panel.pivot_label || (await calculatePivotLabel()),
       series,
     };

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ScreenshotModePluginSetup, ScreenshotModePluginStart } from './types';
 
 export const screenshotModePluginMock = {
   createSetupContract: (): DeeplyMockedKeys<ScreenshotModePluginSetup> => ({
-    getScreenshotLayout: jest.fn(),
+    getScreenshotContext: jest.fn(),
     isScreenshotMode: jest.fn(() => false),
   }),
   createStartContract: (): DeeplyMockedKeys<ScreenshotModePluginStart> => ({
-    getScreenshotLayout: jest.fn(),
+    getScreenshotContext: jest.fn(),
     isScreenshotMode: jest.fn(() => false),
   }),
 };

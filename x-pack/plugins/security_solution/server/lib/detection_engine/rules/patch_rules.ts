@@ -7,15 +7,13 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { defaults } from 'lodash/fp';
-import { PartialAlert } from '../../../../../alerting/server';
+import { PartialRule } from '@kbn/alerting-plugin/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
-import { addTags } from './add_tags';
-import { enableRule } from './enable_rule';
 import { PatchRulesOptions } from './types';
 import {
   calculateInterval,
@@ -37,13 +35,12 @@ class PatchError extends Error {
 
 export const patchRules = async ({
   rulesClient,
-  savedObjectsClient,
   author,
   buildingBlockType,
-  ruleStatusClient,
-  spaceId,
   description,
+  timestampField,
   eventCategoryOverride,
+  tiebreakerField,
   falsePositives,
   enabled,
   query,
@@ -57,13 +54,17 @@ export const patchRules = async ({
   filters,
   from,
   index,
+  dataViewId,
   interval,
   maxSignals,
+  relatedIntegrations,
+  requiredFields,
   riskScore,
   riskScoreMapping,
   ruleNameOverride,
   rule,
   name,
+  setup,
   severity,
   severityMapping,
   tags,
@@ -89,7 +90,7 @@ export const patchRules = async ({
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: PatchRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
+}: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (rule == null) {
     return null;
   }
@@ -98,7 +99,9 @@ export const patchRules = async ({
     author,
     buildingBlockType,
     description,
+    timestampField,
     eventCategoryOverride,
+    tiebreakerField,
     falsePositives,
     query,
     language,
@@ -111,12 +114,16 @@ export const patchRules = async ({
     filters,
     from,
     index,
+    dataViewId,
     interval,
     maxSignals,
+    relatedIntegrations,
+    requiredFields,
     riskScore,
     riskScoreMapping,
     ruleNameOverride,
     name,
+    setup,
     severity,
     severityMapping,
     tags,
@@ -150,6 +157,9 @@ export const patchRules = async ({
       author,
       buildingBlockType,
       description,
+      timestampField,
+      eventCategoryOverride,
+      tiebreakerField,
       falsePositives,
       from,
       query,
@@ -162,10 +172,14 @@ export const patchRules = async ({
       meta,
       filters,
       index,
+      dataViewId,
       maxSignals,
+      relatedIntegrations,
+      requiredFields,
       riskScore,
       riskScoreMapping,
       ruleNameOverride,
+      setup,
       severity,
       severityMapping,
       threat,
@@ -194,7 +208,7 @@ export const patchRules = async ({
   );
 
   const newRule = {
-    tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
+    tags: tags ?? rule.tags,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),
@@ -222,7 +236,7 @@ export const patchRules = async ({
   if (rule.enabled && enabled === false) {
     await rulesClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
-    await enableRule({ rule, rulesClient });
+    await rulesClient.enable({ id: rule.id });
   } else {
     // enabled is null or undefined and we do not touch the rule
   }

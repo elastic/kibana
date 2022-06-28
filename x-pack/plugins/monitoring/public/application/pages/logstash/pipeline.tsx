@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
 import moment from 'moment';
 import { useRouteMatch } from 'react-router-dom';
-import { useKibana, useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 // @ts-ignore
@@ -142,11 +142,12 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
     }
   }, [detailVertexId, getPageData]);
 
-  const onChangePipelineHash = useCallback(() => {
-    window.location.hash = getSafeForExternalLink(
-      `#/logstash/pipelines/${pipelineId}/${pipelineHash}`
-    );
-  }, [pipelineId, pipelineHash]);
+  const onChangePipelineHash = useCallback(
+    (hash) => {
+      window.location.hash = getSafeForExternalLink(`#/logstash/pipelines/${pipelineId}/${hash}`);
+    },
+    [pipelineId]
+  );
 
   useEffect(() => {
     if (cluster) {

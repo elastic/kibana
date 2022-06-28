@@ -10,14 +10,14 @@ import { getApmConfigMock } from './http_resources_service.test.mocks';
 
 import { IRouter, RouteConfig } from '../http';
 
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { coreMock } from '../mocks';
-import { mockCoreContext } from '../core_context.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { renderingMock } from '../rendering/rendering_service.mock';
 import { HttpResourcesService, PrebootDeps, SetupDeps } from './http_resources_service';
 import { httpResourcesMock } from './http_resources_service.mock';
-import { HttpResources } from 'kibana/server';
+import { HttpResources } from '..';
 
 const coreContext = mockCoreContext.create();
 
@@ -27,7 +27,7 @@ describe('HttpResources service', () => {
   let setupDeps: SetupDeps;
   let router: jest.Mocked<IRouter>;
   const kibanaRequest = httpServerMock.createKibanaRequest();
-  const context = { core: coreMock.createRequestHandlerContext() };
+  const context = coreMock.createCustomRequestHandlerContext({});
   const apmConfig = { mockApmConfig: true };
 
   beforeEach(() => {
@@ -71,9 +71,9 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              context.core.uiSettings.client,
+              (await context.core).uiSettings.client,
               {
-                includeUserSettings: true,
+                isAnonymousPage: false,
                 vars: {
                   apmConfig,
                 },
@@ -101,7 +101,7 @@ describe('HttpResources service', () => {
               headers: {
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -117,9 +117,9 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              context.core.uiSettings.client,
+              (await context.core).uiSettings.client,
               {
-                includeUserSettings: false,
+                isAnonymousPage: true,
                 vars: {
                   apmConfig,
                 },
@@ -147,7 +147,7 @@ describe('HttpResources service', () => {
               headers: {
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -167,7 +167,7 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/html',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -196,7 +196,7 @@ describe('HttpResources service', () => {
                 'content-type': 'text/html',
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -216,7 +216,7 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/javascript',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -245,7 +245,7 @@ describe('HttpResources service', () => {
                 'content-type': 'text/javascript',
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
