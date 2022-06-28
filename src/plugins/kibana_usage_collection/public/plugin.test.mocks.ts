@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { EmptyPrompts } from './empty_prompts';
+export const registerEbtCountersMock = jest.fn();
+
+jest.doMock('./ebt_counters', () => ({
+  registerEbtCounters: registerEbtCountersMock,
+}));

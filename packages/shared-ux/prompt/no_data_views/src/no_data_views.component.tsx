@@ -48,7 +48,7 @@ export const NoDataViewsPrompt = ({
       onClick={onClickCreate}
       iconType="plusInCircle"
       fill={true}
-      data-test-subj="createDataViewButtonFlyout"
+      data-test-subj="createDataViewButton"
     >
       {createDataViewText}
     </EuiButton>

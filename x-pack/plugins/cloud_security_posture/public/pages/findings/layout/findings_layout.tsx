@@ -22,7 +22,6 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
-import * as TEXT from '../translations';
 import {
   FINDINGS_TABLE_CELL_ADD_FILTER,
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
@@ -78,7 +77,10 @@ const baseColumns = [
     field: 'resource.id',
     name: (
       <ColumnNameWithTooltip
-        columnName={TEXT.RESOURCE_ID}
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
+          { defaultMessage: 'Resource ID' }
+        )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnTooltipLabel',
           { defaultMessage: 'Custom Elastic Resource ID' }
@@ -96,7 +98,9 @@ const baseColumns = [
   },
   {
     field: 'result.evaluation',
-    name: TEXT.RESULT,
+    name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel', {
+      defaultMessage: 'Result',
+    }),
     width: '120px',
     sortable: true,
     render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
@@ -105,23 +109,34 @@ const baseColumns = [
   },
   {
     field: 'resource.sub_type',
-    name: TEXT.RESOURCE_TYPE,
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.resourceTypeColumnLabel',
+      { defaultMessage: 'Resource Type' }
+    ),
     sortable: true,
     width: '150px',
   },
   {
     field: 'resource.name',
-    name: TEXT.RESOURCE_NAME,
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.resourceNameColumnLabel',
+      { defaultMessage: 'Resource Name' }
+    ),
     sortable: true,
   },
   {
     field: 'rule.name',
-    name: TEXT.RULE,
+    name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.ruleColumnLabel', {
+      defaultMessage: 'Rule',
+    }),
     sortable: true,
   },
   {
     field: 'rule.section',
-    name: TEXT.CIS_SECTION,
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
+      { defaultMessage: 'CIS Section' }
+    ),
     sortable: true,
     truncateText: true,
   },
@@ -129,9 +144,12 @@ const baseColumns = [
     field: 'cluster_id',
     name: (
       <ColumnNameWithTooltip
-        columnName={TEXT.CLUSTER_ID}
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
+          { defaultMessage: 'Cluster ID' }
+        )}
         tooltipContent={i18n.translate(
-          'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
           { defaultMessage: 'Kube-System Namespace ID' }
         )}
       />
@@ -142,7 +160,10 @@ const baseColumns = [
   {
     field: '@timestamp',
     width: '150px',
-    name: TEXT.LAST_CHECKED,
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
+      { defaultMessage: 'Last Checked' }
+    ),
     truncateText: true,
     sortable: true,
     render: (timestamp: number) => (

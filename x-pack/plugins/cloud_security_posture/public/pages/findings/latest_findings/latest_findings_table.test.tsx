@@ -13,7 +13,6 @@ import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import type { CspFinding } from '../types';
 import { TestProvider } from '../../../test/test_provider';
-import { createColumnWithFilters, baseFindingsColumns } from '../layout/findings_layout';
 
 const chance = new Chance();
 
@@ -86,7 +85,9 @@ describe('<FindingsTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByTestId(TEST_SUBJECTS.FINDINGS_TABLE_ZERO_STATE)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE)
+    ).toBeInTheDocument();
   });
 
   it('renders the table with provided items', () => {
@@ -136,17 +137,17 @@ describe('<FindingsTable />', () => {
     const row = data[0];
 
     const columns = [
-      createColumnWithFilters(baseFindingsColumns['resource.id'], filterProps),
-      createColumnWithFilters(baseFindingsColumns['result.evaluation'], filterProps),
-      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], filterProps),
-      createColumnWithFilters(baseFindingsColumns['resource.name'], filterProps),
-      createColumnWithFilters(baseFindingsColumns['rule.name'], filterProps),
-      createColumnWithFilters(baseFindingsColumns.cluster_id, filterProps),
+      'resource.id',
+      'result.evaluation',
+      'resource.sub_type',
+      'resource.name',
+      'rule.name',
+      'cluster_id',
     ];
 
-    columns.forEach((column) => {
+    columns.forEach((field) => {
       const cellElement = screen.getByTestId(
-        TEST_SUBJECTS.getFindingsTableCellTestId(column.field, row.resource.id)
+        TEST_SUBJECTS.getFindingsTableCellTestId(field, row.resource.id)
       );
       userEvent.hover(cellElement);
       const addFilterElement = within(cellElement).getByTestId(
@@ -157,16 +158,16 @@ describe('<FindingsTable />', () => {
       );
 
       // We need to account for values like resource.id (deep.nested.values)
-      const value = column.field.split('.').reduce<any>((a, c) => a[c], row);
+      const value = field.split('.').reduce<any>((a, c) => a[c], row);
 
       expect(addFilterElement).toBeVisible();
       expect(addNegatedFilterElement).toBeVisible();
 
       userEvent.click(addFilterElement);
-      expect(props.onAddFilter).toHaveBeenCalledWith(column.field, value, false);
+      expect(props.onAddFilter).toHaveBeenCalledWith(field, value, false);
 
       userEvent.click(addNegatedFilterElement);
-      expect(props.onAddFilter).toHaveBeenCalledWith(column.field, value, true);
+      expect(props.onAddFilter).toHaveBeenCalledWith(field, value, true);
     });
   });
 });

@@ -38,8 +38,12 @@ jest.mock('../../../../common/lib/kibana', () => ({
 
 const from = '2020-07-07T08:20:18.966Z';
 const to = '2020-07-08T08:20:18.966Z';
+const mockSetQuery = jest.fn();
+const mockDeleteQuery = jest.fn();
 
-const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
+const mockUseGlobalTime = jest
+  .fn()
+  .mockReturnValue({ from, to, setQuery: mockSetQuery, deleteQuery: mockDeleteQuery });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
@@ -97,6 +101,31 @@ describe('useCaseItems', () => {
         isLoading: false,
         updatedAt: dateNow,
       });
+    });
+  });
+
+  test('it should call setQuery when fetching', async () => {
+    mockCasesApi.mockReturnValue(mockCasesResult);
+    await act(async () => {
+      const { waitForNextUpdate } = renderUseCaseItems();
+
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      expect(mockSetQuery).toHaveBeenCalled();
+    });
+  });
+
+  test('it should call deleteQuery when unmounting', async () => {
+    await act(async () => {
+      const { waitForNextUpdate, unmount } = renderUseCaseItems();
+
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      unmount();
+
+      expect(mockDeleteQuery).toHaveBeenCalled();
     });
   });
 

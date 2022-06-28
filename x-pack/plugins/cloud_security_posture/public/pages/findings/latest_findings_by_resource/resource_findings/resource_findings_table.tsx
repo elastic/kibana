@@ -13,7 +13,7 @@ import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
-import * as TEXT from '../../translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   baseFindingsColumns,
   createColumnWithFilters,
@@ -58,7 +58,19 @@ const ResourceFindingsTableComponent = ({
     [onAddFilter]
   );
   if (!loading && !items.length)
-    return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
+    return (
+      <EuiEmptyPrompt
+        iconType="logoKibana"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.csp.findings.resourceFindings.noFindingsTitle"
+              defaultMessage="There are no Findings"
+            />
+          </h2>
+        }
+      />
+    );
 
   return (
     <>
