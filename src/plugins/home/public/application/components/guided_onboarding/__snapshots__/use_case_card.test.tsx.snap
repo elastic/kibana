@@ -56,7 +56,7 @@ exports[`use case card should render use case card component for search 1`] = `
       size="xs"
     >
       <p>
-        Create a search experience for your websites, applications, workplace content, and more.
+        Create a finely-tuned search experience for your websites, applications, workplace content, and more.
       </p>
     </EuiText>
   }
