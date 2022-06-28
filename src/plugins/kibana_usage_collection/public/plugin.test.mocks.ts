@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { OptedInNoticeBanner } from './opted_in_notice_banner';
+export const registerEbtCountersMock = jest.fn();
+
+jest.doMock('./ebt_counters', () => ({
+  registerEbtCounters: registerEbtCountersMock,
+}));
