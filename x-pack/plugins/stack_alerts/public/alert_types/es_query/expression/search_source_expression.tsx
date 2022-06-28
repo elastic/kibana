@@ -18,16 +18,13 @@ import { DEFAULT_VALUES } from '../constants';
 
 export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
   EsQueryAlertParams<SearchType.searchSource>
-> & {
-  shouldResetSearchConfiguration?: boolean;
-};
+>;
 
 export const SearchSourceExpression = ({
   ruleParams,
   errors,
   setRuleParams,
   setRuleProperty,
-  shouldResetSearchConfiguration,
 }: SearchSourceExpressionProps) => {
   const {
     thresholdComparator,
@@ -53,7 +50,8 @@ export const SearchSourceExpression = ({
     const initSearchSource = async () => {
       let initialSearchConfiguration = searchConfiguration;
 
-      if (shouldResetSearchConfiguration) {
+      // Init searchConfiguration when creating rule from Stack Management page
+      if (!searchConfiguration) {
         const newSearchSource = data.search.searchSource.createEmpty();
         newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
         const defaultDataView = await data.dataViews.getDefaultDataView();
@@ -81,7 +79,7 @@ export const SearchSourceExpression = ({
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.search.searchSource, data.dataViews, shouldResetSearchConfiguration]);
+  }, [data.search.searchSource, data.dataViews]);
 
   useEffect(() => {
     if (savedQueryId) {

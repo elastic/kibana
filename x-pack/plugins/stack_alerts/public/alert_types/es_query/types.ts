@@ -41,8 +41,8 @@ export interface OnlyEsQueryAlertParams {
   timeField: string;
 }
 export interface OnlySearchSourceAlertParams {
-  searchType: 'searchSource';
-  searchConfiguration: SerializedSearchSourceFields;
+  searchType?: 'searchSource';
+  searchConfiguration?: SerializedSearchSourceFields;
   savedQueryId?: string;
 }
 

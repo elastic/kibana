@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { memo, PropsWithChildren, useCallback, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
@@ -14,7 +13,7 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import { ErrorKey, EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
-import { QueryFormType, QueryFormTypeChooser } from './query_form_type_chooser';
+import { QueryFormTypeChooser } from './query_form_type_chooser';
 import { isSearchSourceAlert } from '../util';
 import { EXPRESSION_ERROR_KEYS } from '../constants';
 
@@ -35,29 +34,23 @@ const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
 export const EsQueryAlertTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<EsQueryAlertParams>
 > = (props) => {
-  const { ruleParams, errors, setRuleProperty } = props;
+  const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
-  const [activeQueryFormType, setActiveQueryFormType] = useState<QueryFormType | null>(null);
-
-  const resetFormType = useCallback(() => {
-    // @ts-expect-error Reset rule params regardless of their type
-    setRuleProperty('params', {});
-    setActiveQueryFormType(null);
-  }, [setActiveQueryFormType, setRuleProperty]);
+  const isManagementPage = useRef(!Object.keys(ruleParams).length).current;
 
   const formTypeSelected = useCallback(
-    (formType: QueryFormType | null) => {
-      if (!formType) {
-        resetFormType();
+    (searchType: SearchType | null) => {
+      if (!searchType) {
+        // @ts-expect-error Reset rule params regardless of their type
+        setRuleProperty('params', {});
         return;
       }
-
-      setActiveQueryFormType(formType);
+      setRuleParams('searchType', searchType);
     },
-    [setActiveQueryFormType, resetFormType]
+    [setRuleParams, setRuleProperty]
   );
 
-  const hasExpressionErrors = Object.keys(errors).some((errorKey) => {
+  const errorParam = Object.keys(errors).find((errorKey) => {
     return (
       EXPRESSION_ERROR_KEYS.includes(errorKey as ErrorKey) &&
       errors[errorKey].length >= 1 &&
@@ -65,63 +58,31 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     );
   });
 
-  const expressionErrorMessage = i18n.translate(
-    'xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
-    {
-      defaultMessage: 'Expression contains errors.',
-    }
-  );
-
-  const expressionError = hasExpressionErrors && (
+  const expressionError = !!errorParam && (
     <>
-      <EuiCallOut color="danger" size="s" title={expressionErrorMessage} />
+      <EuiCallOut color="danger" size="s" title={errors[errorParam]} />
       <EuiSpacer />
     </>
   );
-
-  // Creating a rule from Stack Management page
-  if (!ruleParams.searchType && !activeQueryFormType) {
-    // Showing the type chooser
-    return (
-      <QueryFormTypeChooser
-        activeFormType={activeQueryFormType}
-        onFormTypeSelect={formTypeSelected}
-        errors={errors}
-      />
-    );
-  }
 
   return (
     <>
       {expressionError}
 
       {/* Showing the selected type */}
-      {activeQueryFormType && (
+      {isManagementPage && (
         <QueryFormTypeChooser
-          activeFormType={activeQueryFormType}
+          searchType={ruleParams.searchType as SearchType}
           onFormTypeSelect={formTypeSelected}
-          errors={errors}
         />
       )}
 
-      {isSearchSource ? (
+      {ruleParams.searchType && isSearchSource && (
         <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
-      ) : (
-        <>
-          {activeQueryFormType === QueryFormType.KQL_OR_LUCENE ? (
-            <SearchSourceExpressionMemoized
-              {...props}
-              ruleParams={{
-                ...ruleParams,
-                searchType: SearchType.searchSource,
-                searchConfiguration: {},
-              }}
-              shouldResetSearchConfiguration
-            />
-          ) : (
-            <EsQueryExpression {...props} ruleParams={ruleParams} />
-          )}
-        </>
+      )}
+
+      {ruleParams.searchType && !isSearchSource && (
+        <EsQueryExpression {...props} ruleParams={ruleParams} />
       )}
 
       <EuiHorizontalRule />

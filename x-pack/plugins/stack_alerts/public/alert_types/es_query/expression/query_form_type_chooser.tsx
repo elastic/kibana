@@ -18,16 +18,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { SearchType } from '../types';
 
-export enum QueryFormType {
-  KQL_OR_LUCENE = 'kql_or_lucene',
-  QUERY_DSL = 'query_dsl',
-}
-
-const FORM_TYPE_ITEMS: Array<{ formType: QueryFormType; label: string; description: string }> = [
+const FORM_TYPE_ITEMS: Array<{ formType: SearchType; label: string; description: string }> = [
   {
-    formType: QueryFormType.KQL_OR_LUCENE,
+    formType: SearchType.searchSource,
     label: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeLabel',
       {
@@ -43,7 +38,7 @@ const FORM_TYPE_ITEMS: Array<{ formType: QueryFormType; label: string; descripti
     ),
   },
   {
-    formType: QueryFormType.QUERY_DSL,
+    formType: SearchType.esQuery,
     label: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeLabel',
       {
@@ -60,18 +55,16 @@ const FORM_TYPE_ITEMS: Array<{ formType: QueryFormType; label: string; descripti
 ];
 
 export interface QueryFormTypeProps {
-  activeFormType: QueryFormType | null;
-  errors: IErrorObject;
-  onFormTypeSelect: (formType: QueryFormType | null) => void;
+  searchType: SearchType | null;
+  onFormTypeSelect: (formType: SearchType | null) => void;
 }
 
 export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
-  activeFormType,
-  errors,
+  searchType,
   onFormTypeSelect,
 }) => {
-  if (activeFormType) {
-    const activeFormTypeItem = FORM_TYPE_ITEMS.find((item) => item.formType === activeFormType);
+  if (searchType) {
+    const activeFormTypeItem = FORM_TYPE_ITEMS.find((item) => item.formType === searchType);
 
     return (
       <>
@@ -114,14 +107,6 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
           />
         </h5>
       </EuiTitle>
-      {errors.searchType?.length > 0 && (
-        <EuiText color="danger" size="xs">
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.selectQueryFormTypeValidationError"
-            defaultMessage="Query is required."
-          />
-        </EuiText>
-      )}
       <EuiListGroup flush gutterSize="m" size="l" maxWidth={false}>
         {FORM_TYPE_ITEMS.map((item) => (
           <EuiListGroupItem
