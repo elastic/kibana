@@ -81,7 +81,7 @@ export const getDatatableRenderer = (dependencies: {
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
-            renderComplete={handlers.done}
+            renderComplete={() => handlers.done()}
           />
         </I18nProvider>
       </KibanaThemeProvider>,
