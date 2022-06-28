@@ -71,7 +71,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           // If the user has typed a command (some text followed by at space),
           // then parse it to get the command name.
           fullCommandText.trimStart().indexOf(' ') !== -1
-            ? getCommandNameFromTextInput(newTextEntered)
+            ? getCommandNameFromTextInput(fullCommandText)
             : '';
 
         return {
