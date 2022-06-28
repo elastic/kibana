@@ -197,6 +197,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
 }
 
 .c0 {
+  background-color: inherit;
   margin: 0 -1px 0;
 }
 
