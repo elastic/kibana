@@ -73,7 +73,12 @@ export const ActionBar = () => {
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="plusInCircleFilled" onClick={handleSubmit(formSubmitter)}>
+            <EuiButton
+              fill
+              iconType="plusInCircleFilled"
+              onClick={handleSubmit(formSubmitter)}
+              data-test-subj="syntheticsMonitorConfigSubmitButton"
+            >
               {isEdit ? UPDATE_MONITOR_LABEL : CREATE_MONITOR_LABEL}
             </EuiButton>
           </EuiFlexItem>

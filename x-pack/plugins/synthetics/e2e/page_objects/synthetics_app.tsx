@@ -56,13 +56,9 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       await page.isVisible('[data-test-subj=monitorSettingsSection]');
     },
 
-    async confirmAndSave(isEditPage?: boolean) {
+    async confirmAndSave() {
       await this.ensureIsOnMonitorConfigPage();
-      if (isEditPage) {
-        await page.click('text=Update monitor');
-      } else {
-        await page.click('text=Create monitor');
-      }
+      await this.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
       return await this.findByText('Monitor added successfully.');
     },
 
