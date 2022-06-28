@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   ActionLogButton,
   getEndpointResponseActionsConsoleCommands,
@@ -23,9 +24,16 @@ const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_ov
 
 export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConsole => {
   const consoleManager = useConsoleManager();
+  const { canAccessResponseConsole } = useUserPrivileges().endpointPrivileges;
 
   return useCallback(
     (endpointMetadata: HostMetadata) => {
+      // If no authz, just exit and log something to the console
+      if (!canAccessResponseConsole) {
+        window.console.error(new Error('Access denied to endpoint response actions console'));
+        return;
+      }
+
       const endpointAgentId = endpointMetadata.agent.id;
       const endpointRunningConsole = consoleManager.getOne(endpointAgentId);
 
@@ -49,6 +57,6 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
           .show();
       }
     },
-    [consoleManager]
+    [canAccessResponseConsole, consoleManager]
   );
 };
