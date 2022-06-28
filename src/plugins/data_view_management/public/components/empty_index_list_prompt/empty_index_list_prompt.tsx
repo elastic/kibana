@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiTitle,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageContent_Deprecated as EuiPageContent,

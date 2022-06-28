@@ -15,7 +15,7 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
