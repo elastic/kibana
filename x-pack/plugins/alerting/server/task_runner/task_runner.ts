@@ -456,11 +456,12 @@ export class TaskRunner<
       });
     }
 
+    rulesClient.clearExpiredSnoozes({ id: rule.id });
+
     const ruleIsSnoozed = isRuleSnoozed(rule);
     if (ruleIsSnoozed) {
       this.markRuleAsSnoozed(rule.id, rulesClient);
     }
-    rulesClient.clearExpiredSnoozes({ id: rule.id });
 
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);

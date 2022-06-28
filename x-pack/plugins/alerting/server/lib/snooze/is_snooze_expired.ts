@@ -16,6 +16,7 @@ export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
   const now = Date.now();
   const { rRule } = snooze;
   // Check to see if the snooze has another upcoming occurrence in the future
+
   try {
     const rRuleOptions = {
       ...rRule,
