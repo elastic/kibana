@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Query } from '@kbn/es-query';
+import { Query, AggregateQuery } from '@kbn/es-query';
 import { has } from 'lodash';
 
-function isOfQueryType(arg: any): arg is Query {
-  return Boolean(arg && 'query' in arg);
+function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
+  return Boolean(query && 'sql' in query);
 }
 
 /**
@@ -22,7 +22,7 @@ function isOfQueryType(arg: any): arg is Query {
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
   if (!has(query, 'language')) {
-    if (typeof query === 'object' && !isOfQueryType(query)) {
+    if (typeof query === 'object' && isOfAggregateQueryType(query)) {
       return query as Query;
     }
     return { query, language: 'lucene' };
