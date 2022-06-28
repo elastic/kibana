@@ -128,6 +128,8 @@ export const getAgentsHandler: RequestHandler<
       showInactive: request.query.showInactive,
       showUpgradeable: request.query.showUpgradeable,
       kuery: request.query.kuery,
+      sortField: request.query.sortField,
+      sortOrder: request.query.sortOrder,
     });
     const totalInactive = request.query.showInactive
       ? await AgentService.countInactiveAgents(esClient, {
@@ -195,7 +197,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     const results = await AgentService.reassignAgents(
       soClient,
       esClient,
-      agentOptions,
+      { ...agentOptions, batchSize: request.body.batchSize },
       request.body.policy_id
     );
 

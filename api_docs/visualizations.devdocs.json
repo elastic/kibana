@@ -4515,6 +4515,19 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEditorLayersContext.collapseFn",
+            "type": "string",
+            "tags": [],
+            "label": "collapseFn",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VisualizeEditorLayersContext.splitFilters",
             "type": "Array",
             "tags": [],
