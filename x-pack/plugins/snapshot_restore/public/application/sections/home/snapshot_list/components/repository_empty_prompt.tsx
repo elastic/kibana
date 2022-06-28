@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiEmptyPrompt,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '../../../../../shared_imports';

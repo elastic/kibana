@@ -10,7 +10,7 @@ import {
   EuiEmptyPrompt,
   EuiPage,
   EuiPageBody,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';

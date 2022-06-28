@@ -12,7 +12,7 @@ import {
   EuiEmptyPrompt,
   EuiIcon,
   EuiLink,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../../common';

@@ -9,7 +9,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import React from 'react';
 import { withRouter } from 'react-router-dom';

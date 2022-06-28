@@ -12,7 +12,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiPageBody,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 
 import type { SimpleSavedObject } from '@kbn/core/public';

@@ -10,7 +10,7 @@ import React, { useContext, FC } from 'react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';

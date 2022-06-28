@@ -13,7 +13,7 @@ import {
   EuiEmptyPrompt,
   EuiSpacer,
   EuiPageHeader,
-  EuiPageContent__Deprecated as EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
