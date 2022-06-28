@@ -169,7 +169,7 @@ export class Plugin implements InfraClientPluginClass {
     core.application.register({
       id: 'metrics',
       title: i18n.translate('xpack.infra.metrics.pluginTitle', {
-        defaultMessage: 'Metrics',
+        defaultMessage: 'Infrastructure',
       }),
       euiIconType: 'logoObservability',
       order: 8200,
