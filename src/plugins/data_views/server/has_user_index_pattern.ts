@@ -38,8 +38,8 @@ export const hasUserIndexPattern = async (
     indexPatterns = await getIndexPattern({ esClient, soClient });
   }
 
-  if (indexPatterns.total === 0) {
-    return false;
+  if (indexPatterns.total > 0) {
+    return true;
   }
 
   const resolveResponse = await esClient.indices.resolveIndex({
@@ -47,13 +47,14 @@ export const hasUserIndexPattern = async (
   });
 
   if (resolveResponse) {
-    const hasAnyDefaultFleetDataStreams = resolveResponse.data_streams.some(
-      (ds) =>
-        ds.name === DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE ||
-        ds.name === DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE
-    );
+    if (resolveResponse.indices.length > 0) return true;
 
-    if (hasAnyDefaultFleetDataStreams) return false;
+    const hasAnyNonDefaultFleetDataStreams = resolveResponse.data_streams.some(
+      (ds) =>
+        ds.name !== DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE &&
+        ds.name !== DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE
+    );
+    if (hasAnyNonDefaultFleetDataStreams) return true;
   }
-  return true;
+  return false;
 };

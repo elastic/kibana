@@ -25,28 +25,13 @@ describe('hasUserIndexPattern', () => {
     expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
   });
 
-  describe('when index patterns exist', () => {
+  describe('when no index patterns exist', () => {
     beforeEach(() => {
       soClient.find.mockResolvedValue({
         page: 1,
         per_page: 100,
-        total: 2,
-        saved_objects: [
-          {
-            id: '1',
-            references: [],
-            type: 'index-pattern',
-            score: 99,
-            attributes: { title: 'my-pattern-*' },
-          },
-          {
-            id: '2',
-            references: [],
-            type: 'index-pattern',
-            score: 99,
-            attributes: { title: 'logs-*' },
-          },
-        ],
+        total: 0,
+        saved_objects: [],
       });
     });
 
@@ -62,13 +47,13 @@ describe('hasUserIndexPattern', () => {
       });
     });
 
-    it('returns true if no data_streams exists', async () => {
+    it('returns false if no data_streams exists', async () => {
       esClient.indices.resolveIndex.mockResponse({
         indices: [],
         data_streams: [],
         aliases: [],
       });
-      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(true);
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
     });
 
     it('returns true if any index exists', async () => {
@@ -118,6 +103,31 @@ describe('hasUserIndexPattern', () => {
             name: 'other',
             timestamp_field: '@timestamp',
             backing_indices: ['.ds-other'],
+          },
+        ],
+        aliases: [],
+      });
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(true);
+    });
+
+    it('returns true if any other data stream exists with logs-enterprise_search.api-default and logs-elastic_agent', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [
+          {
+            name: 'other',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-other'],
+          },
+          {
+            name: 'logs-enterprise_search.api-default',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-logs-enterprise_search.api-default-2022.03.07-000001'],
+          },
+          {
+            name: 'logs-elastic_agent',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-logs-elastic_agent'],
           },
         ],
         aliases: [],
