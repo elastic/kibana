@@ -125,7 +125,7 @@ export type SerializedSearchSourceFields = {
   /**
    * {@link Query}
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * {@link Filter}
    */
