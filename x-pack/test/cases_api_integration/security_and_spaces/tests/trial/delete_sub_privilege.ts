@@ -112,20 +112,19 @@ export default ({ getService }: FtrProviderContext): void => {
           { user: superUser, space: 'space1' }
         );
 
-        await Promise.all([
-          createComment({
-            supertest: supertestWithoutAuth,
-            caseId: secCase.id,
-            params: postCommentUserReq,
-            auth: { user: superUser, space: 'space1' },
-          }),
-          createComment({
-            supertest: supertestWithoutAuth,
-            caseId: secCase.id,
-            params: postCommentUserReq,
-            auth: { user: superUser, space: 'space1' },
-          }),
-        ]);
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: secCase.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: secCase.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space1' },
+        });
 
         await deleteAllComments({
           supertest: supertestWithoutAuth,
@@ -212,34 +211,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseIDs: [caseInfo.id],
             expectedHttpCode: 403,
-            auth: { user: secOnlyDelete, space: 'space1' },
-          });
-        });
-
-        it(`should create a comment but not delete a comment`, async () => {
-          const caseInfo = await createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-            200,
-            {
-              user: secOnlyNoDelete,
-              space: 'space1',
-            }
-          );
-
-          const commentResp = await createComment({
-            supertest: supertestWithoutAuth,
-            caseId: caseInfo.id,
-            params: postCommentUserReq,
             auth: { user: secOnlyNoDelete, space: 'space1' },
-          });
-
-          await deleteComment({
-            supertest: supertestWithoutAuth,
-            caseId: caseInfo.id,
-            commentId: commentResp.comments![0].id,
-            auth: { user: secOnlyNoDelete, space: 'space1' },
-            expectedHttpCode: 403,
           });
         });
       });
@@ -315,6 +287,33 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCase.id,
             params: postCommentUserReq,
             auth: { user: secOnlyDelete, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
+
+        it(`should create a comment but not delete a comment`, async () => {
+          const caseInfo = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: secOnlyNoDelete,
+              space: 'space1',
+            }
+          );
+
+          const commentResp = await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            params: postCommentUserReq,
+            auth: { user: secOnlyNoDelete, space: 'space1' },
+          });
+
+          await deleteComment({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            commentId: commentResp.comments![0].id,
+            auth: { user: secOnlyNoDelete, space: 'space1' },
             expectedHttpCode: 403,
           });
         });
