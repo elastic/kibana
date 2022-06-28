@@ -8,7 +8,14 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'maps', 'timePicker', 'visualize']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'maps',
+    'timePicker',
+    'visualize',
+  ]);
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
