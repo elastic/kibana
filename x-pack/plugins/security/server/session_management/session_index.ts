@@ -304,7 +304,7 @@ export class SessionIndex {
         // We don't specify primary term and sequence number as delete should always take precedence
         // over any updates that could happen in the meantime.
         const { statusCode } = await this.options.elasticsearchClient.delete(
-          { id: filter.sid, index: this.indexName, refresh: 'wait_for' },
+          { id: filter.sid, index: this.aliasName, refresh: 'wait_for' },
           { ignore: [404], meta: true }
         );
 
@@ -339,7 +339,7 @@ export class SessionIndex {
 
     try {
       const response = await this.options.elasticsearchClient.deleteByQuery({
-        index: this.indexName,
+        index: this.aliasName,
         refresh: true,
         body: { query: deleteQuery },
       });

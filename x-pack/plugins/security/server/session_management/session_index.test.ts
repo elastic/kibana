@@ -1207,7 +1207,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.delete).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.delete).toHaveBeenCalledWith(
-        { id: 'some-long-sid', index: indexName, refresh: 'wait_for' },
+        { id: 'some-long-sid', index: aliasName, refresh: 'wait_for' },
         { ignore: [404], meta: true }
       );
     });
@@ -1226,7 +1226,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: { query: { match_all: {} } },
       });
@@ -1250,7 +1250,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: { query: { bool: { must: [{ term: { 'provider.type': 'basic' } }] } } },
       });
@@ -1266,7 +1266,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: {
           query: {
@@ -1291,7 +1291,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: {
           query: {
@@ -1316,7 +1316,7 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
-        index: indexName,
+        index: aliasName,
         refresh: true,
         body: {
           query: {
