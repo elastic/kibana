@@ -205,6 +205,17 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               };
               updatedTextEnteredState = updatedTextEnteredState + prevRightOfCursor.text;
               break;
+
+            // DELETE
+            // Remove the first character from the Right side of cursor
+            case 46:
+              if (prevRightOfCursor.text) {
+                updatedRightOfCursor = {
+                  ...prevRightOfCursor,
+                  text: prevRightOfCursor.text.substring(1),
+                };
+              }
+              break;
           }
 
           return {
