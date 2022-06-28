@@ -40,7 +40,9 @@ export const ExplainLogRateSpikes: FC<ExplainLogRateSpikesProps> = ({
   >(
     `${basePath}/internal/aiops/explain_log_rate_spikes`,
     {
-      // TODO Consider time ranges.
+      // TODO Consider actual user selected time ranges.
+      // Since we already receive window parameters here,
+      // we just set a maximum time range of 1970-2038 here.
       start: 0,
       end: 2147483647000,
       // TODO Consider an optional Kuery.
