@@ -218,7 +218,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
       )}
 
       <EventsTh role="button">
-        <FieldBrowserContainer data-test-subj="field-browser">
+        <FieldBrowserContainer>
           {triggersActionsUi.getFieldBrowser({
             browserFields,
             columnIds: columnHeaders.map(({ id }) => id),

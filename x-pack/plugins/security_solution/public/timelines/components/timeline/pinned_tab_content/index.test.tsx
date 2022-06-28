@@ -71,6 +71,7 @@ jest.mock('../../../../common/lib/kibana', () => {
           getFieldBrowser: jest.fn(),
           getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
+        triggersActionsUi: { getFieldBrowser: jest.fn() },
       },
     }),
     useGetUserSavedObjectPermissions: jest.fn(),

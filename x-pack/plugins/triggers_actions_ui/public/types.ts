@@ -60,7 +60,10 @@ import type { EditConnectorFlyoutProps } from './application/sections/action_con
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
 import type {
   FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
   FieldBrowserProps,
+  BrowserFieldItem,
 } from './application/sections/field_browser/types';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
@@ -104,6 +107,9 @@ export type {
   RulesListNotifyBadgeProps,
   FieldBrowserProps,
   FieldBrowserOptions,
+  CreateFieldComponent,
+  GetFieldTableColumns,
+  BrowserFieldItem,
 };
 export type { ActionType, AsApiContract };
 export {

@@ -4,13 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 
-export const mockTimelines = {
-  getLastUpdated: jest.fn(),
-  getLoadingPanel: jest.fn(),
-  getUseDraggableKeyboardWrapper: () =>
-    jest.fn().mockReturnValue({
-      onBlur: jest.fn(),
-      onKeyDown: jest.fn(),
-    }),
+export const mockTriggersActionsUi = {
+  getFieldBrowser: jest.fn().mockReturnValue(<div data-test-subj="field-browser" />),
 };

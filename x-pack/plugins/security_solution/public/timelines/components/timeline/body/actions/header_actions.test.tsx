@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 
 import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
 import { HeaderActions } from './header_actions';
-import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
 import {
   ColumnHeaderOptions,
   HeaderActionProps,
@@ -38,7 +38,7 @@ const fieldId = 'test-field';
 const timelineId = 'test-timeline';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-mockTimelines.getFieldBrowser.mockImplementation(
+mockTriggersActionsUi.getFieldBrowser.mockImplementation(
   ({
     onToggleColumn,
     onResetColumns,
@@ -56,7 +56,7 @@ mockTimelines.getFieldBrowser.mockImplementation(
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
-      timelines: { ...mockTimelines },
+      triggersActionsUi: { ...mockTriggersActionsUi },
     },
   }),
 }));
