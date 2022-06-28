@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
 
   describe('Loaded Dashboard', () => {
-    const fromTimestamp = 0;
+    let fromTimestamp: string | undefined;
 
     const getEvents = async (count: number) =>
       ebtUIHelper.getEvents(count, {
@@ -44,6 +44,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.status).to.be('done');
       expect(event.properties.timeToData).to.be.a('number');
       expect(event.properties.timeToDone).to.be.a('number');
+
+      // update fromTimestamp
+      fromTimestamp = event.timestamp;
+
       return event;
     };
 
@@ -70,7 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const VIS_PANEL_TITLE = '[Flights] Delay Buckets';
       const MAP_PANEL_TITLE = '[Flights] Origin Time Delayed';
       const MARKDOWN_PANEL_TITLE = 'Matrix';
-      const LENS_PANEL_TITLE = 'Lensy Lens';
 
       before(async () => {
         await PageObjects.common.navigateToApp('dashboards');
