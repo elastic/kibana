@@ -23,9 +23,9 @@ import { i18n } from '@kbn/i18n';
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector_package/generate_connector_api_key_api_logic';
 import { ApiKey } from '../api_key/api_key';
 
-export const ConfigurationConnector: React.FC<{ indexName: string; indexId: string }> = ({
-  indexName,
+export const ConfigurationConnector: React.FC<{ indexId: string; indexName: string }> = ({
   indexId,
+  indexName,
 }) => {
   const { makeRequest, apiReset } = useActions(GenerateConnectorApiKeyApiLogic);
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
@@ -86,14 +86,6 @@ export const ConfigurationConnector: React.FC<{ indexName: string; indexId: stri
         <EuiSteps
           steps={[
             {
-              title: i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.generateApiKey.title',
-                {
-                  defaultMessage: 'Generate an API key',
-                }
-              ),
-
-              titleSize: 'xs',
               children: (
                 <EuiText size="s">
                   <p>
@@ -108,15 +100,16 @@ export const ConfigurationConnector: React.FC<{ indexName: string; indexId: stri
                 </EuiText>
               ),
               status: 'incomplete',
-            },
-            {
               title: i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
+                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.generateApiKey.title',
                 {
-                  defaultMessage: 'Deploy your connector',
+                  defaultMessage: 'Generate an API key',
                 }
               ),
+
               titleSize: 'xs',
+            },
+            {
               children: (
                 <EuiText size="s">
                   <p>
@@ -131,20 +124,20 @@ export const ConfigurationConnector: React.FC<{ indexName: string; indexId: stri
                 </EuiText>
               ),
               status: 'incomplete',
-            },
-            {
               title: i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.configureConnector.title',
+                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
                 {
-                  defaultMessage: 'Build a search experience',
+                  defaultMessage: 'Deploy your connector',
                 }
               ),
               titleSize: 'xs',
+            },
+            {
               children: (
                 <EuiText size="s">
                   <p>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.configurationConnector.steps.configureConnector.title',
+                      'xpack.enterpriseSearch.content.indices.configurationConnector.steps.configureConnector.content',
                       {
                         defaultMessage:
                           'Configure your newly deployed connector with the necessary configuration details so it can connect to your data source.',
@@ -154,15 +147,15 @@ export const ConfigurationConnector: React.FC<{ indexName: string; indexId: stri
                 </EuiText>
               ),
               status: 'incomplete',
-            },
-            {
               title: i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.buildSearchExperience.title',
+                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.configureConnector.title',
                 {
                   defaultMessage: 'Build a search experience',
                 }
               ),
               titleSize: 'xs',
+            },
+            {
               children: (
                 <EuiText size="s">
                   <p>
@@ -177,6 +170,13 @@ export const ConfigurationConnector: React.FC<{ indexName: string; indexId: stri
                 </EuiText>
               ),
               status: 'incomplete',
+              title: i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.steps.buildSearchExperience.title',
+                {
+                  defaultMessage: 'Build a search experience',
+                }
+              ),
+              titleSize: 'xs',
             },
           ]}
         />

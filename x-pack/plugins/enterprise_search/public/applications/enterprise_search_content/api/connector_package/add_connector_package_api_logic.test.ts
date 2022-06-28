@@ -18,14 +18,14 @@ describe('addConnectorPackageApiLogic', () => {
   });
   describe('addConnectorPackage', () => {
     it('calls correct api', async () => {
-      const promise = Promise.resolve('result');
+      const promise = Promise.resolve({ id: 'unique id', index_name: 'indexName' });
       http.post.mockReturnValue(promise);
       const result = addConnectorPackage({ indexName: 'indexName' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
         body: JSON.stringify({ index_name: 'indexName' }),
       });
-      expect(result).resolves.toEqual('result');
+      expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
     });
   });
 });

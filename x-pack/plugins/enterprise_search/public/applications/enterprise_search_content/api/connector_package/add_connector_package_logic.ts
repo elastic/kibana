@@ -23,7 +23,7 @@ export const AddConnectorPackageLogic = kea<MakeLogicType<{}, AddConnectorAction
   listeners: {
     apiSuccess: ({ indexName }) => {
       KibanaLogic.values.navigateToUrl(
-        SEARCH_INDEX_CONFIGURATION_PATH.replace(':indexSlug', encodeURI(indexName))
+        SEARCH_INDEX_CONFIGURATION_PATH.replace(':indexSlug', indexName)
       );
     },
   },

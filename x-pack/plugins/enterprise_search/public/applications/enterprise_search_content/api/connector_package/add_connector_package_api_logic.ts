@@ -9,9 +9,8 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 interface AddConnectorValue {
-  apiKey: string;
   id: string;
-  indexName: string;
+  index_name: string;
 }
 
 export const addConnectorPackage = async ({ indexName }: { indexName: string }) => {
@@ -20,9 +19,13 @@ export const addConnectorPackage = async ({ indexName }: { indexName: string }) 
   const params = {
     index_name: indexName,
   };
-  return await HttpLogic.values.http.post<AddConnectorValue>(route, {
+  const result = await HttpLogic.values.http.post<AddConnectorValue>(route, {
     body: JSON.stringify(params),
   });
+  return {
+    id: result.id,
+    indexName: result.index_name,
+  };
 };
 
 export const AddConnectorPackageApiLogic = createApiLogic(
