@@ -83,7 +83,7 @@ export const createSavedObjects = async <T>({
         ...(!importStateValue.omitOriginId && { originId: originId ?? object.id }),
       };
     }
-    return { ...object, originId, ...(references && { references }) };
+    return { ...object, ...(references && { references }), ...(originId && { originId }) };
   });
 
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
