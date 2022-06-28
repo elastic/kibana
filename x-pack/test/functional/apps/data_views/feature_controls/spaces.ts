@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`data views listing shows create button`, async () => {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.existOrFail('createIndexPatternButton');
+        await testSubjects.existOrFail('createDataViewButton');
       });
     });
 

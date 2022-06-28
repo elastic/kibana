@@ -40,6 +40,7 @@ export const CasesPage = React.memo(() => {
 
   return userPermissions == null || userPermissions?.read ? (
     <ObservabilityPageTemplate
+      isPageDataLoaded={Boolean(hasAnyData || isAllRequestsComplete)}
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       noDataConfig={noDataConfig}
     >

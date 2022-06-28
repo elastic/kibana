@@ -192,20 +192,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/one_drive',
   },
   {
-    id: 'outlook',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.outlookName', {
-      defaultMessage: 'Outlook',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.outlookDescription',
-      {
-        defaultMessage: 'Search over your email and calendars with Enterprise Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'microsoft_365', 'communications', 'productivity'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/outlook/custom',
-  },
-  {
     id: 'salesforce',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.salesforceName', {
       defaultMessage: 'Salesforce',
@@ -296,21 +282,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['communications'],
   },
   {
-    id: 'teams',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.teamsName', {
-      defaultMessage: 'Teams',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.teamsDescription',
-      {
-        defaultMessage:
-          'Search over meeting recordings, chats and other communications with Enterprise Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'microsoft_365', 'communications', 'productivity'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/teams/custom',
-  },
-  {
     id: 'zendesk',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.zendeskName', {
       defaultMessage: 'Zendesk',
@@ -322,21 +293,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['communications'],
-  },
-  {
-    id: 'zoom',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.zoomName', {
-      defaultMessage: 'Zoom',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.zoomDescription',
-      {
-        defaultMessage:
-          'Search over meeting recordings, chats and other communications with Enterprise Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'communications', 'productivity'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/zoom/custom',
   },
 ];
 

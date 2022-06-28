@@ -629,5 +629,43 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       }
     });
+
+    it('project monitors - is able to enable and disable monitors', async () => {
+      try {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send(projectMonitors);
+
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ...projectMonitors,
+            monitors: [
+              {
+                ...projectMonitors.monitors[0],
+                enabled: false,
+              },
+            ],
+          })
+          .expect(200);
+        const response = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.journey_id: ${projectMonitors.monitors[0].id}`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { monitors } = response.body;
+        expect(monitors[0].attributes.enabled).eql(false);
+      } finally {
+        await Promise.all([
+          projectMonitors.monitors.map((monitor) => {
+            return deleteMonitor(monitor.id, projectMonitors.project);
+          }),
+        ]);
+      }
+    });
   });
 }
