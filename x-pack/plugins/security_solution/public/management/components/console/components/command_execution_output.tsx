@@ -18,7 +18,7 @@ const CommandOutputContainer = styled.div`
   position: relative;
 
   .busy-indicator {
-    margin-right: 1em;
+    margin-left: 0.5em;
   }
 `;
 
@@ -70,8 +70,6 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
         <div>
           <EuiSpacer size="s" />
 
-          {isRunning && <EuiLoadingChart className="busy-indicator" />}
-
           <RenderComponent
             command={command}
             store={state.store}
@@ -80,6 +78,8 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
             setStatus={setCommandStatus}
             ResultComponent={CommandExecutionResult}
           />
+
+          {isRunning && <EuiLoadingChart className="busy-indicator" mono={true} />}
         </div>
       </CommandOutputContainer>
     );

@@ -17,9 +17,11 @@ export async function waitForLoadingToFinish({ page }: { page: Page }) {
 export async function loginToKibana({
   page,
   user,
+  dismissTour = true,
 }: {
   page: Page;
   user?: { username: string; password: string };
+  dismissTour?: boolean;
 }) {
   await page.fill('[data-test-subj=loginUsername]', user?.username ?? 'elastic', {
     timeout: 60 * 1000,
@@ -30,8 +32,10 @@ export async function loginToKibana({
   await page.click('[data-test-subj=loginSubmit]');
 
   await waitForLoadingToFinish({ page });
-  // Close Monitor Management tour added in 8.2.0
-  await page.click('[data-test-subj=syntheticsManagementTourDismiss]');
+  if (dismissTour) {
+    // Close Monitor Management tour added in 8.2.0
+    await page.click('[data-test-subj=syntheticsManagementTourDismiss]');
+  }
 }
 
 export const byTestId = (testId: string) => {
@@ -54,3 +58,7 @@ export const getQuerystring = (params: object) => {
 };
 
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const TIMEOUT_60_SEC = {
+  timeout: 60 * 1000,
+};

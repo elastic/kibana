@@ -31,7 +31,8 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
   }, [dispatch, isHelpOpen]);
 
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
+<<<<<<< HEAD
+    <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={1} className="eui-textTruncate">
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>

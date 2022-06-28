@@ -808,13 +808,29 @@ describe('SearchSource', () => {
   });
 
   describe('#serialize', () => {
+    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
     test('should reference index patterns', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       const { searchSourceJSON, references } = searchSource.serialize();
       expect(references[0].id).toEqual('123');
       expect(references[0].type).toEqual('index-pattern');
       expect(JSON.parse(searchSourceJSON).indexRefName).toEqual(references[0].name);
+    });
+
+    test('should contain persisted data view by value', () => {
+      const localDataView = {
+        id: 'local-123',
+        isPersisted: () => false,
+        toSpec: () => ({ id: 'local-123' }),
+      } as DataView;
+      searchSource.setField('index', localDataView);
+      const { searchSourceJSON, references } = searchSource.serialize();
+      expect(references.length).toEqual(0);
+      expect(JSON.parse(searchSourceJSON).index).toMatchInlineSnapshot(`
+        Object {
+          "id": "local-123",
+        }
+      `);
     });
 
     test('should add other fields', () => {
@@ -851,7 +867,6 @@ describe('SearchSource', () => {
     });
 
     test('should reference index patterns in filters separately from index field', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
@@ -908,8 +923,9 @@ describe('SearchSource', () => {
       },
     ];
 
+    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
+
     test('should return serialized fields', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('filter', () => {
         return filter;
@@ -941,7 +957,6 @@ describe('SearchSource', () => {
     });
 
     test('should support nested search sources', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('from', 123);
       const childSearchSource = searchSource.createChild();
