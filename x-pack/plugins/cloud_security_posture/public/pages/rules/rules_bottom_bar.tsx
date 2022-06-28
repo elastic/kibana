@@ -6,8 +6,8 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBottomBar, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as TEST_SUBJECTS from './test_subjects';
-import * as TEXT from './translations';
 
 interface RulesBottomBarProps {
   onSave(): void;
@@ -25,7 +25,10 @@ export const RulesBottomBar = ({ onSave, onCancel, isLoading }: RulesBottomBarPr
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiButton size="m" iconType="cross" isLoading={isLoading} onClick={onCancel} color="ghost">
-          {TEXT.CANCEL}
+          <FormattedMessage
+            id="xpack.csp.rules.rulesBottomBar.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -37,7 +40,10 @@ export const RulesBottomBar = ({ onSave, onCancel, isLoading }: RulesBottomBarPr
           fill
           data-test-subj={TEST_SUBJECTS.CSP_RULES_SAVE_BUTTON}
         >
-          {TEXT.SAVE}
+          <FormattedMessage
+            id="xpack.csp.rules.rulesBottomBar.saveButtonLabel"
+            defaultMessage="Save"
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

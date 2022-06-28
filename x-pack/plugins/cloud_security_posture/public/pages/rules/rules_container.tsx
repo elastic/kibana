@@ -7,6 +7,7 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { type EuiBasicTable, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import {
   extractErrorMessage,
   createCspRuleSearchFilterByPackagePolicy,
@@ -24,7 +25,6 @@ import {
 } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
-import { DATA_UPDATE_INFO } from './translations';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 interface RulesPageData {
@@ -174,7 +174,14 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <EuiCallOut size="m" title={DATA_UPDATE_INFO} iconType="iInCircle" />
+      <EuiCallOut
+        size="m"
+        title={i18n.translate('xpack.csp.rules.rulesContainerCallout.dataUpdateCalloutTitle', {
+          defaultMessage:
+            'Please note, any changes to your benchmark rules will take effect the next time your resources are evaluated. This can take up to ~5 hours',
+        })}
+        iconType="iInCircle"
+      />
       <EuiSpacer />
       <EuiPanel hasBorder hasShadow={false}>
         <RulesTableHeader
