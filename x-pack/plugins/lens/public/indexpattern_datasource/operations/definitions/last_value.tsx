@@ -122,7 +122,8 @@ function getExistsFilter(field: string) {
 export const lastValueOperation: OperationDefinition<
   LastValueIndexPatternColumn,
   'field',
-  Partial<LastValueIndexPatternColumn['params']>
+  Partial<LastValueIndexPatternColumn['params']>,
+  true
 > = {
   type: 'last_value',
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
@@ -131,6 +132,7 @@ export const lastValueOperation: OperationDefinition<
   getDefaultLabel: (column, indexPattern) =>
     ofName(getSafeName(column.sourceField, indexPattern), column.timeShift),
   input: 'field',
+  allowAsReference: true,
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
 

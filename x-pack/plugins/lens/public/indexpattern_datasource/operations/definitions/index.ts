@@ -443,7 +443,11 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
   ) => ExpressionAstFunction;
 }
 
-interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
+interface FieldBasedOperationDefinition<
+  C extends BaseIndexPatternColumn,
+  P = {},
+  AR extends boolean = false
+> {
   input: 'field';
 
   /**
@@ -471,6 +475,10 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       usedInMath?: boolean;
     }
   ) => C;
+  allowAsReference?: AR;
+  paramEditor?: React.ComponentType<
+    AR extends true ? FancyColumnSetterParamEditorProps<C> : ParamEditorProps<C>
+  >;
   /**
    * This method will be called if the user changes the field of an operation.
    * You must implement it and return the new column after the field change.
@@ -631,8 +639,12 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
   ) => Record<string, IndexPatternLayer>;
 }
 
-interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
-  field: FieldBasedOperationDefinition<C, P>;
+interface OperationDefinitionMap<
+  C extends BaseIndexPatternColumn,
+  P = {},
+  AR extends boolean = false
+> {
+  field: FieldBasedOperationDefinition<C, P, AR>;
   none: FieldlessOperationDefinition<C, P>;
   fullReference: FullReferenceOperationDefinition<C>;
   managedReference: ManagedReferenceOperationDefinition<C>;
@@ -646,8 +658,9 @@ interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
 export type OperationDefinition<
   C extends BaseIndexPatternColumn,
   Input extends keyof OperationDefinitionMap<C>,
-  P = {}
-> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C, P>[Input];
+  P = {},
+  AR extends boolean = false
+> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C, P, AR>[Input];
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.
