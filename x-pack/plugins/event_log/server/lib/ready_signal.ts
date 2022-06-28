@@ -8,10 +8,12 @@
 export interface ReadySignal<T = void> {
   wait(): Promise<T>;
   signal(value: T): void;
+  isEmitted(): boolean;
 }
 
 export function createReadySignal<T>(): ReadySignal<T> {
   let resolver: (value: T) => void;
+  let emitted: boolean = false;
 
   const promise = new Promise<T>((resolve) => {
     resolver = resolve;
@@ -22,8 +24,13 @@ export function createReadySignal<T>(): ReadySignal<T> {
   }
 
   function signal(value: T) {
+    emitted = true;
     resolver(value);
   }
 
-  return { wait, signal };
+  function isEmitted(): boolean {
+    return emitted;
+  }
+
+  return { wait, signal, isEmitted };
 }
