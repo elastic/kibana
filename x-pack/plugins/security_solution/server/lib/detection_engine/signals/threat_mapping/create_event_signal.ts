@@ -96,7 +96,7 @@ export const createEventSignal = async ({
       },
     };
 
-    const { esFilter } = await getFilter({
+    const { esFilter, unprocessedExceptions } = await getFilter({
       type,
       filters: [...filters, indexFilter],
       language,
@@ -126,7 +126,7 @@ export const createEventSignal = async ({
       completeRule,
       enrichment: threatEnrichment,
       eventsTelemetry,
-      exceptionsList: exceptionItems,
+      exceptionsList: unprocessedExceptions,
       filter: esFilter,
       inputIndexPattern: inputIndex,
       listClient,
