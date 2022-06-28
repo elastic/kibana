@@ -53,6 +53,14 @@ describe('When using `getActionDetailsById()', () => {
       comment: doc?.EndpointActions.data.comment,
       createdBy: doc?.user.id,
       parameters: doc?.EndpointActions.data.parameters,
+      outputs: {
+        'agent-a': {
+          type: 'json',
+          content: {
+            entries: [],
+          },
+        },
+      },
     });
   });
 
