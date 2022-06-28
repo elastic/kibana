@@ -19,11 +19,13 @@ function isOfAggregateQueryType(query: AggregateQuery | Query): query is Aggrega
  * @return Object
  */
 
-export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
+export function migrateLegacyQuery(
+  query: Query | { [key: string]: any } | string | AggregateQuery
+): Query | AggregateQuery {
   // Lucene was the only option before, so language-less queries are all lucene
   if (!has(query, 'language')) {
     if (typeof query === 'object' && isOfAggregateQueryType(query)) {
-      return query as Query;
+      return query;
     }
     return { query, language: 'lucene' };
   }
