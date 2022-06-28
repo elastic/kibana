@@ -59,6 +59,7 @@ export const ValueExpression = ({
           onClick={() => {
             setValuePopoverOpen(true);
           }}
+          isInvalid={errors.length > 0}
         />
       }
       isOpen={valuePopoverOpen}

@@ -9,6 +9,7 @@ import React, { memo, PropsWithChildren, useCallback, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
@@ -50,13 +51,28 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     [setRuleParams, setRuleProperty]
   );
 
+  const expressionGenericErrorMessage = i18n.translate(
+    'xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
+    {
+      defaultMessage: 'Expression contains errors.',
+    }
+  );
+
   const errorParam = EXPRESSION_ERROR_KEYS.find((errorKey) => {
     return errors[errorKey].length >= 1 && ruleParams[errorKey] !== undefined;
   });
 
   const expressionError = !!errorParam && (
     <>
-      <EuiCallOut color="danger" size="s" title={errors[errorParam]} />
+      <EuiCallOut
+        color="danger"
+        size="s"
+        title={
+          ['index', 'searchType'].includes(errorParam)
+            ? errors[errorParam]
+            : expressionGenericErrorMessage
+        }
+      />
       <EuiSpacer />
     </>
   );
