@@ -22,40 +22,40 @@ import {
 import './button_group.scss';
 
 export interface ButtonGroupOption {
-  id: string;
-  icon: string;
-  label: string;
+  badge?: React.ReactNode;
   description: string;
   footer: string;
-  badge?: React.ReactNode;
+  icon: string;
+  id: string;
+  label: string;
 }
 
 interface Props {
+  onChange(option: ButtonGroupOption): void;
   options: ButtonGroupOption[];
   selected?: ButtonGroupOption;
-  onChange(option: ButtonGroupOption): void;
 }
 
-export const ButtonGroup: React.FC<Props> = ({ options, selected, onChange }) => (
-  <EuiFlexGroup direction="column" gutterSize="m" className="buttonGroup">
+export const ButtonGroup: React.FC<Props> = ({ onChange, options, selected }) => (
+  <EuiFlexGroup className="buttonGroup" direction="column" gutterSize="m" role="radiogroup">
     {options.map((option) => {
       const isSelected = option === selected;
-
       return (
         <EuiFlexItem
+          className={classNames('buttonGroupOption', {
+            'buttonGroupOption--selected': isSelected,
+          })}
           grow={false}
           onClick={() => {
             onChange(option);
           }}
         >
           <EuiSplitPanel.Outer
+            borderRadius="m"
             grow
             hasBorder
-            borderRadius="m"
             hasShadow={false}
-            className={classNames('buttonGroupOption', {
-              'buttonGroupOption-selected': isSelected,
-            })}
+            className="buttonGroupOption-panel"
           >
             <EuiSplitPanel.Inner color="plain" paddingSize="s">
               <EuiFlexGroup alignItems="center" responsive={false}>
@@ -78,8 +78,10 @@ export const ButtonGroup: React.FC<Props> = ({ options, selected, onChange }) =>
                   <EuiButtonIcon
                     display="base"
                     iconType={isSelected ? 'check' : 'arrowRight'}
-                    aria-label={option.label}
                     color={isSelected ? 'success' : 'primary'}
+                    aria-label={option.label}
+                    aria-checked={isSelected}
+                    role="radio"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

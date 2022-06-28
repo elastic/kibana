@@ -123,11 +123,11 @@ export const NewIndex: React.FC = () => {
         <EuiFlexItem grow={false} style={{ maxWidth: '24rem' }}>
           <EuiPanel hasShadow={false} paddingSize="m" grow={false} color="subdued">
             <EuiTitle size="xs">
-              <h4>
+              <h2>
                 {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectSearchIndex.title', {
                   defaultMessage: 'Select an ingestion method',
                 })}
-              </h4>
+              </h2>
             </EuiTitle>
             <EuiSpacer size="xs" />
             <EuiText size="xs">

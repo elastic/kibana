@@ -1,7 +1,11 @@
 .buttonGroup {
   .buttonGroupOption {
-    &-selected {
-      border: 1px $euiColorSuccess solid;
+    cursor: pointer;
+
+    &--selected {
+      .buttonGroupOption-panel {
+        border: 1px $euiColorSuccess solid;
+      }
     }
   }
 }
