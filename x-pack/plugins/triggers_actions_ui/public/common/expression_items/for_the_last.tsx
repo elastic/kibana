@@ -67,7 +67,7 @@ export const ForLastExpression = ({
             }
           )}
           data-test-subj="forLastExpression"
-          value={`${timeWindowSize} ${getTimeUnitLabel(
+          value={`${timeWindowSize ?? '?'} ${getTimeUnitLabel(
             timeWindowUnit as TIME_UNITS,
             (timeWindowSize ?? '').toString()
           )}`}
@@ -97,13 +97,10 @@ export const ForLastExpression = ({
         </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiFormRow
-              isInvalid={errors.timeWindowSize.length > 0 && timeWindowSize !== undefined}
-              error={errors.timeWindowSize}
-            >
+            <EuiFormRow isInvalid={errors.timeWindowSize.length > 0} error={errors.timeWindowSize}>
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
-                isInvalid={errors.timeWindowSize.length > 0 && timeWindowSize !== undefined}
+                isInvalid={errors.timeWindowSize.length > 0}
                 min={0}
                 value={timeWindowSize || ''}
                 onChange={(e) => {
