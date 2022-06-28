@@ -148,7 +148,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
 
   // If args were entered, then validate them
-  if (parsedInput.hasArgs || requiredArgs.length > 0 || exclusiveOrArgs.length > 0) {
+  if (parsedInput.hasArgs) {
     // Show command help
     if (parsedInput.hasArg('help')) {
       return updateStateWithNewCommandHistoryItem(state, {
@@ -327,6 +327,24 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           'xpack.securitySolution.console.commandValidation.oneArgIsRequired',
           {
             defaultMessage: 'At least one argument must be used',
+          }
+        ),
+      }),
+    });
+  } else if (exclusiveOrArgs.length > 0) {
+    // Validate exclusiveOr arguments, can only have one.
+    return updateStateWithNewCommandHistoryItem(state, {
+      id: uuidV4(),
+      command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+      state: createCommandExecutionState({
+        errorMessage: i18n.translate(
+          'xpack.securitySolution.console.commandValidation.exclusiveArgs',
+          {
+            defaultMessage:
+              'This command supports one and only one of the following arguments: {argNames}',
+            values: {
+              argNames: toCliArgumentOptions(exclusiveOrArgs),
+            },
           }
         ),
       }),

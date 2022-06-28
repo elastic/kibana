@@ -181,7 +181,7 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should show error no options were provided, bug command requires some', async () => {
+  it('should show error no options were provided, but command requires some', async () => {
     render();
     enterCommand('cmd2');
 
