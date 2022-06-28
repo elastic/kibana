@@ -110,7 +110,7 @@ interface State {
   dateRangeTo: string;
 }
 
-function isOfQueryType(arg: any): arg is Query {
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
   return Boolean(arg && 'query' in arg);
 }
 
@@ -132,23 +132,27 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     }
 
     let nextQuery = null;
-    if (isOfQueryType(nextProps.query) && isOfQueryType(prevState.query)) {
-      if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
-        nextQuery = {
-          query: nextProps.query.query,
-          language: nextProps.query.language,
-        };
-      } else if (
-        nextProps.query &&
-        prevState.query &&
-        nextProps.query.language !== prevState.query.language
-      ) {
-        nextQuery = {
-          query: '',
-          language: nextProps.query.language,
-        };
-      }
-    } else {
+    if (
+      nextProps.query &&
+      isOfQueryType(nextProps.query) &&
+      nextProps.query.query !== get(prevState, 'currentProps.query.query')
+    ) {
+      nextQuery = {
+        query: nextProps.query.query,
+        language: nextProps.query.language,
+      };
+    } else if (
+      nextProps.query &&
+      prevState.query &&
+      isOfQueryType(nextProps.query) &&
+      isOfQueryType(prevState.query) &&
+      nextProps.query.language !== prevState.query.language
+    ) {
+      nextQuery = {
+        query: '',
+        language: nextProps.query.language,
+      };
+    } else if (nextProps.query && !isOfQueryType(nextProps.query)) {
       nextQuery = nextProps.query;
     }
 
@@ -446,7 +450,11 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     const queryBarMenu = (
       <QueryBarMenu
         nonKqlMode={this.props.nonKqlMode}
-        language={isOfQueryType(this.state?.query) ? this.state?.query?.language : 'kuery'}
+        language={
+          this.state.query && isOfQueryType(this.state?.query)
+            ? this.state?.query?.language
+            : 'kuery'
+        }
         onQueryChange={this.onQueryBarChange}
         onQueryBarSubmit={this.onQueryBarSubmit}
         dateRangeFrom={this.state.dateRangeFrom}
