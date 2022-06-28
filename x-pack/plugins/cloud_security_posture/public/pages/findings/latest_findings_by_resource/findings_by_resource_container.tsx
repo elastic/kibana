@@ -108,10 +108,9 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             {findingsGroupByResource.isSuccess && !!findingsGroupByResource.data.page.length && (
               <FindingsDistributionBar
                 {...{
-                  type: i18n.translate(
-                    'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
-                    { defaultMessage: 'Resources' }
-                  ),
+                  type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
+                    defaultMessage: 'Resources',
+                  }),
                   total: findingsGroupByResource.data.total,
                   passed: findingsGroupByResource.data.count.passed,
                   failed: findingsGroupByResource.data.count.failed,
