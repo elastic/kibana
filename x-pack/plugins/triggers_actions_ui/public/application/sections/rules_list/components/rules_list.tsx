@@ -91,6 +91,11 @@ import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_ke
 
 const ENTER_KEY = 13;
 
+interface RulesPageContainerState {
+  lastResponse: string[];
+  status: RuleStatus[];
+}
+
 export interface RulesListProps {
   filteredRuleTypes?: string[] | undefined;
   filteredSolutions?: string[] | undefined;
@@ -98,9 +103,9 @@ export interface RulesListProps {
   ruleDetailsRoute?: string | undefined;
   showCreateRuleButton?: boolean;
   statusFilter?: RuleStatus[];
-  setStatusFilter?: (status: RuleStatus[]) => any; // TODO update any
+  setStatusFilter?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
-  setLastResponseFilter?: (lastResponse: string[]) => any; // TODO update any
+  setLastResponseFilter?: (lastResponse: string[]) => RulesPageContainerState;
   refresh?: Date;
 }
 
