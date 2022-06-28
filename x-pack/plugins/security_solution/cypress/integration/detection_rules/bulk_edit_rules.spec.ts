@@ -229,7 +229,7 @@ describe('Detection rules, bulk edit', () => {
     testAllTagsBadges(['overwrite-tag']);
   });
 
-  it.only('should not lose rules selection after edit action', () => {
+  it('should not lose rules selection after edit action', () => {
     const rulesCount = 4;
     // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
     changeRowsPerPageTo(5);
