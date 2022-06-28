@@ -20,10 +20,13 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
 import type { CoreTheme, OverlayStart } from '@kbn/core/public';
+import { isCloud } from '../../services/ml_server_info';
 import {
   composeValidators,
   numberValidator,
@@ -175,6 +178,30 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
+        {isCloud() ? (
+          <>
+            <EuiCallOut
+              size={'s'}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.cloudWarning"
+                  defaultMessage="In the future Cloud deployments will autoscale to have the required number of processors."
+                />
+              }
+              iconType="iInCircle"
+              color={'warning'}
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.cloudWarning"
+                  defaultMessage="However, in this release you must increase the size of your ML nodes manually in the Cloud console to get more processors."
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size={'m'} />
+          </>
+        ) : null}
+
         <StartDeploymentSetup config={config} onConfigChange={setConfig} />
       </EuiModalBody>
 
