@@ -37,7 +37,7 @@ interface Props {
 export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   const { getList } = useManagementApiService();
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
-  const [jobs, setJobs] = useState<ManagementListResponse>();
+  const [items, setItems] = useState<ManagementListResponse>();
   const [columns, setColumns] = useState<Array<EuiBasicTableColumn<ManagementItems>>>([]);
   const [filters, setFilters] = useState<SearchFilterConfig[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -46,23 +46,26 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
     setIsLoading(true);
     getList(currentTabId)
       .then((jobList) => {
-        setJobs(jobList);
+        setItems(jobList);
         setIsLoading(false);
         setFilters(getFilters(currentTabId, jobList));
       })
       .catch(() => {
-        setJobs([]);
+        setItems([]);
         setFilters(undefined);
         setIsLoading(false);
       });
   }, [getList, currentTabId]);
 
-  useEffect(() => {
-    setJobs(undefined);
-    setColumns(createColumns());
-    setCurrentTab(currentTabId);
-    refresh();
-  }, [currentTabId]);
+  useEffect(
+    function refreshOnTabChange() {
+      setItems(undefined);
+      setColumns(createColumns());
+      setCurrentTab(currentTabId);
+      refresh();
+    },
+    [currentTabId]
+  );
 
   const createColumns = useCallback(() => {
     return [
@@ -97,7 +100,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
     return (
       <>
         <EuiSpacer size="m" />
-        {jobs === undefined ? null : (
+        {items === undefined ? null : (
           <>
             <EuiFlexGroup>
               <EuiFlexItem />
@@ -105,11 +108,11 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
                 <RefreshButton onRefreshClick={refresh} isRefreshing={isLoading} />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiInMemoryTable
+            <EuiInMemoryTable<ManagementItems>
               data-test-subj={`mlSpacesManagementTable-${currentTabId} ${
                 isLoading ? 'loading' : 'loaded'
               }`}
-              items={jobs as any}
+              items={items}
               columns={columns}
               search={{
                 box: {
@@ -134,7 +137,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
         )}
       </>
     );
-  }, [jobs, columns, isLoading, filters]);
+  }, [items, columns, isLoading, filters]);
 
   const tabs = useMemo(
     () => [

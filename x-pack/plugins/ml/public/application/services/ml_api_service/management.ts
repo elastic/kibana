@@ -51,11 +51,10 @@ export function managementApiProvider(httpService: HttpService) {
 
   return {
     /**
-     * Fetches configuration information for a trained inference model.
+     * Fetches lists of anomaly detection jobs, data frame analytics jobs or trained models
+     * for use in the stack management space management table.
      *
-     * @param modelId - Model ID, collection of Model IDs or Model ID pattern.
-     *                  Fetches all In case nothing is provided.
-     * @param params - Optional query params
+     * @param mlSavedObjectType - 'anomaly-detector', 'data-frame-analytics' or 'trained-model'
      */
     getList(mlSavedObjectType: MlSavedObjectType) {
       return httpService.http<ManagementListResponse>({

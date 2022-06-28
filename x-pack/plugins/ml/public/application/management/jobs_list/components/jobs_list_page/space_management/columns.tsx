@@ -33,7 +33,7 @@ export function getColumns(mlSavedObjectType: MlSavedObjectType) {
 const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
   {
     field: 'id',
-    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.trainedModels.ad.idid', {
+    name: i18n.translate('xpack.ml.management.spaceManagementTableColumn.trainedModels.ad.id', {
       defaultMessage: 'ID',
     }),
     sortable: true,
@@ -45,7 +45,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
   {
     field: 'description',
     name: i18n.translate(
-      'xpack.ml.management.spaceManagementTableColumn.trainedModels.ad.descriptiondescription',
+      'xpack.ml.management.spaceManagementTableColumn.trainedModels.ad.description',
       {
         defaultMessage: 'Description',
       }
@@ -57,7 +57,7 @@ const adColumns: Array<EuiBasicTableColumn<AnomalyDetectionManagementItems>> = [
   {
     field: 'jobState',
     name: i18n.translate(
-      'xpack.ml.management.spaceManagementTableColumn.trainedModels.ad.jobStatejobState',
+      'xpack.ml.management.spaceManagementTableColumn.trainedModels.ad.jobState',
       {
         defaultMessage: 'Job state',
       }

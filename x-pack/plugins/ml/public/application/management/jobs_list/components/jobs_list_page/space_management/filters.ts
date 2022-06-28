@@ -16,11 +16,11 @@ import type {
   TrainedModelsManagementItems,
 } from '../../../../../../../common/types/management';
 
-export function getFilters(mlSavedObjectType: MlSavedObjectType, jobs: ManagementListResponse) {
+export function getFilters(mlSavedObjectType: MlSavedObjectType, items: ManagementListResponse) {
   switch (mlSavedObjectType) {
     case 'anomaly-detector':
       return createOptions<AnomalyDetectionManagementItems>(
-        jobs as AnomalyDetectionManagementItems[],
+        items as AnomalyDetectionManagementItems[],
         [
           [
             'jobState',
@@ -38,7 +38,7 @@ export function getFilters(mlSavedObjectType: MlSavedObjectType, jobs: Managemen
       );
 
     case 'data-frame-analytics':
-      return createOptions(jobs as AnalyticsManagementItems[], [
+      return createOptions(items as AnalyticsManagementItems[], [
         [
           'job_type',
           i18n.translate('xpack.ml.management.spaceManagementFilters.dfa.job_type', {
@@ -54,7 +54,7 @@ export function getFilters(mlSavedObjectType: MlSavedObjectType, jobs: Managemen
       ]);
 
     case 'trained-model':
-      return createOptions(jobs as TrainedModelsManagementItems[], [
+      return createOptions(items as TrainedModelsManagementItems[], [
         [
           'type',
           i18n.translate('xpack.ml.management.spaceManagementFilters.trainedModels.type', {
@@ -68,9 +68,9 @@ export function getFilters(mlSavedObjectType: MlSavedObjectType, jobs: Managemen
   }
 }
 
-function createOptions<T extends ManagementItems>(jobs: T[], matches: Array<[keyof T, string]>) {
+function createOptions<T extends ManagementItems>(items: T[], matches: Array<[keyof T, string]>) {
   return matches.map(([field, name]) => {
-    const options = [...new Set(jobs.map((j) => j[field]).flat())]
+    const options = [...new Set(items.map((j) => j[field]).flat())]
       .sort((a, b) => (a as string).localeCompare(b as string))
       .map((t) => ({
         value: t,

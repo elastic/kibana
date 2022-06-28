@@ -41,7 +41,11 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
         params: listTypeSchema,
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: [
+          'access:ml:canCreateJob',
+          'access:ml:canCreateDataFrameAnalytics',
+          'access:ml:canCreateTrainedModels',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(
@@ -138,7 +142,8 @@ export function managementRoutes({ router, routeGuard }: RouteInitialization) {
                 body: modelsWithSpaces,
               });
             default:
-              throw Error('aagghhh');
+              // this should never be hit because of the route's schema checks.
+              throw Error('Specified listType not supported');
           }
         } catch (e) {
           return response.customError(wrapError(e));

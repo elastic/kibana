@@ -11,14 +11,12 @@ import { hasLicenseExpired } from '../license';
 
 import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
 import { getCapabilities } from './get_capabilities';
-import { HttpService } from '../services/http_service';
-import { mlApiServicesProvider } from '../services/ml_api_service';
+import type { MlApiServices } from '../services/ml_api_service';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
-export function checkGetManagementMlJobsResolver(httpService: HttpService) {
+export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {
   return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
-    const { checkMlCapabilities } = mlApiServicesProvider(httpService);
     checkMlCapabilities()
       .then(({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         _capabilities = capabilities;

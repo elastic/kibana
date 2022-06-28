@@ -38,7 +38,12 @@ export const DocsLink: FC<{ currentTabId: MlSavedObjectType }> = ({ currentTabId
     });
   }
   return (
-    <EuiButtonEmpty href={href} target="_blank" iconType="help" data-test-subj="documentationLink">
+    <EuiButtonEmpty
+      href={href}
+      target="_blank"
+      iconType="help"
+      data-test-subj="mlDocumentationLink"
+    >
       {linkLabel}
     </EuiButtonEmpty>
   );

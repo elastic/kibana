@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC, useCallback } from 'react';
+import React, { useEffect, useState, FC, useCallback, useMemo } from 'react';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,6 +41,7 @@ import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { getMlGlobalServices } from '../../../../app';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
 import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
+import { mlApiServicesProvider } from '../../../../services/ml_api_service';
 
 import { HttpService } from '../../../../services/http_service';
 import { SpaceManagement } from './space_management';
@@ -57,7 +58,10 @@ export const JobsListPage: FC<{
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsStart;
 }> = ({ coreStart, share, history, spacesApi, data, usageCollection, fieldFormats }) => {
-  const httpService = new HttpService(coreStart.http);
+  const mlApiServices = useMemo(
+    () => mlApiServicesProvider(new HttpService(coreStart.http)),
+    [coreStart.http]
+  );
   const spacesEnabled = spacesApi !== undefined;
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
@@ -69,7 +73,7 @@ export const JobsListPage: FC<{
 
   const check = async () => {
     try {
-      await checkGetManagementMlJobsResolver(httpService);
+      await checkGetManagementMlJobsResolver(mlApiServices);
     } catch (e) {
       if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
         setIsPlatinumOrTrialLicense(false);
