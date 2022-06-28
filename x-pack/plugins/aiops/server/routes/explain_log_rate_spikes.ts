@@ -70,12 +70,12 @@ export const defineExplainLogRateSpikesRoute = (
 
         const { fieldCandidates } = await fetchFieldCandidates(client, request.body);
 
-        if (shouldStop) {
-          end();
-          return;
+        if (fieldCandidates.length > 0) {
+          loaded += LOADED_FIELD_CANDIDATES;
+        } else {
+          loaded = 1;
         }
 
-        loaded += LOADED_FIELD_CANDIDATES;
         push(
           updateLoadingStateAction({
             ccsWarning: false,
@@ -83,6 +83,11 @@ export const defineExplainLogRateSpikesRoute = (
             loadingState: `Identified ${fieldCandidates.length} field candidates.`,
           })
         );
+
+        if (shouldStop || fieldCandidates.length === 0) {
+          end();
+          return;
+        }
 
         const changePoints: ChangePoint[] = [];
         const fieldsToSample = new Set<string>();
