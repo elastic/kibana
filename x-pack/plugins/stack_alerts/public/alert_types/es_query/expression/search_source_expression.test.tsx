@@ -37,7 +37,13 @@ const defaultSearchSourceExpressionParams: EsQueryAlertParams<SearchType.searchS
   index: ['test-index'],
   timeField: '@timestamp',
   searchType: SearchType.searchSource,
-  searchConfiguration: {},
+  searchConfiguration: {
+    query: {
+      query: '',
+      language: 'lucene',
+    },
+    index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+  },
 };
 
 const mockSearchResult = new Subject();
@@ -103,6 +109,7 @@ const dataMock = dataPluginMock.createStartContract();
   Promise.resolve(searchSourceMock)
 );
 (dataMock.dataViews.getIdsWithTitle as jest.Mock).mockImplementation(() => Promise.resolve([]));
+dataMock.dataViews.getDefaultDataView = jest.fn(() => Promise.resolve(null));
 (dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
   Promise.resolve(savedQueryMock)
 );
@@ -152,6 +159,17 @@ describe('SearchSourceAlertTypeExpression', () => {
     expect(findTestSubject(wrapper, 'thresholdExpression')).toBeTruthy();
   });
 
+  test('should disable Test Query button if data view is not selected yet', async () => {
+    let wrapper = setup({ ...defaultSearchSourceExpressionParams, searchConfiguration: undefined });
+    await act(async () => {
+      await nextTick();
+    });
+    wrapper = await wrapper.update();
+
+    const testButton = findTestSubject(wrapper, 'testQuery');
+    expect(testButton.prop('disabled')).toBeTruthy();
+  });
+
   test('should show success message if Test Query is successful', async () => {
     let wrapper = setup(defaultSearchSourceExpressionParams);
     await act(async () => {
@@ -159,7 +177,9 @@ describe('SearchSourceAlertTypeExpression', () => {
     });
     wrapper = await wrapper.update();
     await act(async () => {
-      findTestSubject(wrapper, 'testQuery').simulate('click');
+      const testButton = findTestSubject(wrapper, 'testQuery');
+      expect(testButton.prop('disabled')).toBeFalsy();
+      testButton.simulate('click');
       wrapper.update();
     });
     wrapper = await wrapper.update();
