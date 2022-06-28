@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { useState } from 'react';
 
+import { parseInterval } from '../../../../../../../common';
 import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../../types';
 import { recurrenceSummary } from '../recurrence_scheduler/helpers';
 import { SnoozeUnit } from './constants';
@@ -17,7 +18,15 @@ const PREV_SNOOZE_INTERVAL_KEY = 'triggersActionsUi_previousSnoozeInterval';
 export const usePreviousSnoozeInterval: (
   p?: string | null
 ) => [string | null, (n: string) => void] = (propsInterval) => {
-  const intervalFromStorage = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
+  let intervalFromStorage = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
+  if (intervalFromStorage) {
+    try {
+      parseInterval(intervalFromStorage);
+    } catch (e) {
+      intervalFromStorage = null;
+      localStorage.removeItem(PREV_SNOOZE_INTERVAL_KEY);
+    }
+  }
   const usePropsInterval = typeof propsInterval !== 'undefined';
   const interval = usePropsInterval ? propsInterval : intervalFromStorage;
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(interval);
