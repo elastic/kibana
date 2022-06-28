@@ -36,6 +36,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
   const { isLoading: isLoadingAlertFeatureIds, alertFeatureIds } =
     useGetFeatureIds(alertRegistrationContexts);
 
+  console.log('CASE DATA: ', caseData, alertFeatureIds); // eslint-disable-line
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
     configurationId: caseData.owner,

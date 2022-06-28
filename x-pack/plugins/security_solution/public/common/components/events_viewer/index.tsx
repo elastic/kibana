@@ -15,7 +15,7 @@ import { useBulkAddToCaseActions } from '../../../detections/components/alerts_t
 import { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
-import { APP_UI_ID } from '../../../../common/constants';
+import { APP_ID, APP_UI_ID, SERVER_APP_ID } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -115,7 +115,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, id));
 
-  const { timelines: timelinesUi } = useKibana().services;
+  const { timelines: timelinesUi, triggersActionsUi } = useKibana().services;
   const {
     browserFields,
     dataViewId,
@@ -209,12 +209,23 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     editorActionsRef,
   });
 
+  const alertStateProps = {
+    alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
+    configurationId: APP_ID,
+    id,
+    flyoutSize: 'm',
+    featureIds: [SERVER_APP_ID],
+    query,
+    showExpandToDetails: true,
+  };
+
   const isLive = input.policy.kind === 'interval';
 
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
+          {triggersActionsUi.getAlertsStateTable(alertStateProps)}
           {timelinesUi.getTGrid<'embedded'>({
             additionalFilters,
             appId: APP_UI_ID,
