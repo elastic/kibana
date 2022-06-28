@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutSize,
   EuiButtonIcon,
   EuiPanel,
   EuiTitle,
@@ -36,7 +37,6 @@ import {
   RuleType,
   getNotifyWhenOptions,
   RuleEventLogListProps,
-  AlertsTableFlyoutState,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -177,7 +177,7 @@ export function RuleDetailsPage() {
     alertsTableConfigurationRegistry,
     configurationId: observabilityFeatureId,
     id: `case-details-alerts-o11y`,
-    flyoutState: AlertsTableFlyoutState.external,
+    flyoutSize: 's' as EuiFlyoutSize,
     featureIds: [features] as AlertConsumers[],
     query: {
       bool: {

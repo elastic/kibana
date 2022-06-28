@@ -37,7 +37,10 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
-import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import {
+  createObservabilityRuleTypeRegistry,
+  ObservabilityRuleTypeRegistry,
+} from './rules/create_observability_rule_type_registry';
 import { createCallObservabilityApi } from './services/call_observability_api';
 import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
 import { updateGlobalNavigation } from './update_global_navigation';
@@ -83,6 +86,8 @@ export class Plugin
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly navigationRegistry = createNavigationRegistry();
+  private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
+    {} as ObservabilityRuleTypeRegistry;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -134,7 +139,7 @@ export class Plugin
 
     createCallObservabilityApi(coreSetup.http);
 
-    const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
+    this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
@@ -158,7 +163,7 @@ export class Plugin
         core: coreStart,
         plugins: pluginsStart,
         appMountParameters: params,
-        observabilityRuleTypeRegistry,
+        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
         kibanaFeatures,
         usageCollection: pluginsSetup.usageCollection,
@@ -257,7 +262,7 @@ export class Plugin
 
     return {
       dashboard: { register: registerDataHandler },
-      observabilityRuleTypeRegistry,
+      observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
@@ -286,7 +291,7 @@ export class Plugin
       const { getO11yAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration();
+      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry);
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
