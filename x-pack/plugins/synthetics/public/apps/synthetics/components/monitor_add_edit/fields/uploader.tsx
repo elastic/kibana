@@ -76,7 +76,7 @@ const TESTING_SCRIPT_LABEL = i18n.translate(
 );
 
 const PROMPT_TEXT = i18n.translate(
-  'xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.uploader.label',
+  'xpack.synthetics.monitorConfig.uploader.label',
   {
     defaultMessage: 'Select or drag and drop a script.js file',
   }
