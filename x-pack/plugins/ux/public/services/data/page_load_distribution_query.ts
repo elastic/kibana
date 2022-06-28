@@ -81,7 +81,7 @@ export function usePageLoadDistribution(
 
   let pageDistVals: Array<{ key: number; value: number | null }> = [];
   if (loadDistribution?.values) {
-    // @ts-ignore automatic typescript inline types not working
+    // @ts-ignore inferred types for `values` incompatible with actual data
     pageDistVals = loadDistribution.values;
   }
   const maxPercQuery = durPercentiles?.values['99.0'] ?? 0;
@@ -105,7 +105,7 @@ export function usePageLoadDistribution(
   );
   if (percDistRequest.data) {
     pageDistVals = pageDistVals.concat(
-      // @ts-ignore automatic typescript inline types not working
+      // @ts-ignore inferred types for `values` incompatible with actual data
       percDistRequest.data?.aggregations?.loadDistribution?.values ?? []
     );
   }
