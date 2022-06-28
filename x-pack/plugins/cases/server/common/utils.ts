@@ -249,11 +249,11 @@ export const isCommentRequestTypeExternalReference = (
  * A type narrowing function for external reference so attachments. Exporting so integration tests can use it.
  */
 export const isCommentRequestTypeExternalReferenceSO = (
-  context: CommentRequest
+  context: Partial<CommentRequest>
 ): context is CommentRequestExternalReferenceSOType => {
   return (
     context.type === CommentType.externalReference &&
-    context.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject
+    context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
   );
 };
 

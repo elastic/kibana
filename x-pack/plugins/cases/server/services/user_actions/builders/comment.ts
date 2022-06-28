@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { isCommentRequestTypeExternalReferenceSO } from '../../../common/utils';
-import { EXTERNAL_REFERENCE_REF_NAME } from '../../../common/constants';
 import { ActionTypes, Actions, CommentUserAction } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
 import { UserActionParameters, BuilderReturnValue } from '../types';
-import { SOReferenceExtractor } from '../../so_reference_extractor';
+import { getAttachmentSOExtractor } from '../../so_reference_extractor';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'comment'>): BuilderReturnValue {
-    const soExtractor = getSOExtractor(args.payload.attachment);
+    const soExtractor = getAttachmentSOExtractor(args.payload.attachment);
     const { transformedFields, references: refsWithExternalRefId } =
       soExtractor.extractFieldsToReferences<CommentUserAction['payload']['comment']>({
         data: args.payload.attachment,
@@ -34,17 +32,3 @@ export class CommentUserActionBuilder extends UserActionBuilder {
     };
   }
 }
-
-const getSOExtractor = (attachment: CommentUserAction['payload']['comment']) => {
-  const fieldsToExtract = [];
-
-  if (isCommentRequestTypeExternalReferenceSO(attachment)) {
-    fieldsToExtract.push({
-      path: 'externalReferenceId',
-      type: attachment.externalReferenceStorage.soType,
-      name: EXTERNAL_REFERENCE_REF_NAME,
-    });
-  }
-
-  return new SOReferenceExtractor(fieldsToExtract);
-};

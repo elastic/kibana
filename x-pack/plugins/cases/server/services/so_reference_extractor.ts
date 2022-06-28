@@ -8,6 +8,9 @@
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { SavedObject, SavedObjectReference, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { CommentRequest } from '../../common/api';
+import { EXTERNAL_REFERENCE_REF_NAME } from '../common/constants';
+import { isCommentRequestTypeExternalReferenceSO } from '../common/utils';
 
 interface Field {
   path: string;
@@ -113,3 +116,17 @@ function createReferenceMap(
 ): Map<string, SavedObjectReference> {
   return new Map<string, SavedObjectReference>(references.map((ref) => [ref.name, ref]));
 }
+
+export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) => {
+  const fieldsToExtract = [];
+
+  if (isCommentRequestTypeExternalReferenceSO(attachment)) {
+    fieldsToExtract.push({
+      path: 'externalReferenceId',
+      type: attachment.externalReferenceStorage.soType,
+      name: EXTERNAL_REFERENCE_REF_NAME,
+    });
+  }
+
+  return new SOReferenceExtractor(fieldsToExtract);
+};

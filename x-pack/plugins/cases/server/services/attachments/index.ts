@@ -25,7 +25,6 @@ import {
   CommentAttributesWithoutSORefs as AttachmentAttributesWithoutSORefs,
   CommentPatchAttributes as AttachmentPatchAttributes,
   CommentType,
-  ExternalReferenceStorageType,
 } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -36,8 +35,7 @@ import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
 import { AggregationResponse } from '../../client/metrics/types';
-import { EXTERNAL_REFERENCE_REF_NAME } from '../../common/constants';
-import { SOReferenceExtractor } from '../so_reference_extractor';
+import { getAttachmentSOExtractor } from '../so_reference_extractor';
 import { SavedObjectFindOptionsKueryNode } from '../../common/types';
 
 interface AttachedToCaseArgs extends ClientArgs {
@@ -243,7 +241,7 @@ export class AttachmentService {
         attachmentId
       );
 
-      const soExtractor = this.getSOExtractor(res.attributes);
+      const soExtractor = getAttachmentSOExtractor(res.attributes);
 
       return soExtractor.populateFieldsFromReferences<AttachmentAttributes>(res);
     } catch (error) {
@@ -271,7 +269,7 @@ export class AttachmentService {
     try {
       this.log.debug(`Attempting to POST a new comment`);
 
-      const soExtractor = this.getSOExtractor(attributes);
+      const soExtractor = getAttachmentSOExtractor(attributes);
 
       const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
         soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
@@ -304,7 +302,7 @@ export class AttachmentService {
       this.log.debug(`Attempting to bulk create attachments`);
       const res = await unsecuredSavedObjectsClient.bulkCreate<AttachmentAttributesWithoutSORefs>(
         attachments.map((attachment) => {
-          const soExtractor = this.getSOExtractor(attachment.attributes);
+          const soExtractor = getAttachmentSOExtractor(attachment.attributes);
 
           const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
             soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
@@ -323,7 +321,7 @@ export class AttachmentService {
 
       return {
         saved_objects: res.saved_objects.map((so) => {
-          const soExtractor = this.getSOExtractor(so.attributes);
+          const soExtractor = getAttachmentSOExtractor(so.attributes);
           return soExtractor.populateFieldsFromReferences<AttachmentAttributes>(so);
         }),
       };
@@ -341,7 +339,7 @@ export class AttachmentService {
   }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE comment ${attachmentId}`);
-      const soExtractor = this.getSOExtractor(updatedAttributes);
+      const soExtractor = getAttachmentSOExtractor(updatedAttributes);
 
       const {
         transformedFields: migratedAttributes,
@@ -392,7 +390,7 @@ export class AttachmentService {
 
       const res = await unsecuredSavedObjectsClient.bulkUpdate<AttachmentAttributesWithoutSORefs>(
         comments.map((c) => {
-          const soExtractor = this.getSOExtractor(c.updatedAttributes);
+          const soExtractor = getAttachmentSOExtractor(c.updatedAttributes);
           const {
             transformedFields: migratedAttributes,
             references: refsWithExternalRefId,
@@ -422,7 +420,7 @@ export class AttachmentService {
 
       return {
         saved_objects: res.saved_objects.map((so, index) => {
-          const soExtractor = this.getSOExtractor(so.attributes);
+          const soExtractor = getAttachmentSOExtractor(so.attributes);
           return soExtractor.populateFieldsFromReferencesForPatch<AttachmentAttributes>({
             dataBeforeRequest: comments[index].updatedAttributes,
             dataReturnedFromRequest: so,
@@ -504,7 +502,7 @@ export class AttachmentService {
       return {
         ...res,
         saved_objects: res.saved_objects.map((so) => {
-          const soExtractor = this.getSOExtractor(so.attributes);
+          const soExtractor = getAttachmentSOExtractor(so.attributes);
           return { ...so, ...soExtractor.populateFieldsFromReferences<AttachmentAttributes>(so) };
         }),
       };
@@ -551,23 +549,5 @@ export class AttachmentService {
         },
       },
     };
-  }
-
-  private getSOExtractor(
-    attributes: AttachmentAttributesWithoutSORefs | AttachmentPatchAttributes
-  ) {
-    const fieldsToExtract = [];
-    if (
-      attributes.type === CommentType.externalReference &&
-      attributes.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
-    ) {
-      fieldsToExtract.push({
-        path: 'externalReferenceId',
-        type: attributes.externalReferenceStorage.soType,
-        name: EXTERNAL_REFERENCE_REF_NAME,
-      });
-    }
-
-    return new SOReferenceExtractor(fieldsToExtract);
   }
 }

@@ -8,7 +8,7 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
-import { CommentRequest, CommentType } from '@kbn/cases-plugin/common/api';
+import { ActionTypes, CommentRequest, CommentType } from '@kbn/cases-plugin/common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -231,12 +231,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-      const createCommentUserAction = userActions[1];
+      const createCommentUserAction = userActions.find(
+        (userAction) => userAction.type === ActionTypes.comment
+      );
 
       const esResponse = await getSOFromKibanaIndex({
         es,
         soType: CASE_USER_ACTION_SAVED_OBJECT,
-        soId: createCommentUserAction.action_id,
+        soId: createCommentUserAction!.action_id,
       });
 
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
