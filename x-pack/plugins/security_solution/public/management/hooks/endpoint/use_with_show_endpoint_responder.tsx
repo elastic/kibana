@@ -13,6 +13,7 @@ import {
 } from '../../components/endpoint_responder';
 import { useConsoleManager } from '../../components/console';
 import type { HostMetadata } from '../../../../common/endpoint/types';
+import { HeaderEndpointInfo } from '../../components/endpoint_responder/header_endpoint_info';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
@@ -40,7 +41,8 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
             consoleProps: {
               commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
               'data-test-subj': 'endpointResponseActionsConsole',
-              TitleComponent: () => <>{endpointMetadata.host.name}</>,
+              prompt: `endpoint-${endpointMetadata.agent.version}`,
+              TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             ActionComponents: [ActionLogButton],
