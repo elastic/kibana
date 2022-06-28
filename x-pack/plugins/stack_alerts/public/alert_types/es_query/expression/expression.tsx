@@ -59,7 +59,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
   );
 
   const errorParam = EXPRESSION_ERROR_KEYS.find((errorKey) => {
-    return errors[errorKey].length >= 1 && ruleParams[errorKey] !== undefined;
+    return errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined;
   });
 
   const expressionError = !!errorParam && (
