@@ -5,12 +5,27 @@
  * 2.0.
  */
 
-import type { HttpApiInterface } from '../common/api_routes';
+import type {
+  HttpApiInterfaceEntryDefinition,
+  CreateHttpEndpoint,
+  DeleteHttpEndpoint,
+  DownloadHttpEndpoint,
+  GetByIdHttpEndpoint,
+  ListHttpEndpoint,
+  UpdateHttpEndpoint,
+  UploadHttpEndpoint,
+} from '../common/api_routes';
 
-export type FilesClient = {
-  [method in keyof HttpApiInterface]: (
-    args: HttpApiInterface[method]['inputs']['body'] &
-      HttpApiInterface[method]['inputs']['params'] &
-      HttpApiInterface[method]['inputs']['query']
-  ) => Promise<HttpApiInterface[method]['output']>;
-};
+type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
+  args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
+) => Promise<E['output']>;
+
+export interface FilesClient {
+  create: ClientMethodFrom<CreateHttpEndpoint>;
+  delete: ClientMethodFrom<DeleteHttpEndpoint>;
+  download: ClientMethodFrom<DownloadHttpEndpoint>;
+  getById: ClientMethodFrom<GetByIdHttpEndpoint>;
+  list: ClientMethodFrom<ListHttpEndpoint>;
+  update: ClientMethodFrom<UpdateHttpEndpoint>;
+  upload: ClientMethodFrom<UploadHttpEndpoint>;
+}

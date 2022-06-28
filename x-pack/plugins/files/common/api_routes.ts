@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as qs from 'query-string';
 import { PLUGIN_ID } from './constants';
 import { FileJSON } from './types';
 
@@ -23,7 +24,26 @@ export const FILE_KIND_API_ROUTES = {
   getByIdRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
 };
 
-interface HttpApiInterfaceEntryDefinition<P = unknown, Q = unknown, B = unknown, R = unknown> {
+export const FILE_KIND_API_ROUTES_FILLED = {
+  getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
+  getUploadRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}/blob`,
+  getDownloadRoute: (fileKind: string, id: string, fileName?: string) =>
+    `${FILES_API_BASE_PATH}/${fileKind}/${id}/blob/${fileName ? fileName : ''}`,
+  getUpdateRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
+  getDeleteRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
+  getListRoute: (fileKind: string, page?: number, perPage?: number) => {
+    const qParams = qs.stringify({ page, perPage });
+    return `${FILES_API_BASE_PATH}/${fileKind}/list${qParams ? `?${qParams}` : ''}`;
+  },
+  getByIdRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}`,
+};
+
+export interface HttpApiInterfaceEntryDefinition<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  R = unknown
+> {
   inputs: {
     params: P;
     query: Q;
@@ -81,7 +101,7 @@ export type ListHttpEndpoint = HttpApiInterfaceEntryDefinition<
 >;
 
 export type UpdateHttpEndpoint = HttpApiInterfaceEntryDefinition<
-  unknown,
+  { id: string },
   unknown,
   { name?: string; alt?: string; meta?: Record<string, unknown> },
   { file: FileJSON }

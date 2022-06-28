@@ -27,7 +27,7 @@ export const paramsSchema = schema.object({
   id: schema.string(),
 });
 
-type Params = TypeOf<typeof paramsSchema>;
+type Params = Ensure<UpdateHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
 
 type Response = UpdateHttpEndpoint['output'];
 
