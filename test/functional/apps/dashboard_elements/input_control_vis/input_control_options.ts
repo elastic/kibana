@@ -17,19 +17,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const find = getService('find');
   const comboBox = getService('comboBox');
-
   const FIELD_NAME = 'machine.os.raw';
+
+  const from = 'Jan 1, 2017 @ 00:00:00.000';
+  const to = 'Jan 1, 2017 @ 00:00:00.000';
 
   describe('input control options', () => {
     before(async () => {
       await PageObjects.visualize.initTests();
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickInputControlVis();
-      // set time range to time with no documents - input controls do not use time filter be default
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Jan 1, 2017 @ 00:00:00.000',
-        'Jan 1, 2017 @ 00:00:00.000'
-      );
+      await PageObjects.common.setTime({ from, to });
       await PageObjects.visEditor.clickVisEditorTab('controls');
       await PageObjects.visEditor.addInputControl();
       await comboBox.set('indexPatternSelect-0', 'logstash-');
@@ -136,6 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'inputControlEditorUpdateFiltersOnChangeCheckbox'
         );
         await PageObjects.visEditor.clickGo();
+        await PageObjects.common.unsetTime();
       });
 
       it('should not display staging control buttons', async () => {
