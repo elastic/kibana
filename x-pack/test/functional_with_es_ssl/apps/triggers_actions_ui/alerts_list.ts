@@ -408,9 +408,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // initialy alert get Pending status, so we need to retry refresh list logic to get the post execution statuses
       await retry.try(async () => {
         await refreshAlertsList();
+        await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
         expect(refreshResults.map((item: any) => item.status).sort()).to.eql(['Error', 'Ok']);
       });
+      await refreshAlertsList();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await testSubjects.click('ruleExecutionStatusFilterButton');
       await testSubjects.click('ruleExecutionStatuserrorFilterOption'); // select Error status filter
       await retry.try(async () => {
