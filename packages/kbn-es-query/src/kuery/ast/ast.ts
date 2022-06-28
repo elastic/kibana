@@ -10,7 +10,7 @@ import { JsonObject } from '@kbn/utility-types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeTypes } from '../node_types';
 import { KQLSyntaxError } from '../kuery_syntax_error';
-import { KueryNode, KueryParseOptions, KueryQueryOptions } from '../types';
+import type { KqlContext, KueryNode, KueryParseOptions, KueryQueryOptions } from '../types';
 
 import { parse as parseKuery } from '../grammar';
 import { DataViewBase } from '../..';
@@ -68,7 +68,7 @@ export const toElasticsearchQuery = (
   node: KueryNode,
   indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
-  context?: Record<string, any>
+  context?: KqlContext
 ): JsonObject => {
   if (!node || !node.type || !nodeTypes[node.type]) {
     return toElasticsearchQuery(nodeTypes.function.buildNode('and', []), indexPattern);
