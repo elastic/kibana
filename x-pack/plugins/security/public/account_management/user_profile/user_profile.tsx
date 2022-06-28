@@ -520,39 +520,38 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   defaultMessage="Profile"
                 />
               ),
+              pageTitleProps: { id: titleId },
               rightSideItems: rightSideItems.reverse().map((item) => (
-                <>
-                  <EuiDescriptionList
-                    textStyle="reverse"
-                    listItems={[
-                      {
-                        title: (
-                          <EuiText color={euiTheme.colors.darkestShade} size="s">
-                            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-                              <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
-                              <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
-                                <EuiIconTip type="questionInCircle" content={item.helpText} />
-                              </EuiFlexItem>
-                            </EuiFlexGroup>
-                          </EuiText>
-                        ),
-                        description: (
-                          <span data-test-subj={item.testSubj}>
-                            {item.description || (
-                              <EuiText color={euiTheme.colors.disabledText} size="s">
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.userProfile.noneProvided"
-                                  defaultMessage="None provided"
-                                />
-                              </EuiText>
-                            )}
-                          </span>
-                        ),
-                      },
-                    ]}
-                    compressed
-                  />
-                </>
+                <EuiDescriptionList
+                  textStyle="reverse"
+                  listItems={[
+                    {
+                      title: (
+                        <EuiText color={euiTheme.colors.darkestShade} size="s">
+                          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                            <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                            <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
+                              <EuiIconTip type="questionInCircle" content={item.helpText} />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiText>
+                      ),
+                      description: (
+                        <span data-test-subj={item.testSubj}>
+                          {item.description || (
+                            <EuiText color={euiTheme.colors.disabledText} size="s">
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.userProfile.noneProvided"
+                                defaultMessage="None provided"
+                              />
+                            </EuiText>
+                          )}
+                        </span>
+                      ),
+                    },
+                  ]}
+                  compressed
+                />
               )),
             }}
             bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
