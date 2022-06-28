@@ -232,7 +232,6 @@ export class TaskManagerPlugin
       logger: this.logger,
       taskStore,
       middleware: this.middleware,
-      taskPollingLifecycle: this.taskPollingLifecycle,
       ephemeralTaskLifecycle: this.ephemeralTaskLifecycle,
       definitions: this.definitions,
       taskManagerId: taskStore.taskManagerId,
