@@ -52,9 +52,11 @@ const supportedFieldTypes = ['number', 'histogram'];
 export const percentileRanksOperation: OperationDefinition<
   PercentileRanksIndexPatternColumn,
   'field',
-  { value: number }
+  { value: number },
+  true
 > = {
   type: 'percentile_rank',
+  allowAsReference: true,
   displayName: i18n.translate('xpack.lens.indexPattern.percentileRank', {
     defaultMessage: 'Percentile rank',
   }),

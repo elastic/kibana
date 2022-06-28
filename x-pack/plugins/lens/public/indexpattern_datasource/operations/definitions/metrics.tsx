@@ -81,6 +81,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
   return {
     type,
+    allowAsReference: true,
     priority,
     displayName,
     description,
@@ -226,7 +227,7 @@ Example: Get the {metric} of price for orders from the UK:
       }),
     },
     shiftable: true,
-  } as OperationDefinition<T, 'field'>;
+  } as OperationDefinition<T, 'field', {}, true>;
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;

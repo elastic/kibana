@@ -131,19 +131,18 @@ describe('reference editor', () => {
     );
   });
 
-  it('should indicate functions and fields that are incompatible with the current', () => {
+  it('should indicate fields that are incompatible with the current', () => {
     const newLayer = {
       indexPatternId: '1',
       columnOrder: ['ref'],
       columns: {
         ref: {
-          label: 'Top values of dest',
-          dataType: 'string',
-          isBucketed: true,
-          operationType: 'terms',
-          sourceField: 'dest',
-          params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'desc' },
-        } as TermsIndexPatternColumn,
+          label: 'Average of bytes',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'average',
+          sourceField: 'bytes',
+        },
       },
     } as IndexPatternLayer;
     wrapper = mount(
@@ -153,7 +152,46 @@ describe('reference editor', () => {
         column={newLayer.columns.ref}
         validation={{
           input: ['field'],
-          validateMetadata: (meta: OperationMetadata) => meta.isBucketed,
+          validateMetadata: (meta: OperationMetadata) => !meta.isBucketed,
+        }}
+      />
+    );
+
+    const fields = wrapper
+      .find(EuiComboBox)
+      .filter('[data-test-subj="indexPattern-dimension-field"]')
+      .prop('options');
+
+    const findFieldDataTestSubj = (l: string) => {
+      return fields![0].options!.find(({ label }) => label === l)!['data-test-subj'];
+    };
+    expect(findFieldDataTestSubj('timestampLabel')).toContain('Incompatible');
+    expect(findFieldDataTestSubj('source')).toContain('Incompatible');
+    expect(findFieldDataTestSubj('memory')).toContain('lns-fieldOption-memory');
+  });
+
+  it('should indicate functions that are incompatible with the current', () => {
+    const newLayer = {
+      indexPatternId: '1',
+      columnOrder: ['ref'],
+      columns: {
+        ref: {
+          label: 'Unique count of dest',
+          dataType: 'string',
+          isBucketed: false,
+          operationType: 'unique_count',
+          sourceField: 'dest',
+        },
+      },
+    } as IndexPatternLayer;
+    wrapper = mount(
+      <ReferenceEditor
+        {...getDefaultArgs()}
+        layer={newLayer}
+        column={newLayer.columns.ref}
+        validation={{
+          input: ['field'],
+          validateMetadata: (meta: OperationMetadata) => !meta.isBucketed,
         }}
       />
     );
@@ -162,17 +200,10 @@ describe('reference editor', () => {
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-reference-function"]')
       .prop('options');
-    expect(functions.find(({ label }) => label === 'Date histogram')!['data-test-subj']).toContain(
+
+    expect(functions.find(({ label }) => label === 'Average')!['data-test-subj']).toContain(
       'incompatible'
     );
-
-    const fields = wrapper
-      .find(EuiComboBox)
-      .filter('[data-test-subj="indexPattern-dimension-field"]')
-      .prop('options');
-    expect(
-      fields![0].options!.find(({ label }) => label === 'timestampLabel')!['data-test-subj']
-    ).toContain('Incompatible');
   });
 
   it('should not update when selecting the same operation', () => {
@@ -263,11 +294,11 @@ describe('reference editor', () => {
       columnOrder: ['ref'],
       columns: {
         ref: {
-          label: 'Average of bytes',
-          dataType: 'number',
+          label: 'Unique count of dest',
+          dataType: 'string',
           isBucketed: false,
-          operationType: 'average',
-          sourceField: 'bytes',
+          operationType: 'unique_count',
+          sourceField: 'dest',
         },
       },
     } as IndexPatternLayer;
@@ -288,13 +319,13 @@ describe('reference editor', () => {
     const comboBox = wrapper
       .find(EuiComboBox)
       .filter('[data-test-subj="indexPattern-reference-function"]');
-    const option = comboBox.prop('options')!.find(({ label }) => label === 'Date histogram')!;
+    const option = comboBox.prop('options')!.find(({ label }) => label === 'Average')!;
 
     act(() => {
       comboBox.prop('onChange')!([option]);
     });
 
-    expect(onChooseFunction).toHaveBeenCalledWith('date_histogram', undefined);
+    expect(onChooseFunction).toHaveBeenCalledWith('average', undefined);
   });
 
   it("should show the sub-function as invalid if there's no field compatible with it", () => {

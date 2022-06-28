@@ -134,7 +134,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     const operationByField: Partial<Record<string, Set<OperationType>>> = {};
     const fieldByOperation: Partial<Record<OperationType, Set<string>>> = {};
     Object.values(operationDefinitionMap)
-      .filter(({ hidden }) => !hidden)
+      .filter(({ hidden, allowAsReference }) => !hidden && allowAsReference)
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })

@@ -20,7 +20,6 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
-import { adjustColumnReferencesForChangedColumn, updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
 import {
   getFormatFromPreviousColumn,
@@ -122,7 +121,8 @@ function getExistsFilter(field: string) {
 export const lastValueOperation: OperationDefinition<
   LastValueIndexPatternColumn,
   'field',
-  Partial<LastValueIndexPatternColumn['params']>
+  Partial<LastValueIndexPatternColumn['params']>,
+  true
 > = {
   type: 'last_value',
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
@@ -257,7 +257,7 @@ export const lastValueOperation: OperationDefinition<
         supportedTypes.has(newField.type)
     );
   },
-
+  allowAsReference: true,
   paramEditor: ({ layer, paramEditorUpdater, currentColumn, indexPattern, isReferenced }) => {
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid = !!getInvalidSortFieldMessage(

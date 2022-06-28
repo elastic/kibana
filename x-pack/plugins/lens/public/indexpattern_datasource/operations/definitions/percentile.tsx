@@ -64,9 +64,11 @@ const supportedFieldTypes = ['number', 'histogram'];
 export const percentileOperation: OperationDefinition<
   PercentileIndexPatternColumn,
   'field',
-  { percentile: number }
+  { percentile: number },
+  true
 > = {
   type: 'percentile',
+  allowAsReference: true,
   displayName: i18n.translate('xpack.lens.indexPattern.percentile', {
     defaultMessage: 'Percentile',
   }),

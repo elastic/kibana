@@ -517,7 +517,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const FieldInputComponent = selectedOperationDefinition?.renderFieldInput || FieldInput;
 
-  const paramEditorProps: ParamEditorProps<GenericIndexPatternColumn> = {
+  const paramEditorProps: ParamEditorProps<
+    GenericIndexPatternColumn,
+    | IndexPatternLayer
+    | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+    | GenericIndexPatternColumn
+  > = {
     layer: state.layers[layerId],
     layerId,
     activeData: props.activeData,

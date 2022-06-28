@@ -160,15 +160,13 @@ export { staticValueOperation } from './static_value';
 /**
  * Properties passed to the operation-specific part of the popover editor
  */
-export interface ParamEditorProps<C> {
+export interface ParamEditorProps<
+  C,
+  U = IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+> {
   currentColumn: C;
   layer: IndexPatternLayer;
-  paramEditorUpdater: (
-    setter:
-      | IndexPatternLayer
-      | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
-      | GenericIndexPatternColumn
-  ) => void;
+  paramEditorUpdater: (setter: U) => void;
   toggleFullscreen: () => void;
   setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
@@ -232,7 +230,12 @@ export interface AdvancedOption {
   helpPopup?: string | null;
 }
 
-interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}> {
+interface BaseOperationDefinitionProps<
+  C extends BaseIndexPatternColumn,
+  AR extends boolean,
+  U = IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
+  P = {}
+> {
   type: C['operationType'];
   /**
    * The priority of the operation. If multiple operations are possible in
@@ -263,8 +266,11 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
   /**
    * React component for operation specific settings shown in the flyout editor
    */
-  paramEditor?: React.ComponentType<ParamEditorProps<C>>;
-  getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
+  allowAsReference?: AR;
+  paramEditor?: React.ComponentType<
+    AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C, U>
+  >;
+  getAdvancedOptions?: (params: ParamEditorProps<C, U>) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
@@ -448,7 +454,11 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
   ) => ExpressionAstFunction;
 }
 
-interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
+interface FieldBasedOperationDefinition<
+  C extends BaseIndexPatternColumn,
+  P = {},
+  AR extends boolean = false
+> {
   input: 'field';
 
   /**
@@ -636,8 +646,12 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
   ) => Record<string, IndexPatternLayer>;
 }
 
-interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
-  field: FieldBasedOperationDefinition<C, P>;
+interface OperationDefinitionMap<
+  C extends BaseIndexPatternColumn,
+  AR extends boolean = false,
+  P = {}
+> {
+  field: FieldBasedOperationDefinition<C, P, AR>;
   none: FieldlessOperationDefinition<C, P>;
   fullReference: FullReferenceOperationDefinition<C>;
   managedReference: ManagedReferenceOperationDefinition<C>;
@@ -651,8 +665,9 @@ interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
 export type OperationDefinition<
   C extends BaseIndexPatternColumn,
   Input extends keyof OperationDefinitionMap<C>,
-  P = {}
-> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C, P>[Input];
+  P = {},
+  AR extends boolean = false
+> = BaseOperationDefinitionProps<C, AR> & OperationDefinitionMap<C, AR, P>[Input];
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.
