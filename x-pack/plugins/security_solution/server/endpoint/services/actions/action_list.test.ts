@@ -42,6 +42,7 @@ describe('When using `getActionList()', () => {
   });
 
   it('should return expected output', async () => {
+    const doc = actionRequests.hits.hits[0]._source;
     await expect(getActionList({ esClient, logger, page: 1, pageSize: 10 })).resolves.toEqual({
       page: 0,
       pageSize: 10,
@@ -53,80 +54,17 @@ describe('When using `getActionList()', () => {
       data: [
         {
           agents: ['agent-a'],
-          command: 'isolate',
+          command: 'unisolate',
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
           errors: undefined,
           id: '123',
           isCompleted: true,
           isExpired: false,
-          logEntries: [
-            {
-              item: {
-                data: {
-                  '@timestamp': '2022-04-30T16:08:47.449Z',
-                  EndpointActions: {
-                    action_id: '123',
-                    completed_at: '2022-04-30T16:08:47.449Z',
-                    data: {
-                      command: 'unisolate',
-                      comment: '',
-                    },
-                    started_at: expect.any(String),
-                  },
-                  agent: {
-                    id: 'agent-a',
-                  },
-                  error: undefined,
-                },
-                id: expect.any(String),
-              },
-              type: 'response',
-            },
-            {
-              item: {
-                data: {
-                  '@timestamp': '2022-04-30T16:08:47.449Z',
-                  action_data: {
-                    command: 'unisolate',
-                    comment: '',
-                  },
-                  action_id: '123',
-                  agent_id: 'agent-a',
-                  completed_at: '2022-04-30T16:08:47.449Z',
-                  error: '',
-                  started_at: expect.any(String),
-                },
-                id: expect.any(String),
-              },
-              type: 'fleetResponse',
-            },
-            {
-              item: {
-                data: {
-                  '@timestamp': '2022-04-27T16:08:47.449Z',
-                  EndpointActions: {
-                    action_id: '123',
-                    data: {
-                      command: 'isolate',
-                      comment: '5wb6pu6kh2xix5i',
-                    },
-                    expiration: expect.any(String),
-                    input_type: 'endpoint',
-                    type: 'INPUT_ACTION',
-                  },
-                  agent: { id: 'agent-a' },
-                  user: {
-                    id: expect.any(String),
-                  },
-                  error: undefined,
-                },
-                id: expect.any(String),
-              },
-              type: 'action',
-            },
-          ],
           startedAt: '2022-04-27T16:08:47.449Z',
+          comment: doc?.EndpointActions.data.comment,
+          createdBy: doc?.user.id,
+          parameters: doc?.EndpointActions.data.parameters,
         },
       ],
       total: 1,

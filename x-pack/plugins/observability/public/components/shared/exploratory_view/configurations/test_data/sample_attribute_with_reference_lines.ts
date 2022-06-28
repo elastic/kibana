@@ -81,7 +81,6 @@ export const sampleAttributeWithReferenceLines = {
                   isFormulaBroken: false,
                 },
                 references: ['y-axis-column-layer0X3'],
-                scale: 'ratio',
               },
               'y-axis-column-layer0X0': {
                 customLabel: true,
@@ -92,8 +91,11 @@ export const sampleAttributeWithReferenceLines = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
                 },
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'count',
+                params: {
+                  emptyAsNull: false,
+                },
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
               },
@@ -106,8 +108,11 @@ export const sampleAttributeWithReferenceLines = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
                 },
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'count',
+                params: {
+                  emptyAsNull: false,
+                },
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
               },
@@ -115,7 +120,7 @@ export const sampleAttributeWithReferenceLines = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'overall_sum',
                 references: ['y-axis-column-layer0X1'],
                 scale: 'ratio',
@@ -124,13 +129,13 @@ export const sampleAttributeWithReferenceLines = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Part of count() / overall_sum(count())',
+                label: 'Part of Pages loaded',
                 operationType: 'math',
                 params: {
                   tinymathAst: {
                     args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
                     location: {
-                      max: 30,
+                      max: 288,
                       min: 0,
                     },
                     name: 'divide',

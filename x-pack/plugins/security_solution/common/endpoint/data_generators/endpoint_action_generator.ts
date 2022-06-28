@@ -16,12 +16,10 @@ import {
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   EndpointPendingActions,
-  ISOLATION_ACTIONS,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  RESPONSE_ACTION_COMMANDS,
 } from '../types';
-
-const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -42,8 +40,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           type: 'INPUT_ACTION',
           input_type: 'endpoint',
           data: {
-            command: this.randomIsolateCommand(),
+            command: this.randomResponseActionCommand(),
             comment: this.randomString(15),
+            parameters: undefined,
           },
         },
         error: undefined,
@@ -87,8 +86,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           action_id: this.seededUUIDv4(),
           completed_at: timeStamp.toISOString(),
           data: {
-            command: this.randomIsolateCommand(),
+            command: this.randomResponseActionCommand(),
             comment: '',
+            parameters: undefined,
           },
           started_at: this.randomPastDate(),
         },
@@ -116,67 +116,10 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       isExpired: false,
       wasSuccessful: true,
       errors: undefined,
-      logEntries: [
-        {
-          item: {
-            data: {
-              '@timestamp': '2022-04-27T16:08:47.449Z',
-              action_id: '123',
-              agents: ['agent-a'],
-              data: {
-                command: 'isolate',
-                comment: '5wb6pu6kh2xix5i',
-              },
-              expiration: '2022-04-29T16:08:47.449Z',
-              input_type: 'endpoint',
-              type: 'INPUT_ACTION',
-              user_id: 'elastic',
-            },
-            id: '44d8b915-c69c-4c48-8c86-b57d0bd631d0',
-          },
-          type: 'fleetAction',
-        },
-        {
-          item: {
-            data: {
-              '@timestamp': '2022-04-30T16:08:47.449Z',
-              action_data: {
-                command: 'unisolate',
-                comment: '',
-              },
-              action_id: '123',
-              agent_id: 'agent-a',
-              completed_at: '2022-04-30T16:08:47.449Z',
-              error: '',
-              started_at: '2022-04-30T16:08:47.449Z',
-            },
-            id: '54-65-65-98',
-          },
-          type: 'fleetResponse',
-        },
-        {
-          item: {
-            data: {
-              '@timestamp': '2022-04-30T16:08:47.449Z',
-              EndpointActions: {
-                action_id: '123',
-                completed_at: '2022-04-30T16:08:47.449Z',
-                data: {
-                  command: 'unisolate',
-                  comment: '',
-                },
-                started_at: '2022-04-30T16:08:47.449Z',
-              },
-              agent: {
-                id: 'agent-a',
-              },
-            },
-            id: '32-65-98',
-          },
-          type: 'response',
-        },
-      ],
       startedAt: '2022-04-27T16:08:47.449Z',
+      comment: 'thisisacomment',
+      createdBy: 'auserid',
+      parameters: undefined,
     };
 
     return merge(details, overrides);
@@ -235,7 +178,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
-  protected randomIsolateCommand() {
-    return this.randomChoice(ISOLATION_COMMANDS);
+  protected randomResponseActionCommand() {
+    return this.randomChoice(RESPONSE_ACTION_COMMANDS);
   }
 }

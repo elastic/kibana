@@ -8,8 +8,8 @@
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { HttpSetup, HttpStart } from './types';
-import { FatalErrorsSetup } from '../fatal_errors';
 import { BasePath } from './base_path';
 import { AnonymousPathsService } from './anonymous_paths_service';
 import { LoadingCountService } from './loading_count_service';

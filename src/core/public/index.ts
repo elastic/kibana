@@ -35,6 +35,11 @@ import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-brows
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 
+import type {
+  FatalErrorsSetup,
+  FatalErrorsStart,
+  FatalErrorInfo,
+} from '@kbn/core-fatal-errors-browser';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -57,7 +62,6 @@ import {
   NavType,
   ChromeHelpMenuActions,
 } from './chrome';
-import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';

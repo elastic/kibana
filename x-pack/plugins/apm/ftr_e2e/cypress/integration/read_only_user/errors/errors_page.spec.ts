@@ -8,7 +8,7 @@
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { checkA11y } from '../../../support/commands';
-import { generateData } from './generate_data';
+import { generateData, generateErrors } from './generate_data';
 
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
@@ -107,6 +107,70 @@ describe('Errors page', () => {
         cy.contains('span', 'Last seen').click();
         cy.url().should('include', '&sortField=lastSeen&sortDirection=asc');
       });
+    });
+  });
+});
+
+describe('Check detailed statistics API with multiple errors', () => {
+  before(async () => {
+    cy.loginAsViewerUser();
+    await synthtrace.index(
+      generateErrors({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+        errorCount: 50,
+      })
+    );
+  });
+
+  after(async () => {
+    await synthtrace.clean();
+  });
+
+  it('calls detailed API with visible items only', () => {
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/errors/groups/main_statistics?*'
+    ).as('errorsMainStatistics');
+    cy.intercept(
+      'POST',
+      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*'
+    ).as('errorsDetailedStatistics');
+    cy.visit(`${javaServiceErrorsPageHref}&pageSize=10`);
+    cy.wait('@errorsMainStatistics');
+    cy.get('.euiPagination__list').children().should('have.length', 5);
+    cy.wait('@errorsDetailedStatistics').then((payload) => {
+      expect(payload.request.body.groupIds).eql(
+        JSON.stringify([
+          '0000000000000000000000000Error 0',
+          '0000000000000000000000000Error 1',
+          '0000000000000000000000000Error 2',
+          '0000000000000000000000000Error 3',
+          '0000000000000000000000000Error 4',
+          '0000000000000000000000000Error 5',
+          '0000000000000000000000000Error 6',
+          '0000000000000000000000000Error 7',
+          '0000000000000000000000000Error 8',
+          '0000000000000000000000000Error 9',
+        ])
+      );
+    });
+    cy.get('[data-test-subj="pagination-button-1"]').click();
+    cy.wait('@errorsDetailedStatistics').then((payload) => {
+      expect(payload.request.body.groupIds).eql(
+        JSON.stringify([
+          '000000000000000000000000Error 10',
+          '000000000000000000000000Error 11',
+          '000000000000000000000000Error 12',
+          '000000000000000000000000Error 13',
+          '000000000000000000000000Error 14',
+          '000000000000000000000000Error 15',
+          '000000000000000000000000Error 16',
+          '000000000000000000000000Error 17',
+          '000000000000000000000000Error 18',
+          '000000000000000000000000Error 19',
+        ])
+      );
     });
   });
 });
