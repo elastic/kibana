@@ -25,7 +25,6 @@ import {
   EuiText,
   EuiTableSortingType,
   EuiButtonIcon,
-  EuiHorizontalRule,
   EuiSelectableOption,
   EuiIcon,
   EuiDescriptionList,
@@ -647,7 +646,7 @@ export const RulesList: React.FunctionComponent = () => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
+      <EuiSpacer size="s" />
       <RulesListTable
         canExecuteActions={canExecuteActions}
         isLoading={rulesState.isLoading || ruleTypesState.isLoading || isPerformingAction}
