@@ -3673,7 +3673,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -8977,7 +8977,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -15431,7 +15431,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -16396,7 +16396,7 @@
             "tags": [],
             "label": "onNotification",
             "description": [
-              "\nHander for service notifications"
+              "\nHandler for service notifications"
             ],
             "signature": [
               "(toastInputFields: ",
@@ -16549,6 +16549,23 @@
             "label": "getCanSave",
             "description": [
               "\nDetermines whether the user can save data views"
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServiceDeps.getCanSaveAdvancedSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "getCanSaveAdvancedSettings",
+            "description": [
+              "\nDetermines whether the user can save advancedSettings (used for defaultIndex)"
             ],
             "signature": [
               "() => Promise<boolean>"
@@ -20303,16 +20320,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_INDEX_PATTERN",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
@@ -20323,30 +20330,10 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
             "label": "ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_ENDPOINT_INDEX_TO_IGNORE",
             "description": [],
             "path": "src/plugins/data_views/common/constants.ts",
             "deprecated": false

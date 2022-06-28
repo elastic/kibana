@@ -9,7 +9,7 @@ import { EuiAccordion, EuiDescriptionList, EuiPanel, EuiSpacer, EuiText } from '
 import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
-import * as TEXT from '../translations';
+import { i18n } from '@kbn/i18n';
 import { CspFinding } from '../types';
 import { CisKubernetesIcons, Markdown, CodeBlock } from './findings_flyout';
 
@@ -18,23 +18,33 @@ type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
 
 const getDetailsList = (data: CspFinding) => [
   {
-    title: TEXT.RULE_NAME,
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
+      defaultMessage: 'Rule Name',
+    }),
     description: data.rule.name,
   },
   {
-    title: TEXT.EVALUATED_AT,
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.evaluatedAtTitle', {
+      defaultMessage: 'Evaluated at',
+    }),
     description: moment(data['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS'),
   },
   {
-    title: TEXT.RESOURCE_NAME,
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle', {
+      defaultMessage: 'Resource Name',
+    }),
     description: data.resource.name,
   },
   {
-    title: TEXT.FRAMEWORK_SOURCES,
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
+      defaultMessage: 'Framework Sources',
+    }),
     description: <CisKubernetesIcons />,
   },
   {
-    title: TEXT.CIS_SECTION,
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.cisSectionTitle', {
+      defaultMessage: 'CIS Section',
+    }),
     description: data.rule.section,
   },
 ];
@@ -44,16 +54,30 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
     title: '',
     description: <Markdown>{rule.remediation}</Markdown>,
   },
+  ...(rule.impact
+    ? [
+        {
+          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
+            defaultMessage: 'Impact',
+          }),
+          description: <Markdown>{rule.impact}</Markdown>,
+        },
+      ]
+    : []),
+  ...(rule.default_value
+    ? [
+        {
+          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
+            defaultMessage: 'Default Value',
+          }),
+          description: <Markdown>{rule.default_value}</Markdown>,
+        },
+      ]
+    : []),
   {
-    title: TEXT.IMPACT,
-    description: <Markdown>{rule.impact}</Markdown>,
-  },
-  {
-    title: TEXT.DEFAULT_VALUE,
-    description: <Markdown>{rule.default_value}</Markdown>,
-  },
-  {
-    title: TEXT.RATIONALE,
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle', {
+      defaultMessage: 'Rationale',
+    }),
     description: <Markdown>{rule.rationale}</Markdown>,
   },
 ];
@@ -61,11 +85,15 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
 const getEvidenceList = ({ result }: CspFinding) =>
   [
     result.expected && {
-      title: TEXT.EXPECTED,
+      title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.expectedTitle', {
+        defaultMessage: 'Expected',
+      }),
       description: <CodeBlock>{JSON.stringify(result.expected, null, 2)}</CodeBlock>,
     },
     {
-      title: TEXT.ACTUAL,
+      title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.actualTitle', {
+        defaultMessage: 'Actual',
+      }),
       description: <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>,
     },
   ].filter(Boolean) as EuiDescriptionListProps['listItems'];
@@ -75,19 +103,26 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
     () => [
       {
         initialIsOpen: true,
-        title: TEXT.DETAILS,
+        title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.detailsTitle', {
+          defaultMessage: 'Details',
+        }),
         id: 'detailsAccordion',
         listItems: getDetailsList(data),
       },
       {
         initialIsOpen: true,
-        title: TEXT.REMEDIATION,
+        title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle', {
+          defaultMessage: 'Remediation',
+        }),
         id: 'remediationAccordion',
         listItems: getRemediationList(data.rule),
       },
       {
         initialIsOpen: false,
-        title: TEXT.EVIDENCE,
+        title: i18n.translate(
+          'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
+          { defaultMessage: 'Evidence' }
+        ),
         id: 'evidenceAccordion',
         listItems: getEvidenceList(data),
       },
