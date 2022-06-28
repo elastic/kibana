@@ -17,30 +17,21 @@ import {
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
+import {
+  getCustomPipelineNameForDatastream,
+  getPipelineNameForDatastream,
+} from '../../../../../common';
 
 import { appendMetadataToIngestPipeline } from '../meta';
-
 import { retryTransientEsErrors } from '../retry';
 
 import {
-  getPipelineNameForDatastream,
   getPipelineNameForInstallation,
   rewriteIngestPipeline,
+  isTopLevelPipeline,
+  addCustomPipelineProcessor,
 } from './helpers';
-import type { RewriteSubstitution } from './helpers';
-
-interface PipelineInstall {
-  nameForInstallation: string;
-  contentForInstallation: string;
-  extension: string;
-}
-
-export const isTopLevelPipeline = (path: string) => {
-  const pathParts = getPathParts(path);
-  return (
-    pathParts.type === ElasticsearchAssetType.ingestPipeline && pathParts.dataset === undefined
-  );
-};
+import type { PipelineInstall, RewriteSubstitution } from './types';
 
 export const prepareToInstallPipelines = (
   installablePackage: InstallablePackage,
@@ -156,8 +147,8 @@ export async function installAllPipelines({
     ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
     : paths;
   const pipelinesInfos: Array<{
-    name: string;
     nameForInstallation: string;
+    customIngestPipelineNameForInstallation?: string;
     content: string;
     extension: string;
   }> = [];
@@ -176,8 +167,10 @@ export async function installAllPipelines({
     });
     const content = getAsset(path).toString('utf-8');
     pipelinesInfos.push({
-      name,
       nameForInstallation,
+      customIngestPipelineNameForInstallation: dataStream
+        ? getCustomPipelineNameForDatastream(dataStream)
+        : undefined,
       content,
       extension,
     });
@@ -203,6 +196,7 @@ export async function installAllPipelines({
 
     pipelinesToInstall.push({
       nameForInstallation,
+      customIngestPipelineNameForInstallation: getCustomPipelineNameForDatastream(dataStream),
       contentForInstallation: 'processors: []',
       extension: 'yml',
     });
@@ -220,27 +214,36 @@ async function installPipeline({
   logger,
   pipeline,
   installablePackage,
+  shouldAddCustomPipelineProcessor = true,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   pipeline: PipelineInstall;
   installablePackage?: InstallablePackage;
+  shouldAddCustomPipelineProcessor?: boolean;
 }): Promise<EsAssetReference> {
-  const pipelineWithMetadata = appendMetadataToIngestPipeline({
+  let pipelineToInstall = appendMetadataToIngestPipeline({
     pipeline,
     packageName: installablePackage?.name,
   });
 
+  if (shouldAddCustomPipelineProcessor) {
+    pipelineToInstall = addCustomPipelineProcessor(pipelineToInstall);
+  }
+
   const esClientParams = {
-    id: pipelineWithMetadata.nameForInstallation,
-    body: pipelineWithMetadata.contentForInstallation,
+    id: pipelineToInstall.nameForInstallation,
+    body:
+      pipelineToInstall.extension === 'yml'
+        ? pipelineToInstall.contentForInstallation
+        : JSON.parse(pipelineToInstall.contentForInstallation),
   };
 
   const esClientRequestOptions: TransportRequestOptions = {
     ignore: [404],
   };
 
-  if (pipelineWithMetadata.extension === 'yml') {
+  if (pipelineToInstall.extension === 'yml') {
     esClientRequestOptions.headers = {
       // pipeline is YAML
       'Content-Type': 'application/yaml',
@@ -255,7 +258,7 @@ async function installPipeline({
   );
 
   return {
-    id: pipelineWithMetadata.nameForInstallation,
+    id: pipelineToInstall.nameForInstallation,
     type: ElasticsearchAssetType.ingestPipeline,
   };
 }

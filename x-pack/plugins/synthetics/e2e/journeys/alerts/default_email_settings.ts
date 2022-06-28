@@ -13,7 +13,12 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import { assertNotText, assertText, byTestId, waitForLoadingToFinish } from '../utils';
+import {
+  assertNotText,
+  assertText,
+  byTestId,
+  waitForLoadingToFinish,
+} from '@kbn/observability-plugin/e2e/utils';
 import { settingsPageProvider } from '../../page_objects/settings';
 
 journey('DefaultEmailSettings', async ({ page, params }) => {
@@ -62,7 +67,7 @@ journey('DefaultEmailSettings', async ({ page, params }) => {
     await page.fill(byTestId('emailHostInput'), 'test');
     await page.fill(byTestId('emailPortInput'), '1025');
     await page.click('text=Require authentication for this server');
-    await page.click(byTestId('saveNewActionButton'));
+    await page.click(byTestId('create-connector-flyout-save-btn'));
   });
 
   step('Select email connector', async () => {

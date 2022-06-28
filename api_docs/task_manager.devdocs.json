@@ -1398,7 +1398,7 @@
       "signature": [
         "Pick<",
         "TaskScheduling",
-        ", \"schedule\" | \"runNow\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\"> & Pick<",
+        ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\"> & Pick<",
         "TaskStore",
         ", \"fetch\" | \"get\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
       ],

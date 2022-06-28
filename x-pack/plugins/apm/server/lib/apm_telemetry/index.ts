@@ -159,7 +159,7 @@ export async function createApmTelemetry({
         logger.debug(
           `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
         );
-        await taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
+        await taskManagerStart.runSoon(APM_TELEMETRY_TASK_NAME);
       }
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

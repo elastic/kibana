@@ -17,9 +17,11 @@ WARNING: After you delete a rule, you cannot recover it.
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Management* > *Stack Rules* feature or
-for the *{ml-app}*, *{observability}*, or *Security* features, depending on the
-`consumer` and `rule_type_id` of the rule you're deleting.
+You must have `all` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rule you're deleting. For example, the
+*Management* > *Stack Rules* feature,  *Analytics* > *Discover* or *{ml-app}*
+features, *{observability}*, or *Security* features. For more details, refer to
+<<kibana-feature-privileges>>.
 
 [[delete-rule-api-path-params]]
 === {api-path-parms-title}

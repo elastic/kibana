@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { safeDump, safeLoad } from 'js-yaml';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { RegistryDataStream } from '../../../../types';
 import { getPathParts } from '../../archive';
+
+import { getPipelineNameForDatastream } from '../../../../../common';
+
+import type { PipelineInstall, RewriteSubstitution } from './types';
 
 export const isTopLevelPipeline = (path: string) => {
   const pathParts = getPathParts(path);
@@ -35,22 +40,6 @@ export const getPipelineNameForInstallation = ({
   return `${packageVersion}-${pipelineName}`;
 };
 
-export const getPipelineNameForDatastream = ({
-  dataStream,
-  packageVersion,
-}: {
-  dataStream: RegistryDataStream;
-  packageVersion: string;
-}): string => {
-  return `${dataStream.type}-${dataStream.dataset}-${packageVersion}`;
-};
-
-export interface RewriteSubstitution {
-  source: string;
-  target: string;
-  templateFunction: string;
-}
-
 export function rewriteIngestPipeline(
   pipeline: string,
   substitutions: RewriteSubstitution[]
@@ -70,4 +59,42 @@ export function rewriteIngestPipeline(
     pipeline = pipeline.replace(regexStandardStyle, target).replace(regexBeatsStyle, target);
   });
   return pipeline;
+}
+
+function mutatePipelineContentWithNewProcessor(jsonPipelineContent: any, processor: any) {
+  if (!jsonPipelineContent.processors) {
+    jsonPipelineContent.processors = [];
+  }
+
+  jsonPipelineContent.processors.push(processor);
+}
+
+export function addCustomPipelineProcessor(pipeline: PipelineInstall): PipelineInstall {
+  if (!pipeline.customIngestPipelineNameForInstallation) {
+    return pipeline;
+  }
+
+  const customPipelineProcessor = {
+    pipeline: {
+      name: pipeline.customIngestPipelineNameForInstallation,
+      ignore_missing_pipeline: true,
+    },
+  };
+
+  if (pipeline.extension === 'yml') {
+    const parsedPipelineContent = safeLoad(pipeline.contentForInstallation);
+    mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
+    return {
+      ...pipeline,
+      contentForInstallation: `---\n${safeDump(parsedPipelineContent)}`,
+    };
+  }
+
+  const parsedPipelineContent = JSON.parse(pipeline.contentForInstallation);
+  mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
+
+  return {
+    ...pipeline,
+    contentForInstallation: JSON.stringify(parsedPipelineContent),
+  };
 }

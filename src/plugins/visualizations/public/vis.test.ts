@@ -44,7 +44,7 @@ jest.mock('./services', () => {
     getSearch: () => ({
       searchSource: {
         create: () => {
-          return new SearchSource({ index: stubIndexPattern });
+          return new SearchSource({ index: stubIndexPattern.stubDataView });
         },
       },
     }),

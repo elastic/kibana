@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutSize,
   EuiButtonIcon,
   EuiPanel,
   EuiTitle,
@@ -36,7 +37,6 @@ import {
   RuleType,
   getNotifyWhenOptions,
   RuleEventLogListProps,
-  AlertsTableFlyoutState,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -177,7 +177,7 @@ export function RuleDetailsPage() {
     alertsTableConfigurationRegistry,
     configurationId: observabilityFeatureId,
     id: `case-details-alerts-o11y`,
-    flyoutState: AlertsTableFlyoutState.external,
+    flyoutSize: 's' as EuiFlyoutSize,
     featureIds: [features] as AlertConsumers[],
     query: {
       bool: {
@@ -200,13 +200,9 @@ export function RuleDetailsPage() {
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: rule ? (
-        getRuleEventLogList({
-          rule,
-        } as RuleEventLogListProps)
-      ) : (
-        <EuiLoadingSpinner size="m" />
-      ),
+      content: getRuleEventLogList({
+        rule,
+      } as RuleEventLogListProps),
     },
     {
       id: ALERT_LIST_TAB,
@@ -255,10 +251,10 @@ export function RuleDetailsPage() {
       disableRule: async () => await disableRule({ http, id: rule.id }),
       onRuleChanged: () => reloadRule(),
       isEditable: hasEditButton,
-      snoozeRule: async (snoozeEndTime: string | -1) => {
-        await snoozeRule({ http, id: rule.id, snoozeEndTime });
+      snoozeRule: async (snoozeSchedule) => {
+        await snoozeRule({ http, id: rule.id, snoozeSchedule });
       },
-      unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+      unsnoozeRule: async (scheduleIds) => await unsnoozeRule({ http, id: rule.id, scheduleIds }),
     });
 
   const getNotifyText = () =>
@@ -536,22 +532,20 @@ export function RuleDetailsPage() {
           onSave: reloadRule,
         })}
       <DeleteModalConfirmation
-        onDeleted={async () => {
+        onDeleted={() => {
           setRuleToDelete([]);
           navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
-        onErrors={async () => {
+        onErrors={() => {
           setRuleToDelete([]);
           navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
-        onCancel={() => {}}
+        onCancel={() => setRuleToDelete([])}
         apiDeleteCall={deleteRules}
         idsToDelete={ruleToDelete}
         singleTitle={rule.name}
         multipleTitle={rule.name}
-        setIsLoadingState={(isLoading: boolean) => {
-          setIsPageLoading(isLoading);
-        }}
+        setIsLoadingState={() => setIsPageLoading(true)}
       />
       {errorRule && toasts.addDanger({ title: errorRule })}
     </ObservabilityPageTemplate>
