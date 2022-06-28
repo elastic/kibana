@@ -19,13 +19,13 @@ import {
   DEFAULT_LEGEND_SIZE,
   LegendSize,
 } from '@kbn/visualizations-plugin/public';
-import type { ChartType } from '../../common';
 import type { VisParams, XYVisConfig } from '../types';
+import type { XyVisType } from '../../common';
 
 export const visName = 'xy_vis';
 export interface RenderValue {
   visData: Datatable;
-  visType: ChartType;
+  visType: XyVisType;
   visConfig: VisParams;
   syncColors: boolean;
   syncTooltips: boolean;
@@ -262,7 +262,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
     },
   },
   fn(context, args, handlers) {
-    const visType = args.chartType;
+    const visType = args.type;
     const visConfig = {
       ariaLabel:
         args.ariaLabel ??

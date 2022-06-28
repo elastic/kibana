@@ -45,8 +45,9 @@ import {
 } from './lib/enterprise_search_request_handler';
 
 import { registerAppSearchRoutes } from './routes/app_search';
+import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
-import { registerIndexRoutes } from './routes/enterprise_search/indices';
+import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -159,8 +160,9 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
+    registerEnterpriseSearchRoutes(dependencies);
     registerWorkplaceSearchRoutes(dependencies);
-    registerIndexRoutes(dependencies);
+    registerConnectorRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry
