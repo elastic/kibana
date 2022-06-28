@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it.skip('should navigate to the new rule details page by URL', async () => {
+      it('should navigate to the new rule details page by URL', async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
         await retry.waitFor(
           'Rule details to be visible',
