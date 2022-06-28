@@ -26,6 +26,14 @@ type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends Read
   ? ElementType
   : never;
 
+const getActivatedBenchmark = (packagePolicy: PackagePolicy): string => {
+  const activatedBenchmark = packagePolicy.inputs[0].streams[0].vars?.benchmark.value;
+
+  if (activatedBenchmark === 'cis_k8s' || activatedBenchmark === 'cis_eks')
+    return activatedBenchmark;
+  return 'cis_k8s';
+};
+
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
@@ -34,10 +42,13 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
+  const activatedBenchmark = getActivatedBenchmark(packagePolicy);
+
   // Create csp-rules from the generic asset
   const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplateType> =
     await savedObjectsClient.find({
       type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+      filter: `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmarks.id: '${activatedBenchmark}'`,
       perPage: 10000,
     });
 

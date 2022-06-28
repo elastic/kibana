@@ -33,10 +33,8 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
       visibleInManagement: true,
       getTitle: (savedObject) =>
         `${i18n.translate('xpack.csp.cspSettings.rules', {
-          defaultMessage: `CSP Security Rules - `,
-        })} ${savedObject.attributes.metadata.benchmark.name} ${
-          savedObject.attributes.metadata.benchmark.version
-        } ${savedObject.attributes.metadata.name}`,
+          defaultMessage: `CSP Security Rules`,
+        })}`,
     },
     schemas: {
       '8.3.0': cspRuleSchemaV830,
