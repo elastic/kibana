@@ -12,7 +12,7 @@ import { useValues } from 'kea';
 
 import {
   EuiPage,
-  EuiPageSideBar,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiPageBody,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiCallOut,

@@ -14,7 +14,7 @@ import {
   EuiPage,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageSideBar,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiSideNav,
 } from '@elastic/eui';
 import 'brace/mode/json';
