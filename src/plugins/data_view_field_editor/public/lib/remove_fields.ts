@@ -32,7 +32,9 @@ export async function removeFields(
   } catch {}
 
   try {
-    await services.dataViews.updateSavedObject(dataView);
+    if (dataView.isPersisted()) {
+      await services.dataViews.updateSavedObject(dataView);
+    }
   } catch (e) {
     const title = i18n.translate('indexPatternFieldEditor.save.deleteErrorTitle', {
       defaultMessage: 'Failed to save field removal',
