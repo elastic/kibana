@@ -78,7 +78,7 @@ const SortableControlInner = forwardRef<
       <button
         ref={dragHandleRef}
         {...dragHandleProps}
-        aria-label={`${ControlGroupStrings.otherActions.getMoveControlButtonTitle()} ${title}`}
+        aria-label={`${ControlGroupStrings.ariaActions.getMoveControlButtonAction(title)}`}
         className="controlFrame__dragHandle"
       >
         <EuiIcon type="grabHorizontal" />

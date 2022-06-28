@@ -29,6 +29,7 @@ import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListComponentState } from './options_list_component';
+import { ControlGroupStrings } from '../../control_group/control_group_strings';
 
 export const OptionsListPopover = ({
   field,
@@ -152,6 +153,8 @@ export const OptionsListPopover = ({
         className="optionsList__items"
         data-option-count={availableOptions?.length ?? 0}
         data-test-subj={`optionsList-control-available-options`}
+        role="listbox"
+        aria-label={`${ControlGroupStrings.ariaActions.getAvailableOptionsPopoverAction(title)}`}
       >
         {!showOnlySelected && (
           <>
@@ -160,6 +163,7 @@ export const OptionsListPopover = ({
                 data-test-subj={`optionsList-control-selection-${availableOption}`}
                 checked={selectedOptionsSet?.has(availableOption) ? 'on' : undefined}
                 key={index}
+                aria-label={availableOption}
                 onClick={() => {
                   if (singleSelect) {
                     dispatch(replaceSelection(availableOption));
