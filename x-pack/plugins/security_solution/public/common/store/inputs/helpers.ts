@@ -87,6 +87,7 @@ export const upsertQuery = ({
   loading,
   refetch,
   state,
+  adapters,
 }: UpdateQueryParams): InputsModel => {
   const queryIndex = state[inputId].queries.findIndex((q) => q.id === id);
   return {
@@ -104,6 +105,7 @@ export const upsertQuery = ({
                 loading,
                 refetch,
                 selectedInspectIndex: state[inputId].queries[queryIndex].selectedInspectIndex,
+                adapters,
               },
               ...state[inputId].queries.slice(queryIndex + 1),
             ]
@@ -116,6 +118,7 @@ export const upsertQuery = ({
                 loading,
                 refetch,
                 selectedInspectIndex: 0,
+                adapters,
               },
             ],
     },

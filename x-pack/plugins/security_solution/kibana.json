@@ -13,6 +13,7 @@
     "alerting",
     "cases",
     "data",
+    "expressions",
     "embeddable",
     "eventLog",
     "features",

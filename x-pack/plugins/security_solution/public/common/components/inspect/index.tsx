@@ -6,7 +6,8 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import React from 'react';
+
+import React, { useMemo } from 'react';
 
 import { InputsModelId } from '../../store/inputs/constants';
 
@@ -15,6 +16,7 @@ import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { ModalInspectQuery } from './modal';
 import { useInspect } from './use_inspect';
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
 
@@ -54,6 +56,11 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   title = '',
 }) => {
   const {
+    services: { inspector },
+  } = useKibana();
+  let overlayRef: InspectorSession | undefined;
+
+  const {
     additionalRequests,
     additionalResponses,
     handleClick,
@@ -63,6 +70,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
     loading,
     request,
     response,
+    adapters,
   } = useInspect({
     inputId,
     inspectIndex,
@@ -71,6 +79,23 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
     onCloseInspect,
     queryId,
   });
+
+  const inspectorInfo = useMemo(
+    () => ({
+      adapters,
+      inspect: (options?: InspectorOptions) => {
+        overlayRef = inspector.open(adapters, options);
+        overlayRef.onClose.then(() => {
+          if (overlayRef) {
+            overlayRef = undefined;
+          }
+        });
+        return overlayRef;
+      },
+      close: () => overlayRef?.close(),
+    }),
+    []
+  );
 
   return (
     <>
@@ -113,9 +138,22 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           title={title}
         />
       )}
+
+      <EuiButtonEmpty
+        className={BUTTON_CLASS}
+        aria-label={i18n.INSPECT}
+        data-test-subj="inspect-empty-button"
+        color="text"
+        iconSide="left"
+        iconType="inspect"
+        isDisabled={isButtonDisabled}
+        isLoading={loading}
+        onClick={inspectorInfo.inspect}
+      >
+        {i18n.INSPECT} {'plugin'}
+      </EuiButtonEmpty>
     </>
   );
 };
 
-InspectButtonComponent.displayName = 'InspectButtonComponent';
 export const InspectButton = React.memo(InspectButtonComponent);

@@ -6,6 +6,8 @@
  */
 
 import deepEqual from 'fast-deep-equal';
+import numeral from '@elastic/numeral';
+
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
@@ -66,12 +68,14 @@ export const useAllHost = ({
   skip = false,
   startDate,
   type,
+  adapters,
 }: UseAllHost): [boolean, HostsArgs] => {
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state: State) =>
     getHostsSelector(state, type)
   );
   const { data } = useKibana().services;
+
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription = useRef(new Subscription());
@@ -123,6 +127,8 @@ export const useAllHost = ({
 
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
+        const requestAdapter = adapters.requests.start('All hosts');
+
         setLoading(true);
 
         searchSubscription.current = data.search
@@ -142,6 +148,40 @@ export const useAllHost = ({
                   refetch: refetch.current,
                   totalCount: response.totalCount,
                 }));
+                requestAdapter.stats({
+                  indexPattern: {
+                    label: 'Index Pattern',
+                    value: request.defaultIndex,
+                  },
+                  queryTime: {
+                    label: 'Query Time',
+                    value:
+                      response?.rawResponse.took === 0
+                        ? '0ms'
+                        : response?.rawResponse.took
+                        ? `${numeral(response.rawResponse.took).format('0,0')}ms`
+                        : 'WOOPS! Something went wrong',
+                  },
+                });
+                adapters.tables.logDatatable('default', {
+                  type: 'test table',
+                  columns: [
+                    {
+                      id: 'id',
+                      name: 'id',
+                      meta: 'my id',
+                    },
+                    {
+                      id: 'value',
+                      name: 'Value',
+                      meta: 'test value',
+                    },
+                  ],
+                  rows: [{ id: '1234', value: 'my test value' }],
+                });
+                const stats: RequestStatistics = {};
+                requestAdapter.stats(stats).ok({ json: response.rawResponse });
+                requestAdapter.json(JSON.parse(response?.inspect?.dsl[0] ?? {})?.body);
                 searchSubscription.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
@@ -161,7 +201,7 @@ export const useAllHost = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, addError, addWarning, skip]
+    [skip, adapters.requests, adapters.tables, data.search, addWarning, addError]
   );
 
   useEffect(() => {

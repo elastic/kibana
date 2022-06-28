@@ -7,6 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/public';
 import { useAllHost, ID } from '../../containers/hosts';
 import { HostsComponentsQueryProps } from './types';
 import { HostsTable } from '../../components/hosts_table';
@@ -14,6 +15,7 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const HostsTableManage = manageQuery(HostsTable);
+const adapters: Adapters = createDefaultInspectorAdapters();
 
 export const HostsQueryTabBody = ({
   deleteQuery,
@@ -27,6 +29,7 @@ export const HostsQueryTabBody = ({
 }: HostsComponentsQueryProps) => {
   const { toggleStatus } = useQueryToggle(ID);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
@@ -38,6 +41,7 @@ export const HostsQueryTabBody = ({
       skip: querySkip,
       startDate,
       type,
+      adapters,
     });
 
   return (
@@ -56,6 +60,7 @@ export const HostsQueryTabBody = ({
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}
+      adapters={adapters}
     />
   );
 };

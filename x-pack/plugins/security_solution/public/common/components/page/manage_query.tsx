@@ -25,7 +25,7 @@ export function manageQuery<T>(
   WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
 ): React.FC<OwnProps & T> {
   const ManageQuery = (props: OwnProps & T) => {
-    const { loading, id, refetch, setQuery, deleteQuery, inspect = null } = props;
+    const { loading, id, refetch, setQuery, deleteQuery, inspect = null, adapters } = props;
     useQueryInspector({
       queryId: id,
       loading,
@@ -33,6 +33,7 @@ export function manageQuery<T>(
       setQuery,
       deleteQuery,
       inspect,
+      adapters,
     });
 
     const otherProps = omit(['refetch', 'setQuery'], props);
@@ -58,10 +59,15 @@ export const useQueryInspector = ({
   inspect,
   loading,
   queryId,
+  adapters,
 }: UseQueryInspectorTypes) => {
   useEffect(() => {
-    setQuery({ id: queryId, inspect: inspect ?? null, loading, refetch });
-  }, [deleteQuery, setQuery, queryId, refetch, inspect, loading]);
+    if (adapters) {
+      setQuery({ id: queryId, inspect: inspect ?? null, loading, refetch, adapters });
+    } else {
+      setQuery({ id: queryId, inspect: inspect ?? null, loading, refetch });
+    }
+  }, [deleteQuery, setQuery, queryId, refetch, inspect, loading, adapters]);
 
   useEffect(() => {
     return () => {

@@ -35,8 +35,9 @@ export const useInspect = ({
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const { loading, inspect, selectedInspectIndex, isInspected } = useDeepEqualSelector((state) =>
-    inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId)
+  const { loading, inspect, selectedInspectIndex, isInspected, adapters } = useDeepEqualSelector(
+    (state) =>
+      inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId)
   );
 
   const handleClick = useCallback(() => {
@@ -107,5 +108,6 @@ export const useInspect = ({
     loading,
     request,
     response,
+    adapters,
   };
 };
