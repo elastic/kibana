@@ -7,10 +7,16 @@
  */
 
 import { compact, isEqual, isUndefined, omitBy } from 'lodash';
-import { BehaviorSubject, Observable, Subscription, map } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { KibanaExecutionContext } from '../../types';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from '@kbn/core-execution-context-browser';
 
 // Should be exported from elastic/apm-rum
 export type LabelValue = string | number | boolean;
@@ -18,44 +24,6 @@ export type LabelValue = string | number | boolean;
 export interface Labels {
   [key: string]: LabelValue;
 }
-
-/**
- * Kibana execution context.
- * Used to provide execution context to Elasticsearch, reporting, performance monitoring, etc.
- * @public
- **/
-export interface ExecutionContextSetup {
-  /**
-   * The current context observable
-   **/
-  context$: Observable<KibanaExecutionContext>;
-  /**
-   * Set the current top level context
-   **/
-  set(c$: KibanaExecutionContext): void;
-  /**
-   * Get the current top level context
-   **/
-  get(): KibanaExecutionContext;
-  /**
-   * clears the context
-   **/
-  clear(): void;
-  /**
-   * returns apm labels
-   **/
-  getAsLabels(): Labels;
-  /**
-   * merges the current top level context with the specific event context
-   **/
-  withGlobalContext(context?: KibanaExecutionContext): KibanaExecutionContext;
-}
-
-/**
- * See {@link ExecutionContextSetup}.
- * @public
- */
-export type ExecutionContextStart = ExecutionContextSetup;
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
