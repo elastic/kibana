@@ -20,6 +20,7 @@ import {
   useFormData,
   useKibana,
   GetFieldsOptions,
+  UseField,
 } from '../shared_imports';
 
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
@@ -372,6 +373,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
         </EuiTitle>
         <Form form={form} className="indexPatternEditor__form">
+          <UseField path="isAdHoc" />
           {indexPatternTypeSelect}
           <EuiSpacer size="l" />
           <EuiFlexGroup>
@@ -410,8 +412,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
         </Form>
         <Footer
           onCancel={onCancel}
-          onSubmit={(isAdHoc?: boolean) => {
-            form.getFields().isAdHoc.setValue(isAdHoc || false);
+          onSubmit={(adhoc?: boolean) => {
+            form.setFieldValue('isAdHoc', adhoc || false);
             form.submit();
           }}
           submitDisabled={form.isSubmitted && !form.isValid}
