@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPanel,

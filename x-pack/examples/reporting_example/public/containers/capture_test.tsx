@@ -20,7 +20,7 @@ import {
   EuiPageHeader,
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 
 import { TestImageA } from '../components';

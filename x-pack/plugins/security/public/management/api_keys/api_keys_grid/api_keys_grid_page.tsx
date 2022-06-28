@@ -16,7 +16,7 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
   EuiText,

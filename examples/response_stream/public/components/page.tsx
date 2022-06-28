@@ -11,7 +11,7 @@ import * as React from 'react';
 import {
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
