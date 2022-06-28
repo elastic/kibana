@@ -11,7 +11,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
-import { Filter, Query } from '../filters';
+import { Filter, Query, AggregateQuery } from '../filters';
 import { BoolQuery, DataViewBase } from './types';
 import type { KueryQueryOptions } from '../kuery';
 import type { EsQueryFiltersConfig } from './from_filters';
@@ -31,6 +31,9 @@ function removeMatchAll<T>(filters: T[]) {
     (filter) => !filter || typeof filter !== 'object' || !isEqual(filter, { match_all: {} })
   );
 }
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
 
 /**
  * @param indexPattern
@@ -44,7 +47,7 @@ function removeMatchAll<T>(filters: T[]) {
  */
 export function buildEsQuery(
   indexPattern: DataViewBase | undefined,
-  queries: Query | Query[],
+  queries: Query | AggregateQuery | Array<Query | AggregateQuery>,
   filters: Filter | Filter[],
   config: EsQueryConfig = {
     allowLeadingWildcards: false,
@@ -55,7 +58,8 @@ export function buildEsQuery(
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
-  const validQueries = queries.filter((query) => has(query, 'query'));
+  const isOfQueryTypeQueries = queries.filter(isOfQueryType);
+  const validQueries = isOfQueryTypeQueries.filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
   const kueryQuery = buildQueryFromKuery(
     indexPattern,

@@ -10,7 +10,7 @@ import { share } from 'rxjs/operators';
 import { HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import { PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { buildEsQuery, TimeRange, Query } from '@kbn/es-query';
+import { buildEsQuery, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
@@ -125,7 +125,7 @@ export class QueryService implements PersistableStateService<QueryState> {
 
         return buildEsQuery(
           indexPattern,
-          this.queryStringManager.getQuery() as Query,
+          this.queryStringManager.getQuery(),
           [...this.filterManager.getFilters(), ...(timeFilter ? [timeFilter] : [])],
           getEsQueryConfig(getUiSettings())
         );

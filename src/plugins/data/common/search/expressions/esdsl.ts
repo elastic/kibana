@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import { lastValueFrom } from 'rxjs';
@@ -85,7 +85,7 @@ export const getEsdslFn = ({
         const esQueryConfigs = getEsQueryConfig(uiSettingsClient as any);
         const query = buildEsQuery(
           undefined, //        args.index,
-          (input.query as Query) || [],
+          input.query || [],
           input.filters || [],
           esQueryConfigs
         );

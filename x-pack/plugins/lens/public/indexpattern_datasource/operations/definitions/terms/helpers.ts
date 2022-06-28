@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
-import { buildEsQuery, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
@@ -139,7 +139,7 @@ export function getDisallowedTermsMessage(
                   fieldName: fieldNames[0],
                   dslQuery: buildEsQuery(
                     indexPattern,
-                    frame.query as Query,
+                    frame.query,
                     frame.filters,
                     getEsQueryConfig(core.uiSettings)
                   ),

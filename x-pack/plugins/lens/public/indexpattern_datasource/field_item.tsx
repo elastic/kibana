@@ -39,7 +39,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldButton } from '@kbn/react-field';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { EuiHighlight } from '@elastic/eui';
-import { Filter, buildEsQuery, Query } from '@kbn/es-query';
+import { Filter, buildEsQuery, Query, AggregateQuery } from '@kbn/es-query';
 import { KBN_FIELD_TYPES, ES_FIELD_TYPES, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -61,7 +61,7 @@ export interface FieldItemProps {
   indexPattern: IndexPattern;
   highlight?: string;
   exists: boolean;
-  query: Query;
+  query: Query | AggregateQuery;
   dateRange: DatasourceDataPanelProps['dateRange'];
   chartsThemeService: ChartsPluginSetup['theme'];
   filters: Filter[];
