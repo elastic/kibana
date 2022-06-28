@@ -8,9 +8,7 @@ import * as t from 'io-ts';
 import { Logger } from '@kbn/core/server';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getPageLoadDistribution } from './get_page_load_distribution';
-import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
-import { getVisitorBreakdown } from './get_visitor_breakdown';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
 import { APMRouteHandlerResources } from '../typings';
@@ -127,58 +125,6 @@ const rumPageLoadDistBreakdownRoute = createApmServerRoute({
   },
 });
 
-const rumPageViewsTrendRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/page-view-trends',
-  params: t.type({
-    query: t.intersection([uxQueryRt, t.partial({ breakdowns: t.string })]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{ topItems: string[]; items: Array<Record<string, number>> }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { breakdowns, urlQuery, start, end },
-    } = resources.params;
-
-    return getPageViewTrends({
-      setup,
-      breakdowns,
-      urlQuery,
-      start,
-      end,
-    });
-  },
-});
-
-const rumVisitorsBreakdownRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/visitor-breakdown',
-  params: t.type({
-    query: uxQueryRt,
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    os: Array<{ count: number; name: string }>;
-    browsers: Array<{ count: number; name: string }>;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { urlQuery, start, end },
-    } = resources.params;
-
-    return getVisitorBreakdown({
-      setup,
-      urlQuery,
-      start,
-      end,
-    });
-  },
-});
-
 function decodeUiFilters(
   logger: Logger,
   uiFiltersEncoded?: string
@@ -211,6 +157,4 @@ async function setupUXRequest<TParams extends SetupUXRequestParams>(
 export const rumRouteRepository = {
   ...rumPageLoadDistributionRoute,
   ...rumPageLoadDistBreakdownRoute,
-  ...rumPageViewsTrendRoute,
-  ...rumVisitorsBreakdownRoute,
 };

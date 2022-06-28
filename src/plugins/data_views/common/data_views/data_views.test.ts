@@ -12,7 +12,6 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../constants';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -405,41 +404,6 @@ describe('IndexPatterns', () => {
       expect(uiSettings.set).toBeCalledTimes(0);
     });
 
-    test('when setting default it prefers user created data views', async () => {
-      savedObjectsClient.find = jest.fn().mockResolvedValue([
-        {
-          id: 'id1',
-          version: 'a',
-          attributes: { title: DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN },
-        },
-        {
-          id: 'id2',
-          version: 'a',
-          attributes: { title: DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN },
-        },
-        {
-          id: 'id3',
-          version: 'a',
-          attributes: { title: 'user-data-view' },
-        },
-      ]);
-
-      savedObjectsClient.get = jest
-        .fn()
-        .mockImplementation((type: string, id: string) =>
-          Promise.resolve({ id, version: 'a', attributes: { title: 'title' } })
-        );
-
-      const defaultDataViewResult = await indexPatterns.getDefaultDataView();
-      expect(defaultDataViewResult).toBeInstanceOf(DataView);
-      expect(defaultDataViewResult?.id).toBe('id3');
-
-      // make sure we're not pulling from cache
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
-      expect(uiSettings.remove).toBeCalledTimes(0);
-      expect(uiSettings.set).toBeCalledTimes(1);
-    });
     test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
       savedObjectsClient.find = jest.fn().mockResolvedValue([
         {
