@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
@@ -27,13 +27,28 @@ interface MatchParams {
   name: string;
 }
 
-export function useTabFromQueryString(history: History): WizardSection | undefined {
-  return useMemo(() => {
+export function useStepFromQueryString(history: History) {
+  const activeStep = useMemo(() => {
     const params = new URLSearchParams(history.location.search);
-    if (params.has('tab')) {
-      return params.get('tab') as WizardSection;
+    if (params.has('step')) {
+      return params.get('step') as WizardSection;
     }
   }, [history.location.search]);
+
+  const updateStep = useCallback(
+    (stepId: string) => {
+      const params = new URLSearchParams(history.location.search);
+      if (params.has('step')) {
+        params.set('step', stepId);
+        history.push({
+          search: params.toString(),
+        });
+      }
+    },
+    [history]
+  );
+
+  return { activeStep, updateStep };
 }
 
 export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -43,7 +58,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   history,
 }) => {
   const { api, breadcrumbs } = useComponentTemplatesContext();
-  const defaultActiveStep = useTabFromQueryString(history);
+  const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
   const redirectTo = useRedirectPath(history);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -126,7 +141,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
       <ComponentTemplateForm
         defaultValue={componentTemplate!}
-        defaultActiveStep={defaultActiveStep}
+        defaultActiveWizardSection={defaultActiveStep}
+        onStepChange={updateStep}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}

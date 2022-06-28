@@ -38,7 +38,8 @@ interface Props {
   saveError: any;
   defaultValue?: ComponentTemplateDeserialized;
   isEditing?: boolean;
-  defaultActiveStep?: WizardSection;
+  defaultActiveWizardSection?: WizardSection;
+  onStepChange?: (stepId: string) => void;
 }
 
 const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
@@ -88,8 +89,9 @@ export const ComponentTemplateForm = ({
   isSaving,
   saveError,
   clearSaveError,
-  defaultActiveStep,
+  defaultActiveWizardSection,
   onSave,
+  onStepChange,
 }: Props) => {
   const {
     template: { settings, mappings, aliases },
@@ -198,8 +200,13 @@ export const ComponentTemplateForm = ({
 
   const defaultActiveStepIndex = useMemo(
     () =>
-      Math.max(defaultActiveStep ? Object.keys(wizardSections).indexOf(defaultActiveStep) : 0, 0),
-    [defaultActiveStep]
+      Math.max(
+        defaultActiveWizardSection
+          ? Object.keys(wizardSections).indexOf(defaultActiveWizardSection)
+          : 0,
+        0
+      ),
+    [defaultActiveWizardSection]
   );
 
   return (
@@ -211,6 +218,7 @@ export const ComponentTemplateForm = ({
       apiError={apiError}
       texts={i18nTexts}
       defaultActiveStep={defaultActiveStepIndex}
+      onStepChange={onStepChange}
     >
       <FormWizardStep
         id={wizardSections.logistics.id}

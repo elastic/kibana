@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createMemoryHistory } from 'history';
 import { useRedirectPath } from './redirect_path';
 import { useKibana } from '..';
@@ -14,14 +15,12 @@ const mockedUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 jest.mock('..');
 
 describe('useRedirectPath', () => {
-  const mockedNavigateToUrl = jest.fn();
+  const mockStart = coreMock.createStart();
   beforeEach(() => {
-    mockedNavigateToUrl.mockReset();
+    mockStart.application.navigateToUrl.mockReset();
     mockedUseKibana.mockReturnValue({
-      services: {
-        application: {
-          navigateToUrl: mockedNavigateToUrl,
-        },
+      core: {
+        application: mockStart.application,
       },
     } as any);
   });
@@ -37,7 +36,7 @@ describe('useRedirectPath', () => {
 
     redirectToPathOrRedirectPath({ pathname: '/test' });
 
-    expect(mockedNavigateToUrl).toBeCalledWith('/test-redirect-path');
+    expect(mockStart.application.navigateToUrl).toBeCalledWith('/test-redirect-path');
   });
 
   it('should redirect to the provided path if no redirect path is specified in the url', () => {
@@ -50,7 +49,7 @@ describe('useRedirectPath', () => {
 
     redirectToPathOrRedirectPath({ pathname: '/test' });
 
-    expect(mockedNavigateToUrl).not.toBeCalled();
+    expect(mockStart.application.navigateToUrl).not.toBeCalled();
     expect(history.location.pathname).toBe('/test');
   });
 });

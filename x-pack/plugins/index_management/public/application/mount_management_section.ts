@@ -81,6 +81,7 @@ export async function mountManagementSection(
       fatalErrors,
       getUrlForApp: application.getUrlForApp,
       executionContext,
+      application,
     },
     plugins: {
       usageCollection,
@@ -91,7 +92,6 @@ export async function mountManagementSection(
       notificationService,
       uiMetricService,
       extensionsService,
-      application,
     },
     history,
     setBreadcrumbs,

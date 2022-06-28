@@ -31,6 +31,7 @@ export interface AppDependencies {
     fatalErrors: FatalErrorsStart;
     getUrlForApp: ApplicationStart['getUrlForApp'];
     executionContext: ExecutionContextStart;
+    application: ApplicationStart;
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
@@ -41,7 +42,6 @@ export interface AppDependencies {
     extensionsService: ExtensionsService;
     httpService: HttpService;
     notificationService: NotificationService;
-    application: ApplicationStart;
   };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];

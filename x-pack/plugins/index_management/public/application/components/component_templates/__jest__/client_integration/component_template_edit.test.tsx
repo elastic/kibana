@@ -76,7 +76,7 @@ describe('<ComponentTemplateEdit />', () => {
 
   it('should allow to go directly to a step', async () => {
     await act(async () => {
-      testBed = await setup(httpSetup, '?tab=mappings');
+      testBed = await setup(httpSetup, '?step=mappings');
     });
 
     testBed.component.update();

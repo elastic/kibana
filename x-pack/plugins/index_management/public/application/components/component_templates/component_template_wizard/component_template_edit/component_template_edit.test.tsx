@@ -7,28 +7,61 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-import { useTabFromQueryString } from './component_template_edit';
+import { useStepFromQueryString } from './component_template_edit';
 
 describe('useTabFromQueryString', () => {
-  it('should return undefined if not tab is set in the url', () => {
+  it('should return undefined if no step is set in the url', () => {
     const history = createMemoryHistory();
     history.push('/app/management/data/index_management/edit_component_template');
 
     const {
-      result: { current: tab },
-    } = renderHook(() => useTabFromQueryString(history));
+      result: {
+        current: { activeStep },
+      },
+    } = renderHook(() => useStepFromQueryString(history));
 
-    expect(tab).not.toBeDefined();
+    expect(activeStep).not.toBeDefined();
   });
 
-  it('should return the tab if set in the url', () => {
+  it('should return the step if set in the url', () => {
     const history = createMemoryHistory();
-    history.push('/app/management/data/index_management/edit_component_template?tab=mappings');
+    history.push('/app/management/data/index_management/edit_component_template?step=mappings');
 
     const {
-      result: { current: tab },
-    } = renderHook(() => useTabFromQueryString(history));
+      result: {
+        current: { activeStep },
+      },
+    } = renderHook(() => useStepFromQueryString(history));
 
-    expect(tab).toBe('mappings');
+    expect(activeStep).toBe('mappings');
+  });
+
+  it('should not update history on step change if no step is set in the url', () => {
+    const history = createMemoryHistory();
+    history.push('/app/management/data/index_management/edit_component_template');
+
+    const {
+      result: {
+        current: { updateStep },
+      },
+    } = renderHook(() => useStepFromQueryString(history));
+
+    updateStep('aliases');
+
+    expect(history.location.search).toBe('');
+  });
+
+  it('should update history on step change if a step is set in the url', () => {
+    const history = createMemoryHistory();
+    history.push('/app/management/data/index_management/edit_component_template?step=mappings');
+
+    const {
+      result: {
+        current: { updateStep },
+      },
+    } = renderHook(() => useStepFromQueryString(history));
+
+    updateStep('aliases');
+    expect(history.location.search).toBe('?step=aliases');
   });
 });
