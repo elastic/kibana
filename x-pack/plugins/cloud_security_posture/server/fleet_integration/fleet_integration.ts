@@ -27,7 +27,7 @@ type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends Read
   ? ElementType
   : never;
 
-const getActivatedBenchmark = (packagePolicy: PackagePolicy): string[] => {
+const getActivatedBenchmark = (packagePolicy: PackagePolicy): string => {
   const benchmarks = Object.entries(packagePolicy.inputs[0].streams[0].vars!);
 
   const activatedBenchmarks = benchmarks.map(([benchmarkName, benchmark]) => {
@@ -35,14 +35,7 @@ const getActivatedBenchmark = (packagePolicy: PackagePolicy): string[] => {
   });
 
   const boo = activatedBenchmarks.filter(isNonNullable);
-  return boo.length ? boo : ['k8s_cis'];
-};
-
-const buildQuery = (query: string, benchmarks: string[]): string => {
-  const q = benchmarks.map((benchmark) => `${query}: ${benchmark}`);
-  const foo = q.reduce((a, b) => `${a} or ${b}`);
-
-  return foo;
+  return boo.length ? boo[0] : 'k8s_cis';
 };
 
 /**
@@ -53,14 +46,12 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  const activatedBenchmarks = getActivatedBenchmark(packagePolicy);
-  const baseQuery = `${cloudSecurityPostureRuleTemplateSavedObjectType}.attributes.benchmark.id`;
-  const composeQuery = buildQuery(baseQuery, activatedBenchmarks);
+  const activatedBenchmark = getActivatedBenchmark(packagePolicy);
 
   const existingRuleTemplates: SavedObjectsFindResponse<CloudSecurityPostureRuleTemplateSchema> =
     await savedObjectsClient.find<CloudSecurityPostureRuleTemplateSchema>({
       type: cloudSecurityPostureRuleTemplateSavedObjectType,
-      filter: composeQuery,
+      filter: `${cloudSecurityPostureRuleTemplateSavedObjectType}.attributes.benchmark.id: ${activatedBenchmark}`,
       perPage: 10000,
     });
 
