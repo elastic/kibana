@@ -1,20 +1,20 @@
 [[disable-rule-api]]
-=== Disable rule API
+== Disable rule API
 ++++
 <titleabbrev>Disable rule</titleabbrev>
 ++++
 
-Disable a rule.
+Disables a rule.
 
 [[disable-rule-api-request]]
-==== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>/_disable`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>/_disable`
 
 [[disable-rule-api-path-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the rule that you want to disable.
@@ -23,17 +23,17 @@ Disable a rule.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[disable-rule-api-response-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
   Indicates a successful call.
 
-==== Example
+=== {api-examples-title}
 
 Disable a rule with ID:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35/_disable
+POST api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35/_disable
 --------------------------------------------------
 // KIBANA
