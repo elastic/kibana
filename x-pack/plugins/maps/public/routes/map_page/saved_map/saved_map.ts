@@ -328,6 +328,30 @@ export class SavedMap {
     return this._attributes;
   }
 
+  public getAutoFitToBounds(): boolean {
+    if (
+      this._mapEmbeddableInput &&
+      this._mapEmbeddableInput?.mapSettings?.autoFitToDataBounds !== undefined
+    ) {
+      return this._mapEmbeddableInput.mapSettings.autoFitToDataBounds;
+    }
+
+    if (!this._attributes || !this._attributes.mapStateJSON) {
+      return false;
+    }
+
+    try {
+      const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+      if (mapState?.settings.autoFitToDataBounds !== undefined) {
+        return mapState.settings.autoFitToDataBounds;
+      }
+    } catch (e) {
+      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+    }
+
+    return false;
+  }
+
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {
     return this._sharingSavedObjectProps;
   }
