@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { MouseEventHandler, MouseEvent, useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
@@ -56,12 +57,6 @@ import { TimelineKPIs } from './kpis';
 
 import { setActiveTabTimeline } from '../../../store/timeline/actions';
 import { useIsOverflow } from '../../../../common/hooks/use_is_overflow';
-
-// to hide side borders
-const StyledPanel = styled(EuiPanel)`
-  background-color: inherit;
-  margin: 0 -1px 0;
-`;
 
 interface FlyoutHeaderProps {
   timelineId: string;
@@ -145,13 +140,16 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     focusActiveTimelineButton();
   }, [dispatch, timelineId]);
 
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <StyledPanel
+    <EuiPanel
       borderRadius="none"
       grow={false}
       paddingSize="s"
       hasShadow={false}
       data-test-subj="timeline-flyout-header-panel"
+      style={{ backgroundColor: euiTheme.colors.emptyShade, color: euiTheme.colors.text }}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <AddTimelineButton timelineId={timelineId} />
@@ -194,7 +192,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </StyledPanel>
+    </EuiPanel>
   );
 };
 
