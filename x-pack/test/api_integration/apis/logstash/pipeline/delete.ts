@@ -9,13 +9,10 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
   describe('delete', () => {
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-
       await supertest
         .put('/api/logstash/pipeline/fast_generator')
         .set('kbn-xsrf', 'xxx')
@@ -26,10 +23,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(204);
 
       await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should delete the specified pipeline', async () => {
