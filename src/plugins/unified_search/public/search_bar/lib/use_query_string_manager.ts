@@ -8,19 +8,21 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Subscription } from 'rxjs';
-import type { Query } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { QueryStringContract } from '@kbn/data-plugin/public';
 
 interface UseQueryStringProps {
-  query?: Query;
+  query?: Query | AggregateQuery;
   queryStringManager: QueryStringContract;
 }
-function isOfQueryType(arg: any): arg is Query {
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
   return Boolean(arg && 'query' in arg);
 }
 export const useQueryStringManager = (props: UseQueryStringProps) => {
   // Filters should be either what's passed in the initial state or the current state of the filter manager
-  const [query, setQuery] = useState<Query>(props.query || props.queryStringManager.getQuery());
+  const [query, setQuery] = useState<Query | AggregateQuery>(
+    props.query || props.queryStringManager.getQuery()
+  );
   useEffect(() => {
     const subscriptions = new Subscription();
 
@@ -39,12 +41,14 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
   }, [props.queryStringManager]);
 
   const isQueryType = isOfQueryType(query);
-  const stableQuery = useMemo(
-    () => ({
-      language: query.language,
-      query: query.query,
-    }),
-    [query.language, query.query]
-  );
-  return { query: isQueryType ? stableQuery : query };
+  const stableQuery = useMemo(() => {
+    if (isQueryType) {
+      return {
+        language: query.language,
+        query: query.query,
+      };
+    }
+    return query;
+  }, [isQueryType, query]);
+  return { query: stableQuery };
 };
