@@ -128,7 +128,6 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
         });
         updateRulesCache(res?.attributes?.results?.updated ?? []);
-        setIsRefreshOn(true);
       };
 
       const handleDisableActions = async () => {
@@ -144,7 +143,6 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
         });
         updateRulesCache(res?.attributes?.results?.updated ?? []);
-        setIsRefreshOn(true);
       };
 
       const handleDuplicateAction = async () => {
@@ -275,7 +273,6 @@ export const useBulkActions = ({
 
         isBulkEditFinished = true;
         updateRulesCache(res?.attributes?.results?.updated ?? []);
-        setIsRefreshOn(true);
         if (getIsMounted()) {
           await resolveTagsRefetch(bulkEditActionType);
         }
