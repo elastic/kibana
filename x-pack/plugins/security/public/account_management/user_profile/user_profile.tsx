@@ -511,7 +511,6 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           ) : null}
 
           <EuiPageTemplate
-            style={{ backgroundColor: euiTheme.colors.emptyShade }}
             className="eui-fullHeight"
             pageHeader={{
               pageTitle: (
