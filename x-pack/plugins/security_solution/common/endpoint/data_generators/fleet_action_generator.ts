@@ -63,13 +63,13 @@ export class FleetActionGenerator extends BaseDataGenerator {
   generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
-    const startedAtTimes = [2, 3, 5, 8, 13, 21].reduce<number[]>((acc, curr) => {
-      acc.push(
-        timeStamp.setMinutes(-this.randomN(curr)),
-        timeStamp.setSeconds(-this.randomN(curr))
+    const startedAtTimes: number[] = [];
+    [2, 3, 5, 8, 13, 21].forEach((n) => {
+      startedAtTimes.push(
+        timeStamp.setMinutes(-this.randomN(n)),
+        timeStamp.setSeconds(-this.randomN(n))
       );
-      return acc;
-    }, []);
+    });
 
     return merge(
       {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useMemo } from 'react';
 import dateMath from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -67,6 +67,22 @@ export const ActionListDateRangePicker = memo(
           label: display,
         }));
 
+    const end = useMemo(
+      () =>
+        dateRangePickerState.endDate
+          ? dateMath.parse(dateRangePickerState.endDate)?.toISOString()
+          : undefined,
+      [dateRangePickerState]
+    );
+
+    const start = useMemo(
+      () =>
+        dateRangePickerState.startDate
+          ? dateMath.parse(dateRangePickerState.startDate)?.toISOString()
+          : undefined,
+      [dateRangePickerState]
+    );
+
     return (
       <StickyFlexItem>
         <EuiFlexGroup justifyContent="flexStart" responsive>
@@ -77,22 +93,14 @@ export const ActionListDateRangePicker = memo(
                 isLoading={isDataLoading}
                 dateFormat={dateFormat}
                 commonlyUsedRanges={commonlyUsedRanges}
-                end={
-                  dateRangePickerState.endDate
-                    ? dateMath.parse(dateRangePickerState.endDate)?.toISOString()
-                    : undefined
-                }
+                end={end}
                 isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
                 onTimeChange={onTimeChange}
                 onRefreshChange={onRefreshChange}
                 refreshInterval={dateRangePickerState.autoRefreshOptions.duration}
                 onRefresh={onRefresh}
                 recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
-                start={
-                  dateRangePickerState.startDate
-                    ? dateMath.parse(dateRangePickerState.startDate)?.toISOString()
-                    : undefined
-                }
+                start={start}
               />
             </EuiFlexItem>
           </DatePickerWrapper>

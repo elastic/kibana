@@ -545,7 +545,7 @@ export const ResponseActionsList = memo<
     return { fromCount, toCount };
   }, [queryParams.page, queryParams.pageSize, totalItemCount]);
 
-  // crete range label to display
+  // create range label to display
   const recordRangeLabel = useMemo(
     () => (
       <EuiText color="subdued" size="xs" data-test-subj={getTestId('endpointListTableTotal')}>
