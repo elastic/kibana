@@ -8,6 +8,7 @@
 
 import React, { useCallback } from 'react';
 
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { Chart, Metric, MetricSpec, RenderChangeListener, Settings } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
@@ -16,6 +17,7 @@ import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { VisParams } from '../../common';
 import { getPaletteService, getThemeService } from '../services';
+import { currencyCodeMap } from './currency_code_map';
 
 // TODO - find a reasonable default (from EUI perhaps?)
 const defaultColor = '#5e5e5e';
@@ -35,6 +37,9 @@ const getFormatter = (
       })
     );
   }
+
+  const locale = String(numeral.language());
+
   const intlOptions: Intl.NumberFormatOptions = {};
 
   if (formatId !== 'duration') {
@@ -46,7 +51,12 @@ const getFormatter = (
   }
 
   if (formatId === 'currency') {
-    intlOptions.currency = 'USD'; // TODO - get this from somewhere
+    const {
+      currency: { symbol: currencySymbol },
+      // @ts-expect-error
+    } = numeral.languageData();
+
+    intlOptions.currency = currencyCodeMap[`${locale}-${currencySymbol}`.toLowerCase()];
     intlOptions.style = 'currency';
   }
 
@@ -54,7 +64,7 @@ const getFormatter = (
     intlOptions.style = 'percent';
   }
 
-  return new Intl.NumberFormat('en', intlOptions).format; // TODO - look up locale
+  return new Intl.NumberFormat(locale, intlOptions).format;
 };
 
 const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
