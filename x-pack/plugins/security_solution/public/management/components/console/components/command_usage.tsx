@@ -87,17 +87,6 @@ export interface CommandUsageProps {
 export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const hasArgs = useMemo(() => Object.keys(commandDef.args ?? []).length > 0, [commandDef.args]);
-  const commandOptions = useMemo(() => {
-    // `command.args` only here to silence TS check
-    if (!hasArgs || !commandDef.args) {
-      return [];
-    }
-
-    return Object.entries(commandDef.args).map(([option, { about: description }]) => ({
-      title: `--${option}`,
-      description,
-    }));
-  }, [commandDef.args, hasArgs]);
 
   const commandOptionsOptional = useMemo(() => {
     // `command.args` only here to silence TS check
@@ -120,10 +109,10 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
       return [];
     }
 
-    const optionalEntries = Object.entries(commandDef.args).filter(
+    const requiredEntries = Object.entries(commandDef.args).filter(
       (arg) => arg[1].required && !arg[1].exclusiveOr
     );
-    return optionalEntries.map(([option, { about: description }]) => ({
+    return requiredEntries.map(([option, { about: description }]) => ({
       title: `--${option}`,
       description,
     }));
@@ -135,8 +124,8 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
       return [];
     }
 
-    const optionalEntries = Object.entries(commandDef.args).filter((arg) => arg[1].exclusiveOr);
-    return optionalEntries.map(([option, { about: description }]) => ({
+    const exclusiveEntries = Object.entries(commandDef.args).filter((arg) => arg[1].exclusiveOr);
+    return exclusiveEntries.map(([option, { about: description }]) => ({
       title: `--${option}`,
       description,
     }));
@@ -158,7 +147,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
           <EuiSpacer />
           <EuiText>
             <FormattedMessage
-              id="xpack.securitySolution.console.commandUsage.optionsLabel"
+              id="xpack.securitySolution.console.commandUsage.requiredLabel"
               defaultMessage="Required:"
             />
             {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
@@ -188,7 +177,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
           <EuiSpacer />
           <EuiText>
             <FormattedMessage
-              id="xpack.securitySolution.console.commandUsage.optionsLabel"
+              id="xpack.securitySolution.console.commandUsage.exclusiveLabel"
               defaultMessage="Must include one and only one:"
             />
             {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
@@ -218,7 +207,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
           <EuiSpacer />
           <EuiText>
             <FormattedMessage
-              id="xpack.securitySolution.console.commandUsage.optionsLabel"
+              id="xpack.securitySolution.console.commandUsage.optionalLabel"
               defaultMessage="Optional:"
             />
             {commandDef.mustHaveArgs && commandDef.args && hasArgs && (

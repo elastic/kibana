@@ -16,7 +16,7 @@ import { CommandExecutionComponentProps } from '../console/types';
 
 export const KillProcessActionResult = memo<
   CommandExecutionComponentProps<
-    { comment?: string },
+    { comment?: string; pid?: number; entityId?: string },
     {
       actionId?: string;
       actionRequestSent?: boolean;
@@ -37,16 +37,18 @@ export const KillProcessActionResult = memo<
     refetchInterval: isPending ? 3000 : false,
   });
 
-  // Send Release request if not yet done
+  // Send Kill request if not yet done
   useEffect(() => {
-    if (!actionRequestSent && endpointId) {
+    const parameters = command.args.args?.pid?.[0]
+      ? { pid: command.args.args?.pid?.[0] }
+      : command.args.args?.entityId?.[0]
+      ? { entity_id: command.args.args?.entityId?.[0] }
+      : undefined;
+    if (!actionRequestSent && endpointId && parameters) {
       killProcessApi.mutate({
         endpoint_ids: [endpointId],
         comment: command.args.args?.comment?.[0],
-        parameters: {
-          pid: command.args.args?.pid?.[0],
-          entity_id: command.args.args?.entityId?.[0],
-        },
+        parameters,
       });
 
       setStore((prevState) => {

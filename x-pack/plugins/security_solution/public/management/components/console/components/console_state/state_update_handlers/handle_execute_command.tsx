@@ -224,13 +224,13 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
     // Validate exclusiveOr arguments, can only have one.
     const exclusiveArgsUsed = exclusiveOrArgs.filter((arg) => parsedInput.args[arg]);
-    if (exclusiveArgsUsed.length !== 1) {
+    if (exclusiveArgsUsed.length > 1) {
       return updateStateWithNewCommandHistoryItem(state, {
         id: uuidV4(),
         command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
         state: createCommandExecutionState({
           errorMessage: i18n.translate(
-            'xpack.securitySolution.console.commandValidation.missingRequiredArg',
+            'xpack.securitySolution.console.commandValidation.exclusiveArgs',
             {
               defaultMessage:
                 'This command supports one and only one of the following arguments: {argNames}',
