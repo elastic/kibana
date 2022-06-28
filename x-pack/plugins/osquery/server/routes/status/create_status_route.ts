@@ -58,10 +58,10 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               const packagePolicyName = policy.name;
               const currentOsqueryManagerNamePacksCount = filter(
                 Object.keys(acc.packs),
-                (packName) => packName.startsWith('osquery_manager')
+                (packName) => packName.startsWith(OSQUERY_INTEGRATION_NAME)
               ).length;
 
-              const packName = packagePolicyName.startsWith('osquery_manager')
+              const packName = packagePolicyName.startsWith(OSQUERY_INTEGRATION_NAME)
                 ? `osquery_manager-1_${currentOsqueryManagerNamePacksCount + 1}`
                 : packagePolicyName;
 
@@ -69,7 +69,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 if (!acc.packs[packName]) {
                   acc.packs[packName] = {
                     policy_ids: [policy.policy_id],
-                    enabled: !packName.startsWith('osquery_manager'),
+                    enabled: !packName.startsWith(OSQUERY_INTEGRATION_NAME),
                     name: packName,
                     description: policy.description,
                     queries: reduce(
@@ -173,7 +173,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
                     set(draft, 'inputs[0]', {
                       enabled: true,
-                      policy_template: 'osquery_manager',
+                      policy_template: OSQUERY_INTEGRATION_NAME,
                       streams: [],
                       type: 'osquery',
                     });

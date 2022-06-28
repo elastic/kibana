@@ -64,7 +64,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
           }),
         }),
       refetchOnWindowFocus: false,
-      retryDelay: 1000,
+      retryDelay: 5000,
     }
   );
 };

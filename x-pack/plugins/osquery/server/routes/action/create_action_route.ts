@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { pickBy, isEmpty } from 'lodash';
+import { some, flatten, map, pick, pickBy, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
 import { IRouter } from '@kbn/core/server';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';
@@ -21,7 +22,10 @@ import {
 
 import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
-import { savedQuerySavedObjectType } from '../../../common/types';
+import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
+import { ACTIONS_INDEX } from '../../../common/constants';
+import { convertSOQueriesToPack } from '../pack/utils';
+import { PackSavedObjectAttributes } from '../../common/types';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -82,33 +86,93 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
       try {
         const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
-        const action = {
+
+        let packSO;
+
+        if (request.body.pack_id) {
+          packSO = await soClient.get<PackSavedObjectAttributes>(
+            packSavedObjectType,
+            request.body.pack_id
+          );
+        }
+
+        const osqueryAction = {
           action_id: uuid.v4(),
+          '@timestamp': moment().toISOString(),
+          expiration: moment().add(5, 'minutes').toISOString(),
+          type: 'INPUT_ACTION',
+          input_type: 'osquery',
+          agent_selection: agentSelection,
+          agents: selectedAgents,
+          execution_context: request.body.execution_context,
+          user_id: currentUser,
+          saved_query_id: savedQueryId,
+          pack_id: request.body.pack_id,
+          pack_name: packSO?.attributes?.name,
+          pack_prebuilt: !!(packSO
+            ? some(packSO?.references, ['type', 'osquery-pack-asset'])
+            : undefined),
+          queries: packSO
+            ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) =>
+                pickBy(
+                  {
+                    action_id: uuid.v4(),
+                    id: packQueryId,
+                    query: packQuery.query,
+                    ecs_mapping: packQuery.ecs_mapping,
+                    version: packQuery.version,
+                    platform: packQuery.platform,
+                  },
+                  (value) => !isEmpty(value)
+                )
+              )
+            : [
+                pickBy(
+                  {
+                    action_id: uuid.v4(),
+                    id: uuid.v4(),
+                    query: request.body.query,
+                    saved_query_id: savedQueryId,
+                    ecs_mapping: request.body.ecs_mapping,
+                  },
+                  (value) => !isEmpty(value)
+                ),
+              ],
+        };
+
+        const fleetActions = map(osqueryAction.queries, (query) => ({
+          action_id: query.action_id,
           '@timestamp': moment().toISOString(),
           expiration: moment().add(5, 'minutes').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
           agents: selectedAgents,
           user_id: currentUser,
-          data: pickBy(
-            {
-              id: uuid.v4(),
-              query: request.body.query,
-              saved_query_id: savedQueryId,
-              ecs_mapping: request.body.ecs_mapping,
-            },
-            (value) => !isEmpty(value)
+          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+        }));
+
+        let actionResponse = await esClient.bulk({
+          refresh: 'wait_for',
+          body: flatten(
+            fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
           ),
-        };
-        const actionResponse = await esClient.index({
-          index: '.fleet-actions',
-          body: action,
         });
+
+        const actionsComponentTemplateExists = await esClient.indices.exists({
+          index: `${ACTIONS_INDEX}*`,
+        });
+
+        if (actionsComponentTemplateExists) {
+          actionResponse = await esClient.bulk({
+            refresh: 'wait_for',
+            body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
+          });
+        }
 
         return response.ok({
           body: {
             response: actionResponse,
-            actions: [action],
+            actions: [osqueryAction],
           },
         });
       } catch (error) {

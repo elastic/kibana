@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
-import { ActionAgentsStatus } from '../../../action_results/action_agents_status';
 
 interface ResultTabsProps {
   actionId: string;
@@ -64,16 +63,12 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   );
 
   return (
-    <>
-      <ActionAgentsStatus actionId={actionId} agentIds={agentIds} expirationDate={endDate} />
-      <EuiSpacer size="s" />
-      <EuiTabbedContent
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-        expand={false}
-      />
-    </>
+    <EuiTabbedContent
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+      expand={false}
+    />
   );
 };
 

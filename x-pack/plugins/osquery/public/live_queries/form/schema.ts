@@ -43,6 +43,9 @@ export const liveQueryFormSchema = {
       { validator: queryFieldValidation },
     ],
   },
+  packId: {
+    type: FIELD_TYPES.SUPER_SELECT,
+  },
   ecs_mapping: {
     defaultValue: [],
     type: FIELD_TYPES.JSON,

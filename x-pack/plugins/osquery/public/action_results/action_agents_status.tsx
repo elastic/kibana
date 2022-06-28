@@ -9,10 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { Direction } from '../../common/search_strategy';
 import { AgentStatusBar } from './action_agents_status_bar';
 import { ActionAgentsStatusBadges } from './action_agents_status_badges';
-import { useActionResults } from './use_action_results';
+import { useActionAgentStatus } from './use_action_agents_status';
 
 interface ActionAgentsStatusProps {
   actionId: string;
@@ -30,37 +29,16 @@ const ActionAgentsStatusComponent: React.FC<ActionAgentsStatusProps> = ({
     () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
     [expirationDate]
   );
-  const {
-    // @ts-expect-error update types
-    data: { aggregations },
-  } = useActionResults({
-    actionId,
-    activePage: 0,
-    agentIds,
-    limit: 0,
-    direction: Direction.asc,
-    sortField: '@timestamp',
-    isLive,
-  });
-
-  const agentStatus = useMemo(() => {
-    const notRespondedCount = !agentIds?.length ? 0 : agentIds.length - aggregations.totalResponded;
-
-    return {
-      success: aggregations.successful,
-      pending: notRespondedCount,
-      failed: aggregations.failed,
-    };
-  }, [agentIds?.length, aggregations.failed, aggregations.successful, aggregations.totalResponded]);
+  const agentStatus = useActionAgentStatus({ actionId, agentIds, skip: !isLive });
 
   useEffect(
     () =>
       setIsLive(() => {
         if (!agentIds?.length || expired) return false;
 
-        return !!(aggregations.totalResponded !== agentIds?.length);
+        return !!(agentStatus.total !== agentIds?.length);
       }),
-    [agentIds?.length, aggregations.totalResponded, expired]
+    [agentIds?.length, agentStatus.total, expired]
   );
 
   return (

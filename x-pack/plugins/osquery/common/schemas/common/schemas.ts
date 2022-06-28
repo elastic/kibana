@@ -53,6 +53,22 @@ export type SavedQueryId = t.TypeOf<typeof savedQueryId>;
 export const savedQueryIdOrUndefined = t.union([savedQueryId, t.undefined]);
 export type SavedQueryIdOrUndefined = t.TypeOf<typeof savedQueryIdOrUndefined>;
 
+export const packId = t.string;
+export type PackId = t.TypeOf<typeof packId>;
+export const packIdOrUndefined = t.union([packId, t.undefined]);
+export type PackIdOrUndefined = t.TypeOf<typeof packIdOrUndefined>;
+
+export const executionContext = t.type({
+  name: t.union([t.string, t.undefined]),
+  url: t.union([t.string, t.undefined]),
+  event_id: t.union([t.string, t.undefined]),
+  alert_id: t.union([t.string, t.undefined]),
+});
+
+export type ExecutionContext = t.TypeOf<typeof executionContext>;
+export const executionContextOrUndefined = t.union([executionContext, t.undefined]);
+export type ExecutionContextOrUndefined = t.TypeOf<typeof executionContextOrUndefined>;
+
 export const ecsMapping = t.record(
   t.string,
   t.partial({

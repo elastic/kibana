@@ -6,6 +6,8 @@
  */
 
 import { ISearchRequestParams } from '@kbn/data-plugin/common';
+import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { ACTION_RESPONSES_INDEX } from '../../../../../../common/constants';
 import { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
@@ -14,6 +16,7 @@ export const buildActionResultsQuery = ({
   filterQuery,
   // pagination: { activePage, querySize },
   sort,
+  componentTemplateExists,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -26,7 +29,9 @@ export const buildActionResultsQuery = ({
 
   const dslQuery = {
     allow_no_indices: true,
-    index: '.fleet-actions-results*',
+    index: componentTemplateExists
+      ? `${ACTION_RESPONSES_INDEX}-default*`
+      : `${AGENT_ACTIONS_RESULTS_INDEX}*`,
     ignore_unavailable: true,
     body: {
       aggs: {

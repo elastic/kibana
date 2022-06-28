@@ -12,17 +12,21 @@ import { DataView, SortDirection } from '@kbn/data-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 
 interface UsePackQueryLastResultsProps {
-  actionId: string;
+  actionId?: string;
   agentIds?: string[];
-  interval: number;
+  interval?: number;
   logsDataView?: DataView;
   skip?: boolean;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const usePackQueryLastResults = ({
   actionId,
   interval,
   logsDataView,
+  startDate,
+  endDate,
   skip = false,
 }: UsePackQueryLastResultsProps) => {
   const data = useKibana().services.data;
@@ -62,8 +66,10 @@ export const usePackQueryLastResults = ({
                 {
                   range: {
                     '@timestamp': {
-                      gte: moment(timestamp).subtract(interval, 'seconds').format(),
-                      lte: moment(timestamp).format(),
+                      gte: startDate
+                        ? moment(startDate).format()
+                        : moment(timestamp).subtract(interval, 'seconds').format(),
+                      lte: moment(endDate || timestamp).format(),
                     },
                   },
                 },
@@ -95,7 +101,7 @@ export const usePackQueryLastResults = ({
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && logsDataView),
+      enabled: !!(!skip && actionId && logsDataView),
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
     }

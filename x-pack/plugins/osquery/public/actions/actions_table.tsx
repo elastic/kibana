@@ -7,7 +7,15 @@
 
 import { isArray, isEmpty, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiCodeBlock,
+  formatDate,
+  EuiIcon,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
@@ -47,14 +55,24 @@ const ActionsTableComponent = () => {
     setPageSize(size);
   }, []);
 
-  const renderQueryColumn = useCallback(
-    (_, item) => (
+  const renderQueryColumn = useCallback((_, item) => {
+    if (item._source.pack_name) {
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="package" />
+          </EuiFlexItem>
+          <EuiFlexItem>{item._source.pack_name}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    return (
       <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {item._source.data.query}
+        {item._source.queries[0].query}
       </EuiCodeBlock>
-    ),
-    []
-  );
+    );
+  }, []);
 
   const renderAgentsColumn = useCallback((_, item) => <>{item.fields.agents?.length ?? 0}</>, []);
 
@@ -71,18 +89,33 @@ const ActionsTableComponent = () => {
   );
 
   const handlePlayClick = useCallback(
-    (item) =>
+    (item) => {
+      const packId = item._source.pack_id;
+
+      if (packId) {
+        return push('/live_queries/new', {
+          form: pickBy(
+            {
+              packId: item._source.pack_id,
+              agentSelection: item._source.agent_selection,
+            },
+            (value) => !isEmpty(value)
+          ),
+        });
+      }
+
       push('/live_queries/new', {
         form: pickBy(
           {
-            agentIds: item.fields.agents,
-            query: item._source.data.query,
-            ecs_mapping: item._source.data.ecs_mapping,
-            savedQueryId: item._source.data.saved_query_id,
+            query: item._source.queries[0].query,
+            ecs_mapping: item._source.queries[0].ecs_mapping,
+            savedQueryId: item._source.queries[0].saved_query_id,
+            agentSelection: item._source.agent_selection,
           },
           (value) => !isEmpty(value)
         ),
-      }),
+      });
+    },
     [push]
   );
   const isPlayButtonAvailable = useCallback(

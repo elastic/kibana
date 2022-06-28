@@ -40,6 +40,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
+  componentTemplateExists?: boolean;
 }
 
 /** A mapping of semantic fields to their document counterparts */

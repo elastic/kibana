@@ -16,6 +16,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 
 import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
@@ -30,10 +31,12 @@ import {
   packAssetSavedObjectType,
   savedQuerySavedObjectType,
 } from '../common/types';
-import { PLUGIN_ID } from '../common';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_ID } from '../common';
 import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
+import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
+import { initializeTransforms } from './create_transforms/create_transforms';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
@@ -236,8 +239,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     defineRoutes(router, osqueryContext);
 
-    core.getStartServices().then(([, depsStart]) => {
-      const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
+    core.getStartServices().then(([{ elasticsearch }, depsStart]) => {
+      const osquerySearchStrategy = osquerySearchStrategyProvider(
+        depsStart.data,
+        elasticsearch.client
+      );
 
       plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
     });
@@ -273,11 +279,34 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       this.telemetryReceiver
     );
 
-    if (registerIngestCallback) {
-      const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    plugins.fleet?.fleetSetupCompleted().then(async () => {
+      const packageInfo = await plugins.fleet?.packageService.asInternalUser.getInstallation(
+        OSQUERY_INTEGRATION_NAME
+      );
 
-      registerIngestCallback('postPackagePolicyDelete', getPackagePolicyDeleteCallback(client));
-    }
+      // If package is installed we want to make sure all needed assets are installed
+      if (packageInfo) {
+        // noinspection ES6MissingAwait
+        this.initialize(core);
+      }
+
+      if (registerIngestCallback) {
+        const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+
+        registerIngestCallback(
+          'packagePolicyPostCreate',
+          async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
+            if (packagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
+              await this.initialize(core);
+            }
+
+            return packagePolicy;
+          }
+        );
+
+        registerIngestCallback('postPackagePolicyDelete', getPackagePolicyDeleteCallback(client));
+      }
+    });
 
     return {};
   }
@@ -286,5 +315,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Stopped');
     this.telemetryEventsSender.stop();
     this.osqueryAppContextService.stop();
+  }
+
+  async initialize(core: CoreStart): Promise<void> {
+    this.logger.debug('initialize');
+    await initializeTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    await initializeTransforms(core.elasticsearch.client.asInternalUser, this.logger);
   }
 }

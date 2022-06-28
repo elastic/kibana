@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { SavedObjectsFindResponsePublic } from '@kbn/core/public';
 import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
 import { PACKS_ID } from './constants';
+import { PackSavedObject } from './types';
 
 export const usePacks = ({
   isLive = false,
   pageIndex = 0,
-  pageSize = 10000,
+  pageSize = 1000,
   sortField = 'updated_at',
   sortDirection = 'desc',
 }) => {
@@ -22,8 +24,11 @@ export const usePacks = ({
   return useQuery(
     [PACKS_ID, { pageIndex, pageSize, sortField, sortDirection }],
     async () =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      http.get<any>('/internal/osquery/packs', {
+      http.get<
+        Omit<SavedObjectsFindResponsePublic, 'savedObjects'> & {
+          saved_objects: PackSavedObject[];
+        }
+      >('/internal/osquery/packs', {
         query: { pageIndex, pageSize, sortField, sortDirection },
       }),
     {
