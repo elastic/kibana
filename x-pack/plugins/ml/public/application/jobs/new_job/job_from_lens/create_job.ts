@@ -207,7 +207,7 @@ async function createADJobFromLensSavedObject(
 
   const combinedFiltersAndQueries = combineQueriesAndFilters(
     { query, filters },
-    { query: vis.state.query, filters: vis.state.filters },
+    { query: vis.state.query as Query, filters: vis.state.filters },
     dataView,
     kibanaConfig
   );

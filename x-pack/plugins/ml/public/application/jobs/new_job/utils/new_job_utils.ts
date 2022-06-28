@@ -72,7 +72,7 @@ export function createQueries(
   dataView: DataViewBase | undefined,
   kibanaConfig: IUiSettingsClient
 ) {
-  let query = getDefaultQuery();
+  let query: Query = getDefaultQuery();
   let combinedQuery: estypes.QueryDslQueryContainer = getDefaultDatafeedQuery();
 
   query = data.query;
