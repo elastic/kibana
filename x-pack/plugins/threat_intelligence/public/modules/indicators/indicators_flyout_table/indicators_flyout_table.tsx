@@ -9,33 +9,34 @@ import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
 import React, { VFC } from 'react';
 import { Indicator } from '../indicators_flyout/indicators_flyout';
 
-export const FlyoutTable: VFC<{ indicator: Indicator }> = ({ indicator }) => {
-  const columns = [
-    {
-      field: 'field',
-      name: 'Field',
-      sortable: true,
-      'data-test-subj': 'firstNameCell',
-    },
-    {
-      field: 'value',
-      name: 'Value',
-      truncateText: true,
-    },
-  ];
+export const EMPTY_PROMPT_TEST_ID = 'tiFlyoutTableEmptyPrompt';
+export const TABLE_TEST_ID = 'tiFlyoutTableMemoryTable';
 
+const columns = [
+  {
+    field: 'field',
+    name: 'Field',
+    sortable: true,
+  },
+  {
+    field: 'value',
+    name: 'Value',
+    truncateText: true,
+  },
+];
+const search = {
+  box: {
+    incremental: true,
+    schema: true,
+  },
+};
+
+export const IndicatorsFlyoutTable: VFC<{ indicator: Indicator }> = ({ indicator }) => {
   const items: Array<{ field: string; value: string }> = [];
   for (const key in indicator) {
     if (!indicator.hasOwnProperty(key)) continue;
     items.push({ field: key, value: indicator[key] });
   }
-
-  const search = {
-    box: {
-      incremental: true,
-      schema: true,
-    },
-  };
 
   return items.length === 0 ? (
     <EuiEmptyPrompt
@@ -43,7 +44,7 @@ export const FlyoutTable: VFC<{ indicator: Indicator }> = ({ indicator }) => {
       color="danger"
       title={<h2>Unable to display indicator information</h2>}
       body={<p>There was an error displaying the indicator fields and values.</p>}
-      data-test-subj={'tiFlyoutTableEmptyPrompt'}
+      data-test-subj={EMPTY_PROMPT_TEST_ID}
     />
   ) : (
     <EuiInMemoryTable
@@ -52,7 +53,7 @@ export const FlyoutTable: VFC<{ indicator: Indicator }> = ({ indicator }) => {
       columns={columns}
       search={search}
       sorting={true}
-      data-test-subj={'tiFlyoutTableMemoryTable'}
+      data-test-subj={TABLE_TEST_ID}
     />
   );
 };

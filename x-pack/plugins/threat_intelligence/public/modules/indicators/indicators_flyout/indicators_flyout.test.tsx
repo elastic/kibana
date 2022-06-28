@@ -18,7 +18,7 @@ import {
   EuiTabs,
   EuiTab,
 } from '@elastic/eui';
-import { Indicator, IndicatorsFlyout } from './indicators_flyout';
+import { Indicator, IndicatorsFlyout, SUBTITLE_TEST_ID, TITLE_TEST_ID } from './indicators_flyout';
 
 const mockIndicator: Indicator = {
   id: '12.68.554.87',
@@ -27,8 +27,8 @@ const mockIndicator: Indicator = {
   first_seen: '2022-06-03T11:41:06.000Z',
 };
 
-describe('DetailedIOCFlyout', () => {
-  it('Verify EUI components are present', () => {
+describe('IndicatorsFlyout', () => {
+  it('should render EUI components', () => {
     const wrapper = mountWithIntl(
       <IndicatorsFlyout indicator={mockIndicator} closeFlyout={() => {}} />
     );
@@ -43,25 +43,35 @@ describe('DetailedIOCFlyout', () => {
     expect(wrapper.find(EuiFlyoutBody)).toHaveLength(1);
   });
 
-  it('Verify the title and subtitle', () => {
+  it('should render ioc id in title and first_seen in subtitle', () => {
     const { getByTestId } = render(
       <IndicatorsFlyout indicator={mockIndicator} closeFlyout={() => {}} />
     );
 
-    expect(getByTestId('tiIndicatorFlyoutTitle').innerHTML).toContain(
-      `Indicator: ${mockIndicator.id}`
-    );
-    expect(getByTestId('tiIndicatorFlyoutSubtitle').innerHTML).toContain(
-      `First seen: ${mockIndicator.first_seen}`
+    expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(`Indicator: ${mockIndicator.id}`);
+    expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(
+      `First seen: ${new Date(mockIndicator.first_seen).toDateString()}`
     );
   });
 
-  it('Verify N/A is shown when indicator isn t properly formatted', () => {
+  it('should render N/A in on invalid indicator first_seen value', () => {
     const { getByTestId } = render(
       <IndicatorsFlyout indicator={{} as unknown as Indicator} closeFlyout={() => {}} />
     );
 
-    expect(getByTestId('tiIndicatorFlyoutTitle').innerHTML).toContain('Indicator: N/A');
-    expect(getByTestId('tiIndicatorFlyoutSubtitle').innerHTML).toContain('First seen: N/A');
+    expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain('Indicator: N/A');
+    expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain('First seen: N/A');
+  });
+
+  it('should render N/A in title and subtitle on invalid indicator', () => {
+    const { getByTestId } = render(
+      <IndicatorsFlyout
+        indicator={{ ...mockIndicator, first_seen: 'abc' } as unknown as Indicator}
+        closeFlyout={() => {}}
+      />
+    );
+
+    expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(`Indicator: ${mockIndicator.id}`);
+    expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain('First seen: N/A');
   });
 });

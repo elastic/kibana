@@ -10,7 +10,11 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { render } from '@testing-library/react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { Indicator } from '../indicators_flyout/indicators_flyout';
-import { FlyoutTable } from './flyout_table';
+import {
+  EMPTY_PROMPT_TEST_ID,
+  IndicatorsFlyoutTable,
+  TABLE_TEST_ID,
+} from './indicators_flyout_table';
 
 const mockIndicator: Indicator = {
   id: '12.68.554.87',
@@ -19,29 +23,29 @@ const mockIndicator: Indicator = {
   first_seen: '2022-06-03T11:41:06.000Z',
 };
 
-describe('FlyoutTable', () => {
-  it('Verify EUI components are present', () => {
-    const wrapper = mountWithIntl(<FlyoutTable indicator={mockIndicator} />);
+describe('IndicatorsFlyoutTable', () => {
+  it('should render EUI components', () => {
+    const wrapper = mountWithIntl(<IndicatorsFlyoutTable indicator={mockIndicator} />);
 
     expect(wrapper.find(EuiInMemoryTable)).toHaveLength(1);
   });
 
-  it('Verify the table shows some indicator fields and values', () => {
-    const { getByTestId, getByText } = render(<FlyoutTable indicator={mockIndicator} />);
+  it('should render fields and values in table', () => {
+    const { getByTestId, getByText } = render(<IndicatorsFlyoutTable indicator={mockIndicator} />);
 
-    expect(getByTestId('tiFlyoutTableMemoryTable')).toBeInTheDocument();
+    expect(getByTestId(TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByText('id')).toBeInTheDocument();
     expect(getByText('name')).toBeInTheDocument();
     expect(getByText(mockIndicator.id)).toBeInTheDocument();
     expect(getByText(mockIndicator.name)).toBeInTheDocument();
   });
 
-  it('Verify the error messages show up on invalid indicator', () => {
+  it('should render error message on invalid indicator', () => {
     const { getByTestId, getByText } = render(
-      <FlyoutTable indicator={{} as unknown as Indicator} />
+      <IndicatorsFlyoutTable indicator={{} as unknown as Indicator} />
     );
 
-    expect(getByTestId('tiFlyoutTableEmptyPrompt')).toBeInTheDocument();
+    expect(getByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();
     expect(getByText('Unable to display indicator information')).toBeInTheDocument();
     expect(
       getByText('There was an error displaying the indicator fields and values.')

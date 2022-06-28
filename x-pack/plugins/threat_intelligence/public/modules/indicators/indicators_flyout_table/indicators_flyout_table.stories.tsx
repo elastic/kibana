@@ -8,11 +8,11 @@
 import React from 'react';
 import { Story } from '@storybook/react';
 import { Indicator } from '../indicators_flyout/indicators_flyout';
-import { FlyoutTable } from './flyout_table';
+import { IndicatorsFlyoutTable } from './indicators_flyout_table';
 
 export default {
-  component: FlyoutTable,
-  title: 'FlyoutTable',
+  component: IndicatorsFlyoutTable,
+  title: 'IndicatorsFlyoutTable',
 };
 
 const mockIndicator: Indicator = {
@@ -23,9 +23,9 @@ const mockIndicator: Indicator = {
 };
 
 export const Default: Story<void> = () => {
-  return <FlyoutTable indicator={mockIndicator} />;
+  return <IndicatorsFlyoutTable indicator={mockIndicator} />;
 };
 
 export const EmptyIndicator: Story<void> = () => {
-  return <FlyoutTable indicator={{} as unknown as Indicator} />;
+  return <IndicatorsFlyoutTable indicator={{} as unknown as Indicator} />;
 };

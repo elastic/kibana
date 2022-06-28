@@ -11,7 +11,7 @@ import { Indicator, IndicatorsFlyout } from './indicators_flyout';
 
 export default {
   component: IndicatorsFlyout,
-  title: 'DetailedIOCFlyout',
+  title: 'IndicatorsFlyout',
 };
 
 const mockIndicator: Indicator = {
