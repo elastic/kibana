@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from '../../types';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 // Switch to the standard Baggage header
 // https://github.com/elastic/apm-agent-rum-js/issues/1040
