@@ -19,7 +19,6 @@ import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 
 import './_markdown.scss';
-import { RenderCounter } from '../../render_counter';
 
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, getConfig, fieldFormatMap, initialRender } = props;
@@ -63,6 +62,7 @@ function MarkdownVisualization(props) {
               <div>
                 {!markdownError && (
                   <Markdown
+                    onRender={initialRender}
                     markdown={markdownSource}
                     openLinksInNewTab={model.markdown_openLinksInNewTab}
                   />
@@ -76,7 +76,7 @@ function MarkdownVisualization(props) {
   }
   return (
     <div className="tvbVis" style={style}>
-      <RenderCounter initialRender={initialRender}>{markdown}</RenderCounter>
+      {markdown}
     </div>
   );
 }

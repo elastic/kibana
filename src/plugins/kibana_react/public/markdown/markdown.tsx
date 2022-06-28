@@ -78,9 +78,13 @@ export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   markdown?: string;
   openLinksInNewTab?: boolean;
   whiteListedRules?: string[];
+  onRender?: () => void;
 }
 
 export class Markdown extends PureComponent<MarkdownProps> {
+  componentDidMount() {
+    this.props.onRender?.();
+  }
   render() {
     const { className, markdown = '', openLinksInNewTab, whiteListedRules, ...rest } = this.props;
 
