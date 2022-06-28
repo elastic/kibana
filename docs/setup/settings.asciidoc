@@ -320,7 +320,7 @@ For more information, refer to the <<`logging-configuration-migration`, logging 
  deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
  Instead, specify an appender `type`. Options are `console` for stdout or `file` for sending logs to file.
  +
- Enables you to specify a file where Kibana stores log output. *Default: `stdout`*
+ Enables you to specify a file where {kib} stores log output. *Default: `stdout`*
 
 `logging.json`::
 deprecated:[7.13.0,This setting will be removed in Kibana 8.0.]
