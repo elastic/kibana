@@ -6,7 +6,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { FileJSON } from '../../../common/types';
+import type { Ensure } from '@kbn/utility-types';
+import type { HttpApiInterface } from '../../../common/api_routes';
 import type { FileKindsRequestHandler } from './types';
 import { getById } from './helpers';
 
@@ -14,22 +15,23 @@ import * as commonSchemas from './common_schemas';
 
 export const method = 'patch' as const;
 
+type UpdateEndpoint = HttpApiInterface['update'];
+
 export const bodySchema = schema.object({
   name: schema.maybe(commonSchemas.fileName),
   alt: schema.maybe(commonSchemas.fileAlt),
   meta: schema.maybe(commonSchemas.fileMeta),
 });
 
-type Body = TypeOf<typeof bodySchema>;
+type Body = Ensure<UpdateEndpoint['inputs']['body'], TypeOf<typeof bodySchema>>;
 
 export const paramsSchema = schema.object({
-  fileId: schema.string(),
+  id: schema.string(),
 });
+
 type Params = TypeOf<typeof paramsSchema>;
 
-interface Response {
-  file: FileJSON;
-}
+type Response = UpdateEndpoint['output'];
 
 export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   { files, fileKind },
@@ -38,7 +40,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
 ) => {
   const { fileService } = await files;
   const {
-    params: { fileId: id },
+    params: { id },
     body: attrs,
   } = req;
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);

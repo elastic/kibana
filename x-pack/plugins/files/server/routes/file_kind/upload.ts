@@ -6,24 +6,25 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { Ensure } from '@kbn/utility-types';
 import { Readable } from 'stream';
-
+import type { HttpApiInterface } from '../../../common/api_routes';
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
 export const method = 'put' as const;
 
+type UploadEndpoint = HttpApiInterface['upload'];
+
 export const bodySchema = schema.stream();
 type Body = TypeOf<typeof bodySchema>;
 
 export const paramsSchema = schema.object({
-  fileId: schema.string(),
+  id: schema.string(),
 });
-type Params = TypeOf<typeof paramsSchema>;
+type Params = Ensure<UploadEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
 
-interface Response {
-  ok: true;
-}
+type Response = UploadEndpoint['output'];
 
 export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   { files, fileKind },
@@ -33,7 +34,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   const { fileService } = await files;
   const {
     body: stream,
-    params: { fileId: id },
+    params: { id },
   } = req;
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;

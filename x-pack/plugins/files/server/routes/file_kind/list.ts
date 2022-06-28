@@ -5,20 +5,23 @@
  * 2.0.
  */
 import { schema, TypeOf } from '@kbn/config-schema';
-import { FileJSON } from '../../../common/types';
+import type { Ensure } from '@kbn/utility-types';
+import type { FileJSON } from '../../../common';
+import type { HttpApiInterface } from '../../../common/api_routes';
 import type { FileKindsRequestHandler } from './types';
 
 export const method = 'get' as const;
 
-export const querySchema = schema.object({
-  page: schema.number({ defaultValue: 1 }),
-  perPage: schema.number({ defaultValue: 100 }),
-});
-type Query = TypeOf<typeof querySchema>;
+type ListEndpoint = HttpApiInterface['list'];
 
-interface Response {
-  files: FileJSON[];
-}
+export const querySchema = schema.object({
+  page: schema.maybe(schema.number({ defaultValue: 1 })),
+  perPage: schema.maybe(schema.number({ defaultValue: 100 })),
+});
+
+type Query = Ensure<ListEndpoint['inputs']['query'], TypeOf<typeof querySchema>>;
+
+type Response = ListEndpoint['output'];
 
 export const handler: FileKindsRequestHandler<unknown, Query> = async (
   { files, fileKind },

@@ -6,9 +6,11 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Ensure } from '@kbn/utility-types';
 import { Readable } from 'stream';
 
 import type { File } from '../../../common';
+import type { HttpApiInterface } from '../../../common/api_routes';
 
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
@@ -16,10 +18,13 @@ import type { FileKindsRequestHandler } from './types';
 export const method = 'get' as const;
 
 export const paramsSchema = schema.object({
-  fileId: schema.string(),
+  id: schema.string(),
   fileName: schema.maybe(schema.string()),
 });
-type Params = TypeOf<typeof paramsSchema>;
+
+type DownloadInterface = HttpApiInterface['download'];
+
+type Params = Ensure<DownloadInterface['inputs']['params'], TypeOf<typeof paramsSchema>>;
 
 type Response = Readable;
 
@@ -39,7 +44,7 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
 ) => {
   const { fileService } = await files;
   const {
-    params: { fileId: id, fileName },
+    params: { id, fileName },
   } = req;
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
