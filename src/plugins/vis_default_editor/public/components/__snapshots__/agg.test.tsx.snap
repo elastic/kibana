@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DefaultEditorAgg component should init with the default set of props 1`] = `
-<WithEuiTheme(EuiAccordionClass)
+<EuiAccordionClass
   aria-label="Toggle metric editor"
   buttonClassName="eui-textTruncate"
   buttonContent={
@@ -72,5 +72,5 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
       }
     }
   />
-</WithEuiTheme(EuiAccordionClass)>
+</EuiAccordionClass>
 `;

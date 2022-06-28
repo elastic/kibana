@@ -75,7 +75,7 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
     </div>
   </div>
   <div
-    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
 </div>
 `;
@@ -155,7 +155,7 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
     </div>
   </div>
   <div
-    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
 </div>
 `;
@@ -171,7 +171,7 @@ exports[`Storyshots arguments/AxisConfig/components extended disabled 1`] = `
   }
 >
   <div
-    className="euiText css-pwgelg-euiText-xs-euiTextColor-subdued"
+    className="euiText emotion-euiText-xs-euiTextColor-subdued"
     style={Object {}}
   >
     <p>

@@ -2,19 +2,19 @@
 
 exports[`NoDataCard props button 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned css-1nsffwn-euiPanel-grow-m-l-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned emotion-euiPanel-grow-m-l-plain-hasShadow"
 >
   <div
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+      class="euiTitle euiCard__title emotion-euiTitle-s"
       id="generated-idTitle"
     >
       Card title
     </span>
     <div
-      class="euiText euiCard__description css-1vkrgyt-euiText-s"
+      class="euiText euiCard__description emotion-euiText-s"
       id="generated-idDescription"
     >
       <p>
@@ -45,13 +45,13 @@ exports[`NoDataCard props button 1`] = `
 
 exports[`NoDataCard props href 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable css-1pe7jko-euiPanel-grow-m-l-plain-hasShadow-isClickable"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable"
 >
   <div
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+      class="euiTitle euiCard__title emotion-euiTitle-s"
       id="generated-idTitle"
     >
       <a
@@ -64,7 +64,7 @@ exports[`NoDataCard props href 1`] = `
       </a>
     </span>
     <div
-      class="euiText euiCard__description css-1vkrgyt-euiText-s"
+      class="euiText euiCard__description emotion-euiText-s"
       id="generated-idDescription"
     >
       <p>
@@ -95,19 +95,19 @@ exports[`NoDataCard props href 1`] = `
 
 exports[`NoDataCard props recommended 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--hasBetaBadge css-1nsffwn-euiPanel-grow-m-l-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--hasBetaBadge emotion-euiPanel-grow-m-l-plain-hasShadow"
 >
   <div
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+      class="euiTitle euiCard__title emotion-euiTitle-s"
       id="generated-idTitle"
     >
       Card title
     </span>
     <div
-      class="euiText euiCard__description css-1vkrgyt-euiText-s"
+      class="euiText euiCard__description emotion-euiText-s"
       id="generated-idDescription"
     >
       <p>
@@ -131,19 +131,19 @@ exports[`NoDataCard props recommended 1`] = `
 
 exports[`NoDataCard renders 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned css-1nsffwn-euiPanel-grow-m-l-plain-hasShadow"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned emotion-euiPanel-grow-m-l-plain-hasShadow"
 >
   <div
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+      class="euiTitle euiCard__title emotion-euiTitle-s"
       id="generated-idTitle"
     >
       Card title
     </span>
     <div
-      class="euiText euiCard__description css-1vkrgyt-euiText-s"
+      class="euiText euiCard__description emotion-euiText-s"
       id="generated-idDescription"
     >
       <p>

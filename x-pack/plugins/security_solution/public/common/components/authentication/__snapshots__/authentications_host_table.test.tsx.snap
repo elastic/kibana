@@ -57,7 +57,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
 }
 
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 css-khmtme-euiPanel-grow-m-m-plain-hasBorder"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="authentications-host-table-loading-false"
 >
   <header
@@ -107,7 +107,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
                     class="euiFlexItem"
                   >
                     <h4
-                      class="euiTitle css-1w464ad-euiTitle-m"
+                      class="euiTitle emotion-euiTitle-m"
                       data-test-subj="header-section-title"
                     >
                       <span

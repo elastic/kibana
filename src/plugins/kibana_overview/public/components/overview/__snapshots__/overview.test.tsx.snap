@@ -1134,7 +1134,7 @@ exports[`Overview show loading spinner during loading 1`] = `
   >
     <span
       aria-label="Loading"
-      class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+      class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
       role="progressbar"
     />
   </div>

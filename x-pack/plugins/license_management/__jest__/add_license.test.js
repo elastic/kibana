@@ -16,7 +16,7 @@ describe('AddLicense component when license is active', () => {
       },
       AddLicense
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 });
 
@@ -28,6 +28,6 @@ describe('AddLicense component when license is expired', () => {
       },
       AddLicense
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 });

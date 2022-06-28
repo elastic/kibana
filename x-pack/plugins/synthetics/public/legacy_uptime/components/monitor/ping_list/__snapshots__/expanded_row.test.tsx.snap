@@ -140,10 +140,10 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
     class="euiFlexItem"
   >
     <div
-      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary css-1lbbq49-euiPanel-none-m-primary-euiCallOut"
+      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
     >
       <div
-        class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
+        class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
       >
         <dl
           class="euiDescriptionList euiDescriptionList--row"
@@ -157,26 +157,26 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
             class="euiDescriptionList__description"
           >
             <div
-              class="euiText css-1lo1kz-euiText-m"
+              class="euiText emotion-euiText-m"
             >
               Body size is 1MB.
             </div>
             <div
-              class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
             />
             <div
-              class="euiText css-1lo1kz-euiText-m"
+              class="euiText emotion-euiText-m"
             >
               Body not recorded. Read our 
               <a
-                class="euiLink css-102pf9n-euiLink-primary"
+                class="euiLink emotion-euiLink-primary"
                 href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
                 rel="noopener"
                 target="_blank"
               >
                 docs
                 <span
-                  class="css-q4vwwx-euiLink__externalIcon"
+                  class="emotion-euiLink__externalIcon"
                   data-euiicon-type="popout"
                 >
                   External link

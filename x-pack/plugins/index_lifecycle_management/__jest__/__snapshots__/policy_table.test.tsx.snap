@@ -38,11 +38,11 @@ Array [
 
 exports[`policy table shows empty state when there are no policies 1`] = `
 <div
-  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter css-1f0qifb-euiPanel-grow-m-l-subdued"
+  class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-subdued"
   role="main"
 >
   <div
-    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge css-7iihzj-euiPanel-m-transparent"
+    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
   >
     <div
       class="euiEmptyPrompt__main"
@@ -62,22 +62,22 @@ exports[`policy table shows empty state when there are no policies 1`] = `
           class="euiEmptyPrompt__contentInner"
         >
           <h1
-            class="euiTitle css-1w464ad-euiTitle-m"
+            class="euiTitle emotion-euiTitle-m"
           >
             Create your first index lifecycle policy
           </h1>
           <div
-            class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
-            class="euiText css-nexvet-euiText-m-euiTextColor-subdued"
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
           >
             <p>
                An index lifecycle policy helps you manage your indices as they age.
             </p>
           </div>
           <div
-            class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <button
             class="euiButton euiButton--primary euiButton--fill"

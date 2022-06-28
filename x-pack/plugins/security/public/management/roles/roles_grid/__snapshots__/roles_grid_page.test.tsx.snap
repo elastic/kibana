@@ -2,11 +2,11 @@
 
 exports[`<RolesGridPage /> renders permission denied if required 1`] = `
 <div
-  class="euiPanel euiPanel--danger euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter css-1i3sgbh-euiPanel-grow-m-l-danger"
+  class="euiPanel euiPanel--danger euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-danger"
   role="main"
 >
   <div
-    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge css-7iihzj-euiPanel-m-transparent"
+    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
   >
     <div
       class="euiEmptyPrompt__main"
@@ -26,15 +26,15 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
           class="euiEmptyPrompt__contentInner"
         >
           <h2
-            class="euiTitle css-1w464ad-euiTitle-m"
+            class="euiTitle emotion-euiTitle-m"
           >
             You need permission to manage roles
           </h2>
           <div
-            class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
           />
           <div
-            class="euiText css-nexvet-euiText-m-euiTextColor-subdued"
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
           >
             <p
               data-test-subj="permissionDeniedMessage"

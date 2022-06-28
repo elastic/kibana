@@ -80,6 +80,6 @@ describe('<Settings />', () => {
 
     // The Portal should not be open.
     expect(popover(wrapper).prop('isOpen')).toEqual(false);
-    expect(portal(wrapper).html()).toMatchSnapshot();
+    expect(portal(wrapper).render()).toMatchSnapshot();
   });
 });

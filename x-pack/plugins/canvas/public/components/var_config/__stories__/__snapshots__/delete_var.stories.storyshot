@@ -44,7 +44,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiText css-czh9ev-euiText-s-euiTextColor-subdued"
+            className="euiText emotion-euiText-s-euiTextColor-subdued"
             style={Object {}}
           >
             Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?
@@ -52,7 +52,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"

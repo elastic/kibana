@@ -26,7 +26,7 @@ export const CoreContextProvider: FC<CoreContextProviderProps> = ({
   children,
   globalStyles = false,
 }) => {
-  // `globalStyles` default value is inverted from that of `EuiProvider`.
+  // `globalStyles` and `utilityClasses` default values are inverted from that of `EuiProvider`.
   // Default to `false` (does not add EUI global styles) because more instances use that value.
   // A value of `true` (does add EUI global styles) will have `EuiProvider` use its default value.
   const includeGlobalStyles = globalStyles === false ? false : undefined;

@@ -34,6 +34,7 @@ const externals = {
   '@kbn/ui-theme': '__kbnSharedDeps__.KbnUiTheme',
   '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
   '@kbn/i18n-react': '__kbnSharedDeps__.KbnI18nReact',
+  '@emotion/cache': '__kbnSharedDeps__.EmotionCache',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',

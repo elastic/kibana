@@ -439,7 +439,7 @@ exports[`<ToolbarButton /> is rendered 1`] = `
         }
         type="button"
       >
-        <EuiButtonContent
+        <EuiButtonContentDeprecated
           className="euiButton__content"
           iconSide="left"
           textProps={
@@ -457,7 +457,7 @@ exports[`<ToolbarButton /> is rendered 1`] = `
               test
             </span>
           </span>
-        </EuiButtonContent>
+        </EuiButtonContentDeprecated>
       </button>
     </EuiButtonDisplay>
   </EuiButton>

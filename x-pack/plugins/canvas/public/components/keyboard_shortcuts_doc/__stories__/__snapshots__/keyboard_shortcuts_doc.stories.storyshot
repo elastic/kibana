@@ -15,7 +15,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
     className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
   >
     <h2
-      className="euiTitle css-1mr6cet-euiTitle-s"
+      className="euiTitle emotion-euiTitle-s"
     >
       Keyboard shortcuts
     </h2>
@@ -34,12 +34,12 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle css-1c9cwui-euiTitle-xs"
+            className="euiTitle emotion-euiTitle-xs"
           >
             Element controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -378,19 +378,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
         </div>
         <div
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle css-1c9cwui-euiTitle-xs"
+            className="euiTitle emotion-euiTitle-xs"
           >
             Expression controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -415,19 +415,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
         </div>
         <div
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle css-1c9cwui-euiTitle-xs"
+            className="euiTitle emotion-euiTitle-xs"
           >
             Editor controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -734,19 +734,19 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
         </div>
         <div
           className="canvasKeyboardShortcut"
         >
           <h4
-            className="euiTitle css-1c9cwui-euiTitle-xs"
+            className="euiTitle emotion-euiTitle-xs"
           >
             Presentation controls
           </h4>
           <hr
-            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall css-1u1q69a-euiHorizontalRule-full-s"
+            className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall emotion-euiHorizontalRule-full-s"
           />
           <dl
             className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
@@ -907,7 +907,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
             </dd>
           </dl>
           <div
-            className="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
+            className="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
         </div>
       </div>

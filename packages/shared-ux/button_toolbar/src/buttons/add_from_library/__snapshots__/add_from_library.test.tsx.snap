@@ -546,7 +546,7 @@ exports[`<ToolbarButton /> is rendered 1`] = `
           }
           type="button"
         >
-          <EuiButtonContent
+          <EuiButtonContentDeprecated
             className="euiButton__content"
             iconSide="left"
             iconType="folderOpen"
@@ -578,7 +578,7 @@ exports[`<ToolbarButton /> is rendered 1`] = `
                 Add from library
               </span>
             </span>
-          </EuiButtonContent>
+          </EuiButtonContentDeprecated>
         </button>
       </EuiButtonDisplay>
     </EuiButton>

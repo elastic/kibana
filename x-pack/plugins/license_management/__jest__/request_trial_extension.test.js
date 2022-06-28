@@ -31,7 +31,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.html();
+    const html = rendered.render();
     expect(html).not.toBeNull();
     expect(html).toMatchSnapshot();
   });
@@ -57,7 +57,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.html();
+    const html = rendered.render();
     expect(html).not.toBeNull();
     expect(html).toMatchSnapshot();
   });
@@ -71,7 +71,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.html();
+    const html = rendered.render();
     expect(html).not.toBeNull();
     expect(html).toMatchSnapshot();
   });
@@ -85,7 +85,7 @@ describe('RequestTrialExtension component', () => {
       },
       RequestTrialExtension
     );
-    const html = rendered.html();
+    const html = rendered.render();
     expect(html).not.toBeNull();
     expect(html).toMatchSnapshot();
   });
