@@ -190,7 +190,11 @@ export interface ConsoleProps extends CommonProps {
    */
   TitleComponent?: ComponentType;
 
+  /** The string to display to the left of the input area */
   prompt?: string;
+
+  /** If defined, certain console data will be persisted to storage */
+  storagePrefix?: string;
 
   /**
    * For internal use only!

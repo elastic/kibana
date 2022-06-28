@@ -36,6 +36,8 @@ export interface ConsoleDataState {
 
   dataTestSubj?: string;
 
+  storagePrefix?: string;
+
   /** The key for the console when it is under ConsoleManager control */
   managedKey?: symbol;
 
