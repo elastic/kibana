@@ -8,7 +8,7 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { lastValueFrom } from 'rxjs';
-import { Filter } from '@kbn/es-query';
+import { Filter, AggregateQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,10 +29,14 @@ import { useTriggersAndActionsUiDeps } from '../util';
 import { totalHitsToNumber } from './use_test_query';
 import { TestQueryRow } from './test_query_row';
 
+function isOfQueryType(arg?: Query | AggregateQuery): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
+
 interface LocalState {
   index: DataView;
   filter: Filter[];
-  query: Query;
+  query: Query | AggregateQuery;
   threshold: number[];
   timeWindowSize: number;
   size: number;
@@ -47,7 +51,7 @@ type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => Lo
 
 interface SearchSourceParamsAction {
   type: 'index' | 'filter' | 'query';
-  payload: DataView | Filter[] | Query;
+  payload: DataView | Filter[] | Query | AggregateQuery;
 }
 
 interface SearchSourceExpressionFormProps {
@@ -114,8 +118,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   }, []);
 
   const onChangeQuery = useCallback(
-    ({ query: newQuery }: { query?: Query }) => {
-      if (!deepEqual(newQuery, query)) {
+    ({ query: newQuery }: { query?: Query | AggregateQuery }) => {
+      if (!deepEqual(newQuery, query) && isOfQueryType(query)) {
         dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } });
       }
     },
@@ -123,8 +127,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   // needs to change language mode only
-  const onQueryBarSubmit = ({ query: newQuery }: { query?: Query }) => {
-    if (newQuery?.language !== query.language) {
+  const onQueryBarSubmit = ({ query: newQuery }: { query?: Query | AggregateQuery }) => {
+    if (isOfQueryType(query) && isOfQueryType(newQuery) && newQuery?.language !== query.language) {
       dispatch({ type: 'query', payload: { ...query, language: newQuery?.language } as Query });
     }
   };

@@ -8,7 +8,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import {
   FilterManager,
   TimeHistory,
@@ -19,6 +19,10 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
+
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
   dateRangeFrom?: string;
@@ -27,11 +31,11 @@ export interface QueryBarComponentProps {
   indexPattern: DataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
-  filterQuery: Query;
+  filterQuery: Query | AggregateQuery;
   filterManager: FilterManager;
   filters: Filter[];
-  onChangedQuery?: (query: Query) => void;
-  onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
+  onChangedQuery?: (query: Query | AggregateQuery) => void;
+  onSubmitQuery: (query: Query | AggregateQuery, timefilter?: SavedQueryTimeFilter) => void;
   refreshInterval?: number;
   savedQuery?: SavedQuery;
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
@@ -58,7 +62,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
   }) => {
     const onQuerySubmit = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query }) => {
+      (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
           onSubmitQuery(payload.query);
         }
@@ -67,7 +71,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const onQueryChange = useCallback(
-      (payload: { dateRange: TimeRange; query?: Query }) => {
+      (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (onChangedQuery && payload.query != null && !deepEqual(payload.query, filterQuery)) {
           onChangedQuery(payload.query);
         }
@@ -86,7 +90,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const onClearSavedQuery = useCallback(() => {
-      if (savedQuery != null) {
+      if (savedQuery != null && isOfQueryType(savedQuery.attributes.query)) {
         onSubmitQuery({
           query: '',
           language: savedQuery.attributes.query.language,

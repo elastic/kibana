@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { BoolQuery, Filter, Query } from '@kbn/es-query';
+import type { BoolQuery, Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { CspRuleMetadataType } from '../../../common/schemas';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 
 export interface FindingsBaseURLQuery {
-  query: Query;
+  query: Query | AggregateQuery;
   filters: Filter[];
 }
 
