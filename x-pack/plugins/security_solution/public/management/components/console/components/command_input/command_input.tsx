@@ -165,9 +165,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             case 37:
               updatedRightOfCursor = {
                 ...prevRightOfCursor,
-                text: `${updatedTextEnteredState.charAt(lengthOfTextEntered - 1)}${
-                  prevRightOfCursor.text
-                }`,
+                text:
+                  updatedTextEnteredState.charAt(lengthOfTextEntered - 1) + prevRightOfCursor.text,
               };
               updatedTextEnteredState = updatedTextEnteredState.substring(
                 0,
@@ -183,6 +182,28 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                 text: prevRightOfCursor.text.substring(1),
               };
               updatedTextEnteredState = updatedTextEnteredState + prevRightOfCursor.text.charAt(0);
+              break;
+
+            // HOME
+            // Move cursor to the start of the input area
+            // (or more accurately - move all text to the right of the cursor)
+            case 36:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: updatedTextEnteredState + prevRightOfCursor.text,
+              };
+              updatedTextEnteredState = '';
+              break;
+
+            // END
+            // Move cursor to the end of the input area
+            // (or more accurately - move all text to the left of the cursor)
+            case 35:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: '',
+              };
+              updatedTextEnteredState = updatedTextEnteredState + prevRightOfCursor.text;
               break;
           }
 
