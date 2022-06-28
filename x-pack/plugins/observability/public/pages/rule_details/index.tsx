@@ -200,13 +200,9 @@ export function RuleDetailsPage() {
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: rule ? (
-        getRuleEventLogList({
-          rule,
-        } as RuleEventLogListProps)
-      ) : (
-        <EuiLoadingSpinner size="m" />
-      ),
+      content: getRuleEventLogList({
+        rule,
+      } as RuleEventLogListProps),
     },
     {
       id: ALERT_LIST_TAB,
@@ -536,22 +532,20 @@ export function RuleDetailsPage() {
           onSave: reloadRule,
         })}
       <DeleteModalConfirmation
-        onDeleted={async () => {
+        onDeleted={() => {
           setRuleToDelete([]);
           navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
-        onErrors={async () => {
+        onErrors={() => {
           setRuleToDelete([]);
           navigateToUrl(http.basePath.prepend(paths.observability.rules));
         }}
-        onCancel={() => {}}
+        onCancel={() => setRuleToDelete([])}
         apiDeleteCall={deleteRules}
         idsToDelete={ruleToDelete}
         singleTitle={rule.name}
         multipleTitle={rule.name}
-        setIsLoadingState={(isLoading: boolean) => {
-          setIsPageLoading(isLoading);
-        }}
+        setIsLoadingState={() => setIsPageLoading(true)}
       />
       {errorRule && toasts.addDanger({ title: errorRule })}
     </ObservabilityPageTemplate>
