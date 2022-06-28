@@ -12,7 +12,7 @@ import {
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,

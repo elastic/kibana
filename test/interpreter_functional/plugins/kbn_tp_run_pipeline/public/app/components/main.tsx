@@ -12,7 +12,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentHeader,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
 } from '@elastic/eui';
 import { first, pluck } from 'rxjs/operators';
 import { IInterpreterRenderHandlers, ExpressionValue } from '@kbn/expressions-plugin/public';

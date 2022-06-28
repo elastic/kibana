@@ -13,7 +13,7 @@ import {
   EuiText,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiCard,
-  EuiPageContentHeader,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
