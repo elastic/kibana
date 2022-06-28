@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { JoinExpression } from './join_expression';
@@ -149,7 +150,7 @@ export class Join extends Component<Props, State> {
     });
   };
 
-  _onWhereQueryChange = (whereQuery?: Query) => {
+  _onWhereQueryChange = (whereQuery?: Query | AggregateQuery) => {
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {

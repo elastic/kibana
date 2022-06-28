@@ -12,7 +12,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter } from '@kbn/es-query';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { Geometry, Position } from 'geojson';
 import { asyncForEach, asyncMap } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
@@ -292,7 +292,7 @@ export function setQuery({
   clearTimeslice,
 }: {
   filters?: Filter[];
-  query?: Query;
+  query?: Query | AggregateQuery;
   timeFilters?: TimeRange;
   timeslice?: Timeslice;
   forceRefresh?: boolean;

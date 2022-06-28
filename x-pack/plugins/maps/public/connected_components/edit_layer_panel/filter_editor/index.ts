@@ -8,7 +8,7 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type { Query } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { FilterEditor } from './filter_editor';
 import { getEditState, getSelectedLayer } from '../../../selectors/map_selectors';
 import { setLayerQuery, updateSourceProp } from '../../../actions';
@@ -24,7 +24,7 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    setLayerQuery: (layerId: string, query: Query) => {
+    setLayerQuery: (layerId: string, query: Query | AggregateQuery) => {
       dispatch(setLayerQuery(layerId, query));
     },
     updateSourceProp: (id: string, propName: string, value: unknown) =>
