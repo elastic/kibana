@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import { KibanaFeature } from '@kbn/features-plugin/common';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
@@ -52,7 +51,6 @@ export const renderApp = ({
   appMountParameters,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
-  kibanaFeatures,
   usageCollection,
 }: {
   core: CoreStart;
@@ -60,7 +58,6 @@ export const renderApp = ({
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
-  kibanaFeatures: KibanaFeature[];
   usageCollection: UsageCollectionSetup;
 }) => {
   const { element, history, theme$ } = appMountParameters;
@@ -90,7 +87,6 @@ export const renderApp = ({
               appMountParameters,
               observabilityRuleTypeRegistry,
               ObservabilityPageTemplate,
-              kibanaFeatures,
             }}
           >
             <Router history={history}>

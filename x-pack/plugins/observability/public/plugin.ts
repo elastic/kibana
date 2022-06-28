@@ -22,7 +22,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -31,7 +30,6 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { KibanaFeature } from '@kbn/features-plugin/common';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
@@ -65,8 +63,6 @@ export interface ObservabilityPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
-  features: FeaturesPluginStart;
-  kibanaFeatures: KibanaFeature[];
   sharedUX: SharedUXPluginStart;
   ruleTypeRegistry: {};
   actionTypeRegistry: {};
@@ -147,22 +143,12 @@ export class Plugin
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
-      // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
-      // subset of this privilege are not authorized to access this endpoint and will receive a 404
-      // error that causes the Alerting view to fail to load.
-      let kibanaFeatures: KibanaFeature[];
-      try {
-        kibanaFeatures = await pluginsStart.features.getFeatures();
-      } catch (err) {
-        kibanaFeatures = [];
-      }
       return renderApp({
         core: coreStart,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         appMountParameters: params,
         observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
-        kibanaFeatures,
         usageCollection: pluginsSetup.usageCollection,
       });
     };
