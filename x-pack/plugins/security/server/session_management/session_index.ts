@@ -238,7 +238,7 @@ export class SessionIndex {
           'Attempted to create a new session, but session index or alias was missing.'
         );
         await this.ensureSessionIndexExists();
-        ({ body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
+        ({ body } = await this.writeNewSessionDocument(sessionValue, {
           ignore404: false,
         }));
       }

@@ -892,7 +892,7 @@ describe('Session index', () => {
       mockElasticsearchClient.indices.exists.mockResponse(false);
 
       let callCount = 0;
-      mockElasticsearchClient.create.mockResponseImplementation((req, opts) => {
+      mockElasticsearchClient.create.mockResponseImplementation(() => {
         callCount++;
         // Fail the first create attempt because the index/alias doesn't exist
         if (callCount === 1) {
