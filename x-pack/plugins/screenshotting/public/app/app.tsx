@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';

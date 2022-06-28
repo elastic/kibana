@@ -10,7 +10,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,

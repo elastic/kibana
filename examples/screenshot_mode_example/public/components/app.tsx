@@ -13,7 +13,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageHeader,

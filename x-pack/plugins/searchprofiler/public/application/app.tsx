@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiFlexGroup,
   EuiFlexItem,

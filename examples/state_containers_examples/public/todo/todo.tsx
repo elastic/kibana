@@ -14,7 +14,7 @@ import {
   EuiCheckbox,
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,

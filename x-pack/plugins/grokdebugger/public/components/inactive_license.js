@@ -13,7 +13,7 @@ import {
   EuiCode,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

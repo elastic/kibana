@@ -14,7 +14,7 @@ import {
   EuiButton,
   EuiConfirmModal,
   EuiPageContentBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 

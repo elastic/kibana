@@ -8,7 +8,11 @@
 
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiHorizontalRule, EuiPageContent } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiHorizontalRule,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 
 interface ManagementLandingPageProps {
   version: string;

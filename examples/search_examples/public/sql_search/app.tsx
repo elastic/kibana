@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPanel,

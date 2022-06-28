@@ -17,7 +17,7 @@ import {
   EuiButton,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiSpacer,
 } from '@elastic/eui';

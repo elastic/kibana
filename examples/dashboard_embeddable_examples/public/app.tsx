@@ -12,7 +12,7 @@ import { BrowserRouter as Router, Route, RouteComponentProps, withRouter } from 
 
 import {
   EuiPage,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageSideBar,
   EuiSideNav,

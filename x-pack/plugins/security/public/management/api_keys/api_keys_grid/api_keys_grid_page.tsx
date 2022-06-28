@@ -15,7 +15,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,

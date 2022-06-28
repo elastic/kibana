@@ -19,7 +19,7 @@ import {
   EuiPage,
   EuiPageHeader,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
 } from '@elastic/eui';
 

@@ -14,7 +14,7 @@ import {
   EuiButtonEmpty,
   EuiCodeBlock,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiTitle,

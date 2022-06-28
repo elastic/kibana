@@ -14,7 +14,7 @@ import {
   EuiPageContentHeaderSection,
   EuiTitle,
   EuiPageContentBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiIcon,
   EuiSpacer,
   EuiFlexItem,

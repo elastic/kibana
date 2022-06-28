@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 
 import {
   EuiText,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiCard,
   EuiPageContentHeader,
   EuiFlexGroup,
