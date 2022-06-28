@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, type Filter, buildFilter, FILTERS, FilterStateStore } from '@kbn/es-query';
 import { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { Serializable } from '@kbn/utility-types';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from './types';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { isNonNullable } from '../../../common/utils/helpers';
 
 const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
   try {
@@ -126,4 +128,36 @@ export const getAggregationCount = (buckets: estypes.AggregationsStringRareTerms
     passed: passed?.doc_count || 0,
     failed: failed?.doc_count || 0,
   };
+};
+
+export const addFilter = ({
+  filters,
+  dataView,
+  field,
+  value,
+  negate,
+}: {
+  filters: Filter[];
+  dataView: FindingsBaseProps['dataView'];
+  field: string;
+  value: Serializable;
+  negate: boolean;
+}): Filter[] => {
+  const dataViewField = dataView.getFieldByName(field);
+  if (!dataViewField) return filters;
+
+  const singleValue = Array.isArray(value) ? value[0] : value;
+
+  const filter = buildFilter(
+    dataView,
+    dataViewField,
+    FILTERS.PHRASE,
+    negate,
+    false,
+    singleValue,
+    null,
+    FilterStateStore.APP_STATE
+  );
+
+  return [...filters, filter].filter(isNonNullable);
 };

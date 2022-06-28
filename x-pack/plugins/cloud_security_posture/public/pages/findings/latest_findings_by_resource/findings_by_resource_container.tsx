@@ -17,6 +17,7 @@ import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_b
 import { FindingsByResourceTable } from './findings_by_resource_table';
 import {
   getFindingsPageSizeInfo,
+  addFilter,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -133,6 +134,18 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
               })}
               setTableOptions={({ page }) =>
                 setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+              }
+              onAddFilter={(field, value, negate) =>
+                setUrlQuery({
+                  pageIndex: 0,
+                  filters: addFilter({
+                    filters: urlQuery.filters,
+                    dataView,
+                    field,
+                    value,
+                    negate,
+                  }),
+                })
               }
             />
           </>
