@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Environment } from '../../../common/environment_rt';
 
 import { Setup } from '../../lib/helpers/setup_request';

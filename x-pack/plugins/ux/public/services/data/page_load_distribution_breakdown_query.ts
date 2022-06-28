@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import {
