@@ -86,6 +86,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await focusAndPressButton('discoverAlertsButton');
         expect(await hasFocus('discoverAlertsButton')).to.be(false);
         await focusAndPressButton('discoverCreateAlertButton');
+        await retry.waitFor(
+          'Create Rule flyout is visible',
+          async () => await testSubjects.exists('addRuleFlyoutTitle')
+        );
         expect(await hasFocus('discoverCreateAlertButton')).to.be(false);
         await retry.try(async () => {
           await browser.pressKeys(browser.keys.ESCAPE);
