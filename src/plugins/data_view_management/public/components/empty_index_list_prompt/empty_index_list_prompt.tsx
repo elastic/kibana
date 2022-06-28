@@ -13,7 +13,7 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiTitle,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiIcon,
   EuiSpacer,

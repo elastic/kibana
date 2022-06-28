@@ -11,7 +11,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,

@@ -18,7 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';

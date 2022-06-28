@@ -17,7 +17,7 @@ import {
   EuiLoadingContent,
   EuiModal,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
   EuiCallOut,

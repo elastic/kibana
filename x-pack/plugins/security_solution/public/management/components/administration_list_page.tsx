@@ -11,7 +11,7 @@ import type { CommonProps } from '@elastic/eui';
 import {
   EuiPageHeader,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,

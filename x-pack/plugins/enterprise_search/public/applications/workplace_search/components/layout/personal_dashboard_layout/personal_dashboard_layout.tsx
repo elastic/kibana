@@ -14,7 +14,7 @@ import {
   EuiPage,
   EuiPageSideBar,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';

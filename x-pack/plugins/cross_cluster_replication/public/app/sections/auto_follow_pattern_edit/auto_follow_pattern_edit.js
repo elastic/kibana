@@ -14,7 +14,7 @@ import {
   EuiButton,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';

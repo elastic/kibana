@@ -13,7 +13,7 @@ import {
   EuiSpacer,
   EuiPageHeader,
   EuiTitle,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageContent_Deprecated as EuiPageContent,
   EuiDragDropContext,
   EuiDroppable,

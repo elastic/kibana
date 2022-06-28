@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiPageBody,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiPanel,
   EuiSuperUpdateButton,

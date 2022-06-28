@@ -13,7 +13,7 @@ import { BrowserRouter as Router, Route, RouteComponentProps, withRouter } from 
 import {
   EuiPage,
   EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageSideBar,
   EuiSideNav,
 } from '@elastic/eui';
