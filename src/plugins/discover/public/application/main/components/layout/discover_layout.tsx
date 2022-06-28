@@ -346,6 +346,7 @@ export function DiscoverLayout({
                       setExpandedDoc={setExpandedDoc}
                       state={state}
                       stateContainer={stateContainer}
+                      onEditRuntimeField={onEditRuntimeField}
                     />
                   ) : (
                     <FieldStatisticsTableMemoized

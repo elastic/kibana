@@ -8,7 +8,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import {
+  EuiDataGridColumn,
+  EuiIcon,
+  EuiListGroupItemProps,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
@@ -19,6 +25,7 @@ import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { DiscoverServices } from '../../build_services';
+import { getFieldCapabilities } from '../../utils/get_field_capabilities';
 
 export function getLeadControlColumns() {
   return [
@@ -53,7 +60,7 @@ export function getLeadControlColumns() {
   ];
 }
 
-export function buildEuiGridColumn({
+function buildEuiGridColumn({
   columnName,
   columnWidth = 0,
   indexPattern,
@@ -62,6 +69,8 @@ export function buildEuiGridColumn({
   services,
   valueToStringConverter,
   rowsCount,
+  onEditRuntimeField,
+  setFieldEditorRef,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -71,8 +80,15 @@ export function buildEuiGridColumn({
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
+  onEditRuntimeField: () => void;
+  setFieldEditorRef?: (ref: () => void | undefined) => void;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
+  const { canEdit: canEditField } =
+    indexPatternField == null
+      ? { canEdit: false }
+      : getFieldCapabilities(indexPattern, indexPatternField);
+  const canEditDataView = Boolean(services.dataViewEditor?.userPermissions?.editDataView());
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(indexPatternField?.type),
@@ -105,6 +121,32 @@ export function buildEuiGridColumn({
           rowsCount,
           valueToStringConverter,
         }),
+        ...(canEditField && canEditDataView
+          ? [
+              {
+                size: 'xs',
+                label: 'Edit field',
+                iconType: 'pencil',
+                iconProps: { size: 'm' },
+                onClick: () => {
+                  const ref = services.dataViewFieldEditor.openEditor({
+                    ctx: {
+                      dataView: indexPattern,
+                    },
+                    fieldName: indexPatternField?.name,
+                    onSave: async () => {
+                      onEditRuntimeField();
+                    },
+                  });
+
+                  if (setFieldEditorRef) {
+                    setFieldEditorRef(ref);
+                  }
+                },
+                'data-test-subj': 'gridEditFieldButton',
+              } as EuiListGroupItemProps,
+            ]
+          : []),
       ],
     },
     cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
@@ -153,6 +195,8 @@ export function getEuiGridColumns({
   isSortEnabled,
   services,
   valueToStringConverter,
+  onEditRuntimeField,
+  setFieldEditorRef,
 }: {
   columns: string[];
   rowsCount: number;
@@ -163,6 +207,8 @@ export function getEuiGridColumns({
   isSortEnabled: boolean;
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
+  onEditRuntimeField: () => void;
+  setFieldEditorRef?: (ref: () => void | undefined) => void;
 }) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
@@ -182,6 +228,7 @@ export function getEuiGridColumns({
       services,
       valueToStringConverter,
       rowsCount,
+      onEditRuntimeField,
     })
   );
 }
