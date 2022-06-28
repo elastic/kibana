@@ -59,6 +59,7 @@ import { useIsOverflow } from '../../../../common/hooks/use_is_overflow';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
+  background-color: inherit;
   margin: 0 -1px 0;
 `;
 
