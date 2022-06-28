@@ -7,10 +7,7 @@
 
 import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import type {
-  AlertsClient,
-  RuleRegistryPluginStartContract,
-} from '@kbn/rule-registry-plugin/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import { validateTree } from '../../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 
