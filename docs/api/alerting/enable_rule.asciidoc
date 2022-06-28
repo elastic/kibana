@@ -18,7 +18,7 @@ WARNING: This API supports <<token-api-authentication>> only.
 === {api-prereq-title}
 
 You must have `all` privileges for the appropriate {kib} features, depending on
-the `consumer` and `rule_type_id` of the rules you're creating. For example, the
+the `consumer` and `rule_type_id` of the rules you're enabling. For example, the
 *Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
 features, *{observability}*, and *Security* features. For more details, refer to
 <<kibana-feature-privileges>>.
@@ -27,20 +27,19 @@ features, *{observability}*, and *Security* features. For more details, refer to
 === {api-path-parms-title}
 
 `id`::
-  (Required, string) The ID of the rule that you want to enable.
+(Required, string) The ID of the rule that you want to enable.
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+(Optional, string) An identifier for the space. If `space_id` is not provided in
+the URL, the default space is used.
 
 [[enable-rule-api-response-codes]]
 === {api-response-codes-title}
 
 `200`::
-  Indicates a successful call.
+Indicates a successful call.
 
 === {api-examples-title}
-
-Enable a rule with ID:
 
 [source,sh]
 --------------------------------------------------
