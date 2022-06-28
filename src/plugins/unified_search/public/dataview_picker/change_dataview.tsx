@@ -310,21 +310,33 @@ export function ChangeDataView({
     setIsTextLangTransitionModalDismissed(true);
   }, [storage]);
 
-  const onModalClose = useCallback(
-    (shouldDismissModal: boolean, needsSave?: boolean) => {
+  const cleanup = useCallback(
+    (shouldDismissModal: boolean) => {
       setIsTextLangTransitionModalVisible(false);
-      if (Boolean(needsSave)) {
-        onSaveTextLanguageQuery?.();
-      }
       setIsTextBasedLangSelected(false);
-      // clean up the text based language query
+      // clean up the Text based language jQuery
       onTextLangQuerySubmit?.();
       setTriggerLabel(trigger.label);
       if (shouldDismissModal) {
         onTransitionModalDismiss();
       }
     },
-    [onSaveTextLanguageQuery, onTextLangQuerySubmit, onTransitionModalDismiss, trigger.label]
+    [onTextLangQuerySubmit, onTransitionModalDismiss, trigger.label]
+  );
+
+  const onModalClose = useCallback(
+    (shouldDismissModal: boolean, needsSave?: boolean) => {
+      if (Boolean(needsSave)) {
+        onSaveTextLanguageQuery?.({
+          onSave: () => {
+            cleanup(shouldDismissModal);
+          },
+        });
+      } else {
+        cleanup(shouldDismissModal);
+      }
+    },
+    [cleanup, onSaveTextLanguageQuery]
   );
 
   if (isTextLangTransitionModalVisible && !isTextLangTransitionModalDismissed) {

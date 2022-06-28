@@ -15,6 +15,7 @@ import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
+import { onSaveSearch } from './on_save_search';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -184,6 +185,21 @@ export const DiscoverTopNav = ({
     textBasedLanguages: ['SQL'] as DataViewPickerProps['textBasedLanguages'],
   };
 
+  const onTextBasedSavedAndExit = useCallback(
+    async ({ onSave }) => {
+      await onSaveSearch({
+        savedSearch,
+        services,
+        indexPattern,
+        navigateTo,
+        state: stateContainer,
+        onClose: onSave,
+        onSaveCb: onSave,
+      });
+    },
+    [indexPattern, navigateTo, savedSearch, services, stateContainer]
+  );
+
   return (
     <TopNavMenu
       appName="discover"
@@ -204,6 +220,7 @@ export const DiscoverTopNav = ({
       textBasedLanguageModeErrors={
         textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
       }
+      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
     />
   );
 };

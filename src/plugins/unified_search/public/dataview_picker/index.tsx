@@ -21,6 +21,10 @@ export enum TextBasedLanguages {
   ESQL = 'ESQL',
 }
 
+export interface OnSaveTextLanguageQueryProps {
+  onSave: () => void;
+}
+
 /** @public */
 export interface DataViewPickerProps {
   trigger: ChangeDataViewTriggerProps;
@@ -34,7 +38,7 @@ export interface DataViewPickerProps {
   // list of the supported text-based languages per application
   textBasedLanguages?: TextBasedLanguages[];
   // called when the user clicks the Save and switch transition modal button
-  onSaveTextLanguageQuery?: () => void;
+  onSaveTextLanguageQuery?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
 }
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {

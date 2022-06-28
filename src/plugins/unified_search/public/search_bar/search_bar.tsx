@@ -25,7 +25,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
-import type { DataViewPickerProps } from '../dataview_picker';
+import type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from '../dataview_picker';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
@@ -88,6 +88,7 @@ export interface SearchBarOwnProps {
   fillSubmitButton?: boolean;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
+  onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   showSubmitButton?: boolean;
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
@@ -532,6 +533,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
+          onTextBasedSavedAndExit={this.props.onTextBasedSavedAndExit}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
           suggestionsSize={this.props.suggestionsSize}

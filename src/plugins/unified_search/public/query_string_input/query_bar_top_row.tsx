@@ -35,7 +35,11 @@ import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
-import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
+import {
+  DataViewPicker,
+  DataViewPickerProps,
+  OnSaveTextLanguageQueryProps,
+} from '../dataview_picker';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { TextBasedLanguagesEditor } from './text_based_languages_editor';
@@ -86,6 +90,7 @@ export interface QueryBarTopRowProps {
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
+  onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
@@ -444,6 +449,7 @@ export const QueryBarTopRow = React.memo(
             trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
             onTextLangQuerySubmit={props.onTextLangQuerySubmit}
             textBasedLanguage={textBasedLanguage}
+            onSaveTextLanguageQuery={props.onTextBasedSavedAndExit}
           />
         </EuiFlexItem>
       );

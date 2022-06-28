@@ -104,6 +104,7 @@ describe('getSavedSearch', () => {
         "hideAggregatedPreview": undefined,
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
+        "isTextBasedQuery": undefined,
         "rowHeight": undefined,
         "searchSource": Object {
           "create": [MockFunction],
