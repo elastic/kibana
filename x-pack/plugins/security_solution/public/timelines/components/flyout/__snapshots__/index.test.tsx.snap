@@ -219,7 +219,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
     data-test-subj="flyoutBottomBar"
   >
     <div
-      class="euiPanel euiPanel--plain euiPanel--paddingSmall c0 css-1sriiwr-euiPanel-none-s-plain"
+      class="euiPanel euiPanel--plain euiPanel--paddingSmall c0 emotion-euiPanel-none-s-plain"
       data-test-subj="timeline-flyout-header-panel"
     >
       <div
@@ -277,7 +277,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <div
-                        class="euiHealth c3 css-qn8ayk-euiHealth-s"
+                        class="euiHealth c3 emotion-euiHealth-s"
                       >
                         <div
                           class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -315,7 +315,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
       </div>
     </div>
     <div
-      class="euiPanel euiPanel--plain c5 css-n9us4v-euiPanel-grow-m-plain-hasShadow"
+      class="euiPanel euiPanel--plain c5 emotion-euiPanel-grow-m-plain-hasShadow"
     >
       <div
         aria-label="You are in the timeline query area, which contains groups of data providers that query for events"
@@ -339,7 +339,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                 class="c10"
               >
                 <div
-                  class="euiText c11 timeline-drop-area-empty__text css-czh9ev-euiText-s-euiTextColor-subdued"
+                  class="euiText c11 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
                 >
                   Drop anything
                 </div>
@@ -363,7 +363,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   </span>
                 </span>
                 <div
-                  class="euiText c11 timeline-drop-area-empty__text css-czh9ev-euiText-s-euiTextColor-subdued"
+                  class="euiText c11 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
                 >
                   here to build an
                 </div>
@@ -383,7 +383,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   </span>
                 </span>
                 <div
-                  class="euiText c11 timeline-drop-area-empty__text css-czh9ev-euiText-s-euiTextColor-subdued"
+                  class="euiText c11 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
                 >
                   query
                 </div>
@@ -407,7 +407,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText css-1vkrgyt-euiText-s"
+                          class="euiText emotion-euiText-s"
                         >
                           + Add field
                         </div>
