@@ -15,20 +15,21 @@ export default function ({ getService, getPageObjects }) {
   const pipelineEditor = getService('pipelineEditor');
   const PageObjects = getPageObjects(['logstash']);
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
+  const supertest = getService('supertest');
 
   describe('pipeline create new', () => {
     let originalWindowSize;
+    let id;
 
     before(async () => {
+      id = random.id();
       originalWindowSize = await browser.getWindowSize();
       await browser.setWindowSize(1600, 1000);
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+    after('delete created pipeline', async () => {
       await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
+      await supertest.delete(`/api/logstash/pipeline/${id}`).set('kbn-xsrf', 'xxx');
     });
 
     it('starts with the default values', async () => {
@@ -39,8 +40,6 @@ export default function ({ getService, getPageObjects }) {
     describe('save button', () => {
       it('creates the pipeline and redirects to the list', async () => {
         await PageObjects.logstash.gotoNewPipelineEditor();
-
-        const id = random.id();
         const description = random.text();
         const pipeline = random.longText();
         const workers = random.int().toString();
