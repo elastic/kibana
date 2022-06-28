@@ -171,7 +171,7 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
       },
     },
     {
-      title: i18n.translate('xpack.synthetics.addMonitorRoute.title', {
+      title: i18n.translate('xpack.synthetics.createMonitorRoute.title', {
         defaultMessage: 'Create Monitor | {baseTitle}',
         values: { baseTitle },
       }),
@@ -185,7 +185,7 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
       pageHeader: {
         pageTitle: (
           <FormattedMessage
-            id="xpack.synthetics.addMonitor.pageHeader.title"
+            id="xpack.synthetics.createMonitor.pageHeader.title"
             defaultMessage="Create Monitor"
           />
         ),

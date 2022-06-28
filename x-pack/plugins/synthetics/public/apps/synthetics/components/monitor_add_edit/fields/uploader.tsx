@@ -75,12 +75,9 @@ const TESTING_SCRIPT_LABEL = i18n.translate(
   }
 );
 
-const PROMPT_TEXT = i18n.translate(
-  'xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.uploader.label',
-  {
-    defaultMessage: 'Select or drag and drop a script.js file',
-  }
-);
+const PROMPT_TEXT = i18n.translate('xpack.synthetics.monitorConfig.uploader.label', {
+  defaultMessage: 'Select or drag and drop a script.js file',
+});
 
 const INVALID_FILE_ERROR = i18n.translate(
   'xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.uploader.invalidFileError',
