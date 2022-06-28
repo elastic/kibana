@@ -16,7 +16,6 @@ import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_re
 import { DEFAULT_TIMEPICKER_QUICK_RANGES, MANAGEMENT_PATH } from '../../../../../common/constants';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import userEvent from '@testing-library/user-event';
-// import { HttpFetchError } from '@kbn/core/public';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -121,11 +120,12 @@ describe('Response Actions List', () => {
   });
 
   describe('', () => {
+    const refetchFunction = jest.fn();
     const baseMockedActionList = {
       isFetched: true,
       isFetching: false,
       error: null,
-      refetch: jest.fn(),
+      refetch: refetchFunction,
     };
     beforeEach(async () => {
       mockUseGetEndpointActionList = {
@@ -136,7 +136,7 @@ describe('Response Actions List', () => {
 
     afterEach(() => {
       mockUseGetEndpointActionList = {
-        refetch: jest.fn(),
+        ...baseMockedActionList,
       };
     });
 
@@ -212,6 +212,21 @@ describe('Response Actions List', () => {
         expandButtons.map((button) => userEvent.click(button));
         const noTrays = renderResult.queryAllByTestId(`${testPrefix}-output-section`);
         expect(noTrays).toEqual([]);
+      });
+
+      it('should refresh data when autoRefresh is toggled on', async () => {
+        render({});
+        const quickMenu = renderResult.getByTestId('superDatePickerToggleQuickMenuButton');
+        userEvent.click(quickMenu);
+
+        const toggle = renderResult.getByTestId('superDatePickerToggleRefreshButton');
+        const intervalInput = renderResult.getByTestId('superDatePickerRefreshIntervalInput');
+
+        userEvent.click(toggle);
+        reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
+
+        await new Promise((r) => setTimeout(r, 3000));
+        expect(refetchFunction).toHaveBeenCalledTimes(3);
       });
     });
 
