@@ -37,6 +37,7 @@ import { EditorFooter } from './editor_footer';
 interface TextBasedLanguagesEditorProps {
   query: any;
   onTextLangQueryChange: (query: any) => void;
+  onTextLangQuerySubmit: () => void;
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
   errors?: Error[];
@@ -67,6 +68,7 @@ let updateLinesFromModel = false;
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
   onTextLangQueryChange,
+  onTextLangQuerySubmit,
   expandCodeEditor,
   isCodeEditorExpanded,
   errors,
@@ -171,6 +173,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         clickedOutside = false;
         initialRender = false;
         updateLinesFromModel = true;
+      });
+      // eslint-disable-next-line no-bitwise
+      editor1.current?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
+        onTextLangQuerySubmit();
       });
       if (!isCodeEditorExpanded) {
         editor1.current?.onDidContentSizeChange(updateHeight);

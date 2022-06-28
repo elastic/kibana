@@ -526,6 +526,12 @@ export const QueryBarTopRow = React.memo(
             expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
             isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
+            onTextLangQuerySubmit={() =>
+              onSubmit({
+                query: queryRef.current,
+                dateRange: dateRangeRef.current,
+              })
+            }
           />
         )
       );
