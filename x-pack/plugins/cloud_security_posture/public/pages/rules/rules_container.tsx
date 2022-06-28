@@ -25,6 +25,7 @@ import {
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { DATA_UPDATE_INFO } from './translations';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 interface RulesPageData {
   rules_page: RuleSavedObject[];
@@ -93,6 +94,7 @@ const MAX_ITEMS_PER_PAGE = 10000;
 export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
 
 export const RulesContainer = () => {
+  const canUpdate = !!useKibana().services.application.capabilities.siem.crud;
   const params = useParams<PageUrlParams>();
   const tableRef = useRef<EuiBasicTable>(null);
   const [changedRules, setChangedRules] = useState<Map<string, RuleSavedObject>>(new Map());
@@ -192,6 +194,7 @@ export const RulesContainer = () => {
           totalRulesCount={rulesPageData.all_rules.length}
           isSearching={status === 'loading'}
           lastModified={rulesPageData.lastModified}
+          canUpdate={canUpdate}
         />
         <EuiSpacer />
         <RulesTable
@@ -212,6 +215,7 @@ export const RulesContainer = () => {
           }
           setSelectedRuleId={setSelectedRuleId}
           selectedRuleId={selectedRuleId}
+          canUpdate={canUpdate}
         />
       </EuiPanel>
       {hasChanges && (
@@ -222,6 +226,7 @@ export const RulesContainer = () => {
           rule={changedRules.get(selectedRuleId) || rulesPageData.rules_map.get(selectedRuleId)!}
           onClose={() => setSelectedRuleId(null)}
           toggleRule={toggleRule}
+          canUpdate={canUpdate}
         />
       )}
     </div>
