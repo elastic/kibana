@@ -10,6 +10,7 @@ import { RuleSnoozeSchedule } from '../../types';
 
 export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
   const { duration, rRule, id } = snooze;
+  if (duration === -1) return true;
   const startTimeMS = Date.parse(rRule.dtstart);
   const initialEndTime = startTimeMS + duration;
   // If now is during the first occurrence of the snooze
