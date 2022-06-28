@@ -131,7 +131,7 @@ export const GetRunningProcessesActionResult = memo<
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.enityId',
         { defaultMessage: 'ENTITY ID' }
       ),
-      width: '15%',
+      width: '30%',
     },
     {
       field: 'pid',
@@ -139,7 +139,7 @@ export const GetRunningProcessesActionResult = memo<
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.pid',
         { defaultMessage: 'PID' }
       ),
-      width: '15%',
+      width: '5%',
     },
     {
       field: 'command',
@@ -155,7 +155,7 @@ export const GetRunningProcessesActionResult = memo<
         'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.user',
         { defaultMessage: 'USER' }
       ),
-      width: '15%',
+      width: '10%',
     },
   ];
 
