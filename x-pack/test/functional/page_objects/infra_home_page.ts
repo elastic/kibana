@@ -338,15 +338,15 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickTourNextButton() {
-      await testSubjects.click('observTourNextStepButton');
+      await testSubjects.click('onboarding--observTourNextStepButton');
     },
 
     async clickTourEndButton() {
-      await testSubjects.click('observTourEndButton');
+      await testSubjects.click('onboarding--observTourEndButton');
     },
 
     async clickTourSkipButton() {
-      await testSubjects.click('observTourSkipButton');
+      await testSubjects.click('onboarding--observTourSkipButton');
     },
   };
 }

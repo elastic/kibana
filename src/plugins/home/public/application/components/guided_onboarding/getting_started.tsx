@@ -96,7 +96,7 @@ export const GettingStarted = () => {
         <EuiSpacer />
         <div className="eui-textCenter">
           {/* data-test-subj used for FS tracking */}
-          <EuiLink onClick={onSkip} data-test-subj="skipToursLink">
+          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipUseCaseTourLink">
             {skipText}
           </EuiLink>
         </div>
