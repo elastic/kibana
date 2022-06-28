@@ -110,6 +110,13 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
   defaultMessage: 'Blocklist',
 });
 
+export const RESPONSE_ACTIONS = i18n.translate(
+  'xpack.securitySolution.navigation.responseActions',
+  {
+    defaultMessage: 'Response Actions',
+  }
+);
+
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',
 });
