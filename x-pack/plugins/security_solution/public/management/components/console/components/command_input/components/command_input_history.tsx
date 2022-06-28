@@ -25,7 +25,7 @@ export const CommandInputHistory = memo(() => {
   const isMounted = useIsMounted();
   const dispatch = useConsoleStateDispatch();
   const inputHistory = useWithInputHistory();
-  const [priorInputText] = useState(useWithInputTextEntered());
+  const [priorInputText] = useState(useWithInputTextEntered().textEntered);
   const optionWasSelected = useRef(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const hasInputHistory = inputHistory.length > 0;

@@ -21,7 +21,7 @@ const InputPlaceholderContainer = styled(EuiText)`
 `;
 
 export const InputPlaceholder = memo(() => {
-  const textEntered = useWithInputTextEntered();
+  const { textEntered } = useWithInputTextEntered();
   const placeholder = useWithInputPlaceholder();
   const getTestId = useTestIdGenerator(useDataTestSubj());
 

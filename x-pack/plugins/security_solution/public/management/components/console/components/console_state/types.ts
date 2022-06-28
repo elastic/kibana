@@ -44,8 +44,15 @@ export interface ConsoleDataState {
 
   /** state for the command input area */
   input: {
-    /** The text the user is typing into the console input area */
-    textEntered: string;
+    /**
+     * The text the user is typing into the console input area. By default, this
+     * value goes into the left of the cursor position
+     */
+    textEntered: string; // FIXME:PT convert this to same structure as `rightOfCursor`
+
+    rightOfCursor: {
+      text: string;
+    };
 
     /** The command name that was entered (derived from `textEntered` */
     commandEntered: string;
@@ -106,6 +113,11 @@ export type ConsoleDataAction =
       type: 'updateInputTextEnteredState';
       payload: {
         textEntered: string | ((prevState: string) => string);
+        rightOfCursor:
+          | ConsoleDataState['input']['rightOfCursor']
+          | ((
+              prevState: ConsoleDataState['input']['rightOfCursor']
+            ) => ConsoleDataState['input']['rightOfCursor']);
       };
     }
   | {

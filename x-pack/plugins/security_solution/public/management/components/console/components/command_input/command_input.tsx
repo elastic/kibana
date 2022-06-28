@@ -59,7 +59,9 @@ const CommandInputContainer = styled.div`
     }
 
     &.inactive {
-      background-color: transparent !important;
+      background-color: ${({ theme }) => theme.eui.euiTextSubduedColor} !important;
+      animation: none;
+      -webkit-animation: none;
     }
   }
 `;
@@ -73,13 +75,15 @@ export interface CommandInputProps extends CommonProps {
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
   useInputHints();
   const dispatch = useConsoleStateDispatch();
-  const textEntered = useWithInputTextEntered();
+  const { rightOfCursor, textEntered } = useWithInputTextEntered();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const [commandToExecute, setCommandToExecute] = useState('');
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
+
+  // TODO:PT what do I use this for? investigate
   const textDisplayRef = useRef<HTMLDivElement | null>(null);
 
   const dimensions = useResizeObserver(containerRef.current);
@@ -137,7 +141,10 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               // remove the last character from the text entered
               case 8:
                 if (updatedTextEnteredState.length) {
-                  updatedTextEnteredState = updatedTextEnteredState.replace(/.$/, '');
+                  updatedTextEnteredState = updatedTextEnteredState.substring(
+                    0,
+                    updatedTextEnteredState.length - 1
+                  );
                 }
                 break;
 
@@ -151,6 +158,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
             return updatedTextEnteredState;
           },
+
+          rightOfCursor: { text: '' },
         },
       });
     },
@@ -181,14 +190,29 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               <span className="eui-displayInlineBlock prompt">{prompt}</span>
             </EuiFlexItem>
           )}
-          <EuiFlexItem className="textEntered" grow={false}>
-            <div data-test-subj={getTestId('cmdInput-userTextInput')}>{textEntered}</div>
+          <EuiFlexItem className="textEntered">
+            <EuiFlexGroup
+              responsive={false}
+              alignItems="flexStart"
+              gutterSize="none"
+              justifyContent="flexStart"
+            >
+              <EuiFlexItem grow={false}>
+                <div data-test-subj={getTestId('cmdInput-userTextInput')}>{textEntered}</div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span className={cursorClassName} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>{rightOfCursor}</div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
             <InputPlaceholder />
           </EuiFlexItem>
-          <EuiFlexItem grow>
-            <span className={cursorClassName} />
-          </EuiFlexItem>
+          <EuiFlexItem grow={false} />
         </EuiFlexGroup>
+
         <KeyCapture
           onCapture={handleKeyCapture}
           focusRef={keyCaptureFocusRef}

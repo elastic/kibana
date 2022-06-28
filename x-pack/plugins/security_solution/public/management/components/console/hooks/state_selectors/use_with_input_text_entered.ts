@@ -5,9 +5,19 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useConsoleStore } from '../../components/console_state/console_state';
 import type { ConsoleDataState } from '../../components/console_state/types';
 
-export const useWithInputTextEntered = (): ConsoleDataState['input']['textEntered'] => {
-  return useConsoleStore().state.input.textEntered;
+type InputTextEntered = Pick<ConsoleDataState['input'], 'textEntered' | 'rightOfCursor'>;
+
+export const useWithInputTextEntered = (): InputTextEntered => {
+  const inputState = useConsoleStore().state.input;
+
+  return useMemo(() => {
+    return {
+      textEntered: inputState.textEntered,
+      rightOfCursor: inputState.rightOfCursor,
+    };
+  }, [inputState.rightOfCursor, inputState.textEntered]);
 };
