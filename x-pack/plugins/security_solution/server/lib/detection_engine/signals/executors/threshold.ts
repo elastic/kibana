@@ -87,7 +87,7 @@ export const thresholdExecutor = async ({
           ruleDataReader,
         });
 
-    if (!state.initialized) {
+    if (state.initialized) {
       // Clean up any signal history that has fallen outside the window
       const toDelete: string[] = [];
       for (const [hash, entry] of Object.entries(signalHistory)) {
