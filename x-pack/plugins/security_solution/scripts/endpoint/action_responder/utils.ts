@@ -124,16 +124,7 @@ const getOutputDataIfNeeded = (command: EndpointActionData['command']) => {
         output: {
           type: 'json',
           content: {
-            entries: [
-              { command: '/opt/cmd1', pid: '123', entity_id: '345', user: 'root' },
-              { command: '/opt/cmd2', pid: '234', entity_id: '456', user: 'test' },
-              {
-                command: '/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3',
-                pid: '345',
-                entity_id: '467',
-                user: 'test',
-              },
-            ],
+            entries: endpointActionGenerator.randomResponseActionRunningProcesses(),
           },
         },
       } as { output: ActionResponseOutput<RunningProcessesEntry> })
