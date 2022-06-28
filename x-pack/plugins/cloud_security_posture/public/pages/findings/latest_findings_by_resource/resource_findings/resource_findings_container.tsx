@@ -115,7 +115,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             {resourceFindings.isSuccess && !!resourceFindings.data.page.length && (
               <FindingsDistributionBar
                 {...{
-                  type: i18n.translate('xpack.csp.findingsResourceTableHeader.tableRowTypeLabel', {
+                  type: i18n.translate('xpack.csp.findings.resourceFindings.tableRowTypeLabel', {
                     defaultMessage: 'Findings',
                   }),
                   total: resourceFindings.data.total,

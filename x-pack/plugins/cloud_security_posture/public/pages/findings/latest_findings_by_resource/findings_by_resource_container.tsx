@@ -109,7 +109,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
               <FindingsDistributionBar
                 {...{
                   type: i18n.translate(
-                    'xpack.csp.findingsByResourceTableHeader.tableRowTypeLabel',
+                    'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
                     { defaultMessage: 'Resources' }
                   ),
                   total: findingsGroupByResource.data.total,

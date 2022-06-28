@@ -87,7 +87,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
               <FindingsDistributionBar
                 {...{
-                  type: i18n.translate('xpack.csp.latestFindingsTableHeader.tableRowTypeLabel', {
+                  type: i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
                     defaultMessage: 'Findings',
                   }),
                   total: findingsGroupByNone.data.total,
