@@ -7,8 +7,6 @@
 
 import { Rule, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 
-export const DEFAULT_SEARCH_PAGE_SIZE: number = 25;
-
 export const OBSERVABILITY_SOLUTIONS = ['logs', 'uptime', 'infrastructure', 'apm'];
 
 export type InitialRule = Partial<Rule> &
