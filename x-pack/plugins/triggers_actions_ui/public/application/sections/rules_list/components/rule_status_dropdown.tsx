@@ -62,11 +62,20 @@ const PREV_SNOOZE_INTERVAL_KEY = 'triggersActionsUi_previousSnoozeInterval';
 export const usePreviousSnoozeInterval: (
   p?: string | null
 ) => [string | null, (n: string) => void] = (propsInterval) => {
-  const intervalFromStorage = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
+  let intervalFromStorage = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
+  if (intervalFromStorage) {
+    try {
+      parseInterval(intervalFromStorage);
+    } catch (e) {
+      intervalFromStorage = null;
+      localStorage.removeItem(PREV_SNOOZE_INTERVAL_KEY);
+    }
+  }
   const usePropsInterval = typeof propsInterval !== 'undefined';
   const interval = usePropsInterval ? propsInterval : intervalFromStorage;
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(interval);
   const storeAndSetPreviousSnoozeInterval = (newInterval: string) => {
+    if (newInterval.startsWith('-')) throw new Error('Cannot store a negative interval');
     if (!usePropsInterval) {
       localStorage.setItem(PREV_SNOOZE_INTERVAL_KEY, newInterval);
     }
@@ -426,6 +435,7 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
       <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">
         <EuiFlexItem>
           <EuiFieldNumber
+            min={1}
             value={intervalValue}
             onChange={onChangeValue}
             aria-label={i18n.translate(
@@ -456,6 +466,7 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            disabled={!intervalValue || intervalValue < 1}
             isLoading={isLoading}
             onClick={onClickApplyButton}
             data-test-subj="ruleSnoozeApply"
