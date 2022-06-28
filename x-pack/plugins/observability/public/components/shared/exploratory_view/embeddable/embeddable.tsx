@@ -48,6 +48,7 @@ export interface ExploratoryEmbeddableProps {
   singleMetricOptions?: SingleMetricOptions;
   title?: string | JSX.Element;
   withActions?: boolean | ActionTypes[];
+  align?: 'left' | 'right' | 'center';
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -78,6 +79,7 @@ export default function Embeddable({
   title,
   withActions = true,
   lensFormulaHelper,
+  align,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
@@ -139,7 +141,7 @@ export default function Embeddable({
   }
 
   return (
-    <Wrapper $customHeight={customHeight}>
+    <Wrapper $customHeight={customHeight} align={align}>
       <EuiFlexGroup alignItems="center" gutterSize="none">
         {title && (
           <EuiFlexItem data-test-subj="exploratoryView-title">
@@ -212,6 +214,7 @@ export default function Embeddable({
 
 const Wrapper = styled.div<{
   $customHeight?: string | number;
+  align?: 'left' | 'right' | 'center';
 }>`
   height: 100%;
   &&& {
@@ -231,10 +234,25 @@ const Wrapper = styled.div<{
     .embPanel__optionsMenuPopover {
       visibility: collapse;
     }
+    .expExpressionRenderer__expression {
+      padding-top: 0;
+    }
 
     &&&:hover {
       .embPanel__optionsMenuPopover {
         visibility: visible;
+      }
+    }
+    .mtrVis > :first-child {
+      justify-content: ${(props) =>
+        props.align === 'left' ? `flex-start;` : props.align === 'right' ? `flex-end;` : 'center;'};
+      .mtrVis__container {
+        padding-top: 0;
+        padding-left: ${(props) => (props.align === 'left' ? `0` : '16px;')};
+        padding-right: ${(props) => (props.align === 'right' ? `0` : '16px;')};
+      }
+      > :first-child {
+        transform: none !important;
       }
     }
   }

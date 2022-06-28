@@ -22,6 +22,7 @@ export const AvailabilityPanel = () => {
   return (
     <>
       <ExploratoryViewEmbeddable
+        align="left"
         reportType={ReportTypes.SINGLE_METRIC}
         attributes={[
           {
