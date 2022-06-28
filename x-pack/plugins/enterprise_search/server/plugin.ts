@@ -49,7 +49,6 @@ import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler';
-import { registerIndexRoutes } from './routes/enterprise_search/indices';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -165,7 +164,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerEnterpriseSearchRoutes(dependencies);
     registerWorkplaceSearchRoutes(dependencies);
     // Enterprise Search Routes
-    registerIndexRoutes(dependencies);
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
 
