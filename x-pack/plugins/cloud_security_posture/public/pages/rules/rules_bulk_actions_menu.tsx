@@ -6,8 +6,8 @@
  */
 import React, { useState } from 'react';
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as TEST_SUBJECTS from './test_subjects';
-import * as TEXT from './translations';
 
 interface RulesBulkActionsMenuProps {
   items: ReadonlyArray<React.ComponentProps<typeof EuiContextMenuItem>>;
@@ -35,7 +35,10 @@ export const RulesBulkActionsMenu = ({ items }: RulesBulkActionsMenuProps) => {
       onClick={onButtonClick}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_BULK_MENU_BUTTON}
     >
-      {TEXT.BULK_ACTIONS}
+      <FormattedMessage
+        id="xpack.csp.rules.rulesBulkActionsMenu.bulkActionsButtonLabel"
+        defaultMessage="Bulk Actions"
+      />
     </EuiButtonEmpty>
   );
 
