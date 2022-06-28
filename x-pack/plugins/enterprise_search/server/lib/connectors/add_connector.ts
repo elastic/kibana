@@ -8,10 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
-
-interface ConnectorDocument {
-  index_name: string;
-}
+import { Connector } from '../../types/connector';
 
 export const createConnectorsIndex = async (client: IScopedClusterClient): Promise<void> => {
   const index = CONNECTORS_INDEX;
@@ -20,45 +17,46 @@ export const createConnectorsIndex = async (client: IScopedClusterClient): Promi
 
 const createConnector = async (
   index: string,
-  document: ConnectorDocument,
+  document: Connector,
   client: IScopedClusterClient
-): Promise<{ id: string; apiKey: string }> => {
+): Promise<{ id: string; index_name: string }> => {
   const result = await client.asCurrentUser.index({
-    index,
     document,
+    index,
   });
   await client.asCurrentUser.indices.create({ index: document.index_name });
-  const apiKeyResult = await client.asCurrentUser.security.createApiKey({
-    name: `${document.index_name}-connector`,
-    role_descriptors: {
-      [`${document.index_name}-connector-name`]: {
-        cluster: [],
-        index: [
-          {
-            names: [document.index_name, index],
-            privileges: ['all'],
-          },
-        ],
-      },
-    },
-  });
-  return { apiKey: apiKeyResult.encoded, id: result._id };
+
+  return { id: result._id, index_name: document.index_name };
 };
 
 export const addConnector = async (
   client: IScopedClusterClient,
-  document: ConnectorDocument
-): Promise<{ apiKey: string; id: string }> => {
+  input: { index_name: string }
+): Promise<{ id: string; index_name: string }> => {
   const index = CONNECTORS_INDEX;
+  const document: Connector = {
+    api_key_id: null,
+    configuration: {},
+    created_at: null,
+    index_name: input.index_name,
+    last_seen: null,
+    last_synced: null,
+    scheduling: { enabled: false, interval: null },
+    service_type: null,
+    status: 'not connected',
+    sync_error: null,
+    sync_now: false,
+    sync_status: null,
+  };
   try {
-    return createConnector(index, document, client);
+    return await createConnector(index, document, client);
   } catch (error) {
     if (error.statusCode === 404) {
       // This means .ent-search-connectors index doesn't exist yet
       // So we first have to create it, and then try inserting the document again
       // TODO: Move index creation to Kibana startup instead
       await createConnectorsIndex(client);
-      return createConnector(index, document, client);
+      return await createConnector(index, document, client);
     } else {
       throw error;
     }
