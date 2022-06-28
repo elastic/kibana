@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useReducer, Dispatch } from 'react';
 import { merge } from 'lodash';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
@@ -72,7 +73,14 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   }));
 
   /**
-   * `permissions` prop may change by the parent plugin.
+   * Only update the context if the nested permissions fields changed, this avoids a rerender when the object's reference
+   * changes.
+   */
+  useDeepCompareEffect(() => {
+    setValue((prev) => ({ ...prev, permissions }));
+  }, [permissions]);
+
+  /**
    * `appId` and `appTitle` are dynamically retrieved from kibana context.
    * We need to update the state if any of these values change, the rest of props are never updated.
    */
@@ -82,7 +90,6 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
         ...prev,
         appId,
         appTitle,
-        permissions,
       }));
     }
   }, [appTitle, appId, permissions]);

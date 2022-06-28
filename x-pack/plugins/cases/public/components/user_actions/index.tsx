@@ -27,6 +27,7 @@ import type { UserActionTreeProps } from './types';
 import { getDescriptionUserAction } from './description';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
@@ -90,7 +91,6 @@ export const UserActions = React.memo(
     onUpdateField,
     statusActionButton,
     useFetchAlertData,
-    userCanCrud,
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
@@ -121,7 +121,6 @@ export const UserActions = React.memo(
         <AddComment
           id={NEW_COMMENT_ID}
           caseId={caseId}
-          userCanCrud={userCanCrud}
           ref={(element) => (commentRefs.current[NEW_COMMENT_ID] = element)}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
@@ -129,14 +128,7 @@ export const UserActions = React.memo(
           statusActionButton={statusActionButton}
         />
       ),
-      [
-        caseId,
-        userCanCrud,
-        handleUpdate,
-        handleManageMarkdownEditId,
-        statusActionButton,
-        commentRefs,
-      ]
+      [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
     );
 
     useEffect(() => {
@@ -155,7 +147,6 @@ export const UserActions = React.memo(
           commentRefs,
           manageMarkdownEditIds,
           isLoadingDescription,
-          userCanCrud,
           onUpdateField,
           handleManageMarkdownEditId,
           handleManageQuote,
@@ -165,7 +156,6 @@ export const UserActions = React.memo(
         commentRefs,
         manageMarkdownEditIds,
         isLoadingDescription,
-        userCanCrud,
         onUpdateField,
         handleManageMarkdownEditId,
         handleManageQuote,
@@ -192,7 +182,6 @@ export const UserActions = React.memo(
               caseServices,
               comments: caseData.comments,
               index,
-              userCanCrud,
               commentRefs,
               manageMarkdownEditIds,
               selectedOutlineCommentId,
@@ -218,7 +207,6 @@ export const UserActions = React.memo(
         descriptionCommentListObj,
         caseData,
         caseServices,
-        userCanCrud,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
@@ -237,7 +225,9 @@ export const UserActions = React.memo(
       ]
     );
 
-    const bottomActions = userCanCrud
+    const { permissions } = useCasesContext();
+
+    const bottomActions = permissions.all
       ? [
           {
             username: (

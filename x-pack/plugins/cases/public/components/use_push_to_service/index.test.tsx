@@ -70,7 +70,6 @@ describe('usePushToService', () => {
     hasDataToPush: true,
     onEditClick,
     isValidConnector: true,
-    userCanCrud: true,
   };
 
   beforeEach(() => {
@@ -281,8 +280,6 @@ describe('usePushToService', () => {
   });
 
   describe('user does not have write permissions', () => {
-    const noWriteProps = { ...defaultArgs, userCanCrud: false };
-
     it('does not display a message when user does not have a premium license', async () => {
       useFetchActionLicenseMock.mockImplementation(() => ({
         isLoading: false,
@@ -293,7 +290,7 @@ describe('usePushToService', () => {
       }));
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () => usePushToService(noWriteProps),
+          () => usePushToService(defaultArgs),
           {
             wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
           }
@@ -313,7 +310,7 @@ describe('usePushToService', () => {
       }));
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () => usePushToService(noWriteProps),
+          () => usePushToService(defaultArgs),
           {
             wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
           }
@@ -328,7 +325,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connectors: [],
               connector: {
                 id: 'none',
@@ -351,7 +348,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connector: {
                 id: 'none',
                 name: 'none',
@@ -373,7 +370,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connector: {
                 id: 'not-exist',
                 name: 'not-exist',
@@ -396,7 +393,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connectors: [],
               connector: {
                 id: 'not-exist',
@@ -420,7 +417,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               caseStatus: CaseStatuses.closed,
             }),
           {

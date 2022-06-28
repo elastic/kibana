@@ -23,6 +23,7 @@ import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { ErrorMessage } from './callout/types';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface UsePushToService {
   caseId: string;
@@ -33,7 +34,6 @@ export interface UsePushToService {
   hasDataToPush: boolean;
   isValidConnector: boolean;
   onEditClick: () => void;
-  userCanCrud: boolean;
 }
 
 export interface ReturnUsePushToService {
@@ -50,8 +50,8 @@ export const usePushToService = ({
   hasDataToPush,
   isValidConnector,
   onEditClick,
-  userCanCrud,
 }: UsePushToService): ReturnUsePushToService => {
+  const { permissions } = useCasesContext();
   const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
   const { isLoading: loadingLicense, data: actionLicense = null } = useGetActionLicense();
@@ -76,7 +76,7 @@ export const usePushToService = ({
 
     // these message require that the user do some sort of write action as a result of the message, readonly users won't
     // be able to perform such an action so let's not display the error to the user in that situation
-    if (!userCanCrud) {
+    if (!permissions.all) {
       return errors;
     }
 
@@ -114,7 +114,7 @@ export const usePushToService = ({
 
     return errors;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, userCanCrud]);
+  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, permissions]);
 
   const pushToServiceButton = useMemo(
     () => (
@@ -126,7 +126,7 @@ export const usePushToService = ({
           isLoading ||
           loadingLicense ||
           errorsMsg.length > 0 ||
-          !userCanCrud ||
+          !permissions.all ||
           !isValidConnector ||
           !hasDataToPush
         }
@@ -146,7 +146,7 @@ export const usePushToService = ({
       hasDataToPush,
       isLoading,
       loadingLicense,
-      userCanCrud,
+      permissions,
       isValidConnector,
     ]
   );

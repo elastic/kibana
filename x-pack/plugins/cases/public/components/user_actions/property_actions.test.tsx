@@ -24,7 +24,6 @@ const props = {
   isLoading: false,
   onEdit,
   onQuote,
-  userCanCrud: true,
 };
 
 describe('UserActionPropertyActions ', () => {

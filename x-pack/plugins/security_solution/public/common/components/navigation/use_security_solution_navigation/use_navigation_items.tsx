@@ -65,7 +65,7 @@ export const usePrimaryNavigationItems = ({
 };
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
-  const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
+  const hasCasesReadPermissions = useGetUserCasesPermissions().read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
   const uiCapabilities = useKibana().services.application.capabilities;

@@ -12,6 +12,7 @@ import { useKibana } from '../../lib/kibana/kibana_react';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
 import { LensAttributes } from './types';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 const owner = APP_ID;
 
@@ -19,13 +20,12 @@ export const useAddToExistingCase = ({
   onAddToCaseClicked,
   lensAttributes,
   timeRange,
-  userCanCrud,
 }: {
   onAddToCaseClicked?: () => void;
   lensAttributes: LensAttributes | null;
   timeRange: { from: string; to: string } | null;
-  userCanCrud: boolean;
 }) => {
+  const userPermissions = useGetUserCasesPermissions();
   const { cases } = useKibana().services;
   const attachments = useMemo(() => {
     return [
@@ -54,6 +54,6 @@ export const useAddToExistingCase = ({
 
   return {
     onAddToExistingCaseClicked,
-    disabled: lensAttributes == null || timeRange == null || !userCanCrud,
+    disabled: lensAttributes == null || timeRange == null || !userPermissions.crud,
   };
 };

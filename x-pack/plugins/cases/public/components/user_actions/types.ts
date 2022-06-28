@@ -29,7 +29,6 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
   useFetchAlertData: UseFetchAlertData;
-  userCanCrud: boolean;
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
@@ -41,7 +40,6 @@ export interface UserActionBuilderArgs {
   caseServices: CaseServices;
   comments: Comment[];
   index: number;
-  userCanCrud: boolean;
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
   >;
