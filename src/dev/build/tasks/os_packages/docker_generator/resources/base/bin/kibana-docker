@@ -126,6 +126,7 @@ kibana_vars=(
     monitoring.ui.max_bucket_size
     monitoring.ui.min_interval_seconds
     newsfeed.enabled
+    node.roles
     ops.cGroupOverrides.cpuAcctPath
     ops.cGroupOverrides.cpuPath
     ops.interval

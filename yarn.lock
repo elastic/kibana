@@ -3167,6 +3167,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-node-server-mocks@link:bazel-bin/packages/core/node/core-node-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-node-server@link:bazel-bin/packages/core/node/core-node-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
   version "0.0.0"
   uid ""
@@ -6631,6 +6643,18 @@
   uid ""
 
 "@types/kbn__core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-node-server-mocks@link:bazel-bin/packages/core/node/core-node-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-node-server@link:bazel-bin/packages/core/node/core-node-server/npm_module_types":
   version "0.0.0"
   uid ""
 
