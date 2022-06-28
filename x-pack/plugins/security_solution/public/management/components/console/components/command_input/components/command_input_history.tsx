@@ -25,7 +25,7 @@ export const CommandInputHistory = memo(() => {
   const isMounted = useIsMounted();
   const dispatch = useConsoleStateDispatch();
   const inputHistory = useWithInputHistory();
-  const [priorInputText] = useState(useWithInputTextEntered().textEntered);
+  const [priorInputState] = useState(useWithInputTextEntered());
   const optionWasSelected = useRef(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const hasInputHistory = inputHistory.length > 0;
@@ -140,11 +140,17 @@ export const CommandInputHistory = memo(() => {
 
     return () => {
       if (!optionWasSelected.current) {
-        dispatch({ type: 'updateInputTextEnteredState', payload: { textEntered: priorInputText } });
+        dispatch({
+          type: 'updateInputTextEnteredState',
+          payload: {
+            textEntered: priorInputState.textEntered,
+            rightOfCursor: priorInputState.rightOfCursor,
+          },
+        });
         dispatch({ type: 'updateInputPlaceholderState', payload: { placeholder: '' } });
       }
     };
-  }, [dispatch, optionWasSelected, priorInputText]);
+  }, [dispatch, optionWasSelected, priorInputState]);
 
   return (
     <EuiSelectable
