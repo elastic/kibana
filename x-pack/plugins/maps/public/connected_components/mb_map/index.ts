@@ -27,7 +27,6 @@ import {
   getLayerList,
   getMapReady,
   getMapSettings,
-  getScrollZoom,
   getSpatialFiltersLayer,
   getTimeslice,
 } from '../../selectors/map_selectors';
@@ -47,7 +46,6 @@ function mapStateToProps(state: MapStoreState) {
     spatialFiltersLayer: getSpatialFiltersLayer(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
-    scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
     timeslice: getTimeslice(state),
     featureModeActive:

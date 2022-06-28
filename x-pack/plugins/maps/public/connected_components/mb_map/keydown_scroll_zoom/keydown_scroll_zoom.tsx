@@ -9,13 +9,14 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Map as MbMap, MapMouseEvent } from '@kbn/mapbox-gl';
 
 interface Props {
   mbMap: MbMap;
 }
 
 interface State {
-  show: boolean
+  show: boolean;
 }
 
 export class KeydownScrollZoom extends Component<Props, State> {
@@ -24,7 +25,7 @@ export class KeydownScrollZoom extends Component<Props, State> {
 
   state: State = {
     show: false,
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -36,7 +37,7 @@ export class KeydownScrollZoom extends Component<Props, State> {
     this.props.mbMap.off('wheel', this._onWheel);
   }
 
-  _onWheel = (event) => {
+  _onWheel = (event: MapMouseEvent) => {
     if (this._hideTimeout) {
       clearTimeout(this._hideTimeout);
       this._hideTimeout = undefined;
@@ -48,17 +49,17 @@ export class KeydownScrollZoom extends Component<Props, State> {
     }
 
     this.setState({ show: true });
-    this._hideTimeout  = setTimeout(() => {
+    this._hideTimeout = setTimeout(() => {
       if (this._isMounted) {
         this.setState({ show: false });
       }
     }, 500);
     event.preventDefault();
-  }
+  };
 
   render() {
     return (
-      <div 
+      <div
         className={classNames('mapKeydownScrollZoom', {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           mapKeydownScrollZoom__show: this.state.show,
@@ -75,7 +76,8 @@ export class KeydownScrollZoom extends Component<Props, State> {
           <h2>
             <EuiTextColor color="ghost">
               {i18n.translate('xpack.maps.keydownScrollZoom.keydownClickAndDragZoomInstructions', {
-                defaultMessage: 'Use shift + click and drag to zoom the map to fit within a bounding box',
+                defaultMessage:
+                  'Use shift + click and drag to zoom the map to fit within a bounding box',
               })}
             </EuiTextColor>
           </h2>
@@ -84,6 +86,3 @@ export class KeydownScrollZoom extends Component<Props, State> {
     );
   }
 }
-
-  
-  
