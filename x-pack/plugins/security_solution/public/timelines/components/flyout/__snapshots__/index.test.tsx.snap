@@ -215,7 +215,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
     data-test-subj="flyoutBottomBar"
   >
     <div
-      class="euiPanel euiPanel--plain euiPanel--paddingSmall c0 emotion-euiPanel-none-s-plain"
+      class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-none-s-plain"
       data-test-subj="timeline-flyout-header-panel"
       style="background-color: rgb(255, 255, 255); color: rgb(52, 55, 65);"
     >
@@ -274,8 +274,11 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <div
-                        class="euiHealth c3 emotion-euiHealth-s"
+                        class="euiHealth c2 emotion-euiHealth-s"
                       >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                        >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero"
                           >
@@ -309,11 +312,15 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
       </div>
     </div>
     <div
-      class="euiPanel euiPanel--plain c5 emotion-euiPanel-grow-m-plain-hasShadow"
+      class="euiPanel euiPanel--plain c4 emotion-euiPanel-grow-m-plain-hasShadow"
     >
       <div
         aria-label="You are in the timeline query area, which contains groups of data providers that query for events"
+        class="c5 drop-target-data-providers-container"
       >
+        <div
+          class="c6 drop-target-data-providers"
+          data-test-subj="dataProviders"
         >
           <div
             class="c7"
@@ -329,7 +336,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                 class="c9"
               >
                 <div
-                  class="euiText c11 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
+                  class="euiText c10 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
                 >
                   Drop anything
                 </div>
@@ -337,7 +344,11 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   class="c11"
                 >
                   <span
+                    class="euiBadge euiBadge--iconLeft c12 highlighted-drop-target"
                     style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+                    title="highlighted"
+                  >
+                    <span
                       class="euiBadge__content"
                     >
                       <span
@@ -349,7 +360,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   </span>
                 </span>
                 <div
-                  class="euiText c11 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
+                  class="euiText c10 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
                 >
                   here to build an
                 </div>
@@ -361,11 +372,15 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   <span
                     class="euiBadge__content"
                   >
+                    <span
                       class="euiBadge__text"
+                    >
+                      OR
+                    </span>
                   </span>
                 </span>
                 <div
-                  class="euiText c11 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
+                  class="euiText c10 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
                 >
                   query
                 </div>
@@ -381,7 +396,11 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                     class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
                     data-test-subj="addField"
                     type="button"
+                  >
                     <span
+                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                    >
+                      <span
                         class="euiButtonEmpty__text"
                       >
                         <div
