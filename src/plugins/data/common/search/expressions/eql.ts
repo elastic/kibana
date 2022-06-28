@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, Query } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -107,7 +107,7 @@ export const getEqlFn = ({
         const esQueryConfigs = getEsQueryConfig(uiSettingsClient as any);
         const query = buildEsQuery(
           dataview,
-          input.query || [],
+          (input.query as Query) || [],
           input.filters || [],
           esQueryConfigs
         );

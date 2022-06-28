@@ -13,7 +13,7 @@ import { adaptToExpressionValueFilter, DataViewField } from '../..';
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ExecutionContextSearch = {
   filters?: Filter[];
-  query?: Query | AggregateQuery | Query[];
+  query?: Query | AggregateQuery | Array<Query | AggregateQuery>;
   timeRange?: TimeRange;
 };
 

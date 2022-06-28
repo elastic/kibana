@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from '@kbn/core/server';
-import { buildEsQuery } from '@kbn/es-query';
+import { buildEsQuery, Query } from '@kbn/es-query';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import {
@@ -171,7 +171,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
 
             params.filter = buildEsQuery(
               undefined,
-              input.query || [],
+              (input.query as Query) || [],
               [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
               esQueryConfigs
             );

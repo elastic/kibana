@@ -158,7 +158,7 @@ type QueryLanguage = 'lucene' | 'kuery';
  * extra filter pill.
  */
 export function combineQueryAndFilters(
-  query: Query | AggregateQuery | Query[] | undefined,
+  query: Query | AggregateQuery | Array<Query | AggregateQuery> | undefined,
   filters: Filter[],
   meta: LayerMetaInfo,
   dataViews: DataViewBase[] | undefined
