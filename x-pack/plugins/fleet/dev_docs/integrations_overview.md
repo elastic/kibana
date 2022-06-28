@@ -1,10 +1,10 @@
 # Overview of Integrations
 
-Integrations are distinctly installable assets that contain all the necessary configuration for an "out of the box" experience for various pieces of software, third party services, and even internal Elastic products that can be installed and configured via Fleet. Integrations tell Elastic Agent where and how to retrieve data, and how it should be ingested into Elasticsearch.
+Elastic Agent integrations are mechanisms for installing assets that provide an opinionated "out of the box" experience for ingesting data from various pieces of software, third party services, and even internal Elastic products. Fleet provides an interface for installing and managing these integrations. Integrations tell Elastic Agent where and how to retrieve data, and how it should be ingested into Elasticsearch.
 
 In terms of what an integration actually _is_, it's a set of mostly YML files in a particular directory structure with particular naming conventions. These conventions are captured in a specification maintained by Elastic called the [package spec](https://github.com/elastic/package-spec/).
 
-This document will detail some of the key files and fields that we'll commonly deal with in Fleet, and will attempt to provide an informed mental model around integrations. We'll use Fleet's integration policy editor UI to show how integrations' configuration files are translated into the Fleet interface we present to users.
+This document will detail some of the key files and fields defined by the package spec that we'll commonly deal with in Fleet, and will attempt to provide an informed mental model around integrations. We'll use Fleet's integration policy editor UI to show how integrations' configuration files are translated into the Fleet interface we present to users.
 
 ## References
 
@@ -83,7 +83,7 @@ It's important to note that integration also define variables at the data stream
 
 Each integration includes a `data_stream` directory that contains configuration for, well, [data streams](https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams.html).
 
-Data streams are a construct in Elasticsearch designed for storing "append-only" time series data across multiple backing indices. They give Elastic Agent an easy and performant way to ingest loggin and monitoring data into Elasticsearch.
+Data streams are a construct in Elasticsearch designed for storing "append-only" time series data across multiple backing indices. They give Elastic Agent an easy and performant way to ingest logs and metrics data into Elasticsearch.
 
 Inside of the `data_stream` directory, each data stream is defined as its own directory. For example, the Nginx integration's `data_stream` [directory](https://github.com/elastic/integrations/tree/main/packages/nginx/data_stream) contains three data streams:
 
@@ -91,15 +91,19 @@ Inside of the `data_stream` directory, each data stream is defined as its own di
 2. `error`
 3. `substatus`
 
+Elastic Agent data streams conform to a [naming schema](https://www.elastic.co/blog/an-introduction-to-the-elastic-data-stream-naming-scheme) of `{type}-{dataset}-{namespace}`. The `type` of a data stream is either `logs` or `metrics`. The `dataset` of a datastream is controlled in most cases by an interpolation of the integration's `name` field and the directory name containing the data stream's `manifest.yml` file. The `namespace` value is provided by the user for the purpose of grouping or organizing data.
+
 Each data stream directory contains a `manifest.yml` file that controls the configuration for the data stream, as well as Elasticsearch/Kibana assets, configuration for Agent, and more. Generally, though, the `manifest.yml` file is the most critical one in a given data stream directory.
 
-In a data streams `manifest.yml` file, the integration defines a list of `streams`. Each item in that `streams` list is tied to a single `input`, and defines its own list of `vars` that controls the set of form fields that appear in the policy editor UI.
+In a data stream's `manifest.yml` file, the integration defines a list of `streams`. Each item in that `streams` list is tied to a single `input`, and defines its own list of `vars` that controls the set of form fields that appear in the policy editor UI.
 
 For example, the Nginx integration's `access` data stream defines an entry in its `streams` list tied to the `logfile` input mentioned above that includes variables like `paths` and `tags`. The variables appear as form fields in the policy editor UI as below:
 
 ![Nginx data streams screenshot](https://user-images.githubusercontent.com/6766512/171729648-3936f0a8-2487-4862-8732-b0b93748274f.png)
 
 The "Nginx access logs" fieldset we see in the policy editor UI is defined [here](https://github.com/elastic/integrations/blob/main/packages/nginx/data_stream/access/manifest.yml#L4-L40) in the `data_streams/access/manifest.yml` file within the Nginx integration. It's `input` value is set to `logfile`, so it appears under the "Collect logs from Nginx instances" section in the policy editor. The `title` and `description` values control what appears on the left-hand side to describe the fieldset.
+
+For more information on data streams, see Fleet's dev docs [here](https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/dev_docs/data_streams.md).
 
 ## Relationship diagram
 
