@@ -41,6 +41,30 @@ describe('tasks/lib/licenses', () => {
       }).toThrow(PACKAGE.name);
     });
 
+    it('throw an error when the packages license is invalid and not overriden', () => {
+      expect(() => {
+        assertLicensesValid({
+          packages: [PACKAGE],
+          validLicenses: [`not ${PACKAGE.licenses[0]}`],
+          perPackageOverrides: {
+            [`${PACKAGE.name}-${PACKAGE.version}`]: [`also not ${PACKAGE.licenses[0]}`],
+          },
+        });
+      }).toThrow(PACKAGE.name);
+    });
+
+    it('should return undefined if the package license is invalid but has an ovveride', () => {
+      expect(
+        assertLicensesValid({
+          packages: [PACKAGE],
+          validLicenses: [`not ${PACKAGE.licenses[0]}`],
+          perPackageOverrides: {
+            [`${PACKAGE.name}-${PACKAGE.version}`]: PACKAGE.licenses,
+          },
+        })
+      ).toEqual(undefined);
+    });
+
     it('throws an error when the package has no licenses', () => {
       expect(() => {
         assertLicensesValid({
