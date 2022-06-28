@@ -26,6 +26,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiTitle,
 } from '@elastic/eui';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
@@ -78,6 +79,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
   return (
     <EuiForm component={'form'} id={'startDeploymentForm'}>
       <EuiDescribedFormGroup
+        titleSize={'xxs'}
         title={
           <h3>
             <FormattedMessage
@@ -116,6 +118,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
       </EuiDescribedFormGroup>
 
       <EuiDescribedFormGroup
+        titleSize={'xxs'}
         title={
           <h3>
             <FormattedMessage
@@ -199,19 +202,21 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
         <EuiModalHeaderTitle>
           <EuiFlexGroup justifyContent={'spaceBetween'}>
             <EuiFlexItem grow={false}>
-              <h2>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
-                  defaultMessage="Start {modelId} deployment"
-                  values={{ modelId }}
-                />
-              </h2>
+              <EuiTitle size={'s'}>
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
+                    defaultMessage="Start {modelId} deployment"
+                    values={{ modelId }}
+                  />
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false} />
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
-        <EuiLink href={startModelDeploymentDocUrl} external>
+        <EuiLink href={startModelDeploymentDocUrl} external target={'_blank'}>
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.docLinkTitle"
             defaultMessage="Learn more"
