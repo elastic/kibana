@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
       await PageObjects.common.navigateToApp('lens');
 
-      const button = await testSubjects.find('createDataViewButtonFlyout');
+      const button = await testSubjects.find('createDataViewButton');
       button.click();
       await retry.waitForWithTimeout('index pattern editor form to be visible', 15000, async () => {
         return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();

@@ -44,7 +44,6 @@ import {
   schema,
   Footer,
   AdvancedParamsContent,
-  EmptyPrompts,
   PreviewPanel,
   RollupBetaWarning,
 } from '.';
@@ -62,7 +61,6 @@ export interface Props {
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
   editData?: DataView;
-  showEmptyPrompt?: boolean;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -79,7 +77,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
-  showEmptyPrompt = true,
 }: Props) => {
   const {
     services: { http, dataViews, uiSettings, searchClient, overlays },
@@ -366,75 +363,68 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   return (
-    <EmptyPrompts
-      onCancel={onCancel}
-      allSources={allSources}
-      loadSources={loadSources}
-      showEmptyPrompt={showEmptyPrompt}
-    >
-      <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-        <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
-          <EuiTitle data-test-subj="flyoutTitle">
-            <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
-          </EuiTitle>
-          <Form form={form} className="indexPatternEditor__form">
-            {indexPatternTypeSelect}
-            <EuiSpacer size="l" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <NameField editData={editData} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <TitleField
-                  isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
-                  existingIndexPatterns={existingIndexPatterns}
-                  refreshMatchedIndices={reloadMatchedIndices}
-                  matchedIndices={matchedIndices.exactMatchedIndices}
-                  rollupIndicesCapabilities={rollupIndicesCapabilities}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <TimestampField
-                  options={timestampFieldOptions}
-                  isLoadingOptions={isLoadingTimestampFields}
-                  isExistingIndexPattern={existingIndexPatterns.includes(title)}
-                  isLoadingMatchedIndices={isLoadingMatchedIndices}
-                  hasMatchedIndices={!!matchedIndices.exactMatchedIndices.length}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <AdvancedParamsContent
-              disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
-              disableId={!!editData}
-            />
-          </Form>
-          <Footer
-            onCancel={onCancel}
-            onSubmit={() => form.submit()}
-            submitDisabled={form.isSubmitted && !form.isValid}
-            isEdit={!!editData}
+    <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
+      <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
+        <EuiTitle data-test-subj="flyoutTitle">
+          <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
+        </EuiTitle>
+        <Form form={form} className="indexPatternEditor__form">
+          {indexPatternTypeSelect}
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <NameField editData={editData} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <TitleField
+                isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
+                existingIndexPatterns={existingIndexPatterns}
+                refreshMatchedIndices={reloadMatchedIndices}
+                matchedIndices={matchedIndices.exactMatchedIndices}
+                rollupIndicesCapabilities={rollupIndicesCapabilities}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <TimestampField
+                options={timestampFieldOptions}
+                isLoadingOptions={isLoadingTimestampFields}
+                isExistingIndexPattern={existingIndexPatterns.includes(title)}
+                isLoadingMatchedIndices={isLoadingMatchedIndices}
+                hasMatchedIndices={!!matchedIndices.exactMatchedIndices.length}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <AdvancedParamsContent
+            disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
+            disableId={!!editData}
           />
-        </FlyoutPanels.Item>
-        <FlyoutPanels.Item>
-          {isLoadingSources ? (
-            <></>
-          ) : (
-            <PreviewPanel
-              type={type}
-              allowHidden={allowHidden}
-              title={title}
-              matched={matchedIndices}
-            />
-          )}
-        </FlyoutPanels.Item>
-      </FlyoutPanels.Group>
-    </EmptyPrompts>
+        </Form>
+        <Footer
+          onCancel={onCancel}
+          onSubmit={() => form.submit()}
+          submitDisabled={form.isSubmitted && !form.isValid}
+          isEdit={!!editData}
+        />
+      </FlyoutPanels.Item>
+      <FlyoutPanels.Item>
+        {isLoadingSources ? (
+          <></>
+        ) : (
+          <PreviewPanel
+            type={type}
+            allowHidden={allowHidden}
+            title={title}
+            matched={matchedIndices}
+          />
+        )}
+      </FlyoutPanels.Item>
+    </FlyoutPanels.Group>
   );
 };
 

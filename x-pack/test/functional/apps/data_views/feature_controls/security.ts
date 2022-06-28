@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`index pattern listing shows create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.existOrFail('createIndexPatternButton');
+        await testSubjects.existOrFail('createDataViewButton');
       });
 
       it(`doesn't show read-only badge`, async () => {
@@ -134,7 +134,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`index pattern listing doesn't show create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('noDataViewsPrompt');
-        await testSubjects.missingOrFail('createDataViewButtonFlyout');
+        await testSubjects.missingOrFail('createDataViewButton');
       });
 
       it(`shows read-only badge`, async () => {
