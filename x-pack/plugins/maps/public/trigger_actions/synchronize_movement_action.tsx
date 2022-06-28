@@ -31,7 +31,8 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
   },
   getDisplayNameTooltip: () => {
     return i18n.translate('xpack.maps.synchronizeMovementAction.tooltipContent', {
-      defaultMessage: 'Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps',
+      defaultMessage:
+        'Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps',
     });
   },
   getIconType: () => {
