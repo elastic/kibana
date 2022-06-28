@@ -119,7 +119,7 @@ export const ResponseActionsList = memo<
     hideHeader?: boolean;
     hideHostNameColumn?: boolean;
   }
->(({ agentIds, commands, userIds, hideHeader = false, hideHostNameColumn = false }) => {
+>(({ agentIds, commands, userIds, hideHeader = false }) => {
   const getTestId = useTestIdGenerator('response-actions-list');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
     [k: ActionDetails['id']]: React.ReactNode;
@@ -284,6 +284,7 @@ export const ResponseActionsList = memo<
         itemIdToExpandedRowMapValues[item.id] = (
           <>
             <EuiFlexGroup
+              data-test-subj={getTestId('output-section')}
               direction="column"
               style={{ maxHeight: 270, overflowY: 'auto' }}
               className="eui-yScrollWithShadows"
@@ -291,7 +292,7 @@ export const ResponseActionsList = memo<
               <EuiFlexItem grow={false}>
                 <EuiFlexGrid columns={3}>
                   {[descriptionListLeft, descriptionListCenter, descriptionListRight].map(
-                    (_list) => {
+                    (_list, i) => {
                       const list = _list.map((l) => {
                         const isParameters = l.title === OUTPUT_MESSAGES.expandSection.parameters;
                         return {
@@ -306,7 +307,7 @@ export const ResponseActionsList = memo<
                       });
 
                       return (
-                        <EuiFlexItem>
+                        <EuiFlexItem key={i}>
                           <StyledDescriptionList listItems={list} />
                         </EuiFlexItem>
                       );
@@ -323,7 +324,7 @@ export const ResponseActionsList = memo<
       }
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
-    [itemIdToExpandedRowMap]
+    [getTestId, itemIdToExpandedRowMap]
   );
   // memoized callback for toggleDetails
   const onClickCallback = useCallback(
@@ -487,6 +488,7 @@ export const ResponseActionsList = memo<
         render: (data: ActionDetails) => {
           return (
             <EuiButtonIcon
+              data-test-subj={getTestId('expand-button')}
               onClick={onClickCallback(data)}
               aria-label={itemIdToExpandedRowMap[data.id] ? 'Collapse' : 'Expand'}
               iconType={itemIdToExpandedRowMap[data.id] ? 'arrowUp' : 'arrowDown'}
@@ -496,11 +498,11 @@ export const ResponseActionsList = memo<
       },
     ];
     // filter out the host column
-    if (hideHostNameColumn) {
+    if (typeof agentIds === 'string') {
       return columns.filter((column) => column.field !== 'agents');
     }
     return columns;
-  }, [getTestId, hideHostNameColumn, itemIdToExpandedRowMap, onClickCallback]);
+  }, [agentIds, getTestId, itemIdToExpandedRowMap, onClickCallback]);
 
   // table pagination
   const tablePagination = useMemo(() => {

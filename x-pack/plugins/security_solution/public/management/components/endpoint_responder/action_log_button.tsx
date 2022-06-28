@@ -36,11 +36,7 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <ResponseActionsList
-              hideHeader
-              hideHostNameColumn
-              agentIds={[props.meta.endpoint.agent.id]}
-            />
+            <ResponseActionsList hideHeader agentIds={props.meta.endpoint.agent.id} />
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

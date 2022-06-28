@@ -10,9 +10,9 @@ import dateMath from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DurationRange, OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
-import { useKibana } from '../../../../../common/lib/kibana/kibana_react';
+import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
 
 export interface DateRangePickerValues {
@@ -70,7 +70,7 @@ export const ActionListDateRangePicker = memo(
     return (
       <StickyFlexItem>
         <EuiFlexGroup justifyContent="flexStart" responsive>
-          <DatePickerWrapper data-test-subj="activityLogSuperDatePicker">
+          <DatePickerWrapper data-test-subj="actionListSuperDatePicker">
             <EuiFlexItem>
               <EuiSuperDatePicker
                 updateButtonProps={{ iconOnly: true, fill: false }}
