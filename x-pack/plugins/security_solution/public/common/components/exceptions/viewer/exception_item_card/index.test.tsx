@@ -116,8 +116,7 @@ describe('ExceptionItemCard', () => {
       .at(0)
       .simulate('click');
     wrapper
-      .find('button[data-test-subj="exceptionItemCardHeader-actionItem"]')
-      .at(0)
+      .find('button[data-test-subj="exceptionItemCardHeader-actionItem-edit"]')
       .simulate('click');
 
     expect(mockOnEditException).toHaveBeenCalledWith(getExceptionListItemSchemaMock());
@@ -146,8 +145,7 @@ describe('ExceptionItemCard', () => {
       .at(0)
       .simulate('click');
     wrapper
-      .find('button[data-test-subj="exceptionItemCardHeader-actionItem"]')
-      .at(1)
+      .find('button[data-test-subj="exceptionItemCardHeader-actionItem-delete"]')
       .simulate('click');
 
     expect(mockOnDeleteException).toHaveBeenCalledWith({

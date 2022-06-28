@@ -93,7 +93,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
           });
         }
       },
-      []
+      [dataTestSubj]
     );
 
     return (

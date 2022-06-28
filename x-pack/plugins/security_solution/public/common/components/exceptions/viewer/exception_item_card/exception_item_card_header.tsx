@@ -29,13 +29,13 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
   ({ item, actions, disableActions = false, dataTestSubj }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-    const onItemActionsClick = () => setIsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
+    const onItemActionsClick = () => setIsPopoverOpen((isOpen) => !isOpen);
     const onClosePopover = () => setIsPopoverOpen(false);
 
     const itemActions = useMemo((): EuiContextMenuPanelProps['items'] => {
       return actions.map((action) => (
         <EuiContextMenuItem
-          data-test-subj={`${dataTestSubj}-actionItem`}
+          data-test-subj={`${dataTestSubj}-actionItem-${action.key}`}
           key={action.key}
           icon={action.icon}
           onClick={() => {
@@ -46,7 +46,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
           {action.label}
         </EuiContextMenuItem>
       ));
-    }, []);
+    }, [dataTestSubj, actions]);
 
     return (
       <EuiFlexGroup data-test-subj={dataTestSubj} justifyContent="spaceBetween">

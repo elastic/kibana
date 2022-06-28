@@ -76,7 +76,7 @@ const ExceptionsViewerItemsComponent: React.FC<ExceptionsViewerItemsProps> = ({
         >
           {!isInitLoading &&
             exceptions.length > 0 &&
-            exceptions.map((exception, index) => (
+            exceptions.map((exception) => (
               <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
                 <ExceptionItemCard
                   disableActions={disableActions}
