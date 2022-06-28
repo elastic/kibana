@@ -14,6 +14,7 @@ import {
   RangeFilterParams,
   Filter,
   Query,
+  AggregateQuery,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -246,7 +247,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     dataView: DataView;
     field: DataViewField;
     filters: Filter[];
-    query?: Query;
+    query?: Query | AggregateQuery;
   }) => {
     const searchSource = await this.dataService.searchSource.create();
     searchSource.setField('size', 0);

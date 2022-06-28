@@ -9,7 +9,7 @@
 import { memoize } from 'lodash';
 
 import dateMath from '@kbn/datemath';
-import { buildEsQuery, type TimeRange } from '@kbn/es-query';
+import { buildEsQuery, type TimeRange, type Query } from '@kbn/es-query';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import {
@@ -81,7 +81,7 @@ class OptionsListService implements ControlsOptionsListService {
     const { query, filters, dataView, timeRange, field, ...passThroughProps } = request;
     const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
     const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
-    const esFilters = [buildEsQuery(dataView, query ?? [], filtersToUse ?? [])];
+    const esFilters = [buildEsQuery(dataView, (query as Query) ?? [], filtersToUse ?? [])];
     return {
       ...passThroughProps,
       filters: esFilters,
