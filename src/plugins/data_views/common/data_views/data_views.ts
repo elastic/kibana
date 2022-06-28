@@ -12,7 +12,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import uuid from 'uuid';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, DEFAULT_ASSETS_TO_IGNORE } from '..';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import { SavedObjectsClientCommon } from '../types';
 
 import { createDataViewCache } from '.';
@@ -977,15 +977,7 @@ export class DataViewsService {
     }
 
     if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
-      // try to set first user created data view as default,
-      // otherwise fallback to any data view
-      const userDataViews = patterns.filter(
-        (pattern) =>
-          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN &&
-          pattern.title !== DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN
-      );
-
-      defaultId = userDataViews[0]?.id ?? patterns[0].id;
+      defaultId = patterns[0].id;
       if (await this.getCanSaveAdvancedSettings()) {
         await this.config.set('defaultIndex', defaultId);
       }
