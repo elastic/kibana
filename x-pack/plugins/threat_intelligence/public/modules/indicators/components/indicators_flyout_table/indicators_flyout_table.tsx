@@ -7,7 +7,9 @@
 
 import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
 import React, { VFC } from 'react';
-import { Indicator } from '../../../../common/types/Indicator';
+import { EMPTY_VALUE } from '../../../../../common/constants';
+import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/Indicator';
+import { unwrapValue } from '../../lib/unwrap_value';
 
 export const EMPTY_PROMPT_TEST_ID = 'tiFlyoutTableEmptyPrompt';
 export const TABLE_TEST_ID = 'tiFlyoutTableMemoryTable';
@@ -33,9 +35,13 @@ const search = {
 
 export const IndicatorsFlyoutTable: VFC<{ indicator: Indicator }> = ({ indicator }) => {
   const items: Array<{ field: string; value: string }> = [];
-  for (const key in indicator) {
-    if (!indicator.hasOwnProperty(key)) continue;
-    items.push({ field: key, value: indicator[key] });
+
+  for (const key in indicator.fields) {
+    if (!indicator.fields.hasOwnProperty(key)) continue;
+    items.push({
+      field: key,
+      value: unwrapValue(indicator, key as RawIndicatorFieldId) || EMPTY_VALUE,
+    });
   }
 
   return items.length === 0 ? (

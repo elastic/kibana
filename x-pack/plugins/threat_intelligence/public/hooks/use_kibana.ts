@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { ThreatIntelligencePlugin } from './plugin';
+import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ThreatIntelligencePlugin(initializerContext);
-}
+import { Services } from '../types';
+
+const useTypedKibana = () => useKibana<Services>();
+
+export { KibanaContextProvider, useTypedKibana as useKibana };

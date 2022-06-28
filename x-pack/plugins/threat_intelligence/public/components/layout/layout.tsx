@@ -22,26 +22,24 @@ const ROOT_HEADER = 'Threat intelligence';
 
 export const displayName = 'DefaultPageLayout';
 
-export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle }) => {
-  return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiPageHeader pageTitle={ROOT_HEADER}>
-          Elastic threat intelligence help you see if you are open to or have been subject to
-          current or historical known threats
-        </EuiPageHeader>
-        <EuiHorizontalRule />
+export const DefaultPageLayout: FC<LayoutProps> = ({ children, pageTitle }) => (
+  <EuiPageBody>
+    <EuiPageContent>
+      <EuiPageHeader pageTitle={ROOT_HEADER}>
+        Elastic threat intelligence help you see if you are open to or have been subject to current
+        or historical known threats
+      </EuiPageHeader>
+      <EuiHorizontalRule />
 
-        {pageTitle && (
-          <EuiText>
-            <h2 data-testid={`${displayName}-subheader`}>{pageTitle}</h2>
-          </EuiText>
-        )}
+      {pageTitle && (
+        <EuiText>
+          <h2 data-testid={`${displayName}-subheader`}>{pageTitle}</h2>
+        </EuiText>
+      )}
 
-        {children}
-      </EuiPageContent>
-    </EuiPageBody>
-  );
-};
+      {children}
+    </EuiPageContent>
+  </EuiPageBody>
+);
 
 DefaultPageLayout.displayName = displayName;

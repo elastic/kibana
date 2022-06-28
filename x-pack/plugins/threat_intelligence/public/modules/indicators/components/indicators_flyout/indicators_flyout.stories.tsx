@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Story } from '@storybook/react';
-import { generateMockIndicator, Indicator } from '../../../../common/types/Indicator';
+import { generateMockIndicator, Indicator } from '../../../../../common/types/Indicator';
 import { IndicatorsFlyout } from './indicators_flyout';
 
 export default {
@@ -25,7 +25,7 @@ export const Default: Story<void> = () => {
 export const EmtpyIndicator: Story<void> = () => {
   return (
     <IndicatorsFlyout
-      indicator={{} as unknown as Indicator}
+      indicator={{ fields: {} } as Indicator}
       // eslint-disable-next-line no-console
       closeFlyout={() => console.log('closing')}
     />

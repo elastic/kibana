@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import { EuiButton, EuiPage, EuiPageSideBar, EuiSideNav, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPage,
+  EuiPageSideBar,
+  EuiSideNav,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import type { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
 import React, { useCallback, VFC } from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect, Route, RouteComponentProps, Router, withRouter } from 'react-router-dom';
 import { DefaultPageLayout } from './components/layout';
-import { CoreStartProvider } from './context/core_start';
-import { SourcesPage } from './modules/sources/sources_page';
 import { IndicatorsPage } from './modules/indicators/indicators_page';
+import { KibanaContextProvider } from './hooks/use_kibana';
+import { Services } from './types';
 
 interface AppProps {
   history: ScopedHistory;
-  coreStart: CoreStart;
+  services: CoreStart;
 }
 
 const ROUTES = {
@@ -61,7 +68,7 @@ const VIEW_SOURCES_LABEL = 'View sources';
 const VIEW_INDICATORS_LABEL = 'View indicators';
 
 const Home: VFC<RouteComponentProps> = ({ history }) => {
-  const handleGoToSources = useCallback(() => history.push(ROUTES.sources), [history]);
+  const handleGoToSources = useCallback(() => history.push(ROUTES.indicators), [history]);
   const handleGoToIndicators = useCallback(() => history.push(ROUTES.indicators), [history]);
 
   return (
@@ -78,29 +85,28 @@ const Home: VFC<RouteComponentProps> = ({ history }) => {
   );
 };
 
-export const App: VFC<AppProps> = ({ history, coreStart }) => {
+export const App: VFC<AppProps> = ({ history, services }) => {
   return (
-    <CoreStartProvider value={coreStart}>
+    <KibanaContextProvider services={services}>
       <Router history={history}>
         <EuiPage>
           <EuiPageSideBar>
             <Nav />
           </EuiPageSideBar>
-          <Route path="/" exact render={() => <Redirect to={ROUTES.sources} />} />
+          <Route path="/" exact render={() => <Redirect to={ROUTES.indicators} />} />
           <Route path={ROUTES.home} exact component={Home} />
-          <Route path={ROUTES.sources} exact component={SourcesPage} />
           <Route path={ROUTES.indicators} exact component={IndicatorsPage} />
         </EuiPage>
       </Router>
-    </CoreStartProvider>
+    </KibanaContextProvider>
   );
 };
 
 /**
  * This is an entry point to the plugin. This should be lazy loaded in the plugin root composition file.
  */
-export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<App history={history} coreStart={coreStart} />, element);
+export const renderApp = (services: Services, { history, element }: AppMountParameters) => {
+  ReactDOM.render(<App history={history} services={services} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
