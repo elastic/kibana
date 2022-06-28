@@ -113,16 +113,3 @@ export type UploadHttpEndpoint = HttpApiInterfaceEntryDefinition<
   any,
   { ok: true }
 >;
-
-/**
- * Types describing the full files public HTTP API interface
- */
-export interface HttpApiInterface {
-  create: CreateHttpEndpoint;
-  delete: DeleteHttpEndpoint;
-  download: DownloadHttpEndpoint;
-  getById: GetByIdHttpEndpoint;
-  list: ListHttpEndpoint;
-  update: UpdateHttpEndpoint;
-  upload: UploadHttpEndpoint;
-}

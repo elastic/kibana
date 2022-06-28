@@ -18,6 +18,9 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
   return {
     create(args) {
       return http.post(FILE_KIND_API_ROUTES_FILLED.getCreateFileRoute(fileKind), {
+        headers: {
+          'content-type': 'application/json',
+        },
         body: JSON.stringify(args),
       });
     },
@@ -37,6 +40,9 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
     },
     update({ id, ...body }) {
       return http.patch(FILE_KIND_API_ROUTES_FILLED.getUpdateRoute(fileKind, id), {
+        headers: {
+          'content-type': 'application/json',
+        },
         body: JSON.stringify(body),
       });
     },
