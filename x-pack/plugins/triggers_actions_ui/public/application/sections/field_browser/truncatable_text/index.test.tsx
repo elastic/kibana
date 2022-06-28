@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import { matchers } from '@emotion/jest';
 import React from 'react';
 
 import { TruncatableText } from '.';
 
+expect.extend(matchers);
+
 describe('TruncatableText', () => {
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<TruncatableText>{'Hiding in plain sight'}</TruncatableText>);
-    expect(wrapper).toMatchSnapshot();
-  });
-
   test('it adds the hidden overflow style', () => {
-    const wrapper = mount(<TruncatableText>{'Hiding in plain sight'}</TruncatableText>);
+    const wrapper = render(<TruncatableText>{'content text'}</TruncatableText>);
 
-    expect(wrapper).toHaveStyleRule('overflow', 'hidden');
+    expect(wrapper.getByText('content text')).toHaveStyleRule('overflow', 'hidden');
   });
 
   test('it adds the ellipsis text-overflow style', () => {
-    const wrapper = mount(<TruncatableText>{'Dramatic pause'}</TruncatableText>);
+    const wrapper = render(<TruncatableText>{'content text'}</TruncatableText>);
 
-    expect(wrapper).toHaveStyleRule('text-overflow', 'ellipsis');
+    expect(wrapper.getByText('content text')).toHaveStyleRule('text-overflow', 'ellipsis');
   });
 
   test('it adds the nowrap white-space style', () => {
-    const wrapper = mount(<TruncatableText>{'Who stopped the beats?'}</TruncatableText>);
+    const wrapper = render(<TruncatableText>{'content text'}</TruncatableText>);
 
-    expect(wrapper).toHaveStyleRule('white-space', 'nowrap');
+    expect(wrapper.getByText('content text')).toHaveStyleRule('white-space', 'nowrap');
   });
 });

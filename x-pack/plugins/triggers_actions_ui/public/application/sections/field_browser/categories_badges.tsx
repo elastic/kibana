@@ -4,26 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
 import React, { useCallback } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { styles } from './categories_badges.styles';
 
 export interface CategoriesBadgesProps {
   setSelectedCategoryIds: (categoryIds: string[]) => void;
   selectedCategoryIds: string[];
 }
 
-const CategoriesBadgesGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.euiSizeXS};
-  min-height: 24px;
-`;
-CategoriesBadgesGroup.displayName = 'CategoriesBadgesGroup';
+type CategoriesBadgesWithThemeProps = CategoriesBadgesProps & { theme: EuiTheme };
 
-const CategoriesBadgesComponent: React.FC<CategoriesBadgesProps> = ({
+const CategoriesBadgesComponent: React.FC<CategoriesBadgesWithThemeProps> = ({
   setSelectedCategoryIds,
   selectedCategoryIds,
+  theme,
 }) => {
   const onUnselectCategory = useCallback(
     (categoryId: string) => {
@@ -35,7 +33,12 @@ const CategoriesBadgesComponent: React.FC<CategoriesBadgesProps> = ({
   );
 
   return (
-    <CategoriesBadgesGroup data-test-subj="category-badges" gutterSize="xs" wrap>
+    <EuiFlexGroup
+      css={styles.badgesGroup({ theme })}
+      data-test-subj="category-badges"
+      gutterSize="xs"
+      wrap
+    >
       {selectedCategoryIds.map((categoryId) => (
         <EuiFlexItem grow={false} key={categoryId}>
           <EuiBadge
@@ -50,8 +53,8 @@ const CategoriesBadgesComponent: React.FC<CategoriesBadgesProps> = ({
           </EuiBadge>
         </EuiFlexItem>
       ))}
-    </CategoriesBadgesGroup>
+    </EuiFlexGroup>
   );
 };
 
-export const CategoriesBadges = React.memo(CategoriesBadgesComponent);
+export const CategoriesBadges = React.memo(withTheme(CategoriesBadgesComponent));

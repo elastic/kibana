@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useMemo, useState } from 'react';
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { omit } from 'lodash';
 import {
+  EuiBadge,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -19,13 +21,8 @@ import {
 } from '@elastic/eui';
 import type { BrowserFields } from './types';
 import * as i18n from './translations';
-import {
-  CountBadge,
-  getFieldCount,
-  CategoryName,
-  CategorySelectableContainer,
-  isEscape,
-} from './helpers';
+import { getFieldCount, isEscape } from './helpers';
+import { styles } from './categories_selector.styles';
 
 interface CategoriesSelectorProps {
   /**
@@ -62,15 +59,15 @@ const renderOption = (option: CategoryOption, searchValue: string) => {
       justifyContent="spaceBetween"
     >
       <EuiFlexItem grow={false}>
-        <CategoryName
+        <span
+          css={styles.categoryName({ bold: checked === 'on' })}
           data-test-subj={`categories-selector-option-name-${idAttr}`}
-          bold={checked === 'on'}
         >
           <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-        </CategoryName>
+        </span>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <CountBadge>{count}</CountBadge>
+        <EuiBadge css={styles.countBadge}>{count}</EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -148,7 +145,8 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
         closePopover={closePopover}
         panelPaddingSize="none"
       >
-        <CategorySelectableContainer
+        <div
+          css={styles.selectableContainer}
           onKeyDown={onKeyDown}
           data-test-subj="categories-selector-container"
         >
@@ -163,13 +161,13 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
             onChange={onCategoriesChange}
           >
             {(list, search) => (
-              <>
+              <Fragment>
                 {search}
                 {list}
-              </>
+              </Fragment>
             )}
           </EuiSelectable>
-        </CategorySelectableContainer>
+        </div>
       </EuiPopover>
     </EuiFilterGroup>
   );

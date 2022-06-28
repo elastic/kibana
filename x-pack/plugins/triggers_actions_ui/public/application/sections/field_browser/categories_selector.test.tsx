@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
 import { render } from '@testing-library/react';
-import React from 'react';
+import { matchers } from '@emotion/jest';
 import { mockBrowserFields } from './mock';
-
 import { CategoriesSelector } from './categories_selector';
+
+expect.extend(matchers);
 
 const mockSetSelectedCategoryIds = jest.fn();
 const defaultProps = {

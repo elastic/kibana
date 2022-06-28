@@ -5,20 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
-
 import { BrowserField, BrowserFields } from './types';
-
-export const LoadingSpinner = styled(EuiLoadingSpinner)`
-  cursor: pointer;
-  position: relative;
-  top: 3px;
-`;
-
-LoadingSpinner.displayName = 'LoadingSpinner';
 
 export const FIELD_BROWSER_WIDTH = 925;
 export const TABLE_HEIGHT = 260;
@@ -178,19 +166,3 @@ export const isEscape = (event: React.KeyboardEvent): boolean => event.key === '
 export const CATEGORY_TABLE_CLASS_NAME = 'category-table';
 export const CLOSE_BUTTON_CLASS_NAME = 'close-button';
 export const RESET_FIELDS_CLASS_NAME = 'reset-fields';
-
-export const CountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-` as unknown as typeof EuiBadge;
-
-CountBadge.displayName = 'CountBadge';
-
-export const CategoryName = styled.span<{ bold: boolean }>`
-  font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
-`;
-CategoryName.displayName = 'CategoryName';
-
-export const CategorySelectableContainer = styled.div`
-  width: 300px;
-`;
-CategorySelectableContainer.displayName = 'CategorySelectableContainer';

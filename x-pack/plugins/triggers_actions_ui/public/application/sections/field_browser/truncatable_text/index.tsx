@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+/** @jsx jsx */
+import { jsx, css } from '@emotion/react';
+import React from 'react';
 
 /**
  * Applies CSS styling to enable text to be truncated with an ellipsis.
@@ -14,8 +14,7 @@ import styled from 'styled-components';
  *
  * Note: Requires a parent container with a defined width or max-width.
  */
-
-export const TruncatableText = styled.span`
+const styles = css`
   &,
   & * {
     display: inline-block;
@@ -26,4 +25,5 @@ export const TruncatableText = styled.span`
     white-space: nowrap;
   }
 `;
-TruncatableText.displayName = 'TruncatableText';
+
+export const TruncatableText: React.FC = ({ children }) => <span css={styles}>{children}</span>;

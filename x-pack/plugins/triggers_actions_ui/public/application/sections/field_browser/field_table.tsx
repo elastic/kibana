@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiInMemoryTable, Pagination, Direction } from '@elastic/eui';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
 import type { BrowserFields, GetFieldTableColumns } from './types';
 import { FieldTableHeader } from './field_table_header';
+import { styles } from './field_table.styles';
 
 const DEFAULT_SORTING: { field: string; direction: Direction } = {
   field: '',
@@ -48,20 +49,9 @@ export interface FieldTableProps {
   onHide: () => void;
 }
 
-const TableContainer = styled.div<{ height: number }>`
-  margin-top: ${({ theme }) => theme.eui.euiSizeXS};
-  border-top: ${({ theme }) => theme.eui.euiBorderThin};
-  ${({ height }) => `height: ${height}px`};
-  overflow: hidden;
-`;
-TableContainer.displayName = 'TableContainer';
+type FieldTableWithThemeProps = FieldTableProps & { theme: EuiTheme };
 
-const Count = styled.span`
-  font-weight: bold;
-`;
-Count.displayName = 'Count';
-
-const FieldTableComponent: React.FC<FieldTableProps> = ({
+const FieldTableComponent: React.FC<FieldTableWithThemeProps> = ({
   columnIds,
   filteredBrowserFields,
   filterSelectedEnabled,
@@ -71,6 +61,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   onFilterSelectedChange,
   onToggleColumn,
   onHide,
+  theme,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -140,14 +131,14 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 
   return (
-    <>
+    <Fragment>
       <FieldTableHeader
         fieldCount={fieldItems.length}
         filterSelectedEnabled={filterSelectedEnabled}
         onFilterSelectedChange={onFilterSelectedChange}
       />
 
-      <TableContainer height={TABLE_HEIGHT}>
+      <div css={styles.tableContainer({ height: TABLE_HEIGHT, theme })}>
         <EuiInMemoryTable
           data-test-subj="field-table"
           className={`${CATEGORY_TABLE_CLASS_NAME} eui-yScroll`}
@@ -160,9 +151,8 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
           onChange={onTableChange}
           compressed
         />
-      </TableContainer>
-    </>
+      </div>
+    </Fragment>
   );
 };
-
-export const FieldTable = React.memo(FieldTableComponent);
+export const FieldTable = React.memo(withTheme(FieldTableComponent));

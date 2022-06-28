@@ -4,29 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 
 import type { FieldBrowserProps, BrowserFields } from './types';
 import { FieldBrowserModal } from './field_browser_modal';
 import { filterBrowserFieldsByFieldName, filterSelectedBrowserFields } from './helpers';
 import * as i18n from './translations';
+import { styles } from './field_browser.styles';
 
 const FIELDS_BUTTON_CLASS_NAME = 'fields-button';
 
 /** wait this many ms after the user completes typing before applying the filter input */
 export const INPUT_TIMEOUT = 250;
 
-const FieldBrowserButtonContainer = styled.div`
-  display: inline-block;
-  position: relative;
-`;
-
-FieldBrowserButtonContainer.displayName = 'FieldBrowserButtonContainer';
 /**
  * Manages the state of the field browser
  */
@@ -123,7 +117,7 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
   );
 
   return (
-    <FieldBrowserButtonContainer data-test-subj="fields-browser-button-container">
+    <div css={styles.buttonContainer} data-test-subj="fields-browser-button-container">
       <EuiToolTip content={i18n.FIELDS_BROWSER}>
         <EuiButtonEmpty
           aria-label={i18n.FIELDS_BROWSER}
@@ -161,7 +155,7 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
           width={width}
         />
       )}
-    </FieldBrowserButtonContainer>
+    </div>
   );
 };
 

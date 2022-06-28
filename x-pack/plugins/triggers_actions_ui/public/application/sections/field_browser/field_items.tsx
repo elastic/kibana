@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React from 'react';
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
+import { Fragment } from 'react';
 import {
   EuiCheckbox,
   EuiIcon,
@@ -18,8 +19,6 @@ import {
   EuiTableActionsColumnType,
 } from '@elastic/eui';
 import { uniqBy } from 'lodash/fp';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 
 import { getEmptyValue, getExampleText, getIconFromType } from './helpers';
 import type {
@@ -31,19 +30,7 @@ import type {
 import { TruncatableText } from './truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
-
-const TypeIcon = styled(EuiIcon)`
-  margin: 0 4px;
-  position: relative;
-  top: -1px;
-`;
-TypeIcon.displayName = 'TypeIcon';
-
-export const Description = styled.span`
-  user-select: text;
-  width: 400px;
-`;
-Description.displayName = 'Description';
+import { styles } from './field_items.style';
 
 /**
  * Returns the field items of all categories selected
@@ -92,8 +79,9 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiToolTip content={type}>
-              <TypeIcon
+              <EuiIcon
                 data-test-subj={`field-${name}-icon`}
+                css={styles.icon}
                 type={getIconFromType(type ?? null)}
               />
             </EuiToolTip>
@@ -113,16 +101,16 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
     name: i18n.DESCRIPTION,
     render: (description: string, { name, example }) => (
       <EuiToolTip content={description}>
-        <>
+        <Fragment>
           <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
             <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
           </EuiScreenReaderOnly>
           <TruncatableText>
-            <Description data-test-subj={`field-${name}-description`}>
+            <span css={styles.description} data-test-subj={`field-${name}-description`}>
               {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
-            </Description>
+            </span>
           </TruncatableText>
-        </>
+        </Fragment>
       </EuiToolTip>
     ),
     sortable: true,

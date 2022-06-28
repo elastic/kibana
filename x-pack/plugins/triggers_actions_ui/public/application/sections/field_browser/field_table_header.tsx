@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+/** @jsx jsx */
+import { jsx } from '@emotion/react';
 import React, { useCallback, useState } from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 import {
   EuiText,
   EuiPopover,
@@ -19,17 +18,13 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import * as i18n from './translations';
+import { styles } from './field_table_header.styles';
 
 export interface FieldTableHeaderProps {
   fieldCount: number;
   filterSelectedEnabled: boolean;
   onFilterSelectedChange: (enabled: boolean) => void;
 }
-
-const Count = styled.span`
-  font-weight: bold;
-`;
-Count.displayName = 'Count';
 
 const FieldTableHeaderComponent: React.FC<FieldTableHeaderProps> = ({
   fieldCount,
@@ -51,7 +46,10 @@ const FieldTableHeaderComponent: React.FC<FieldTableHeaderProps> = ({
       <EuiFlexItem>
         <EuiText data-test-subj="fields-showing" size="xs">
           {i18n.FIELDS_SHOWING}
-          <Count data-test-subj="fields-count"> {fieldCount} </Count>
+          <span css={styles.count} data-test-subj="fields-count">
+            {' '}
+            {fieldCount}{' '}
+          </span>
           {i18n.FIELDS_COUNT(fieldCount)}
         </EuiText>
       </EuiFlexItem>
