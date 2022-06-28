@@ -41,7 +41,6 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
             consoleProps: {
               commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
               'data-test-subj': 'endpointResponseActionsConsole',
-              prompt: `endpoint-${endpointMetadata.agent.version}`,
               TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
