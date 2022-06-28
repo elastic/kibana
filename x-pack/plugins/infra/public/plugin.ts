@@ -98,7 +98,7 @@ export class Plugin implements InfraClientPluginClass {
             ...(capabilities.infrastructure.show
               ? [
                   {
-                    label: 'Metrics',
+                    label: 'Infrastructure',
                     sortKey: 300,
                     entries: [
                       { label: 'Inventory', app: 'metrics', path: '/inventory' },
