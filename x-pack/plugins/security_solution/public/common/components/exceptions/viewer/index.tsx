@@ -243,10 +243,10 @@ const ExceptionsViewerComponent = ({
   );
 
   const handleAddException = useCallback(
-    (type: ExceptionListTypeEnum): void => {
+    (): void => {
       dispatch({
         type: 'updateExceptionListTypeToEdit',
-        exceptionListType: type,
+        exceptionListType: 'detection',
       });
       setCurrentModal('addException');
     },
@@ -376,7 +376,6 @@ const ExceptionsViewerComponent = ({
 
       {currentModal === 'addException' && exceptionListTypeToEdit != null && (
         <AddExceptionFlyout
-          showAlertCloseOptions={true}
           ruleName={ruleName}
           ruleIndices={ruleIndices}
           dataViewId={dataViewId}
@@ -402,25 +401,12 @@ const ExceptionsViewerComponent = ({
           <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
         )}
         {!showEmpty && (
-          <>
-            <ExceptionsViewerHeader
-              isInitLoading={isInitLoading}
-              supportedListTypes={supportedListTypes}
-              detectionsListItems={totalDetectionsItems}
-              endpointListItems={totalEndpointItems}
-              onFilterChange={handleFilterChange}
-              onAddExceptionClick={handleAddException}
-            />
-            <EuiSpacer size="l" />
-
-            <ExceptionsViewerUtility
-              pagination={pagination}
-              showEndpointListsOnly={showEndpointListsOnly}
-              showDetectionsListsOnly={showDetectionsListsOnly}
-              onRefreshClick={handleFetchList}
-              ruleSettingsUrl={ruleSettingsUrl}
-            />
-          </>
+          <ExceptionsViewerHeader
+            isInitLoading={isInitLoading}
+            exceptionListContainers={[]}
+            onFilterChange={handleFilterChange}
+            onAddExceptionClick={handleAddException}
+          />
         )}
 
         <ExceptionItemsViewer

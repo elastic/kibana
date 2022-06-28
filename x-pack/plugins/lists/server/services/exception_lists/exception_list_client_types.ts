@@ -586,7 +586,7 @@ export interface FindExceptionListPointInTimeFinderOptions {
  */
 export interface FindExceptionListItemsPointInTimeFinderOptions {
   /** The "list_id" to find against */
-  listId: NonEmptyStringArrayDecoded;
+  listId: NonEmptyStringArrayDecoded | undefined;
   /** "agnostic" | "single" of your namespace */
   namespaceType: NamespaceTypeArray;
   /** The filter to apply in the search */

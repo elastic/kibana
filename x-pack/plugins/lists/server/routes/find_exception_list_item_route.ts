@@ -42,38 +42,50 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
           namespace_type: namespaceType,
           page,
           per_page: perPage,
+          pit,
+          search_after: searchAfter,
           sort_field: sortField,
           sort_order: sortOrder,
         } = request.query;
 
-        if (listId.length !== namespaceType.length) {
+        if (listId != null && listId.length !== namespaceType.length) {
           return siemResponse.error({
             body: `list_id and namespace_id need to have the same comma separated number of values. Expected list_id length: ${listId.length} to equal namespace_type length: ${namespaceType.length}`,
             statusCode: 400,
           });
         } else {
-          const exceptionListItems = await exceptionLists.findExceptionListsItem({
+          const core = await context.core;
+          const savedObjectsClient = core.savedObjects.getClient();
+          const pitId = pit ?? await savedObjectsClient.openPointInTimeForType(
+            'exceptionItems',
+            { keepAlive: '5m' },
+          );
+        
+          const items = await exceptionLists.findExceptionListsItem({
             filter,
             listId,
             namespaceType,
             page,
             perPage,
-            pit: undefined,
-            searchAfter: undefined,
+            pit: pitId,
+            searchAfter,
             sortField,
             sortOrder,
           });
-          if (exceptionListItems == null) {
-            return siemResponse.error({
-              body: `exception list id: "${listId}" does not exist`,
-              statusCode: 404,
-            });
-          }
-          const [validated, errors] = validate(exceptionListItems, foundExceptionListItemSchema);
+          
+          const searchAfterValue = items.saved_objects[items.saved_objects.length - 1].sort;
+
+          const [validated, errors] = validate(items, foundExceptionListItemSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {
-            return response.ok({ body: validated ?? {} });
+            return response.ok({
+              body: {
+                ...validated,
+                pit: { id: validated.pit, keepAlive: '2m' },
+                searchAfter: searchAfterValue
+              } ?? {} 
+            });
           }
         }
       } catch (err) {

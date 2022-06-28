@@ -36,7 +36,7 @@ export const FIRST_LINKED_LIST_CALLOUT_TITLE = i18n.translate('xpack.securitySol
 });
 
 export const FIRST_LINKED_LIST_CALLOUT_BODY = i18n.translate('xpack.securitySolution.exceptions.createExceptionList.firstLinkedListCalloutBody', {
-  defaultMessage: 'You need to create an exception list. If you would like to create an exception for an existing list, go to Manage --> Exception lists page.',
+  defaultMessage: 'You need to create an exception list first. If you would like to create an exception for an existing list, go to Manage --> Exception lists page.',
 });
 
 export const exceptionListCreateSuccessMessage = (listId: string) =>

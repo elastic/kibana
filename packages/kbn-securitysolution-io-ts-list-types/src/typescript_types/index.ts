@@ -173,6 +173,17 @@ export interface ApiCallByListIdProps {
   signal: AbortSignal;
 }
 
+export interface ApiCallFindItemsProps {
+  http: HttpStart;
+  listIds: string[] | undefined;
+  namespaceTypes: NamespaceType[];
+  filters: string[];
+  searchAfter: string[] | undefined;
+  pit: { id: string; keepAlive: string; } | undefined;
+  pagination: Partial<Pagination>;
+  signal: AbortSignal;
+}
+
 export type AddExceptionList = UpdateExceptionListSchema | CreateExceptionListSchema;
 
 export interface PersistHookProps {

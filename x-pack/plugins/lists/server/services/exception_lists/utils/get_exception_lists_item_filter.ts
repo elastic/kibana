@@ -18,19 +18,32 @@ export const getExceptionListsItemFilter = ({
   listId,
   savedObjectType,
 }: {
-  listId: NonEmptyStringArrayDecoded;
+  listId: NonEmptyStringArrayDecoded | undefined;
   filter: EmptyStringArrayDecoded;
   savedObjectType: SavedObjectType[];
 }): string => {
-  return listId.reduce((accum, singleListId, index) => {
-    const escapedListId = escapeQuotes(singleListId);
-    const listItemAppend = `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: "${escapedListId}")`;
-    const listItemAppendWithFilter =
-      filter[index] != null ? `(${listItemAppend} AND ${filter[index]})` : listItemAppend;
-    if (accum === '') {
-      return listItemAppendWithFilter;
-    } else {
-      return `${accum} OR ${listItemAppendWithFilter}`;
-    }
-  }, '');
+  if (listId == null) {
+    return savedObjectType.reduce((accum, soType, index) => {
+      const soTypeAppend = `(${soType}.attributes.list_type: item)`;
+      const listItemAppendWithFilter =
+        filter[index] != null ? `(${soTypeAppend} AND ${filter[index]})` : soTypeAppend;
+      if (accum === '') {
+        return listItemAppendWithFilter;
+      } else {
+        return `${accum} OR ${listItemAppendWithFilter}`;
+      }
+    }, '');
+  } else {
+    return listId.reduce((accum, singleListId, index) => {
+      const escapedListId = escapeQuotes(singleListId);
+      const listItemAppend = `(${savedObjectType[index]}.attributes.list_type: item AND ${savedObjectType[index]}.attributes.list_id: "${escapedListId}")`;
+      const listItemAppendWithFilter =
+        filter[index] != null ? `(${listItemAppend} AND ${filter[index]})` : listItemAppend;
+      if (accum === '') {
+        return listItemAppendWithFilter;
+      } else {
+        return `${accum} OR ${listItemAppendWithFilter}`;
+      }
+    }, '');
+  }
 };

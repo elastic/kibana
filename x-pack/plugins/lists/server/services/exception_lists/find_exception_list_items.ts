@@ -25,7 +25,6 @@ import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import { transformSavedObjectsToFoundExceptionListItem } from './utils';
-import { getExceptionList } from './get_exception_list';
 import { getExceptionListsItemFilter } from './utils/get_exception_lists_item_filter';
 
 interface FindExceptionListItemsOptions {
@@ -54,33 +53,18 @@ export const findExceptionListsItem = async ({
   sortOrder,
 }: FindExceptionListItemsOptions): Promise<FoundExceptionListItemSchema | null> => {
   const savedObjectType = getSavedObjectTypes({ namespaceType });
-  const exceptionLists = (
-    await Promise.all(
-      listId.map((singleListId, index) => {
-        return getExceptionList({
-          id: undefined,
-          listId: singleListId,
-          namespaceType: namespaceType[index],
-          savedObjectsClient,
-        });
-      })
-    )
-  ).filter((list) => list != null);
-  if (exceptionLists.length === 0) {
-    return null;
-  } else {
-    const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
-      filter: getExceptionListsItemFilter({ filter, listId, savedObjectType }),
-      page,
-      perPage,
-      pit,
-      searchAfter,
-      sortField,
-      sortOrder,
-      type: savedObjectType,
-    });
-    return transformSavedObjectsToFoundExceptionListItem({
-      savedObjectsFindResponse,
-    });
-  }
+  
+  const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
+    filter: getExceptionListsItemFilter({ filter, listId, savedObjectType }),
+    page,
+    perPage,
+    pit,
+    searchAfter,
+    sortField,
+    sortOrder,
+    type: savedObjectType,
+  });
+  return transformSavedObjectsToFoundExceptionListItem({
+    savedObjectsFindResponse,
+  });
 };

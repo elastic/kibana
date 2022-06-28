@@ -21,24 +21,22 @@ import {
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';
+import { pitId } from '../../common/pit';
+import { search_after } from '../../common/search_after';
 
-export const findExceptionListItemSchema = t.intersection([
-  t.exact(
-    t.type({
-      list_id: NonEmptyStringArray,
-    })
-  ),
-  t.exact(
-    t.partial({
-      filter: EmptyStringArray, // defaults to an empty array [] if not set during decode
-      namespace_type: DefaultNamespaceArray, // defaults to ['single'] if not set during decode
-      page: StringToPositiveNumber, // defaults to undefined if not set during decode
-      per_page: StringToPositiveNumber, // defaults to undefined if not set during decode
-      sort_field, // defaults to undefined if not set during decode
-      sort_order, // defaults to undefined if not set during decode
-    })
-  ),
-]);
+export const findExceptionListItemSchema = t.exact(
+  t.partial({
+    list_id: NonEmptyStringArray, // defaults to undefined if not set during decode
+    filter: EmptyStringArray, // defaults to an empty array [] if not set during decode
+    namespace_type: DefaultNamespaceArray, // defaults to ['single'] if not set during decode
+    page: StringToPositiveNumber, // defaults to undefined if not set during decode
+    per_page: StringToPositiveNumber, // defaults to undefined if not set during decode
+    pit: pitId, // defaults to undefined if not set during decode
+    search_after, // defaults to undefined if not set during decode
+    sort_field, // defaults to undefined if not set during decode
+    sort_order, // defaults to undefined if not set during decode
+  })
+);
 
 export type FindExceptionListItemSchema = t.OutputOf<typeof findExceptionListItemSchema>;
 

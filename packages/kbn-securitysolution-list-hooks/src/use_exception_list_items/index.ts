@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   ExceptionListItemSchema,
   Pagination,
   UseExceptionListProps,
   FilterExceptionsOptions,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { fetchExceptionListsItemsByListIds } from '@kbn/securitysolution-list-api';
+import { fetchExceptionItems } from '@kbn/securitysolution-list-api';
 
 import { getIdsAndNamespaces } from '@kbn/securitysolution-list-utils';
 import { transformInput } from '../transforms';
@@ -44,15 +44,14 @@ export type ReturnExceptionListAndItems = [
 export const useExceptionListItems = ({
   http,
   lists,
+  filters,
+  pit,
+  searchAfter,
   pagination = {
     page: 1,
     perPage: 20,
     total: 0,
   },
-  filterOptions,
-  showDetectionsListsOnly,
-  showEndpointListsOnly,
-  matchFilters,
   onError,
   onSuccess,
 }: UseExceptionListProps): ReturnExceptionListAndItems => {
@@ -60,17 +59,17 @@ export const useExceptionListItems = ({
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
   const fetchExceptionListsItems = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
-  const { ids, namespaces } = getIdsAndNamespaces({
-    lists,
-    showDetection: showDetectionsListsOnly,
-    showEndpoint: showEndpointListsOnly,
-  });
-  const filters: FilterExceptionsOptions[] =
-    matchFilters && filterOptions.length > 0 ? ids.map(() => filterOptions[0]) : filterOptions;
-  const idsAsString: string = ids.join(',');
-  const namespacesAsString: string = namespaces.join(',');
-  const filterAsString: string = filterOptions.map(({ filter }) => filter).join(',');
-  const filterTagsAsString: string = filterOptions.map(({ tags }) => tags.join(',')).join(',');
+  const { ids, namespaces } = useMemo(() => {
+    if (lists != null) {
+      return getIdsAndNamespaces({
+        lists,
+        showDetection: true,
+        showEndpoint: false,
+      });
+    } else {
+      return { ids: undefined, namespaces: ['single', 'agnostic'] };
+    }
+  }, [lists]);
 
   useEffect(
     () => {
@@ -81,65 +80,50 @@ export const useExceptionListItems = ({
         try {
           setLoading(true);
 
-          if (ids.length === 0 && isSubscribed) {
-            setPagination({
-              page: 0,
+          const {
+            page,
+            per_page: perPage,
+            total,
+            pit: pitId,
+            search_after: searchAfterValue,
+            data,
+          } = await fetchExceptionItems({
+            filters,
+            http,
+            listIds: ids,
+            namespaceTypes: namespaces,
+            pagination: {
+              page: pagination.page,
               perPage: pagination.perPage,
-              total: 0,
+            },
+            pit,
+            searchAfter,
+            signal: abortCtrl.signal,
+          });
+
+          // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+          // for context around the temporary `id`
+          const transformedData = data.map((item) => transformInput(item));
+
+          if (isSubscribed) {
+            setPagination({
+              page,
+              perPage,
+              total,
             });
-            setExceptionListItems([]);
+            setExceptionListItems(transformedData);
 
             if (onSuccess != null) {
               onSuccess({
-                exceptions: [],
+                items: transformedData,
                 pagination: {
-                  page: 0,
-                  perPage: pagination.perPage,
-                  total: 0,
+                  page,
+                  perPage,
+                  total,
                 },
+                pit: pitId,
+                searchAfter: searchAfterValue,
               });
-            }
-            setLoading(false);
-          } else {
-            const {
-              page,
-              per_page: perPage,
-              total,
-              data,
-            } = await fetchExceptionListsItemsByListIds({
-              filterOptions: filters,
-              http,
-              listIds: ids,
-              namespaceTypes: namespaces,
-              pagination: {
-                page: pagination.page,
-                perPage: pagination.perPage,
-              },
-              signal: abortCtrl.signal,
-            });
-
-            // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
-            // for context around the temporary `id`
-            const transformedData = data.map((item) => transformInput(item));
-
-            if (isSubscribed) {
-              setPagination({
-                page,
-                perPage,
-                total,
-              });
-              setExceptionListItems(transformedData);
-
-              if (onSuccess != null) {
-                onSuccess({
-                  exceptions: transformedData,
-                  pagination: {
-                    page,
-                    perPage,
-                    total,
-                  },
-                });
-              }
             }
           }
         } catch (error) {
@@ -168,16 +152,11 @@ export const useExceptionListItems = ({
         isSubscribed = false;
         abortCtrl.abort();
       };
-    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
     [
       http,
-      idsAsString,
-      namespacesAsString,
-      setExceptionListItems,
-      pagination.page,
-      pagination.perPage,
-      filterAsString,
-      filterTagsAsString,
+      ids,
+      namespaces
     ]
   );
 

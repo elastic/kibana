@@ -43,3 +43,30 @@ export const EXCEPTION_LOADING_TITLE = i18n.translate(
     defaultMessage: 'Loading exceptions',
   }
 );
+
+export const CREATE_RULE_EXCEPTION_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.createRuleExceptionButtonLabel',
+  {
+    defaultMessage: 'Create rule exception',
+  }
+);
+
+export const EXCEPTION_ITEMS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.exceptionItemsSearchPlaceholder',
+  {
+    defaultMessage: 'Search on the fields below: name, description, value',
+  }
+);
+
+export const exceptionItemsListFilterLabel = (numberLists: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.viewer.searchFilterLabel', {
+    values: { numberLists },
+    defaultMessage: 'Exception {numberLists, plural, =1 {list} other {lists}} [{numberLists}]',
+  });
+
+export const EXCEPTION_LISTS_FETCH_ERROR_TOASTER = i18n.translate(
+  'xpack.securitySolution.exceptions.viewer.exceptionListsFetchErrorDescription',
+  {
+    defaultMessage: 'Error fetching exception lists',
+  }
+);

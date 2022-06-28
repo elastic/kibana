@@ -25,6 +25,7 @@ import {
   AddExceptionListProps,
   ApiCallByIdProps,
   ApiCallByListIdProps,
+  ApiCallFindItemsProps,
   ApiCallFetchExceptionListsProps,
   ExportExceptionListProps,
   UpdateExceptionListItemProps,
@@ -317,6 +318,80 @@ const fetchExceptionListByIdWithValidation = async ({
   )();
 
 export { fetchExceptionListByIdWithValidation as fetchExceptionListById };
+
+/**
+ * Fetch an ExceptionList's ExceptionItems by providing a ExceptionList list_id
+ *
+ * @param http Kibana http service
+ * @param listIds ExceptionList list_ids (not ID)
+ * @param namespaceTypes ExceptionList namespace_types
+ * @param filterOptions optional - filter by field or tags
+ * @param pagination optional
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+ const fetchExceptionItems = async ({
+  http,
+  listIds,
+  namespaceTypes,
+  filters,
+  pagination,
+  searchAfter,
+  pit,
+  signal,
+}: ApiCallFindItemsProps): Promise<FoundExceptionListItemSchema> => {
+  const query = {
+    list_id: listIds != null ? listIds.join(',') : undefined,
+    namespace_type: namespaceTypes.join(','),
+    page: pagination.page ? `${pagination.page}` : '1',
+    per_page: pagination.perPage ? `${pagination.perPage}` : '20',
+    sort_field: 'exception-list.created_at',
+    sort_order: 'desc',
+    filters,
+    pit,
+    searchAfter,
+  };
+
+  return http.fetch<FoundExceptionListItemSchema>(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+    method: 'GET',
+    query,
+    signal,
+  });
+};
+
+const fetchExceptionItemsWithValidation = async ({
+  http,
+  listIds,
+  namespaceTypes,
+  filters,
+  pagination,
+  searchAfter,
+  pit,
+  signal,
+}: ApiCallFindItemsProps): Promise<FoundExceptionListItemSchema> =>
+  flow(
+    () =>
+      tryCatch(
+        () =>
+          fetchExceptionItems({
+            http,
+            listIds,
+            namespaceTypes,
+            filters,
+            pagination,
+            searchAfter,
+            pit,
+            signal,
+          }),
+        toError
+      ),
+    chain((response) => fromEither(validateEither(foundExceptionListItemSchema, response))),
+    flow(toPromise)
+  )();
+
+export { fetchExceptionItemsWithValidation as fetchExceptionItems };
+
 
 /**
  * Fetch an ExceptionList's ExceptionItems by providing a ExceptionList list_id

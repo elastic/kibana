@@ -18,7 +18,7 @@ import type {
   Filter,
 } from '../types';
 
-export type ViewerFlyoutName = 'addException' | 'editException' | null;
+export type ViewerFlyoutName = 'addException' | 'editException' | 'createExceptionList' | null;
 
 export interface State {
   filterOptions: FilterOptions;

@@ -16,11 +16,11 @@ import {
 import * as i18n from './translations';
 
 interface ExeptionItemsViewerNoItemsComponentProps {
-  handleCreateExceptionList: () => void;
+  onCreateExceptionList: () => void;
 }
 
 const ExeptionItemsViewerNoItemsComponent = ({
-  handleCreateExceptionList
+  onCreateExceptionList
 }: ExeptionItemsViewerNoItemsComponentProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
@@ -42,7 +42,7 @@ const ExeptionItemsViewerNoItemsComponent = ({
           </p>
         }
         actions={
-          <EuiButton onClick={handleCreateExceptionList} iconType="plusInCircle" color="primary" fill>
+          <EuiButton onClick={onCreateExceptionList} iconType="plusInCircle" color="primary" fill>
             {i18n.EXCEPTION_EMPTY_PROMPT_BUTTON}
           </EuiButton>
         }
