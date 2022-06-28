@@ -577,10 +577,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       )}
       {showTagsAddRemove && (
         <TagsAddRemove
-          agentId={agentToAddRemoveTags?.id}
+          agentId={agentToAddRemoveTags?.id!}
           allTags={allTags ?? []}
           selectedTags={agentToAddRemoveTags?.tags ?? []}
-          button={tagsPopoverButton}
+          button={tagsPopoverButton!}
           onTagsUpdated={() => {
             fetchData();
           }}
