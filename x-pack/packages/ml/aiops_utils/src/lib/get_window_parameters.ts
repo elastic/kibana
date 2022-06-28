@@ -44,7 +44,8 @@ export const getWindowParameters = (
   const minBaselineWindow = 30 * 60 * 1000; // 30min
   const minWindowGap = 5 * 60 * 1000; // 5min
 
-  // work out bounds, with the deviation window aiming to be a 1/10
+  // work out bounds as done in the original notebooks,
+  // with the deviation window aiming to be a 1/10
   // of the size of the total window and the baseline window
   // being 3.5/10 of the total window.
   const deviationWindow = Math.max(totalWindow / 10, minDeviationWindow);
