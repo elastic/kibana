@@ -32,6 +32,7 @@ import { hasInvalidButRequiredVar, countValidationErrors } from '../../../servic
 
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
+import { useDataStreamId } from './hooks';
 
 const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
   &&& {
@@ -43,13 +44,13 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 const shouldShowStreamsByDefault = (
   packageInput: RegistryInput,
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>,
-  packagePolicyInput: NewPackagePolicyInput
+  packagePolicyInput: NewPackagePolicyInput,
+  defaultDataStreamId?: string
 ): boolean => {
   return (
-    packagePolicyInput.enabled &&
-    (hasInvalidButRequiredVar(packageInput.vars, packagePolicyInput.vars) ||
-      Boolean(
-        packageInputStreams.find(
+    (packagePolicyInput.enabled &&
+      (hasInvalidButRequiredVar(packageInput.vars, packagePolicyInput.vars) ||
+        packageInputStreams.some(
           (stream) =>
             stream.enabled &&
             hasInvalidButRequiredVar(
@@ -58,8 +59,10 @@ const shouldShowStreamsByDefault = (
                 (pkgStream) => stream.data_stream.dataset === pkgStream.data_stream.dataset
               )?.vars
             )
-        )
-      ))
+        ))) ||
+    packagePolicyInput.streams.some((stream) => {
+      return defaultDataStreamId && stream.id && stream.id === defaultDataStreamId;
+    })
   );
 };
 
@@ -83,9 +86,15 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     inputValidationResults,
     forceShowErrors,
   }) => {
+    const defaultDataStreamId = useDataStreamId();
     // Showing streams toggle state
-    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(
-      shouldShowStreamsByDefault(packageInput, packageInputStreams, packagePolicyInput)
+    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
+      shouldShowStreamsByDefault(
+        packageInput,
+        packageInputStreams,
+        packagePolicyInput,
+        defaultDataStreamId
+      )
     );
 
     // Errors state
