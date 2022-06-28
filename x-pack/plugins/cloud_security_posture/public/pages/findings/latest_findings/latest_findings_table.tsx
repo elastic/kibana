@@ -36,24 +36,6 @@ interface Props {
   onAddFilter: OnAddFilter;
 }
 
-export const getColumns = ({
-  setSelectedFinding,
-  onAddFilter,
-}: {
-  setSelectedFinding(v: CspFinding): void;
-  onAddFilter: OnAddFilter;
-}) => [
-  getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
-  createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
-  createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
-  createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
-  createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
-  createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-  baseFindingsColumns['rule.section'],
-  createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
-  baseFindingsColumns['@timestamp'],
-];
-
 const FindingsTableComponent = ({
   loading,
   items,
