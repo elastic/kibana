@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { AppLeaveHandler } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
@@ -99,6 +99,9 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         }
       : {};
 
+    // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
+    // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
+    const { colorMode: globalColorMode } = useEuiTheme();
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
      * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
@@ -111,7 +114,11 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         bottomBarProps={SecuritySolutionBottomBarProps}
         bottomBar={
-          isTimelineBottomBarVisible && <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
+          isTimelineBottomBarVisible && (
+            <EuiThemeProvider colorMode={globalColorMode}>
+              <SecuritySolutionBottomBar onAppLeave={onAppLeave} />
+            </EuiThemeProvider>
+          )
         }
         paddingSize="none"
         solutionNav={solutionNav}
