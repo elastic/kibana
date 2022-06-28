@@ -793,6 +793,39 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.runAt).to.eql(scheduledRunAt);
       });
     });
+
+    it('should allow a failed task to be rerun using runSoon', async () => {
+      const taskThatFailsBeforeRunNow = await scheduleTask({
+        taskType: 'singleAttemptSampleTask',
+        params: {
+          waitForParams: true,
+        },
+      });
+      // tell the task to fail on its next run
+      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id, {
+        failWith: 'error on first run',
+      });
+
+      // wait for task to fail
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, taskThatFailsBeforeRunNow.id).status).to.eql('failed');
+      });
+
+      // run the task again
+      await runTaskSoon({
+        id: taskThatFailsBeforeRunNow.id,
+      });
+
+      // runTaskSoon should successfully update the runAt property of the task
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(
+          Date.parse(getTaskById(tasks, taskThatFailsBeforeRunNow.id).runAt)
+        ).to.be.greaterThan(Date.parse(taskThatFailsBeforeRunNow.runAt));
+      });
+    });
+
     // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
     // it('should return the resulting task state when asked to run an ephemeral task now', async () => {
     //   const ephemeralTask = await runEphemeralTaskNow({
