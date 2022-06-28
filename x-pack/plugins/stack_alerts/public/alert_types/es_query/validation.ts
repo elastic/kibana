@@ -18,7 +18,7 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
   const errors: ExpressionErrors = defaultsDeep({}, EXPRESSION_ERRORS);
   validationResult.errors = errors;
 
-  if (Object.keys(ruleParams).length > 0 && !ruleParams.searchType) {
+  if (!ruleParams.searchType) {
     errors.searchType.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchType', {
         defaultMessage: 'Query is required.',
@@ -93,6 +93,12 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
             defaultMessage: 'Search source configuration is required.',
           }
         )
+      );
+    } else if (!ruleParams.searchConfiguration.index) {
+      errors.index.push(
+        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
+          defaultMessage: 'Data view is required.',
+        })
       );
     }
     return validationResult;
