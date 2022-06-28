@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { FilesClient as IFilesClient } from '../types';
+import type { FilesClient } from '../types';
 import { FILE_KIND_API_ROUTES_FILLED } from '../../common/api_routes';
 
 interface Args {
@@ -14,7 +14,7 @@ interface Args {
   http: HttpStart;
 }
 
-export const createFilesClient = ({ http, fileKind }: Args): IFilesClient => {
+export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
   return {
     create(args) {
       return http.post(FILE_KIND_API_ROUTES_FILLED.getCreateFileRoute(fileKind), {
