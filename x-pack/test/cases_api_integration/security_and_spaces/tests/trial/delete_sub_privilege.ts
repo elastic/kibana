@@ -10,9 +10,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { getPostCaseRequest, postCommentUserReq } from '../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
-  deleteCasesUserActions,
-  deleteComments,
+  deleteAllCaseItems,
   createCase,
   deleteCases,
   createComment,
@@ -22,8 +20,13 @@ import {
   deleteComment,
   getSpaceUrlPrefix,
   updateComment,
+  deleteAllComments,
 } from '../../../common/lib/utils';
-import { superUser, secOnlyDelete } from '../../../common/lib/authentication/users';
+import {
+  superUser,
+  secOnlyDelete,
+  secOnlyNoDelete,
+} from '../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -32,9 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('user with deletion sub privilege', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
-      await deleteComments(es);
-      await deleteCasesUserActions(es);
+      await deleteAllCaseItems(es);
     });
 
     describe('successful operations', () => {
@@ -52,6 +53,29 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteCases({
           supertest: supertestWithoutAuth,
           caseIDs: [postedCase.id],
+          expectedHttpCode: 204,
+          auth: { user: secOnlyDelete, space: 'space1' },
+        });
+      });
+
+      it(`should delete a case with a comment`, async () => {
+        const secCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        await createComment({
+          supertest: supertestWithoutAuth,
+          caseId: secCase.id,
+          params: postCommentUserReq,
+          auth: { user: superUser, space: 'space1' },
+        });
+
+        await deleteCases({
+          supertest: supertestWithoutAuth,
+          caseIDs: [secCase.id],
           expectedHttpCode: 204,
           auth: { user: secOnlyDelete, space: 'space1' },
         });
@@ -76,6 +100,36 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           caseId: secCase.id,
           commentId: commentResp.comments![0].id,
+          auth: { user: secOnlyDelete, space: 'space1' },
+        });
+      });
+
+      it(`should delete all comments from a case`, async () => {
+        const secCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+
+        await Promise.all([
+          createComment({
+            supertest: supertestWithoutAuth,
+            caseId: secCase.id,
+            params: postCommentUserReq,
+            auth: { user: superUser, space: 'space1' },
+          }),
+          createComment({
+            supertest: supertestWithoutAuth,
+            caseId: secCase.id,
+            params: postCommentUserReq,
+            auth: { user: superUser, space: 'space1' },
+          }),
+        ]);
+
+        await deleteAllComments({
+          supertest: supertestWithoutAuth,
+          caseId: secCase.id,
           auth: { user: secOnlyDelete, space: 'space1' },
         });
       });
@@ -141,6 +195,52 @@ export default ({ getService }: FtrProviderContext): void => {
               space: 'space1',
             }
           );
+        });
+
+        it(`should create a case but not delete a case`, async () => {
+          const caseInfo = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: secOnlyNoDelete,
+              space: 'space1',
+            }
+          );
+
+          await deleteCases({
+            supertest: supertestWithoutAuth,
+            caseIDs: [caseInfo.id],
+            expectedHttpCode: 403,
+            auth: { user: secOnlyDelete, space: 'space1' },
+          });
+        });
+
+        it(`should create a comment but not delete a comment`, async () => {
+          const caseInfo = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: secOnlyNoDelete,
+              space: 'space1',
+            }
+          );
+
+          const commentResp = await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            params: postCommentUserReq,
+            auth: { user: secOnlyNoDelete, space: 'space1' },
+          });
+
+          await deleteComment({
+            supertest: supertestWithoutAuth,
+            caseId: caseInfo.id,
+            commentId: commentResp.comments![0].id,
+            auth: { user: secOnlyNoDelete, space: 'space1' },
+            expectedHttpCode: 403,
+          });
         });
       });
 

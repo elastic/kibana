@@ -18,6 +18,7 @@ import {
   observabilityOnlyReadSpacesAll,
   testDisabledPluginAll,
   securitySolutionOnlyDelete,
+  securitySolutionOnlyNoDelete,
 } from './roles';
 import { User } from './types';
 
@@ -43,6 +44,12 @@ export const secOnlyDelete: User = {
   username: 'sec_only_delete',
   password: 'sec_only_delete',
   roles: [securitySolutionOnlyDelete.name],
+};
+
+export const secOnlyNoDelete: User = {
+  username: 'sec_only_no_delete',
+  password: 'sec_only_no_delete',
+  roles: [securitySolutionOnlyNoDelete.name],
 };
 
 export const secOnlyRead: User = {
@@ -92,6 +99,7 @@ export const users = [
   secOnly,
   secOnlyRead,
   secOnlyDelete,
+  secOnlyNoDelete,
   obsOnly,
   obsOnlyRead,
   obsSec,
