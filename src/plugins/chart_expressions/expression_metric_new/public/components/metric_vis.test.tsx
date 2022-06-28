@@ -246,7 +246,7 @@ describe('MetricVisComponent', function () {
 
       // overrides subtitle and extra text
       expect(visConfig!.subtitle).toBe(table.columns[2].name);
-      expect(visConfig!.extra).toEqual(<span>13.633</span>);
+      expect(visConfig!.extra).toEqual(<span>13.63</span>);
 
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
@@ -410,19 +410,19 @@ describe('MetricVisComponent', function () {
       ).toMatchInlineSnapshot(`
         Array [
           <span>
-            13.633
+            13.63
           </span>,
           <span>
-            13.640
+            13.64
           </span>,
           <span>
-            13.344
+            13.34
           </span>,
           <span>
-            13.492
+            13.49
           </span>,
           <span>
-            13.344
+            13.34
           </span>,
         ]
       `);
