@@ -84,7 +84,7 @@ export const useBulkActions = ({
   );
 
   const {
-    state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
+    state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds, isRefreshOn },
     actions: { setLoadingRules, setIsRefreshOn },
   } = rulesTableContext;
 
@@ -126,7 +126,7 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
         });
         invalidateRules();
-        setIsRefreshOn(true);
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDisableActions = async () => {
@@ -143,7 +143,7 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
         });
         invalidateRules();
-        setIsRefreshOn(true);
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDuplicateAction = async () => {
@@ -159,7 +159,7 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
-        setIsRefreshOn(true);
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDeleteAction = async () => {
@@ -169,7 +169,7 @@ export const useBulkActions = ({
         if (isAllSelected) {
           // User has cancelled deletion
           if ((await confirmDeletion()) === false) {
-            setIsRefreshOn(true);
+            setIsRefreshOn(isRefreshOn);
             return;
           }
         }
@@ -183,7 +183,7 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
-        setIsRefreshOn(true);
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleExportAction = async () => {
@@ -198,7 +198,7 @@ export const useBulkActions = ({
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
-        setIsRefreshOn(true);
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -215,13 +215,13 @@ export const useBulkActions = ({
 
         // User has cancelled edit action or there are no custom rules to proceed
         if ((await confirmBulkEdit()) === false) {
-          setIsRefreshOn(true);
+          setIsRefreshOn(isRefreshOn);
           return;
         }
 
         const editPayload = await completeBulkEditForm(bulkEditActionType);
         if (editPayload == null) {
-          setIsRefreshOn(true);
+          setIsRefreshOn(isRefreshOn);
           return;
         }
 
@@ -283,7 +283,7 @@ export const useBulkActions = ({
 
         isBulkEditFinished = true;
         invalidateRules();
-        setIsRefreshOn(true);
+        setIsRefreshOn(isRefreshOn);
         if (getIsMounted()) {
           await resolveTagsRefetch(bulkEditActionType);
         }
@@ -455,6 +455,7 @@ export const useBulkActions = ({
       filterOptions,
       getIsMounted,
       resolveTagsRefetch,
+      isRefreshOn,
     ]
   );
 };
