@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Ensure } from '@kbn/utility-types';
-import type { HttpApiInterface } from '../../../common/api_routes';
+import type { CreateHttpEndpoint } from '../../../common/api_routes';
 import type { FileKindsRequestHandler } from './types';
 import * as commonSchemas from './common_schemas';
 
@@ -20,11 +20,9 @@ export const bodySchema = schema.object({
   mime: schema.maybe(schema.string()),
 });
 
-type CreateInterface = HttpApiInterface['create'];
+type Body = Ensure<CreateHttpEndpoint['inputs']['body'], TypeOf<typeof bodySchema>>;
 
-type Body = Ensure<CreateInterface['inputs']['body'], TypeOf<typeof bodySchema>>;
-
-type Response = CreateInterface['output'];
+type Response = CreateHttpEndpoint['output'];
 
 export const handler: FileKindsRequestHandler<unknown, unknown, Body> = async (
   { fileKind, files },

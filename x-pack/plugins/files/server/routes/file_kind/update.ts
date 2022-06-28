@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
-import type { HttpApiInterface } from '../../../common/api_routes';
+import type { UpdateHttpEndpoint } from '../../../common/api_routes';
 import type { FileKindsRequestHandler } from './types';
 import { getById } from './helpers';
 
@@ -15,15 +15,13 @@ import * as commonSchemas from './common_schemas';
 
 export const method = 'patch' as const;
 
-type UpdateEndpoint = HttpApiInterface['update'];
-
 export const bodySchema = schema.object({
   name: schema.maybe(commonSchemas.fileName),
   alt: schema.maybe(commonSchemas.fileAlt),
   meta: schema.maybe(commonSchemas.fileMeta),
 });
 
-type Body = Ensure<UpdateEndpoint['inputs']['body'], TypeOf<typeof bodySchema>>;
+type Body = Ensure<UpdateHttpEndpoint['inputs']['body'], TypeOf<typeof bodySchema>>;
 
 export const paramsSchema = schema.object({
   id: schema.string(),
@@ -31,7 +29,7 @@ export const paramsSchema = schema.object({
 
 type Params = TypeOf<typeof paramsSchema>;
 
-type Response = UpdateEndpoint['output'];
+type Response = UpdateHttpEndpoint['output'];
 
 export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   { files, fileKind },

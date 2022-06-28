@@ -10,7 +10,7 @@ import { Ensure } from '@kbn/utility-types';
 import { Readable } from 'stream';
 
 import type { File } from '../../../common';
-import type { HttpApiInterface } from '../../../common/api_routes';
+import type { DownloadHttpEndpoint } from '../../../common/api_routes';
 
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
@@ -22,9 +22,7 @@ export const paramsSchema = schema.object({
   fileName: schema.maybe(schema.string()),
 });
 
-type DownloadInterface = HttpApiInterface['download'];
-
-type Params = Ensure<DownloadInterface['inputs']['params'], TypeOf<typeof paramsSchema>>;
+type Params = Ensure<DownloadHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
 
 type Response = Readable;
 

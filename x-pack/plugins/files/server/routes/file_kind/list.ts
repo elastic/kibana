@@ -7,21 +7,19 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
 import type { FileJSON } from '../../../common';
-import type { HttpApiInterface } from '../../../common/api_routes';
+import type { ListHttpEndpoint } from '../../../common/api_routes';
 import type { FileKindsRequestHandler } from './types';
 
 export const method = 'get' as const;
-
-type ListEndpoint = HttpApiInterface['list'];
 
 export const querySchema = schema.object({
   page: schema.maybe(schema.number({ defaultValue: 1 })),
   perPage: schema.maybe(schema.number({ defaultValue: 100 })),
 });
 
-type Query = Ensure<ListEndpoint['inputs']['query'], TypeOf<typeof querySchema>>;
+type Query = Ensure<ListHttpEndpoint['inputs']['query'], TypeOf<typeof querySchema>>;
 
-type Response = ListEndpoint['output'];
+type Response = ListHttpEndpoint['output'];
 
 export const handler: FileKindsRequestHandler<unknown, Query> = async (
   { files, fileKind },

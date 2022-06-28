@@ -32,7 +32,7 @@ interface HttpApiInterfaceEntryDefinition<P = unknown, Q = unknown, B = unknown,
   output: R;
 }
 
-type CreateHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type CreateHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   unknown,
   {
@@ -44,7 +44,7 @@ type CreateHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { file: FileJSON }
 >;
 
-type DeleteHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type DeleteHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     id: string;
   },
@@ -53,7 +53,7 @@ type DeleteHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { ok: true }
 >;
 
-type DownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type DownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     id: string;
     fileName?: string;
@@ -64,7 +64,7 @@ type DownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
   any
 >;
 
-type GetByIdHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type GetByIdHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     id: string;
   },
@@ -73,21 +73,21 @@ type GetByIdHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { file: FileJSON }
 >;
 
-type ListHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type ListHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   { page?: number; perPage?: number },
   unknown,
   { files: FileJSON[] }
 >;
 
-type UpdateHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type UpdateHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   unknown,
   { name?: string; alt?: string; meta?: Record<string, unknown> },
   { file: FileJSON }
 >;
 
-type UploadHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type UploadHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { id: string },
   unknown,
   any,

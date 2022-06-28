@@ -7,20 +7,18 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { Ensure } from '@kbn/utility-types';
-import type { HttpApiInterface } from '../../../common/api_routes';
+import type { GetByIdHttpEndpoint } from '../../../common/api_routes';
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
-type GetByIdEndpoint = HttpApiInterface['getById'];
-
-type Response = GetByIdEndpoint['output'];
+type Response = GetByIdHttpEndpoint['output'];
 
 export const method = 'get' as const;
 
 export const paramsSchema = schema.object({
   id: schema.string(),
 });
-type Params = Ensure<GetByIdEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
+type Params = Ensure<GetByIdHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
 
 export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind }, req, res) => {
   const { fileService } = await files;
