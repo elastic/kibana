@@ -15,6 +15,14 @@ WARNING: This API supports <<token-api-authentication>> only.
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>/_enable`
 
+=== {api-prereq-title}
+
+You must have `all` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rules you're creating. For example, the
+*Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
+features, *{observability}*, and *Security* features. For more details, refer to
+<<kibana-feature-privileges>>.
+
 [[enable-rule-api-path-params]]
 === {api-path-parms-title}
 
