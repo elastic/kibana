@@ -25,6 +25,8 @@ export const getEndpointResponseActionsConsoleCommands = (
       meta: {
         endpointId: endpointAgentId,
       },
+      exampleUsage: 'isolate --comment "isolate this host"',
+      exampleInstruction: 'Hit enter to execute or add an optional comment',
       args: {
         comment: {
           required: false,
@@ -45,6 +47,8 @@ export const getEndpointResponseActionsConsoleCommands = (
       meta: {
         endpointId: endpointAgentId,
       },
+      exampleUsage: 'release --comment "isolate this host"',
+      exampleInstruction: 'Hit enter to execute or add an optional comment',
       args: {
         comment: {
           required: false,
@@ -65,6 +69,8 @@ export const getEndpointResponseActionsConsoleCommands = (
       meta: {
         endpointId: endpointAgentId,
       },
+      exampleUsage: 'kill-process --pid 123',
+      exampleInstruction: 'Enter pid or entityId to execute',
       args: {
         comment: {
           required: false,

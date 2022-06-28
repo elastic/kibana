@@ -27,25 +27,48 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
     return getArgumentsForCommand(commandDef);
   }, [commandDef]);
 
+  const commandUsage = usageHelp.map((currentUsage) => {
+    return (
+      <EuiText size="s">
+        <EuiBadge>{commandDef.name}</EuiBadge>
+        <EuiCode transparentBackground={true}>{currentUsage}</EuiCode>
+      </EuiText>
+    );
+  });
+
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.securitySolution.console.commandUsage.inputUsage"
-            defaultMessage="Usage:"
-          />
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <code>
+    <>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <EuiBadge>{commandDef.name}</EuiBadge>
-            <EuiCode transparentBackground={true}>{usageHelp}</EuiCode>
+            <FormattedMessage
+              id="xpack.securitySolution.console.commandUsage.inputUsage"
+              defaultMessage="Usage:"
+            />
           </EuiText>
-        </code>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <code>{commandUsage}</code>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {commandDef.exampleUsage && (
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.securitySolution.console.commandUsage.inputUsage"
+                defaultMessage="Example:"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <code>
+              <EuiCode transparentBackground={true}>{commandDef.exampleUsage}</EuiCode>
+            </code>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </>
   );
 });
 CommandInputUsage.displayName = 'CommandInputUsage';
@@ -118,7 +141,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
           <EuiText>
             <FormattedMessage
               id="xpack.securitySolution.console.commandUsage.requiredLabel"
-              defaultMessage="Required:"
+              defaultMessage="Required parameters:"
             />
             {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
               <EuiText size="s" color="subdued">
@@ -148,7 +171,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
           <EuiText>
             <FormattedMessage
               id="xpack.securitySolution.console.commandUsage.exclusiveLabel"
-              defaultMessage="Must include one and only one:"
+              defaultMessage="Include only one of the following required parameters:"
             />
             {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
               <EuiText size="s" color="subdued">
@@ -178,7 +201,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
           <EuiText>
             <FormattedMessage
               id="xpack.securitySolution.console.commandUsage.optionalLabel"
-              defaultMessage="Optional:"
+              defaultMessage="Optional parameters:"
             />
             {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
               <EuiText size="s" color="subdued">

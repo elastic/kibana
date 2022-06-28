@@ -222,6 +222,26 @@ export const getCommandListMock = (): CommandDefinition[] => {
         },
       },
     },
+    {
+      name: 'cmd5',
+      about: 'has exclusive or paramters, must pass at least one',
+      RenderComponent: jest.fn(RenderComponent),
+      mustHaveArgs: false,
+      args: {
+        foo: {
+          about: 'foo stuff',
+          required: false,
+          allowMultiples: false,
+          exclusiveOr: true,
+        },
+        bar: {
+          about: 'bar stuff',
+          required: false,
+          allowMultiples: false,
+          exclusiveOr: true,
+        },
+      },
+    },
   ];
 
   return commands;

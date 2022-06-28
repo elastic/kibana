@@ -36,6 +36,9 @@ export interface CommandDefinition<TMeta = any> {
   /** If all args are optional, but at least one must be defined, set to true */
   mustHaveArgs?: boolean;
 
+  exampleUsage?: string;
+  exampleInstruction?: string;
+
   /**
    * Validate the command entered by the user. This is called only after the Console has ran
    * through all of its builtin validations (based on `CommandDefinition`).

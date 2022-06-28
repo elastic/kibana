@@ -74,7 +74,7 @@ export const KillProcessActionResult = memo<
     setStore,
   ]);
 
-  // If release request was created, store the action id if necessary
+  // If kill-process request was created, store the action id if necessary
   useEffect(() => {
     if (killProcessApi.isSuccess && actionId !== killProcessApi.data.action) {
       setStore((prevState) => {
@@ -115,7 +115,7 @@ export const KillProcessActionResult = memo<
           'xpack.securitySolution.endpointResponseActions.killProcess.errorMessageTitle',
           { defaultMessage: 'Kill process action Failure' }
         )}
-        data-test-subj="releaseErrorCallout"
+        data-test-subj="killProcessErrorCallout"
       >
         <FormattedMessage
           id="xpack.securitySolution.endpointResponseActions.killProcess.errorMessage"
@@ -133,7 +133,7 @@ export const KillProcessActionResult = memo<
         'xpack.securitySolution.endpointResponseActions.killProcess.successMessageTitle',
         { defaultMessage: 'Process killed successfully!' }
       )}
-      data-test-subj="releaseSuccessCallout"
+      data-test-subj="killProcessSuccessCallout"
     />
   );
 });

@@ -203,6 +203,46 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
+  it('should show error if has exclusive or paramters, but none are defined', async () => {
+    render();
+    enterCommand('cmd5');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'This command supports one and only one of the following arguments: --foo --bar '
+      );
+    });
+  });
+
+  it('should show error if has exclusive or paramters, but two are defined', async () => {
+    render();
+    enterCommand('cmd5 --foo one --bar two');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'This command supports one and only one of the following arguments: --foo --bar '
+      );
+    });
+  });
+
+  it('should show success if has exclusive or paramters, and only one is defined', async () => {
+    render();
+    enterCommand('cmd5 --foo one');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+    });
+  });
+
+  it('should show success if has exclusive or paramters, and the other one is only defined', async () => {
+    render();
+    enterCommand('cmd5 --bar one');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+    });
+  });
+
   it('should show error if command definition `validate()` callback return a message', async () => {
     const cmd1Definition = commands.find((command) => command.name === 'cmd1');
 

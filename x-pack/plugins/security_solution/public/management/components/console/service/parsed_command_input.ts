@@ -135,9 +135,9 @@ export const getCommandNameFromTextInput = (input: string): string => {
   return trimmedInput.substring(0, firstSpacePosition);
 };
 
-export const getArgumentsForCommand = (command: CommandDefinition): string => {
+export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
   let requiredArgs = '';
-  let exclusiveOrArgs = '';
+  const exclusiveOrArgs = [];
   let optionalArgs = '';
 
   if (command.args) {
@@ -148,10 +148,7 @@ export const getArgumentsForCommand = (command: CommandDefinition): string => {
         }
         requiredArgs += `--${argName}`;
       } else if (argDefinition.exclusiveOr) {
-        if (exclusiveOrArgs.length) {
-          exclusiveOrArgs += ' OR ';
-        }
-        exclusiveOrArgs += `--${argName}`;
+        exclusiveOrArgs.push(`--${argName}`);
       } else {
         if (optionalArgs.length) {
           optionalArgs += ' ';
@@ -161,7 +158,11 @@ export const getArgumentsForCommand = (command: CommandDefinition): string => {
     }
   }
 
-  return `${requiredArgs} ${exclusiveOrArgs.length > 0 ? `ONE OF (${exclusiveOrArgs}) ` : ''}${
-    optionalArgs.length > 0 ? `[${optionalArgs}]` : ''
-  }`.trim();
+  return exclusiveOrArgs.length > 0
+    ? exclusiveOrArgs.map((currentArg) => {
+        return `${requiredArgs} ${currentArg} ${
+          optionalArgs.length > 0 ? `[${optionalArgs}]` : ''
+        }`.trim();
+      })
+    : [`${requiredArgs} ${optionalArgs.length > 0 ? `[${optionalArgs}]` : ''}`.trim()];
 };
