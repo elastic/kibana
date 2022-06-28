@@ -20,7 +20,7 @@ import {
   EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiTitle,
   EuiSideNav,
 } from '@elastic/eui';
