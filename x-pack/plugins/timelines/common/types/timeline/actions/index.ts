@@ -7,12 +7,14 @@
 import { ComponentType, JSXElementConstructor } from 'react';
 import { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
 
+// Temporary import from triggers-actions-ui public types, it will not be needed after alerts table migrated
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
 import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
-import { FieldBrowserOptions } from '../../field_browser';
 
 export interface ActionProps {
   action?: RowCellRender;
@@ -79,6 +81,8 @@ export interface BulkActionsProps {
   customBulkActions?: CustomBulkActionProp[];
   timelineId?: string;
 }
+
+export { FieldBrowserOptions };
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;

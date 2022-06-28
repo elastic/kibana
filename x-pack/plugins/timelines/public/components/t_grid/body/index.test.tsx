@@ -39,6 +39,20 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        triggersActionsUi: {
+          getFieldBrowser: jest.fn(),
+        },
+      },
+    }),
+  };
+});
+
 jest.mock('../../../hooks/use_selector', () => ({
   useShallowEqualSelector: () => mockGlobalState.timelineById.test,
   useDeepEqualSelector: () => mockGlobalState.timelineById.test,
