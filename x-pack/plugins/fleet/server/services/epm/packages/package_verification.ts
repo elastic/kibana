@@ -47,7 +47,7 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
 }
 
 export interface PackageVerificationResult {
-  verified: boolean;
+  isVerified: boolean;
   keyId: string;
 }
 
@@ -78,11 +78,11 @@ export async function verifyPackageSignature({
 
   const signatureVerificationResult = verificationResult.signatures[0];
 
-  let verified = false;
+  let isVerified = false;
   try {
-    verified = await signatureVerificationResult.verified;
+    isVerified = await signatureVerificationResult.verified;
   } catch (e) {
     logger.error(`Error verifying package signature: ${e}`);
   }
-  return { verified, keyId: verificationKey.getKeyID().toHex() };
+  return { isVerified, keyId: verificationKey.getKeyID().toHex() };
 }
