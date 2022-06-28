@@ -54,17 +54,23 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
       };
 
     case 'updateInputTextEnteredState':
-      const newTextEntered =
-        typeof payload.textEntered === 'function'
-          ? payload.textEntered(state.input.textEntered)
-          : payload.textEntered;
+      const { textEntered: newTextEntered, rightOfCursor: newRightOfCursor = { text: '' } } =
+        typeof payload === 'function'
+          ? payload({
+              textEntered: state.input.textEntered,
+              rightOfCursor: state.input.rightOfCursor,
+            })
+          : payload;
 
-      if (state.input.textEntered !== newTextEntered) {
-        const textEntered = newTextEntered;
+      if (
+        state.input.textEntered !== newTextEntered ||
+        state.input.rightOfCursor !== newRightOfCursor
+      ) {
+        const fullCommandText = newTextEntered + newRightOfCursor.text;
         const commandEntered =
           // If the user has typed a command (some text followed by at space),
           // then parse it to get the command name.
-          textEntered.trimStart().indexOf(' ') !== -1
+          fullCommandText.trimStart().indexOf(' ') !== -1
             ? getCommandNameFromTextInput(newTextEntered)
             : '';
 
@@ -72,7 +78,8 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           ...state,
           input: {
             ...state.input,
-            textEntered,
+            textEntered: newTextEntered,
+            rightOfCursor: newRightOfCursor,
             commandEntered,
           },
         };

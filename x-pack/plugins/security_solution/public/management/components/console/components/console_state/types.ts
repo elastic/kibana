@@ -111,14 +111,11 @@ export type ConsoleDataAction =
     }
   | {
       type: 'updateInputTextEnteredState';
-      payload: {
-        textEntered: string | ((prevState: string) => string);
-        rightOfCursor:
-          | ConsoleDataState['input']['rightOfCursor']
-          | ((
-              prevState: ConsoleDataState['input']['rightOfCursor']
-            ) => ConsoleDataState['input']['rightOfCursor']);
-      };
+      payload: PayloadValueOrFunction<{
+        textEntered: string;
+        /** When omitted, the right side of the cursor value will be blanked out */
+        rightOfCursor?: ConsoleDataState['input']['rightOfCursor'];
+      }>;
     }
   | {
       type: 'updateInputPopoverState';
@@ -138,6 +135,8 @@ export type ConsoleDataAction =
         command: string;
       };
     };
+
+type PayloadValueOrFunction<T extends object = object> = T | ((options: Required<T>) => T);
 
 export interface ConsoleStore {
   state: ConsoleDataState;

@@ -17,6 +17,7 @@ import React, {
 import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { ConsoleDataState } from '../console_state/types';
 import { useInputHints } from './hooks/use_input_hints';
 import { InputPlaceholder } from './components/input_placeholder';
 import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
@@ -132,38 +133,57 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
-        payload: {
-          textEntered: (prevValue) => {
-            let updatedTextEnteredState = prevValue + value;
+        payload: ({ rightOfCursor: prevRightOfCursor, textEntered: prevTextEntered }) => {
+          let updatedTextEnteredState = prevTextEntered + value;
+          let updatedRightOfCursor: ConsoleDataState['input']['rightOfCursor'] | undefined =
+            prevRightOfCursor;
 
-            switch (keyCode) {
-              // BACKSPACE
-              // remove the last character from the text entered
-              case 8:
-                if (updatedTextEnteredState.length) {
-                  updatedTextEnteredState = updatedTextEnteredState.substring(
-                    0,
-                    updatedTextEnteredState.length - 1
-                  );
-                }
-                break;
+          const lengthOfTextEntered = updatedTextEnteredState.length;
 
-              // ENTER
-              // Execute command and blank out the input area
-              case 13:
-                setCommandToExecute(updatedTextEnteredState);
-                updatedTextEnteredState = '';
-                break;
-            }
+          switch (keyCode) {
+            // BACKSPACE
+            // remove the last character from the text entered
+            case 8:
+              if (lengthOfTextEntered) {
+                updatedTextEnteredState = updatedTextEnteredState.substring(
+                  0,
+                  lengthOfTextEntered - 1
+                );
+              }
+              break;
 
-            return updatedTextEnteredState;
-          },
+            // ENTER
+            // Execute command and blank out the input area
+            case 13:
+              setCommandToExecute(updatedTextEnteredState + rightOfCursor.text);
+              updatedTextEnteredState = '';
+              updatedRightOfCursor = undefined;
+              break;
 
-          rightOfCursor: { text: '' },
+            // ARROW LEFT
+            // Move cursor (or more accurately - move text to the right of the cursor)
+            case 37:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: `${updatedTextEnteredState.charAt(lengthOfTextEntered - 1)}${
+                  prevRightOfCursor.text
+                }`,
+              };
+              updatedTextEnteredState = updatedTextEnteredState.substring(
+                0,
+                lengthOfTextEntered - 1
+              );
+              break;
+          }
+
+          return {
+            textEntered: updatedTextEnteredState,
+            rightOfCursor: updatedRightOfCursor,
+          };
         },
       });
     },
-    [dispatch]
+    [dispatch, rightOfCursor.text]
   );
 
   // Execute the command if one was ENTER'd.
@@ -204,7 +224,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                 <span className={cursorClassName} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>{rightOfCursor}</div>
+                <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>{rightOfCursor.text}</div>
               </EuiFlexItem>
             </EuiFlexGroup>
 
