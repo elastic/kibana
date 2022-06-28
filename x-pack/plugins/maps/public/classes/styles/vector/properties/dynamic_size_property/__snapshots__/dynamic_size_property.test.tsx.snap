@@ -52,18 +52,18 @@ exports[`renderLegendDetailRow Should render icon size scale 1`] = `
         y1={26}
         y2={26}
       />
-      <text
+      <RightAlignedText
+        setWidth={[Function]}
         style={
           Object {
             "fill": "#343741",
             "fontSize": 10,
           }
         }
+        value="0_format"
         x={29.75}
         y={31}
-      >
-        0_format
-      </text>
+      />
       <circle
         cx={11}
         cy={26}
@@ -91,18 +91,18 @@ exports[`renderLegendDetailRow Should render icon size scale 1`] = `
         y1={16}
         y2={16}
       />
-      <text
+      <RightAlignedText
+        setWidth={[Function]}
         style={
           Object {
             "fill": "#343741",
             "fontSize": 10,
           }
         }
+        value="25_format"
         x={29.75}
         y={21}
-      >
-        25_format
-      </text>
+      />
       <circle
         cx={11}
         cy={21}
@@ -130,18 +130,18 @@ exports[`renderLegendDetailRow Should render icon size scale 1`] = `
         y1={6}
         y2={6}
       />
-      <text
+      <RightAlignedText
+        setWidth={[Function]}
         style={
           Object {
             "fill": "#343741",
             "fontSize": 10,
           }
         }
+        value="100_format"
         x={29.75}
         y={11}
-      >
-        100_format
-      </text>
+      />
       <circle
         cx={11}
         cy={16}
