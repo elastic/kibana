@@ -13,17 +13,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('lens rollup tests', () => {
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/data');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/config');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/config.json'
+      );
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/data');
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/config');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
