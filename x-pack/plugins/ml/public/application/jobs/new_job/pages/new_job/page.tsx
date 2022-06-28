@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, Fragment, useMemo } from 'react';
-import { EuiPageContentHeader, EuiPageContentHeaderSection } from '@elastic/eui';
+import { EuiPageContentHeader_Deprecated as EuiPageContentHeader, EuiPageContentHeaderSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Wizard } from './wizard';

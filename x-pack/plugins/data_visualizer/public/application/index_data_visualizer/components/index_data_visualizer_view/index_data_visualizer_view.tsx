@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiPanel,
   EuiProgress,
