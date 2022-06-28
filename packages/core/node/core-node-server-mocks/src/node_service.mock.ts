@@ -7,7 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NodeService, InternalNodeServicePreboot } from './node_service';
+import type { NodeService, InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 
 const createInternalPrebootContractMock = () => {
   const prebootContract: jest.Mocked<InternalNodeServicePreboot> = {

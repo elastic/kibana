@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { camelCase } from 'lodash';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import {
   NodeConfigType,
@@ -17,7 +18,6 @@ import {
   NODE_ACCEPTED_ROLES,
   NODE_CONFIG_PATH,
 } from './node_config';
-import type { NodeRoles } from './types';
 
 const DEFAULT_ROLES = NODE_ACCEPTED_ROLES;
 const containsWildcard = (roles: string[]) => roles.includes(NODE_WILDCARD_CHAR);
@@ -47,7 +47,7 @@ export class NodeService {
     this.log.info(`Kibana process configured with roles: [${nodeRoles.join(', ')}]`, {
       service: {
         // @ts-expect-error Field not available in ECS until 8.4
-        roles: nodeRoles,
+        node: { roles: nodeRoles },
       },
     });
 

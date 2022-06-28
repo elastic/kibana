@@ -15,8 +15,8 @@ import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { coreMock } from '../mocks';
-import { nodeServiceMock } from '../node/node_service.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginManifest, PluginType } from './types';

@@ -13,6 +13,7 @@ import { fromRoot } from '@kbn/utils';
 import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import {
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
@@ -26,7 +27,6 @@ import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';
 import { coreMock } from '../mocks';
-import { nodeServiceMock } from '../node/node_service.mock';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {

@@ -21,6 +21,7 @@ import {
   coreDeprecationProvider,
   ensureValidConfiguration,
 } from '@kbn/core-config-server-internal';
+import { NodeService, config as nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { CoreApp } from './core_app';
@@ -46,7 +47,6 @@ import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
-import { NodeService, config as nodeConfig } from './node';
 import { ContextService } from './context';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';

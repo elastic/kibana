@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-/** @internal */
-export interface NodeRoles {
-  backgroundTasks: boolean;
-  ui: boolean;
-}
+export { config } from './node_config';
+
+export { NodeService } from './node_service';
+export type { InternalNodeServicePreboot } from './node_service';

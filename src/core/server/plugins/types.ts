@@ -18,9 +18,9 @@ import type {
   ConfigDeprecationProvider,
 } from '@kbn/config';
 import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
+import type { NodeRoles } from '@kbn/core-node-server';
 
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { NodeRoles } from '../node';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
 

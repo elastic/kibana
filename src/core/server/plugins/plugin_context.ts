@@ -9,6 +9,7 @@
 import { shareReplay } from 'rxjs/operators';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { NodeRoles } from '@kbn/core-node-server';
 import type { RequestHandlerContext } from '..';
 import { PluginWrapper } from './plugin';
 import {
@@ -28,7 +29,7 @@ export interface InstanceInfo {
 
 /** @internal */
 export interface NodeInfo {
-  roles: { backgroundTasks: boolean; ui: boolean };
+  roles: NodeRoles;
 }
 
 /**

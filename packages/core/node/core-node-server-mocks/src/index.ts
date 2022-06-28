@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { config } from './node_config';
-export type { NodeConfigType } from './node_config';
-
-export { NodeService } from './node_service';
-export type { InternalNodeServicePreboot } from './node_service';
-
-export type { NodeRoles } from './types';
+export { nodeServiceMock } from './node_service.mock';
