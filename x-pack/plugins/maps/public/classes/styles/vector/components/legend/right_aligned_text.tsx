@@ -17,7 +17,7 @@ interface Props {
 
 export class RightAlignedText extends Component<Props> {
   private _textRef: RefObject<SVGTextElement> = React.createRef<SVGTextElement>();
-  
+
   componentDidMount() {
     this._setWidth();
   }

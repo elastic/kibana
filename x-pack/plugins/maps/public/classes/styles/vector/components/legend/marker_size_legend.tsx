@@ -26,19 +26,19 @@ interface Props {
 interface State {
   label: string;
   maxLabelWidth: number;
-  fieldMeta: RangeFieldMeta | null
+  fieldMeta: RangeFieldMeta | null;
 }
 
 export class MarkerSizeLegend extends Component<Props, State> {
   private _isMounted: boolean = false;
-  
+
   static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     const nextFieldMeta = nextProps.style.getRangeFieldMeta();
     return !_.isEqual(nextFieldMeta, prevState.fieldMeta)
       ? {
-        maxLabelWidth: 0,
-        fieldMeta: nextFieldMeta,
-      }
+          maxLabelWidth: 0,
+          fieldMeta: nextFieldMeta,
+        }
       : null;
   }
 
@@ -83,7 +83,7 @@ export class MarkerSizeLegend extends Component<Props, State> {
     if (width > this.state.maxLabelWidth) {
       this.setState({ maxLabelWidth: width });
     }
-  }
+  };
 
   _renderMarkers() {
     const fieldMeta = this.state.fieldMeta;
