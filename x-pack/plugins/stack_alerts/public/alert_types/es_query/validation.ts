@@ -18,7 +18,7 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
   const errors: ExpressionErrors = defaultsDeep({}, EXPRESSION_ERRORS);
   validationResult.errors = errors;
 
-  if (!ruleParams.searchType) {
+  if (!('index' in ruleParams) && !ruleParams.searchType) {
     errors.searchType.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchType', {
         defaultMessage: 'Query is required.',
