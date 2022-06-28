@@ -4,19 +4,19 @@
 [float]
 === Prepare for logging in 8.0
 
-The entire logging system changed to offer a more consistent logging behavior with {es}. The current system differs from the more simplistic, deprecated system and allows you the freedom to customize what, how and where {kib} outputs log messages. While for logging based use cases, we recommend the <<logging-service, logging service guide>>, there are some important considerations:
+The entire logging system changed to offer a more consistent logging behavior with {es}, which uses the popular https://logging.apache.org/log4j/2.x[`log4j 2`] for managing logs. The current system differs from the more simplistic, deprecated system and allows you the freedom to customize what, how, and where {kib} outputs log messages. The best place to learn about the new logging system is our logging service guide. However, there are some important considerations when you are migrating from the old to the new system:
 
 [float]
 ==== Mixing deprecated and current configurations
-{kib} supports mixed usage of the deprecated and current logging configuration styles, however, we recommend changing them all at once to reduce the risk of the systems interfering.
+{kib} supports mixed usage of the deprecated and current logging configuration styles, however, to reduce the risk of confusion that may arise from conflicting configurations, we recommend changing over to the new system all at once.
 
 [float]
 ==== Rotating log files
-If you use log rotation, be careful when mixing deprecated and current configuration styles as it could lead to unexpected behavior. For example, one system could apply the log file rotation while the other still writes to the original file. Rather switch over to the current system completely.
+If you use log rotation, be careful when mixing deprecated and current configuration styles as it could lead to unexpected behavior. For example, one system could apply the log file rotation while the other still writes to the original file. Rather, switch over to the current system completely.
 
 [float]
 ==== Service scripts
-If you are using the service scripts (`kibana.service`), be aware that the deprecated `logging.dest` configuration might be set via CLI options in the `kibana.service` declaration. When `logging.dest` is set in the service scripts, {kib} will continue to write log messages to the "old" file. To switch over to the current logging system, remove the `logging.dest` CLI argument from `/etc/systemd/system/kibana.service` and run `systemctl daemon-reload`.
+If you are using the systemd service scripts (`kibana.service`), be aware that the deprecated `logging.dest` configuration might be set via CLI options in the `kibana.service` declaration. When `logging.dest` is set in the service scripts, {kib} will continue to write log messages to the "old" file. To switch over to the current logging system, remove the `logging.dest` CLI argument from `/etc/systemd/system/kibana.service` and run `systemctl daemon-reload`.
 
 [float]
 ==== Compatibility

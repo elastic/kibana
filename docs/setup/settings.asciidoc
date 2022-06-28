@@ -311,7 +311,7 @@ suggestions. This value must be a whole number greater than zero.
 
 [WARNING]
 ============================================================================
-While {kib} supports both deprecated and current logging systems being enabled at the same time, mixing the configurations is not recommended. To avoid unforeseen consequences, rather switch over to the current configuration completely.
+While {kib} supports both deprecated and current logging systems being enabled at the same time, mixing the configurations is not recommended. To avoid unforeseen consequences, we recommend switching over to the current configuration completely.
 For more information, refer to the <<`logging-configuration-migration`, logging configuration migration guide>>
 ============================================================================
 
@@ -419,10 +419,10 @@ NOTE: To reload the <<logging-settings, logging settings>>, send a SIGHUP signal
 
 // new logging configuration settings
 [[logging-root]] `logging.root`::
-The `root` logger has is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. If any other logger is configured, the `root` logger _must_ also be explicitly configured with an appropriate appender. 
+The `root` logger is a <<dedicated-loggers, dedicated logger>> and is pre-configured. The `root` logger logs at `info` level by default. 
 
 [[logging-root-level]] `logging.root.level` {ess-icon}::
-Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_ and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to <<change-overall-log-level,change the overall log level>>. Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs. *Default: `info`*. 
+Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_, and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to <<change-overall-log-level,change the overall log level>>. Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs. *Default: `info`*. 
 +
 The following example shows a full, valid `root` logging configuration that will log at the `debug` level:
 +
