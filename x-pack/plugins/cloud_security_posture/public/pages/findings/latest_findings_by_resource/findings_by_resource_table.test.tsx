@@ -8,7 +8,6 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsByResourceTable, formatNumber, getResourceId } from './findings_by_resource_table';
-import * as TEXT from '../translations';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import numeral from '@elastic/numeral';
@@ -55,7 +54,9 @@ describe('<FindingsByResourceTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByText(TEXT.NO_FINDINGS)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE)
+    ).toBeInTheDocument();
   });
 
   it('renders the table with provided items', () => {
