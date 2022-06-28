@@ -12,6 +12,7 @@
  * @public
  */
 export interface NodeInfo {
+  /** A list of roles this node has been configured with. */
   roles: NodeRoles;
 }
 
@@ -20,9 +21,20 @@ export interface NodeInfo {
  * This configuration is then exposed to plugins via `NodeRoles`,
  * which is available on the `PluginInitializerContext`.
  *
+ * The node roles can be used by plugins to adjust their behavior based
+ * on the way the Kibana process has been configured.
+ *
  * @public
  */
 export interface NodeRoles {
+  /**
+   * The backgroundTasks role includes operations which don't involve
+   * responding to incoming http traffic from the UI.
+   */
   backgroundTasks: boolean;
+  /**
+   * The ui role covers any operations that need to occur in order
+   * to handle http traffic from the browser.
+   */
   ui: boolean;
 }
