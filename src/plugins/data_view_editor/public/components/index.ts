@@ -13,7 +13,6 @@ export { DataViewEditor } from './data_view_editor';
 
 export { schema } from './form_schema';
 export { NameField, TimestampField, TypeField, TitleField } from './form_fields';
-export { EmptyPrompts } from './empty_prompts';
 export { PreviewPanel } from './preview_panel';
 export { LoadingIndices } from './loading_indices';
 export { Footer } from './footer';
