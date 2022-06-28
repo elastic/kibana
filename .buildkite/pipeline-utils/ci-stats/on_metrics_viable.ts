@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
-const { readFileSync, writeFileSync } = require('fs');
+import { CiStatsClient } from './client';
 
-const file = process.argv[2];
-const search = process.argv[3];
-const replace = process.argv[4];
-writeFileSync(file, readFileSync(file).toString().replaceAll(search, replace));
+const ciStats = new CiStatsClient();
+
+export async function onMetricsViable() {
+  if (!process.env.CI_STATS_BUILD_ID) {
+    return;
+  }
+
+  console.log('Marking build as a "valid baseline" so that it can be used to power PR reports');
+  await ciStats.markBuildAsValidBaseline(process.env.CI_STATS_BUILD_ID);
+}

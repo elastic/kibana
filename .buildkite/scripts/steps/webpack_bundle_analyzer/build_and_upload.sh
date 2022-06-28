@@ -12,4 +12,4 @@ find . -path "*target/public/*" -name "stats.json" | while read line; do
   ./node_modules/.bin/webpack-bundle-analyzer $line --report "built_assets/webpack_bundle_analyzer/$PLUGIN.html" --mode static --no-open
 done
 
-node .buildkite/scripts/steps/webpack_bundle_analyzer/upload.js
+ts-node .buildkite/scripts/steps/webpack_bundle_analyzer/upload.ts

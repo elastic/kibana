@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-const execSync = require('child_process').execSync;
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 // TODO - how to generate this dynamically?
 const STORYBOOKS = [
@@ -47,14 +47,14 @@ const GITHUB_CONTEXT = 'Build and Publish Storybooks';
 const STORYBOOK_DIRECTORY =
   process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
     ? `pr-${process.env.BUILDKITE_PULL_REQUEST}`
-    : process.env.BUILDKITE_BRANCH.replace('/', '__');
+    : (process.env.BUILDKITE_BRANCH ?? '').replace('/', '__');
 const STORYBOOK_BUCKET = 'ci-artifacts.kibana.dev/storybooks';
 const STORYBOOK_BUCKET_URL = `https://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}`;
 const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}/${process.env.BUILDKITE_COMMIT}`;
 
-const exec = (...args) => execSync(args.join(' '), { stdio: 'inherit' });
+const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
 
-const ghStatus = (state, description) =>
+const ghStatus = (state: string, description: string) =>
   exec(
     `gh api "repos/elastic/kibana/statuses/${process.env.BUILDKITE_COMMIT}"`,
     `-f state=${state}`,
@@ -84,8 +84,8 @@ const upload = () => {
       .toString()
       .trim()
       .split('\n')
-      .map((path) => path.replace('/', ''))
-      .filter((path) => path !== 'composite');
+      .map((filePath) => filePath.replace('/', ''))
+      .filter((filePath) => filePath !== 'composite');
 
     const listHtml = storybooks
       .map((storybook) => `<li><a href="${STORYBOOK_BASE_URL}/${storybook}">${storybook}</a></li>`)

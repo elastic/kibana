@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-const fs = require('fs');
-const { execSync } = require('child_process');
-const { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } = require('./bucket_config');
+import fs from 'fs';
+import { execSync } from 'child_process';
+import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
 
 (async () => {
   try {

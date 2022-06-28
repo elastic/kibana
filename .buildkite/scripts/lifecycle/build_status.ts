@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
-const { CiStats } = require('kibana-buildkite-library');
+import { BuildkiteClient } from '#pipeline-utils';
 
 (async () => {
   try {
-    await CiStats.onComplete();
+    const client = new BuildkiteClient();
+    const status = await client.getCurrentBuildStatus();
+    console.log(status.success ? 'true' : 'false');
+    process.exit(0);
   } catch (ex) {
-    console.error('CI Stats Error', ex.message);
+    console.error('Buildkite API Error', ex.message);
     if (ex.response) {
       console.error('HTTP Error Response Status', ex.response.status);
       console.error('HTTP Error Response Body', ex.response.data);

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-const { CiStats } = require('kibana-buildkite-library');
+import { TestFailures } from '#pipeline-utils';
 
 (async () => {
   try {
-    await CiStats.pickTestGroupRunOrder();
+    await TestFailures.annotateTestFailures();
   } catch (ex) {
-    console.error('CI Stats Error', ex.message);
+    console.error('Annotate test failures error', ex.message);
     if (ex.response) {
       console.error('HTTP Error Response Status', ex.response.status);
       console.error('HTTP Error Response Body', ex.response.data);

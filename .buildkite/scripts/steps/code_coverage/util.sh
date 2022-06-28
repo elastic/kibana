@@ -34,7 +34,7 @@ replacePaths() {
   local replace=$3
 
   for x in $(find "$dirName" -maxdepth 1 -type f -name '*.json'); do
-    node .buildkite/scripts/steps/code_coverage/clean_coverage_paths.js \
+    ts-node .buildkite/scripts/steps/code_coverage/clean_coverage_paths.ts \
       "$x" \
       "$search" \
       "$replace"

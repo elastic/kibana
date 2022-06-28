@@ -23,7 +23,7 @@ steps:
             - path:
                 - 'versions.json'
               config:
-                command: 'node .buildkite/scripts/steps/trigger_pipeline.js kibana-buildkite-pipelines-deploy main'
+                command: 'ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-buildkite-pipelines-deploy main'
                 label: 'Trigger pipeline deploy'
                 agents:
                   queue: 'kibana-default'
