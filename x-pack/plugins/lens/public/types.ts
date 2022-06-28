@@ -398,7 +398,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   setState: StateSetter<T, { applyImmediately?: boolean }>;
   showNoDataPopover: () => void;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
-  query: Query;
+  query: Query | AggregateQuery;
   dateRange: DateRange;
   filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
