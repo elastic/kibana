@@ -172,6 +172,8 @@ export const UseCaseCard = ({ useCase }: UseCaseProps) => {
       image={<div css={cardCss} />}
       title={title}
       description={description}
+      // Used for FS tracking
+      data-test-subj={`onboarding--${useCase}UseCaseCard`}
       onClick={onUseCaseSelection}
     />
   );

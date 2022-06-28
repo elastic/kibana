@@ -203,7 +203,6 @@
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
 /x-pack/packages/ml/ @elastic/ml-ui
-/packages/kbn-aiops-utils @elastic/ml-ui
 /examples/response_stream/ @elastic/ml-ui
 
 # Maps
