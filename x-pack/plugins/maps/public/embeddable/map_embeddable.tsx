@@ -46,6 +46,7 @@ import {
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getLayerList,
   getMapCenter,
   getMapBuffer,
   getMapExtent,
@@ -138,36 +139,6 @@ export class MapEmbeddable
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
-    this.setEventHandlers({
-      onDataLoad: () => {
-        this.updateOutput({
-          ...this.getOutput(),
-          loading: true,
-          rendered: false,
-          error: undefined,
-        });
-      },
-      onDataLoadEnd: () => {
-        this.updateOutput({
-          ...this.getOutput(),
-          loading: false,
-          // TODO: rendering happens later - separate the rendered and loading events
-          rendered: true,
-        });
-      },
-      onDataLoadError: (e) => {
-        this.updateOutput({
-          ...this.getOutput(),
-          loading: false,
-          // TODO: rendering happens later - separate the rendered and loading events
-          rendered: true,
-          error: {
-            name: 'EmbeddableError',
-            message: e.errorMessage,
-          },
-        });
-      },
-    });
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
     this._prevFilterByMapExtent =
       this.input.filterByMapExtent === undefined ? false : this.input.filterByMapExtent;
@@ -648,6 +619,31 @@ export class MapEmbeddable
     if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
       this.updateInput({
         hiddenLayers: hiddenLayerIds,
+      });
+    }
+
+    const layers = getLayerList(this._savedMap.getStore().getState());
+    const isLoading = layers.some((layer) => {
+      return layer.isLayerLoading();
+    });
+    const firstLayerWithError = layers.find((layer) => {
+      return layer.hasErrors();
+    });
+    const output = this.getOutput();
+    if (
+      output.loading !== isLoading ||
+      firstLayerWithError?.getErrors() !== output.error?.message
+    ) {
+      this.updateOutput({
+        ...output,
+        loading: isLoading,
+        rendered: !isLoading && firstLayerWithError === undefined,
+        error: firstLayerWithError
+          ? {
+              name: 'EmbeddableError',
+              message: firstLayerWithError.getErrors(),
+            }
+          : undefined,
       });
     }
   }
