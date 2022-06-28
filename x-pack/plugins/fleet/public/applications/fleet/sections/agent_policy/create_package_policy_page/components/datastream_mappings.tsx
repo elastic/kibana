@@ -100,7 +100,7 @@ export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
                       path: `/data/index_management/edit_component_template/${el.templateName}`,
                     });
 
-                    application.navigateToUrl(`${url}?redirect_path=${pageUrl}`);
+                    application.navigateToUrl(`${url}?step=mappings&redirect_path=${pageUrl}`);
                   },
                   available: ({ canEdit }) => !!canEdit,
                 },
