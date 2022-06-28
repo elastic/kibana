@@ -134,7 +134,8 @@ export const getActionCompletionInfo = (
   if (completedInfo.isCompleted) {
     const responseErrors: ActionCompletionInfo['errors'] = [];
     completedInfo.outputs = {};
-    for (const normalizedAgentResponse of Object.values(responsesByAgentId)) {
+    for (const agentKey of Object.keys(responsesByAgentId)) {
+      const normalizedAgentResponse = responsesByAgentId[agentKey];
       if (
         !completedInfo.completedAt ||
         completedInfo.completedAt < (normalizedAgentResponse.completedAt ?? '')
@@ -142,11 +143,9 @@ export const getActionCompletionInfo = (
         completedInfo.completedAt = normalizedAgentResponse.completedAt;
         if (
           normalizedAgentResponse.endpointResponse &&
-          normalizedAgentResponse.endpointResponse.item.data.EndpointActions.output &&
-          normalizedAgentResponse.fleetResponse &&
-          normalizedAgentResponse.fleetResponse.item.data.agent_id
+          normalizedAgentResponse.endpointResponse.item.data.EndpointActions.output
         ) {
-          completedInfo.outputs[normalizedAgentResponse.fleetResponse.item.data.agent_id] =
+          completedInfo.outputs[agentKey] =
             normalizedAgentResponse.endpointResponse.item.data.EndpointActions.output;
         }
       }
