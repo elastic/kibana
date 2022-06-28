@@ -31,6 +31,7 @@ type RulesTableProps = Pick<
   selectedRuleId: string | null;
   // ForwardRef makes this ref not available in parent callbacks
   tableRef: React.RefObject<EuiBasicTable<RuleSavedObject>>;
+  canUpdate: boolean;
 };
 
 export const RulesTable = ({
@@ -46,11 +47,12 @@ export const RulesTable = ({
   loading,
   error,
   selectedRuleId,
+  canUpdate,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
   const columns = useMemo(
-    () => getColumns({ toggleRule, setSelectedRuleId }),
-    [setSelectedRuleId, toggleRule]
+    () => getColumns({ toggleRule, setSelectedRuleId, canUpdate }),
+    [setSelectedRuleId, toggleRule, canUpdate]
   );
 
   const euiPagination: EuiBasicTableProps<RuleSavedObject>['pagination'] = {
@@ -99,13 +101,14 @@ export const RulesTable = ({
   );
 };
 
-interface GetColumnProps extends Pick<RulesTableProps, 'setSelectedRuleId'> {
+interface GetColumnProps extends Pick<RulesTableProps, 'setSelectedRuleId' | 'canUpdate'> {
   toggleRule: (rule: RuleSavedObject) => void;
 }
 
 const getColumns = ({
   toggleRule,
   setSelectedRuleId,
+  canUpdate,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<RuleSavedObject>> => [
   {
     field: 'attributes.metadata.name',
@@ -142,6 +145,7 @@ const getColumns = ({
     name: TEXT.ENABLED,
     render: (enabled, rule) => (
       <EuiSwitch
+        disabled={!canUpdate}
         showLabel={false}
         label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
         checked={enabled}
