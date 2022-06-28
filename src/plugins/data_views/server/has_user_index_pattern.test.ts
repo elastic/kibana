@@ -25,21 +25,104 @@ describe('hasUserIndexPattern', () => {
     expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
   });
 
-  it('returns true when there are any index patterns other than metrics-* or logs-*', async () => {
-    soClient.find.mockResolvedValue({
-      page: 1,
-      per_page: 100,
-      total: 1,
-      saved_objects: [
-        {
-          id: '1',
-          references: [],
-          type: 'index-pattern',
-          score: 99,
-          attributes: { title: 'my-pattern-*' },
-        },
-      ],
+  describe('when index patterns exist', () => {
+    beforeEach(() => {
+      soClient.find.mockResolvedValue({
+        page: 1,
+        per_page: 100,
+        total: 2,
+        saved_objects: [
+          {
+            id: '1',
+            references: [],
+            type: 'index-pattern',
+            score: 99,
+            attributes: { title: 'my-pattern-*' },
+          },
+          {
+            id: '2',
+            references: [],
+            type: 'index-pattern',
+            score: 99,
+            attributes: { title: 'logs-*' },
+          },
+        ],
+      });
     });
-    expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(true);
+
+    it('calls indices.resolveIndex for the index patterns', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [],
+        aliases: [],
+      });
+      await hasUserIndexPattern({ esClient, soClient });
+      expect(esClient.indices.resolveIndex).toHaveBeenCalledWith({
+        name: 'logs-*',
+      });
+    });
+
+    it('returns true if no data_streams exists', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [],
+        aliases: [],
+      });
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(true);
+    });
+
+    it('returns true if any index exists', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: 'logs', attributes: [] }],
+        data_streams: [],
+        aliases: [],
+      });
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(true);
+    });
+
+    it('returns false if only logs-elastic_agent data stream exists', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [
+          {
+            name: 'logs-elastic_agent',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-logs-elastic_agent'],
+          },
+        ],
+        aliases: [],
+      });
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
+    });
+
+    it('returns false if only logs-enterprise_search.api-default data stream exists', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [
+          {
+            name: 'logs-enterprise_search.api-default',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-logs-enterprise_search.api-default-2022.03.07-000001'],
+          },
+        ],
+        aliases: [],
+      });
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
+    });
+
+    it('returns true if any other data stream exists', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [
+          {
+            name: 'other',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-other'],
+          },
+        ],
+        aliases: [],
+      });
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(true);
+    });
   });
 });
