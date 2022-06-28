@@ -22,6 +22,14 @@ describe('When entering data into the Console input', () => {
     typeText('{ArrowUp}');
   };
 
+  const getInputPlaceholderText = () => {
+    return renderResult.getByTestId('test-inputPlaceholder').textContent;
+  };
+
+  const getUserInputText = () => {
+    return renderResult.getByTestId('test-cmdInput-userTextInput').textContent;
+  };
+
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
@@ -33,35 +41,33 @@ describe('When entering data into the Console input', () => {
     render();
 
     enterCommand('c', { inputOnly: true });
-    expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('c');
+    expect(getUserInputText()).toEqual('c');
 
     enterCommand('m', { inputOnly: true });
-    expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('cm');
+    expect(getUserInputText()).toEqual('cm');
   });
 
   it('should delete last character when BACKSPACE is pressed', () => {
     render();
 
     enterCommand('cm', { inputOnly: true });
-    expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('cm');
+    expect(getUserInputText()).toEqual('cm');
 
     enterCommand('{backspace}', { inputOnly: true, useKeyboard: true });
-    expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('c');
+    expect(getUserInputText()).toEqual('c');
   });
 
   it('should display placeholder text when input area is blank', () => {
     render();
 
-    expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
-      INPUT_DEFAULT_PLACEHOLDER_TEXT
-    );
+    expect(getInputPlaceholderText()).toEqual(INPUT_DEFAULT_PLACEHOLDER_TEXT);
   });
 
   it('should NOT display placeholder text if input area has text entered', () => {
     render();
     enterCommand('cm', { inputOnly: true });
 
-    expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual('');
+    expect(getInputPlaceholderText()).toEqual('');
   });
 
   it('should NOT display any hint test in footer if nothing is displayed', () => {
@@ -113,12 +119,10 @@ describe('When entering data into the Console input', () => {
     it('should clear the input area and show placeholder with first item that is focused', async () => {
       renderWithInputHistory('one');
 
-      expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('');
+      expect(getUserInputText()).toEqual('');
 
       waitFor(() => {
-        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
-          'cmd1 --help'
-        );
+        expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
     });
 
@@ -126,15 +130,13 @@ describe('When entering data into the Console input', () => {
       renderWithInputHistory('one');
 
       waitFor(() => {
-        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
-          'cmd1 --help'
-        );
+        expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
       userEvent.keyboard('{Escape}');
 
       waitFor(() => {
-        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual('one');
+        expect(getInputPlaceholderText()).toEqual('one');
       });
     });
 
@@ -142,17 +144,13 @@ describe('When entering data into the Console input', () => {
       renderWithInputHistory('one');
 
       waitFor(() => {
-        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
-          'cmd1 --help'
-        );
+        expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
       userEvent.keyboard('{Enter}');
 
       waitFor(() => {
-        expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual(
-          'cmd1 --help'
-        );
+        expect(getUserInputText()).toEqual('cmd1 --help');
       });
     });
   });
