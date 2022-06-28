@@ -50,6 +50,7 @@ import { createBasemapLayerDescriptor } from '../../../classes/layers/create_bas
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
+import { incrementLayerUsage } from '../../../reducers/map/layer_utils';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -223,6 +224,7 @@ export class SavedMap {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
     }
     this._initialLayerListConfig = copyPersistentState(layerList);
+    incrementLayerUsage(this._initialLayerListConfig);
 
     if (this._defaultLayerWizard) {
       this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));

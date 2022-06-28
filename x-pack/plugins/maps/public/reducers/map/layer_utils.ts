@@ -5,9 +5,23 @@
  * 2.0.
  */
 
-import { LayerDescriptor } from '../../../common/descriptor_types';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  EMSTMSSourceDescriptor,
+  ESGeoGridSourceDescriptor,
+  ESSearchSourceDescriptor,
+  LayerDescriptor,
+} from '../../../common/descriptor_types';
 import { MapState } from './types';
+import { getUsageCollection } from '../../kibana_services';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../copy_persistent_state';
+import {
+  APP_ID,
+  SOURCE_TYPES,
+  GRID_RESOLUTION,
+  RENDER_AS,
+  SCALING_TYPES,
+} from '../../../common/constants';
 
 export function getLayerIndex(list: LayerDescriptor[], layerId: string): number {
   return list.findIndex(({ id }) => layerId === id);
@@ -152,4 +166,112 @@ export function setLayer(
   const newLayerList = [...layerList];
   newLayerList[layerIndex] = layerDescriptor;
   return newLayerList;
+}
+
+export function incrementLayerUsage(layerList: LayerDescriptor[]): void {
+  const usageCollector = getUsageCollection();
+  if (!usageCollector) {
+    return;
+  }
+
+  for (const layer of layerList) {
+    const { sourceDescriptor } = layer;
+    switch (sourceDescriptor?.type) {
+      case undefined:
+        break;
+      case SOURCE_TYPES.ES_GEO_GRID: {
+        const { resolution, requestType } = sourceDescriptor as ESGeoGridSourceDescriptor;
+        let agg;
+        const resolutionType = GRID_RESOLUTION[resolution].toLowerCase();
+        if (requestType === RENDER_AS.POINT) {
+          agg = 'clusters';
+        } else if (requestType === RENDER_AS.GRID) {
+          agg = 'grids';
+        } else if (requestType === RENDER_AS.HEX) {
+          agg = 'hexagons';
+        } else if (requestType === RENDER_AS.HEATMAP) {
+          agg = 'heatmap';
+        } else return;
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, [
+          `view_layer_es_agg_${agg}`,
+          `resolution_${resolutionType}`,
+        ]);
+        break;
+      }
+      case SOURCE_TYPES.ES_SEARCH: {
+        const { scalingType } = sourceDescriptor as ESSearchSourceDescriptor;
+        let scaling;
+        let layer = 'es_docs';
+        if (scalingType === SCALING_TYPES.LIMIT) {
+          scaling = 'limit';
+        } else if (scalingType === SCALING_TYPES.CLUSTERS) {
+          scaling = 'clusters';
+        } else if (scalingType === SCALING_TYPES.MVT) {
+          scaling = 'mvt';
+        } else if (scalingType === SCALING_TYPES.TOP_HITS) {
+          // Count top hits layer separately from documents
+          layer = 'es_top_hits';
+          scaling = 'top_hits';
+        // TODO machine learning anomalies layer
+        } else return;
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, [
+          `view_layer_${layer}`,
+          `scaling_${scaling}`,
+        ]);
+        break;
+      }
+      case SOURCE_TYPES.ES_PEW_PEW: {
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, `view_layer_es_point_to_point`);
+        break;
+      }
+      case SOURCE_TYPES.ES_GEO_LINE: {
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, `view_layer_es_tracks`);
+        break;
+      }
+      case SOURCE_TYPES.EMS_TMS: {
+        let emsLayer;
+        const { isAutoSelect, id } = sourceDescriptor as EMSTMSSourceDescriptor;
+        if (isAutoSelect) {
+          emsLayer = 'auto';
+        } else if (id === 'dark_map') {
+          emsLayer = 'dark';
+        } else if (id === 'road_map_desaturated') {
+          emsLayer = 'roadmap_desaturated';
+        } else if (id === 'road_map') {
+          emsLayer = 'roadmap';
+        } else return;
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, [
+          `view_layer_ems_basemap`,
+          `ems_basemap_${emsLayer}`,
+        ]);
+        break;
+      }
+      case SOURCE_TYPES.EMS_FILE: {
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, `view_layer_ems_region`);
+        break;
+      }
+      case SOURCE_TYPES.KIBANA_TILEMAP: {
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, `view_layer_kbn_tms_raster`);
+        break;
+      }
+      case SOURCE_TYPES.WMS: {
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, `view_layer_wms`);
+        break;
+      }
+      case SOURCE_TYPES.EMS_XYZ: {
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, `view_layer_tms_raster`);
+        break;
+      }
+      case SOURCE_TYPES.MVT_SINGLE_LAYER: {
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, `view_layer_tms_mvt`);
+        break;
+      }
+      // TODO Can we import the ML_ANOMALY const from @kbn/ml-plugin?
+      case 'ML_ANOMALIES': {
+        usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, `view_layer_ml_anomalies`);
+      }
+      default:
+        break;
+    }
+  }
 }
