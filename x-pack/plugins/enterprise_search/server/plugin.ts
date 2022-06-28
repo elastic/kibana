@@ -164,11 +164,8 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerAppSearchRoutes(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
     registerWorkplaceSearchRoutes(dependencies);
-<<<<<<< HEAD
     // Enterprise Search Routes
     registerIndexRoutes(dependencies);
-=======
->>>>>>> origin/main
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
 
