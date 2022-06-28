@@ -18,10 +18,10 @@ import {
   EuiFlexGroup,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getRuleList } from '../findings/findings_flyout/rule_tab';
 import { getRemediationList } from '../findings/findings_flyout/overview_tab';
 import type { RuleSavedObject } from './use_csp_rules';
-import * as TEXT from './translations';
 import * as TEST_SUBJECTS from './test_subjects';
 
 interface RuleFlyoutProps {
@@ -32,8 +32,20 @@ interface RuleFlyoutProps {
 }
 
 const tabs = [
-  { label: TEXT.OVERVIEW, id: 'overview', disabled: false },
-  { label: TEXT.REMEDIATION, id: 'remediation', disabled: false },
+  {
+    label: i18n.translate('xpack.csp.rules.ruleFlyout.overviewTabLabel', {
+      defaultMessage: 'Overview',
+    }),
+    id: 'overview',
+    disabled: false,
+  },
+  {
+    label: i18n.translate('xpack.csp.rules.ruleFlyout.remediationTabLabel', {
+      defaultMessage: 'Remediation',
+    }),
+    id: 'remediation',
+    disabled: false,
+  },
 ] as const;
 
 type RuleTab = typeof tabs[number]['id'];
@@ -94,7 +106,9 @@ const RuleOverviewTab = ({
       <span>
         <EuiSwitch
           disabled={!canUpdate}
-          label={TEXT.ACTIVATED}
+          label={i18n.translate('xpack.csp.rules.ruleFlyout.overviewTab.activatedSwitchLabel', {
+            defaultMessage: 'Activated',
+          })}
           checked={rule.attributes.enabled}
           onChange={toggleRule}
           data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
