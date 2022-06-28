@@ -10,7 +10,7 @@ import deepEqual from 'fast-deep-equal';
 import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { ErrorKey, EsQueryAlertParams, SearchType } from '../types';
+import { EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
 import { QueryFormTypeChooser } from './query_form_type_chooser';
@@ -50,12 +50,8 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
     [setRuleParams, setRuleProperty]
   );
 
-  const errorParam = Object.keys(errors).find((errorKey) => {
-    return (
-      EXPRESSION_ERROR_KEYS.includes(errorKey as ErrorKey) &&
-      errors[errorKey].length >= 1 &&
-      ruleParams[errorKey] !== undefined
-    );
+  const errorParam = EXPRESSION_ERROR_KEYS.find((errorKey) => {
+    return errors[errorKey].length >= 1 && ruleParams[errorKey] !== undefined;
   });
 
   const expressionError = !!errorParam && (
