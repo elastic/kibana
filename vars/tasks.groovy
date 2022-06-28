@@ -172,7 +172,6 @@ def functionalXpack(Map params = [:]) {
       }
     }
 
-
     whenChanged([
       'x-pack/plugins/fleet/',
     ]) {

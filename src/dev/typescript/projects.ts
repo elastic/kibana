@@ -75,6 +75,11 @@ export const PROJECTS = [
     disableTypeCheck: true,
   }),
 
+  createProject('x-pack/plugins/observability/e2e/tsconfig.json', {
+    name: 'observability/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+
   // Glob patterns to be all search at once
   ...findProjects([
     'src/plugins/*/tsconfig.json',

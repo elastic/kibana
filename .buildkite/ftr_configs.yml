@@ -41,6 +41,7 @@ disabled:
   - x-pack/plugins/synthetics/e2e/config.ts
   - x-pack/plugins/synthetics/e2e/synthetics_run.ts
   - x-pack/plugins/ux/e2e/synthetics_run.ts
+  - x-pack/plugins/observability/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - test/visual_regression/config.ts

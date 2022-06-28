@@ -13,7 +13,12 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import { assertNotText, assertText, byTestId, waitForLoadingToFinish } from '../utils';
+import {
+  assertNotText,
+  assertText,
+  byTestId,
+  waitForLoadingToFinish,
+} from '@kbn/observability-plugin/e2e/utils';
 import { settingsPageProvider } from '../../page_objects/settings';
 
 journey('DefaultEmailSettings', async ({ page, params }) => {
