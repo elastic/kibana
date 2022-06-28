@@ -134,6 +134,7 @@ type RegistryOverridesToOptional = Pick<PackageSpecManifest, 'title' | 'release'
 interface RegistryAdditionalProperties {
   assets?: string[];
   download: string;
+  signature_path?: string;
   path: string;
   readme?: string;
   internal?: boolean; // Registry addition[0] and EPM uses it[1] [0]: https://github.com/elastic/package-registry/blob/dd7b021893aa8d66a5a5fde963d8ff2792a9b8fa/util/package.go#L63 [1]

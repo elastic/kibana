@@ -10,7 +10,17 @@ import { readFile } from 'fs/promises';
 import * as openpgp from 'openpgp';
 import type { Logger } from '@kbn/logging';
 
+import * as Registry from '../registry';
+
 import { appContextService } from '../../app_context';
+
+interface VerificationResult {
+  isVerified: boolean;
+  keyId: string;
+}
+
+type PackageVerificationResult = { didVerify: false } | ({ didVerify: true } & VerificationResult);
+
 let cachedKey: openpgp.Key | undefined | null = null;
 
 export async function getGpgKeyOrUndefined(): Promise<openpgp.Key | undefined> {
@@ -46,28 +56,64 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
   return key;
 }
 
-export interface PackageVerificationResult {
-  isVerified: boolean;
-  keyId: string;
+export async function verifyPackageArchiveSignature({
+  pkgName,
+  pkgVersion,
+  logger,
+}: {
+  pkgName: string;
+  pkgVersion: string;
+  logger: Logger;
+}): Promise<PackageVerificationResult> {
+  const verificationKey = await getGpgKeyOrUndefined();
+
+  if (!verificationKey) {
+    logger.warn(`Not performing package verification as no local verification key found`);
+    return { didVerify: false };
+  }
+  const pkgArchiveSignature = await Registry.getPackageArchiveSignatureOrUndefined({
+    pkgName,
+    pkgVersion,
+    logger,
+  });
+
+  if (!pkgArchiveSignature) {
+    logger.warn(`Not performing package verification as package has no signature file`);
+    return { didVerify: false };
+  }
+
+  const { archiveBuffer: pkgArchiveBuffer } = await Registry.fetchArchiveBuffer(
+    pkgName,
+    pkgVersion
+  );
+
+  const verificationResult = await _verifyPackageSignature({
+    pkgArchiveBuffer,
+    pkgArchiveSignature,
+    verificationKey,
+    logger,
+  });
+
+  return { didVerify: true, ...verificationResult };
 }
 
-export async function verifyPackageSignature({
-  pkgZipBuffer,
-  pkgZipSignature,
+async function _verifyPackageSignature({
+  pkgArchiveBuffer,
+  pkgArchiveSignature,
   verificationKey,
   logger,
 }: {
-  pkgZipBuffer: Buffer;
-  pkgZipSignature: string;
+  pkgArchiveBuffer: Buffer;
+  pkgArchiveSignature: string;
   verificationKey: openpgp.Key;
   logger: Logger;
-}): Promise<PackageVerificationResult> {
+}): Promise<VerificationResult> {
   const signature = await openpgp.readSignature({
-    armoredSignature: pkgZipSignature,
+    armoredSignature: pkgArchiveSignature,
   });
 
   const message = await openpgp.createMessage({
-    binary: pkgZipBuffer,
+    binary: pkgArchiveBuffer,
   });
 
   const verificationResult = await openpgp.verify({

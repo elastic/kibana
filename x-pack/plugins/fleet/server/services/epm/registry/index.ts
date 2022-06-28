@@ -11,6 +11,7 @@ import mime from 'mime-types';
 import semverGte from 'semver/functions/gte';
 
 import type { Response } from 'node-fetch';
+import type { Logger } from '@kbn/logging';
 
 import { splitPkgKey as split } from '../../../../common';
 
@@ -31,7 +32,7 @@ import {
   getPackageInfo,
   setPackageInfo,
 } from '../archive';
-import { streamToBuffer } from '../streams';
+import { streamToBuffer, streamToString } from '../streams';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
 
@@ -282,6 +283,32 @@ export async function fetchArchiveBuffer(
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
 
   return { archiveBuffer, archivePath };
+}
+
+export async function getPackageArchiveSignatureOrUndefined({
+  pkgName,
+  pkgVersion,
+  logger,
+}: {
+  pkgName: string;
+  pkgVersion: string;
+  logger: Logger;
+}): Promise<string | undefined> {
+  const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion);
+
+  if (!signaturePath) {
+    logger.warn(`Package ${pkgName}-${pkgVersion} does not have signature_file specified.`);
+    return undefined;
+  }
+
+  try {
+    const { body } = await fetchFile(signaturePath);
+
+    return streamToString(body);
+  } catch (e) {
+    logger.error(`Error retrieving package signature at '${signaturePath}' : ${e}`);
+    return undefined;
+  }
 }
 
 export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByType {
