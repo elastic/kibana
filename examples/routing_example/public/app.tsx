@@ -12,7 +12,7 @@ import { AppMountParameters } from '@kbn/core/public';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiText,
   EuiHorizontalRule,
   EuiPageContentHeader,

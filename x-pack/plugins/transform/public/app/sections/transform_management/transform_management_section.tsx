@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiLoadingContent,
   EuiModal,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,

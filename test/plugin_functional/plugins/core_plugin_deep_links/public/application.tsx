@@ -14,7 +14,7 @@ import { Router, Route, withRouter, RouteComponentProps, Redirect } from 'react-
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,

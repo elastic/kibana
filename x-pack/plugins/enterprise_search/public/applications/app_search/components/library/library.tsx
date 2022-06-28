@@ -14,7 +14,7 @@ import {
   EuiPageHeader,
   EuiTitle,
   EuiPageContentBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,

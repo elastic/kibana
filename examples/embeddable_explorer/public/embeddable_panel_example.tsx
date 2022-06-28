@@ -10,7 +10,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   EuiPanel,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,

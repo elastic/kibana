@@ -13,7 +13,7 @@ import { EuiPage } from '@elastic/eui';
 
 import { EuiButton } from '@elastic/eui';
 import { EuiPageBody } from '@elastic/eui';
-import { EuiPageContent } from '@elastic/eui';
+import { EuiPageContent__Deprecated as EuiPageContent } from '@elastic/eui';
 import { EuiPageContentBody } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
