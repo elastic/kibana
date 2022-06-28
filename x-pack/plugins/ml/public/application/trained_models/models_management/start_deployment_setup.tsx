@@ -23,6 +23,9 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
 } from '@elastic/eui';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
@@ -161,6 +164,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
 
 interface StartDeploymentModalProps {
   modelId: string;
+  startModelDeploymentDocUrl: string;
   onConfigChange: (config: ThreadingParams) => void;
   onClose: () => void;
 }
@@ -175,6 +179,7 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
   modelId,
   onConfigChange,
   onClose,
+  startModelDeploymentDocUrl,
 }) => {
   const [config, setConfig] = useState<ThreadingParams>({
     numOfAllocations: 1,
@@ -192,14 +197,26 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
     <EuiModal onClose={onClose} initialFocus="[name=numOfAllocations]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
-              defaultMessage="Start {modelId} deployment"
-              values={{ modelId }}
-            />
-          </h2>
+          <EuiFlexGroup justifyContent={'spaceBetween'}>
+            <EuiFlexItem grow={false}>
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
+                  defaultMessage="Start {modelId} deployment"
+                  values={{ modelId }}
+                />
+              </h2>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false} />
+          </EuiFlexGroup>
         </EuiModalHeaderTitle>
+        <EuiLink href={startModelDeploymentDocUrl} external>
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.docLinkTitle"
+            defaultMessage="Learn more"
+          />
+        </EuiLink>
       </EuiModalHeader>
 
       <EuiModalBody>
@@ -263,7 +280,7 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
  * @param theme$
  */
 export const getUserInputThreadingParamsProvider =
-  (overlays: OverlayStart, theme$: Observable<CoreTheme>) =>
+  (overlays: OverlayStart, theme$: Observable<CoreTheme>, startModelDeploymentDocUrl: string) =>
   (modelId: string): Promise<ThreadingParams | void> => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -271,6 +288,7 @@ export const getUserInputThreadingParamsProvider =
           toMountPoint(
             wrapWithTheme(
               <StartDeploymentModal
+                startModelDeploymentDocUrl={startModelDeploymentDocUrl}
                 modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();

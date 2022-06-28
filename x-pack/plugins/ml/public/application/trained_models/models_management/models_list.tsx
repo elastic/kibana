@@ -95,9 +95,12 @@ export const ModelsList: FC<Props> = ({
       overlays,
       theme,
       spacesApi,
+      docLinks,
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
+
+  const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeployment;
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
@@ -141,8 +144,8 @@ export const ModelsList: FC<Props> = ({
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
 
   const getUserInputThreadingParams = useMemo(
-    () => getUserInputThreadingParamsProvider(overlays, theme.theme$),
-    [overlays, theme.theme$]
+    () => getUserInputThreadingParamsProvider(overlays, theme.theme$, startModelDeploymentDocUrl),
+    [overlays, theme.theme$, startModelDeploymentDocUrl]
   );
 
   const navigateToPath = useNavigateToPath();
