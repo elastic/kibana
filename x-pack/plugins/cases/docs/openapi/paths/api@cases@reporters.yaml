@@ -15,8 +15,16 @@ get:
       content:
         application/json; charset=utf-8:
           schema:
-            type: string
-        examples: {}
+            type: array
+            items:
+              type: object
+              properties:
+                email:
+                  type: string
+                full_name:
+                  type: string
+                username: 
+                  type: string
   servers:
     - url: https://localhost:5601
 servers:

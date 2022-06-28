@@ -2134,6 +2134,38 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /api/cases/reporters:
+    get:
+      summary: Returns information about the users who opened cases.
+      description: >
+        You must have read privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    full_name:
+                      type: string
+                    username:
+                      type: string
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /api/cases/{caseId}/comments:
     post:
       summary: Adds a comment or alert to a case.
@@ -4803,6 +4835,39 @@ paths:
               examples:
                 findConnectorResponse:
                   $ref: '#/components/examples/find_connector_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/reporters:
+    get:
+      summary: Returns information about the users who opened cases.
+      description: >
+        You must have read privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                    full_name:
+                      type: string
+                    username:
+                      type: string
       servers:
         - url: https://localhost:5601
     servers:
