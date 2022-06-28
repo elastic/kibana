@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import {FtrProviderContext} from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({getService}: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('save', () => {
@@ -31,7 +31,7 @@ export default function ({getService}: FtrProviderContext) {
         })
         .expect(204);
 
-      const {body} = await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
+      const { body } = await supertest.get('/api/logstash/pipeline/fast_generator').expect(200);
 
       expect(body.description).to.eql('foobar baz');
     });
