@@ -7,7 +7,7 @@
  */
 import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -24,7 +24,10 @@ export type DiscoverTopNavProps = Pick<
   onOpenInspector: () => void;
   query?: Query;
   savedQuery?: string;
-  updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
+  updateQuery: (
+    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
+    isUpdate?: boolean
+  ) => void;
   stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
   onChangeIndexPattern: (indexPattern: string) => void;
