@@ -122,7 +122,6 @@ export const replaceVariables = (
       req.url = req.url.replaceAll(urlRegex, (match) => {
         // Sanitize variable name
         const key = match.replace('${', '').replace('}', '');
-        // Get variable value from storage
         const variable = variables.find(({ name }) => name === key);
 
         return variable?.value ?? match;
@@ -134,7 +133,6 @@ export const replaceVariables = (
         const data = req.data[0].replaceAll(bodyRegex, (match) => {
           // Sanitize variable name
           const key = match.replace('"${', '').replace('}"', '');
-          // Get variable value from storage
           const variable = variables.find(({ name }) => name === key);
 
           if (variable) {
