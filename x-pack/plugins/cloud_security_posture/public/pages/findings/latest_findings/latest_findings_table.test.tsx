@@ -83,7 +83,9 @@ describe('<FindingsTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByTestId(TEST_SUBJECTS.FINDINGS_TABLE_ZERO_STATE)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE)
+    ).toBeInTheDocument();
   });
 
   it('renders the table with provided items', () => {

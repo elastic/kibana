@@ -147,6 +147,7 @@ export class CoreSystem {
   private reportKibanaLoadedEvent(analytics: AnalyticsServiceStart) {
     analytics.reportEvent('Loaded Kibana', {
       kibana_version: this.coreContext.env.packageInfo.version,
+      protocol: window.location.protocol,
       ...fetchOptionalMemoryInfo(),
       ...this.getLoadMarksInfo(),
     });
@@ -386,6 +387,12 @@ export class CoreSystem {
           _meta: {
             description: 'When the application emits the first app navigation',
             optional: true,
+          },
+        },
+        protocol: {
+          type: 'keyword',
+          _meta: {
+            description: 'Value from window.location.protocol',
           },
         },
       },
