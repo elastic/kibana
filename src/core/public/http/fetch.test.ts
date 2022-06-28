@@ -11,11 +11,11 @@ import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { first } from 'rxjs/operators';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
 import { HttpResponse, HttpFetchOptionsWithPath } from './types';
-import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 
 function delay<T>(duration: number) {
   return new Promise<T>((r) => setTimeout(r, duration));

@@ -9,8 +9,9 @@
 import { isEmpty, omitBy } from 'lodash';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
-
-import {
+import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
+import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
+import type {
   IBasePath,
   HttpInterceptor,
   HttpHandler,
@@ -22,7 +23,6 @@ import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
-import { ExecutionContextContainer, ExecutionContextSetup } from '../execution_context';
 
 interface Params {
   basePath: IBasePath;
