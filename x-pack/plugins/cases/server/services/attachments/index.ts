@@ -9,8 +9,12 @@ import {
   Logger,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
+  SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -18,6 +22,7 @@ import type { KueryNode } from '@kbn/es-query';
 import {
   AttributesTypeAlerts,
   CommentAttributes as AttachmentAttributes,
+  CommentAttributesWithoutSORefs as AttachmentAttributesWithoutSORefs,
   CommentPatchAttributes as AttachmentPatchAttributes,
   CommentType,
 } from '../../../common/api';
@@ -30,6 +35,9 @@ import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
 import { AggregationResponse } from '../../client/metrics/types';
+import { getAttachmentSOExtractor } from '../so_reference_extractor';
+import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+
 interface AttachedToCaseArgs extends ClientArgs {
   caseId: string;
   filter?: KueryNode;
@@ -68,7 +76,7 @@ interface BulkCreateAttachments extends ClientArgs {
 interface UpdateArgs {
   attachmentId: string;
   updatedAttributes: AttachmentPatchAttributes;
-  options?: SavedObjectsUpdateOptions<AttachmentAttributes>;
+  options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributes>, 'upsert'>;
 }
 
 export type UpdateAttachmentArgs = UpdateArgs & ClientArgs;
@@ -228,10 +236,14 @@ export class AttachmentService {
   }: GetAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to GET attachment ${attachmentId}`);
-      return await unsecuredSavedObjectsClient.get<AttachmentAttributes>(
+      const res = await unsecuredSavedObjectsClient.get<AttachmentAttributesWithoutSORefs>(
         CASE_COMMENT_SAVED_OBJECT,
         attachmentId
       );
+
+      const soExtractor = getAttachmentSOExtractor(res.attributes);
+
+      return soExtractor.populateFieldsFromReferences<AttachmentAttributes>(res);
     } catch (error) {
       this.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
       throw error;
@@ -253,29 +265,66 @@ export class AttachmentService {
     attributes,
     references,
     id,
-  }: CreateAttachmentArgs) {
+  }: CreateAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new comment`);
-      return await unsecuredSavedObjectsClient.create<AttachmentAttributes>(
-        CASE_COMMENT_SAVED_OBJECT,
-        attributes,
-        {
-          references,
-          id,
-        }
-      );
+
+      const soExtractor = getAttachmentSOExtractor(attributes);
+
+      const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
+        soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
+          data: attributes,
+          existingReferences: references,
+        });
+
+      const attachment =
+        await unsecuredSavedObjectsClient.create<AttachmentAttributesWithoutSORefs>(
+          CASE_COMMENT_SAVED_OBJECT,
+          migratedAttributes,
+          {
+            references: refsWithExternalRefId,
+            id,
+          }
+        );
+
+      return soExtractor.populateFieldsFromReferences<AttachmentAttributes>(attachment);
     } catch (error) {
       this.log.error(`Error on POST a new comment: ${error}`);
       throw error;
     }
   }
 
-  public async bulkCreate({ unsecuredSavedObjectsClient, attachments }: BulkCreateAttachments) {
+  public async bulkCreate({
+    unsecuredSavedObjectsClient,
+    attachments,
+  }: BulkCreateAttachments): Promise<SavedObjectsBulkResponse<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to bulk create attachments`);
-      return await unsecuredSavedObjectsClient.bulkCreate(
-        attachments.map((attachment) => ({ type: CASE_COMMENT_SAVED_OBJECT, ...attachment }))
+      const res = await unsecuredSavedObjectsClient.bulkCreate<AttachmentAttributesWithoutSORefs>(
+        attachments.map((attachment) => {
+          const soExtractor = getAttachmentSOExtractor(attachment.attributes);
+
+          const { transformedFields: migratedAttributes, references: refsWithExternalRefId } =
+            soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
+              data: attachment.attributes,
+              existingReferences: attachment.references,
+            });
+
+          return {
+            type: CASE_COMMENT_SAVED_OBJECT,
+            ...attachment,
+            attributes: migratedAttributes,
+            references: refsWithExternalRefId,
+          };
+        })
       );
+
+      return {
+        saved_objects: res.saved_objects.map((so) => {
+          const soExtractor = getAttachmentSOExtractor(so.attributes);
+          return soExtractor.populateFieldsFromReferences<AttachmentAttributes>(so);
+        }),
+      };
     } catch (error) {
       this.log.error(`Error on bulk create attachments: ${error}`);
       throw error;
@@ -287,34 +336,97 @@ export class AttachmentService {
     attachmentId,
     updatedAttributes,
     options,
-  }: UpdateAttachmentArgs) {
+  }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE comment ${attachmentId}`);
-      return await unsecuredSavedObjectsClient.update<AttachmentAttributes>(
+      const soExtractor = getAttachmentSOExtractor(updatedAttributes);
+
+      const {
+        transformedFields: migratedAttributes,
+        references: refsWithExternalRefId,
+        didDeleteOperation,
+      } = soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
+        data: updatedAttributes,
+        existingReferences: options?.references,
+      });
+
+      const res = await unsecuredSavedObjectsClient.update<AttachmentAttributesWithoutSORefs>(
         CASE_COMMENT_SAVED_OBJECT,
         attachmentId,
-        updatedAttributes,
-        options
+        migratedAttributes,
+        {
+          ...options,
+          /**
+           * If options?.references are undefined and there is no field to move to the refs
+           * then the refsWithExternalRefId will be an empty array. If we pass the empty array
+           * on the update then all previously refs will be removed. The check below is needed
+           * to prevent this.
+           */
+          references:
+            refsWithExternalRefId.length > 0 || didDeleteOperation
+              ? refsWithExternalRefId
+              : undefined,
+        }
       );
+
+      return soExtractor.populateFieldsFromReferencesForPatch<AttachmentAttributes>({
+        dataBeforeRequest: updatedAttributes,
+        dataReturnedFromRequest: res,
+      });
     } catch (error) {
       this.log.error(`Error on UPDATE comment ${attachmentId}: ${error}`);
       throw error;
     }
   }
 
-  public async bulkUpdate({ unsecuredSavedObjectsClient, comments }: BulkUpdateAttachmentArgs) {
+  public async bulkUpdate({
+    unsecuredSavedObjectsClient,
+    comments,
+  }: BulkUpdateAttachmentArgs): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributes>> {
     try {
       this.log.debug(
         `Attempting to UPDATE comments ${comments.map((c) => c.attachmentId).join(', ')}`
       );
-      return await unsecuredSavedObjectsClient.bulkUpdate<AttachmentAttributes>(
-        comments.map((c) => ({
-          type: CASE_COMMENT_SAVED_OBJECT,
-          id: c.attachmentId,
-          attributes: c.updatedAttributes,
-          ...c.options,
-        }))
+
+      const res = await unsecuredSavedObjectsClient.bulkUpdate<AttachmentAttributesWithoutSORefs>(
+        comments.map((c) => {
+          const soExtractor = getAttachmentSOExtractor(c.updatedAttributes);
+          const {
+            transformedFields: migratedAttributes,
+            references: refsWithExternalRefId,
+            didDeleteOperation,
+          } = soExtractor.extractFieldsToReferences<AttachmentAttributesWithoutSORefs>({
+            data: c.updatedAttributes,
+            existingReferences: c.options?.references,
+          });
+
+          return {
+            ...c.options,
+            type: CASE_COMMENT_SAVED_OBJECT,
+            id: c.attachmentId,
+            attributes: migratedAttributes,
+            /* If c.options?.references are undefined and there is no field to move to the refs
+             * then the refsWithExternalRefId will be an empty array. If we pass the empty array
+             * on the update then all previously refs will be removed. The check below is needed
+             * to prevent this.
+             */
+            references:
+              refsWithExternalRefId.length > 0 || didDeleteOperation
+                ? refsWithExternalRefId
+                : undefined,
+          };
+        })
       );
+
+      return {
+        saved_objects: res.saved_objects.map((so, index) => {
+          const soExtractor = getAttachmentSOExtractor(so.attributes);
+          return soExtractor.populateFieldsFromReferencesForPatch<AttachmentAttributes>({
+            dataBeforeRequest: comments[index].updatedAttributes,
+            dataReturnedFromRequest: so,
+          });
+        }),
+      };
     } catch (error) {
       this.log.error(
         `Error on UPDATE comments ${comments.map((c) => c.attachmentId).join(', ')}: ${error}`
@@ -370,6 +482,34 @@ export class AttachmentService {
         return acc;
       }, new Map<string, CommentStats>()) ?? new Map()
     );
+  }
+
+  public async find({
+    unsecuredSavedObjectsClient,
+    options,
+  }: {
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    options?: SavedObjectFindOptionsKueryNode;
+  }): Promise<SavedObjectsFindResponse<AttachmentAttributes>> {
+    try {
+      this.log.debug(`Attempting to find comments`);
+      const res = await unsecuredSavedObjectsClient.find<AttachmentAttributesWithoutSORefs>({
+        sortField: defaultSortField,
+        ...options,
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      return {
+        ...res,
+        saved_objects: res.saved_objects.map((so) => {
+          const soExtractor = getAttachmentSOExtractor(so.attributes);
+          return { ...so, ...soExtractor.populateFieldsFromReferences<AttachmentAttributes>(so) };
+        }),
+      };
+    } catch (error) {
+      this.log.error(`Error on find comments: ${error}`);
+      throw error;
+    }
   }
 
   private static buildCommentStatsAggs(
