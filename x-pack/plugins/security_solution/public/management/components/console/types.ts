@@ -63,25 +63,6 @@ export interface CommandDefinition<TMeta = any> {
       selector?: ComponentType;
     };
   };
-
-  /** Arguments that are part of of an exclusive OR list.  The user can only use one of them */
-  oneOf?: {
-    [longName: string]: {
-      required: boolean;
-      allowMultiples: boolean;
-      about: string;
-      /**
-       * Validate the individual values given to this argument.
-       * Should return `true` if valid or a string with the error message
-       */
-      validate?: (argData: ParsedArgData) => true | string;
-
-      // Selector: Idea is that the schema can plugin in a rich component for the
-      // user to select something (ex. a file)
-      // FIXME: implement selector
-      selector?: ComponentType;
-    };
-  };
 }
 
 /**
