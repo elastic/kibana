@@ -28,8 +28,6 @@ import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj'
 
 const CommandInputContainer = styled.div`
   background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
-  border: ${({ theme: { eui } }) => eui.euiBorderThin};
-  border-radius: ${({ theme: { eui } }) => eui.euiFormControlBorderRadius};
   padding: ${({ theme: { eui } }) => eui.euiSizeS};
 
   .prompt {

@@ -21,7 +21,6 @@ import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item'
 const ConsoleWindow = styled.div`
   height: 100%;
   background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
-  border: ${({ theme: { eui } }) => eui.euiBorderThin};
 
   .layout {
     height: 100%;
