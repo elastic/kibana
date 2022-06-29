@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   EuiText,
   EuiSpacer,
@@ -41,12 +41,15 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
     filteredSolutions: OBSERVABILITY_SOLUTIONS,
   });
 
-  useEffect(() => {
+  const getRuleType = useMemo(() => {
     if (ruleTypes.length && rule) {
-      const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
-      setRuleType(matchedRuleType);
+      return ruleTypes.find((type) => type.id === rule.ruleTypeId);
     }
   }, [rule, ruleTypes]);
+
+  useEffect(() => {
+    setRuleType(getRuleType);
+  }, [getRuleType]);
 
   const getRuleConditionsWording = () => {
     const numberOfConditions = rule?.params.criteria ? (rule?.params.criteria as any[]).length : 0;
@@ -55,7 +58,9 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
         {numberOfConditions}&nbsp;
         {i18n.translate('xpack.triggersActionsUI.ruleDetails.conditions', {
           defaultMessage: 'condition{s}',
-          values: { s: numberOfConditions > 1 ? 's' : '' },
+          values: {
+            s: numberOfConditions > 1 || numberOfConditions === 0 ? 's' : '',
+          },
         })}
       </>
     );
