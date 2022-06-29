@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiTourStep,
   EuiTourStepProps,
-  EuiOverlayMask,
   EuiImage,
   EuiSpacer,
   EuiText,
@@ -25,8 +24,6 @@ import { useLocation } from 'react-router-dom';
 import { ApplicationStart } from '@kbn/core/public';
 import { observabilityAppId } from '../../../../common';
 import { tourStepsConfig } from './steps_config';
-
-import './tour.scss';
 
 const minWidth: EuiTourStepProps['minWidth'] = 360;
 const maxWidth: EuiTourStepProps['maxWidth'] = 360;
@@ -97,7 +94,7 @@ const getSteps = ({
 
   return tourStepsConfig.map((stepConfig, index) => {
     const step = index + 1;
-    const { dataTestSubj, showOverlay, content, imageConfig, ...tourStepProps } = stepConfig;
+    const { dataTestSubj, content, imageConfig, ...tourStepProps } = stepConfig;
     return (
       <EuiTourStep
         {...tourStepProps}
@@ -194,7 +191,6 @@ export function ObservabilityTour({
   const isSmallBreakpoint = useIsWithinBreakpoints(['s']);
 
   const isOverviewPage = currentPath === overviewPath;
-  const { showOverlay } = tourStepsConfig[activeStep - 1];
 
   const incrementStep = useCallback(() => {
     setActiveStep((prevState) => prevState + 1);
@@ -231,17 +227,7 @@ export function ObservabilityTour({
   return (
     <>
       {children({ isTourVisible })}
-      {isTourVisible && (
-        <>
-          {getSteps({ activeStep, incrementStep, endTour, prependBasePath })}
-          {showOverlay && (
-            <EuiOverlayMask
-              className="observabilityTour__overlayMask"
-              headerZindexLocation="below"
-            />
-          )}
-        </>
-      )}
+      {isTourVisible && getSteps({ activeStep, incrementStep, endTour, prependBasePath })}
     </>
   );
 }

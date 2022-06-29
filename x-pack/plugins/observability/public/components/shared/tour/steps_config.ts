@@ -14,7 +14,6 @@ interface TourStep {
   anchorPosition: EuiTourStepProps['anchorPosition'];
   title: EuiTourStepProps['title'];
   dataTestSubj: string;
-  showOverlay: boolean;
   imageConfig?: {
     name: string;
     altText: string;
@@ -33,7 +32,6 @@ export const tourStepsConfig: TourStep[] = [
     anchor: `[id^="KibanaPageTemplateSolutionNav"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'overviewStep',
-    showOverlay: true,
   },
   {
     title: i18n.translate('xpack.observability.tour.streamStep.tourTitle', {
@@ -45,7 +43,6 @@ export const tourStepsConfig: TourStep[] = [
     anchor: `[data-nav-id="stream"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'streamStep',
-    showOverlay: true,
     imageConfig: {
       name: 'onboarding_tour_step_logs.gif',
       altText: i18n.translate('xpack.observability.tour.streamStep.imageAltText', {
@@ -63,7 +60,6 @@ export const tourStepsConfig: TourStep[] = [
     anchor: `[data-nav-id="metrics_explorer"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'metricsExplorerStep',
-    showOverlay: true,
     imageConfig: {
       name: 'onboarding_tour_step_metrics.gif',
       altText: i18n.translate('xpack.observability.tour.metricsExplorerStep.imageAltText', {
@@ -81,7 +77,6 @@ export const tourStepsConfig: TourStep[] = [
     anchor: `[data-nav-id="traces"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'tracesStep',
-    showOverlay: true,
     imageConfig: {
       name: 'onboarding_tour_step_traces.gif',
       altText: i18n.translate('xpack.observability.tour.tracesStep.imageAltText', {
@@ -99,7 +94,6 @@ export const tourStepsConfig: TourStep[] = [
     anchor: `[data-nav-id="alerts"]`,
     anchorPosition: 'rightUp',
     dataTestSubj: 'alertStep',
-    showOverlay: true,
     imageConfig: {
       name: 'onboarding_tour_step_alerts.gif',
       altText: i18n.translate('xpack.observability.tour.alertsStep.imageAltText', {
@@ -117,6 +111,5 @@ export const tourStepsConfig: TourStep[] = [
     anchor: '#guidedSetupButton',
     anchorPosition: 'rightUp',
     dataTestSubj: 'guidedSetupStep',
-    showOverlay: false,
   },
 ];
