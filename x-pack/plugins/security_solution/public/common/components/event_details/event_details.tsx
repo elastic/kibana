@@ -20,8 +20,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import { useOsqueryTab } from './osquery_tab';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { useHandleAddToTimeline } from './add_to_timeline_button';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
@@ -44,7 +44,6 @@ import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { HostRisk } from '../../../risk_score/containers';
 import { RelatedCases } from './related_cases';
-import { useKibana } from '../../lib/kibana';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -56,6 +55,7 @@ export interface AlertRawEventData {
     ['kibana.alert.rule.name']?: string;
     ['kibana.alert.rule.actions']?: Array<Record<'action_type_id', string>>;
   };
+
   [key: string]: unknown;
 }
 
@@ -163,15 +163,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     range,
   } = useInvestigationTimeEnrichment(eventFields);
 
-  const {
-    services: { osquery },
-  } = useKibana();
   const isOsqueryDetectionActionEnabled = useIsExperimentalFeatureEnabled('osqueryDetectionAction');
-
-  // @ts-expect-error the types are there
-  const { OsqueryResults } = osquery;
-
-  const handleAddToTimeline = useHandleAddToTimeline();
 
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
@@ -357,55 +349,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     [rawEventData]
   );
 
-  const osqueryTab = useMemo(() => {
-    if (!isOsqueryDetectionActionEnabled) {
-      return;
-    }
-    const osqueryActionsLength = rawEventData?._source['kibana.alert.rule.actions']?.filter(
-      (action: { action_type_id: string }) => action.action_type_id === '.osquery'
-    )?.length;
-
-    const agentIds = rawEventData?.fields['agent.id'];
-    const ruleName = rawEventData?._source['kibana.alert.rule.name'];
-    const ruleActions = rawEventData?._source['kibana.alert.rule.actions'];
-
-    return osqueryActionsLength
-      ? {
-          id: EventsViewType.osqueryView,
-          'data-test-subj': 'osqueryViewTab',
-          name: (
-            <EuiFlexGroup
-              direction="row"
-              alignItems={'center'}
-              justifyContent={'spaceAround'}
-              gutterSize="xs"
-            >
-              <EuiFlexItem>
-                <span>{i18n.OSQUERY_VIEW}</span>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiNotificationBadge data-test-subj="osquery-actions-notification">
-                  {osqueryActionsLength}
-                </EuiNotificationBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          content: (
-            <>
-              <TabContentWrapper data-test-subj="osqueryViewWrapper">
-                <OsqueryResults
-                  agentIds={agentIds}
-                  ruleName={ruleName}
-                  ruleActions={ruleActions}
-                  eventDetailId={id}
-                  addToTimeline={handleAddToTimeline}
-                />
-              </TabContentWrapper>
-            </>
-          ),
-        }
-      : undefined;
-  }, [OsqueryResults, handleAddToTimeline, id, isOsqueryDetectionActionEnabled, rawEventData]);
+  const osqueryTab = useOsqueryTab({ isOsqueryDetectionActionEnabled, rawEventData, id });
 
   const tabs = useMemo(() => {
     return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
@@ -428,7 +372,6 @@ const EventDetailsComponent: React.FC<Props> = ({
     />
   );
 };
-
 EventDetailsComponent.displayName = 'EventDetailsComponent';
 
 export const EventDetails = React.memo(EventDetailsComponent);

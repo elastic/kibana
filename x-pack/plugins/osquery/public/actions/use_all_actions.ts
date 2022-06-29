@@ -100,7 +100,7 @@ export const useInfiniteAllActions = ({
   const [nextPage, setNextPage] = useState(0);
 
   return useInfiniteQuery(
-    [`actions-${eventDetailId}`, { activePage, direction, limit, sortField }],
+    ['actions', { activePage, direction, limit, sortField, eventDetailId }],
     async ({ pageParam = activePage }) => {
       setNextPage(pageParam + 1);
       const responseData = await lastValueFrom(

@@ -6,15 +6,22 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import { OsqueryActionResultsProps } from './osquery_results/types';
+import { StartServices } from '../types';
 
-// @ts-expect-error update types
-// eslint-disable-next-line react/display-name
-export const getLazyOsqueryResults = (services) => (props) => {
-  const OsqueryResults = lazy(() => import('./osquery_results'));
+interface BigServices extends StartServices {
+  kibanaVersion: string;
+  storage: unknown;
+}
 
-  return (
-    <Suspense fallback={null}>
-      <OsqueryResults services={services} {...props} />
-    </Suspense>
-  );
-};
+export const getLazyOsqueryResults =
+  // eslint-disable-next-line react/display-name
+  (services: BigServices) => (props: OsqueryActionResultsProps) => {
+    const OsqueryResults = lazy(() => import('./osquery_results'));
+
+    return (
+      <Suspense fallback={null}>
+        <OsqueryResults services={services} {...props} />
+      </Suspense>
+    );
+  };

@@ -23,7 +23,7 @@ import { useInView } from 'react-intersection-observer';
 
 import { map } from 'lodash';
 import styled from 'styled-components';
-import { AGENT, AGENT_QUERY } from '../../agents/translations';
+import { AGENT, AGENT_QUERY, ATTACHED_QUERY } from '../../agents/translations';
 import { OsqueryActionType } from '../../../common/types';
 import { useInfiniteAllActions } from '../../actions/use_all_actions';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
@@ -33,21 +33,14 @@ import { queryClient } from '../../query_client';
 import { KibanaThemeProvider } from '../../shared_imports';
 import { StartPlugins } from '../../types';
 import { Direction } from '../../../common/search_strategy';
-
-interface OsqueryResultsProps {
-  agentIds: string[];
-  ruleName: string;
-  ruleActions: string[];
-  eventDetailId: string;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
-}
+import { OsqueryActionResultsProps } from './types';
 
 const StyledScrolledEuiFlexItem = styled(EuiFlexItem)`
   overflow-y: auto;
   max-height: 60px;
 `;
 
-const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
+const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   agentIds,
   ruleName,
   ruleActions,
@@ -79,7 +72,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
   const agentsList = useMemo(
     () => (
       <StyledScrolledEuiFlexItem>
-        {agentIds.map((agent, id) => (
+        {agentIds?.map((agent, id) => (
           <EuiFlexItem key={id}>{agent}</EuiFlexItem>
         ))}
       </StyledScrolledEuiFlexItem>
@@ -99,7 +92,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
             <EuiComment
               username={ruleName}
               timestamp={<FormattedRelative value={startDate} />}
-              event={'attached query'}
+              event={ATTACHED_QUERY}
               data-test-subj={'osquery-results-comment'}
               key={ruleAction._id}
             >
@@ -111,7 +104,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
                 language="sql"
                 fontSize="m"
                 paddingSize="m"
-                transparentBackground={!agentIds[0].length}
+                transparentBackground={agentIds && !agentIds[0].length}
               >
                 {agentsList}
               </EuiCodeBlock>
@@ -144,11 +137,13 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({
   );
 };
 
-export const OsqueryResults = React.memo(OsqueryResultsComponent);
+export const OsqueryActionResults = React.memo(OsqueryActionResultsComponent);
 
-type OsqueryResultsWrapperProps = { services: CoreStart & StartPlugins } & OsqueryResultsProps;
+type OsqueryActionResultsWrapperProps = {
+  services: CoreStart & StartPlugins;
+} & OsqueryActionResultsProps;
 
-const OsqueryResultsWrapperComponent: React.FC<OsqueryResultsWrapperProps> = ({
+const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapperProps> = ({
   services,
   ...restProps
 }) => (
@@ -156,14 +151,14 @@ const OsqueryResultsWrapperComponent: React.FC<OsqueryResultsWrapperProps> = ({
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <OsqueryResults {...restProps} />
+          <OsqueryActionResults {...restProps} />
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
   </KibanaThemeProvider>
 );
 
-const OsqueryResultsWrapper = React.memo(OsqueryResultsWrapperComponent);
+const OsqueryActionResultsWrapper = React.memo(OsqueryActionResultsWrapperComponent);
 
 // eslint-disable-next-line import/no-default-export
-export { OsqueryResultsWrapper as default };
+export { OsqueryActionResultsWrapper as default };

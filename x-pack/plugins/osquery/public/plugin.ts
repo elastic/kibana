@@ -69,8 +69,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    // TODO find config of detectionACtion
-    // console.log({ core, plugins });
     if (config.detectionAction) {
       const actionType = getActionType();
       plugins.triggersActionsUi.actionTypeRegistry.register(actionType);

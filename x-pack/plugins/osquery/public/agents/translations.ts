@@ -57,3 +57,7 @@ export const ERROR_ALL_AGENTS = i18n.translate('xpack.osquery.agents.errorSearch
 export const FAIL_ALL_AGENTS = i18n.translate('xpack.osquery.agents.failSearchDescription', {
   defaultMessage: `Failed to fetch agents`,
 });
+
+export const ATTACHED_QUERY = i18n.translate('xpack.osquery.agent.attachedQuery', {
+  defaultMessage: `attached query`, // as in 'User attached query 5 minutes ago'
+});

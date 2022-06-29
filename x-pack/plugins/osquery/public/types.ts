@@ -23,7 +23,7 @@ import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results'
 export interface OsqueryPluginSetup {}
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
-  OsqueryResults?: ReturnType<typeof getLazyOsqueryResults>;
+  OsqueryResults: ReturnType<typeof getLazyOsqueryResults>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
 }
 
