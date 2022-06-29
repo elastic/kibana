@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UseFormReturn, ControllerRenderProps, ControllerFieldState } from 'react-hook-form';
+import { UseFormReturn, ControllerRenderProps } from 'react-hook-form';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -42,6 +42,7 @@ import {
   ServiceLocations,
   TLSVersion,
   VerificationMode,
+  FieldMeta,
 } from '../types';
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
 import { HeaderField } from '../fields/header_field';
@@ -52,42 +53,6 @@ import { SourceField } from '../fields/source_field';
 import { getDefaultFormFields } from './defaults';
 import { StepFields } from '../steps/step_fields';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
-
-export interface FieldMeta {
-  fieldKey: string;
-  component: React.ComponentType<any>;
-  label?: string;
-  ariaLabel?: string;
-  helpText?: string | React.ReactNode;
-  props?: (params: {
-    field?: ControllerRenderProps;
-    setValue: UseFormReturn['setValue'];
-    reset: UseFormReturn['reset'];
-    locations: ServiceLocations;
-    dependencies: unknown[];
-    dependenciesFieldMeta: Record<string, ControllerFieldState>;
-    space?: string;
-    isEdit?: boolean;
-  }) => Record<string, any>;
-  controlled?: boolean;
-  required?: boolean;
-  shouldUseSetValue?: boolean;
-  customHook?: (value: unknown) => {
-    // custom hooks are only supported for controlled components and only supported for determining error validation
-    func: Function;
-    params: unknown;
-    fieldKey: string;
-    error: string;
-  };
-  onChange?: (
-    event: React.ChangeEvent<HTMLInputElement>,
-    formOnChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  ) => void;
-  showWhen?: [string, any]; // show field when another field equals an arbitrary value
-  validation?: (dependencies: unknown[]) => Parameters<UseFormReturn['register']>[1];
-  error?: React.ReactNode;
-  dependencies?: string[]; // fields that another field may depend for or validation. Values are passed to the validation function
-}
 
 export interface AdvancedFieldGroup {
   title: string;

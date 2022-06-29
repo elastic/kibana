@@ -5,5 +5,45 @@
  * 2.0.
  */
 
+import React from 'react';
+import { UseFormReturn, ControllerRenderProps, ControllerFieldState } from 'react-hook-form';
+import { ServiceLocations } from '../../../../../common/runtime_types/monitor_management';
+
 export * from '../../../../../common/runtime_types/monitor_management';
 export * from '../../../../../common/types/monitor_validation';
+
+export interface FieldMeta {
+  fieldKey: string;
+  component: React.ComponentType<any>;
+  label?: string;
+  ariaLabel?: string;
+  helpText?: string | React.ReactNode;
+  props?: (params: {
+    field?: ControllerRenderProps;
+    setValue: UseFormReturn['setValue'];
+    reset: UseFormReturn['reset'];
+    locations: ServiceLocations;
+    dependencies: unknown[];
+    dependenciesFieldMeta: Record<string, ControllerFieldState>;
+    space?: string;
+    isEdit?: boolean;
+  }) => Record<string, any>;
+  controlled?: boolean;
+  required?: boolean;
+  shouldUseSetValue?: boolean;
+  customHook?: (value: unknown) => {
+    // custom hooks are only supported for controlled components and only supported for determining error validation
+    func: Function;
+    params: unknown;
+    fieldKey: string;
+    error: string;
+  };
+  onChange?: (
+    event: React.ChangeEvent<HTMLInputElement>,
+    formOnChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  ) => void;
+  showWhen?: [string, any]; // show field when another field equals an arbitrary value
+  validation?: (dependencies: unknown[]) => Parameters<UseFormReturn['register']>[1];
+  error?: React.ReactNode;
+  dependencies?: string[]; // fields that another field may depend for or validation. Values are passed to the validation function
+}

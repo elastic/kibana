@@ -15,7 +15,7 @@ import {
 } from 'react-hook-form';
 import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { selectServiceLocationsState } from '../../../state';
-import { FieldMeta } from './config';
+import { FieldMeta } from '../types';
 
 type Props = FieldMeta & {
   component: React.ComponentType<any>;

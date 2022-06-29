@@ -11,7 +11,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { selectServiceLocationsState } from '../../../state';
 import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { ControlledField } from './controlled_field';
-import { FieldMeta } from './config';
+import { FieldMeta } from '../types';
 
 type Props = FieldMeta & { fieldError: FieldError };
 
