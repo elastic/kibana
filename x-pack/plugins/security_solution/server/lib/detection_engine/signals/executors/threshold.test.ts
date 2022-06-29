@@ -15,7 +15,7 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import { getEntryListMock } from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
 import { getThresholdRuleParams, getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
 import { buildRuleMessageFactory } from '../rule_messages';
-import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
+import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
@@ -43,7 +43,12 @@ describe('threshold_executor', () => {
   beforeEach(() => {
     alertServices = alertsMock.createRuleExecutorServices();
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        ...sampleEmptyAggsSearchResults(),
+        aggregations: {
+          thresholdTerms: { buckets: [] },
+        },
+      })
     );
     logger = loggingSystemMock.createLogger();
   });
