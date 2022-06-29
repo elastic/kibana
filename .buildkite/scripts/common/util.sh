@@ -147,7 +147,8 @@ set_git_merge_base() {
 # So this function contains some cleanup/retry logic to try to recover from this kind of situation
 npm_install_global() {
   package="$1"
-  version="${2:-}"
+  version="${2:-latest}"
+  toInstall="$package@$version"
 
   npmRoot=$(npm root -g)
   packageRoot="${npmRoot:?}/$package"
@@ -155,11 +156,6 @@ npm_install_global() {
   # The success flag file exists just to try to make sure we know that the full install was done
   # For example, if a job terminates in the middle of npm install, a directory could be left behind that we don't know the state of
   successFlag="${packageRoot:?}/.install-success"
-
-  toInstall="$package"
-  if [[ "$version" ]]; then
-    toInstall="$package@$version"
-  fi
 
   if [[ -d "$packageRoot" && ! -f "$successFlag" ]]; then
     echo "Removing existing package directory $packageRoot before install, seems previous installation was not successful"
