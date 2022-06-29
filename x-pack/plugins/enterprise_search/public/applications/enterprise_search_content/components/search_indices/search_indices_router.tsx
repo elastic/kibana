@@ -8,10 +8,15 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { SEARCH_INDICES_PATH, SEARCH_INDEX_PATH, NEW_INDEX_PATH } from '../../routes';
+import {
+  SEARCH_INDICES_PATH,
+  SEARCH_INDEX_PATH,
+  SEARCH_INDEX_TAB_PATH,
+  NEW_INDEX_PATH,
+} from '../../routes';
 
 import { NewIndex } from '../new_index';
-import { SearchIndexRouter } from '../search_index';
+import { SearchIndex } from '../search_index/search_index';
 
 import { SearchIndices } from './search_indices';
 
@@ -24,8 +29,11 @@ export const SearchIndicesRouter: React.FC = () => {
       <Route exact path={SEARCH_INDICES_PATH}>
         <SearchIndices />
       </Route>
-      <Route path={SEARCH_INDEX_PATH}>
-        <SearchIndexRouter />
+      <Route path={SEARCH_INDEX_PATH} exact>
+        <SearchIndex />
+      </Route>
+      <Route path={SEARCH_INDEX_TAB_PATH}>
+        <SearchIndex />
       </Route>
     </Switch>
   );

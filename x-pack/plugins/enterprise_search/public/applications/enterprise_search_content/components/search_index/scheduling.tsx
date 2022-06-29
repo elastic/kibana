@@ -7,6 +7,8 @@
 
 import React from 'react';
 
-export const SearchIndexDocuments: React.FC = () => {
-  return <>Documents</>;
+export const SearchIndexScheduling: React.FC = () => {
+  // TODO If index && !index.connector then do something
+
+  return <>Scheduling</>;
 };

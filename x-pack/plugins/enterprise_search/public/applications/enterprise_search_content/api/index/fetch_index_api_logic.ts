@@ -32,8 +32,13 @@ export interface Connector {
   sync_status: string | null;
 }
 
+export interface Crawler {
+  domains: [];
+}
+
 export interface IndexData {
   connector?: Connector;
+  crawler?: Crawler;
   index: {
     aliases: string[];
     health: string;

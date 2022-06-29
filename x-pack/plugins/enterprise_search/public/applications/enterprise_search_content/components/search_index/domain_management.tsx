@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { SearchIndexRouter } from './search_index_router';
+import React from 'react';
+
+export const SearchIndexDomainManagement: React.FC = () => {
+  // TODO If index && !index.crawler then do something
+
+  return <>Manage Domains</>;
+};
