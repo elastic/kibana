@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Event, EventType } from '@kbn/core/public';
-
-declare global {
-  interface Window {
-    __analytics_ftr_helpers__: {
-      setOptIn: (optIn: boolean) => void;
-      getEvents: (takeNumberOfEvents: number, eventTypes?: EventType[]) => Promise<Event[]>;
-    };
-  }
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/test/analytics'],
+};

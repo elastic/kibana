@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, ReplaySubject, filter, take, toArray, map } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { Plugin, CoreSetup, Event } from '@kbn/core/server';
+import { fetchEvents } from '../common/fetch_events';
 import { CustomShipper } from './custom_shipper';
 
 export class AnalyticsFTRHelpers implements Plugin {
@@ -45,32 +46,32 @@ export class AnalyticsFTRHelpers implements Plugin {
           query: schema.object({
             takeNumberOfEvents: schema.number({ min: 1 }),
             eventTypes: schema.arrayOf(schema.string()),
+            withTimeoutMs: schema.maybe(schema.number()),
+            fromTimestamp: schema.maybe(schema.string()),
           }),
         },
       },
       async (context, req, res) => {
-        const { takeNumberOfEvents, eventTypes } = req.query;
-
-        const events = await firstValueFrom(
-          events$.pipe(
-            filter((event) => {
-              if (eventTypes.length > 0) {
-                return eventTypes.includes(event.event_type);
-              }
-              return true;
-            }),
-            take(takeNumberOfEvents),
-            toArray(),
-            // Sorting the events by timestamp... on CI it's happening an event may occur while the client is still forwarding the early ones...
-            map((_events) =>
-              _events.sort(
-                (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-              )
-            )
-          )
-        );
-
+        const { takeNumberOfEvents, ...options } = req.query;
+        const events = await fetchEvents(events$, takeNumberOfEvents, options);
         return res.ok({ body: events });
+      }
+    );
+
+    router.get(
+      {
+        path: '/internal/analytics_ftr_helpers/count_events',
+        validate: {
+          query: schema.object({
+            eventTypes: schema.arrayOf(schema.string()),
+            withTimeoutMs: schema.number(),
+            fromTimestamp: schema.maybe(schema.string()),
+          }),
+        },
+      },
+      async (context, req, res) => {
+        const events = await fetchEvents(events$, Number.MAX_SAFE_INTEGER, req.query);
+        return res.ok({ body: { count: events.length } });
       }
     );
   }

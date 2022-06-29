@@ -20,7 +20,9 @@ export default function ({ getService }: FtrProviderContext) {
       let i = 2;
       do {
         // Wait until we get a GREEN "status_changed" event. At that point all the context providers should be set up.
-        const events = await ebtServerHelper.getEvents(i, ['core-overall_status_changed']);
+        const events = await ebtServerHelper.getEvents(i, {
+          eventTypes: ['core-overall_status_changed'],
+        });
         event = events[i - 1];
         i++;
       } while (event.properties.overall_status_level !== 'available');
