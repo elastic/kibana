@@ -9,8 +9,17 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DraggingIdentifier } from '../../../../drag_drop';
-import { Datasource, DropType, GetDropProps } from '../../../../types';
+import { DragDropIdentifier, DraggingIdentifier } from '../../../../drag_drop';
+import {
+  Datasource,
+  DropType,
+  FramePublicAPI,
+  GetDropPropsArgs,
+  isOperation,
+  Visualization,
+  DragDropOperation,
+  VisualizationDimensionGroupConfig,
+} from '../../../../types';
 
 function getPropsForDropType(type: 'swap' | 'duplicate' | 'combine') {
   switch (type) {
@@ -131,35 +140,97 @@ export const getAdditionalClassesOnDroppable = (dropType?: string) => {
   }
 };
 
-const isOperationFromTheSameGroup = (
-  op1?: DraggingIdentifier,
-  op2?: { layerId: string; groupId: string; columnId: string }
-) => {
+const isOperationFromCompatibleGroup = (op1?: DraggingIdentifier, op2?: DragDropOperation) => {
   return (
-    op1 &&
-    op2 &&
-    'columnId' in op1 &&
+    isOperation(op1) &&
+    isOperation(op2) &&
     op1.columnId !== op2.columnId &&
-    'groupId' in op1 &&
     op1.groupId === op2.groupId &&
-    'layerId' in op1 &&
+    op1.layerId !== op2.layerId
+  );
+};
+
+export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: DragDropOperation) => {
+  return (
+    isOperation(op1) &&
+    isOperation(op2) &&
+    op1.columnId !== op2.columnId &&
+    op1.groupId === op2.groupId &&
     op1.layerId === op2.layerId
   );
 };
 
+export function getDropPropsForSameGroup(
+  isNewColumn?: boolean
+): { dropTypes: DropType[]; nextLabel?: string } | undefined {
+  return !isNewColumn ? { dropTypes: ['reorder'] } : { dropTypes: ['duplicate_compatible'] };
+}
+
 export const getDropProps = (
-  layerDatasource: Datasource<unknown, unknown>,
-  dropProps: GetDropProps,
-  isNew?: boolean
+  dropProps: GetDropPropsArgs,
+  sharedDatasource?: Datasource<unknown, unknown>
 ): { dropTypes: DropType[]; nextLabel?: string } | undefined => {
-  if (layerDatasource) {
-    return layerDatasource.getDropProps(dropProps);
+  if (sharedDatasource) {
+    return sharedDatasource?.getDropProps(dropProps);
   } else {
-    // TODO: refactor & test this - it's too annotations specific
-    // TODO: allow moving operations between layers for annotations
-    if (isOperationFromTheSameGroup(dropProps.dragging, dropProps)) {
-      return { dropTypes: [isNew ? 'duplicate_compatible' : 'reorder'], nextLabel: '' };
+    if (isOperationFromTheSameGroup(dropProps.source, dropProps.target)) {
+      return getDropPropsForSameGroup(dropProps.target.isNewColumn);
+    }
+    if (isOperationFromCompatibleGroup(dropProps.source, dropProps.target)) {
+      return {
+        dropTypes: dropProps.target.isNewColumn
+          ? ['move_compatible', 'duplicate_compatible']
+          : ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
+      };
     }
   }
   return;
 };
+
+export interface OnVisDropProps<T> {
+  prevState: T;
+  target: DragDropOperation;
+  source: DragDropIdentifier;
+  frame: FramePublicAPI;
+  dropType: DropType;
+  group?: VisualizationDimensionGroupConfig;
+}
+
+export function onDropForVisualization<T>(
+  props: OnVisDropProps<T>,
+  activeVisualization: Visualization<T>
+) {
+  const { prevState, target, frame, dropType, source, group } = props;
+  const { layerId, columnId, groupId } = target;
+
+  const previousColumn =
+    isOperation(source) && group?.requiresPreviousColumnOnDuplicate ? source.columnId : undefined;
+
+  const newVisState = activeVisualization.setDimension({
+    columnId,
+    groupId,
+    layerId,
+    prevState,
+    previousColumn,
+    frame,
+  });
+
+  // remove source
+  if (
+    isOperation(source) &&
+    (dropType === 'move_compatible' ||
+      dropType === 'move_incompatible' ||
+      dropType === 'combine_incompatible' ||
+      dropType === 'combine_compatible' ||
+      dropType === 'replace_compatible' ||
+      dropType === 'replace_incompatible')
+  ) {
+    return activeVisualization.removeDimension({
+      columnId: source?.columnId,
+      layerId: source?.layerId,
+      prevState: newVisState,
+      frame,
+    });
+  }
+  return newVisState;
+}

@@ -19,19 +19,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const kibanaServer = getService('kibanaServer');
 
   const PageObjects = getPageObjects(['common', 'context']);
 
   describe('context filters', function contextSize() {
-    before(async function () {
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
-    });
-
-    after(async function () {
-      await kibanaServer.uiSettings.replace({});
-    });
-
     beforeEach(async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID, {
         columns: TEST_COLUMN_NAMES,

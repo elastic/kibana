@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   TRAINED_MODEL_TYPE,
   DEPLOYMENT_STATE,
@@ -12,8 +13,6 @@ import {
 } from '../../../../../common/constants/trained_models';
 import type { SupportedPytorchTasksType } from '../../../../../common/constants/trained_models';
 import type { ModelItem } from '../models_list';
-
-import { isPopulatedObject } from '../../../../../common';
 
 const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
 

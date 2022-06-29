@@ -123,7 +123,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
    */
   const fieldCounts = useRef<Record<string, number> | null>(null);
   if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result, selectedIndexPattern);
+    fieldCounts.current = calcFieldCounts(
+      props.documents$.getValue().result!,
+      selectedIndexPattern
+    );
   }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
@@ -266,7 +269,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar
             {...props}
-            documents={documentState.result}
+            documents={documentState.result!}
             fieldFilter={fieldFilter}
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}

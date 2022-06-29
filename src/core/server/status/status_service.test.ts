@@ -24,7 +24,7 @@ import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
-import { analyticsServiceMock } from '../analytics/analytics_service.mock';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { AnalyticsServiceSetup } from '..';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);

@@ -13,7 +13,6 @@ export class HomePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly log = this.ctx.getService('log');
 
   async clickSynopsis(title: string) {
     await this.testSubjects.click(`homeSynopsisLink${title}`);
@@ -29,9 +28,8 @@ export class HomePageObject extends FtrService {
 
   async isSampleDataSetInstalled(id: string) {
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
-    const sampleDataCardInnerHTML = await sampleDataCard.getAttribute('innerHTML');
-    this.log.debug(sampleDataCardInnerHTML);
-    return sampleDataCardInnerHTML.includes('removeSampleDataSet');
+    const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
+    return deleteButton.length > 0;
   }
 
   async isWelcomeInterstitialDisplayed() {
@@ -65,6 +63,7 @@ export class HomePageObject extends FtrService {
     // where it appears the click just didn't work.
     await this.common.sleep(1010);
     await this.testSubjects.click(`removeSampleDataSet${id}`);
+    await this.common.sleep(1010);
     await this._waitForSampleDataLoadingAction(id);
   }
 
@@ -134,6 +133,7 @@ export class HomePageObject extends FtrService {
   async clickOnConsole() {
     await this.clickSynopsis('console');
   }
+
   async clickOnLogo() {
     await this.testSubjects.click('logo');
   }
