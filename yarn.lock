@@ -1429,10 +1429,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@46.10.2":
-  version "46.10.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.10.2.tgz#e8cde58040e3609c8cb1555c53d52a1bf93f654d"
-  integrity sha512-yaA8bp/YAbWh7n00hL6GODVSnSNnwOmOo4g8PTT7weNmGeccRrjQhxW0H6U3dkRfIvmtEk5v7p7vim1gALeH1g==
+"@elastic/charts@46.11.2":
+  version "46.11.2"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.11.2.tgz#8d95515e4c0adf5fd94392d304dc5b5ea8416be0"
+  integrity sha512-RcqrjMguXNCS+O8hnd8DtCTlVtZxmzdfu0N+ez+zA3a41YOblet1qt6YfLsEY/5wFiJndacR+O8pNHjbeLV7gA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
@@ -1504,10 +1504,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@59.0.1":
-  version "59.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-59.0.1.tgz#54bf17c058292a9045b99b2ad30c88f52b98fa20"
-  integrity sha512-oaYyT4jK4Nyftp/w/VTF+GxZ3rUpbEfLyxkN240oioAcQC1gnn/v791SkhCNqm72PDAtv/buqsgWd4oAnqdC5g==
+"@elastic/eui@60.0.0":
+  version "60.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-60.0.0.tgz#7b2cc45b4305abb0fb7081bd2adbd3ab41e55e8a"
+  integrity sha512-TLYttLSBrTw3QloXjRXrTkHZLSmTf3YNi0rakWslG25IkFkllY9yGSKjEUNBLHDDm0SfV9aBReM7Vc9Whzhw+g==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -3099,6 +3099,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-execution-context-browser-internal@link:bazel-bin/packages/core/execution-context/core-execution-context-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-execution-context-browser-mocks@link:bazel-bin/packages/core/execution-context/core-execution-context-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-execution-context-browser@link:bazel-bin/packages/core/execution-context/core-execution-context-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-execution-context-common@link:bazel-bin/packages/core/execution-context/core-execution-context-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal":
   version "0.0.0"
   uid ""
@@ -3108,6 +3124,14 @@
   uid ""
 
 "@kbn/core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-environment-server-internal@link:bazel-bin/packages/core/environment/core-environment-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-environment-server-mocks@link:bazel-bin/packages/core/environment/core-environment-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -3148,6 +3172,18 @@
   uid ""
 
 "@kbn/core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-node-server-mocks@link:bazel-bin/packages/core/node/core-node-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-node-server@link:bazel-bin/packages/core/node/core-node-server":
   version "0.0.0"
   uid ""
 
@@ -6550,6 +6586,30 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-environment-server-internal@link:bazel-bin/packages/core/environment/core-environment-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-environment-server-mocks@link:bazel-bin/packages/core/environment/core-environment-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-execution-context-browser-internal@link:bazel-bin/packages/core/execution-context/core-execution-context-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-execution-context-browser-mocks@link:bazel-bin/packages/core/execution-context/core-execution-context-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-execution-context-browser@link:bazel-bin/packages/core/execution-context/core-execution-context-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-execution-context-common@link:bazel-bin/packages/core/execution-context/core-execution-context-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6599,6 +6659,18 @@
   uid ""
 
 "@types/kbn__core-logging-server@link:bazel-bin/packages/core/logging/core-logging-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-node-server-internal@link:bazel-bin/packages/core/node/core-node-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-node-server-mocks@link:bazel-bin/packages/core/node/core-node-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-node-server@link:bazel-bin/packages/core/node/core-node-server/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -10713,10 +10785,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^102.0.0:
-  version "102.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-102.0.0.tgz#02844c39ee33d1e88ac8c48fbe28cb8423e970a4"
-  integrity sha512-xer/0g1Oarkjc2e+4nyoLgZT4kJHYhcj3PcxD1nEoGJQYEllTjprN1uDpSb4BkgMGo0ydfIS1VDkszrr/J9OOg==
+chromedriver@^103.0.0:
+  version "103.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-103.0.0.tgz#2ef086d62076e3ff6df6cfb84895d11d2c18d9cf"
+  integrity sha512-7BHf6HWt0PeOHCzWO8qlnD13sARzr5AKTtG8Csn+czsuAsajwPxdLNtry5GPh8HYFyl+i0M+yg3bT43AGfgU9w==
   dependencies:
     "@testim/chrome-version" "^1.1.2"
     axios "^0.27.2"
@@ -13528,10 +13600,10 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.35.0:
-  version "3.35.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.35.0.tgz#dd388075e8945b867088b7a8ad0e364e838ff523"
-  integrity sha512-zug5tN13Cx6IdKNScil6FIgFxSDbRfss5MKoz9riWpTU0V0kLJjPFndNmqmUSCDnam+GehZat52IqITMd/3NXg==
+elastic-apm-node@^3.36.0:
+  version "3.36.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.36.0.tgz#8f2cb5eac1653eb8abc88e32851a57fc32fb1064"
+  integrity sha512-4BDfLjfBHDQbXOyj8Ef//w31Cpvzh8z/tofNDPRDUsqpp/Nkt7KFNmHKgVCMxYi9e3Sd/2Mj+K4CoIuSriW9+Q==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.1.0"
@@ -19306,15 +19378,15 @@ jsts@^1.6.2:
     array-includes "^3.1.2"
     object.assign "^4.1.2"
 
-jszip@^3.6.0:
-  version "3.7.1"
-  resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.7.1.tgz#bd63401221c15625a1228c556ca8a68da6fda3d9"
-  integrity sha512-ghL0tz1XG9ZEmRMcEN2vt7xabrDdqHHeykgARpmZ0BiIctWxM47Vt63ZO2dnp4QYt/xJVLLy5Zv1l/xRdh2byg==
+jszip@^3.10.0:
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.10.0.tgz#faf3db2b4b8515425e34effcdbb086750a346061"
+  integrity sha512-LDfVtOLtOxb9RXkYOwPyNBTQDL4eUbqahtoY6x07GiDJHwSYvn8sHHIw8wINImV3MqbMNve2gSuM1DDqEKk09Q==
   dependencies:
     lie "~3.3.0"
     pako "~1.0.2"
     readable-stream "~2.3.6"
-    set-immediate-shim "~1.0.1"
+    setimmediate "^1.0.5"
 
 junk@^3.1.0:
   version "3.1.0"
@@ -26155,14 +26227,14 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.2.0.tgz#d3c9704735c6228e09580eb4613932b30bdb4d27"
-  integrity sha512-gPPXYSz4jJBM2kANRQ9cZW6KFBzR/ptxqGLtyC75eXtdgOsWWRRRyZz5F2pqdnwNmAjrCSFMMXfisJaZeWVejg==
+selenium-webdriver@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.3.0.tgz#00526ddeca3c187c8d889cd3f790926b95d5f044"
+  integrity sha512-9XFr8w95BO7jageR61AtiB83fJNem3fdtOQcUpqIIDHWSxihomyG/yBlL1H4y/shi/dO/Ai3PJMAOG+OW3+JHw==
   dependencies:
-    jszip "^3.6.0"
+    jszip "^3.10.0"
     tmp "^0.2.1"
-    ws ">=7.4.6"
+    ws ">=8.7.0"
 
 selfsigned@^1.10.7:
   version "1.10.8"
@@ -26314,11 +26386,6 @@ set-harmonic-interval@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/set-harmonic-interval/-/set-harmonic-interval-1.0.1.tgz#e1773705539cdfb80ce1c3d99e7f298bb3995249"
   integrity sha512-AhICkFV84tBP1aWqPwLZqFvAwqEoVA9kxNMniGEUvzOlm4vLmOFLiTT3UZ6bziJTy4bOVpzWGTfSCbmaayGx8g==
-
-set-immediate-shim@~1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/set-immediate-shim/-/set-immediate-shim-1.0.1.tgz#4b2b1b27eb808a9f8dcc481a58e5e56f599f3f61"
-  integrity sha1-SysbJ+uAip+NzEgaWOXlb1mfP2E=
 
 set-value@^2.0.0, set-value@^2.0.1:
   version "2.0.1"
@@ -30704,10 +30771,10 @@ ws@7.4.6, ws@^7.2.3:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.6.tgz#5654ca8ecdeee47c33a9a4bf6d28e2be2980377c"
   integrity sha512-YmhHDO4MzaDLB+M9ym/mDA5z0naX8j7SIlT8f8z+I0VtzsRbekxEutHSme7NPS2qE8StCYQNUnfWdXta/Yu85A==
 
-ws@>=7.4.6, ws@^7.4.6:
-  version "7.5.5"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.5.tgz#8b4bc4af518cfabd0473ae4f99144287b33eb881"
-  integrity sha512-BAkMFcAzl8as1G/hArkxOxq3G7pjUqQ3gzYbLL0/5zNkph70e+lCoxBGnm6AW1+/aiNeV4fnKqZ8m4GZewmH2w==
+ws@>=8.7.0:
+  version "8.8.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.8.0.tgz#8e71c75e2f6348dbf8d78005107297056cb77769"
+  integrity sha512-JDAgSYQ1ksuwqfChJusw1LSJ8BizJ2e/vVu5Lxjq3YvNJNlROv1ui4i+c/kUUrPheBvQl4c5UbERhTwKa6QBJQ==
 
 ws@^6.1.2, ws@^6.2.1:
   version "6.2.2"
@@ -30720,6 +30787,11 @@ ws@^7.3.1:
   version "7.5.6"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.6.tgz#e59fc509fb15ddfb65487ee9765c5a51dec5fe7b"
   integrity sha512-6GLgCqo2cy2A2rjCNFlxQS6ZljG/coZfZXclldI8FB/1G3CCI36Zd8xy2HrFVACi8tfk5XrgLQEk+P0Tnz9UcA==
+
+ws@^7.4.6:
+  version "7.5.5"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.5.tgz#8b4bc4af518cfabd0473ae4f99144287b33eb881"
+  integrity sha512-BAkMFcAzl8as1G/hArkxOxq3G7pjUqQ3gzYbLL0/5zNkph70e+lCoxBGnm6AW1+/aiNeV4fnKqZ8m4GZewmH2w==
 
 ws@^8.2.3:
   version "8.5.0"
