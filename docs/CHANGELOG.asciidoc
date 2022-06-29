@@ -82,7 +82,7 @@ Machine Learning::
 * Use time range when validating datafeed preview {kibana-pull}134073[#134073]
 
 Observability::
-* Fixes a bug show toast error when deleting a rule from rule details page {kibana-pull}135132[#135132]
+* Fixes a bug that displayed a toast error when deleting a rule {kibana-pull}135132[#135132]
 * Fixes viewInAppUrl for custom metrics for Inventory Threshold Rule {kibana-pull}134114[#134114]
 
 Platform::
