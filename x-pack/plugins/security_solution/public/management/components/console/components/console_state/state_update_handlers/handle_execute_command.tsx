@@ -97,6 +97,18 @@ const cloneCommandDefinitionWithNewRenderComponent = (
   };
 };
 
+const createCommandHistoryEntry = (
+  command: CommandHistoryItem['command'],
+  state: CommandHistoryItem['state'] = createCommandExecutionState()
+): CommandHistoryItem => {
+  return {
+    id: uuidV4(),
+    enteredAt: new Date().toISOString(),
+    command,
+    state,
+  };
+};
+
 export const handleExecuteCommand: ConsoleStoreReducer<
   ConsoleDataAction & { type: 'executeCommand' }
 > = (state, action) => {
@@ -113,18 +125,17 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
   // Unknown command
   if (!commandDefinition) {
-    return updateStateWithNewCommandHistoryItem(state, {
-      id: uuidV4(),
-      command: {
+    return updateStateWithNewCommandHistoryItem(
+      state,
+      createCommandHistoryEntry({
         input: parsedInput.input,
         args: parsedInput,
         commandDefinition: {
           ...UnknownCommandDefinition,
           RenderComponent: UnknownCommand,
         },
-      },
-      state: createCommandExecutionState(),
-    });
+      })
+    );
   }
 
   const command = {
@@ -138,74 +149,82 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (parsedInput.hasArgs) {
     // Show command help
     if (parsedInput.hasArg('help')) {
-      return updateStateWithNewCommandHistoryItem(state, {
-        id: uuidV4(),
-        command: cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument),
-        state: createCommandExecutionState(),
-      });
+      return updateStateWithNewCommandHistoryItem(
+        state,
+        createCommandHistoryEntry(
+          cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument)
+        )
+      );
     }
 
     // Command supports no arguments
     if (!commandDefinition.args || Object.keys(commandDefinition.args).length === 0) {
-      return updateStateWithNewCommandHistoryItem(state, {
-        id: uuidV4(),
-        command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-        state: createCommandExecutionState({
-          errorMessage: i18n.translate(
-            'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
-            {
-              defaultMessage: 'Command does not support any arguments',
-            }
-          ),
-        }),
-      });
+      return updateStateWithNewCommandHistoryItem(
+        state,
+        createCommandHistoryEntry(
+          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          createCommandExecutionState({
+            errorMessage: i18n.translate(
+              'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
+              {
+                defaultMessage: 'Command does not support any arguments',
+              }
+            ),
+          })
+        )
+      );
     }
 
     // no unknown arguments allowed?
     const unknownInputArgs = getUnknownArguments(parsedInput.args, commandDefinition.args);
 
     if (unknownInputArgs.length) {
-      return updateStateWithNewCommandHistoryItem(state, {
-        id: uuidV4(),
-        command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-        state: createCommandExecutionState({
-          errorMessage: (
-            <FormattedMessage
-              id="xpack.securitySolution.console.commandValidation.unknownArgument"
-              defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not support by this command: {unknownArgs}"
-              values={{
-                countOfInvalidArgs: unknownInputArgs.length,
-                command: <EuiCode transparentBackground={true}>{parsedInput.name}</EuiCode>,
-                unknownArgs: (
-                  <EuiCode transparentBackground={true}>
-                    {unknownInputArgs.map(toCliArgumentOption).join(', ')}
-                  </EuiCode>
-                ),
-              }}
-            />
-          ),
-        }),
-      });
+      return updateStateWithNewCommandHistoryItem(
+        state,
+        createCommandHistoryEntry(
+          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          createCommandExecutionState({
+            errorMessage: (
+              <FormattedMessage
+                id="xpack.securitySolution.console.commandValidation.unknownArgument"
+                defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not support by this command: {unknownArgs}"
+                values={{
+                  countOfInvalidArgs: unknownInputArgs.length,
+                  command: <EuiCode transparentBackground={true}>{parsedInput.name}</EuiCode>,
+                  unknownArgs: (
+                    <EuiCode transparentBackground={true}>
+                      {unknownInputArgs.map(toCliArgumentOption).join(', ')}
+                    </EuiCode>
+                  ),
+                }}
+              />
+            ),
+          })
+        )
+      );
     }
 
     // Missing required Arguments
     for (const requiredArg of requiredArgs) {
       if (!parsedInput.args[requiredArg]) {
-        return updateStateWithNewCommandHistoryItem(state, {
-          id: uuidV4(),
-          command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-          state: createCommandExecutionState({
-            errorMessage: i18n.translate(
-              'xpack.securitySolution.console.commandValidation.missingRequiredArg',
-              {
-                defaultMessage: 'Missing required argument: {argName}',
-                values: {
-                  argName: toCliArgumentOption(requiredArg),
-                },
-              }
-            ),
-          }),
-        });
+        return updateStateWithNewCommandHistoryItem(
+          state,
+
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            createCommandExecutionState({
+              errorMessage: i18n.translate(
+                'xpack.securitySolution.console.commandValidation.missingRequiredArg',
+                {
+                  defaultMessage: 'Missing required argument: {argName}',
+                  values: {
+                    argName: toCliArgumentOption(requiredArg),
+                  },
+                }
+              ),
+            })
+          )
+        );
       }
     }
 
@@ -216,87 +235,100 @@ export const handleExecuteCommand: ConsoleStoreReducer<
 
       // Unknown argument
       if (!argDefinition) {
-        return updateStateWithNewCommandHistoryItem(state, {
-          id: uuidV4(),
-          command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-          state: createCommandExecutionState({
-            errorMessage: i18n.translate(
-              'xpack.securitySolution.console.commandValidation.unsupportedArg',
-              {
-                defaultMessage: 'Unsupported argument: {argName}',
-                values: { argName: toCliArgumentOption(argName) },
-              }
-            ),
-          }),
-        });
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+
+            createCommandExecutionState({
+              errorMessage: i18n.translate(
+                'xpack.securitySolution.console.commandValidation.unsupportedArg',
+                {
+                  defaultMessage: 'Unsupported argument: {argName}',
+                  values: { argName: toCliArgumentOption(argName) },
+                }
+              ),
+            })
+          )
+        );
       }
 
       // does not allow multiple values
       if (!argDefinition.allowMultiples && Array.isArray(argInput) && argInput.length > 1) {
-        return updateStateWithNewCommandHistoryItem(state, {
-          id: uuidV4(),
-          command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-          state: createCommandExecutionState({
-            errorMessage: i18n.translate(
-              'xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce',
-              {
-                defaultMessage: 'Argument can only be used once: {argName}',
-                values: { argName: toCliArgumentOption(argName) },
-              }
-            ),
-          }),
-        });
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            createCommandExecutionState({
+              errorMessage: i18n.translate(
+                'xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce',
+                {
+                  defaultMessage: 'Argument can only be used once: {argName}',
+                  values: { argName: toCliArgumentOption(argName) },
+                }
+              ),
+            })
+          )
+        );
       }
 
       if (argDefinition.validate) {
         const validationResult = argDefinition.validate(argInput);
 
         if (validationResult !== true) {
-          return updateStateWithNewCommandHistoryItem(state, {
-            id: uuidV4(),
-            command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-            state: createCommandExecutionState({
-              errorMessage: i18n.translate(
-                'xpack.securitySolution.console.commandValidation.invalidArgValue',
-                {
-                  defaultMessage: 'Invalid argument value: {argName}. {error}',
-                  values: { argName: toCliArgumentOption(argName), error: validationResult },
-                }
-              ),
-            }),
-          });
+          return updateStateWithNewCommandHistoryItem(
+            state,
+            createCommandHistoryEntry(
+              cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+              createCommandExecutionState({
+                errorMessage: i18n.translate(
+                  'xpack.securitySolution.console.commandValidation.invalidArgValue',
+                  {
+                    defaultMessage: 'Invalid argument value: {argName}. {error}',
+                    values: { argName: toCliArgumentOption(argName), error: validationResult },
+                  }
+                ),
+              })
+            )
+          );
         }
       }
     }
   } else if (requiredArgs.length > 0) {
-    return updateStateWithNewCommandHistoryItem(state, {
-      id: uuidV4(),
-      command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-      state: createCommandExecutionState({
-        errorMessage: i18n.translate(
-          'xpack.securitySolution.console.commandValidation.mustHaveArgs',
-          {
-            defaultMessage: 'Missing required arguments: {requiredArgs}',
-            values: {
-              requiredArgs: requiredArgs.map((argName) => toCliArgumentOption(argName)).join(', '),
-            },
-          }
-        ),
-      }),
-    });
+    return updateStateWithNewCommandHistoryItem(
+      state,
+      createCommandHistoryEntry(
+        cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        createCommandExecutionState({
+          errorMessage: i18n.translate(
+            'xpack.securitySolution.console.commandValidation.mustHaveArgs',
+            {
+              defaultMessage: 'Missing required arguments: {requiredArgs}',
+              values: {
+                requiredArgs: requiredArgs
+                  .map((argName) => toCliArgumentOption(argName))
+                  .join(', '),
+              },
+            }
+          ),
+        })
+      )
+    );
   } else if (commandDefinition.mustHaveArgs) {
-    return updateStateWithNewCommandHistoryItem(state, {
-      id: uuidV4(),
-      command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-      state: createCommandExecutionState({
-        errorMessage: i18n.translate(
-          'xpack.securitySolution.console.commandValidation.oneArgIsRequired',
-          {
-            defaultMessage: 'At least one argument must be used',
-          }
-        ),
-      }),
-    });
+    return updateStateWithNewCommandHistoryItem(
+      state,
+      createCommandHistoryEntry(
+        cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        createCommandExecutionState({
+          errorMessage: i18n.translate(
+            'xpack.securitySolution.console.commandValidation.oneArgIsRequired',
+            {
+              defaultMessage: 'At least one argument must be used',
+            }
+          ),
+        })
+      )
+    );
   }
 
   // if the Command definition has a `validate()` callback, then call it now
@@ -304,20 +336,18 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     const validationResult = commandDefinition.validate(command);
 
     if (validationResult !== true) {
-      return updateStateWithNewCommandHistoryItem(state, {
-        id: uuidV4(),
-        command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-        state: createCommandExecutionState({
-          errorMessage: validationResult,
-        }),
-      });
+      return updateStateWithNewCommandHistoryItem(
+        state,
+        createCommandHistoryEntry(
+          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          createCommandExecutionState({
+            errorMessage: validationResult,
+          })
+        )
+      );
     }
   }
 
   // All is good. Execute the command
-  return updateStateWithNewCommandHistoryItem(state, {
-    id: uuidV4(),
-    command,
-    state: createCommandExecutionState(),
-  });
+  return updateStateWithNewCommandHistoryItem(state, createCommandHistoryEntry(command));
 };
