@@ -114,6 +114,7 @@ export function initClient(options: ClientOptions) {
         { field: 'processor.event', value: 'transaction' },
         { field: 'labels.testBuildId', value: buildId },
         { field: 'labels.journeyName', value: journeyName },
+        { field: 'labels.performancePhase', value: 'TEST' },
       ];
       const queryFilters = filters.map((filter) => addBooleanFilter(filter));
       return await this.getTransactions(queryFilters);
@@ -125,7 +126,7 @@ export function initClient(options: ClientOptions) {
           sort: [
             {
               '@timestamp': {
-                order: 'desc',
+                order: 'asc',
                 unmapped_type: 'boolean',
               },
             },
