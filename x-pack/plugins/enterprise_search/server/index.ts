@@ -38,3 +38,5 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     host: true,
   },
 };
+
+export const CONNECTORS_INDEX = '.elastic-connectors';

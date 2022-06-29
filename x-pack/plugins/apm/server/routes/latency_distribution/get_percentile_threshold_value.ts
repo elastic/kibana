@@ -5,49 +5,34 @@
  * 2.0.
  */
 
+import { CommonCorrelationsQueryParams } from '../../../common/correlations/types';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { Setup } from '../../lib/helpers/setup_request';
+import { fetchDurationPercentiles } from '../correlations/queries/fetch_duration_percentiles';
 
-import { getTransactionDurationPercentilesRequest } from '../correlations/queries/query_percentiles';
+export async function getPercentileThresholdValue({
+  setup,
+  eventType,
+  start,
+  end,
+  environment,
+  kuery,
+  query,
+  percentileThreshold,
+}: CommonCorrelationsQueryParams & {
+  setup: Setup;
+  eventType: ProcessorEvent;
+  percentileThreshold: number;
+}) {
+  const durationPercentiles = await fetchDurationPercentiles({
+    setup,
+    eventType,
+    start,
+    end,
+    environment,
+    kuery,
+    query,
+  });
 
-import type { OverallLatencyDistributionOptions } from './types';
-
-export async function getPercentileThresholdValue(
-  options: OverallLatencyDistributionOptions
-) {
-  const { setup, percentileThreshold, ...rawParams } = options;
-  const { apmEventClient } = setup;
-  const params = {
-    // pass on an empty index because we're using only the body attribute
-    // of the request body getters we're reusing from search strategies.
-    index: '',
-    ...rawParams,
-  };
-
-  const { body: transactionDurationPercentilesRequestBody } =
-    getTransactionDurationPercentilesRequest(params, [percentileThreshold]);
-
-  const transactionDurationPercentilesResponse = (await apmEventClient.search(
-    'get_transaction_duration_percentiles',
-    {
-      // TODO: add support for metrics
-      apm: { events: [ProcessorEvent.transaction] },
-      body: { size: 0, ...transactionDurationPercentilesRequestBody },
-    }
-  )) as {
-    aggregations?: {
-      transaction_duration_percentiles: {
-        values: Record<string, number>;
-      };
-    };
-  };
-
-  if (!transactionDurationPercentilesResponse.aggregations) {
-    return;
-  }
-
-  const percentilesResponseThresholds =
-    transactionDurationPercentilesResponse.aggregations
-      .transaction_duration_percentiles?.values ?? {};
-
-  return percentilesResponseThresholds[`${percentileThreshold}.0`];
+  return durationPercentiles.percentiles[`${percentileThreshold}.0`];
 }

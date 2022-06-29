@@ -8,10 +8,9 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
-import { SeriesType } from '@kbn/expression-xy-plugin/common';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import type { VisualizationLayerWidgetProps, VisualizationType } from '../../types';
-import { State, visualizationTypes } from '../types';
+import { State, visualizationTypes, SeriesType } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { StaticHeader } from '../../shared_components';

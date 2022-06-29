@@ -566,14 +566,15 @@
             "label": "getWriter",
             "description": [],
             "signature": [
-              "(options?: { namespace?: string | undefined; }) => ",
+              "(options?: { namespace?: string | undefined; }) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
                 "docId": "kibRuleRegistryPluginApi",
                 "section": "def-server.IRuleDataWriter",
                 "text": "IRuleDataWriter"
-              }
+              },
+              ">"
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
@@ -1047,16 +1048,53 @@
               {
                 "parentPluginId": "ruleRegistry",
                 "id": "def-server.RuleDataWriteDisabledError.Unnamed.$1",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "message",
+                "label": "{\n    reason,\n    registrationContext,\n    message,\n  }",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                 "deprecated": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.RuleDataWriteDisabledError.Unnamed.$1.reason",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "reason",
+                    "description": [],
+                    "signature": [
+                      "\"error\" | \"config\""
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.RuleDataWriteDisabledError.Unnamed.$1.registrationContext",
+                    "type": "string",
+                    "tags": [],
+                    "label": "registrationContext",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.RuleDataWriteDisabledError.Unnamed.$1.message",
+                    "type": "string",
+                    "tags": [],
+                    "label": "message",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -2022,14 +2060,15 @@
             "label": "getWriter",
             "description": [],
             "signature": [
-              "(options?: { namespace?: string | undefined; } | undefined) => ",
+              "(options?: { namespace?: string | undefined; } | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
                 "docId": "kibRuleRegistryPluginApi",
                 "section": "def-server.IRuleDataWriter",
                 "text": "IRuleDataWriter"
-              }
+              },
+              ">"
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
             "deprecated": false,
