@@ -1686,7 +1686,7 @@ export const ViewStrings = {
       }),
     getLegendPositionDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionTitle', {
-        defaultMessage: 'Legend Position',
+        defaultMessage: 'Legend position',
       }),
     getLegendPositionHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionLabel', {
@@ -1710,7 +1710,7 @@ export const ViewStrings = {
       }),
     getLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayTitle', {
-        defaultMessage: 'Legend visibility mode',
+        defaultMessage: 'Legend visibility',
       }),
     getLegendDisplayHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayLabel', {
@@ -1738,15 +1738,15 @@ export const ViewStrings = {
       }),
     getTruncateLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.truncateLegendDisplayName', {
-        defaultMessage: 'Truncate legend',
+        defaultMessage: 'Legend text',
       }),
     getTruncateLegendHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.truncateLegendHelp', {
-        defaultMessage: 'Defines if the legend items will be truncated or not',
+        defaultMessage: 'Truncate when long',
       }),
     getMaxLegendLinesDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.maxLegendLinesDisplayName', {
-        defaultMessage: 'Maximum legend lines',
+        defaultMessage: 'Max legend lines',
       }),
     getMaxLegendLinesHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.maxLegendLinesHelp', {
@@ -1754,12 +1754,11 @@ export const ViewStrings = {
       }),
     getDistictColorsDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.distinctColorsDisplayName', {
-        defaultMessage: 'Distinct colors',
+        defaultMessage: 'Slice color',
       }),
     getDistictColorsHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.distinctColorsHelp', {
-        defaultMessage:
-          'Maps a different color per slice. Slices with the same value have the same color.',
+        defaultMessage: 'Use distinct colors',
       }),
     getRespectSourceOrderDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderDisplayName', {
@@ -1771,15 +1770,15 @@ export const ViewStrings = {
       }),
     getIsDonutDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.isDonutDisplayName', {
-        defaultMessage: 'Donut mode',
+        defaultMessage: 'Donut',
       }),
     getIsDonutHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.isDonutHelp', {
-        defaultMessage: 'Enable donut mode',
+        defaultMessage: 'Show donut chart',
       }),
     getEmptySizeRatioDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioDisplayName', {
-        defaultMessage: 'Size of the donut hole',
+        defaultMessage: 'Size of donut hole',
       }),
     getEmptySizeRatioHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioHelp', {

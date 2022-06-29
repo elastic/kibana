@@ -50,10 +50,10 @@ export const pieVis = () => ({
       name: 'isDonut',
       displayName: strings.getIsDonutDisplayName(),
       help: strings.getIsDonutHelp(),
-      argType: 'inlineToggle',
+      argType: 'toggle',
       default: false,
       options: {
-        labelValue: strings.getEnableLabel(),
+        labelValue: strings.getIsDonutHelp(),
       },
     },
     {
@@ -76,20 +76,20 @@ export const pieVis = () => ({
       name: 'distinctColors',
       displayName: strings.getDistictColorsDisplayName(),
       help: strings.getDistictColorsHelp(),
-      argType: 'inlineToggle',
+      argType: 'toggle',
       default: false,
       options: {
-        labelValue: strings.getEnableLabel(),
+        labelValue: strings.getDistictColorsHelp(),
       },
     },
     {
       name: 'addTooltip',
       displayName: strings.getAddTooltipDisplayName(),
       help: strings.getAddTooltipHelp(),
-      argType: 'inlineToggle',
+      argType: 'toggle',
       default: true,
       options: {
-        labelValue: strings.getShowLabel(),
+        labelValue: strings.getAddTooltipHelp(),
       },
     },
     {
@@ -125,20 +125,20 @@ export const pieVis = () => ({
       name: 'nestedLegend',
       displayName: strings.getNestedLegendDisplayName(),
       help: strings.getNestedLegendHelp(),
-      argType: 'inlineToggle',
+      argType: 'toggle',
       default: false,
       options: {
-        labelValue: strings.getEnableLabel(),
+        labelValue: strings.getNestedLegendHelp(),
       },
     },
     {
       name: 'truncateLegend',
       displayName: strings.getTruncateLegendDisplayName(),
       help: strings.getTruncateLegendHelp(),
-      argType: 'inlineToggle',
+      argType: 'toggle',
       default: true,
       options: {
-        labelValue: strings.getTruncateLabel(),
+        labelValue: strings.getTruncateLegendHelp(),
       },
     },
     {
