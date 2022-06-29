@@ -570,8 +570,8 @@
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-onboarding-and-lifecycle-mgt
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
-x-pack/plugins/security_solution/server/usage/ @elastic/security-telemetry
-x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-telemetry
+x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
+x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
 
 ## Security Solution sub teams - security-engineering-productivity
 x-pack/plugins/security_solution/cypress/ccs_integration @elastic/security-engineering-productivity
