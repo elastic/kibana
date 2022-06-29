@@ -112,6 +112,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       webCrawler: `${APP_SEARCH_DOCS}web-crawler.html`,
       webCrawlerEventLogs: `${APP_SEARCH_DOCS}view-web-crawler-events-logs.html`,
       webCrawlerReference: `${APP_SEARCH_DOCS}web-crawler-reference.html`,
+      webCFgd: `${APP_SEARCH_DOCS}web-crawler-reference-doh.html`,
     },
     enterpriseSearch: {
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
