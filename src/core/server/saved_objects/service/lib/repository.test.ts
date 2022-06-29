@@ -1224,6 +1224,8 @@ describe('SavedObjectsRepository', () => {
     test.todo('with encryption extension');
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#bulkGet', () => {
@@ -1530,6 +1532,8 @@ describe('SavedObjectsRepository', () => {
     test.todo('with encryption extension');
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#bulkResolve', () => {
@@ -1586,6 +1590,8 @@ describe('SavedObjectsRepository', () => {
 
       await expect(savedObjectsRepository.resolve('some-type', 'some-id')).rejects.toEqual(error);
     });
+
+    test.todo('with spaces extension');
   });
 
   describe('#bulkUpdate', () => {
@@ -2061,6 +2067,8 @@ describe('SavedObjectsRepository', () => {
     test.todo('with encryption extension');
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#checkConflicts', () => {
@@ -2198,6 +2206,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#create', () => {
@@ -2812,6 +2822,8 @@ describe('SavedObjectsRepository', () => {
     test.todo('with encryption extension');
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#delete', () => {
@@ -3105,6 +3117,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#deleteByNamespace', () => {
@@ -3343,6 +3357,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#find', () => {
@@ -3831,6 +3847,8 @@ describe('SavedObjectsRepository', () => {
     test.todo('with encryption extension');
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#get', () => {
@@ -4015,6 +4033,8 @@ describe('SavedObjectsRepository', () => {
     test.todo('with encryption extension');
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#resolve', () => {
@@ -4052,6 +4072,8 @@ describe('SavedObjectsRepository', () => {
 
       await expect(savedObjectsRepository.resolve('foo', '2')).rejects.toEqual(error);
     });
+
+    test.todo('with spaces extension');
   });
 
   describe('#incrementCounter', () => {
@@ -4957,6 +4979,8 @@ describe('SavedObjectsRepository', () => {
     test.todo('with encryption extension');
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#openPointInTimeForType', () => {
@@ -5050,6 +5074,8 @@ describe('SavedObjectsRepository', () => {
     });
 
     test.todo('with security extension');
+
+    test.todo('with spaces extension');
   });
 
   describe('#closePointInTime', () => {
@@ -5152,6 +5178,8 @@ describe('SavedObjectsRepository', () => {
         expectedResult
       );
     });
+
+    test.todo('with spaces extension');
   });
 
   describe('#updateObjectsSpaces', () => {
@@ -5192,5 +5220,7 @@ describe('SavedObjectsRepository', () => {
         expectedResult
       );
     });
+
+    test.todo('with spaces extension');
   });
 });

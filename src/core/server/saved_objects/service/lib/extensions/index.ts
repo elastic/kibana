@@ -18,4 +18,5 @@ export type {
   ISavedObjectsSecurityExtension,
 } from './security';
 export { AuditAction } from './security';
+export type { ISavedObjectsSpacesExtension } from './spaces';
 export type { SavedObjectsExtensions } from './extensions';

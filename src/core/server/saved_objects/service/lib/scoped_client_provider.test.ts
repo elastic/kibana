@@ -12,11 +12,15 @@ import { httpServerMock } from '../../../http/http_server.mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 
 function createClientProvider(
-  params: Optional<Params, 'encryptionExtensionFactory' | 'securityExtensionFactory'>
+  params: Optional<
+    Params,
+    'encryptionExtensionFactory' | 'securityExtensionFactory' | 'spacesExtensionFactory'
+  >
 ) {
   return new SavedObjectsClientProvider({
     encryptionExtensionFactory: undefined,
     securityExtensionFactory: undefined,
+    spacesExtensionFactory: undefined,
     ...params,
   });
 }

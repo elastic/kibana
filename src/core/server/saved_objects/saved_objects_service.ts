@@ -43,6 +43,7 @@ import type {
   SavedObjectsClientWrapperFactory,
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
 } from './service/lib/scoped_client_provider';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
@@ -56,6 +57,7 @@ import { getSavedObjectsDeprecationsProvider } from './deprecations';
 
 export const ENCRYPTION_EXTENSION_ID = 'encryptedSavedObjects' as const;
 export const SECURITY_EXTENSION_ID = 'security' as const;
+export const SPACES_EXTENSION_ID = 'spaces' as const;
 
 const kibanaIndex = '.kibana';
 
@@ -115,6 +117,8 @@ export interface SavedObjectsServiceSetup {
   addEncryptionExtension: (factory: SavedObjectsEncryptionExtensionFactory) => void;
 
   addSecurityExtension: (factory: SavedObjectsSecurityExtensionFactory) => void;
+
+  addSpacesExtension: (factory: SavedObjectsSpacesExtensionFactory) => void;
 
   /**
    * Register a {@link SavedObjectsType | savedObjects type} definition.
@@ -321,6 +325,7 @@ export class SavedObjectsService
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
   private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
   private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
+  private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
@@ -411,6 +416,15 @@ export class SavedObjectsService
           throw new Error('security extension is already set, and can only be set once');
         }
         this.securityExtensionFactory = factory;
+      },
+      addSpacesExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `addSpacesExtension` after service startup.');
+        }
+        if (this.spacesExtensionFactory) {
+          throw new Error('spaces extension is already set, and can only be set once');
+        }
+        this.spacesExtensionFactory = factory;
       },
       registerType: (type) => {
         if (this.started) {
@@ -525,6 +539,7 @@ export class SavedObjectsService
       typeRegistry: this.typeRegistry,
       encryptionExtensionFactory: this.encryptionExtensionFactory,
       securityExtensionFactory: this.securityExtensionFactory,
+      spacesExtensionFactory: this.spacesExtensionFactory,
     });
     if (this.clientFactoryProvider) {
       const clientFactory = this.clientFactoryProvider(repositoryFactory);

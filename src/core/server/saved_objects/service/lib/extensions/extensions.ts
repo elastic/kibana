@@ -8,8 +8,10 @@
 
 import type { ISavedObjectsEncryptionExtension } from './encryption';
 import type { ISavedObjectsSecurityExtension } from './security';
+import { ISavedObjectsSpacesExtension } from './spaces';
 
 export interface SavedObjectsExtensions {
   encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
   securityExtension: ISavedObjectsSecurityExtension | undefined;
+  spacesExtension: ISavedObjectsSpacesExtension | undefined;
 }

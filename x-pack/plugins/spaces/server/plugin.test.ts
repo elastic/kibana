@@ -39,21 +39,7 @@ describe('Spaces plugin', () => {
       `);
     });
 
-    it('registers the capabilities provider and switcher', () => {
-      const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
-      const features = featuresPluginMock.createSetup();
-      const licensing = licensingMock.createSetup();
-
-      const plugin = new SpacesPlugin(initializerContext);
-
-      plugin.setup(core, { features, licensing });
-
-      expect(core.capabilities.registerProvider).toHaveBeenCalledTimes(1);
-      expect(core.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
-    });
-
-    it('registers the usage collector', () => {
+    it('registers the usage collector if the usageCollection plugin is enabled', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
       const features = featuresPluginMock.createSetup();
@@ -68,30 +54,7 @@ describe('Spaces plugin', () => {
       expect(usageCollection.getCollectorByType('spaces')).toBeDefined();
     });
 
-    it('registers the "space" saved object type and client wrapper', () => {
-      const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
-      const features = featuresPluginMock.createSetup();
-      const licensing = licensingMock.createSetup();
-
-      const plugin = new SpacesPlugin(initializerContext);
-
-      plugin.setup(core, { features, licensing });
-
-      expect(core.savedObjects.registerType).toHaveBeenCalledWith({
-        name: 'space',
-        namespaceType: 'agnostic',
-        hidden: true,
-        mappings: expect.any(Object),
-        migrations: expect.any(Object),
-      });
-
-      expect(core.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-        Number.MIN_SAFE_INTEGER,
-        'spaces',
-        expect.any(Function)
-      );
-    });
+    it.todo('registers the tutorial if the home plugin is enabled'); // There is not a mock for the server-side home plugin
   });
 
   describe('#start', () => {

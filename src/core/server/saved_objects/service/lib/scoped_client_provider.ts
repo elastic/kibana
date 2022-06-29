@@ -11,6 +11,7 @@ import { SavedObjectsClientContract } from '../../types';
 import {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
   SavedObjectsRepositoryFactory,
 } from '../../saved_objects_service';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -18,6 +19,7 @@ import { KibanaRequest } from '../../../http';
 import type {
   ISavedObjectsEncryptionExtension,
   ISavedObjectsSecurityExtension,
+  ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
 } from './extensions';
 
@@ -59,6 +61,11 @@ export type SavedObjectsSecurityExtensionFactory = (params: {
   request: KibanaRequest;
 }) => ISavedObjectsSecurityExtension | undefined; // May be undefined if RBAC is disabled
 
+export type SavedObjectsSpacesExtensionFactory = (params: {
+  typeRegistry: ISavedObjectTypeRegistry;
+  request: KibanaRequest;
+}) => ISavedObjectsSpacesExtension;
+
 /**
  * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
  * @public
@@ -94,6 +101,7 @@ export interface Params {
   typeRegistry: ISavedObjectTypeRegistry;
   encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory | undefined;
   securityExtensionFactory: SavedObjectsSecurityExtensionFactory | undefined;
+  spacesExtensionFactory: SavedObjectsSpacesExtensionFactory | undefined;
 }
 
 /**
@@ -110,17 +118,20 @@ export class SavedObjectsClientProvider {
   private readonly _originalClientFactory: SavedObjectsClientFactory;
   private readonly encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory | undefined;
   private readonly securityExtensionFactory: SavedObjectsSecurityExtensionFactory | undefined;
+  private readonly spacesExtensionFactory: SavedObjectsSpacesExtensionFactory | undefined;
   private readonly _typeRegistry: ISavedObjectTypeRegistry;
 
   constructor({
     defaultClientFactory,
     encryptionExtensionFactory,
     securityExtensionFactory,
+    spacesExtensionFactory,
     typeRegistry,
   }: Params) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
     this.encryptionExtensionFactory = encryptionExtensionFactory;
     this.securityExtensionFactory = securityExtensionFactory;
+    this.spacesExtensionFactory = spacesExtensionFactory;
     this._typeRegistry = typeRegistry;
   }
 
@@ -183,10 +194,16 @@ export class SavedObjectsClientProvider {
     const securityExtension = isSecurityExtensionIncluded
       ? this.securityExtensionFactory?.({ typeRegistry: this._typeRegistry, request })
       : undefined;
+    const isSpacesExtensionIncluded =
+      !excludedWrappers.includes(SPACES_EXTENSION_ID) && !!this.spacesExtensionFactory;
+    const spacesExtension = isSpacesExtensionIncluded
+      ? this.spacesExtensionFactory?.({ typeRegistry: this._typeRegistry, request })
+      : undefined;
 
     return {
       encryptionExtension,
       securityExtension,
+      spacesExtension,
     };
   }
 }

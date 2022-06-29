@@ -19,6 +19,7 @@ export type {
   AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
+  ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
 } from './extensions';
 export { AuditAction } from './extensions';
@@ -38,6 +39,7 @@ export type {
   SavedObjectsClientFactoryProvider,
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
 } from './scoped_client_provider';
 
 export { SavedObjectsErrorHelpers } from './errors';
