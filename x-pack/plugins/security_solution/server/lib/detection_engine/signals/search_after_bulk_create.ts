@@ -160,6 +160,7 @@ export const searchAfterAndBulkCreate = async ({
           // const enrichedEvents = await enrichment(limitedEvents);
 
           logger.debug(buildRuleMessage(`--------- Start enrichments`));
+
           const enrichedEvents = await enrichEvents({
             events: limitedEvents,
             services,
