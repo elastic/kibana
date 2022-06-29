@@ -1338,6 +1338,20 @@
       },
       {
         "parentPluginId": "discover",
+        "id": "def-common.HIDE_ANNOUNCEMENTS",
+        "type": "string",
+        "tags": [],
+        "label": "HIDE_ANNOUNCEMENTS",
+        "description": [],
+        "signature": [
+          "\"hideAnnouncements\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-common.MAX_DOC_FIELDS_DISPLAYED",
         "type": "string",
         "tags": [],
