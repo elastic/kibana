@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
   const es = getService('es');
   const security = getService('security');
 
@@ -38,7 +38,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await createIndex('similar_index_two');
 
       await PageObjects.settings.createIndexPattern('similar_index*', '@timestamp', true);
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.timePicker.setDefaultDataRange();
       await PageObjects.common.navigateToApp('discover');
     });
 
