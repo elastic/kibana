@@ -3099,6 +3099,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-environment-server-internal@link:bazel-bin/packages/core/environment/core-environment-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-environment-server-mocks@link:bazel-bin/packages/core/environment/core-environment-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-execution-context-browser-internal@link:bazel-bin/packages/core/execution-context/core-execution-context-browser-internal":
   version "0.0.0"
   uid ""
@@ -3115,6 +3123,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-execution-context-server-internal@link:bazel-bin/packages/core/execution-context/core-execution-context-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-execution-context-server-mocks@link:bazel-bin/packages/core/execution-context/core-execution-context-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-execution-context-server@link:bazel-bin/packages/core/execution-context/core-execution-context-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-fatal-errors-browser-internal@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser-internal":
   version "0.0.0"
   uid ""
@@ -3124,14 +3144,6 @@
   uid ""
 
 "@kbn/core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-environment-server-internal@link:bazel-bin/packages/core/environment/core-environment-server-internal":
-  version "0.0.0"
-  uid ""
-
-"@kbn/core-environment-server-mocks@link:bazel-bin/packages/core/environment/core-environment-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -6607,6 +6619,18 @@
   uid ""
 
 "@types/kbn__core-execution-context-common@link:bazel-bin/packages/core/execution-context/core-execution-context-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-execution-context-server-internal@link:bazel-bin/packages/core/execution-context/core-execution-context-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-execution-context-server-mocks@link:bazel-bin/packages/core/execution-context/core-execution-context-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-execution-context-server@link:bazel-bin/packages/core/execution-context/core-execution-context-server/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -13600,10 +13624,10 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.35.0:
-  version "3.35.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.35.0.tgz#dd388075e8945b867088b7a8ad0e364e838ff523"
-  integrity sha512-zug5tN13Cx6IdKNScil6FIgFxSDbRfss5MKoz9riWpTU0V0kLJjPFndNmqmUSCDnam+GehZat52IqITMd/3NXg==
+elastic-apm-node@^3.36.0:
+  version "3.36.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.36.0.tgz#8f2cb5eac1653eb8abc88e32851a57fc32fb1064"
+  integrity sha512-4BDfLjfBHDQbXOyj8Ef//w31Cpvzh8z/tofNDPRDUsqpp/Nkt7KFNmHKgVCMxYi9e3Sd/2Mj+K4CoIuSriW9+Q==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.1.0"
