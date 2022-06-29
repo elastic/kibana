@@ -124,3 +124,5 @@ export const RULES_TAGS_POPOVER_BTN = '[data-test-subj="tagsDisplayPopoverButton
 export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWrapper"]';
 
 export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-button"]';
+
+export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
