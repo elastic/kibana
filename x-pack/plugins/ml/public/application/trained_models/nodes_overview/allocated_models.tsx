@@ -65,12 +65,12 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
     {
       name: (
         <EuiToolTip
-          content={i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelSizeHeader', {
+          content={i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationTooltip', {
             defaultMessage: 'number_of_allocations times threads_per_allocation',
           })}
         >
           <span>
-            {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
+            {i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationHeader', {
               defaultMessage: 'Allocation',
             })}
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
