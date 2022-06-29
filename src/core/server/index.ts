@@ -475,7 +475,10 @@ export type {
   AnalyticsServiceStart,
 } from '@kbn/core-analytics-server';
 
-/** @public **/
+/**
+ * Base, abstract type for request handler contexts.
+ * @public
+ **/
 export interface RequestHandlerContextBase {
   /**
    * Await all the specified context parts and return them.
@@ -493,7 +496,7 @@ export interface RequestHandlerContextBase {
 }
 
 /**
- * Base context passed to a route handler.
+ * Base context passed to a route handler, containing the `core` context part.
  *
  * @public
  */
@@ -501,7 +504,11 @@ export interface RequestHandlerContext extends RequestHandlerContextBase {
   core: Promise<CoreRequestHandlerContext>;
 }
 
-/** @public */
+/**
+ * Mixin allowing plugins to define their own request handler contexts.
+ *
+ * @public
+ */
 export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
   [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
 };
@@ -575,7 +582,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
   /** {@link HttpServiceSetup} */
-  http: HttpServiceSetup & {
+  http: HttpServiceSetup<RequestHandlerContext> & {
     /** {@link HttpResources} */
     resources: HttpResources;
   };
