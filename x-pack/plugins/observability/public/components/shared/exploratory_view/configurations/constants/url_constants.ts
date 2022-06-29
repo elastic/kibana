@@ -16,4 +16,7 @@ export enum URL_KEYS {
   HIDDEN = 'h',
   NAME = 'n',
   COLOR = 'c',
+  SHOW_PERCENTILE_ANNOTATIONS = 'spa',
 }
+
+export const ALL_VALUES_SELECTED = 'ALL_VALUES';

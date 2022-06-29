@@ -151,19 +151,19 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with categorization detector and default datafeed settings',
-      jobSource: 'ft_ecommerce',
-      jobId: `ec_advanced_2_${Date.now()}`,
+      jobSource: 'ft_categorization_small',
+      jobId: `categorization_advanced_2_${Date.now()}`,
       get jobIdClone(): string {
         return `${this.jobId}_clone`;
       },
       jobDescription:
-        'Create advanced job from ft_ecommerce dataset with a categorization detector and default datafeed settings',
-      jobGroups: ['automated', 'ecommerce', 'advanced'],
+        'Create advanced job from ft_categorization_small dataset with a categorization detector and default datafeed settings',
+      jobGroups: ['automated', 'categorization', 'advanced'],
       get jobGroupsClone(): string[] {
         return [...this.jobGroups, 'clone'];
       },
       pickFieldsConfig: {
-        categorizationField: 'products.product_name',
+        categorizationField: 'field1',
         detectors: [
           {
             identifier: 'count by mlcategory',
@@ -178,30 +178,30 @@ export default function ({ getService }: FtrProviderContext) {
       datafeedConfig: {} as DatafeedConfig,
       expected: {
         wizard: {
-          timeField: 'order_date',
+          timeField: '@timestamp',
         },
         row: {
-          recordCount: '4,675',
+          recordCount: '1,000',
           memoryStatus: 'ok',
           jobState: 'closed',
           datafeedState: 'stopped',
-          latestTimestamp: '2019-07-12 23:45:36',
+          latestTimestamp: '2019-11-21 00:01:13',
         },
         counts: {
-          processed_record_count: '4,675',
-          processed_field_count: '4,675',
-          input_bytes: '354.2 KB',
-          input_field_count: '4,675',
+          processed_record_count: '1,000',
+          processed_field_count: '1,000',
+          input_bytes: '148.8 KB',
+          input_field_count: '1,000',
           invalid_date_count: '0',
           missing_field_count: '0',
           out_of_order_timestamp_count: '0',
-          empty_bucket_count: '0',
+          empty_bucket_count: '1,073',
           sparse_bucket_count: '0',
-          bucket_count: '185',
-          earliest_record_timestamp: '2019-06-12 00:04:19',
-          latest_record_timestamp: '2019-07-12 23:45:36',
-          input_record_count: '4,675',
-          latest_bucket_timestamp: '2019-07-12 20:00:00',
+          bucket_count: '1,378',
+          earliest_record_timestamp: '2019-04-05 11:25:35',
+          latest_record_timestamp: '2019-11-21 00:01:13',
+          input_record_count: '1,000',
+          latest_bucket_timestamp: '2019-11-21 00:00:00',
         },
         modelSizeStats: {
           result_type: 'model_size_stats',
@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
           total_partition_field_count: '2',
           bucket_allocation_failures_count: '0',
           memory_status: 'ok',
-          timestamp: '2019-07-12 16:00:00',
+          timestamp: '2019-11-20 20:00:00',
         },
       },
     },
@@ -219,12 +219,13 @@ export default function ({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  // Failing: See https://github.com/elastic/kibana/issues/132955
-  describe.skip('advanced job', function () {
+  describe('advanced job', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createIndexPatternIfNeeded('ft_categorization_small', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -234,6 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanMlIndices();
       await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await ml.testResources.deleteIndexPatternByTitle('ft_categorization_small');
     });
 
     for (const testData of testDataList) {
@@ -421,8 +423,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.advanceToSummarySection();
         });
 
-        // Failing ES Promotion: https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify/builds/1253
-        it.skip('job creation runs the job and displays it correctly in the job list', async () => {
+        it('job creation runs the job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep(
             'job creation creates the job and finishes processing'
           );

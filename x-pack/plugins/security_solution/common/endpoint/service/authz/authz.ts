@@ -20,7 +20,7 @@ import { MaybeImmutable } from '../../types';
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
-  fleetAuthz: FleetAuthz,
+  fleetAuthz: FleetAuthz | undefined, // TODO: Remove `undefined` type when `fleetAuthz` is needed and used.
   userRoles: MaybeImmutable<string[]>
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
@@ -32,6 +32,9 @@ export const calculateEndpointAuthz = (
     canCreateArtifactsByPolicy: hasAllAccessToFleet && isPlatinumPlusLicense,
     canIsolateHost: isPlatinumPlusLicense && hasAllAccessToFleet,
     canUnIsolateHost: hasAllAccessToFleet,
+    canKillProcess: hasAllAccessToFleet && isPlatinumPlusLicense,
+    canSuspendProcess: hasAllAccessToFleet && isPlatinumPlusLicense,
+    canGetRunningProcesses: hasAllAccessToFleet && isPlatinumPlusLicense,
   };
 };
 
@@ -42,5 +45,8 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canCreateArtifactsByPolicy: false,
     canIsolateHost: false,
     canUnIsolateHost: true,
+    canKillProcess: false,
+    canSuspendProcess: false,
+    canGetRunningProcesses: false,
   };
 };

@@ -36,7 +36,7 @@ describe('reindex', () => {
       targetIndex: 'my_target_index',
       reindexScript: Option.none,
       requireAlias: false,
-      unusedTypesQuery: {},
+      excludeOnUpgradeQuery: {},
     });
     try {
       await task();

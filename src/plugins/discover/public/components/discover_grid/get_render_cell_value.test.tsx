@@ -12,9 +12,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { dataViewMock } from '../../__mocks__/index_pattern';
-import { flattenHit } from '@kbn/data-plugin/public';
-import { ElasticSearchHit } from '../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../../utils/build_data_record';
+import { EsHitRecord } from '../../types';
 
 const mockServices = {
   uiSettings: {
@@ -25,15 +25,15 @@ const mockServices = {
   },
 };
 
-jest.mock('../../utils/use_discover_services', () => {
-  const originalModule = jest.requireActual('../../utils/use_discover_services');
+jest.mock('../../hooks/use_discover_services', () => {
+  const originalModule = jest.requireActual('../../hooks/use_discover_services');
   return {
     ...originalModule,
     useDiscoverServices: () => mockServices,
   };
 });
 
-const rowsSource: ElasticSearchHit[] = [
+const rowsSource: EsHitRecord[] = [
   {
     _id: '1',
     _index: 'test',
@@ -45,7 +45,7 @@ const rowsSource: ElasticSearchHit[] = [
   },
 ];
 
-const rowsFields: ElasticSearchHit[] = [
+const rowsFields: EsHitRecord[] = [
   {
     _id: '1',
     _index: 'test',
@@ -58,7 +58,7 @@ const rowsFields: ElasticSearchHit[] = [
   },
 ];
 
-const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
+const rowsFieldsWithTopLevelObject: EsHitRecord[] = [
   {
     _id: '1',
     _index: 'test',
@@ -71,16 +71,13 @@ const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   },
 ];
 
-const flatten = (hit: ElasticSearchHit): Record<string, unknown> => {
-  return flattenHit(hit, dataViewMock);
-};
+const build = (hit: EsHitRecord) => buildDataTableRecord(hit, dataViewMock);
 
 describe('Discover grid cell rendering', function () {
   it('renders bytes column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsSource,
-      rowsSource.map(flatten),
+      rowsSource.map(build),
       false,
       [],
       100,
@@ -105,8 +102,7 @@ describe('Discover grid cell rendering', function () {
   it('renders bytes column correctly using _source when details is true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsSource,
-      rowsSource.map(flatten),
+      rowsSource.map(build),
       false,
       [],
       100,
@@ -132,8 +128,7 @@ describe('Discover grid cell rendering', function () {
     const closePopoverMockFn = jest.fn();
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFields,
-      rowsFields.map(flatten),
+      rowsFields.map(build),
       false,
       [],
       100,
@@ -160,8 +155,7 @@ describe('Discover grid cell rendering', function () {
   it('renders _source column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsSource,
-      rowsSource.map(flatten),
+      rowsSource.map(build),
       false,
       ['extension', 'bytes'],
       100,
@@ -235,8 +229,7 @@ describe('Discover grid cell rendering', function () {
   it('renders _source column correctly when isDetails is set to true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsSource,
-      rowsSource.map(flatten),
+      rowsSource.map(build),
       false,
       [],
       100,
@@ -309,8 +302,7 @@ describe('Discover grid cell rendering', function () {
   it('renders fields-based column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFields,
-      rowsFields.map(flatten),
+      rowsFields.map(build),
       true,
       ['extension', 'bytes'],
       100,
@@ -388,8 +380,7 @@ describe('Discover grid cell rendering', function () {
   it('limits amount of rendered items', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFields,
-      rowsFields.map(flatten),
+      rowsFields.map(build),
       true,
       ['extension', 'bytes'],
       // this is the number of rendered items
@@ -468,8 +459,7 @@ describe('Discover grid cell rendering', function () {
   it('renders fields-based column correctly when isDetails is set to true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFields,
-      rowsFields.map(flatten),
+      rowsFields.map(build),
       true,
       [],
       100,
@@ -547,8 +537,7 @@ describe('Discover grid cell rendering', function () {
   it('collect object fields and renders them like _source', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFieldsWithTopLevelObject,
-      rowsFieldsWithTopLevelObject.map(flatten),
+      rowsFieldsWithTopLevelObject.map(build),
       true,
       ['object.value', 'extension', 'bytes'],
       100,
@@ -590,8 +579,7 @@ describe('Discover grid cell rendering', function () {
     (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFieldsWithTopLevelObject,
-      rowsFieldsWithTopLevelObject.map(flatten),
+      rowsFieldsWithTopLevelObject.map(build),
       true,
       ['extension', 'bytes', 'object.value'],
       100,
@@ -633,8 +621,7 @@ describe('Discover grid cell rendering', function () {
     const closePopoverMockFn = jest.fn();
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFieldsWithTopLevelObject,
-      rowsFieldsWithTopLevelObject.map(flatten),
+      rowsFieldsWithTopLevelObject.map(build),
       true,
       [],
       100,
@@ -699,8 +686,7 @@ describe('Discover grid cell rendering', function () {
     const closePopoverMockFn = jest.fn();
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFieldsWithTopLevelObject,
-      rowsFieldsWithTopLevelObject.map(flatten),
+      rowsFieldsWithTopLevelObject.map(build),
       true,
       [],
       100,
@@ -728,8 +714,7 @@ describe('Discover grid cell rendering', function () {
     (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFieldsWithTopLevelObject,
-      rowsFieldsWithTopLevelObject.map(flatten),
+      rowsFieldsWithTopLevelObject.map(build),
       true,
       [],
       100,
@@ -763,8 +748,7 @@ describe('Discover grid cell rendering', function () {
   it('renders correctly when invalid row is given', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsSource,
-      rowsSource.map(flatten),
+      rowsSource.map(build),
       false,
       [],
       100,
@@ -789,8 +773,7 @@ describe('Discover grid cell rendering', function () {
   it('renders correctly when invalid column is given', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsSource,
-      rowsSource.map(flatten),
+      rowsSource.map(build),
       false,
       [],
       100,
@@ -814,7 +797,7 @@ describe('Discover grid cell rendering', function () {
 
   it('renders unmapped fields correctly', () => {
     (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
-    const rowsFieldsUnmapped: ElasticSearchHit[] = [
+    const rowsFieldsUnmapped: EsHitRecord[] = [
       {
         _id: '1',
         _index: 'test',
@@ -828,8 +811,7 @@ describe('Discover grid cell rendering', function () {
     ];
     const DiscoverGridCellValue = getRenderCellValueFn(
       dataViewMock,
-      rowsFieldsUnmapped,
-      rowsFieldsUnmapped.map(flatten),
+      rowsFieldsUnmapped.map(build),
       true,
       ['unmapped'],
       100,

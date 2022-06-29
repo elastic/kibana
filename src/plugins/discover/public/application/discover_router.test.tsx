@@ -18,9 +18,12 @@ import { ContextAppRoute } from './context';
 const pathMap: Record<string, never> = {};
 
 describe('Discover router', () => {
+  const props = {
+    isDev: false,
+  };
   beforeAll(() => {
     const { history } = createSearchSessionMock();
-    const component = shallow(discoverRouter(mockDiscoverServices, history));
+    const component = shallow(discoverRouter(mockDiscoverServices, history, props.isDev));
     component.find(Route).forEach((route) => {
       const routeProps = route.props() as RouteProps;
       const path = routeProps.path;
@@ -33,11 +36,11 @@ describe('Discover router', () => {
   });
 
   it('should show DiscoverMainRoute component for / route', () => {
-    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute />);
+    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute {...props} />);
   });
 
   it('should show DiscoverMainRoute component for /view/:id route', () => {
-    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute />);
+    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute {...props} />);
   });
 
   it('should show SingleDocRoute component for /doc/:dataViewId/:index route', () => {

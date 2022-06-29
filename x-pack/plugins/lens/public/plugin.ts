@@ -195,6 +195,7 @@ export interface LensPublicStart {
       openInNewTab?: boolean;
       originatingApp?: string;
       originatingPath?: string;
+      skipAppLeave?: boolean;
     }
   ) => void;
   /**
@@ -228,6 +229,7 @@ export class LensPlugin {
   private gaugeVisualization: GaugeVisualizationType | undefined;
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
   private hasDiscoverAccess: boolean = false;
+  private dataViewsService: DataViewsPublicPluginStart | undefined;
 
   private stopReportManager?: () => void;
 
@@ -270,6 +272,7 @@ export class LensPlugin {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
+        data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
@@ -295,6 +298,7 @@ export class LensPlugin {
       uiActionsEnhanced.registerDrilldown(
         new OpenInDiscoverDrilldown({
           discover,
+          dataViews: () => this.dataViewsService!,
           hasDiscoverAccess: () => this.hasDiscoverAccess,
         })
       );
@@ -303,6 +307,7 @@ export class LensPlugin {
     setupExpressions(
       expressions,
       () => startServices().plugins.fieldFormats.deserialize,
+      () => startServices().plugins.data.datatableUtilities,
       async () => {
         const { getTimeZone } = await import('./utils');
         return getTimeZone(core.uiSettings);
@@ -434,6 +439,7 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
     this.hasDiscoverAccess = core.application.capabilities.discover.show as boolean;
+    this.dataViewsService = startDependencies.dataViews;
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
@@ -450,7 +456,11 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      createOpenInDiscoverAction(startDependencies.discover!, this.hasDiscoverAccess)
+      createOpenInDiscoverAction(
+        startDependencies.discover!,
+        startDependencies.dataViews!,
+        this.hasDiscoverAccess
+      )
     );
 
     return {
@@ -458,7 +468,7 @@ export class LensPlugin {
       SaveModalComponent: getSaveModalComponent(core, startDependencies),
       navigateToPrefilledEditor: (
         input,
-        { openInNewTab = false, originatingApp = '', originatingPath } = {}
+        { openInNewTab = false, originatingApp = '', originatingPath, skipAppLeave = false } = {}
       ) => {
         // for openInNewTab, we set the time range in url via getEditPath below
         if (input?.timeRange && !openInNewTab) {
@@ -476,6 +486,7 @@ export class LensPlugin {
             originatingPath,
             valueInput: input,
           },
+          skipAppLeave,
         });
       },
       canUseEditor: () => {

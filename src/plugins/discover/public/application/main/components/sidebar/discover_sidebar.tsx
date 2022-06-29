@@ -26,9 +26,10 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { indexPatterns as indexPatternUtils } from '@kbn/data-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../common';
@@ -39,7 +40,7 @@ import { getDataViewFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { ElasticSearchHit } from '../../../../types';
+import type { DataTableRecord } from '../../../../types';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -67,9 +68,18 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    */
   setFieldEditorRef?: (ref: () => void | undefined) => void;
 
-  editField: (fieldName?: string) => void;
+  /**
+   * Handles "Edit field" action
+   * Buttons will be hidden if not provided
+   * @param fieldName
+   */
+  editField?: (fieldName?: string) => void;
 
-  createNewDataView: () => void;
+  /**
+   * Handles "Create a data view action" action
+   * Buttons will be hidden if not provided
+   */
+  createNewDataView?: () => void;
 
   /**
    * a statistics of the distribution of fields in the given hits
@@ -78,7 +88,7 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   /**
    * hits fetched from ES, displayed in the doc table
    */
-  documents?: ElasticSearchHit[];
+  documents?: DataTableRecord[];
   /**
    * Discover view mode
    */
@@ -93,16 +103,15 @@ export function DiscoverSidebarComponent({
   fieldCounts,
   fieldFilter,
   documents,
-  dataViewList,
   onAddField,
   onAddFilter,
   onRemoveField,
-  selectedDataView,
+  selectedIndexPattern,
   setFieldFilter,
   trackUiMetric,
   useNewFieldsApi = false,
   onEditRuntimeField,
-  onChangeDataView,
+  onChangeIndexPattern,
   setFieldEditorRef,
   closeFlyout,
   editField,
@@ -112,9 +121,6 @@ export function DiscoverSidebarComponent({
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
-
-  const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
-  const canEditDataViewField = !!dataViewFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
@@ -122,10 +128,10 @@ export function DiscoverSidebarComponent({
 
   useEffect(() => {
     if (documents) {
-      const newFields = getDataViewFieldList(selectedDataView, fieldCounts);
+      const newFields = getDataViewFieldList(selectedIndexPattern, fieldCounts);
       setFields(newFields);
     }
-  }, [selectedDataView, fieldCounts, documents]);
+  }, [selectedIndexPattern, fieldCounts, documents]);
 
   const scrollDimensions = useResizeObserver(scrollContainer);
 
@@ -139,8 +145,8 @@ export function DiscoverSidebarComponent({
   );
 
   const getDetailsByField = useCallback(
-    (ipField: DataViewField) => getDetails(ipField, documents, columns, selectedDataView),
-    [documents, columns, selectedDataView]
+    (ipField: DataViewField) => getDetails(ipField, documents, columns, selectedIndexPattern),
+    [documents, columns, selectedIndexPattern]
   );
 
   const popularLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
@@ -233,7 +239,7 @@ export function DiscoverSidebarComponent({
     }
     const map = new Map<string, Array<{ field: DataViewField; isSelected: boolean }>>();
     fields.forEach((field) => {
-      const subTypeMulti = getFieldSubtypeMulti(field);
+      const subTypeMulti = indexPatternUtils.getFieldSubtypeMulti(field);
       const parent = subTypeMulti?.multi.parent;
       if (!parent) {
         return;
@@ -257,11 +263,11 @@ export function DiscoverSidebarComponent({
 
   const deleteField = useMemo(
     () =>
-      canEditDataViewField && selectedDataView
+      editField && selectedIndexPattern
         ? async (fieldName: string) => {
             const ref = dataViewFieldEditor.openDeleteModal({
               ctx: {
-                dataView: selectedDataView,
+                dataView: selectedIndexPattern,
               },
               fieldName,
               onDelete: async () => {
@@ -277,8 +283,8 @@ export function DiscoverSidebarComponent({
           }
         : undefined,
     [
-      selectedDataView,
-      canEditDataViewField,
+      selectedIndexPattern,
+      editField,
       setFieldEditorRef,
       closeFlyout,
       onEditRuntimeField,
@@ -295,7 +301,7 @@ export function DiscoverSidebarComponent({
 
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
 
-  if (!selectedDataView) {
+  if (!selectedIndexPattern) {
     return null;
   }
 
@@ -317,14 +323,14 @@ export function DiscoverSidebarComponent({
       >
         {Boolean(showDataViewPicker) && (
           <DataViewPicker
-            currentDataViewId={selectedDataView.id}
-            onChangeDataView={onChangeDataView}
+            currentDataViewId={selectedIndexPattern.id}
+            onChangeDataView={onChangeIndexPattern}
             onAddField={editField}
             onDataViewCreated={createNewDataView}
             trigger={{
-              label: selectedDataView?.title || '',
+              label: selectedIndexPattern?.getName() || '',
               'data-test-subj': 'dataView-switch-link',
-              title: selectedDataView?.title || '',
+              title: selectedIndexPattern?.title || '',
               fullWidth: true,
             }}
           />
@@ -387,7 +393,7 @@ export function DiscoverSidebarComponent({
                               <DiscoverField
                                 alwaysShowActionButton={alwaysShowActionButtons}
                                 field={field}
-                                dataView={selectedDataView}
+                                dataView={selectedIndexPattern}
                                 onAddField={onAddField}
                                 onRemoveField={onRemoveField}
                                 onAddFilter={onAddFilter}
@@ -395,8 +401,8 @@ export function DiscoverSidebarComponent({
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditDataViewField ? editField : undefined}
-                                onDeleteField={canEditDataViewField ? deleteField : undefined}
+                                onEditField={editField}
+                                onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
@@ -448,15 +454,15 @@ export function DiscoverSidebarComponent({
                               <DiscoverField
                                 alwaysShowActionButton={alwaysShowActionButtons}
                                 field={field}
-                                dataView={selectedDataView}
+                                dataView={selectedIndexPattern}
                                 onAddField={onAddField}
                                 onRemoveField={onRemoveField}
                                 onAddFilter={onAddFilter}
                                 getDetails={getDetailsByField}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
-                                onEditField={canEditDataViewField ? editField : undefined}
-                                onDeleteField={canEditDataViewField ? deleteField : undefined}
+                                onEditField={editField}
+                                onDeleteField={deleteField}
                                 showFieldStats={showFieldStats}
                               />
                             </li>
@@ -477,15 +483,15 @@ export function DiscoverSidebarComponent({
                           <DiscoverField
                             alwaysShowActionButton={alwaysShowActionButtons}
                             field={field}
-                            dataView={selectedDataView}
+                            dataView={selectedIndexPattern}
                             onAddField={onAddField}
                             onRemoveField={onRemoveField}
                             onAddFilter={onAddFilter}
                             getDetails={getDetailsByField}
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
-                            onEditField={canEditDataViewField ? editField : undefined}
-                            onDeleteField={canEditDataViewField ? deleteField : undefined}
+                            onEditField={editField}
+                            onDeleteField={deleteField}
                             showFieldStats={showFieldStats}
                           />
                         </li>
@@ -497,18 +503,20 @@ export function DiscoverSidebarComponent({
             )}
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            iconType="indexOpen"
-            data-test-subj="dataView-add-field_btn"
-            onClick={() => editField()}
-            size="s"
-          >
-            {i18n.translate('discover.fieldChooser.addField.label', {
-              defaultMessage: 'Add a field',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
+        {!!editField && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="indexOpen"
+              data-test-subj="dataView-add-field_btn"
+              onClick={() => editField()}
+              size="s"
+            >
+              {i18n.translate('discover.fieldChooser.addField.label', {
+                defaultMessage: 'Add a field',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPageSideBar>
   );

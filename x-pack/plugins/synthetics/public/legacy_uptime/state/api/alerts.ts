@@ -122,9 +122,9 @@ export const fetchMonitorAlertRecords = async (): Promise<AlertsResult> => {
   return await apiService.get(API_URLS.RULES_FIND, data);
 };
 
-export const fetchAlertRecords = async ({
+export const fetchAnomalyAlertRecords = async ({
   monitorId,
-}: MonitorIdParam): Promise<Rule<NewAlertParams>> => {
+}: MonitorIdParam): Promise<Rule<NewAlertParams> | undefined> => {
   const data = {
     page: 1,
     per_page: 500,
@@ -139,10 +139,12 @@ export const fetchAlertRecords = async ({
   const monitorRule = rawRules.data.find(
     (rule) => rule.params.monitorId === monitorId
   ) as Rule<NewAlertParams> & { rule_type_id: string };
-  return {
-    ...monitorRule,
-    ruleTypeId: monitorRule.rule_type_id,
-  };
+  if (monitorRule) {
+    return {
+      ...monitorRule,
+      ruleTypeId: monitorRule.rule_type_id,
+    };
+  }
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {

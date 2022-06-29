@@ -149,7 +149,7 @@ interface RegistryOverridePropertyValue {
   screenshots?: RegistryImage[];
 }
 
-export type RegistryRelease = PackageSpecManifest['release'];
+export type RegistryRelease = NonNullable<PackageSpecManifest['release']>;
 export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }
@@ -397,6 +397,7 @@ export interface IntegrationCardItem {
   integration: string;
   id: string;
   categories: string[];
+  fromIntegrations?: string;
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;

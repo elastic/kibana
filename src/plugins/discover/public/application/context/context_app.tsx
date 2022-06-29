@@ -15,18 +15,19 @@ import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, isEqualFilters } from './services/context_state';
-import { useColumns } from '../../utils/use_data_grid_columns';
-import { useContextAppState } from './utils/use_context_app_state';
-import { useContextAppFetch } from './utils/use_context_app_fetch';
+import { useColumns } from '../../hooks/use_data_grid_columns';
+import { useContextAppState } from './hooks/use_context_app_state';
+import { useContextAppFetch } from './hooks/use_context_app_fetch';
 import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -95,7 +96,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     fetchContextRows,
     fetchAllRows,
     fetchSurroundingRows,
-    fetchedState.anchor._id,
+    fetchedState.anchor.id,
   ]);
 
   const { columns, onAddColumn, onRemoveColumn, onSetColumns } = useColumns({
@@ -110,7 +111,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
   const rows = useMemo(
     () => [
       ...(fetchedState.predecessors || []),
-      ...(fetchedState.anchor._id ? [fetchedState.anchor] : []),
+      ...(fetchedState.anchor.id ? [fetchedState.anchor] : []),
       ...(fetchedState.successors || []),
     ],
     [fetchedState.predecessors, fetchedState.anchor, fetchedState.successors]
@@ -118,7 +119,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
 
   const addFilter = useCallback(
     async (field: DataViewField | string, values: unknown, operation: string) => {
-      const newFilters = generateFilters(filterManager, field, values, operation, dataView.id!);
+      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
       filterManager.addFilters(newFilters);
       if (dataViews) {
         const fieldName = typeof field === 'string' ? field : field.name;
@@ -138,10 +139,15 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
       showFilterBar: true,
       showSaveQuery: false,
       showDatePicker: false,
-      dataViews: [dataView],
+      indexPatterns: [dataView],
       useDefaultBehaviors: true,
     };
   };
+
+  const contextAppTitle = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    contextAppTitle.current?.focus();
+  }, []);
 
   return (
     <Fragment>
@@ -149,6 +155,18 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
         <ContextErrorMessage status={fetchedState.anchorStatus} />
       ) : (
         <Fragment>
+          <h1
+            id="contextAppTitle"
+            className="euiScreenReaderOnly"
+            data-test-subj="discoverContextAppTitle"
+            tabIndex={-1}
+            ref={contextAppTitle}
+          >
+            {i18n.translate('discover.context.pageTitle', {
+              defaultMessage: 'Documents surrounding #{anchorId}',
+              values: { anchorId },
+            })}
+          </h1>
           <TopNavMenu {...getNavBarProps()} />
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageContent paddingSize="s" className="dscDocsContent">

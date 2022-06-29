@@ -8,7 +8,7 @@
 import { useState } from 'react';
 
 import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 
 import { getPivotQuery } from '../../../../../common';
 

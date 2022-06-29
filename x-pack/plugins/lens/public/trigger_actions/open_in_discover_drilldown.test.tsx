@@ -16,6 +16,7 @@ import {
   CollectConfigProps,
   OpenInDiscoverDrilldown,
 } from './open_in_discover_drilldown';
+import { DataViewsService } from '@kbn/data-views-plugin/public';
 
 jest.mock('./open_in_discover_helpers', () => ({
   isCompatible: jest.fn(() => true),
@@ -27,6 +28,7 @@ describe('open in discover drilldown', () => {
   beforeEach(() => {
     drilldown = new OpenInDiscoverDrilldown({
       discover: {} as DiscoverSetup,
+      dataViews: () => ({} as DataViewsService),
       hasDiscoverAccess: () => true,
     });
   });
@@ -52,9 +54,9 @@ describe('open in discover drilldown', () => {
     );
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
-  it('calls through to execute helper', () => {
+  it('calls through to execute helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    drilldown.execute(
+    await drilldown.execute(
       { openInNewTab: true },
       { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
     );

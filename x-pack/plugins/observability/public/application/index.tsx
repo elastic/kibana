@@ -19,7 +19,6 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ConfigSchema } from '..';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 import { DatePickerContextProvider } from '../context/date_picker_context';
 import { HasDataContextProvider } from '../context/has_data_context';
@@ -48,7 +47,6 @@ function App() {
 }
 
 export const renderApp = ({
-  config,
   core,
   plugins,
   appMountParameters,
@@ -57,7 +55,6 @@ export const renderApp = ({
   kibanaFeatures,
   usageCollection,
 }: {
-  config: ConfigSchema;
   core: CoreStart;
   plugins: ObservabilityPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
@@ -91,9 +88,6 @@ export const renderApp = ({
           <PluginContext.Provider
             value={{
               appMountParameters,
-              config,
-              core,
-              plugins,
               observabilityRuleTypeRegistry,
               ObservabilityPageTemplate,
               kibanaFeatures,

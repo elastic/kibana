@@ -33,12 +33,11 @@ export type Goto = {
   center?: MapCenterAndZoom;
 };
 
-export const GEOMETRY_FILTER_ACTION = 'GEOMETRY_FILTER_ACTION';
-
 export type TooltipFeatureAction = {
   label: string;
-  id: typeof GEOMETRY_FILTER_ACTION;
-  form: ReactNode;
+  id: string;
+  form?: ReactNode;
+  onClick?: () => void;
 };
 
 export type TooltipFeature = {

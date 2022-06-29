@@ -13,27 +13,18 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { PackagePolicy, DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
 import {
-  cloudSecurityPostureRuleTemplateSavedObjectType,
-  CloudSecurityPostureRuleTemplateSchema,
-} from '../../common/schemas/csp_rule_template';
-import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  cspRuleAssetSavedObjectType,
+  CSP_RULE_SAVED_OBJECT_TYPE,
+  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import { CspRuleSchema } from '../../common/schemas/csp_rule';
+import type { CspRuleType, CspRuleTemplateType } from '../../common/schemas';
 
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
   infer ElementType
 >
   ? ElementType
   : never;
-
-const isCspPackagePolicy = <T extends { package?: { name: string } }>(
-  packagePolicy: T
-): boolean => {
-  return packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
-};
 
 /**
  * Callback to handle creation of PackagePolicies in Fleet
@@ -43,14 +34,10 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
-  // We only care about Cloud Security Posture package policies
-  if (!isCspPackagePolicy(packagePolicy)) {
-    return;
-  }
   // Create csp-rules from the generic asset
-  const existingRuleTemplates: SavedObjectsFindResponse<CloudSecurityPostureRuleTemplateSchema> =
+  const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplateType> =
     await savedObjectsClient.find({
-      type: cloudSecurityPostureRuleTemplateSavedObjectType,
+      type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       perPage: 10000,
     });
 
@@ -76,34 +63,55 @@ export const onPackagePolicyPostCreateCallback = async (
 /**
  * Callback to handle deletion of PackagePolicies in Fleet
  */
-export const onPackagePolicyDeleteCallback = async (
-  logger: Logger,
+export const removeCspRulesInstancesCallback = async (
   deletedPackagePolicy: ArrayElement<DeletePackagePoliciesResponse>,
-  soClient: ISavedObjectsRepository
+  soClient: ISavedObjectsRepository,
+  logger: Logger
 ): Promise<void> => {
   try {
-    const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleSchema> =
-      await soClient.find({
-        type: cspRuleAssetSavedObjectType,
-        filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${deletedPackagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
-        perPage: 10000,
-      });
-    await Promise.all(
-      cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))
-    );
+    const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleType> = await soClient.find({
+      type: CSP_RULE_SAVED_OBJECT_TYPE,
+      filter: createCspRuleSearchFilterByPackagePolicy({
+        packagePolicyId: deletedPackagePolicy.id,
+        policyId: deletedPackagePolicy.policy_id,
+      }),
+      perPage: 10000,
+    });
+    await Promise.all(cspRules.map((rule) => soClient.delete(CSP_RULE_SAVED_OBJECT_TYPE, rule.id)));
   } catch (e) {
     logger.error(`Failed to delete CSP rules after delete package ${deletedPackagePolicy.id}`);
     logger.error(e);
   }
 };
 
+export const isCspPackageInstalled = async (
+  soClient: ISavedObjectsRepository,
+  logger: Logger
+): Promise<boolean> => {
+  // TODO: check if CSP package installed via the Fleet API
+  try {
+    const { saved_objects: postDeleteRules }: SavedObjectsFindResponse<CspRuleType> =
+      await soClient.find({
+        type: CSP_RULE_SAVED_OBJECT_TYPE,
+      });
+
+    if (!postDeleteRules.length) {
+      return true;
+    }
+    return false;
+  } catch (e) {
+    logger.error(e);
+    return false;
+  }
+};
+
 const generateRulesFromTemplates = (
   packagePolicyId: string,
   policyId: string,
-  cspRuleTemplates: Array<SavedObjectsFindResult<CloudSecurityPostureRuleTemplateSchema>>
-): Array<SavedObjectsBulkCreateObject<CspRuleSchema>> =>
+  cspRuleTemplates: Array<SavedObjectsFindResult<CspRuleTemplateType>>
+): Array<SavedObjectsBulkCreateObject<CspRuleType>> =>
   cspRuleTemplates.map((template) => ({
-    type: cspRuleAssetSavedObjectType,
+    type: CSP_RULE_SAVED_OBJECT_TYPE,
     attributes: {
       ...template.attributes,
       package_policy_id: packagePolicyId,

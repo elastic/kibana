@@ -13,7 +13,8 @@ import {
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiInMemoryTable,
-  Criteria,
+  Pagination,
+  CriteriaWithPagination,
   PropertySort,
   Direction,
   EuiLink,
@@ -25,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
-import { debounce, keyBy, sortBy, uniq } from 'lodash';
+import { debounce, keyBy, sortBy, uniq, get } from 'lodash';
 import React from 'react';
 import moment from 'moment';
 import { KibanaPageTemplate } from '../page_template';
@@ -78,6 +79,7 @@ export interface TableListViewState<V> {
   filter: string;
   selectedIds: string[];
   totalItems: number;
+  pagination: Pagination;
   tableSort?: {
     field: keyof V;
     direction: Direction;
@@ -93,17 +95,10 @@ class TableListView<V extends {}> extends React.Component<
   TableListViewProps<V>,
   TableListViewState<V>
 > {
-  private pagination = {};
   private _isMounted = false;
 
   constructor(props: TableListViewProps<V>) {
     super(props);
-
-    this.pagination = {
-      initialPageIndex: 0,
-      initialPageSize: props.initialPageSize,
-      pageSizeOptions: uniq([10, 20, 50, props.initialPageSize]).sort(),
-    };
 
     this.state = {
       items: [],
@@ -116,6 +111,12 @@ class TableListView<V extends {}> extends React.Component<
       showLimitError: false,
       filter: props.initialFilter,
       selectedIds: [],
+      pagination: {
+        pageIndex: 0,
+        totalItemCount: 0,
+        pageSize: props.initialPageSize,
+        pageSizeOptions: uniq([10, 20, 50, props.initialPageSize]).sort(),
+      },
     };
   }
 
@@ -149,6 +150,10 @@ class TableListView<V extends {}> extends React.Component<
                 direction: 'desc' as const,
               }
             : prev.tableSort,
+          pagination: {
+            ...prev.pagination,
+            totalItemCount: this.state.items.length,
+          },
         };
       });
     }
@@ -454,7 +459,19 @@ class TableListView<V extends {}> extends React.Component<
     );
   }
 
-  onTableChange(criteria: Criteria<V>) {
+  onTableChange(criteria: CriteriaWithPagination<V>) {
+    this.setState((prev) => {
+      const tableSort = criteria.sort ?? prev.tableSort;
+      return {
+        pagination: {
+          ...prev.pagination,
+          pageIndex: criteria.page.index,
+          pageSize: criteria.page.size,
+        },
+        tableSort,
+      };
+    });
+
     if (criteria.sort) {
       this.setState({ tableSort: criteria.sort });
     }
@@ -499,12 +516,12 @@ class TableListView<V extends {}> extends React.Component<
         itemId="id"
         items={this.state.items}
         columns={this.getTableColumns()}
-        pagination={this.pagination}
+        pagination={this.state.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
         selection={selection}
         search={search}
-        sorting={{ sort: this.state.tableSort as PropertySort }}
+        sorting={this.state.tableSort ? { sort: this.state.tableSort as PropertySort } : undefined}
         onChange={this.onTableChange.bind(this)}
         data-test-subj="itemsInMemTable"
         rowHeader={this.props.rowHeader}
@@ -566,9 +583,13 @@ class TableListView<V extends {}> extends React.Component<
     if (this.props.editItem) {
       const actions: EuiTableActionsColumnType<V>['actions'] = [
         {
-          name: i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
-            defaultMessage: 'Edit',
-          }),
+          name: (item) =>
+            i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
+              defaultMessage: 'Edit {itemDescription}',
+              values: {
+                itemDescription: get(item, this.props.rowHeader),
+              },
+            }),
           description: i18n.translate(
             'kibana-react.tableListView.listing.table.editActionDescription',
             {

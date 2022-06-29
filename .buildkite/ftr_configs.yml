@@ -39,7 +39,9 @@ disabled:
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
-  - x-pack/plugins/synthetics/e2e/playwright_run.ts
+  - x-pack/plugins/synthetics/e2e/synthetics_run.ts
+  - x-pack/plugins/ux/e2e/synthetics_run.ts
+  - x-pack/plugins/observability/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - test/visual_regression/config.ts
@@ -72,6 +74,7 @@ enabled:
   - test/functional/apps/discover/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
+  - test/functional/apps/kibana_overview/config.ts
   - test/functional/apps/management/config.ts
   - test/functional/apps/saved_objects_management/config.ts
   - test/functional/apps/status_page/config.ts
@@ -93,6 +96,9 @@ enabled:
   - test/interactive_setup_functional/manual_configuration.config.ts
   - test/interpreter_functional/config.ts
   - test/new_visualize_flow/config.ts
+  - test/node_roles_functional/all.config.ts
+  - test/node_roles_functional/background_tasks.config.ts
+  - test/node_roles_functional/ui.config.ts
   - test/plugin_functional/config.ts
   - test/server_integration/http/platform/config.status.ts
   - test/server_integration/http/platform/config.ts
@@ -145,6 +151,7 @@ enabled:
   - x-pack/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/test/functional/apps/dashboard/group1/config.ts
   - x-pack/test/functional/apps/dashboard/group2/config.ts
+  - x-pack/test/functional/apps/dashboard/group3/config.ts
   - x-pack/test/functional/apps/data_views/config.ts
   - x-pack/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/config.ts
@@ -188,6 +195,7 @@ enabled:
   - x-pack/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
   - x-pack/test/functional/config.firefox.js
+  - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/lists_api_integration/security_and_spaces/config.ts
@@ -201,6 +209,7 @@ enabled:
   - x-pack/test/reporting_functional/reporting_and_deprecated_security.config.ts
   - x-pack/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/test/reporting_functional/reporting_without_security.config.ts
+  - x-pack/test/reporting_functional/reporting_and_timeout.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
@@ -234,6 +243,7 @@ enabled:
   - x-pack/test/security_functional/saml.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
   - x-pack/test/security_solution_endpoint/config.ts
+  - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/spaces_api_integration/spaces_only/config.ts
@@ -242,3 +252,9 @@ enabled:
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
   - x-pack/test/usage_collection/config.ts
+  - x-pack/test/performance/journeys/ecommerce_dashboard/config.ts
+  - x-pack/test/performance/journeys/flight_dashboard/config.ts
+  - x-pack/test/performance/journeys/login/config.ts
+  - x-pack/test/performance/journeys/many_fields_discover/config.ts
+  - x-pack/test/performance/journeys/promotion_tracking_dashboard/config.ts
+  - x-pack/test/performance/journeys/web_logs_dashboard/config.ts

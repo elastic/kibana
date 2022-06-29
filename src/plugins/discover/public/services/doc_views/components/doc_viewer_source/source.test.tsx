@@ -10,11 +10,12 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DocViewerSource } from './source';
-import * as hooks from '../../../../utils/use_es_doc_search';
+import * as hooks from '../../../../hooks/use_es_doc_search';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../../../../components/json_code_editor/json_code_editor_common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 const mochDataView = {
   getComputedFields: () => [],
@@ -51,7 +52,6 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children()).toMatchSnapshot();
     const loadingIndicator = comp.find(EuiLoadingSpinner);
     expect(loadingIndicator).not.toBe(null);
   });
@@ -70,7 +70,6 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children().render()).toMatchSnapshot();
     const errorPrompt = comp.find(EuiEmptyPrompt);
     expect(errorPrompt.length).toBe(1);
     const refreshButton = comp.find(EuiButton);
@@ -78,9 +77,8 @@ describe('Source Viewer component', () => {
   });
 
   test('renders json code editor', () => {
-    const mockHit = {
+    const mockHit = buildDataTableRecord({
       _index: 'logstash-2014.09.09',
-      _type: 'doc',
       _id: 'id123',
       _score: 1,
       _source: {
@@ -95,7 +93,7 @@ describe('Source Viewer component', () => {
         scripted: 123,
         _underscore: 123,
       },
-    } as never;
+    });
     jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit, () => {}]);
     jest.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => {
       return false;
@@ -111,7 +109,6 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children()).toMatchSnapshot();
     const jsonCodeEditor = comp.find(JsonCodeEditorCommon);
     expect(jsonCodeEditor).not.toBe(null);
   });

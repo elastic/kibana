@@ -14,7 +14,7 @@ import { assertUnreachable } from '../../../../common/utility_types';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import {
   Direction,
-  FlowTarget,
+  FlowTargetSourceDest,
   NetworkUsersEdges,
   NetworkUsersFields,
   SortField,
@@ -32,7 +32,7 @@ const tableType = networkModel.NetworkDetailsTableType.users;
 
 interface UsersTableProps {
   data: NetworkUsersEdges[];
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   fakeTotalCount: number;
   id: string;
   isInspect: boolean;

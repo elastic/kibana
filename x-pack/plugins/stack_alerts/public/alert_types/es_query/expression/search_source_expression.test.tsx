@@ -14,8 +14,8 @@ import { EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
-import { of } from 'rxjs';
-import { IKibanaSearchResponse, ISearchSource } from '@kbn/data-plugin/common';
+import { Subject } from 'rxjs';
+import { ISearchSource } from '@kbn/data-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -38,6 +38,20 @@ const defaultSearchSourceExpressionParams: EsQueryAlertParams<SearchType.searchS
   timeField: '@timestamp',
   searchType: SearchType.searchSource,
   searchConfiguration: {},
+};
+
+const mockSearchResult = new Subject();
+const testResultComplete = {
+  rawResponse: {
+    hits: {
+      total: 1234,
+    },
+  },
+};
+
+const testResultPartial = {
+  partial: true,
+  running: true,
 };
 
 const searchSourceMock = {
@@ -67,13 +81,7 @@ const searchSourceMock = {
     return searchSourceMock;
   }),
   fetch$: jest.fn(() => {
-    return of<IKibanaSearchResponse>({
-      rawResponse: {
-        hits: {
-          total: 1234,
-        },
-      },
-    });
+    return mockSearchResult;
   }),
 } as unknown as ISearchSource;
 
@@ -143,6 +151,7 @@ describe('SearchSourceAlertTypeExpression', () => {
     wrapper = await wrapper.update();
     expect(findTestSubject(wrapper, 'thresholdExpression')).toBeTruthy();
   });
+
   test('should show success message if Test Query is successful', async () => {
     let wrapper = setup(defaultSearchSourceExpressionParams);
     await act(async () => {
@@ -156,6 +165,9 @@ describe('SearchSourceAlertTypeExpression', () => {
     wrapper = await wrapper.update();
 
     await act(async () => {
+      mockSearchResult.next(testResultPartial);
+      mockSearchResult.next(testResultComplete);
+      mockSearchResult.complete();
       await nextTick();
       wrapper.update();
     });

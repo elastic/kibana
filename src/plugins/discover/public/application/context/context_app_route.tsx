@@ -13,12 +13,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useDataView } from '../../utils/use_index_pattern';
-import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDataView } from '../../hooks/use_index_pattern';
+import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface ContextUrlParams {
-  dataViewId: string;
+  indexPatternId: string;
   id: string;
 }
 
@@ -26,8 +26,9 @@ export function ContextAppRoute() {
   const services = useDiscoverServices();
   const { chrome } = services;
 
-  const { dataViewId, id } = useParams<ContextUrlParams>();
+  const { indexPatternId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
+  const dataViewId = decodeURIComponent(indexPatternId);
   const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
@@ -50,13 +51,13 @@ export function ContextAppRoute() {
         iconColor="danger"
         title={
           <FormattedMessage
-            id="discover.context.dataViewErrorTitle"
+            id="discover.contextViewRoute.errorTitle"
             defaultMessage="An error occurred"
           />
         }
         body={
           <FormattedMessage
-            id="discover.context.dataViewErrorMessage"
+            id="discover.contextViewRoute.errorMessage"
             defaultMessage="No matching data view for id {dataViewId}"
             values={{ dataViewId }}
           />

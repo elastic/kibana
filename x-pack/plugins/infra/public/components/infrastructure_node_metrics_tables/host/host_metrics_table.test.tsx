@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { HttpFetchOptions } from '@kbn/core/public';
+import { CoreProviders } from '../../../apps/common_providers';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { HttpFetchOptions } from '@kbn/core/public';
+import type { MetricsExplorerSeries } from '../../../../common/http_api';
 import type {
   DataResponseMock,
   NodeMetricsTableFetchMock,
@@ -15,6 +17,7 @@ import type {
 } from '../test_helpers';
 import { createStartServicesAccessorMock } from '../test_helpers';
 import { createLazyHostMetricsTable } from './create_lazy_host_metrics_table';
+import { HostMetricsTable } from './host_metrics_table';
 import IntegratedHostMetricsTable from './integrated_host_metrics_table';
 import { metricByField } from './use_host_metrics_table';
 
@@ -39,6 +42,8 @@ describe('HostMetricsTable', () => {
 
   const fetchMock = createFetchMock();
 
+  const loadingIndicatorTestId = 'metricsTableLoadingContent';
+
   describe('createLazyHostMetricsTable', () => {
     it('should lazily load and render the table', async () => {
       const { fetch, getStartServices } = createStartServicesAccessorMock(fetchMock);
@@ -46,7 +51,7 @@ describe('HostMetricsTable', () => {
 
       render(<LazyHostMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
 
-      expect(screen.queryByTestId('hostMetricsTableLoader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('hostMetricsTable')).not.toBeInTheDocument();
 
       // Using longer time out since resolving dynamic import can be slow
@@ -55,7 +60,7 @@ describe('HostMetricsTable', () => {
         timeout: 10000,
       });
 
-      expect(screen.queryByTestId('hostMetricsTableLoader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(loadingIndicatorTestId)).not.toBeInTheDocument();
       expect(screen.queryByTestId('hostMetricsTable')).toBeInTheDocument();
     }, 10000);
   });
@@ -78,6 +83,44 @@ describe('HostMetricsTable', () => {
       expect(await findByText(/some-host/)).toBeInTheDocument();
     });
   });
+
+  it('should render a loading indicator on first load', () => {
+    const { coreProvidersPropsMock } = createStartServicesAccessorMock(jest.fn());
+
+    const { queryByTestId } = render(
+      <CoreProviders {...coreProvidersPropsMock}>
+        <HostMetricsTable
+          data={{ state: 'unknown' }}
+          isLoading={true}
+          setCurrentPageIndex={jest.fn()}
+          setSortState={jest.fn()}
+          sortState={{ field: 'name', direction: 'asc' }}
+          timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
+        />
+      </CoreProviders>
+    );
+
+    expect(queryByTestId(loadingIndicatorTestId)).toBeInTheDocument();
+  });
+
+  it('should render a prompt when indices are missing', () => {
+    const { coreProvidersPropsMock } = createStartServicesAccessorMock(jest.fn());
+
+    const { queryByTestId } = render(
+      <CoreProviders {...coreProvidersPropsMock}>
+        <HostMetricsTable
+          data={{ state: 'no-indices' }}
+          isLoading={false}
+          setCurrentPageIndex={jest.fn()}
+          setSortState={jest.fn()}
+          sortState={{ field: 'name', direction: 'asc' }}
+          timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
+        />
+      </CoreProviders>
+    );
+
+    expect(queryByTestId('metricsTableLoadingContent')).toBeInTheDocument();
+  });
 });
 
 function createFetchMock(): NodeMetricsTableFetchMock {
@@ -85,6 +128,9 @@ function createFetchMock(): NodeMetricsTableFetchMock {
     source: {
       configuration: {
         metricAlias: 'some-index-pattern',
+      },
+      status: {
+        metricIndicesExist: true,
       },
     },
   };
@@ -96,7 +142,7 @@ function createFetchMock(): NodeMetricsTableFetchMock {
     ],
   };
 
-  return (path: string, options: HttpFetchOptions) => {
+  return (path: string, _options: HttpFetchOptions) => {
     // options can be used to read body for filter clause
     if (path === '/api/metrics/source/default') {
       return Promise.resolve(sourceMock);
@@ -114,7 +160,7 @@ function createHost(
   cpuUsagePct: number,
   memoryBytes: number,
   memoryUsagePct: number
-) {
+): Partial<MetricsExplorerSeries> {
   return {
     id: name,
     rows: [
@@ -123,7 +169,7 @@ function createHost(
         [metricByField['system.cpu.total.norm.pct']]: cpuUsagePct,
         [metricByField['system.memory.total']]: memoryBytes,
         [metricByField['system.memory.used.pct']]: memoryUsagePct,
-      },
+      } as MetricsExplorerSeries['rows'][number],
     ],
   };
 }

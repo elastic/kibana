@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { QueryClientProvider } from 'react-query';
 import * as i18n from './translations';
 import { LinkAnchor } from '../links';
 import { RecentCasesFilters } from './filters';
@@ -15,6 +16,7 @@ import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
 import { useAllCasesNavigation } from '../../common/navigation';
+import { casesQueryClient } from '../cases_context/query_client';
 
 export interface RecentCasesProps {
   maxCasesToShow: number;
@@ -52,7 +54,7 @@ const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
   );
 
   return (
-    <>
+    <QueryClientProvider client={casesQueryClient}>
       <>
         <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -81,7 +83,7 @@ const RecentCases = React.memo(({ maxCasesToShow }: RecentCasesProps) => {
           </LinkAnchor>
         </EuiText>
       </EuiText>
-    </>
+    </QueryClientProvider>
   );
 });
 

@@ -7,14 +7,9 @@
 
 import expect from '@kbn/expect';
 import { Spaces, Superuser } from '../../../scenarios';
-import {
-  getUrlPrefix,
-  getEventLog,
-  getTestRuleData,
-  ObjectRemover,
-  TaskManagerDoc,
-} from '../../../../common/lib';
+import { getUrlPrefix, getEventLog, getTestRuleData, TaskManagerDoc } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { setupSpacesAndUsers } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export
 export default function createActionsTelemetryTests({ getService }: FtrProviderContext) {
@@ -22,26 +17,19 @@ export default function createActionsTelemetryTests({ getService }: FtrProviderC
   const es = getService('es');
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const esArchiver = getService('esArchiver');
 
   describe('actions telemetry', () => {
     const alwaysFiringRuleId: { [key: string]: string } = {};
-    const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/event_log_telemetry');
       // reset the state in the telemetry task
-      await es.update({
-        id: `task:Actions-actions_telemetry`,
-        index: '.kibana_task_manager',
-        body: {
-          doc: {
-            task: {
-              state: '{}',
-            },
-          },
-        },
-      });
+      await setupSpacesAndUsers(getService);
     });
-    after(() => objectRemover.removeAll());
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/event_log_telemetry');
+    });
 
     async function createConnector(opts: { name: string; space: string; connectorTypeId: string }) {
       const { name, space, connectorTypeId } = opts;
@@ -56,7 +44,6 @@ export default function createActionsTelemetryTests({ getService }: FtrProviderC
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(space, createdConnector.id, 'action', 'actions');
       return createdConnector.id;
     }
 
@@ -68,7 +55,6 @@ export default function createActionsTelemetryTests({ getService }: FtrProviderC
         .auth(Superuser.username, Superuser.password)
         .send(getTestRuleData(ruleOverwrites));
       expect(ruleResponse.status).to.eql(200);
-      objectRemover.add(space, ruleResponse.body.id, 'rule', 'alerting');
       return ruleResponse.body.id;
     }
 
@@ -173,22 +159,23 @@ export default function createActionsTelemetryTests({ getService }: FtrProviderC
 
       // request telemetry task to run
       await supertest
-        .post('/api/alerting_actions_telemetry/run_now')
+        .post('/api/alerting_actions_telemetry/run_soon')
         .set('kbn-xsrf', 'xxx')
         .send({ taskId: 'Actions-actions_telemetry' })
         .expect(200);
 
-      // get telemetry task doc
-      const telemetryTask = await es.get<TaskManagerDoc>({
-        id: `task:Actions-actions_telemetry`,
-        index: '.kibana_task_manager',
+      let telemetry: any;
+      await retry.try(async () => {
+        const telemetryTask = await es.get<TaskManagerDoc>({
+          id: `task:Actions-actions_telemetry`,
+          index: '.kibana_task_manager',
+        });
+        expect(telemetryTask!._source!.task?.status).to.be('idle');
+        const taskState = telemetryTask!._source!.task?.state;
+        expect(taskState).not.to.be(undefined);
+        telemetry = JSON.parse(taskState!);
+        expect(telemetry.count_total).to.equal(19);
       });
-      const taskState = telemetryTask?._source?.task?.state;
-      expect(taskState).not.to.be(undefined);
-      const telemetry = JSON.parse(taskState!);
-
-      // total number of connectors
-      expect(telemetry.count_total).to.equal(19);
 
       // total number of active connectors (used by a rule)
       expect(telemetry.count_active_total).to.equal(7);

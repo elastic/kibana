@@ -55,7 +55,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
     className="euiFormControlLayout euiFormControlLayout--compressed"
@@ -130,7 +130,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
     className="euiFormControlLayout euiFormControlLayout--compressed"

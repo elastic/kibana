@@ -11,7 +11,7 @@ import {
   createTransportMock,
   createInternalErrorHandlerMock,
 } from './cluster_client.test.mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '../../http/http_server.mocks';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { elasticsearchClientMock } from './mocks';
@@ -537,7 +537,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.close).toHaveBeenCalledTimes(1);
     });
 
-    it('waits for both clients to close', async (done) => {
+    it('waits for both clients to close', (done) => {
       expect.assertions(4);
 
       const clusterClient = new ClusterClient({

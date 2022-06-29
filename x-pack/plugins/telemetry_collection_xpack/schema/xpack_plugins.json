@@ -7000,6 +7000,9 @@
                 },
                 "visual_reporting_soft_disabled_error": {
                   "type": "long"
+                },
+                "invalid_layout_parameters_error": {
+                  "type": "long"
                 }
               }
             }
@@ -7117,6 +7120,9 @@
                   "type": "long"
                 },
                 "visual_reporting_soft_disabled_error": {
+                  "type": "long"
+                },
+                "invalid_layout_parameters_error": {
                   "type": "long"
                 }
               }
@@ -7268,6 +7274,9 @@
                 },
                 "visual_reporting_soft_disabled_error": {
                   "type": "long"
+                },
+                "invalid_layout_parameters_error": {
+                  "type": "long"
                 }
               }
             }
@@ -7417,6 +7426,9 @@
                   "type": "long"
                 },
                 "visual_reporting_soft_disabled_error": {
+                  "type": "long"
+                },
+                "invalid_layout_parameters_error": {
                   "type": "long"
                 }
               }
@@ -8275,6 +8287,9 @@
                     },
                     "visual_reporting_soft_disabled_error": {
                       "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -8392,6 +8407,9 @@
                       "type": "long"
                     },
                     "visual_reporting_soft_disabled_error": {
+                      "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
                       "type": "long"
                     }
                   }
@@ -8543,6 +8561,9 @@
                     },
                     "visual_reporting_soft_disabled_error": {
                       "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -8692,6 +8713,9 @@
                       "type": "long"
                     },
                     "visual_reporting_soft_disabled_error": {
+                      "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
                       "type": "long"
                     }
                   }

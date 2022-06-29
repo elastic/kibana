@@ -7,6 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { buildDataViewMock } from './index_pattern';
 
 const fields = [
   {
@@ -51,27 +52,8 @@ const fields = [
   },
 ] as DataView['fields'];
 
-fields.getByName = (name: string) => {
-  return fields.find((field) => field.name === name);
-};
-fields.getAll = () => {
-  return fields;
-};
-
-const dataView = {
-  id: 'index-pattern-with-timefield-id',
-  title: 'index-pattern-with-timefield',
-  metaFields: ['_index', '_score'],
+export const dataViewWithTimefieldMock = buildDataViewMock({
+  name: 'index-pattern-with-timefield',
   fields,
-  getComputedFields: () => ({}),
-  getSourceFiltering: () => ({}),
-  getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
-  getFormatterForField: () => ({ convert: (value: unknown) => value }),
-  isTimeNanosBased: () => false,
-  popularizeField: () => {},
-} as unknown as DataView;
-
-dataView.isTimeBased = () => !!dataView.timeFieldName;
-
-export const dataViewWithTimefieldMock = dataView;
+});

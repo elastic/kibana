@@ -33,7 +33,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
-import type { FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatInstanceType, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import { DataView, DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -97,7 +97,7 @@ export interface FieldEditorState {
   fieldTypeFormats: FieldTypeFormat[];
   existingFieldNames: string[];
   fieldFormatId?: string;
-  fieldFormatParams: { [key: string]: unknown };
+  fieldFormatParams: FieldFormatParams;
   showScriptingHelp: boolean;
   showDeleteModal: boolean;
   hasFormatError: boolean;

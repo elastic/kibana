@@ -11,6 +11,14 @@ import Path from 'path';
 import { inspect } from 'util';
 
 import webpack from 'webpack';
+import {
+  isExternalModule,
+  isNormalModule,
+  isIgnoredModule,
+  isConcatenatedModule,
+  isDelegatedModule,
+  getModulePath,
+} from '@kbn/optimizer-webpack-helpers';
 
 import {
   Bundle,
@@ -21,14 +29,6 @@ import {
   ParsedDllManifest,
 } from '../common';
 import { BundleRefModule } from './bundle_ref_module';
-import {
-  isExternalModule,
-  isNormalModule,
-  isIgnoredModule,
-  isConcatenatedModule,
-  isDelegatedModule,
-  getModulePath,
-} from './webpack_helpers';
 
 /**
  * sass-loader creates about a 40% overhead on the overall optimizer runtime, and

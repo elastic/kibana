@@ -152,6 +152,14 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
     },
 
+    async navigateToSingleMetricViewer(jobId: string) {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'ml',
+        `/timeseriesexplorer`,
+        `?_g=(ml%3A(jobIds%3A!(${jobId}))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0))`
+      );
+    },
+
     async navigateToDataFrameAnalytics() {
       await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
     },

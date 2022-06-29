@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { duration } from 'moment';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { AggCardinality } from '../../../common/types/fields';
@@ -15,7 +16,6 @@ import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 import { RuntimeMappings } from '../../../common/types/fields';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 
 /**
  * Service for carrying out queries to obtain data

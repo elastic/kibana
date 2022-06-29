@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
+export interface IndexPatternRef {
+  id: string;
+  title: string;
+  name?: string;
+}
+
 export interface FieldDetails {
   error: string;
   exists: number;

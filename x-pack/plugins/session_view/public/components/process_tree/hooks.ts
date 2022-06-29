@@ -306,7 +306,9 @@ export const useProcessTree = ({
     const newProcessedPages: ProcessEventsPage[] = [];
 
     data.forEach((page, i) => {
-      const processed = processedPages.find((p) => p.cursor === page.cursor);
+      const processed = processedPages.find(
+        (p) => p.cursor === page.cursor && p.events?.length === page.events?.length
+      );
 
       if (!processed) {
         const backwards = i < processedPages.length;

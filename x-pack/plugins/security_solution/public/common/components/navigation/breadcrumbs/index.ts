@@ -14,6 +14,7 @@ import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../..
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
+import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import {
@@ -83,7 +84,7 @@ export const getBreadcrumbsForRoute = (
   }
 
   const newMenuLeadingBreadcrumbs = getLeadingBreadcrumbsForSecurityPage(
-    spyState.pageName as SecurityPageName,
+    spyState.pageName,
     getSecuritySolutionUrl,
     object.navTabs,
     isGroupedNavigationEnabled
@@ -134,6 +135,10 @@ const getTrailingBreadcrumbsForRoutes = (
     return getDetectionRulesBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
 
+  if (isKubernetesRoutes(spyState)) {
+    return getKubernetesBreadcrumbs(spyState, getSecuritySolutionUrl);
+  }
+
   return [];
 };
 
@@ -147,6 +152,9 @@ const isUsersRoutes = (spyState: RouteSpyState): spyState is UsersRouteSpyState 
   spyState.pageName === SecurityPageName.users;
 
 const isCaseRoutes = (spyState: RouteSpyState) => spyState.pageName === SecurityPageName.case;
+
+const isKubernetesRoutes = (spyState: RouteSpyState) =>
+  spyState.pageName === SecurityPageName.kubernetes;
 
 const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
   spyState.pageName === SecurityPageName.administration;

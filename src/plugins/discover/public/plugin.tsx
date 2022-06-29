@@ -54,7 +54,7 @@ import { DeferredSpinner } from './components';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
-import { useDiscoverServices } from './utils/use_discover_services';
+import { useDiscoverServices } from './hooks/use_discover_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 
 const DocViewerLegacyTable = React.lazy(
@@ -82,7 +82,7 @@ export interface DiscoverSetup {
    * ```ts
    * await plugins.discover.locator.navigate({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   dataViewId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
    *     to: 'now',
    *     from: 'now-15m',
@@ -96,7 +96,7 @@ export interface DiscoverSetup {
    * ```ts
    * const location = await plugins.discover.locator.getLocation({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   dataViewId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
    *     to: 'now',
    *     from: 'now-15m',
@@ -116,7 +116,7 @@ export interface DiscoverStart {
    * ```ts
    * await plugins.discover.locator.navigate({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   dataViewId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
    *     to: 'now',
    *     from: 'now-15m',
@@ -130,7 +130,7 @@ export interface DiscoverStart {
    * ```ts
    * const location = await plugins.discover.locator.getLocation({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
-   *   dataViewId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
    *     to: 'now',
    *     from: 'now-15m',
@@ -191,7 +191,7 @@ export class DiscoverPlugin
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
-
+    const isDev = this.initializerContext.env.mode.dev;
     if (plugins.share) {
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({
@@ -240,7 +240,12 @@ export class DiscoverPlugin
             </DeferredSpinner>
           }
         >
-          <SourceViewer index={hit._index} id={hit._id} dataView={dataView} hasLineNumbers />
+          <SourceViewer
+            index={hit.raw._index}
+            id={hit.raw._id}
+            dataView={dataView}
+            hasLineNumbers
+          />
         </React.Suspense>
       ),
     });
@@ -279,14 +284,14 @@ export class DiscoverPlugin
           this.locator!
         );
 
-        // make sure the data view list is up to date
-        await discoverStartPlugins.data.dataViews.clearCache();
+        // make sure the index pattern list is up to date
+        await discoverStartPlugins.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application');
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element, services);
+        const unmount = renderApp(params.element, services, isDev);
         return () => {
           unlistenParentHistory();
           unmount();
@@ -301,7 +306,7 @@ export class DiscoverPlugin
     plugins.urlForwarding.forwardApp('context', 'discover', (path) => {
       const urlParts = path.split('/');
       // take care of urls containing legacy url, those split in the following way
-      // ["", "context", dataViewId, _type, id + params]
+      // ["", "context", indexPatternId, _type, id + params]
       if (urlParts[4]) {
         // remove _type part
         const newPath = [...urlParts.slice(0, 3), ...urlParts.slice(4)].join('/');

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 
@@ -60,6 +60,9 @@ describe('Search service', () => {
         fieldFormats: {},
         indexPatterns: {},
         screenshotMode: screenshotModePluginMock.createStartContract(),
+        nowProvider: {
+          get: jest.fn(),
+        },
       } as any);
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');

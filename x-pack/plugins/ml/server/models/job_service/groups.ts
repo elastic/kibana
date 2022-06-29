@@ -7,13 +7,8 @@
 
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
+import type { Group } from '../../../common/types/groups';
 import type { MlClient } from '../../lib/ml_client';
-
-export interface Group {
-  id: string;
-  jobIds: string[];
-  calendarIds: string[];
-}
 
 export interface Results {
   [id: string]: {

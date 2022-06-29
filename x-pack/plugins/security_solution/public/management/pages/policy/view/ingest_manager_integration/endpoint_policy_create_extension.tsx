@@ -38,7 +38,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             <p>
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.endpointConfiguration"
-                defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint Security integration within your agent policy."
+                defaultMessage="We'll save your integration with our recommended defaults. You can change this later by editing the Endpoint and Cloud Security integration within your agent policy."
               />
             </p>
           </EuiText>

@@ -24,7 +24,7 @@ import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ZipUrlTLSFields } from './zip_url_tls_fields';
-import { ConfigKey, MonacoEditorLangId } from '../types';
+import { ConfigKey, MonacoEditorLangId, Validation } from '../types';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
@@ -48,6 +48,7 @@ interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
   onFieldBlur: (field: ConfigKey) => void;
   defaultConfig?: SourceConfig;
+  validate?: Validation;
 }
 
 export const defaultValues = {
@@ -72,33 +73,31 @@ const getDefaultTab = (defaultConfig: SourceConfig, isZipUrlSourceEnabled = true
   return isZipUrlSourceEnabled ? SourceType.ZIP : SourceType.INLINE;
 };
 
-export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValues }: Props) => {
+export const SourceField = ({
+  onChange,
+  onFieldBlur,
+  defaultConfig = defaultValues,
+  validate,
+}: Props) => {
   const { isZipUrlSourceEnabled } = usePolicyConfigContext();
   const [sourceType, setSourceType] = useState<SourceType>(
     getDefaultTab(defaultConfig, isZipUrlSourceEnabled)
   );
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     onChange(config);
   }, [config, onChange]);
 
-  const onFieldTouched = (field: ConfigKey) => {
-    if (!touchedFields[field]) {
-      setTouchedFields((existing) => ({ ...existing, [field]: true }));
-    }
+  const isSourceInlineInvalid =
+    validate?.[ConfigKey.SOURCE_INLINE]?.({
+      [ConfigKey.SOURCE_INLINE]: config.inlineScript,
+    }) ?? false;
 
-    onFieldBlur(field);
-  };
-
-  const isWithInUptime = window.location.pathname.includes('/app/uptime');
-  const isZipUrlInvalid = isWithInUptime
-    ? touchedFields[ConfigKey.SOURCE_ZIP_URL] && !config.zipUrl
-    : !config.zipUrl;
-  const isScriptInvalid = isWithInUptime
-    ? touchedFields[ConfigKey.SOURCE_INLINE] && !config.inlineScript
-    : !config.inlineScript;
+  const isZipUrlInvalid =
+    validate?.[ConfigKey.SOURCE_ZIP_URL]?.({
+      [ConfigKey.SOURCE_ZIP_URL]: config.zipUrl,
+    }) ?? false;
 
   const zipUrlLabel = (
     <FormattedMessage
@@ -136,7 +135,7 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
               onChange={({ target: { value } }) =>
                 setConfig((prevConfig) => ({ ...prevConfig, zipUrl: value }))
               }
-              onBlur={() => onFieldTouched(ConfigKey.SOURCE_ZIP_URL)}
+              onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_URL)}
               value={config.zipUrl}
               data-test-subj="syntheticsBrowserZipUrl"
             />
@@ -284,7 +283,7 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
       'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
         <EuiFormRow
-          isInvalid={isScriptInvalid}
+          isInvalid={isSourceInlineInvalid}
           error={
             <FormattedMessage
               id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
@@ -309,7 +308,7 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
             languageId={MonacoEditorLangId.JAVASCRIPT}
             onChange={(code) => {
               setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }));
-              onFieldTouched(ConfigKey.SOURCE_INLINE);
+              onFieldBlur(ConfigKey.SOURCE_INLINE);
             }}
             value={config.inlineScript}
           />

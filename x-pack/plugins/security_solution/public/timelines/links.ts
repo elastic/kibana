@@ -15,13 +15,13 @@ export const links: LinkItem = {
   title: TIMELINES,
   path: TIMELINES_PATH,
   globalNavEnabled: true,
+  globalNavOrder: 3,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.timelines', {
       defaultMessage: 'Timelines',
     }),
   ],
-  globalNavOrder: 9005,
   links: [
     {
       id: SecurityPageName.timelinesTemplates,

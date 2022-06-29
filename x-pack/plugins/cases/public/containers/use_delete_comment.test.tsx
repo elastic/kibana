@@ -9,13 +9,13 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useDeleteComment, UseDeleteComment } from './use_delete_comment';
 import * as api from './api';
 import { basicCaseId } from './mock';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 jest.mock('../common/lib/kibana');
 jest.mock('./api');
+jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
 const commentId = 'ab124';
-const fetchUserActions = jest.fn();
-const updateCase = jest.fn();
 
 describe('useDeleteComment', () => {
   it('init', async () => {
@@ -43,8 +43,6 @@ describe('useDeleteComment', () => {
       result.current.deleteComment({
         caseId: basicCaseId,
         commentId,
-        fetchUserActions,
-        updateCase,
       });
       await waitForNextUpdate();
       expect(spyOnDeleteComment).toBeCalledWith({
@@ -56,9 +54,7 @@ describe('useDeleteComment', () => {
     });
   });
 
-  it('fetches the case information', async () => {
-    const spyOnGetCase = jest.spyOn(api, 'getCase');
-
+  it('refreshes the case page view after delete', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseDeleteComment>(() =>
         useDeleteComment()
@@ -68,11 +64,9 @@ describe('useDeleteComment', () => {
       result.current.deleteComment({
         caseId: basicCaseId,
         commentId,
-        fetchUserActions,
-        updateCase,
       });
       await waitForNextUpdate();
-      expect(spyOnGetCase).toBeCalledWith(basicCaseId, true, expect.any(AbortSignal));
+      expect(useRefreshCaseViewPage()).toBeCalled();
     });
   });
 
@@ -89,8 +83,6 @@ describe('useDeleteComment', () => {
       result.current.deleteComment({
         caseId: basicCaseId,
         commentId,
-        fetchUserActions,
-        updateCase,
       });
       await waitForNextUpdate();
       expect(spyOnDeleteComment).toBeCalledWith({

@@ -18,9 +18,13 @@ import type { K8sMode } from './types';
 
 interface Props {
   isK8s?: K8sMode;
+  isManaged?: boolean;
 }
 
-export const InstallationMessage: React.FunctionComponent<Props> = ({ isK8s }) => {
+export const InstallationMessage: React.FunctionComponent<Props> = ({
+  isK8s,
+  isManaged = true,
+}) => {
   const { docLinks } = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const kibanaVersionURLString = useMemo(
@@ -55,7 +59,15 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({ isK8s }) =
                 </EuiLink>
               ),
               installationLink: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.installElasticAgent}>
+                <EuiLink
+                  target="_blank"
+                  external
+                  href={
+                    isManaged
+                      ? docLinks.links.fleet.installElasticAgent
+                      : docLinks.links.fleet.installElasticAgentStandalone
+                  }
+                >
                   <FormattedMessage
                     id="xpack.fleet.enrollmentInstructions.installationMessage.link"
                     defaultMessage="installation docs"

@@ -11,10 +11,12 @@ import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { FieldFormatMap } from '@kbn/data-plugin/common';
+import type { FieldFormatMap } from '@kbn/data-views-plugin/common';
 import { TimeseriesVisParams } from '../../../types';
 import type { TimeseriesVisData, PanelData } from '../../../../common/types';
 import { FetchedIndexPattern } from '../../../../common/types';
+
+import './_vis_types.scss';
 
 /**
  * Lazy load each visualization type, since the only one is presented on the screen at the same time.

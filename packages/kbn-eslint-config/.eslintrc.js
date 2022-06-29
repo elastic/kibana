@@ -102,6 +102,11 @@ module.exports = {
           to: '@kbn/test-jest-helpers',
           disallowedMessage: `import from @kbn/test-jest-helpers instead`
         },
+        {
+          from: '@kbn/utility-types/jest',
+          to: '@kbn/utility-types-jest',
+          disallowedMessage: `import from @kbn/utility-types-jest instead`
+        },
       ],
     ],
 

@@ -8,8 +8,8 @@
 
 import { Subscription } from 'rxjs';
 
+import type { CoreService } from '@kbn/core-base-browser-internal';
 import { IUiSettingsClient } from '../../ui_settings';
-import { CoreService } from '../../../types';
 // @ts-expect-error
 import disableAnimationsCss from '!!raw-loader!./disable_animations.css';
 

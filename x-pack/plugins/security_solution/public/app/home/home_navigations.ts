@@ -30,7 +30,9 @@ import {
   SecurityPageName,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
   APP_USERS_PATH,
+  APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
+  APP_RESPONSE_ACTIONS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -97,6 +99,13 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'network',
   },
+  [SecurityPageName.kubernetes]: {
+    id: SecurityPageName.kubernetes,
+    name: i18n.KUBERNETES,
+    href: APP_KUBERNETES_PATH,
+    disabled: false,
+    urlKey: 'kubernetes',
+  },
   [SecurityPageName.timelines]: {
     id: SecurityPageName.timelines,
     name: i18n.TIMELINES,
@@ -160,9 +169,20 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'administration',
   },
+  [SecurityPageName.responseActions]: {
+    id: SecurityPageName.responseActions,
+    name: i18n.RESPONSE_ACTIONS,
+    href: APP_RESPONSE_ACTIONS_PATH,
+    disabled: false,
+    urlKey: 'administration',
+  },
 };
 
 export const securityNavGroup: SecurityNavGroup = {
+  [SecurityNavGroupKey.dashboards]: {
+    id: SecurityNavGroupKey.dashboards,
+    name: i18n.DASHBOARDS,
+  },
   [SecurityNavGroupKey.detect]: {
     id: SecurityNavGroupKey.detect,
     name: i18n.DETECT,

@@ -8,17 +8,18 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
+
 import { EnvironmentService } from './environment_service';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
-import { CoreContext } from '../core_context';
-import type { AnalyticsServicePreboot } from '../analytics';
 
-import { configServiceMock } from '../config/mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { mockCoreContext } from '../core_context.mock';
-import { analyticsServiceMock } from '../analytics/analytics_service.mock';
+import { configServiceMock } from '@kbn/config-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 
 jest.mock('./resolve_uuid', () => ({
   resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),

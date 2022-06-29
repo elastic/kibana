@@ -729,5 +729,65 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
     });
+
+    it('should not prevent rules with action execution capabilities from being edited', async () => {
+      const action = await createAction({ supertest, objectRemover });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          actions: [
+            {
+              id: action.id,
+              group: 'default',
+              params: { level: 'info', message: 'gfghfhg' },
+            },
+          ],
+        },
+      });
+      await refreshAlertsList();
+      await retry.try(async () => {
+        const actionButton = await testSubjects.find('selectActionButton');
+        const disabled = await actionButton.getAttribute('disabled');
+        expect(disabled).to.equal(null);
+      });
+    });
+
+    it('should allow rules to be snoozed using the right side dropdown', async () => {
+      const createdAlert = await createAlert({
+        supertest,
+        objectRemover,
+      });
+
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      await testSubjects.click('collapsedItemActions');
+      await testSubjects.click('snoozeButton');
+      await testSubjects.click('ruleSnoozeApply');
+
+      await retry.try(async () => {
+        await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
+      });
+
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      await testSubjects.click('collapsedItemActions');
+      await testSubjects.click('snoozeButton');
+      await testSubjects.click('ruleSnoozeIndefiniteApply');
+
+      await retry.try(async () => {
+        await testSubjects.missingOrFail('rulesListNotifyBadge-snoozedIndefinitely');
+      });
+
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      await testSubjects.click('collapsedItemActions');
+      await testSubjects.click('snoozeButton');
+      await testSubjects.click('ruleSnoozeCancel');
+
+      await retry.try(async () => {
+        await testSubjects.missingOrFail('rulesListNotifyBadge-unsnoozed');
+      });
+    });
   });
 };

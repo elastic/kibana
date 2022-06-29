@@ -18,7 +18,7 @@ const EventsTdContent = styled.div.attrs(({ className }) => ({
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
-  padding: ${({ theme }) => theme.eui.paddingSizes.xs};
+  padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
   width: ${({ width }) =>
     width != null
@@ -26,7 +26,7 @@ const EventsTdContent = styled.div.attrs(({ className }) => ({
       : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 
   button.euiButtonIcon {
-    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+    margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};
   }
 `;
 

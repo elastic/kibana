@@ -6,18 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import {
   AxisExtentConfig,
   CommonXYDataLayerConfig,
-  ExtendedYConfig,
-  YConfig,
-  YScaleType,
+  DataDecorationConfig,
+  YAxisConfig,
+  ReferenceLineDecorationConfig,
+  YAxisConfigResult,
+  XAxisConfigResult,
 } from '../../common';
-import { isDataLayer } from './visualization';
-import { getFormat } from './format';
+import { LayersFieldFormats } from './layers';
 
 export interface Series {
   layer: string;
@@ -26,122 +28,231 @@ export interface Series {
 
 interface FormattedMetric extends Series {
   fieldFormat: SerializedFieldFormat;
+  axisId?: string;
 }
 
-export type GroupsConfiguration = Array<{
-  groupId: 'left' | 'right';
-  position: 'left' | 'right' | 'bottom' | 'top';
+interface AxesSeries {
+  [key: string]: FormattedMetric[];
+}
+
+export interface AxisConfiguration extends Omit<YAxisConfig, 'id'> {
+  /**
+   * Axis group identificator. Format: `axis-${axis.id}` or just `left`/`right`.
+   */
+  groupId: string;
+  position: Position;
   formatter?: IFieldFormat;
   series: Series[];
-  scale?: YScaleType;
-}>;
+}
+
+export type GroupsConfiguration = AxisConfiguration[];
+
+export type AxesMap = Record<'left' | 'right', AxisConfiguration | undefined>;
 
 export function isFormatterCompatible(
   formatter1: SerializedFieldFormat,
   formatter2: SerializedFieldFormat
 ) {
-  return formatter1.id === formatter2.id;
+  return formatter1?.id === formatter2?.id;
 }
 
-export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
-  const series: {
-    auto: FormattedMetric[];
-    left: FormattedMetric[];
-    right: FormattedMetric[];
-    bottom: FormattedMetric[];
-  } = {
+const LEFT_GLOBAL_AXIS_ID = 'left';
+const RIGHT_GLOBAL_AXIS_ID = 'right';
+
+function isAxisSeriesAppliedForFormatter(
+  series: FormattedMetric[],
+  currentSeries: FormattedMetric
+) {
+  return series.every((leftSeries) =>
+    isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+  );
+}
+
+export function groupAxesByType(
+  layers: CommonXYDataLayerConfig[],
+  fieldFormats: LayersFieldFormats,
+  yAxisConfigs?: YAxisConfig[]
+) {
+  const series: AxesSeries = {
     auto: [],
     left: [],
     right: [],
-    bottom: [],
   };
 
+  const leftSeriesKeys: string[] = [];
+  const rightSeriesKeys: string[] = [];
+
   layers.forEach((layer) => {
-    const { table } = layer;
+    const { layerId, table } = layer;
     layer.accessors.forEach((accessor) => {
-      const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
-      const yAccessor = getAccessorByDimension(accessor, table?.columns || []);
-      const mode =
-        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === yAccessor)?.axisMode || 'auto';
-      let formatter: SerializedFieldFormat = getFormat(table.columns, accessor) || {
-        id: 'number',
-      };
-      if (
-        isDataLayer(layer) &&
-        layer.seriesType.includes('percentage') &&
-        formatter.id !== 'percent'
-      ) {
-        formatter = {
-          id: 'percent',
-          params: {
-            pattern: '0.[00]%',
-          },
-        };
+      const dataDecorations:
+        | Array<DataDecorationConfig | ReferenceLineDecorationConfig>
+        | undefined = layer.decorations;
+      const yAccessor = getAccessorByDimension(accessor, table.columns);
+      const decorationByAccessor = dataDecorations?.find(
+        (decorationConfig) => decorationConfig.forAccessor === yAccessor
+      );
+      const axisConfigById = yAxisConfigs?.find(
+        (axis) =>
+          decorationByAccessor?.axisId && axis.id && axis.id === decorationByAccessor?.axisId
+      );
+      const key = axisConfigById?.id ? `axis-${axisConfigById?.id}` : 'auto';
+      const fieldFormat = fieldFormats[layerId].yAccessors[yAccessor]!;
+      if (!series[key]) {
+        series[key] = [];
       }
-      series[mode].push({
-        layer: layer.layerId,
-        accessor: yAccessor,
-        fieldFormat: formatter,
-      });
+      series[key].push({ layer: layer.layerId, accessor: yAccessor, fieldFormat });
+
+      if (axisConfigById?.position === Position.Left) {
+        leftSeriesKeys.push(key);
+      } else if (axisConfigById?.position === Position.Right) {
+        rightSeriesKeys.push(key);
+      }
     });
   });
 
   const tablesExist = layers.filter(({ table }) => Boolean(table)).length > 0;
 
+  leftSeriesKeys.push(LEFT_GLOBAL_AXIS_ID);
+  rightSeriesKeys.push(RIGHT_GLOBAL_AXIS_ID);
+
   series.auto.forEach((currentSeries) => {
-    if (
-      series.left.length === 0 ||
-      (tablesExist &&
-        series.left.every((leftSeries) =>
-          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-        ))
-    ) {
-      series.left.push(currentSeries);
-    } else if (
-      series.right.length === 0 ||
-      (tablesExist &&
-        series.left.every((leftSeries) =>
-          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-        ))
-    ) {
-      series.right.push(currentSeries);
-    } else if (series.right.length >= series.left.length) {
-      series.left.push(currentSeries);
+    const leftAxisGroupId = tablesExist
+      ? leftSeriesKeys.find((leftSeriesKey) =>
+          isAxisSeriesAppliedForFormatter(series[leftSeriesKey], currentSeries)
+        )
+      : undefined;
+
+    const rightAxisGroupId = tablesExist
+      ? rightSeriesKeys.find((rightSeriesKey) =>
+          isAxisSeriesAppliedForFormatter(series[rightSeriesKey], currentSeries)
+        )
+      : undefined;
+
+    let axisGroupId = LEFT_GLOBAL_AXIS_ID;
+
+    if (series[LEFT_GLOBAL_AXIS_ID].length === 0 || leftAxisGroupId) {
+      axisGroupId = leftAxisGroupId || LEFT_GLOBAL_AXIS_ID;
+    } else if (series[RIGHT_GLOBAL_AXIS_ID].length === 0 || rightAxisGroupId) {
+      axisGroupId = rightAxisGroupId || RIGHT_GLOBAL_AXIS_ID;
+    } else if (series[RIGHT_GLOBAL_AXIS_ID].length >= series[LEFT_GLOBAL_AXIS_ID].length) {
+      axisGroupId = LEFT_GLOBAL_AXIS_ID;
     } else {
-      series.right.push(currentSeries);
+      axisGroupId = RIGHT_GLOBAL_AXIS_ID;
     }
+
+    series[axisGroupId].push(currentSeries);
   });
+
   return series;
 }
+
+export function getAxisPosition(position: Position, shouldRotate: boolean) {
+  if (shouldRotate) {
+    switch (position) {
+      case Position.Bottom: {
+        return Position.Right;
+      }
+      case Position.Right: {
+        return Position.Top;
+      }
+      case Position.Top: {
+        return Position.Left;
+      }
+      case Position.Left: {
+        return Position.Bottom;
+      }
+    }
+  }
+
+  return position;
+}
+
+export function getOriginalAxisPosition(position: Position, shouldRotate: boolean) {
+  if (shouldRotate) {
+    switch (position) {
+      case Position.Bottom: {
+        return Position.Left;
+      }
+      case Position.Right: {
+        return Position.Bottom;
+      }
+      case Position.Top: {
+        return Position.Right;
+      }
+      case Position.Left: {
+        return Position.Top;
+      }
+    }
+  }
+
+  return position;
+}
+
+function axisGlobalConfig(position: Position, yAxisConfigs?: YAxisConfig[]) {
+  return yAxisConfigs?.find((axis) => !axis.id && axis.position === position) || {};
+}
+
+const getXAxisConfig = (axisConfigs: Array<XAxisConfigResult | YAxisConfigResult> = []) =>
+  axisConfigs.find(({ type }) => type === 'xAxisConfig');
 
 export function getAxesConfiguration(
   layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
-  formatFactory?: FormatFactory,
-  yLeftScale?: YScaleType,
-  yRightScale?: YScaleType
+  formatFactory: FormatFactory | undefined,
+  fieldFormats: LayersFieldFormats,
+  axisConfigs?: Array<XAxisConfigResult | YAxisConfigResult>
 ): GroupsConfiguration {
-  const series = groupAxesByType(layers);
+  const series = groupAxesByType(layers, fieldFormats, axisConfigs);
 
   const axisGroups: GroupsConfiguration = [];
+  let position: Position;
 
-  if (series.left.length > 0) {
+  axisConfigs?.forEach((axis) => {
+    const groupId = axis.id ? `axis-${axis.id}` : undefined;
+    if (groupId && series[groupId] && series[groupId].length > 0) {
+      position = getAxisPosition(axis.position || Position.Left, shouldRotate);
+      axisGroups.push({
+        groupId,
+        formatter: formatFactory?.(series[groupId][0].fieldFormat),
+        series: series[groupId].map(({ fieldFormat, ...currentSeries }) => currentSeries),
+        ...axisGlobalConfig(axis.position || Position.Left, axisConfigs),
+        ...axis,
+        position,
+      });
+    }
+  });
+
+  if (series[LEFT_GLOBAL_AXIS_ID].length > 0) {
+    position = shouldRotate ? Position.Bottom : Position.Left;
     axisGroups.push({
-      groupId: 'left',
-      position: shouldRotate ? 'bottom' : 'left',
+      groupId: LEFT_GLOBAL_AXIS_ID,
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
-      scale: yLeftScale,
+      ...axisGlobalConfig(Position.Left, axisConfigs),
+      position,
     });
   }
 
-  if (series.right.length > 0) {
+  if (series[RIGHT_GLOBAL_AXIS_ID].length > 0) {
+    position = shouldRotate ? Position.Top : Position.Right;
     axisGroups.push({
-      groupId: 'right',
-      position: shouldRotate ? 'top' : 'right',
+      groupId: RIGHT_GLOBAL_AXIS_ID,
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
-      scale: yRightScale,
+      ...axisGlobalConfig(Position.Right, axisConfigs),
+      position,
+    });
+  }
+
+  const xAxisConfig = getXAxisConfig(axisConfigs);
+  if (xAxisConfig) {
+    position = getAxisPosition(xAxisConfig.position || Position.Bottom, shouldRotate);
+    axisGroups.push({
+      groupId: 'bottom',
+      series: [],
+      ...xAxisConfig,
+      position,
     });
   }
 

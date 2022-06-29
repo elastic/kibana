@@ -56,7 +56,6 @@ export const UserProcess = React.memo<{
           <EuiFlexItem grow={false} key={process}>
             <DraggableBadge
               contextId={contextId}
-              data-test-subj="process-name"
               eventId={eventId}
               field={PROCESS_NAME_FIELD_NAME}
               isDraggable={isDraggable}

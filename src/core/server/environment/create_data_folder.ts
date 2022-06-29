@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PathConfigType } from '@kbn/utils';
+import type { PathConfigType } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import { mkdir } from './fs';
 

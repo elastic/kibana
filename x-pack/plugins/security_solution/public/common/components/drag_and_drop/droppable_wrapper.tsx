@@ -44,7 +44,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
      color: ${props.theme.eui.euiColorSuccess};
      background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
 
-     & .euiTextColor--subdued {
+     & .timeline-drop-area-empty__text {
       color: ${props.theme.eui.euiColorSuccess};
      }
   }

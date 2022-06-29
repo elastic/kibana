@@ -27,9 +27,9 @@ jest.mock('lodash', () => {
 const requiredProps: TableListViewProps<Record<string, unknown>> = {
   entityName: 'test',
   entityNamePlural: 'tests',
-  listingLimit: 5,
+  listingLimit: 500,
   initialFilter: '',
-  initialPageSize: 5,
+  initialPageSize: 20,
   tableColumns: [],
   tableListTitle: 'test title',
   rowHeader: 'name',
@@ -243,6 +243,82 @@ describe('TableListView', () => {
         ['Item 1', 'Item 1 description', '2 days ago'],
         ['Item 3', 'Item 3 description', '-'], // Empty column as no updatedAt provided
       ]);
+    });
+  });
+
+  describe('pagination', () => {
+    let testBed: TestBed;
+
+    const tableColumns = [
+      {
+        field: 'title',
+        name: 'Title',
+        sortable: true,
+      },
+    ];
+
+    const initialPageSize = 20;
+    const totalItems = 30;
+
+    const hits = new Array(totalItems).fill(' ').map((_, i) => ({
+      title: `Item ${i < 10 ? `0${i}` : i}`, // prefix with "0" for correct A-Z sorting
+    }));
+
+    const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits });
+
+    const defaultProps: TableListViewProps<Record<string, unknown>> = {
+      ...requiredProps,
+      initialPageSize,
+      tableColumns,
+      findItems,
+      createItem: () => undefined,
+    };
+
+    const setup = registerTestBed(TableListView, { defaultProps });
+
+    test('should limit the number of row to the `initialPageSize` provided', async () => {
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      expect(tableCellsValues.length).toBe(requiredProps.initialPageSize);
+
+      const [[firstRowTitle]] = tableCellsValues;
+      const [lastRowTitle] = tableCellsValues[tableCellsValues.length - 1];
+
+      expect(firstRowTitle).toBe('Item 00');
+      expect(lastRowTitle).toBe('Item 19');
+    });
+
+    test('should navigate to page 2', async () => {
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component, table } = testBed!;
+      component.update();
+
+      const pageLinks = component.find('.euiPagination__list .euiPagination__item');
+      expect(pageLinks.length).toBe(Math.ceil(totalItems / initialPageSize));
+
+      act(() => {
+        // Click on page 2
+        pageLinks.at(1).find('a').simulate('click');
+      });
+      component.update();
+
+      const { tableCellsValues } = table.getMetaData('itemsInMemTable');
+      expect(tableCellsValues.length).toBe(totalItems - initialPageSize);
+
+      const [[firstRowTitle]] = tableCellsValues;
+      const [lastRowTitle] = tableCellsValues[tableCellsValues.length - 1];
+
+      expect(firstRowTitle).toBe('Item 20');
+      expect(lastRowTitle).toBe('Item 29');
     });
   });
 });
