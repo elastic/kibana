@@ -16,6 +16,7 @@ import type {
   AnalyticsServiceSetup,
   AnalyticsServiceStart,
 } from '@kbn/core-analytics-server';
+import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { InternalContextPreboot, ContextSetup } from './context';
 import {
@@ -37,7 +38,6 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './ui_settings';
-import { InternalEnvironmentServiceSetup } from './environment';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
