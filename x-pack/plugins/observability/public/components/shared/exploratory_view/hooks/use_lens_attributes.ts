@@ -20,7 +20,6 @@ import {
   useSeriesStorage,
 } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
-
 import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import { DataViewState, useAppDataViewContext } from './use_app_data_view';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -125,7 +124,11 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
     }
 
     if (reportTypeT === 'single-metric') {
-      const lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportTypeT);
+      const lensAttributes = new SingleMetricLensAttributes(
+        layerConfigs,
+        reportTypeT,
+        lensFormulaHelper
+      );
 
       return lensAttributes.getJSON(lastRefresh);
     }

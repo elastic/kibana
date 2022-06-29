@@ -24,9 +24,7 @@ import {
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
   generate(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    const timeStamp = overrides['@timestamp']
-      ? new Date(overrides['@timestamp'])
-      : new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -76,6 +74,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   ): LogsEndpointActionResponse {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
+    const startedAtTimes: number[] = [];
+    [2, 3, 5, 8, 13, 21].forEach((n) => {
+      startedAtTimes.push(
+        timeStamp.setMinutes(-this.randomN(n)),
+        timeStamp.setSeconds(-this.randomN(n))
+      );
+    });
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
@@ -90,7 +96,8 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             comment: '',
             parameters: undefined,
           },
-          started_at: this.randomPastDate(),
+          // randomly before a few hours/minutes/seconds later
+          started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
         },
         error: undefined,
       },

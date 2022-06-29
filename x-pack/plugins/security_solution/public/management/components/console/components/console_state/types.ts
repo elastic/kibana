@@ -6,6 +6,7 @@
  */
 
 import type { Dispatch, Reducer } from 'react';
+import { CommandInputProps } from '../command_input';
 import type { Command, CommandDefinition, CommandExecutionComponent } from '../../types';
 
 export interface ConsoleDataState {
@@ -17,6 +18,9 @@ export interface ConsoleDataState {
 
   /** UI function that scrolls the console down to the bottom */
   scrollToBottom: () => void;
+
+  /** UI interface that places allows interaction with the `KeyCapture` component */
+  keyCapture: CommandInputProps['focusRef'];
 
   /**
    * List of commands entered by the user and being shown in the UI
@@ -34,6 +38,32 @@ export interface ConsoleDataState {
 
   /** The key for the console when it is under ConsoleManager control */
   managedKey?: symbol;
+
+  /** content for the console's footer area */
+  footerContent: string;
+
+  /** state for the command input area */
+  input: {
+    /** The text the user is typing into the console input area */
+    textEntered: string;
+
+    /** The command name that was entered (derived from `textEntered` */
+    commandEntered: string;
+
+    /** Placeholder text for the input area **/
+    placeholder: string;
+
+    /** A history of commands entered by the user */
+    history: InputHistoryItem[];
+
+    /** Show the input area popover */
+    showPopover: 'input-history' | undefined; // Other values will exist in the future
+  };
+}
+
+export interface InputHistoryItem {
+  id: string;
+  input: string;
 }
 
 export interface CommandHistoryItem {
@@ -49,11 +79,17 @@ export interface CommandExecutionState {
 
 export type ConsoleDataAction =
   | { type: 'scrollDown' }
+  | { type: 'addFocusToKeyCapture' }
+  | { type: 'removeFocusFromKeyCapture' }
   | { type: 'executeCommand'; payload: { input: string } }
   | { type: 'clear' }
   | {
       type: 'showSidePanel';
       payload: { show: ConsoleDataState['sidePanel']['show'] };
+    }
+  | {
+      type: 'updateFooterContent';
+      payload: { value: string };
     }
   | {
       type: 'updateCommandStoreState';
@@ -65,6 +101,30 @@ export type ConsoleDataAction =
   | {
       type: 'updateCommandStatusState';
       payload: { id: string; value: CommandExecutionState['status'] };
+    }
+  | {
+      type: 'updateInputTextEnteredState';
+      payload: {
+        textEntered: string | ((prevState: string) => string);
+      };
+    }
+  | {
+      type: 'updateInputPopoverState';
+      payload: {
+        show: ConsoleDataState['input']['showPopover'];
+      };
+    }
+  | {
+      type: 'updateInputPlaceholderState';
+      payload: {
+        placeholder: ConsoleDataState['input']['placeholder'];
+      };
+    }
+  | {
+      type: 'updateInputHistoryState';
+      payload: {
+        command: string;
+      };
     };
 
 export interface ConsoleStore {
