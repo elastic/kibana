@@ -19,6 +19,7 @@ import {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   RESPONSE_ACTION_COMMANDS,
+  RunningProcessesEntry,
 } from '../types';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
@@ -98,6 +99,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           },
           // randomly before a few hours/minutes/seconds later
           started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
+          output: undefined,
         },
         error: undefined,
       },
@@ -127,6 +129,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       comment: 'thisisacomment',
       createdBy: 'auserid',
       parameters: undefined,
+      outputs: {},
     };
 
     return merge(details, overrides);
@@ -183,6 +186,32 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomN(max: number): number {
     return super.randomN(max);
+  }
+
+  randomResponseActionRunningProcesses(n?: number): RunningProcessesEntry[] {
+    const numberOfEntries = n ?? this.randomChoice([20, 30, 40, 50]);
+    const entries = [];
+    for (let i = 0; i < numberOfEntries; i++) {
+      entries.push({
+        command: this.randomResponseActionRunningProcessesCommand(),
+        pid: this.randomN(1000).toString(),
+        entity_id: this.randomString(50),
+        user: this.randomUser(),
+      });
+    }
+
+    return entries;
+  }
+
+  protected randomResponseActionRunningProcessesCommand() {
+    const commands = [
+      '/opt/cmd1',
+      '/opt/cmd2',
+      '/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3',
+      '/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3',
+    ];
+
+    return this.randomChoice(commands);
   }
 
   protected randomResponseActionCommand() {
