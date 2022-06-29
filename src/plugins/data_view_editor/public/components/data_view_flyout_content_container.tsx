@@ -19,7 +19,6 @@ const IndexPatternFlyoutContentContainer = ({
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
-  showEmptyPrompt = true,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications },
@@ -62,7 +61,6 @@ const IndexPatternFlyoutContentContainer = ({
       defaultTypeIsRollup={defaultTypeIsRollup}
       requireTimestampField={requireTimestampField}
       editData={editData}
-      showEmptyPrompt={showEmptyPrompt}
     />
   );
 };

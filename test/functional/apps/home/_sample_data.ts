@@ -34,46 +34,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    it('should display registered flights sample data sets', async () => {
-      await retry.try(async () => {
-        const exists = await PageObjects.home.doesSampleDataSetExist('flights');
-        expect(exists).to.be(true);
+    describe('listing', () => {
+      it('should display registered flights sample data sets', async () => {
+        await retry.try(async () => {
+          const exists = await PageObjects.home.doesSampleDataSetExist('flights');
+          expect(exists).to.be(true);
+        });
+      });
+
+      it('should display registered logs sample data sets', async () => {
+        await retry.try(async () => {
+          const exists = await PageObjects.home.doesSampleDataSetExist('logs');
+          expect(exists).to.be(true);
+        });
+      });
+
+      it('should display registered ecommerce sample data sets', async () => {
+        await retry.try(async () => {
+          const exists = await PageObjects.home.doesSampleDataSetExist('ecommerce');
+          expect(exists).to.be(true);
+        });
       });
     });
 
-    it('should display registered logs sample data sets', async () => {
-      await retry.try(async () => {
-        const exists = await PageObjects.home.doesSampleDataSetExist('logs');
-        expect(exists).to.be(true);
+    describe('installing', () => {
+      it('should install flights sample data set', async () => {
+        await PageObjects.home.addSampleDataSet('flights');
+        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
+        expect(isInstalled).to.be(true);
+      });
+
+      it('should install logs sample data set', async () => {
+        await PageObjects.home.addSampleDataSet('logs');
+        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
+        expect(isInstalled).to.be(true);
+      });
+
+      it('should install ecommerce sample data set', async () => {
+        await PageObjects.home.addSampleDataSet('ecommerce');
+        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
+        expect(isInstalled).to.be(true);
       });
     });
 
-    it('should display registered ecommerce sample data sets', async () => {
-      await retry.try(async () => {
-        const exists = await PageObjects.home.doesSampleDataSetExist('ecommerce');
-        expect(exists).to.be(true);
-      });
-    });
-
-    it('should install flights sample data set', async () => {
-      await PageObjects.home.addSampleDataSet('flights');
-      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
-      expect(isInstalled).to.be(true);
-    });
-
-    it('should install logs sample data set', async () => {
-      await PageObjects.home.addSampleDataSet('logs');
-      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
-      expect(isInstalled).to.be(true);
-    });
-
-    it('should install ecommerce sample data set', async () => {
-      await PageObjects.home.addSampleDataSet('ecommerce');
-      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
-      expect(isInstalled).to.be(true);
-    });
-
-    describe('dashboard', () => {
+    describe('accessing sample dashboards', () => {
       beforeEach(async () => {
         await time();
         await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
