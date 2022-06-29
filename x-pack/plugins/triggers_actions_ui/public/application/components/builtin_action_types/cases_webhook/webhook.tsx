@@ -18,7 +18,7 @@ export function getActionType(): ActionTypeModel<
   return {
     id: '.cases-webhook',
     // TODO: Steph/cases webhook get an icon
-    iconClass: 'indexManagementApp',
+    iconClass: 'logoWebhook',
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.selectMessageText',
       {

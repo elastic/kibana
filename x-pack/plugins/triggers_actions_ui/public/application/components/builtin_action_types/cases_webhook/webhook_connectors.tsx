@@ -24,12 +24,28 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { JsonFieldWrapper } from '../../json_field_wrapper';
 import { PasswordField } from '../../password_field';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
-const { emptyField, urlField, isJsonField } = fieldValidators;
+const { emptyField, urlField } = fieldValidators;
 
 const HTTP_VERBS = ['post', 'put', 'patch'];
+
+const casesVars: ActionVariable[] = [
+  { name: 'case.title', description: 'test title', useWithTripleBracesInTemplates: true },
+  {
+    name: 'case.description',
+    description: 'test description',
+    useWithTripleBracesInTemplates: true,
+  },
+  { name: 'case.tags', description: 'test tags', useWithTripleBracesInTemplates: true },
+];
+
+const commentVars: ActionVariable[] = [
+  { name: 'case.comment', description: 'test comment', useWithTripleBracesInTemplates: true },
+];
 
 const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -101,18 +117,20 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               label: i18n.CREATE_INCIDENT_JSON,
               validations: [
                 {
-                  validator: isJsonField(i18n.CREATE_INCIDENT_REQUIRED),
+                  validator: emptyField(i18n.CREATE_INCIDENT_REQUIRED),
                 },
               ],
-              type: FIELD_TYPES.JSON,
+              // type: FIELD_TYPES.JSON,
             }}
-            component={Field}
+            component={JsonFieldWrapper}
             componentProps={{
               euiCodeEditorProps: {
                 isReadOnly: readOnly,
                 'data-test-subj': 'webhookCreateIncidentJson',
                 ['aria-label']: i18n.CODE_EDITOR,
               },
+              messageVariables: casesVars,
+              paramsProperty: 'createIncidentJson',
             }}
           />
         </EuiFlexItem>
@@ -306,18 +324,20 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               label: i18n.UPDATE_INCIDENT_JSON,
               validations: [
                 {
-                  validator: isJsonField(i18n.UPDATE_INCIDENT_REQUIRED),
+                  validator: emptyField(i18n.UPDATE_INCIDENT_REQUIRED),
                 },
               ],
-              type: FIELD_TYPES.JSON,
             }}
-            component={Field}
+            component={JsonFieldWrapper}
             componentProps={{
               euiCodeEditorProps: {
+                height: '200px',
                 isReadOnly: readOnly,
                 'data-test-subj': 'webhookUpdateIncidentJson',
                 ['aria-label']: i18n.CODE_EDITOR,
               },
+              messageVariables: casesVars,
+              paramsProperty: 'updateIncidentJson',
             }}
           />
         </EuiFlexItem>
@@ -379,18 +399,20 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               label: i18n.CREATE_COMMENT_JSON,
               validations: [
                 {
-                  validator: isJsonField(i18n.CREATE_COMMENT_REQUIRED),
+                  validator: emptyField(i18n.CREATE_COMMENT_REQUIRED),
                 },
               ],
-              type: FIELD_TYPES.JSON,
             }}
-            component={Field}
+            component={JsonFieldWrapper}
             componentProps={{
               euiCodeEditorProps: {
+                height: '200px',
                 isReadOnly: readOnly,
                 'data-test-subj': 'webhookCreateCommentJson',
                 ['aria-label']: i18n.CODE_EDITOR,
               },
+              messageVariables: commentVars,
+              paramsProperty: 'createCommentJson',
             }}
           />
         </EuiFlexItem>

@@ -9,14 +9,13 @@ import axios, { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
 import { isString } from 'lodash';
+import { renderMustacheStringInJson } from '../../lib/mustache_renderer';
 import {
   createServiceError,
   getObjectValueByKey,
   getPushedDate,
   makeIncidentUrl,
   removeSlash,
-  replaceComment,
-  replaceSumDesc,
   throwIfResponseIsNotValidSpecial,
 } from './utils';
 import {
@@ -101,17 +100,29 @@ export const createExternalService = (
     }
   };
 
+  const makeCaseStringy = (properties: Record<string, string | string[]>) => ({
+    case: Object.entries(properties).map(([key, value]) => ({ [key]: JSON.stringify(value) })),
+  });
+
   const createIncident = async ({
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     const { labels, summary, description } = incident;
+
     try {
       const res: AxiosResponse = await request({
         axios: axiosInstance,
         url: `${createIncidentUrl}`,
         logger,
         method: createIncidentMethod,
-        data: replaceSumDesc(createIncidentJson, summary, description ?? '', labels ?? []),
+        data: renderMustacheStringInJson(
+          createIncidentJson,
+          makeCaseStringy({
+            title: summary,
+            description: description ?? '',
+            tags: labels ?? [],
+          })
+        ),
         configurationUtilities,
       });
 
@@ -142,16 +153,20 @@ export const createExternalService = (
     incident,
   }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     try {
+      const { labels, summary, description } = incident;
+
       const res = await request({
         axios: axiosInstance,
         method: updateIncidentMethod,
         url: makeIncidentUrl(updateIncidentUrl, incidentId),
         logger,
-        data: replaceSumDesc(
+        data: renderMustacheStringInJson(
           updateIncidentJson,
-          incident.summary,
-          incident.description,
-          incident.labels
+          makeCaseStringy({
+            ...(summary ? { title: summary } : {}),
+            ...(description ? { title: description } : {}),
+            ...(labels ? { tags: labels } : {}),
+          })
         ),
         configurationUtilities,
       });
@@ -180,7 +195,10 @@ export const createExternalService = (
         method: createCommentMethod,
         url: makeIncidentUrl(createCommentUrl, incidentId),
         logger,
-        data: replaceComment(createCommentJson, comment.comment),
+        data: renderMustacheStringInJson(
+          createCommentJson,
+          makeCaseStringy({ comment: comment.comment })
+        ),
         configurationUtilities,
       });
 
