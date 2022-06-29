@@ -449,9 +449,11 @@ export class SessionIndex {
         if (operations.length > 0) {
           const bulkResponse = await elasticsearchClient.bulk(
             {
-              index: this.indexName,
+              index: this.aliasName,
               operations,
               refresh: false,
+              // delete operations do not respect `require_alias`, but we include it here for consistency.
+              require_alias: true,
             },
             { ignore: [409, 404] }
           );
@@ -656,10 +658,26 @@ export class SessionIndex {
       });
     }
 
-    const openPitResponse = await this.options.elasticsearchClient.openPointInTime({
-      index: this.indexName,
-      keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
-    });
+    let { body: openPitResponse, statusCode } =
+      await this.options.elasticsearchClient.openPointInTime(
+        {
+          index: this.aliasName,
+          keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+        },
+        { ignore: [404], meta: true }
+      );
+
+    if (statusCode === 404) {
+      await this.ensureSessionIndexExists();
+      ({ body: openPitResponse, statusCode } =
+        await this.options.elasticsearchClient.openPointInTime(
+          {
+            index: this.aliasName,
+            keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+          },
+          { meta: true }
+        ));
+    }
 
     try {
       let searchAfter: SortResults | undefined;

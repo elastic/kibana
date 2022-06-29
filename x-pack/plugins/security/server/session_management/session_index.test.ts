@@ -270,6 +270,50 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1); // since we attempted to delete sessions, we still refresh the index
     });
 
+    it('creates the index/alias if missing', async () => {
+      mockElasticsearchClient.indices.exists.mockResponse(false);
+
+      let callCount = 0;
+      mockElasticsearchClient.openPointInTime.mockResponseImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return { statusCode: 404 };
+        }
+
+        return {
+          body: {
+            id: 'PIT_ID',
+          } as OpenPointInTimeResponse,
+        };
+      });
+
+      await sessionIndex.cleanUp();
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(2);
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenNthCalledWith(
+        1,
+        {
+          index: aliasName,
+          keep_alive: '5m',
+        },
+        { ignore: [404], meta: true }
+      );
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenNthCalledWith(
+        2,
+        {
+          index: aliasName,
+          keep_alive: '5m',
+        },
+        { meta: true }
+      );
+
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.create).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1); // since we attempted to delete sessions, we still refresh the index
+    });
+
     it('when neither `lifespan` nor `idleTimeout` is configured', async () => {
       await sessionIndex.cleanUp();
 
@@ -328,9 +372,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
@@ -419,9 +464,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
@@ -506,9 +552,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
@@ -603,9 +650,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
@@ -748,9 +796,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
-          index: indexName,
+          index: aliasName,
           operations: [{ delete: { _id: sessionValue._id } }],
           refresh: false,
+          require_alias: true,
         },
         {
           ignore: [409, 404],
