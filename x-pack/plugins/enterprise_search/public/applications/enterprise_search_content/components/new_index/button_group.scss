@@ -5,6 +5,7 @@
     &--selected {
       .buttonGroupOption-panel {
         border: 1px $euiColorSuccess solid;
+        box-shadow: 0 0 0 1px $euiColorSuccess;
       }
     }
   }
