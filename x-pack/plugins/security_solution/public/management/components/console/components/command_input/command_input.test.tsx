@@ -83,9 +83,7 @@ describe('When entering data into the Console input', () => {
     render();
     enterCommand('abc ', { inputOnly: true });
 
-    expect(renderResult.getByTestId('test-footer').textContent).toEqual(
-      'Unknown command abc'
-    );
+    expect(renderResult.getByTestId('test-footer').textContent).toEqual('Unknown command abc');
   });
 
   it('should display a custom hint when provided by a command', () => {
