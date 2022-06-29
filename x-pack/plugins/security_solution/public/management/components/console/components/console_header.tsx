@@ -31,12 +31,18 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
   }, [dispatch, isHelpOpen]);
 
   return (
-    <EuiFlexGroup gutterSize="none" alignItems="center">
-      <EuiFlexItem grow className="eui-textTruncate">
+    <EuiFlexGroup
+      gutterSize="none"
+      alignItems="center"
+      justifyContent="spaceBetween"
+      responsive={false}
+    >
+      <EuiFlexItem grow={1} className="eui-textTruncate">
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={1}>
         <EuiButtonIcon
+          style={{ marginLeft: 'auto' }}
           onClick={handleHelpButtonOnClick}
           iconType="help"
           title={HELP_LABEL}
