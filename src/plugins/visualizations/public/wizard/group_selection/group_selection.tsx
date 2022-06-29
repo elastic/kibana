@@ -95,6 +95,7 @@ function GroupSelection(props: GroupSelectionProps) {
                 <EuiCard
                   titleSize="xs"
                   layout="horizontal"
+                  display="transparent"
                   onClick={() => props.toggleGroups(false)}
                   title={
                     <span data-test-subj="visGroupAggBasedTitle">
@@ -185,6 +186,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
     <EuiFlexItem className="visNewVisDialog__groupsCardWrapper">
       <EuiCard
         titleSize="xs"
+        hasBorder={true}
         title={
           <span data-test-subj="visTypeTitle">
             {'titleInWizard' in visType && visType.titleInWizard
