@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { ExecutionContextService } from './execution_context_service';
+export type {
+  InternalExecutionContextSetup,
+  InternalExecutionContextStart,
+  IExecutionContext,
+} from './execution_context_service';
+export type { IExecutionContextContainer } from './execution_context_container';
+export { executionContextConfig } from './execution_context_config';

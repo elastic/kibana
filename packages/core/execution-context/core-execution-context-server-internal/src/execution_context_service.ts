@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 import { AsyncLocalStorage } from 'async_hooks';
-import apm from 'elastic-apm-node';
+import type apm from 'elastic-apm-node';
 import { isUndefined, omitBy } from 'lodash';
 import type { Subscription } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { KibanaExecutionContext } from '../../types';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ExecutionContextConfigType } from './execution_context_config';
 
 import {
@@ -56,24 +56,6 @@ export type InternalExecutionContextSetup = IExecutionContext;
  * @internal
  */
 export type InternalExecutionContextStart = IExecutionContext;
-
-/**
- * @public
- */
-export interface ExecutionContextSetup {
-  /**
-   * Keeps track of execution context while the passed function is executed.
-   * Data are carried over all async operations spawned by the passed function.
-   * The nested calls stack the registered context on top of each other.
-   **/
-  withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
-  getAsLabels(): apm.Labels;
-}
-
-/**
- * @public
- */
-export type ExecutionContextStart = ExecutionContextSetup;
 
 export class ExecutionContextService
   implements CoreService<InternalExecutionContextSetup, InternalExecutionContextStart>
