@@ -36,7 +36,7 @@ describe('File kind HTTP API', () => {
     fileKindsRegistry.register({
       id: fileKind,
       blobStoreSettings: {
-        esSingleIndex: { index: testIndex },
+        esFixedSizeIndex: { index: testIndex },
       },
       http: {
         create: { tags: ['access:myapp'] },
