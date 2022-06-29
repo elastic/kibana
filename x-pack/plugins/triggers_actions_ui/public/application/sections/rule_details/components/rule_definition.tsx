@@ -15,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { formatDuration } from '@kbn/alerting-plugin/common';
 import { RuleDefinitionProps } from '../../../../types';
 import { RuleType, useLoadRuleTypes } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -165,7 +166,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
               <ItemValueRuleSummary
                 data-test-subj="ruleSummaryRuleInterval"
-                itemValue={formatInterval(rule.schedule.interval)}
+                itemValue={formatDuration(rule.schedule.interval)}
               />
             </EuiFlexGroup>
 
@@ -240,29 +241,5 @@ function ItemTitleRuleSummary({ children }: ItemTitleRuleSummaryProps) {
   );
 }
 
-export type TimeUnitChar = 's' | 'm' | 'h' | 'd';
-
-const formatInterval = (ruleInterval: string) => {
-  const interval: string[] | null = ruleInterval.match(/(^\d*)([s|m|h|d])/);
-  if (!interval || interval.length < 3) return ruleInterval;
-  const value: number = +interval[1];
-  const unit = interval[2] as TimeUnitChar;
-  return formatDurationFromTimeUnitChar(value, unit);
-};
-const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar): string => {
-  const sForPlural = time !== 0 && time > 1 ? 's' : ''; // Negative values are not taken into account
-  switch (unit) {
-    case 's':
-      return `${time} sec${sForPlural}`;
-    case 'm':
-      return `${time} min${sForPlural}`;
-    case 'h':
-      return `${time} hr${sForPlural}`;
-    case 'd':
-      return `${time} day${sForPlural}`;
-    default:
-      return `${time} ${unit}`;
-  }
-};
 // eslint-disable-next-line import/no-default-export
 export { RuleDefinition as default };
