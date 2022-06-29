@@ -5,17 +5,40 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { RouteDependencies } from '../../plugin';
 
 export function registerCreateAPIKeyRoute({ router }: RouteDependencies, security: SecurityPluginStart) {
-  router.get(
-    { path: '/internal/enterprise_search/create_api_key', validate: false },
+  router.post(
+    {
+      path: '/internal/enterprise_search/{indexName}/api_keys}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+        body: schema.object({
+          keyName: schema.string(),
+        }),
+    } },
     async (context, request, response) => {
+      const { indexName } = request.params;
+      const { keyName } = request.body;
       try {
-        const createResponse = await security.authc.apiKeys.create(request, {name: 'test-jgr-1', role_descriptors: {}});
+        const createResponse = await security.authc.apiKeys.create(request, {name: keyName, role_descriptors: {
+          [`${indexName}-key-role`]: {
+            cluster: [],
+            index: [
+              {
+                names: [indexName],
+                privileges: ['all'],
+              },
+            ],
+          },
+        }});
         if (!createResponse) {
-          throw "whoopsie";
+          throw 'Unable to create API Key';
         }
         return response.ok({
           body: { apiKey: createResponse },
