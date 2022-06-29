@@ -36,7 +36,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     [URL_KEYS.SELECTED_METRIC]: selectedMetricField,
     [URL_KEYS.HIDDEN]: hidden,
     [URL_KEYS.NAME]: name,
-    [URL_KEYS.COLOR]: color,
+    [URL_KEYS.COLOR]: color ? escape(color) : undefined,
     ...restSeries,
   };
 }
