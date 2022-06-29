@@ -15,7 +15,7 @@ import { stringify } from 'query-string';
 import { schema } from '@kbn/config-schema';
 
 import {
-  KibanaRequest,
+  CoreKibanaRequest,
   LifecycleResponseFactory,
   RouteMethod,
   KibanaResponseFactory,
@@ -68,7 +68,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   const queryString = stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
-  return KibanaRequest.from<P, Q, B>(
+  return CoreKibanaRequest.from<P, Q, B>(
     createRawRequestMock({
       app: kibanaRequestState,
       auth,
