@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
 
-      it('shows metrics navlink', async () => {
+      it('shows infrastructure navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Overview', 'Alerts', 'Infrastructure', 'Stack Management']);
       });
