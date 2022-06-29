@@ -13,7 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType } from '@elastic/eui';
+import type { IconType, EuiFlyoutSize } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
@@ -396,7 +396,7 @@ export interface AlertsTableProps {
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
-  flyoutState: AlertsTableFlyoutState;
+  flyoutSize?: EuiFlyoutSize;
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
@@ -422,15 +422,10 @@ export type AlertTableFlyoutComponent =
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
-  externalFlyout?: {
-    header?: AlertTableFlyoutComponent;
-    body?: AlertTableFlyoutComponent;
-    footer?: AlertTableFlyoutComponent;
-  };
   useInternalFlyout?: () => {
-    header?: AlertTableFlyoutComponent;
-    body?: AlertTableFlyoutComponent;
-    footer?: AlertTableFlyoutComponent;
+    header: AlertTableFlyoutComponent;
+    body: AlertTableFlyoutComponent;
+    footer: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
@@ -439,11 +434,6 @@ export interface AlertsTableConfigurationRegistry {
 export interface AlertsTableFlyoutBaseProps {
   alert: EcsFieldsResponse;
   isLoading: boolean;
-}
-
-export enum AlertsTableFlyoutState {
-  internal = 'internal',
-  external = 'external',
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

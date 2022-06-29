@@ -42,8 +42,6 @@ export type {
   RuleDefinitionProps,
 } from './types';
 
-export { AlertsTableFlyoutState } from './types';
-
 export {
   ActionForm,
   CreateConnectorFlyout,
