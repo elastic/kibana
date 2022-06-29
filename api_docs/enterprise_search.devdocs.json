@@ -36,7 +36,7 @@
         "label": "CONNECTORS_INDEX",
         "description": [],
         "signature": [
-          "\".ent-search-connectors\""
+          "\".elastic-connectors\""
         ],
         "path": "x-pack/plugins/enterprise_search/server/index.ts",
         "deprecated": false,
