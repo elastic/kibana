@@ -49,17 +49,17 @@ describe('Test of <Doc /> helper / hook', () => {
           "fields": Array [],
           "query": Object {
             "bool": Object {
-              "filter": Array [
+              "must": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
                 Object {
                   "term": Object {
                     "_index": "test-index",
-                  },
-                },
-              ],
-              "must": Array [
-                Object {
-                  "match": Object {
-                    "_id": "1",
                   },
                 },
               ],
@@ -89,17 +89,17 @@ describe('Test of <Doc /> helper / hook', () => {
           ],
           "query": Object {
             "bool": Object {
-              "filter": Array [
+              "must": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
                 Object {
                   "term": Object {
                     "_index": "test-index",
-                  },
-                },
-              ],
-              "must": Array [
-                Object {
-                  "match": Object {
-                    "_id": "1",
                   },
                 },
               ],
@@ -131,17 +131,17 @@ describe('Test of <Doc /> helper / hook', () => {
           ],
           "query": Object {
             "bool": Object {
-              "filter": Array [
+              "must": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
                 Object {
                   "term": Object {
                     "_index": "test-index",
-                  },
-                },
-              ],
-              "must": Array [
-                Object {
-                  "match": Object {
-                    "_id": "1",
                   },
                 },
               ],
@@ -184,17 +184,17 @@ describe('Test of <Doc /> helper / hook', () => {
           ],
           "query": Object {
             "bool": Object {
-              "filter": Array [
+              "must": Array [
+                Object {
+                  "ids": Object {
+                    "values": Array [
+                      "1",
+                    ],
+                  },
+                },
                 Object {
                   "term": Object {
                     "_index": "test-index",
-                  },
-                },
-              ],
-              "must": Array [
-                Object {
-                  "match": Object {
-                    "_id": "1",
                   },
                 },
               ],
