@@ -92,12 +92,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             parameters: undefined,
           },
           started_at: this.randomPastDate(),
-          output: {
-            type: 'json',
-            content: {
-              entries: [],
-            },
-          },
+          output: undefined,
         },
         error: undefined,
       },
@@ -187,7 +182,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   randomResponseActionRunningProcesses(n?: number): RunningProcessesEntry[] {
-    const numberOfEntries = n ?? this.randomChoice([0, 1, 2, 4, 8]);
+    const numberOfEntries = n ?? this.randomChoice([20, 30, 40, 50]);
     const entries = [];
     for (let i = 0; i < numberOfEntries; i++) {
       entries.push({
@@ -201,7 +196,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return entries;
   }
 
-  randomResponseActionRunningProcessesCommand() {
+  protected randomResponseActionRunningProcessesCommand() {
     const commands = [
       '/opt/cmd1',
       '/opt/cmd2',

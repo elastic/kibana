@@ -18,7 +18,7 @@ import { useSendGetEndpointRunningProcessesRequest } from '../../hooks/endpoint/
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
-  .euiTable {
+  table {
     background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
   }
   .euiTableHeaderCell {
@@ -27,9 +27,14 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
       font-weight: 400;
     }
   }
-  .euiTableRowCell {
-    border-top: none !important;
-    border-bottom: none !important;
+  .euiTableRow {
+    &:hover {
+      background-color: white !important;
+    }
+    .euiTableRowCell {
+      border-top: none !important;
+      border-bottom: none !important;
+    }
   }
 `;
 
@@ -77,8 +82,28 @@ export const GetRunningProcessesActionResult = memo<
       setStore((prevState) => {
         return { ...prevState, actionId: getRunningProcessesApi.data.data.id };
       });
+    } else {
+      setStore((prevState) => {
+        if (prevState.completedActionDetails) {
+          return {
+            ...prevState,
+            completedActionDetails: {
+              ...prevState.completedActionDetails,
+              isCompleted: true,
+              errors: [getRunningProcessesApi.error?.message ?? ''],
+            },
+          };
+        }
+        return prevState;
+      });
     }
-  }, [actionId, getRunningProcessesApi?.data?.data.id, getRunningProcessesApi.isSuccess, setStore]);
+  }, [
+    actionId,
+    getRunningProcessesApi.data?.data.id,
+    getRunningProcessesApi.error,
+    getRunningProcessesApi.isSuccess,
+    setStore,
+  ]);
 
   useEffect(() => {
     if (actionDetails?.data.isCompleted) {
@@ -91,6 +116,45 @@ export const GetRunningProcessesActionResult = memo<
       });
     }
   }, [actionDetails?.data, setStatus, setStore]);
+
+  const columns = useMemo(
+    () => [
+      {
+        field: 'user',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.user',
+          { defaultMessage: 'USER' }
+        ),
+        width: '10%',
+      },
+      {
+        field: 'pid',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.pid',
+          { defaultMessage: 'PID' }
+        ),
+        width: '5%',
+      },
+      {
+        field: 'entity_id',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.enityId',
+          { defaultMessage: 'ENTITY ID' }
+        ),
+        width: '30%',
+      },
+
+      {
+        field: 'command',
+        name: i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.command',
+          { defaultMessage: 'COMMAND' }
+        ),
+        width: '55%',
+      },
+    ],
+    []
+  );
 
   const tableEntries = useMemo(() => {
     if (endpointId) {
@@ -123,41 +187,6 @@ export const GetRunningProcessesActionResult = memo<
       </ResultComponent>
     );
   }
-
-  const columns = [
-    {
-      field: 'entity_id',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.enityId',
-        { defaultMessage: 'ENTITY ID' }
-      ),
-      width: '30%',
-    },
-    {
-      field: 'pid',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.pid',
-        { defaultMessage: 'PID' }
-      ),
-      width: '5%',
-    },
-    {
-      field: 'command',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.command',
-        { defaultMessage: 'COMMAND' }
-      ),
-      width: '55%',
-    },
-    {
-      field: 'user',
-      name: i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.getRunningProcesses.table.header.user',
-        { defaultMessage: 'USER' }
-      ),
-      width: '10%',
-    },
-  ];
 
   // Show results
   return (

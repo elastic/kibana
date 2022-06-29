@@ -134,8 +134,7 @@ export const getActionCompletionInfo = (
   if (completedInfo.isCompleted) {
     const responseErrors: ActionCompletionInfo['errors'] = [];
     completedInfo.outputs = {};
-    for (const agentKey of Object.keys(responsesByAgentId)) {
-      const normalizedAgentResponse = responsesByAgentId[agentKey];
+    for (const [agentId, normalizedAgentResponse] of Object.entries(responsesByAgentId)) {
       if (
         !completedInfo.completedAt ||
         completedInfo.completedAt < (normalizedAgentResponse.completedAt ?? '')
@@ -145,7 +144,7 @@ export const getActionCompletionInfo = (
           normalizedAgentResponse.endpointResponse &&
           normalizedAgentResponse.endpointResponse.item.data.EndpointActions.output
         ) {
-          completedInfo.outputs[agentKey] =
+          completedInfo.outputs[agentId] =
             normalizedAgentResponse.endpointResponse.item.data.EndpointActions.output;
         }
       }

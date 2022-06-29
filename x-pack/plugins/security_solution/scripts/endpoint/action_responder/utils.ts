@@ -124,7 +124,7 @@ const getOutputDataIfNeeded = (command: EndpointActionData['command']) => {
         output: {
           type: 'json',
           content: {
-            entries: endpointActionGenerator.randomResponseActionRunningProcesses(),
+            entries: endpointActionGenerator.randomResponseActionRunningProcesses(100),
           },
         },
       } as { output: ActionResponseOutput<RunningProcessesEntry> })
