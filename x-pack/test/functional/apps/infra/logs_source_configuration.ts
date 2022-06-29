@@ -32,7 +32,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('Allows indices configuration', () => {
       const localStart = new Date(new Date(DATES.metricsAndLogs.stream.startWithData).getTime());
-      const localEnd = new Date(new Date(DATES.metricsAndLogs.stream.startWithData).getTime());
+      const localEnd = new Date(new Date(DATES.metricsAndLogs.stream.endWithData).getTime());
       const logPosition = {
         start: localStart.toISOString(),
         end: localEnd.toISOString(),
