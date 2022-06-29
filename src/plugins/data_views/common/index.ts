@@ -56,7 +56,7 @@ export type {
 export { DataViewType } from './types';
 
 export type { DataViewsContract, DataViewsServiceDeps } from './data_views';
-export { DataViewsService } from './data_views';
+export { DataViewsService, DataViewPersistableStateService } from './data_views';
 export type {
   DataViewListItem,
   DataViewsServicePublicMethods,
