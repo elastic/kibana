@@ -13,12 +13,23 @@
 
 import React from 'react';
 
+import { useValues, useActions } from 'kea';
+
 import { EuiSteps, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NewSearchIndexTemplate } from './new_search_index_template';
+import { Status } from '../../../../../../common/types/api';
+import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
+import { NewSearchIndexTemplate } from '../new_search_index_template';
+
+import { MethodCrawlerLogic } from './method_crawler_logic';
 
 export const MethodCrawler: React.FC = () => {
+  const { status } = useValues(CreateCrawlerIndexApiLogic);
+  const { makeRequest } = useActions(CreateCrawlerIndexApiLogic);
+
+  MethodCrawlerLogic.mount();
+
   return (
     <NewSearchIndexTemplate
       title="Crawler"
@@ -31,7 +42,9 @@ export const MethodCrawler: React.FC = () => {
       )}
       docsUrl="#"
       type="crawler"
-      onSubmit={() => null}
+      onSubmit={(indexName, language) => makeRequest({ indexName, language })}
+      formDisabled={status === Status.LOADING}
+      buttonLoading={status === Status.LOADING}
     >
       <EuiSteps
         steps={[

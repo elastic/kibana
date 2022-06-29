@@ -41,7 +41,7 @@ export interface Props {
   docsUrl: string;
   type: string;
   onNameChange?(name: string): void;
-  onSubmit(name: string): void;
+  onSubmit(name: string, language: string): void;
   buttonLoading?: boolean;
   formDisabled?: boolean;
 }
@@ -74,7 +74,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
       <EuiForm
         onSubmit={(event) => {
           event.preventDefault();
-          onSubmit(name);
+          onSubmit(name, language);
         }}
         component="form"
         id="enterprise-search-add-connector"

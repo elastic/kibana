@@ -5,18 +5,29 @@
  * 2.0.
  */
 
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiSteps } from '@elastic/eui';
 
-import { MethodCrawler } from './method_crawler';
-import { NewSearchIndexTemplate } from './new_search_index_template';
+import { Status } from '../../../../../../common/types/api';
 
-describe('MethodApi', () => {
+import { NewSearchIndexTemplate } from '../new_search_index_template';
+
+import { MethodCrawler } from './method_crawler';
+
+describe('MethodCrawler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockValues({
+      status: Status.IDLE,
+    });
+    setMockActions({
+      makeRequest: jest.fn(),
+    });
   });
 
   it('renders API ingestion method tab', () => {
