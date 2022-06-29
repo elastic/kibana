@@ -13,10 +13,11 @@ import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details
 import { EndpointCommandDefinitionMeta } from './types';
 import { useSendKillProcessRequest } from '../../hooks/endpoint/use_send_kill_process_endpoint_request';
 import { CommandExecutionComponentProps } from '../console/types';
+import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
 
 export const KillProcessActionResult = memo<
   CommandExecutionComponentProps<
-    { comment?: string; pid?: number; entityId?: string },
+    { comment?: string; pid: number },
     {
       actionId?: string;
       actionRequestSent?: boolean;
@@ -39,27 +40,14 @@ export const KillProcessActionResult = memo<
 
   // Send Kill request if not yet done
   useEffect(() => {
-    const pid = Number(command.args.args?.pid?.[0]);
-    const entityId = command.args.args?.entityId?.[0];
-    if (!actionRequestSent && endpointId) {
-      if (pid !== undefined) {
-        killProcessApi.mutate({
-          endpoint_ids: [endpointId],
-          comment: command.args.args?.comment?.[0],
-          parameters: {
-            pid,
-          },
-        });
-      } else if (entityId !== undefined) {
-        killProcessApi.mutate({
-          endpoint_ids: [endpointId],
-          comment: command.args.args?.comment?.[0],
-          parameters: {
-            entity_id: entityId,
-          },
-        });
-      }
+    const parameters = parsedPidOrEntityIdParameter(command.args.args?.pid?.[0]);
 
+    if (!actionRequestSent && endpointId) {
+      killProcessApi.mutate({
+        endpoint_ids: [endpointId],
+        comment: command.args.args?.comment?.[0],
+        parameters,
+      });
       setStore((prevState) => {
         return { ...prevState, actionRequestSent: true };
       });
@@ -68,7 +56,6 @@ export const KillProcessActionResult = memo<
     actionRequestSent,
     command.args.args?.comment,
     command.args.args?.pid,
-    command.args.args?.entityId,
     endpointId,
     killProcessApi,
     setStore,

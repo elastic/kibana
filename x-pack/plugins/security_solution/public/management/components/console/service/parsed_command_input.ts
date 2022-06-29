@@ -135,9 +135,8 @@ export const getCommandNameFromTextInput = (input: string): string => {
   return trimmedInput.substring(0, firstSpacePosition);
 };
 
-export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
+export const getArgumentsForCommand = (command: CommandDefinition): string => {
   let requiredArgs = '';
-  const exclusiveOrArgs = [];
   let optionalArgs = '';
 
   if (command.args) {
@@ -147,8 +146,6 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
           requiredArgs += ' ';
         }
         requiredArgs += `--${argName}`;
-      } else if (argDefinition.exclusiveOr) {
-        exclusiveOrArgs.push(`--${argName}`);
       } else {
         if (optionalArgs.length) {
           optionalArgs += ' ';
@@ -158,11 +155,17 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
     }
   }
 
-  return exclusiveOrArgs.length > 0
-    ? exclusiveOrArgs.map((currentArg) => {
-        return `${requiredArgs} ${currentArg} ${
-          optionalArgs.length > 0 ? `[${optionalArgs}]` : ''
-        }`.trim();
-      })
-    : [`${requiredArgs} ${optionalArgs.length > 0 ? `[${optionalArgs}]` : ''}`.trim()];
+  return `${requiredArgs} ${optionalArgs.length > 0 ? `[${optionalArgs}]` : ''}`.trim();
+};
+
+export const parsedPidOrEntityIdParameter = (
+  pid: string | number
+): { pid: number; entity_id?: never } | { pid?: never; entity_id: string } => {
+  const parsedPid = !isNaN(Number(pid)) ? Number(pid) : pid;
+
+  if (typeof parsedPid === 'number') {
+    return { pid: parsedPid };
+  } else {
+    return { entity_id: parsedPid };
+  }
 };

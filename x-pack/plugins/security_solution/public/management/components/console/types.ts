@@ -51,7 +51,6 @@ export interface CommandDefinition<TMeta = any> {
   args?: {
     [longName: string]: {
       required: boolean;
-      exclusiveOr?: boolean;
       allowMultiples: boolean;
       about: string;
       /**

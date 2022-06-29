@@ -83,17 +83,15 @@ describe('When entering data into the Console input', () => {
     render();
     enterCommand('abc ', { inputOnly: true });
 
-    expect(renderResult.getByTestId('test-footer').textContent).toEqual(
-      'Unknown command abc'
-    );
+    expect(renderResult.getByTestId('test-footer').textContent).toEqual('Unknown command abc');
   });
 
   it('should display a custom hint when provided by a command', () => {
     render();
-    enterCommand('cmd6 ', { inputOnly: true });
+    enterCommand('cmd5 ', { inputOnly: true });
 
     expect(renderResult.getByTestId('test-footer').textContent).toEqual(
-      'Enter --foo to execute Ex: [cmd --foo 123]'
+      'Enter --foo to execute Ex: [cmd5 --foo 123]'
     );
   });
 
@@ -110,7 +108,7 @@ describe('When entering data into the Console input', () => {
       enterCommand('cmd1 --help');
       enterCommand('help');
       enterCommand('cmd2 --help');
-      enterCommand('clear');
+      enterCommand('cls');
 
       if (inputText) {
         enterCommand(inputText, { inputOnly: true });

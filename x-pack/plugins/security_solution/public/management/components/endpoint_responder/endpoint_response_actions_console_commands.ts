@@ -71,7 +71,7 @@ export const getEndpointResponseActionsConsoleCommands = (
         endpointId: endpointAgentId,
       },
       exampleUsage: 'kill-process --pid 123',
-      exampleInstruction: 'Enter pid or entityId to execute',
+      exampleInstruction: 'Enter a pid or entity id to execute',
       args: {
         comment: {
           required: false,
@@ -82,23 +82,12 @@ export const getEndpointResponseActionsConsoleCommands = (
           ),
         },
         pid: {
-          required: false,
-          exclusiveOr: true,
+          required: true,
           allowMultiples: false,
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
-            defaultMessage: 'A PID representng the process to kill',
+            defaultMessage:
+              'A PID representng the process to kill.  You can enter a pid or entity id.',
           }),
-        },
-        entityId: {
-          required: false,
-          exclusiveOr: true,
-          allowMultiples: false,
-          about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.entityId.arg.comment',
-            {
-              defaultMessage: 'An Entity ID representng the process to kill',
-            }
-          ),
         },
       },
     },
@@ -113,7 +102,7 @@ export const getEndpointResponseActionsConsoleCommands = (
       },
     },
     {
-      name: 'running-processes',
+      name: 'processes',
       about: i18n.translate(
         'xpack.securitySolution.endpointConsoleCommands.runninProcesses.about',
         {
@@ -124,6 +113,8 @@ export const getEndpointResponseActionsConsoleCommands = (
       meta: {
         endpointId: endpointAgentId,
       },
+      exampleUsage: 'processes --comment "get the processes"',
+      exampleInstruction: 'Hit enter to execute or add an optional comment',
       args: {
         comment: {
           required: false,

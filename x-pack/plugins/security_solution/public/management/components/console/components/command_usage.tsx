@@ -27,15 +27,6 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
     return getArgumentsForCommand(commandDef);
   }, [commandDef]);
 
-  const commandUsage = usageHelp.map((currentUsage) => {
-    return (
-      <EuiText size="s">
-        <EuiBadge>{commandDef.name}</EuiBadge>
-        <EuiCode transparentBackground={true}>{currentUsage}</EuiCode>
-      </EuiText>
-    );
-  });
-
   return (
     <>
       <EuiFlexGroup gutterSize="s">
@@ -48,7 +39,12 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <code>{commandUsage}</code>
+          <code>
+            <EuiText size="s">
+              <EuiBadge>{commandDef.name}</EuiBadge>
+              <EuiCode transparentBackground={true}>{usageHelp}</EuiCode>
+            </EuiText>
+          </code>
         </EuiFlexItem>
       </EuiFlexGroup>
       {commandDef.exampleUsage && (
@@ -87,9 +83,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
       return [];
     }
 
-    const optionalEntries = Object.entries(commandDef.args).filter(
-      (arg) => !arg[1].required && !arg[1].exclusiveOr
-    );
+    const optionalEntries = Object.entries(commandDef.args).filter((arg) => !arg[1].required);
     return optionalEntries.map(([option, { about: description }]) => ({
       title: `--${option}`,
       description,
@@ -102,23 +96,8 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
       return [];
     }
 
-    const requiredEntries = Object.entries(commandDef.args).filter(
-      (arg) => arg[1].required && !arg[1].exclusiveOr
-    );
+    const requiredEntries = Object.entries(commandDef.args).filter((arg) => arg[1].required);
     return requiredEntries.map(([option, { about: description }]) => ({
-      title: `--${option}`,
-      description,
-    }));
-  }, [commandDef.args, hasArgs]);
-
-  const commandOptionsExclusiveOr = useMemo(() => {
-    // `command.args` only here to silence TS check
-    if (!hasArgs || !commandDef.args) {
-      return [];
-    }
-
-    const exclusiveEntries = Object.entries(commandDef.args).filter((arg) => arg[1].exclusiveOr);
-    return exclusiveEntries.map(([option, { about: description }]) => ({
       title: `--${option}`,
       description,
     }));
@@ -158,36 +137,6 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
               type="column"
               className="descriptionList-20_80"
               listItems={commandOptionsRequired}
-              descriptionProps={additionalProps}
-              titleProps={additionalProps}
-              data-test-subj={getTestId('commandUsage-options')}
-            />
-          )}
-        </>
-      )}
-      {commandOptionsExclusiveOr && commandOptionsExclusiveOr.length > 0 && (
-        <>
-          <EuiSpacer />
-          <EuiText>
-            <FormattedMessage
-              id="xpack.securitySolution.console.commandUsage.exclusiveLabel"
-              defaultMessage="Include only one of the following required parameters:"
-            />
-            {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
-                  defaultMessage="Note: at least one option must be used"
-                />
-              </EuiText>
-            )}
-          </EuiText>
-          {commandDef.args && (
-            <EuiDescriptionList
-              compressed
-              type="column"
-              className="descriptionList-20_80"
-              listItems={commandOptionsExclusiveOr}
               descriptionProps={additionalProps}
               titleProps={additionalProps}
               data-test-subj={getTestId('commandUsage-options')}
