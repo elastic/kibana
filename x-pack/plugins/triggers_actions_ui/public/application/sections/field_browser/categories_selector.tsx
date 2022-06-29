@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Fragment, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { omit } from 'lodash';
 import {
   EuiBadge,
@@ -159,10 +159,10 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
             onChange={onCategoriesChange}
           >
             {(list, search) => (
-              <Fragment>
+              <>
                 {search}
                 {list}
-              </Fragment>
+              </>
             )}
           </EuiSelectable>
         </div>

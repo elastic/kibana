@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiCheckbox,
   EuiIcon,
@@ -98,7 +98,7 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
     name: i18n.DESCRIPTION,
     render: (description: string, { name, example }) => (
       <EuiToolTip content={description}>
-        <Fragment>
+        <>
           <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
             <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
           </EuiScreenReaderOnly>
@@ -107,7 +107,7 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
               {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
             </span>
           </span>
-        </Fragment>
+        </>
       </EuiToolTip>
     ),
     sortable: true,
