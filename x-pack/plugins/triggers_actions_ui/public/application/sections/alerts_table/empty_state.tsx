@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext } from 'react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiImage,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -22,25 +14,6 @@ import type { CoreStart } from '@kbn/core/public';
 const heights = {
   tall: 490,
   short: 250,
-};
-
-export const TimelineContext = createContext<{ timelineId: string | null }>({ timelineId: null });
-
-export const TGridLoading: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
-  return (
-    <EuiPanel color="subdued">
-      <EuiFlexGroup
-        style={{ height: heights[height] }}
-        alignItems="center"
-        justifyContent="center"
-        data-test-subj="loading-alerts-panel"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
 };
 
 const panelStyle = {
@@ -51,7 +24,7 @@ export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height
   const { http } = useKibana<CoreStart>().services;
 
   return (
-    <EuiPanel color="subdued" data-test-subj="tGridEmptyState">
+    <EuiPanel color="subdued" data-test-subj="alertsStateTableEmptyState">
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={true} style={panelStyle}>
@@ -79,7 +52,7 @@ export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height
                   size="200"
                   alt=""
                   url={http.basePath.prepend(
-                    '/plugins/timelines/assets/illustration_product_no_results_magnifying_glass.svg'
+                    '/plugins/triggers_actions_ui/application/section/alerts_table/assets/illustration_product_no_results_magnifying_glass.svg'
                   )}
                 />
               </EuiFlexItem>
