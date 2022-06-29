@@ -271,6 +271,8 @@ export class DataView implements DataViewBase {
 
   /**
    * Creates static representation of the data view.
+   * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
+   * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
   public toSpec(includeFields = true): DataViewSpec {
     const fields =
