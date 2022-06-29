@@ -487,7 +487,7 @@ export class SessionIndex {
       // Only refresh the index if we have actually deleted one or more sessions. The index will auto-refresh eventually anyway, this just
       // ensures that searches after the cleanup process are accurate, and this only impacts integration tests.
       try {
-        await elasticsearchClient.indices.refresh({ index: this.indexName });
+        await elasticsearchClient.indices.refresh({ index: this.aliasName });
         logger.debug(`Refreshed session index.`);
       } catch (err) {
         logger.error(`Failed to refresh session index: ${err.message}`);
