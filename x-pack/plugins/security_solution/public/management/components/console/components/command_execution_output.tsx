@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
+import moment from 'moment';
+import { LongRunningCommandHint } from './long_running_command_hint';
 import { CommandExecutionResult } from './command_execution_result';
 import type { CommandExecutionComponentProps } from '../types';
 import type { CommandExecutionState, CommandHistoryItem } from './console_state/types';
@@ -26,9 +28,10 @@ export interface CommandExecutionOutputProps {
   item: CommandHistoryItem;
 }
 export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
-  ({ item: { command, state, id } }) => {
+  ({ item: { command, state, id, enteredAt } }) => {
     const dispatch = useConsoleStateDispatch();
     const RenderComponent = command.commandDefinition.RenderComponent;
+    const [isLongRunningCommand, setIsLongRunningCommand] = useState(false);
 
     const isRunning = useMemo(() => {
       return state.status === 'pending';
@@ -62,6 +65,30 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
       [dispatch, id]
     );
 
+    // keep track if this becomes a long running command
+    useEffect(() => {
+      let timeoutId: number;
+
+      if (isRunning && !isLongRunningCommand) {
+        const elapsedSeconds = moment().diff(moment(enteredAt), 'seconds');
+
+        if (elapsedSeconds >= 15) {
+          setIsLongRunningCommand(true);
+          return;
+        }
+
+        timeoutId = setTimeout(() => {
+          setIsLongRunningCommand(true);
+        }, (15 - elapsedSeconds) * 1000);
+      }
+
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }, [enteredAt, isLongRunningCommand, isRunning]);
+
     return (
       <CommandOutputContainer>
         <div>
@@ -80,6 +107,13 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
           />
 
           {isRunning && <EuiLoadingChart className="busy-indicator" mono={true} />}
+
+          {isRunning && isLongRunningCommand && (
+            <>
+              <EuiSpacer size="s" />
+              <LongRunningCommandHint />
+            </>
+          )}
         </div>
       </CommandOutputContainer>
     );
