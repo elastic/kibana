@@ -38,6 +38,10 @@ import type {
   AnalyticsServiceStart,
   AnalyticsServicePreboot,
 } from '@kbn/core-analytics-server';
+import type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from '@kbn/core-execution-context-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -89,9 +93,8 @@ export type {
   ConfigUsageData,
 };
 
-import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
-
-export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
+export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
 
 export { bootstrap } from './bootstrap';
 export type {
@@ -261,6 +264,8 @@ export type {
   LogRecord,
   LogLevel,
 } from '@kbn/logging';
+
+export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
 export { PluginType } from '@kbn/core-base-common';
 
