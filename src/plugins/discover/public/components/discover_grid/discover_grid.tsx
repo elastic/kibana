@@ -169,7 +169,7 @@ export interface DiscoverGridProps {
   /**
    * Callback to execute on edit runtime field
    */
-  onEditRuntimeField: () => void;
+  onEditRuntimeField?: () => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -345,7 +345,7 @@ export const DiscoverGrid = ({
         },
         fieldName,
         onSave: async () => {
-          onEditRuntimeField();
+          onEditRuntimeField?.();
         },
       });
 
@@ -368,7 +368,7 @@ export const DiscoverGrid = ({
         isSortEnabled,
         services,
         valueToStringConverter,
-        editField,
+        editField: onEditRuntimeField ? editField : undefined,
       }),
     [
       displayedColumns,
@@ -380,6 +380,7 @@ export const DiscoverGrid = ({
       isSortEnabled,
       services,
       valueToStringConverter,
+      onEditRuntimeField,
       editField,
     ]
   );

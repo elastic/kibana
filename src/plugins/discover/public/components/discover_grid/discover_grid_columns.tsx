@@ -8,15 +8,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiDataGridColumn,
-  EuiIcon,
-  EuiListGroupItemProps,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiDataGridColumn, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
 import type { ValueToStringConverter } from '../../types';
@@ -26,7 +19,7 @@ import { SelectButton } from './discover_grid_document_selection';
 import { defaultTimeColumnWidth } from './constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { DiscoverServices } from '../../build_services';
-import { getFieldCapabilities } from '../../utils/get_field_capabilities';
+import { buildEditFieldButton } from './build_edit_field_button';
 
 export function getLeadControlColumns() {
   return [
@@ -80,24 +73,13 @@ function buildEuiGridColumn({
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
-  editField: (fieldName: string) => void;
+  editField?: (fieldName: string) => void;
 }) {
   const indexPatternField = indexPattern.getFieldByName(columnName);
-  const { canEdit: canEditField } =
-    indexPatternField == null
-      ? { canEdit: false }
-      : getFieldCapabilities(indexPattern, indexPatternField);
-  const canEditDataView = Boolean(services.dataViewEditor?.userPermissions?.editDataView());
-  const editFieldButton: EuiListGroupItemProps = {
-    size: 'xs',
-    label: <FormattedMessage id="discover.grid.editFieldButton" defaultMessage="Edit field" />,
-    iconType: 'pencil',
-    iconProps: { size: 'm' },
-    onClick: () => {
-      editField(columnName);
-    },
-    'data-test-subj': 'gridEditFieldButton',
-  };
+  const editFieldButton =
+    editField &&
+    indexPatternField &&
+    buildEditFieldButton({ services, dataView: indexPattern, field: indexPatternField, editField });
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: getSchemaByKbnType(indexPatternField?.type),
@@ -130,7 +112,7 @@ function buildEuiGridColumn({
           rowsCount,
           valueToStringConverter,
         }),
-        ...(canEditField && canEditDataView ? [editFieldButton] : []),
+        ...(editFieldButton ? [editFieldButton] : []),
       ],
     },
     cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
@@ -190,7 +172,7 @@ export function getEuiGridColumns({
   isSortEnabled: boolean;
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
-  editField: (fieldName: string) => void;
+  editField?: (fieldName: string) => void;
 }) {
   const timeFieldName = indexPattern.timeFieldName;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
