@@ -7,7 +7,7 @@
 
 import { identity } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
@@ -22,9 +22,7 @@ import {
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { buildThreatMappingFilter } from './threat_mapping/build_threat_mapping_filter';
-import { getAllThreatListHits } from './threat_mapping/get_threat_list';
-import { THREAT_PIT_KEEP_ALIVE } from '../../../../common/cti/constants';
+import {enrichEvents} from './enrichments'
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -59,15 +57,7 @@ export const searchAfterAndBulkCreate = async ({
     // to ensure we don't exceed maxSignals
     let signalsCreatedCount = 0;
 
-    let threatPitId: OpenPointInTimeResponse['id'] = (
-      await services.scopedClusterClient.asCurrentUser.openPointInTime({
-        index: 'filebeat*',
-        keep_alive: THREAT_PIT_KEEP_ALIVE,
-      })
-    ).id;
-    const reassignThreatPitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
-      if (newPitId) threatPitId = newPitId;
-    };
+  
 
     if (tuple == null || tuple.to == null || tuple.from == null) {
       logger.error(buildRuleMessage(`[-] malformed date tuple`));
@@ -158,10 +148,17 @@ export const searchAfterAndBulkCreate = async ({
         if (includedEvents.length !== 0) {
           // make sure we are not going to create more signals than maxSignals allows
           const limitedEvents = includedEvents.slice(0, tuple.maxSignals - signalsCreatedCount);
-          const enrichedEvents = await enrichment(limitedEvents);
+          // const enrichedEvents = await enrichment(limitedEvents);
+          
+          const enrichedEvents = await enrichEvents({
+            events: limitedEvents,
+            services,
+            logger,
+            buildRuleMessage,
+          });
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
-          const {
+          let {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
             createdItems,
@@ -170,49 +167,7 @@ export const searchAfterAndBulkCreate = async ({
           } = await bulkCreate(wrappedDocs);
 
           logger.debug(`---- wrappedDocs ----- ${JSON.stringify(createdItems.length)}`);
-          if (createdItems.length > 0) {
-            const threatFilter = buildThreatMappingFilter({
-              threatMapping: Array(9)
-                .fill(0)
-                .map((item, index) => ({
-                  entries: [
-                    {
-                      field: 'url.full',
-                      type: 'mapping',
-                      value: `threat.indicator.url.full`,
-                    },
-                  ],
-                })),
-              threatList: createdItems.map((item) => ({
-                ...item,
-                fields: { 'url.full': [item?.url?.full] },
-              })),
-              entryKey: 'field',
-            });
-
-            const threatListHits = await getAllThreatListHits({
-              esClient: services.scopedClusterClient.asCurrentUser,
-              exceptionItems: [],
-              threatFilters: [threatFilter],
-              query: '*:*',
-              language: 'kuery',
-              index: ['filebeat*'],
-              logger,
-              buildRuleMessage,
-              threatListConfig: {
-                _source: [`threat.indicator.*`, 'threat.feed.*'],
-                fields: undefined,
-              },
-              pitId: threatPitId,
-              reassignPitId: reassignThreatPitId,
-              runtimeMappings: undefined,
-            });
-            logger.debug(`---- threats -----`);
-            logger.debug(`---- threatFilter ----- ${JSON.stringify(threatFilter)} `);
-            logger.debug(`---- threatListHits ----- ${JSON.stringify(threatListHits)} `);
-            logger.debug(`---- threatListHits ----- ${threatListHits.length} `);
-            logger.debug(`---- threats -----`);
-          }
+         
 
           toReturn = mergeReturns([
             toReturn,
