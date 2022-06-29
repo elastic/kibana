@@ -18,7 +18,7 @@ import { setHeaderActionMenuMounter } from '../../../../../kibana_services';
 
 setHeaderActionMenuMounter(() => void 0);
 
-storiesOf('components/layout/DiscoverLayout', module).add('Dataview with timestamp', () => (
+storiesOf('components/layout/DiscoverLayout', module).add('Data view with timestamp', () => (
   <IntlProvider locale="en">
     <KibanaContextProvider services={getServices()}>
       <DiscoverLayout {...getLayoutProps(getIndexPatternMock(true))} />
