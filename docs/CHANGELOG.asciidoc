@@ -86,7 +86,7 @@ Observability::
 * Fixes viewInAppUrl for custom metrics for Inventory Threshold Rule {kibana-pull}134114[#134114]
 
 Platform::
-* Fixes an issue where copying the same saved object to a different space multiple times could cause duplicates to be created, even when using the "check for existing objects" option {kibana-pull}135358[#135358]
+* Fixes an issue where importing/copying the same saved object to the same space multiple times using the "Check for existing objects" option could fail or cause duplicates to be created {kibana-pull}135358[#135358]
 * Fixes a bug where {es} nodes that stopped, then started again, were unreachable by {kib} for a given amount of requests when {kib} was configured to connect to multiple {es} nodes {kibana-pull}134628[#134628]
 
 [[release-notes-8.3.0]]
