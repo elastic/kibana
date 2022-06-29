@@ -31,6 +31,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Allows indices configuration', () => {
+      const localStart = new Date(new Date(DATES.metricsAndLogs.stream.startWithData).getTime());
+      const localEnd = new Date(new Date(DATES.metricsAndLogs.stream.startWithData).getTime());
+      const logPosition = {
+        start: localStart.toISOString(),
+        end: localEnd.toISOString(),
+      };
+      const formattedLocalStart = localStart.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
@@ -80,16 +92,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('renders the default log columns with their headers', async () => {
         await logsUi.logStreamPage.navigateTo({
-          logPosition: {
-            start: DATES.metricsAndLogs.stream.startWithData,
-            end: DATES.metricsAndLogs.stream.endWithData,
-          },
+          logPosition,
         });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'event.dataset', 'Message']);
+          expect(columnHeaderLabels).to.eql([formattedLocalStart, 'event.dataset', 'Message']);
         });
 
         const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
@@ -104,12 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('records telemetry for logs', async () => {
-        await logsUi.logStreamPage.navigateTo({
-          logPosition: {
-            start: DATES.metricsAndLogs.stream.startWithData,
-            end: DATES.metricsAndLogs.stream.endWithData,
-          },
-        });
+        await logsUi.logStreamPage.navigateTo({ logPosition });
 
         await logsUi.logStreamPage.getStreamEntries();
 
@@ -144,17 +148,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the changed log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({
-          logPosition: {
-            start: DATES.metricsAndLogs.stream.startWithData,
-            end: DATES.metricsAndLogs.stream.endWithData,
-          },
-        });
+        await logsUi.logStreamPage.navigateTo({ logPosition });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'host.name']);
+          expect(columnHeaderLabels).to.eql([formattedLocalStart, 'host.name']);
         });
 
         const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
