@@ -118,7 +118,9 @@ export const sendEndpointActionResponse = async (
   return endpointResponse;
 };
 
-const getOutputDataIfNeeded = (command: EndpointActionData['command']) => {
+const getOutputDataIfNeeded = (
+  command: EndpointActionData['command']
+): { output?: ActionResponseOutput } => {
   return command === 'running-processes'
     ? ({
         output: {
