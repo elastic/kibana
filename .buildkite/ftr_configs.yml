@@ -56,6 +56,13 @@ disabled:
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
 
+###
+# By default FTR configs use this queue, which in Buildkite maps to an instance type, in this
+# case n2-standard-2 spot instances. These are very cost effective machines with 2 vCPUs and 8GB
+# of RAM. If at all possible please use the default for your FTR config. If your tests can't
+# pass on machines this size then you can set the queue value for your config to `n2-4-spot-2`
+# with will run the tests on a machine with 4 vCPUs and 16GB of RAM.
+###
 defaultQueue: 'n2-2-spot'
 enabled:
   - test/accessibility/config.ts
