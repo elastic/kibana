@@ -101,9 +101,9 @@ const patchSchema = <
   defaultableFields: Defaultable
 ) => {
   return t.intersection([
-    t.exact(t.partial(requiredFields)),
-    t.exact(t.partial(optionalFields)),
-    t.exact(t.partial(defaultableFields)),
+    t.partial(requiredFields),
+    t.partial(optionalFields),
+    t.partial(defaultableFields),
   ]);
 };
 

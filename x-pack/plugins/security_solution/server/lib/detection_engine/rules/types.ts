@@ -78,7 +78,6 @@ export interface CreateRulesOptions<T extends CreateRulesSchema = CreateRulesSch
 
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
-  defaultOutputIndex: string;
   existingRule: RuleAlertType | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }

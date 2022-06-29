@@ -90,7 +90,6 @@ export const updateRulesBulkRoute = (
 
             const rule = await updateRules({
               rulesClient,
-              defaultOutputIndex: siemClient.getSignalsIndex(),
               existingRule: migratedRule,
               ruleUpdate: payloadRule,
             });

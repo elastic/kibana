@@ -20,6 +20,8 @@ export const installPrepackagedRules = (
       createRules({
         rulesClient,
         params: rule,
+        immutable: true,
+        defaultEnabled: false,
       }),
     ];
   }, []);

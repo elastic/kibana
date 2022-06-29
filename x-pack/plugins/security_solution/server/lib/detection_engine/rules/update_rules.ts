@@ -17,7 +17,6 @@ import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './ut
 
 export const updateRules = async ({
   rulesClient,
-  defaultOutputIndex,
   existingRule,
   ruleUpdate,
 }: UpdateRulesOptions): Promise<PartialRule<RuleParams> | null> => {
@@ -40,7 +39,7 @@ export const updateRules = async ({
       // Unlike the create route, immutable comes from the existing rule here
       immutable: existingRule.params.immutable,
       license: ruleUpdate.license,
-      outputIndex: ruleUpdate.output_index ?? defaultOutputIndex,
+      outputIndex: ruleUpdate.output_index ?? '',
       timelineId: ruleUpdate.timeline_id,
       timelineTitle: ruleUpdate.timeline_title,
       meta: ruleUpdate.meta,

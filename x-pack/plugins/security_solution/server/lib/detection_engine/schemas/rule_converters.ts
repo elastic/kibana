@@ -420,9 +420,7 @@ export const convertCreateAPIToInternalSchema = (
       from: input.from ?? 'now-6m',
       immutable,
       license: input.license,
-      // outputIndex is no longer used in the detection engine so there's no point in adding it
-      // to rules
-      outputIndex: '',
+      outputIndex: input.output_index ?? '',
       timelineId: input.timeline_id,
       timelineTitle: input.timeline_title,
       meta: input.meta,
