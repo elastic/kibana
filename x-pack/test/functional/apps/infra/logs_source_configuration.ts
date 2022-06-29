@@ -18,7 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const logsUi = getService('logsUi');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
-  const pageObjects = getPageObjects(['common', 'infraLogs']);
+  const pageObjects = getPageObjects(['common', 'header', 'infraLogs']);
   const retry = getService('retry');
   const supertest = getService('supertest');
 
@@ -45,6 +45,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await infraSourceConfigurationForm.getForm();
         });
 
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
         const nameInput = await infraSourceConfigurationForm.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });
         await nameInput.type('Modified Source');
@@ -70,6 +72,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await infraSourceConfigurationForm.getForm();
         });
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         const logIndicesInput = await infraSourceConfigurationForm.getLogIndicesInput();
         await logIndicesInput.clearValueWithKeyboard({ charByChar: true });
