@@ -20,15 +20,18 @@ export type ComponentTemplateEditTestBed = TestBed<ComponentTemplateFormTestSubj
   actions: ReturnType<typeof getFormActions>;
 };
 
-const testBedConfig: AsyncTestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`${BASE_PATH}/edit_component_template/comp-1`],
-    componentRoutePath: `${BASE_PATH}/edit_component_template/:name`,
-  },
-  doMountAsync: true,
-};
+export const setup = async (
+  httpSetup: HttpSetup,
+  queryParams: string = ''
+): Promise<ComponentTemplateEditTestBed> => {
+  const testBedConfig: AsyncTestBedConfig = {
+    memoryRouter: {
+      initialEntries: [`${BASE_PATH}/edit_component_template/comp-1${queryParams}`],
+      componentRoutePath: `${BASE_PATH}/edit_component_template/:name`,
+    },
+    doMountAsync: true,
+  };
 
-export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateEditTestBed> => {
   const initTestBed = registerTestBed(
     WithAppDependencies(ComponentTemplateEdit, httpSetup),
     testBedConfig

@@ -74,6 +74,16 @@ describe('<ComponentTemplateEdit />', () => {
     expect(nameInput.props().disabled).toEqual(true);
   });
 
+  it('should allow to go directly to a step', async () => {
+    await act(async () => {
+      testBed = await setup(httpSetup, '?step=mappings');
+    });
+
+    testBed.component.update();
+
+    expect(testBed.exists('mappingsEditor')).toBe(true);
+  });
+
   describe('form payload', () => {
     it('should send the correct payload with changed values', async () => {
       const { actions, component, form } = testBed;
