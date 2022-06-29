@@ -181,7 +181,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           <AlertsFlyout
             alert={alerts[flyoutAlertIndex]}
             alertsCount={alertsCount}
-            state={props.flyoutState}
             onClose={handleFlyoutClose}
             alertsTableConfiguration={props.alertsTableConfiguration}
             flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
