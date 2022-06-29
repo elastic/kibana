@@ -7,6 +7,8 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
@@ -14,6 +16,8 @@ import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
 import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_by_resource';
 import { FindingsByResourceTable } from './findings_by_resource_table';
 import {
+  getFindingsPageSizeInfo,
+  addFilter,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -25,6 +29,7 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
+import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 
 const getDefaultQuery = ({
   query,
@@ -90,17 +95,34 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
           <PageTitleText
             title={
               <FormattedMessage
-                id="xpack.csp.findings.findingsByResourceTitle"
+                id="xpack.csp.findings.findingsByResource.findingsByResourcePageTitle"
                 defaultMessage="Findings"
               />
             }
           />
         </PageTitle>
         {error && <ErrorCallout error={error} />}
-
         {!error && (
           <>
             <FindingsGroupBySelector type="resource" />
+            {findingsGroupByResource.isSuccess && !!findingsGroupByResource.data.page.length && (
+              <FindingsDistributionBar
+                {...{
+                  type: i18n.translate('xpack.csp.findings.findingsByResource.tableRowTypeLabel', {
+                    defaultMessage: 'Resources',
+                  }),
+                  total: findingsGroupByResource.data.total,
+                  passed: findingsGroupByResource.data.count.passed,
+                  failed: findingsGroupByResource.data.count.failed,
+                  ...getFindingsPageSizeInfo({
+                    pageIndex: urlQuery.pageIndex,
+                    pageSize: urlQuery.pageSize,
+                    currentPageSize: findingsGroupByResource.data.page.length,
+                  }),
+                }}
+              />
+            )}
+            <EuiSpacer />
             <FindingsByResourceTable
               loading={findingsGroupByResource.isFetching}
               items={findingsGroupByResource.data?.page || []}
@@ -111,6 +133,18 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
               })}
               setTableOptions={({ page }) =>
                 setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+              }
+              onAddFilter={(field, value, negate) =>
+                setUrlQuery({
+                  pageIndex: 0,
+                  filters: addFilter({
+                    filters: urlQuery.filters,
+                    dataView,
+                    field,
+                    value,
+                    negate,
+                  }),
+                })
               }
             />
           </>
