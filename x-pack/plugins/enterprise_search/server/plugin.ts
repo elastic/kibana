@@ -169,7 +169,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConnectorRoutes(dependencies);
     registerCrawlerRoutes(dependencies);
 
-    getStartServices().then(([, { security:securityStart }]) => {
+    getStartServices().then(([, { security: securityStart }]) => {
       registerCreateAPIKeyRoute(dependencies, securityStart);
     });
 
