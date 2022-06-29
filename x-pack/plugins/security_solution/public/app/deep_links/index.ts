@@ -37,6 +37,7 @@ import {
   GETTING_STARTED,
   DASHBOARDS,
   CREATE_NEW_RULE,
+  RESPONSE_ACTIONS,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -60,6 +61,7 @@ import {
   USERS_PATH,
   KUBERNETES_PATH,
   RULES_CREATE_PATH,
+  RESPONSE_ACTIONS_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { subscribeAppLinks } from '../../common/links';
@@ -468,6 +470,11 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.blocklist,
         title: BLOCKLIST,
         path: BLOCKLIST_PATH,
+      },
+      {
+        id: SecurityPageName.responseActions,
+        title: RESPONSE_ACTIONS,
+        path: RESPONSE_ACTIONS_PATH,
       },
     ],
   },
