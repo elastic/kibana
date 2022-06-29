@@ -61,3 +61,19 @@ export const getAddPrepackagedThreatMatchRulesSchemaMock = (): AddPrepackagedRul
     },
   ],
 });
+
+export const getAddPrepackagedThresholdRulesSchemaMock = (): AddPrepackagedRulesSchema => ({
+  description: 'some description',
+  name: 'Query with a rule id',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: 'rule-1',
+  version: 1,
+  type: 'threshold',
+  threshold: {
+    field: ['field-1', 'field-2', 'field-3', 'field-4'],
+    value: 1,
+  },
+});

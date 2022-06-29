@@ -43,6 +43,34 @@ export const validateId = (rule: PatchRulesSchema): string[] => {
   }
 };
 
+export const validateThreshold = (rule: PatchRulesSchema): string[] => {
+  const errors: string[] = [];
+  if (rule.type === 'threshold') {
+    if (!rule.threshold) {
+      errors.push('when "type" is "threshold", "threshold" is required');
+    } else {
+      if (
+        rule.threshold.cardinality?.length &&
+        rule.threshold.field.includes(rule.threshold.cardinality[0].field)
+      ) {
+        errors.push('Cardinality of a field that is being aggregated on is always 1');
+      }
+      if (rule.threshold.value <= 0) {
+        errors.push('"threshold.value" has to be bigger than 0');
+      }
+      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
+        errors.push('Number of fields must be 3 or less');
+      }
+    }
+  }
+  return errors;
+};
+
 export const patchRuleValidateTypeDependents = (rule: PatchRulesSchema): string[] => {
-  return [...validateId(rule), ...validateTimelineId(rule), ...validateTimelineTitle(rule)];
+  return [
+    ...validateId(rule),
+    ...validateTimelineId(rule),
+    ...validateTimelineTitle(rule),
+    ...validateThreshold(rule),
+  ];
 };

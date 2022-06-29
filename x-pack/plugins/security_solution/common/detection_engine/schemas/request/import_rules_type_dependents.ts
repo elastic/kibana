@@ -33,6 +33,22 @@ export const validateTimelineTitle = (rule: ImportRulesSchema): string[] => {
   return [];
 };
 
+export const validateThreshold = (rule: ImportRulesSchema): string[] => {
+  const errors: string[] = [];
+  if (rule.type === 'threshold') {
+    if (
+      rule.threshold.cardinality?.length &&
+      rule.threshold.field.includes(rule.threshold.cardinality[0].field)
+    ) {
+      errors.push('Cardinality of a field that is being aggregated on is always 1');
+    }
+    if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
+      errors.push('Number of fields must be 3 or less');
+    }
+  }
+  return errors;
+};
+
 export const importRuleValidateTypeDependents = (rule: ImportRulesSchema): string[] => {
-  return [...validateTimelineId(rule), ...validateTimelineTitle(rule)];
+  return [...validateTimelineId(rule), ...validateTimelineTitle(rule), ...validateThreshold(rule)];
 };

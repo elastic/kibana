@@ -13,19 +13,6 @@ import { left } from 'fp-ts/lib/Either';
 import { getListArrayMock } from '../types/lists.mock';
 
 describe('patch_rules_schema', () => {
-  test('made up values do not validate', () => {
-    const payload: PatchRulesSchema & { madeUp: string } = {
-      ...getPatchRulesSchemaMock(),
-      madeUp: 'hi',
-    };
-
-    const decoded = patchRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
-    expect(message.schema).toEqual({});
-  });
-
   test('[id] does validate', () => {
     const payload: PatchRulesSchema = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
@@ -616,13 +603,17 @@ describe('patch_rules_schema', () => {
   test('indexes cannot be numbers', () => {
     const payload: Omit<PatchRulesSchema, 'index'> & { index: number[] } = {
       id: 'b8f95e17-681f-407f-8a5e-b832a77d3831',
+      type: 'query',
       index: [5],
     };
 
     const decoded = patchRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "index,[5]"']);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "query" supplied to "type"',
+      'Invalid value "5" supplied to "index"',
+    ]);
     expect(message.schema).toEqual({});
   });
 

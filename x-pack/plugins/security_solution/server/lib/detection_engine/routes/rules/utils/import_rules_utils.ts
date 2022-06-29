@@ -111,7 +111,10 @@ export const importRules = async ({
                 if (rule == null) {
                   await createRules({
                     rulesClient,
-                    params: parsedRule,
+                    params: {
+                      ...parsedRule,
+                      exceptions_list: [...exceptions],
+                    },
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,
