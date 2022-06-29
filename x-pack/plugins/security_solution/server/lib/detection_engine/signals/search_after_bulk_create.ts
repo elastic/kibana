@@ -22,7 +22,7 @@ import {
 } from './utils';
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import {enrichEvents} from './enrichments'
+import { enrichEvents } from './enrichments';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -52,6 +52,13 @@ export const searchAfterAndBulkCreate = async ({
     let sortIds: estypes.SortResults | undefined;
     let hasSortId = true; // default to true so we execute the search on initial run
 
+<<<<<<< HEAD
+=======
+    // signalsCreatedCount keeps track of how many signals we have created,
+    // to ensure we don't exceed maxSignals
+    let signalsCreatedCount = 0;
+
+>>>>>>> aae880e51d0 ([CI] Auto-commit changed files from 'node scripts/eslint --no-cache --fix')
     if (tuple == null || tuple.to == null || tuple.from == null) {
       ruleExecutionLogger.error(`[-] malformed date tuple`);
       return createSearchAfterReturnType({
@@ -137,6 +144,7 @@ export const searchAfterAndBulkCreate = async ({
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
           // make sure we are not going to create more signals than maxSignals allows
+<<<<<<< HEAD
           const limitedEvents = includedEvents.slice(
             0,
             tuple.maxSignals - toReturn.createdSignalsCount
@@ -147,6 +155,40 @@ export const searchAfterAndBulkCreate = async ({
           const bulkCreateResult = await bulkCreate(wrappedDocs);
 
           addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+=======
+          const limitedEvents = includedEvents.slice(0, tuple.maxSignals - signalsCreatedCount);
+          // const enrichedEvents = await enrichment(limitedEvents);
+
+          const enrichedEvents = await enrichEvents({
+            events: limitedEvents,
+            services,
+            logger,
+            buildRuleMessage,
+          });
+          const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
+
+          const {
+            bulkCreateDuration: bulkDuration,
+            createdItemsCount: createdCount,
+            createdItems,
+            success: bulkSuccess,
+            errors: bulkErrors,
+          } = await bulkCreate(wrappedDocs);
+
+          logger.debug(`---- wrappedDocs ----- ${JSON.stringify(createdItems.length)}`);
+
+          toReturn = mergeReturns([
+            toReturn,
+            createSearchAfterReturnType({
+              success: bulkSuccess,
+              createdSignalsCount: createdCount,
+              createdSignals: createdItems,
+              bulkCreateTimes: [bulkDuration],
+              errors: bulkErrors,
+            }),
+          ]);
+          signalsCreatedCount += createdCount;
+>>>>>>> aae880e51d0 ([CI] Auto-commit changed files from 'node scripts/eslint --no-cache --fix')
 
           ruleExecutionLogger.debug(`created ${bulkCreateResult.createdItemsCount} signals`);
           ruleExecutionLogger.debug(`signalsCreatedCount: ${toReturn.createdSignalsCount}`);
