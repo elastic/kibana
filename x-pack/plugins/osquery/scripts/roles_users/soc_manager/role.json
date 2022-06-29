@@ -15,10 +15,11 @@
   "kibana": [
     {
       "feature": {
-        "discover": ["read"],
+        "discover": ["all"],
         "infrastructure": ["read"],
         "ml": ["all"],
         "siem": ["all"],
+        "savedObjectsManagement": ["all"],
         "osquery": ["all"],
         "visualize": ["read"],
         "actions": ["all"]
