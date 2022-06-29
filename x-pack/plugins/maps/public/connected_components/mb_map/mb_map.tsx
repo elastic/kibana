@@ -77,6 +77,7 @@ export interface Props {
   filterModeActive: boolean;
   setTileLoadError(layerId: string, errorMessage: string): void;
   clearTileLoadError(layerId: string): void;
+  onMapMove?: (lat: number, lon: number, zoom: number) => void;
 }
 
 interface State {
@@ -275,6 +276,15 @@ export class MbMap extends Component<Props, State> {
         }
       }, 100)
     );
+
+    // do not update redux state on 'move' event for performance reasons
+    // instead, callback provided for cases where consumers need to react to "move" event
+    mbMap.on('move', () => {
+      if (this.props.onMapMove) {
+        const { zoom, center } = this._getMapExtentState();
+        this.props.onMapMove(center.lat, center.lon, zoom);
+      }
+    });
 
     // Attach event only if view control is visible, which shows lat/lon
     if (!this.props.settings.hideViewControl) {

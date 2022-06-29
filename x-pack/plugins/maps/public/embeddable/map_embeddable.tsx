@@ -34,21 +34,25 @@ import {
   setQuery,
   setReadOnly,
   updateLayerById,
+  setGotoWithCenter,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
+  setOnMapMove,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getGoto,
   getMapCenter,
   getMapBuffer,
   getMapExtent,
   getMapReady,
+  getMapSettings,
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
@@ -77,6 +81,8 @@ import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
+import { synchronizeMovement } from './synchronize_movement';
+import { getFilterByMapExtent } from '../trigger_actions/filter_by_map_extent_action';
 
 import {
   MapByValueInput,
@@ -137,8 +143,7 @@ export class MapEmbeddable
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
-    this._prevFilterByMapExtent =
-      this.input.filterByMapExtent === undefined ? false : this.input.filterByMapExtent;
+    this._prevFilterByMapExtent = getFilterByMapExtent(this.input);
   }
 
   private async _initializeSaveMap() {
@@ -169,6 +174,7 @@ export class MapEmbeddable
     this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
 
     const store = this._savedMap.getStore();
+
     store.dispatch(setReadOnly(true));
     store.dispatch(
       setMapSettings({
@@ -177,11 +183,14 @@ export class MapEmbeddable
       })
     );
 
+    // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
+    store.dispatch(setOnMapMove(this._propogateMapMovement));
+
     this._dispatchSetQuery({
       forceRefresh: false,
     });
 
-    this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
+    this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();
     });
   }
@@ -264,12 +273,10 @@ export class MapEmbeddable
   }
 
   onUpdate() {
-    if (
-      this.input.filterByMapExtent !== undefined &&
-      this._prevFilterByMapExtent !== this.input.filterByMapExtent
-    ) {
-      this._prevFilterByMapExtent = this.input.filterByMapExtent;
-      if (this.input.filterByMapExtent) {
+    const filterByMapExtent = getFilterByMapExtent(this.input);
+    if (this._prevFilterByMapExtent !== filterByMapExtent) {
+      this._prevFilterByMapExtent = filterByMapExtent;
+      if (filterByMapExtent) {
         this.setMapExtentFilter();
       } else {
         this.clearMapExtentFilter();
@@ -302,6 +309,47 @@ export class MapEmbeddable
       );
     }
   }
+
+  _getIsMovementSynchronized = () => {
+    return this.input.isMovementSynchronized === undefined
+      ? true
+      : this.input.isMovementSynchronized;
+  };
+
+  _gotoSynchronizedLocation() {
+    const syncedLocation = synchronizeMovement.getLocation();
+    if (syncedLocation) {
+      // set map to synchronized view
+      this._mapSyncHandler(syncedLocation.lat, syncedLocation.lon, syncedLocation.zoom);
+      return;
+    }
+
+    if (!getMapReady(this._savedMap.getStore().getState())) {
+      // Initialize synchronized view to map's goto
+      // Use goto because un-rendered map will not have accurate mapCenter and mapZoom.
+      const goto = getGoto(this._savedMap.getStore().getState());
+      if (goto && goto.center) {
+        synchronizeMovement.setLocation(
+          this.input.id,
+          goto.center.lat,
+          goto.center.lon,
+          goto.center.zoom
+        );
+        return;
+      }
+    }
+
+    // Initialize synchronized view to map's view
+    const center = getMapCenter(this._savedMap.getStore().getState());
+    const zoom = getMapZoom(this._savedMap.getStore().getState());
+    synchronizeMovement.setLocation(this.input.id, center.lat, center.lon, zoom);
+  }
+
+  _propogateMapMovement = (lat: number, lon: number, zoom: number) => {
+    if (this._getIsMovementSynchronized()) {
+      synchronizeMovement.setLocation(this.input.id, lat, lon, zoom);
+    }
+  };
 
   _getFilters() {
     return this.input.filters
@@ -363,6 +411,35 @@ export class MapEmbeddable
     this._domNode = domNode;
     if (!this._isInitialized) {
       return;
+    }
+
+    synchronizeMovement.register(this.input.id, {
+      getTitle: () => {
+        const output = this.getOutput();
+        if (output.title) {
+          return output.title;
+        }
+
+        if (output.defaultTitle) {
+          return output.defaultTitle;
+        }
+
+        return this.input.id;
+      },
+      onLocationChange: this._mapSyncHandler,
+      getIsMovementSynchronized: this._getIsMovementSynchronized,
+      setIsMovementSynchronized: (isMovementSynchronized: boolean) => {
+        this.updateInput({ isMovementSynchronized });
+        if (isMovementSynchronized) {
+          this._gotoSynchronizedLocation();
+        } else if (!isMovementSynchronized && this._savedMap.getAutoFitToBounds()) {
+          // restore autoFitToBounds when isMovementSynchronized disabled
+          this._savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: true }));
+        }
+      },
+    });
+    if (this._getIsMovementSynchronized()) {
+      this._gotoSynchronizedLocation();
     }
 
     const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
@@ -538,6 +615,7 @@ export class MapEmbeddable
 
   destroy() {
     super.destroy();
+    synchronizeMovement.unregister(this.input.id);
     this._isActive = false;
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
@@ -558,6 +636,15 @@ export class MapEmbeddable
     });
   }
 
+  _mapSyncHandler = (lat: number, lon: number, zoom: number) => {
+    // auto fit to bounds is not compatable with map synchronization
+    // auto fit to bounds may cause map location to never stablize and bound back and forth between bounds on different maps
+    if (getMapSettings(this._savedMap.getStore().getState()).autoFitToDataBounds) {
+      this._savedMap.getStore().dispatch(setMapSettings({ autoFitToDataBounds: false }));
+    }
+    this._savedMap.getStore().dispatch(setGotoWithCenter({ lat, lon, zoom }));
+  };
+
   _handleStoreChanges() {
     if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
@@ -573,7 +660,7 @@ export class MapEmbeddable
     }
 
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());
-    if (this.input.filterByMapExtent && !_.isEqual(this._prevMapExtent, mapExtent)) {
+    if (getFilterByMapExtent(this.input) && !_.isEqual(this._prevMapExtent, mapExtent)) {
       this.setMapExtentFilter();
     }
 
