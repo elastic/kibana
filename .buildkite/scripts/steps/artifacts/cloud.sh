@@ -56,8 +56,8 @@ CLOUD_DEPLOYMENT_PASSWORD=$(jq -r --slurp '.[]|select(.resources).resources[] | 
 CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$LOGS")
 CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$LOGS")
 
-CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
-CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
+export CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
+export CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
 
 echo "Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL"
 echo "ES: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
@@ -68,15 +68,15 @@ function shutdown {
 }
 trap "shutdown" EXIT
 
-export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol.replace(':', ''))")
-export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
-export TEST_KIBANA_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
+export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).protocol.replace(':', ''))")
+export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).hostname)")
+export TEST_KIBANA_PORT=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).port || 443)")
 export TEST_KIBANA_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
 export TEST_KIBANA_PASSWORD="$CLOUD_DEPLOYMENT_PASSWORD"
 
-export TEST_ES_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL').protocol.replace(':', ''))")
-export TEST_ES_HOSTNAME=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL').hostname)")
-export TEST_ES_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL').port)")
+export TEST_ES_PROTOCOL=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).protocol.replace(':', ''))")
+export TEST_ES_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).hostname)")
+export TEST_ES_PORT=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).port || 443)")
 export TEST_ES_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
 export TEST_ES_PASSWORD="$CLOUD_DEPLOYMENT_PASSWORD"
 

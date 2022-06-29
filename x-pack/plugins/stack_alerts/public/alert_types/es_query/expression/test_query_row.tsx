@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButtonEmpty, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFormRow, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestQuery } from './use_test_query';
 
@@ -21,21 +21,21 @@ export function TestQueryRow({
   return (
     <>
       <EuiFormRow>
-        <EuiButtonEmpty
+        <EuiButton
           data-test-subj="testQuery"
           color="primary"
           iconSide="left"
-          flush="left"
-          iconType="play"
+          iconType="playFilled"
           onClick={onTestQuery}
           disabled={hasValidationErrors}
           isLoading={testQueryLoading}
+          size="s"
         >
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.testQuery"
             defaultMessage="Test query"
           />
-        </EuiButtonEmpty>
+        </EuiButton>
       </EuiFormRow>
       {testQueryLoading && (
         <EuiFormRow>

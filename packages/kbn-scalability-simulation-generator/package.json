@@ -1,0 +1,11 @@
+{
+  "name": "@kbn/scalability-simulation-generator",
+  "description": "A library to generate scalability benchmarking simulation files from APM traces.",
+  "private": true,
+  "version": "1.0.0",
+  "main": "./target_node/index.js",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "kibana": {
+    "devOnly": true
+  }
+}

@@ -8,7 +8,9 @@
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DocLinksStart } from '@kbn/core/public';
 import { EuiHealth, EuiText, EuiTreeView, EuiNotificationBadge } from '@elastic/eui';
+import { useKibana } from '../../../common/lib/kibana';
 import {
   HostPolicyResponseActionStatus,
   HostPolicyResponseAppliedAction,
@@ -17,7 +19,7 @@ import {
   ImmutableArray,
   ImmutableObject,
 } from '../../../../common/endpoint/types';
-import { formatResponse } from './policy_response_friendly_names';
+import { formatResponse, PolicyResponseActionFormatter } from './policy_response_friendly_names';
 import { PolicyResponseActionItem } from './policy_response_action_item';
 
 // Most of them are needed in order to display large react nodes (PolicyResponseActionItem) in child levels.
@@ -37,8 +39,8 @@ const StyledEuiTreeView = styled(EuiTreeView)`
       .euiTreeView__node {
         // When response action item displays a callout, this needs to be overwritten to remove the default max height of EuiTreeView
         max-height: none !important;
-        padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
-        padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+        padding-top: ${({ theme }) => theme.eui.euiSizeS};
+        padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
       }
     }
   }
@@ -59,6 +61,7 @@ export const PolicyResponse = memo(
     policyResponseActions,
     policyResponseAttentionCount,
   }: PolicyResponseProps) => {
+    const { docLinks } = useKibana().services;
     const getEntryIcon = useCallback(
       (status: HostPolicyResponseActionStatus, unsuccessCounts: number) =>
         status === HostPolicyResponseActionStatus.success ? (
@@ -88,6 +91,12 @@ export const PolicyResponse = memo(
             (currentAction) => currentAction.name === actionKey
           ) as ImmutableObject<HostPolicyResponseAppliedAction>;
 
+          const policyResponseActionFormatter = new PolicyResponseActionFormatter(
+            action || {},
+            docLinks.links.securitySolution.policyResponseTroubleshooting[
+              action.name as keyof DocLinksStart['links']['securitySolution']['policyResponseTroubleshooting']
+            ]
+          );
           return {
             label: (
               <EuiText
@@ -99,7 +108,7 @@ export const PolicyResponse = memo(
                 }
                 data-test-subj="endpointPolicyResponseAction"
               >
-                {formatResponse(actionKey)}
+                {policyResponseActionFormatter.title}
               </EuiText>
             ),
             id: actionKey,
@@ -116,11 +125,7 @@ export const PolicyResponse = memo(
               {
                 label: (
                   <PolicyResponseActionItem
-                    status={action.status}
-                    actionTitle={action.name}
-                    actionMessage={action.message}
-                    // actionButtonLabel="Do something" // TODO
-                    // actionButtonOnClick={() => {}} // TODO
+                    policyResponseActionFormatter={policyResponseActionFormatter}
                   />
                 ),
                 id: `action_message_${actionKey}`,
@@ -135,7 +140,11 @@ export const PolicyResponse = memo(
           };
         });
       },
-      [getEntryIcon, policyResponseActions]
+      [
+        docLinks.links.securitySolution.policyResponseTroubleshooting,
+        getEntryIcon,
+        policyResponseActions,
+      ]
     );
 
     const getResponseConfigs = useCallback(

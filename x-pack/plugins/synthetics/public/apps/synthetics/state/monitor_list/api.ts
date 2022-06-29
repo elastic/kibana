@@ -26,7 +26,10 @@ function toMonitorManagementListQueryArgs(
     page: pageState.pageIndex + 1,
     sortOrder: pageState.sortOrder,
     sortField: pageState.sortField,
-    search: '',
+    query: pageState.query,
+    tags: pageState.tags,
+    locations: pageState.locations,
+    monitorType: pageState.monitorType,
     searchFields: [],
   };
 }

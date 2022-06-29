@@ -225,15 +225,14 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         width: dimensions.docCount,
       },
       {
-        field: 'stats.cardinality',
+        field: 'cardinality',
         name: i18n.translate('xpack.dataVisualizer.dataGrid.distinctValuesColumnName', {
           defaultMessage: 'Distinct values',
         }),
-        render: (cardinality: number | undefined) => (
-          <DistinctValues cardinality={cardinality} showIcon={dimensions.showIcon} />
+        render: (_: undefined, item: DataVisualizerTableItem) => (
+          <DistinctValues cardinality={item?.stats?.cardinality} showIcon={dimensions.showIcon} />
         ),
-
-        sortable: true,
+        sortable: (item: DataVisualizerTableItem) => item?.stats?.cardinality,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnDistinctValues',
         width: dimensions.distinctValues,

@@ -267,13 +267,7 @@
                 "label": "theme",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
-                  }
+                  "ThemeServiceStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -4227,6 +4221,20 @@
                 "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
                 "deprecated": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ErrorEmbeddable.Unnamed.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "compact",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -5406,13 +5414,7 @@
             "text": "NotificationsStart"
           },
           "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ThemeServiceStart",
-            "text": "ThemeServiceStart"
-          },
+          "ThemeServiceStart",
           "; }) => ",
           {
             "pluginId": "core",
@@ -5705,13 +5707,7 @@
                 "label": "theme",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
-                  }
+                  "ThemeServiceStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false

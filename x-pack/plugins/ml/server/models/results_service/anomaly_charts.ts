@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { extent, max, min } from 'd3';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { MlClient } from '../../lib/ml_client';
-import { isPopulatedObject, isRuntimeMappings } from '../../../common';
+import { isRuntimeMappings } from '../../../common';
 import type {
   MetricData,
   ModelPlotOutput,

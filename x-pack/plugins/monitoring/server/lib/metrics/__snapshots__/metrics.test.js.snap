@@ -6034,6 +6034,31 @@ Object {
           "path": "logstash_stats.pipelines",
         },
       },
+      "pipelines_mb": Object {
+        "aggs": Object {
+          "pipeline_by_id": Object {
+            "aggs": Object {
+              "queue_size_field": Object {
+                "max": Object {
+                  "field": "logstash.node.stats.pipelines.queue.max_queue_size_in_bytes",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "logstash.node.stats.pipelines.id",
+              "size": 1000,
+            },
+          },
+          "total_queue_size_for_node": Object {
+            "sum_bucket": Object {
+              "buckets_path": "pipeline_by_id>queue_size_field",
+            },
+          },
+        },
+        "nested": Object {
+          "path": "logstash.node.stats.pipelines",
+        },
+      },
     },
     "derivative": false,
     "description": "Maximum size set for the persistent queues on this node.",
@@ -6044,7 +6069,7 @@ Object {
     "getDateHistogramSubAggs": undefined,
     "isNotSupportedInInternalCollection": undefined,
     "label": "Max Queue Size",
-    "mbField": undefined,
+    "mbField": "logstash.node.stats.pipelines.queue.max_queue_size_in_bytes",
     "metricAgg": undefined,
     "periodsField": undefined,
     "quotaField": undefined,
@@ -6083,6 +6108,31 @@ Object {
           "path": "logstash_stats.pipelines",
         },
       },
+      "pipelines_mb": Object {
+        "aggs": Object {
+          "pipeline_by_id": Object {
+            "aggs": Object {
+              "queue_size_field": Object {
+                "max": Object {
+                  "field": "logstash.node.stats.pipelines.queue.queue_size_in_bytes",
+                },
+              },
+            },
+            "terms": Object {
+              "field": "logstash.node.stats.pipelines.id",
+              "size": 1000,
+            },
+          },
+          "total_queue_size_for_node": Object {
+            "sum_bucket": Object {
+              "buckets_path": "pipeline_by_id>queue_size_field",
+            },
+          },
+        },
+        "nested": Object {
+          "path": "logstash.node.stats.pipelines",
+        },
+      },
     },
     "derivative": false,
     "description": "Current size of all persistent queues in the Logstash pipelines on this node.",
@@ -6093,7 +6143,7 @@ Object {
     "getDateHistogramSubAggs": undefined,
     "isNotSupportedInInternalCollection": undefined,
     "label": "Queue Size",
-    "mbField": undefined,
+    "mbField": "logstash.node.stats.pipelines.queue.queue_size_in_bytes",
     "metricAgg": undefined,
     "periodsField": undefined,
     "quotaField": undefined,

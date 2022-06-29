@@ -31,6 +31,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
+import { AnalyticsService } from './analytics';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
@@ -184,6 +185,7 @@ export class SecurityPlugin
 
   private readonly auditService: AuditService;
   private readonly securityLicenseService = new SecurityLicenseService();
+  private readonly analyticsService: AnalyticsService;
   private readonly authorizationService = new AuthorizationService();
   private readonly elasticsearchService: ElasticsearchService;
   private readonly sessionManagementService: SessionManagementService;
@@ -240,6 +242,7 @@ export class SecurityPlugin
     this.userProfileService = new UserProfileService(
       this.initializerContext.logger.get('user-profile')
     );
+    this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
   }
 
   public setup(
@@ -347,6 +350,7 @@ export class SecurityPlugin
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
+      analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
     });
 
     return Object.freeze<SecurityPluginSetup>({

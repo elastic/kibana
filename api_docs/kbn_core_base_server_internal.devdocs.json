@@ -1,0 +1,123 @@
+{
+  "id": "@kbn/core-base-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-base-server-internal",
+        "id": "def-server.CriticalError",
+        "type": "Class",
+        "tags": [],
+        "label": "CriticalError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-base-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreBaseServerInternalPluginApi",
+            "section": "def-server.CriticalError",
+            "text": "CriticalError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/core/base/core-base-server-internal/src/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-base-server-internal",
+            "id": "def-server.CriticalError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/base/core-base-server-internal/src/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-base-server-internal",
+                "id": "def-server.CriticalError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/base/core-base-server-internal/src/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-base-server-internal",
+                "id": "def-server.CriticalError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "code",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/base/core-base-server-internal/src/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-base-server-internal",
+                "id": "def-server.CriticalError.Unnamed.$3",
+                "type": "number",
+                "tags": [],
+                "label": "processExitCode",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/core/base/core-base-server-internal/src/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-base-server-internal",
+                "id": "def-server.CriticalError.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "cause",
+                "description": [],
+                "signature": [
+                  "Error | undefined"
+                ],
+                "path": "packages/core/base/core-base-server-internal/src/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

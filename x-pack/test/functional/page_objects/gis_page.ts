@@ -195,6 +195,14 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.missingOrFail('addLayerButton');
   }
 
+  async expectMissingToolsControl() {
+    await this.testSubjects.missingOrFail('mapToolsControlPopover');
+  }
+
+  async expectExistsToolsControl() {
+    await this.testSubjects.existOrFail('mapToolsControlPopover');
+  }
+
   async expectExistAddLayerButton() {
     await this.testSubjects.existOrFail('addLayerButton');
   }

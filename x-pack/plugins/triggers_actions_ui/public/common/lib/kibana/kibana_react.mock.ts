@@ -23,6 +23,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
   return {
     ...core,
+    actions: { validateEmailAddresses: jest.fn() },
     ruleTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),

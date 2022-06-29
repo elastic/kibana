@@ -78,7 +78,16 @@ export const createInitialState = ({
     migrationsConfig.discardUnknownObjects !== kibanaVersion
   ) {
     logger.warn(
-      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
+      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
+    );
+  }
+
+  if (
+    migrationsConfig.discardCorruptObjects &&
+    migrationsConfig.discardCorruptObjects !== kibanaVersion
+  ) {
+    logger.warn(
+      'The flag `migrations.discardCorruptObjects` is defined but does not match the current kibana version; corrupt objects will NOT be discarded.'
     );
   }
 
@@ -101,6 +110,7 @@ export const createInitialState = ({
     batchSize: migrationsConfig.batchSize,
     maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
     discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
+    discardCorruptObjects: migrationsConfig.discardCorruptObjects === kibanaVersion,
     logs: [],
     excludeOnUpgradeQuery: excludeUnusedTypesQuery,
     knownTypes,
