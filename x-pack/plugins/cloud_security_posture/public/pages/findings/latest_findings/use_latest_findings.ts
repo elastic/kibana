@@ -12,9 +12,9 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plug
 import type { CoreStart } from '@kbn/core/public';
 import type { Criteria, Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { i18n } from '@kbn/i18n';
 import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
-import * as TEXT from '../translations';
 import type { CspFinding } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
@@ -56,12 +56,17 @@ const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
 const getSortKey = (key: string): string =>
   FIELDS_WITHOUT_KEYWORD_MAPPING.has(key) ? key : `${key}.keyword`;
 
+const SEARCH_FAILED_TEXT = i18n.translate(
+  'xpack.csp.findings.findingsErrorToast.searchFailedTitle',
+  { defaultMessage: 'Search failed' }
+);
+
 export const showErrorToast = (
   toasts: CoreStart['notifications']['toasts'],
   error: unknown
 ): void => {
-  if (error instanceof Error) toasts.addError(error, { title: TEXT.SEARCH_FAILED });
-  else toasts.addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
+  if (error instanceof Error) toasts.addError(error, { title: SEARCH_FAILED_TEXT });
+  else toasts.addDanger(extractErrorMessage(error, SEARCH_FAILED_TEXT));
 };
 
 export const getFindingsQuery = ({
