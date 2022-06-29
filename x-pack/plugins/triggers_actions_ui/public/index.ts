@@ -39,8 +39,6 @@ export type {
   GetRenderCellValue,
 } from './types';
 
-export { AlertsTableFlyoutState } from './types';
-
 export {
   ActionForm,
   CreateConnectorFlyout,

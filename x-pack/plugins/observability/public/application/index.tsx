@@ -52,6 +52,7 @@ export const renderApp = ({
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
   usageCollection,
+  isDev,
 }: {
   core: CoreStart;
   plugins: ObservabilityPublicPluginsStart;
@@ -59,6 +60,7 @@ export const renderApp = ({
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   usageCollection: UsageCollectionSetup;
+  isDev?: boolean;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -80,7 +82,7 @@ export const renderApp = ({
     <ApplicationUsageTrackingProvider>
       <KibanaThemeProvider theme$={theme$}>
         <KibanaContextProvider
-          services={{ ...core, ...plugins, storage: new Storage(localStorage) }}
+          services={{ ...core, ...plugins, storage: new Storage(localStorage), isDev }}
         >
           <PluginContext.Provider
             value={{
