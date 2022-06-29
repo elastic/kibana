@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'navigationalSearch',
   ]);
   const browser = getService('browser');
+  const retry = getService('retry');
   const filterBar = getService('filterBar');
   const appsMenu = getService('appsMenu');
   const security = getService('security');
@@ -186,18 +187,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('keep time range and pinned filters after refresh', async () => {
       await browser.refresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const timeRange = await PageObjects.timePicker.getTimeConfig();
-      expect(timeRange.start).to.equal('Sep 7, 2015 @ 06:31:44.000');
-      expect(timeRange.end).to.equal('Sep 19, 2025 @ 06:31:44.000');
-      await filterBar.hasFilter('ip', '97.220.3.248', false, true);
+      // Lens app can take a while to be fully functional after refresh, retry assertion
+      await retry.try(async () => {
+        const timeRange = await PageObjects.timePicker.getTimeConfig();
+        expect(timeRange.start).to.equal('Sep 7, 2015 @ 06:31:44.000');
+        expect(timeRange.end).to.equal('Sep 19, 2025 @ 06:31:44.000');
+        await filterBar.hasFilter('ip', '97.220.3.248', false, true);
+      });
     });
 
     it('keeps selected index pattern after refresh', async () => {
       await PageObjects.lens.switchDataPanelIndexPattern('log*');
       await browser.refresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('log*');
+      // Lens app can take a while to be fully functional after refresh, retry assertion
+      await retry.try(async () => {
+        expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('log*');
+      });
     });
 
     it('keeps time range and pinned filters after refreshing directly after saving', async () => {
@@ -216,11 +221,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.save('persistentcontext');
       await browser.refresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const timeRange = await PageObjects.timePicker.getTimeConfig();
-      expect(timeRange.start).to.equal('Sep 7, 2015 @ 06:31:44.000');
-      expect(timeRange.end).to.equal('Sep 19, 2025 @ 06:31:44.000');
-      await filterBar.hasFilter('ip', '97.220.3.248', false, true);
+      // Lens app can take a while to be fully functional after refresh, retry assertion
+      await retry.try(async () => {
+        const timeRange = await PageObjects.timePicker.getTimeConfig();
+        expect(timeRange.start).to.equal('Sep 7, 2015 @ 06:31:44.000');
+        expect(timeRange.end).to.equal('Sep 19, 2025 @ 06:31:44.000');
+        await filterBar.hasFilter('ip', '97.220.3.248', false, true);
+      });
     });
   });
 }
