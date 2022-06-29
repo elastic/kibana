@@ -9,10 +9,8 @@
 import React, { Fragment } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { formatHit } from '../../../utils/format_hit';
-import type { DataTableRecord } from '../../../types';
-
-import './row_formatter.scss';
 import { DataTableRecord } from '../../../types';
+import './row_formatter.scss';
 
 interface Props {
   defPairs: Array<readonly [string, string]>;

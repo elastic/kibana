@@ -20,7 +20,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
@@ -41,7 +40,7 @@ export const getRenderCellValueFn =
     closePopover: () => void
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
-    const { uiSettings, fieldFormats } = useDiscoverServices();
+    const { uiSettings } = useDiscoverServices();
 
     const maxEntries = useMemo(() => uiSettings.get(MAX_DOC_FIELDS_DISPLAYED), [uiSettings]);
 
@@ -87,9 +86,7 @@ export const getRenderCellValueFn =
       return renderPopoverContent({
         row,
         columnId,
-        dataView,
         useTopLevelObjectColumns,
-        fieldFormats,
         closePopover,
       });
     }
@@ -157,18 +154,13 @@ function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumn
  */
 function renderPopoverContent({
   row,
-  field,
   columnId,
-  dataView,
   useTopLevelObjectColumns,
   closePopover,
 }: {
   row: DataTableRecord;
-  field: DataViewField | undefined;
   columnId: string;
-  dataView: DataView;
   useTopLevelObjectColumns: boolean;
-  fieldFormats: FieldFormatsStart;
   closePopover: () => void;
 }) {
   const closeButton = (

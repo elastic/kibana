@@ -17,7 +17,6 @@ import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 import { getFieldsToShow } from '../../../../../utils/get_fields_to_show';
 import { getIgnoredReason } from '../../../../../utils/get_ignored_reason';
 import { isNestedFieldParent } from '../../../../../application/main/utils/nested_fields';
-import { buildDataTableRecord } from '../../../../../utils/build_data_record';
 
 export const DocViewerLegacyTable = ({
   columns,
@@ -29,7 +28,6 @@ export const DocViewerLegacyTable = ({
 }: DocViewRenderProps) => {
   const { uiSettings } = useDiscoverServices();
   const showMultiFields = useMemo(() => uiSettings.get(SHOW_MULTIFIELDS), [uiSettings]);
-  const doc = useMemo(() => buildDataTableRecord(hit, dataView), [hit, dataView]);
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
   const tableColumns = useMemo(() => {
@@ -57,9 +55,9 @@ export const DocViewerLegacyTable = ({
     };
   }, []);
 
-  const fieldsToShow = getFieldsToShow(Object.keys(doc.flattened), dataView, showMultiFields);
+  const fieldsToShow = getFieldsToShow(Object.keys(hit.flattened), dataView, showMultiFields);
 
-  const items: FieldRecordLegacy[] = Object.keys(doc.flattened)
+  const items: FieldRecordLegacy[] = Object.keys(hit.flattened)
     .filter((fieldName) => {
       return fieldsToShow.includes(fieldName);
     })
@@ -84,7 +82,7 @@ export const DocViewerLegacyTable = ({
           onToggleColumn,
           onFilter: filter,
           isActive: !!columns?.includes(field),
-          flattenedField: doc.flattened[field],
+          flattenedField: hit.flattened[field],
         },
         field: {
           field,
@@ -94,7 +92,7 @@ export const DocViewerLegacyTable = ({
           scripted: Boolean(fieldMapping?.scripted),
         },
         value: {
-          formattedValue: doc.renderFormatted!(field),
+          formattedValue: hit.renderFormatted!(field),
           ignored,
         },
       };

@@ -237,15 +237,13 @@ export const DiscoverGrid = ({
   const valueToStringConverter: ValueToStringConverter = useCallback(
     (rowIndex, columnId, options) => {
       return convertValueToString({
-        rowIndex,
-        rows: displayedRows,
+        row: displayedRows[rowIndex],
         dataView: indexPattern,
         columnId,
-        services,
         options,
       });
     },
-    [displayedRows, indexPattern, services]
+    [displayedRows, indexPattern]
   );
 
   /**
@@ -324,25 +322,23 @@ export const DiscoverGrid = ({
     () =>
       getEuiGridColumns({
         columns: displayedColumns,
-        rowsCount: displayedRows.length,
         settings,
         indexPattern,
         showTimeCol,
         defaultColumns,
         isSortEnabled,
         services,
-        valueToStringConverter,
+        rows: displayedRows,
       }),
     [
       displayedColumns,
-      displayedRows,
+      settings,
       indexPattern,
       showTimeCol,
-      settings,
       defaultColumns,
       isSortEnabled,
       services,
-      valueToStringConverter,
+      displayedRows,
     ]
   );
 

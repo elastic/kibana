@@ -7,6 +7,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ConvertedResult } from './utils/convert_value_to_string';
 
 export type ValueToStringConverter = (
   rowIndex: number,
