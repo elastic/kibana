@@ -89,9 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the default log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({
-          logPosition,
-        });
+        await logsUi.logStreamPage.navigateTo({ logPosition });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
