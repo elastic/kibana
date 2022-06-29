@@ -62,7 +62,7 @@ export const createApiLogic = <Result, Args>(
           }),
           makeRequest: ({ data }) => {
             return {
-              ...data,
+              ...{ data: data || undefined },
               status: Status.LOADING,
             };
           },
