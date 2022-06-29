@@ -24,10 +24,8 @@ import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
 import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
-import {
-  ExternalReferenceAttachmentType,
-  ExternalReferenceAttachmentTypeRegistry,
-} from '../../client/attachment_framework/types';
+import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 
 interface TestProviderProps {
   children: React.ReactNode;
@@ -35,6 +33,7 @@ interface TestProviderProps {
   features?: CasesFeatures;
   owner?: string[];
   releasePhase?: ReleasePhase;
+  externalReferenceAttachmentTypeRegistry?: AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -48,6 +47,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   owner = [SECURITY_SOLUTION_OWNER],
   userCanCrud = true,
   releasePhase = 'ga',
+  externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
 }) => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -56,9 +56,6 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       },
     },
   });
-
-  const externalReferenceAttachmentTypeRegistry =
-    new AttachmentTypeRegistry<ExternalReferenceAttachmentType>();
 
   return (
     <I18nProvider>
@@ -100,6 +97,7 @@ export const createAppMockRenderer = ({
   owner = [SECURITY_SOLUTION_OWNER],
   userCanCrud = true,
   releasePhase = 'ga',
+  externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
   const services = createStartServicesMock();
   const queryClient = new QueryClient({
@@ -109,9 +107,6 @@ export const createAppMockRenderer = ({
       },
     },
   });
-
-  const externalReferenceAttachmentTypeRegistry =
-    new AttachmentTypeRegistry<ExternalReferenceAttachmentType>();
 
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <I18nProvider>
@@ -134,13 +129,16 @@ export const createAppMockRenderer = ({
       </KibanaContextProvider>
     </I18nProvider>
   );
+
   AppWrapper.displayName = 'AppWrapper';
+
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {
       wrapper: AppWrapper,
       ...options,
     });
   };
+
   return {
     coreStart: services,
     queryClient,

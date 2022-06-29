@@ -32,7 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           params: {
             type: CommentType.externalReference,
             externalReferenceId: 'my-id',
-            externalReferenceStorage: { type: ExternalReferenceStorageType.other },
+            externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
             externalReferenceAttachmentTypeId: '.test',
             externalReferenceMetadata: null,
             owner: 'cases',

@@ -24,11 +24,7 @@ import { getCasesContextLazy } from './client/ui/get_cases_context';
 import { getCreateCaseFlyoutLazy } from './client/ui/get_create_case_flyout';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
-import {
-  ExternalReferenceAttachmentType,
-  ExternalReferenceAttachmentTypeRegistry,
-} from './client/attachment_framework/types';
-import { AttachmentTypeRegistry } from './client/attachment_framework/registry';
+import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 
 /**
  * @public
@@ -43,8 +39,7 @@ export class CasesUiPlugin
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.externalReferenceAttachmentTypeRegistry =
-      new AttachmentTypeRegistry<ExternalReferenceAttachmentType>();
+    this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
   }
 
   public setup(core: CoreSetup, plugins: CasesPluginSetup): CasesUiSetup {

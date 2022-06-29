@@ -25,6 +25,7 @@ const AttachmentActions: React.FC = () => {
 export const getExternalReferenceAttachmentRegular = (): ExternalReferenceAttachmentType => ({
   id: '.test',
   icon: 'casesApp',
+  displayName: 'Test',
   getAttachmentViewObject: () => ({
     type: 'regular',
     event: 'added a chart',

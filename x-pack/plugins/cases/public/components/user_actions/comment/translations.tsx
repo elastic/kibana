@@ -13,3 +13,10 @@ export const ATTACHMENT_NOT_REGISTERED_ERROR = i18n.translate(
     defaultMessage: 'Attachment type is not registered',
   }
 );
+
+export const DEFAULT_EVENT_ATTACHMENT_TITLE = i18n.translate(
+  'xpack.cases.userActions.defaultEventAttachmentTitle',
+  {
+    defaultMessage: 'added an attachment of type',
+  }
+);

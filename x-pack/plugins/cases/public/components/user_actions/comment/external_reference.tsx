@@ -14,7 +14,7 @@ import { UserActionTimestamp } from '../timestamp';
 import { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionUsernameWithAvatar } from '../avatar_username';
 import { UserActionCopyLink } from '../copy_link';
-import { ATTACHMENT_NOT_REGISTERED_ERROR } from './translations';
+import { ATTACHMENT_NOT_REGISTERED_ERROR, DEFAULT_EVENT_ATTACHMENT_TITLE } from './translations';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -47,7 +47,7 @@ export const createExternalReferenceAttachmentUserActionBuilder = ({
           ),
           event: (
             <>
-              {'added an attachment of type '}
+              {`${DEFAULT_EVENT_ATTACHMENT_TITLE} `}
               <EuiCode>{comment.externalReferenceAttachmentTypeId}</EuiCode>
             </>
           ),
@@ -66,7 +66,7 @@ export const createExternalReferenceAttachmentUserActionBuilder = ({
     );
 
     const externalReferenceViewObject = externalReferenceType.getAttachmentViewObject({
-      externalReferenceId: externalReferenceType.id,
+      externalReferenceId: comment.externalReferenceId,
       externalReferenceMetadata: comment.externalReferenceMetadata,
       caseData: { id: caseData.id, title: caseData.title },
     });

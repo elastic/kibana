@@ -141,6 +141,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
     }
 
     const comment = caseData.comments.find((c) => c.id === commentUserAction.commentId);
+
     if (comment == null) {
       return [];
     }

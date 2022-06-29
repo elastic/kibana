@@ -9,7 +9,6 @@ import type React from 'react';
 import { EuiCommentProps, IconType } from '@elastic/eui';
 import { CommentRequestExternalReferenceType } from '../../../common/api';
 import { Case } from '../../containers/types';
-import { AttachmentTypeRegistry } from './registry';
 
 export interface ExternalReferenceAttachmentViewObject {
   type?: EuiCommentProps['type'];
@@ -28,6 +27,7 @@ export interface ExternalReferenceAttachmentViewProps {
 export interface ExternalReferenceAttachmentType {
   id: string;
   icon: IconType;
+  displayName: string;
   getAttachmentViewObject: (
     props: ExternalReferenceAttachmentViewProps
   ) => ExternalReferenceAttachmentViewObject;
@@ -38,6 +38,3 @@ export interface AttachmentFramework {
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
   ) => void;
 }
-
-export type ExternalReferenceAttachmentTypeRegistry =
-  AttachmentTypeRegistry<ExternalReferenceAttachmentType>;
