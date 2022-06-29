@@ -25,6 +25,10 @@ import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
+import {
+  ExecutionContextService,
+  executionContextConfig,
+} from '@kbn/core-execution-context-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
@@ -38,7 +42,6 @@ import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
-import { ExecutionContextService } from './execution_context';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -53,7 +56,6 @@ import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
-import { config as executionContextConfig } from './execution_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
