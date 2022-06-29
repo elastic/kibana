@@ -74,8 +74,8 @@ Fleet::
 * Improves bulk actions for more than 10k agents {kibana-pull}134565[#134565]
 
 Infrastructure::
-
 Query persistent queue size for metricbeat documents {kibana-pull}134569[#134569]
+
 Machine Learning::
 * Fixes put job endpoint when payload contains datafeed {kibana-pull}134986[#134986]
 * Fixes trained model map associating wrong model to job {kibana-pull}134849[#134849]
