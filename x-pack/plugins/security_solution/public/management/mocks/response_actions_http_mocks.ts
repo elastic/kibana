@@ -11,6 +11,7 @@ import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
   GET_RUNNING_PROCESSES_ROUTE,
+  ENDPOINTS_ACTION_LIST_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
 } from '../../../common/endpoint/constants';
@@ -20,6 +21,7 @@ import {
 } from '../../common/mock/endpoint/http_handler_mock_factory';
 import {
   ActionDetailsApiResponse,
+  ActionListApiResponse,
   HostIsolationResponse,
   PendingActionsResponse,
   RunningProcessesEntry,
@@ -32,6 +34,8 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   releaseHost: () => HostIsolationResponse;
 
   actionDetails: (options: HttpFetchOptionsWithPath) => ActionDetailsApiResponse;
+
+  actionList: (options: HttpFetchOptionsWithPath) => ActionListApiResponse;
 
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
 
@@ -68,6 +72,26 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
       response.id = path.substring(path.lastIndexOf('/') + 1) || response.id;
 
       return { data: response };
+    },
+  },
+  {
+    id: 'actionList',
+    path: ENDPOINTS_ACTION_LIST_ROUTE,
+    method: 'get',
+    handler: (): ActionListApiResponse => {
+      const response = new EndpointActionGenerator('seed').generateActionDetails();
+
+      return {
+        elasticAgentIds: ['agent-a'],
+        commands: ['isolate'],
+        page: 0,
+        pageSize: 10,
+        startDate: 'now-10d',
+        endDate: 'now',
+        data: [response],
+        userIds: ['elastic'],
+        total: 1,
+      };
     },
   },
   {
