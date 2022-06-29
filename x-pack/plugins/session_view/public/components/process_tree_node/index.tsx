@@ -79,6 +79,10 @@ export function ProcessTreeNode({
 
   const dateFormat = useDateFormat();
 
+  useEffect(() => {
+    setChildrenExpanded(process.autoExpand);
+  }, [process.autoExpand]);
+
   // forces nodes to expand if the selected process is a descendant
   useEffect(() => {
     if (!childrenExpanded && selectedProcess) {
@@ -87,10 +91,6 @@ export function ProcessTreeNode({
       }
     }
   }, [selectedProcess, process, childrenExpanded]);
-
-  useEffect(() => {
-    setChildrenExpanded(process.autoExpand);
-  }, [process.autoExpand]);
 
   const alerts = process.getAlerts();
   const hasAlerts = useMemo(() => !!alerts.length, [alerts]);

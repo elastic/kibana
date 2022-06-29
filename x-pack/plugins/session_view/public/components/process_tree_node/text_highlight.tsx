@@ -25,26 +25,24 @@ const css: CSSObject = {
 };
 
 export const TextHighlight = ({ children, match, text, highlightStyle }: Props): JSX.Element => {
-  if (!match) {
-    return <>{children}</>;
-  }
-
   let startIdx = 0;
 
   return (
     <span css={css} aria-label={text} role="document">
-      {React.Children.map(children, (child) => {
-        const childText = child.props.children;
-        const childTextLength = childText.length;
+      {!match
+        ? children
+        : React.Children.map(children, (child) => {
+            const childText = child.props.children;
+            const childTextLength = childText.length;
 
-        const highlightIndices = match.map((v) => v - startIdx);
-        startIdx += childTextLength;
+            const highlightIndices = match.map((v) => v - startIdx);
+            startIdx += childTextLength;
 
-        return React.cloneElement(child, {
-          highlightIndices,
-          highlightStyle,
-        });
-      })}
+            return React.cloneElement(child, {
+              highlightIndices,
+              highlightStyle,
+            });
+          })}
     </span>
   );
 };

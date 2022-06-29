@@ -116,6 +116,11 @@ export const useStyles = ({
 
     const textSection: CSSObject = {
       marginLeft: size.s,
+      span: {
+        fontSize: FONT_SIZE,
+        lineHeight: LINE_HEIGHT,
+        verticalAlign: 'middle',
+      },
     };
 
     const sessionLeader: CSSObject = {

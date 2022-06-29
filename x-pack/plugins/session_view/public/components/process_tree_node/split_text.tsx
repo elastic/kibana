@@ -33,11 +33,13 @@ export const SplitText = ({
   return (
     <>
       {children.split('').map(function (char, index) {
+        const isHighlighted = highlightIndices?.includes(index);
         return (
           <span
             aria-hidden="true"
-            css={highlightIndices?.includes(index) ? highlightStyle : css}
+            css={isHighlighted ? highlightStyle : css}
             key={index}
+            {...(isHighlighted ? { 'data-test-subj': `sessionView:splitTextIsHighlighted` } : {})}
             {...props}
           >
             {char === ' ' ? <>&nbsp;</> : char}
