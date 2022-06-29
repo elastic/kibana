@@ -38,7 +38,10 @@ import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
 
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
-import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
+import {
+  useInvalidateRules,
+  useUpdateRulesCache,
+} from '../../../../../containers/detection_engine/rules/use_find_rules_query';
 import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
 
@@ -63,6 +66,7 @@ export const useBulkActions = ({
   const hasMlPermissions = useHasMlPermissions();
   const rulesTableContext = useRulesTableContext();
   const invalidateRules = useInvalidateRules();
+  const updateRulesCache = useUpdateRulesCache();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
   const getIsMounted = useIsMounted();
@@ -118,14 +122,14 @@ export const useBulkActions = ({
           ? disabledRules.map(({ id }) => id)
           : disabledRulesNoML.map(({ id }) => id);
 
-        await executeRulesBulkAction({
+        const res = await executeRulesBulkAction({
           visibleRuleIds: ruleIds,
           action: BulkAction.enable,
           setLoadingRules,
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
         });
-        invalidateRules();
+        updateRulesCache(res?.attributes?.results?.updated ?? []);
         setIsRefreshOn(isRefreshOn);
       };
 
@@ -135,14 +139,15 @@ export const useBulkActions = ({
         closePopover();
 
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
-        await executeRulesBulkAction({
+
+        const res = await executeRulesBulkAction({
           visibleRuleIds: enabledIds,
           action: BulkAction.disable,
           setLoadingRules,
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
         });
-        invalidateRules();
+        updateRulesCache(res?.attributes?.results?.updated ?? []);
         setIsRefreshOn(isRefreshOn);
       };
 
@@ -264,7 +269,7 @@ export const useBulkActions = ({
           );
         }, 5 * 1000);
 
-        await executeRulesBulkAction({
+        const res = await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.edit,
           setLoadingRules,
@@ -282,7 +287,7 @@ export const useBulkActions = ({
         });
 
         isBulkEditFinished = true;
-        invalidateRules();
+        updateRulesCache(res?.attributes?.results?.updated ?? []);
         setIsRefreshOn(isRefreshOn);
         if (getIsMounted()) {
           await resolveTagsRefetch(bulkEditActionType);
@@ -455,6 +460,7 @@ export const useBulkActions = ({
       filterOptions,
       getIsMounted,
       resolveTagsRefetch,
+      updateRulesCache,
       isRefreshOn,
     ]
   );
