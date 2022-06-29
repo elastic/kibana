@@ -262,6 +262,7 @@ export class MapApp extends React.Component<Props, State> {
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query,
       time: getInitialTimeFilters({
+        hasSaveAndReturnConfig: this.props.savedMap.hasSaveAndReturnConfig(),
         serializedMapState,
         globalState,
       }),

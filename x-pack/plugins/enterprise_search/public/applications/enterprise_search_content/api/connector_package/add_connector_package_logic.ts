@@ -7,8 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { generateEncodedPath } from '../../../app_search/utils/encode_path_params';
+
 import { KibanaLogic } from '../../../shared/kibana';
-import { SEARCH_INDEX_CONFIGURATION_PATH } from '../../routes';
+import { SearchIndexTabId } from '../../components/search_index/search_index';
+import { SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import { AddConnectorPackageApiLogic } from './add_connector_package_api_logic';
 
@@ -23,7 +26,10 @@ export const AddConnectorPackageLogic = kea<MakeLogicType<{}, AddConnectorAction
   listeners: {
     apiSuccess: ({ indexName }) => {
       KibanaLogic.values.navigateToUrl(
-        SEARCH_INDEX_CONFIGURATION_PATH.replace(':indexSlug', indexName)
+        generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          indexName,
+          tabId: SearchIndexTabId.CONFIGURATION,
+        })
       );
     },
   },
