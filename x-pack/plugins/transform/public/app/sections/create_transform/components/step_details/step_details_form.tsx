@@ -304,6 +304,15 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       transformSettingsMaxPageSearchSize
     );
 
+    const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState(
+      defaults.transformSettingsNumFailureRetries
+    );
+
+    const isTransformSettingsNumFailureRetriesValid =
+      transformSettingsNumFailureRetries === undefined ||
+      (typeof transformSettingsNumFailureRetries === 'number' &&
+        transformSettingsNumFailureRetries >= -1);
+
     const valid =
       !transformIdEmpty &&
       transformIdValid &&
@@ -336,6 +345,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         transformFrequency,
         transformSettingsMaxPageSearchSize,
         transformSettingsDocsPerSecond,
+        transformSettingsNumFailureRetries,
         destinationIndex,
         destinationIngestPipeline,
         touched: true,
@@ -357,6 +367,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       transformDescription,
       transformFrequency,
       transformSettingsMaxPageSearchSize,
+      transformSettingsNumFailureRetries,
       destinationIndex,
       destinationIngestPipeline,
       valid,
@@ -838,6 +849,47 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
                 isInvalid={!isTransformFrequencyValid}
                 data-test-subj="transformMaxPageSearchSizeInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={i18n.translate('xpack.transform.stepDetailsForm.transformNumRetriesLabel', {
+                defaultMessage: 'Number of failure retries',
+              })}
+              isInvalid={!isTransformSettingsNumFailureRetriesValid}
+              error={
+                !isTransformSettingsNumFailureRetriesValid && [
+                  i18n.translate('xpack.transform.stepDetailsForm.maxPageSearchSizeError', {
+                    defaultMessage:
+                      'Number of retries needs to be a number greater than or equal to -1. The minimum value is `0` and the maximum is `100`.\n' +
+                      '`-1` can be used to denote infinity. In this case, the transform never gives up on retrying a recoverable failure.',
+                  }),
+                ]
+              }
+              helpText={i18n.translate(
+                'xpack.transform.stepDetailsForm.transformNumRetriesHelpText',
+                {
+                  defaultMessage:
+                    'Defines the number of retries on a recoverable failure before the transform task is marked as `failed`. If not set, the cluster setting `xpack.transform.num_transform_failure_retries` or a default of 10 will be used.',
+                }
+              )}
+            >
+              <EuiFieldText
+                value={
+                  transformSettingsNumFailureRetries
+                    ? transformSettingsNumFailureRetries.toString()
+                    : ''
+                }
+                onChange={(e) =>
+                  setTransformSettingsNumFailureRetries(parseInt(e.target.value, 10))
+                }
+                aria-label={i18n.translate(
+                  'xpack.transform.stepDetailsForm.maxPageSearchSizeAriaLabel',
+                  {
+                    defaultMessage: 'Choose a maximum number of retries.',
+                  }
+                )}
+                isInvalid={!isTransformSettingsNumFailureRetriesValid}
+                data-test-subj="transformNumFailureRetriesInput"
               />
             </EuiFormRow>
           </EuiAccordion>

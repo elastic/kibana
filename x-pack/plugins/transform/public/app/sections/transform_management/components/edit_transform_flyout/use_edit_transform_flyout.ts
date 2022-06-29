@@ -44,7 +44,8 @@ type EditTransformFormFields =
   | 'docsPerSecond'
   | 'maxPageSearchSize'
   | 'retentionPolicyField'
-  | 'retentionPolicyMaxAge';
+  | 'retentionPolicyMaxAge'
+  | 'numFailureRetries';
 
 type EditTransformFlyoutFieldsState = Record<EditTransformFormFields, FormField>;
 
@@ -107,16 +108,34 @@ type Validator = (value: any, isOptional?: boolean) => string[];
 // We do this so we have fine grained control over field validation and the option to
 // cast to special values like `null` for disabling `docs_per_second`.
 const numberAboveZeroNotValidErrorMessage = i18n.translate(
-  'xpack.transform.transformList.editFlyoutFormNumberNotValidErrorMessage',
+  'xpack.transform.transformList.editFlyoutFormNumberAboveZeroNotValidErrorMessage',
   {
     defaultMessage: 'Value needs to be an integer above zero.',
   }
 );
+
+const numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormNumberGreaterThanOrEqualToNegativeOneNotValidErrorMessage',
+  {
+    defaultMessage: 'Number of retries needs to be a number greater than or equal to -1.',
+  }
+);
+
 export const integerAboveZeroValidator: Validator = (value) =>
   !isNaN(value) && Number.isInteger(+value) && +value > 0 && !(value + '').includes('.')
     ? []
     : [numberAboveZeroNotValidErrorMessage];
 
+export const integerGreaterThanOrEqualToValidatorFactory =
+  (threshold: number, message: string): Validator =>
+  (value) => {
+    return !isNaN(value) &&
+      Number.isInteger(+value) &&
+      +value >= threshold &&
+      !(value + '').includes('.')
+      ? []
+      : [message];
+  };
 const numberRange10To10000NotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberRange10To10000NotValidErrorMessage',
   {
@@ -214,6 +233,10 @@ const validate = {
   string: stringValidator,
   frequency: frequencyValidator,
   integerAboveZero: integerAboveZeroValidator,
+  integerGreaterThanOrEqualToNegativeOne: integerGreaterThanOrEqualToValidatorFactory(
+    -1,
+    numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage
+  ),
   integerRange10To10000: integerRange10To10000Validator,
   retentionPolicyMaxAge: retentionPolicyMaxAgeValidator,
 } as const;
@@ -404,6 +427,18 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         isNullable: true,
         isOptional: true,
         validator: 'integerRange10To10000',
+        valueParser: (v) => +v,
+      }
+    ),
+    numFailureRetries: initializeField(
+      'numFailureRetries',
+      'settings.num_failure_retries',
+      config,
+      {
+        defaultValue: undefined,
+        isNullable: true,
+        isOptional: true,
+        validator: 'integerGreaterThanOrEqualToNegativeOne',
         valueParser: (v) => +v,
       }
     ),

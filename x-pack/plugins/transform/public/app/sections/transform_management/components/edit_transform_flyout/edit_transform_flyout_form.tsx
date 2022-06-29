@@ -323,7 +323,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             dataTestSubj="transformEditFlyoutDocsPerSecondInput"
             errorMessages={formFields.docsPerSecond.errorMessages}
             helpText={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
+              'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelpText',
               {
                 defaultMessage:
                   'To enable throttling, set a limit of documents to input per second.',
@@ -343,7 +343,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             dataTestSubj="transformEditFlyoutMaxPageSearchSizeInput"
             errorMessages={formFields.maxPageSearchSize.errorMessages}
             helpText={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelptext',
+              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelpText',
               {
                 defaultMessage:
                   'Defines the initial page size to use for the composite aggregation for each checkpoint.',
@@ -364,6 +364,25 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
                 values: { defaultValue: formFields.maxPageSearchSize.defaultValue },
               }
             )}
+          />
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutNumFailureRetriesInput"
+            errorMessages={formFields.numFailureRetries.errorMessages}
+            helpText={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormNumFailureRetriesHelpText',
+              {
+                defaultMessage:
+                  'Defines number of retries on a recoverable failure before the transform task is marked as `failed`. If not set, the cluster setting `xpack.transform.num_transform_failure_retries` or a default of 10 will be used.',
+              }
+            )}
+            label={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel',
+              {
+                defaultMessage: 'Number of failure retries',
+              }
+            )}
+            onChange={(value) => dispatch({ field: 'numFailureRetries', value })}
+            value={formFields.numFailureRetries.value}
           />
         </div>
       </EuiAccordion>
