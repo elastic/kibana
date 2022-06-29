@@ -21,6 +21,7 @@ import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item'
 const ConsoleWindow = styled.div`
   height: 100%;
   background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+  border: ${({ theme: { eui } }) => eui.euiBorderThin};
 
   .layout {
     height: 100%;
@@ -51,8 +52,7 @@ const ConsoleWindow = styled.div`
     &-rightPanel {
       width: 35%;
       background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
-      border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
-        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+      border-left: ${({ theme: { eui } }) => eui.euiBorderThin};
     }
 
     &-historyOutput {
