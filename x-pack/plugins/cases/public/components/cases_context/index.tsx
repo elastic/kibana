@@ -92,7 +92,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
         appTitle,
       }));
     }
-  }, [appTitle, appId, permissions]);
+  }, [appTitle, appId]);
 
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
