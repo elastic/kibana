@@ -15,19 +15,19 @@ import { setFormatService, setPaletteService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
 
 /** @internal */
-export interface ExpressionMetricPluginSetup {
+export interface ExpressionLegacyMetricPluginSetup {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   charts: ChartsPluginSetup;
 }
 
 /** @internal */
-export interface ExpressionMetricPluginStart {
+export interface ExpressionLegacyMetricPluginStart {
   fieldFormats: FieldFormatsStart;
 }
 
 /** @internal */
-export class ExpressionMetricPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup, { expressions, charts }: ExpressionMetricPluginSetup) {
+export class ExpressionLegacyMetricPlugin implements Plugin<void, void> {
+  public setup(core: CoreSetup, { expressions, charts }: ExpressionLegacyMetricPluginSetup) {
     expressions.registerFunction(metricVisFunction);
     expressions.registerRenderer(getMetricVisRenderer(core.theme));
     charts.palettes.getPalettes().then((palettes) => {
@@ -35,7 +35,7 @@ export class ExpressionMetricPlugin implements Plugin<void, void> {
     });
   }
 
-  public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {
+  public start(core: CoreStart, { fieldFormats }: ExpressionLegacyMetricPluginStart) {
     setFormatService(fieldFormats);
   }
 }

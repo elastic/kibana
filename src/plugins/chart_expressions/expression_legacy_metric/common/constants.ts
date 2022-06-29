@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionMetricPlugin } from './plugin';
+export const EXPRESSION_METRIC_NAME = 'legacyMetricVis';
 
-export function plugin() {
-  return new ExpressionMetricPlugin();
-}
+export const LabelPosition = {
+  BOTTOM: 'bottom',
+  TOP: 'top',
+} as const;

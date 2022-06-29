@@ -1,12 +1,12 @@
 {
-  "id": "expressionBigNumberVis",
+  "id": "expressionLegacyMetricVis",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"
   },
-  "description": "Adds a `metric` renderer and function to the expression plugin. The renderer will display the `big number` chart.",
+  "description": "Adds a `metric` renderer and function to the expression plugin. The renderer will display the `legacy metric` chart.",
   "server": true,
   "ui": true,
   "requiredPlugins": [

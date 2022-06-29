@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'expressionMetricVis';
-export const PLUGIN_NAME = 'expressionMetricVis';
+export const PLUGIN_ID = 'expressionLegacyMetricVis';
+export const PLUGIN_NAME = 'expressionLegacyMetricVis';
 
 export type {
   MetricArguments,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionMetricPlugin } from './plugin';
+import { ExpressionLegacyMetricPlugin } from './plugin';
 
 export function plugin() {
-  return new ExpressionMetricPlugin();
+  return new ExpressionLegacyMetricPlugin();
 }

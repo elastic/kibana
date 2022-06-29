@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const EXPRESSION_METRIC_NAME = 'bigNumberVis';
+import { ExpressionLegacyMetricPlugin } from './plugin';
 
-export const LabelPosition = {
-  BOTTOM: 'bottom',
-  TOP: 'top',
-} as const;
+export function plugin() {
+  return new ExpressionLegacyMetricPlugin();
+}

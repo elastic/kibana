@@ -21,7 +21,7 @@ import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
 const errors = {
   severalMetricsAndColorFullBackgroundSpecifiedError: () =>
     i18n.translate(
-      'expressionMetricVis.function.errors.severalMetricsAndColorFullBackgroundSpecified',
+      'expressionLegacyMetricVis.function.errors.severalMetricsAndColorFullBackgroundSpecified',
       {
         defaultMessage:
           'Full background coloring cannot be applied to a visualization with multiple metrics.',
@@ -29,7 +29,7 @@ const errors = {
     ),
   splitByBucketAndColorFullBackgroundSpecifiedError: () =>
     i18n.translate(
-      'expressionMetricVis.function.errors.splitByBucketAndColorFullBackgroundSpecified',
+      'expressionLegacyMetricVis.function.errors.splitByBucketAndColorFullBackgroundSpecified',
       {
         defaultMessage:
           'Full background coloring cannot be applied to visualizations that have a bucket specified.',
@@ -41,14 +41,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
   type: 'render',
   inputTypes: ['datatable'],
-  help: i18n.translate('expressionMetricVis.function.help', {
+  help: i18n.translate('expressionLegacyMetricVis.function.help', {
     defaultMessage: 'Metric visualization',
   }),
   args: {
     percentageMode: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('expressionMetricVis.function.percentageMode.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.percentageMode.help', {
         defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.',
       }),
     },
@@ -56,7 +56,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string'],
       default: `"${ColorMode.None}"`,
       options: [ColorMode.None, ColorMode.Labels, ColorMode.Background],
-      help: i18n.translate('expressionMetricVis.function.colorMode.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.colorMode.help', {
         defaultMessage: 'Which part of metric to color',
       }),
       strict: true,
@@ -64,33 +64,33 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     colorFullBackground: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('expressionMetricVis.function.colorFullBackground.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.colorFullBackground.help', {
         defaultMessage: 'Applies the selected background color to the full visualization container',
       }),
     },
     palette: {
       types: ['palette'],
-      help: i18n.translate('expressionMetricVis.function.palette.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.palette.help', {
         defaultMessage: 'Provides colors for the values, based on the bounds.',
       }),
     },
     showLabels: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('expressionMetricVis.function.showLabels.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.showLabels.help', {
         defaultMessage: 'Shows labels under the metric values.',
       }),
     },
     font: {
       types: ['style'],
-      help: i18n.translate('expressionMetricVis.function.font.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.font.help', {
         defaultMessage: 'Font settings.',
       }),
       default: `{font size=60 align="center"}`,
     },
     labelFont: {
       types: ['style'],
-      help: i18n.translate('expressionMetricVis.function.labelFont.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.labelFont.help', {
         defaultMessage: 'Label font settings.',
       }),
       default: `{font size=24 align="center"}`,
@@ -98,7 +98,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     labelPosition: {
       types: ['string'],
       options: [LabelPosition.BOTTOM, LabelPosition.TOP],
-      help: i18n.translate('expressionMetricVis.function.labelPosition.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.labelPosition.help', {
         defaultMessage: 'Label position',
       }),
       default: LabelPosition.BOTTOM,
@@ -106,7 +106,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     metric: {
       types: ['string', 'vis_dimension'],
-      help: i18n.translate('expressionMetricVis.function.metric.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.metric.help', {
         defaultMessage: 'metric dimension configuration',
       }),
       required: true,
@@ -114,13 +114,13 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     bucket: {
       types: ['string', 'vis_dimension'],
-      help: i18n.translate('expressionMetricVis.function.bucket.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.bucket.help', {
         defaultMessage: 'bucket dimension configuration',
       }),
     },
     autoScale: {
       types: ['boolean'],
-      help: i18n.translate('expressionMetricVis.function.autoScale.help', {
+      help: i18n.translate('expressionLegacyMetricVis.function.autoScale.help', {
         defaultMessage: 'Enable auto scale',
       }),
       required: false,
@@ -152,7 +152,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       const argsTable: Dimension[] = [
         [
           args.metric,
-          i18n.translate('expressionMetricVis.function.dimension.metric', {
+          i18n.translate('expressionLegacyMetricVis.function.dimension.metric', {
             defaultMessage: 'Metric',
           }),
         ],
@@ -160,7 +160,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       if (args.bucket) {
         argsTable.push([
           [args.bucket],
-          i18n.translate('expressionMetricVis.function.dimension.splitGroup', {
+          i18n.translate('expressionLegacyMetricVis.function.dimension.splitGroup', {
             defaultMessage: 'Split group',
           }),
         ]);

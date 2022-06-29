@@ -1,4 +1,4 @@
-# expressionMetricVis
+# expressionLegacyMetricVis
 
 Expression MetricVis plugin adds a `metric` renderer and function to the expression plugin. The renderer will display the `metric` chart.
 

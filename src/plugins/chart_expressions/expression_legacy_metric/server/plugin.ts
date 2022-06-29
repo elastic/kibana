@@ -18,17 +18,23 @@ interface StartDeps {
   expression: ExpressionsServerStart;
 }
 
-export type ExpressionMetricPluginSetup = void;
-export type ExpressionMetricPluginStart = void;
+export type ExpressionLegacyMetricPluginSetup = void;
+export type ExpressionLegacyMetricPluginStart = void;
 
-export class ExpressionMetricPlugin
-  implements Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps>
+export class ExpressionLegacyMetricPlugin
+  implements
+    Plugin<
+      ExpressionLegacyMetricPluginSetup,
+      ExpressionLegacyMetricPluginStart,
+      SetupDeps,
+      StartDeps
+    >
 {
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
+  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionLegacyMetricPluginSetup {
     expressions.registerFunction(metricVisFunction);
   }
 
-  public start(core: CoreStart): ExpressionMetricPluginStart {}
+  public start(core: CoreStart): ExpressionLegacyMetricPluginStart {}
 
   public stop() {}
 }
