@@ -9,7 +9,7 @@
 import Boom from '@hapi/boom';
 import { KibanaResponse, KibanaResponseFactory, kibanaResponseFactory } from './response';
 import { wrapErrors } from './error_wrapper';
-import { KibanaRequest, RequestHandler, RequestHandlerContext } from '../..';
+import { KibanaRequest, RequestHandler, RequestHandlerContextBase } from '../..';
 
 const createHandler =
   (handler: () => any): RequestHandler<any, any, any> =>
@@ -18,7 +18,7 @@ const createHandler =
   };
 
 describe('wrapErrors', () => {
-  let context: RequestHandlerContext;
+  let context: RequestHandlerContextBase;
   let request: KibanaRequest<any, any, any>;
   let response: KibanaResponseFactory;
 

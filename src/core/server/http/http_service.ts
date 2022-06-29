@@ -16,7 +16,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 
-import type { RequestHandlerContext } from '..';
+import type { RequestHandlerContextBase } from '..';
 import { InternalContextSetup, InternalContextPreboot } from '../context';
 import { CspConfigType, config as cspConfig } from '../csp';
 
@@ -161,7 +161,7 @@ export class HttpService
 
       externalUrl: new ExternalUrlConfig(config.externalUrl),
 
-      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+      createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
         pluginId: PluginOpaqueId = this.coreContext.coreId
       ) => {
@@ -172,7 +172,7 @@ export class HttpService
       },
 
       registerRouteHandlerContext: <
-        Context extends RequestHandlerContext,
+        Context extends RequestHandlerContextBase,
         ContextName extends keyof Context
       >(
         pluginOpaqueId: PluginOpaqueId,
