@@ -27,7 +27,7 @@ export const useRemove = ({ id, defaultIndex, name, onRemove }: Params): [() => 
       setIsRemoving(false);
 
       notifySuccess({
-        title: i18n.translate('home.sampleDataSet.uninstalledLabel', {
+        title: i18n.translate('homePackages.sampleDataSet.uninstalledLabel', {
           defaultMessage: '{name} uninstalled',
           values: { name },
         }),
@@ -37,7 +37,7 @@ export const useRemove = ({ id, defaultIndex, name, onRemove }: Params): [() => 
     } catch (e) {
       setIsRemoving(false);
       notifyError({
-        title: i18n.translate('home.sampleDataSet.unableToUninstallErrorMessage', {
+        title: i18n.translate('homePackages.sampleDataSet.unableToUninstallErrorMessage', {
           defaultMessage: 'Unable to uninstall sample data set: {name}',
           values: { name },
         }),

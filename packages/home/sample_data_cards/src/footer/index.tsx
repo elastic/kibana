@@ -7,9 +7,10 @@
  */
 
 import React from 'react';
-import { INSTALLED_STATUS } from '../constants';
+import { INSTALLED_STATUS, UNINSTALLED_STATUS } from '../constants';
 
 import { SampleDataSet } from '../types';
+import { DefaultFooter } from './default_footer';
 import { InstallFooter } from './install_footer';
 import { RemoveFooter } from './remove_footer';
 
@@ -23,5 +24,9 @@ export const Footer = ({ sampleDataSet, onAction }: Props) => {
     return <RemoveFooter onRemove={onAction} {...sampleDataSet} />;
   }
 
-  return <InstallFooter onInstall={onAction} {...sampleDataSet} />;
+  if (sampleDataSet.status === UNINSTALLED_STATUS) {
+    return <InstallFooter onInstall={onAction} {...sampleDataSet} />;
+  }
+
+  return <DefaultFooter {...sampleDataSet} />;
 };

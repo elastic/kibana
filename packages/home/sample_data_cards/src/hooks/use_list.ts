@@ -30,7 +30,7 @@ export const useList = (): [SampleDataSet[], typeof refresh, boolean] => {
       );
     } catch (fetchError) {
       notifyError({
-        title: i18n.translate('home.sampleDataSet.unableToLoadListErrorMessage', {
+        title: i18n.translate('homePackages.sampleDataSet.unableToLoadListErrorMessage', {
           defaultMessage: 'Unable to load sample data sets list',
         }),
         text: `${fetchError.message}`,

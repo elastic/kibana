@@ -32,7 +32,7 @@ export const useInstall = ({
       setIsInstalling(false);
 
       notifySuccess({
-        title: i18n.translate('home.sampleDataSet.installedLabel', {
+        title: i18n.translate('homePackages.sampleDataSet.installedLabel', {
           defaultMessage: '{name} installed',
           values: { name },
         }),
@@ -42,7 +42,7 @@ export const useInstall = ({
     } catch (e) {
       setIsInstalling(false);
       notifyError({
-        title: i18n.translate('home.sampleDataSet.unableToInstallErrorMessage', {
+        title: i18n.translate('homePackages.sampleDataSet.unableToInstallErrorMessage', {
           defaultMessage: 'Unable to install sample data set: {name}',
           values: { name },
         }),

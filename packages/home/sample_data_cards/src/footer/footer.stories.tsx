@@ -32,10 +32,11 @@ export default {
 const { description, ...argTypes } = getStoryArgTypes();
 
 export const CardFooter = (params: Params) => {
-  const { includeAppLinks, ...rest } = params;
+  const { includeAppLinks, status, ...rest } = params;
   const sampleDataSet: SampleDataSet = {
     ...mockDataSet,
     ...rest,
+    status,
     appLinks: includeAppLinks ? mockDataSet.appLinks : [],
   };
 

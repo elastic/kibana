@@ -34,6 +34,7 @@ export const mockDataSet: SampleDataSet = {
   name: 'Sample Data Set',
   description: 'This is a sample data set you can use.',
   status: 'not_installed',
+  statusMsg: 'optional status message',
 };
 
 export const getMockDataSet = (params: Partial<SampleDataSet> = {}) => ({
@@ -98,7 +99,7 @@ export const getStoryArgTypes = () => ({
     defaultValue: mockDataSet.description,
   },
   status: {
-    options: ['not_installed', 'installed'],
+    options: ['not_installed', 'installed', undefined],
     control: { type: 'radio' },
     defaultValue: mockDataSet.status,
   },

@@ -27,5 +27,5 @@ export interface SampleDataSet {
   darkPreviewImagePath?: string;
   iconPath?: string;
   status?: InstalledStatus;
-  statusMessage?: string;
+  statusMsg?: string;
 }
