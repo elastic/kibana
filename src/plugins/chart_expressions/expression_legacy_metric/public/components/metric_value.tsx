@@ -28,10 +28,10 @@ export const MetricVisValue = ({
   colorFullBackground,
   autoScale,
 }: MetricVisValueProps) => {
-  const containerClassName = classNames('mtrVis__container', {
-    'mtrVis__container--light': metric.lightText,
-    'mtrVis__container-isfilterable': onFilter,
-    'mtrVis__container-isfull': !autoScale && colorFullBackground,
+  const containerClassName = classNames('legacyMtrVis__container', {
+    'legacyMtrVis__container--light': metric.lightText,
+    'legacyMtrVis__container-isfilterable': onFilter,
+    'legacyMtrVis__container-isfull': !autoScale && colorFullBackground,
   });
 
   // for autoScale true we should add background to upper level so that correct colorize full container
@@ -42,7 +42,7 @@ export const MetricVisValue = ({
     >
       <div
         data-test-subj="metric_value"
-        className="mtrVis__value"
+        className="legacyMtrVis__value"
         style={{
           ...(style.spec as CSSProperties),
           ...(metric.color ? { color: metric.color } : {}),

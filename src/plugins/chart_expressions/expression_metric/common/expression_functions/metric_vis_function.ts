@@ -64,7 +64,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     progressMax: {
       types: ['number'],
-      // TODO: revisit default
       help: i18n.translate('expressionMetricVis.function.progressMax.help.', {
         defaultMessage: 'The number at which the progress bar should be full.',
       }),

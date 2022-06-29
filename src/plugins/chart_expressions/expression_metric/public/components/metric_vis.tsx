@@ -15,12 +15,12 @@ import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-pl
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { euiLightVars } from '@kbn/ui-theme';
 import { VisParams } from '../../common';
 import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { currencyCodeMap } from './currency_code_map';
 
-// TODO - find a reasonable default (from EUI perhaps?)
-const defaultColor = '#5e5e5e';
+const defaultColor = euiLightVars.euiColorDarkestShade;
 
 const getBytesUnit = (value: number) => {
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];

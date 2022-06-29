@@ -70,9 +70,8 @@ export const getMetricVisRenderer = (
       render(
         <KibanaThemeProvider theme$={theme.theme$}>
           <VisualizationContainer
-            // TODO - update these data test subjects
-            data-test-subj="mtrVis"
-            className="mtrVis"
+            data-test-subj="legacyMtrVis"
+            className="legacyMtrVis"
             showNoResult={!visData.rows?.length}
             handlers={handlers}
           >

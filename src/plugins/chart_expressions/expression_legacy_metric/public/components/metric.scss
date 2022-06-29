@@ -5,7 +5,7 @@
 //   mtrChart__legend--small
 //   mtrChart__legend-isLoading
 
-.mtrVis {
+.legacyMtrVis {
   @include euiScrollBar;
   height: 100%;
   width: 100%;
@@ -17,23 +17,23 @@
   overflow: auto;
 }
 
-.mtrVis__value {
+.legacyMtrVis__value {
   @include euiTextTruncate;
   font-weight: $euiFontWeightBold;
 }
 
-.mtrVis__container {
+.legacyMtrVis__container {
   text-align: center;
   padding: $euiSize;
   display: flex;
   flex-direction: column;
 }
 
-.mtrVis__container--light {
+.legacyMtrVis__container--light {
   color: $euiColorEmptyShade;
 }
 
-.mtrVis__container-isfull {
+.legacyMtrVis__container-isfull {
   min-height: 100%;
   min-width: max-content;
   display: flex;
@@ -43,12 +43,13 @@
   flex: 1 0 100%;
 }
 
-.mtrVis__container-isFilterable {
+.legacyMtrVis__container-isFilterable {
   cursor: pointer;
   transition: transform $euiAnimSpeedNormal $euiAnimSlightResistance;
   transform: translate(0, 0);
 
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     box-shadow: none;
     transform: translate(0, -2px);
   }
