@@ -38,6 +38,10 @@ import type {
   AnalyticsServiceStart,
   AnalyticsServicePreboot,
 } from '@kbn/core-analytics-server';
+import type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from '@kbn/core-execution-context-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -88,11 +92,6 @@ export type {
   CoreServicesUsageData,
   ConfigUsageData,
 };
-
-import type {
-  ExecutionContextSetup,
-  ExecutionContextStart,
-} from '@kbn/core-execution-context-server';
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
