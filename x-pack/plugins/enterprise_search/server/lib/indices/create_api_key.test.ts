@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { createApiKey } from './create_api_key';
-
 
 describe('createApiKey lib function', () => {
   const security = securityMock.createStart();
   const request = {} as KibanaRequest;
 
   const indexName = 'my-index';
-  const keyName = `{indexName}-key`;
+  const keyName = '{indexName}-key';
 
   const createResponse = {
     api_key: 'ui2lp2axTNmsyakw9tvNnw',
@@ -32,20 +31,23 @@ describe('createApiKey lib function', () => {
   });
 
   it('should create an api key via the security plugin', async () => {
-    await expect(
-      createApiKey(request, security, indexName, keyName)
-    ).resolves.toEqual(createResponse);
+    await expect(createApiKey(request, security, indexName, keyName)).resolves.toEqual(
+      createResponse
+    );
 
-    expect(security.authc.apiKeys.create).toHaveBeenCalledWith(request, {name: keyName, role_descriptors: {
-      [`${indexName}-key-role`]: {
-        cluster: [],
-        index: [
-          {
-            names: [indexName],
-            privileges: ['all'],
-          },
-        ],
+    expect(security.authc.apiKeys.create).toHaveBeenCalledWith(request, {
+      name: keyName,
+      role_descriptors: {
+        [`${indexName}-key-role`]: {
+          cluster: [],
+          index: [
+            {
+              names: [indexName],
+              privileges: ['all'],
+            },
+          ],
+        },
       },
-    }});
+    });
   });
 });
