@@ -6,12 +6,11 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiButtonEmpty, EuiIcon, EuiSelectable, EuiWrappingPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { sendPutAgentTagsUpdate, useStartServices } from '../../../../hooks';
+import { useUpdateTags } from '../hooks';
 
 interface Props {
   agentId: string;
@@ -43,11 +42,12 @@ export const TagsAddRemove: React.FC<Props> = ({
     [selectedTags]
   );
 
-  const { notifications } = useStartServices();
   const [labels, setLabels] = useState<Array<EuiSelectableOption<any>>>(labelsFromTags(allTags));
   const [searchValue, setSearchValue] = useState<string | undefined>(undefined);
   const [isPopoverOpen, setIsPopoverOpen] = useState(true);
   const closePopover = () => setIsPopoverOpen(false);
+
+  const updateTagsHook = useUpdateTags();
 
   // update labels after tags changing
   useEffect(() => {
@@ -55,21 +55,7 @@ export const TagsAddRemove: React.FC<Props> = ({
   }, [allTags, labelsFromTags]);
 
   const updateTags = async (newTags: string[]) => {
-    const res = await sendPutAgentTagsUpdate(agentId, { tags: newTags });
-
-    if (res.error) {
-      const errorMessage = i18n.translate('xpack.fleet.updateAgentTags.errorNotificationTitle', {
-        defaultMessage: 'Tags update failed',
-      });
-      notifications.toasts.addError(res.error, { title: errorMessage });
-      throw res.error;
-    }
-    const successMessage = i18n.translate('xpack.fleet.updateAgentTags.successNotificationTitle', {
-      defaultMessage: 'Tags updated',
-    });
-    notifications.toasts.addSuccess(successMessage);
-
-    onTagsUpdated();
+    updateTagsHook.updateTags(agentId, newTags, () => onTagsUpdated());
   };
 
   const setOptions = (newOptions: Array<EuiSelectableOption<any>>) => {
