@@ -71,7 +71,7 @@ export interface FieldMeta {
   }) => Record<string, any>;
   controlled?: boolean;
   required?: boolean;
-  useSetValue?: boolean;
+  shouldUseSetValue?: boolean;
   customHook?: (value: unknown) => {
     // custom hooks are only supported for controlled components and only supported for determining error validation
     func: Function;

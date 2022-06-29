@@ -25,7 +25,7 @@ export const Field = memo<Props>(
     fieldKey,
     controlled,
     showWhen,
-    useSetValue,
+    shouldUseSetValue,
     required,
     validation,
     error,
@@ -88,7 +88,7 @@ export const Field = memo<Props>(
               field={field}
               component={Component}
               props={props}
-              useSetValue={useSetValue}
+              shouldUseSetValue={shouldUseSetValue}
               fieldKey={fieldKey}
               customHook={customHook}
               formRowProps={formRowProps}

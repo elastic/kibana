@@ -32,10 +32,10 @@ const setFieldValue = (key: string, setValue: UseFormReturn['setValue']) => (val
 };
 
 export const ControlledField = ({
-  component: Component,
+  component: FieldComponent,
   props,
   fieldKey,
-  useSetValue,
+  shouldUseSetValue,
   field,
   formRowProps,
   fieldState,
@@ -56,7 +56,7 @@ export const ControlledField = ({
     hook = hookProps.func;
   }
   const { [hookProps?.fieldKey as string]: hookResult } = hook(hookProps?.params) || {};
-  const onChange = useSetValue ? setFieldValue(fieldKey, setValue) : field.onChange;
+  const onChange = shouldUseSetValue ? setFieldValue(fieldKey, setValue) : field.onChange;
   const generatedProps = props
     ? props({
         field,
@@ -77,7 +77,7 @@ export const ControlledField = ({
       isInvalid={isInvalid}
       error={isInvalid ? hookError || fieldState.error?.message || error : undefined}
     >
-      <Component
+      <FieldComponent
         {...field}
         checked={field.value}
         defaultValue={field.value}
