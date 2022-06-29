@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE } from '../../../common/constants';
 import { transformIdParamSchema, TransformIdParamSchema } from '../../../common/api_schemas/common';
 import { AuditMessage } from '../../../common/types/messages';
 
@@ -16,7 +17,6 @@ import { addBasePath } from '..';
 import { wrapError, wrapEsError } from './error_utils';
 
 export const ML_DF_NOTIFICATION_INDEX_PATTERN = '.transform-notifications-read';
-const SIZE = 500;
 
 interface BoolQuery {
   bool: { [key: string]: any };
@@ -97,7 +97,7 @@ export function registerTransformsAuditMessagesRoutes({ router, license }: Route
           const resp = await esClient.asCurrentUser.search<AuditMessage>({
             index: ML_DF_NOTIFICATION_INDEX_PATTERN,
             ignore_unavailable: true,
-            size: SIZE,
+            size: DEFAULT_MAX_AUDIT_MESSAGE_SIZE,
             body: {
               sort: [
                 { [sortField]: { order: sortDirection } },

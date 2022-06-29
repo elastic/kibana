@@ -14,6 +14,7 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 
+import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE } from '../../../../../../common/constants';
 import { isGetTransformsAuditMessagesResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { TransformMessage } from '../../../../../../common/types/messages';
 
@@ -133,13 +134,12 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
         }
       ),
       width: '50%',
-      sortable: true,
     },
   ];
 
   const getPageOfMessages = ({ index, size }: { index: number; size: number }) => {
     let list = messages;
-    if (msgCount <= 500) {
+    if (msgCount <= DEFAULT_MAX_AUDIT_MESSAGE_SIZE) {
       const sortField = sorting.sort.field ?? 'timestamp';
       list = messages.sort((a: TransformMessage, b: TransformMessage) => {
         const prev = a[sortField] as any;
@@ -172,7 +172,7 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
 
       // Since we only show 500 messages, if user wants oldest messages first
       // we need to make sure we fetch them from elasticsearch
-      if (msgCount > 500) {
+      if (msgCount > DEFAULT_MAX_AUDIT_MESSAGE_SIZE) {
         getMessagesFactory(sort.field, sort.direction)();
       }
     }
