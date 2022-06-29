@@ -20,7 +20,7 @@ export const useStyles = () => {
       border: euiTheme.border.thin,
       borderRadius: euiTheme.border.radius.medium,
       overflow: 'auto',
-      height: '300px',
+      height: '250px',
     };
 
     const dataInfo: CSSObject = {
