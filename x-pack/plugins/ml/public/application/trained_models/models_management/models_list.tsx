@@ -26,6 +26,8 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { getUserInputThreadingParamsProvider } from './start_deployment_setup';
 import { getAnalysisType } from '../../data_frame_analytics/common';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
@@ -44,7 +46,6 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { usePageUrlState } from '../../util/url_state';
 import { ExpandedRow } from './expanded_row';
-import { isPopulatedObject } from '../../../../common';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
@@ -94,9 +95,12 @@ export const ModelsList: FC<Props> = ({
       overlays,
       theme,
       spacesApi,
+      docLinks,
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
+
+  const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeploymentQueryParams;
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
@@ -138,6 +142,11 @@ export const ModelsList: FC<Props> = ({
   );
   const [showTestFlyout, setShowTestFlyout] = useState<ModelItem | null>(null);
   const getUserConfirmation = useMemo(() => getUserConfirmationProvider(overlays, theme), []);
+
+  const getUserInputThreadingParams = useMemo(
+    () => getUserInputThreadingParamsProvider(overlays, theme.theme$, startModelDeploymentDocUrl),
+    [overlays, theme.theme$, startModelDeploymentDocUrl]
+  );
 
   const navigateToPath = useNavigateToPath();
 
@@ -369,9 +378,16 @@ export const ModelsList: FC<Props> = ({
           },
           available: (item) => item.model_type === TRAINED_MODEL_TYPE.PYTORCH,
           onClick: async (item) => {
+            const threadingParams = await getUserInputThreadingParams(item.model_id);
+
+            if (!threadingParams) return;
+
             try {
               setIsLoading(true);
-              await trainedModelsApiService.startModelAllocation(item.model_id);
+              await trainedModelsApiService.startModelAllocation(item.model_id, {
+                number_of_allocations: threadingParams.numOfAllocations,
+                threads_per_allocation: threadingParams.threadsPerAllocations,
+              });
               displaySuccessToast(
                 i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
                   defaultMessage: 'Deployment for "{modelId}" has been started successfully.',

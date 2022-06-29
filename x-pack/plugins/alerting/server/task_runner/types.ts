@@ -24,7 +24,7 @@ import {
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
-import { RawRule } from '../types';
+import { RawRule, RulesClientApi } from '../types';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -41,6 +41,7 @@ export type RuleTaskStateAndMetrics = RuleTaskState & {
 };
 
 export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
+  rulesClient: RulesClientApi;
   stateWithMetrics: RuleTaskStateAndMetrics;
 };
 

@@ -8,6 +8,8 @@
 
 import { Action } from 'history';
 import { AnalyticsClient } from '@kbn/analytics-client';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ButtonColor } from '@elastic/eui';
 import { ContextProviderOpts } from '@kbn/analytics-client';
 import { CoreContext } from '@kbn/core-base-browser-internal';
@@ -27,6 +29,7 @@ import { EventType } from '@kbn/analytics-client';
 import { EventTypeOpts } from '@kbn/analytics-client';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import { IconType } from '@elastic/eui';
 import { InjectedMetadataParams } from '@kbn/core-injected-metadata-browser-internal';
 import type { InjectedMetadataSetup } from '@kbn/core-injected-metadata-browser';
@@ -58,15 +61,9 @@ export function __kbnBootstrap__(): Promise<void>;
 
 export { AnalyticsClient }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
+export { AnalyticsServiceSetup }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
+export { AnalyticsServiceStart }
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {
@@ -399,6 +396,8 @@ export { CoreContext }
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServiceSetup;
     // (undocumented)
@@ -427,6 +426,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServiceStart;
     // (undocumented)
@@ -445,6 +446,8 @@ export interface CoreStart {
     fatalErrors: FatalErrorsStart;
     // (undocumented)
     http: HttpStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     i18n: I18nStart;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "InjectedMetadataStart"
@@ -688,12 +691,7 @@ export interface HttpSetup {
 // @public
 export type HttpStart = HttpSetup;
 
-// @public
-export interface I18nStart {
-    Context: ({ children }: {
-        children: React_2.ReactNode;
-    }) => JSX.Element;
-}
+export { I18nStart }
 
 // Warning: (ae-missing-release-tag) "IAnonymousPaths" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1556,6 +1554,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:186:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:202:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

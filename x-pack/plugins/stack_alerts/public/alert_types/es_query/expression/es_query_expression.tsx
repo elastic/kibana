@@ -6,7 +6,7 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -141,7 +141,7 @@ export const EsQueryExpression = ({
     const timeWindow = parseDuration(window);
     const parsedQuery = JSON.parse(esQuery);
     const now = Date.now();
-    const { rawResponse } = await firstValueFrom(
+    const { rawResponse } = await lastValueFrom(
       data.search.search({
         params: buildSortedEventsQuery({
           index,

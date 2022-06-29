@@ -14,6 +14,8 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { getLastValue } from '../../../../common/last_value_utils';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
 
+import './_metric.scss';
+
 export class Metric extends Component {
   constructor(props) {
     super(props);

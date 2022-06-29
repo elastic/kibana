@@ -9,13 +9,12 @@
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import type { ElasticSearchHit, HitsFlattened, ValueToStringConverter } from '../../types';
+import type { DataTableRecord, ValueToStringConverter } from '../../types';
 
 export interface GridContext {
-  expanded?: ElasticSearchHit;
-  setExpanded: (hit?: ElasticSearchHit) => void;
-  rows: ElasticSearchHit[];
-  rowsFlattened: HitsFlattened;
+  expanded?: DataTableRecord | undefined;
+  setExpanded: (hit?: DataTableRecord) => void;
+  rows: DataTableRecord[];
   onFilter: DocViewFilterFn;
   indexPattern: DataView;
   isDarkMode: boolean;

@@ -194,6 +194,30 @@ describe('formula', () => {
       });
     });
 
+    it("should start with an empty formula if previous operation can't be converted", () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            ...layer.columns.col1,
+            dataType: 'date',
+            filter: { language: 'kuery', query: 'ABC: DEF' },
+          },
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        filter: undefined,
+        timeScale: undefined,
+        scale: 'ratio',
+        params: {},
+        references: [],
+      });
+    });
+
     it('it should move over explicit format param if set', () => {
       expect(
         formulaOperation.buildColumn({

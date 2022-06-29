@@ -76,6 +76,7 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
         pageHeader={pageHeader}
         data-test-subj={noDataConfig ? 'data-missing' : undefined}
         noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
+        isPageDataLoaded={Boolean(loading === false && isMainRoute && data)}
         {...pageTemplateProps}
       >
         {showLoading && <EmptyStateLoading />}

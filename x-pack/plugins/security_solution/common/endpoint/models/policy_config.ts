@@ -149,6 +149,13 @@ export const policyFactoryWithoutPaidFeatures = (
     ...policy,
     windows: {
       ...policy.windows,
+      advanced:
+        policy.windows.advanced === undefined
+          ? undefined
+          : {
+              ...policy.windows.advanced,
+              rollback: undefined,
+            },
       ransomware: {
         mode: ProtectionModes.off,
         supported: false,

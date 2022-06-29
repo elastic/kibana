@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
@@ -18,17 +19,13 @@ import {
 
 import { StatefulEditDataProvider } from '.';
 
-interface HasIsDisabled {
-  isDisabled: boolean;
-}
-
 describe('StatefulEditDataProvider', () => {
   const field = 'client.address';
   const timelineId = 'test';
   const value = 'test-host';
 
   test('it renders the current field', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -44,11 +41,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="field"]').first().text()).toEqual(field);
+    expect(screen.getByText(field)).toBeInTheDocument();
   });
 
   test('it renders the expected placeholder for the current field when field is empty', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -64,13 +61,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="field"]').first().props().placeholder).toEqual(
-      'Select a field'
-    );
+    expect(screen.getByText(/Select a field/)).toBeInTheDocument();
   });
 
   test('it renders the "is" operator in a humanized format', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -86,11 +81,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="operator"]').first().text()).toEqual('is');
+    expect(screen.getByText('is')).toBeInTheDocument();
   });
 
   test('it renders the negated "is" operator in a humanized format when isExcluded is true', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -106,11 +101,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="operator"]').first().text()).toEqual('is not');
+    expect(screen.getByText('is not')).toBeInTheDocument();
   });
 
   test('it renders the "exists" operator in human-readable format', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -126,11 +121,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="operator"]').first().text()).toEqual('exists');
+    expect(screen.getByText('exists')).toBeInTheDocument();
   });
 
   test('it renders the negated "exists" operator in a humanized format when isExcluded is true', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -146,11 +141,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="operator"]').first().text()).toEqual('does not exist');
+    expect(screen.getByText('does not exist')).toBeInTheDocument();
   });
 
   test('it renders the current value when the operator is "is"', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -166,13 +161,13 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="value"]').first().props().value).toEqual(value);
+    expect(screen.getByDisplayValue(value)).toBeInTheDocument();
   });
 
   test('it renders the current value when the type of value is an array', () => {
     const reallyAnArray = [value] as unknown as string;
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -188,11 +183,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="value"]').first().props().value).toEqual(value);
+    expect(screen.getByDisplayValue(value)).toBeInTheDocument();
   });
 
   test('it does NOT render the current value when the operator is "is not" (isExcluded is true)', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -208,11 +203,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="value"]').first().props().value).toEqual(value);
+    expect(screen.getByDisplayValue(value)).toBeInTheDocument();
   });
 
   test('it renders the expected placeholder when value is empty', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -228,11 +223,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="value"]').first().props().placeholder).toEqual('value');
+    expect(screen.getByPlaceholderText('value')).toBeInTheDocument();
   });
 
   test('it does NOT render value when the operator is "exists"', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -248,11 +243,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="value"]').exists()).toBe(false);
+    expect(screen.queryByPlaceholderText('value')).not.toBeInTheDocument();
   });
 
   test('it does NOT render value when the operator is "not exists" (isExcluded is true)', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -268,11 +263,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="value"]').exists()).toBe(false);
+    expect(screen.queryByPlaceholderText('value')).not.toBeInTheDocument();
   });
 
   test('it does NOT render value when is template field', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -289,11 +284,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="value"]').exists()).toBe(false);
+    expect(screen.queryByPlaceholderText('value')).not.toBeInTheDocument();
   });
 
   test('it does NOT disable the save button when field is valid', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -309,13 +304,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    const props = wrapper.find('[data-test-subj="save"]').first().props() as HasIsDisabled;
-
-    expect(props.isDisabled).toBe(false);
+    expect(screen.getByTestId('save')).not.toBeDisabled();
   });
 
   test('it disables the save button when field is invalid because it is empty', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -331,13 +324,11 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    const props = wrapper.find('[data-test-subj="save"]').first().props() as HasIsDisabled;
-
-    expect(props.isDisabled).toBe(true);
+    expect(screen.getByTestId('save')).toBeDisabled();
   });
 
   test('it disables the save button when field is invalid because it is not contained in the browser fields', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -353,15 +344,13 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    const props = wrapper.find('[data-test-subj="save"]').first().props() as HasIsDisabled;
-
-    expect(props.isDisabled).toBe(true);
+    expect(screen.getByTestId('save')).toBeDisabled();
   });
 
   test('it invokes onDataProviderEdited with the expected values when the user clicks the save button', () => {
     const onDataProviderEdited = jest.fn();
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEditDataProvider
           andProviderId={undefined}
@@ -377,9 +366,7 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="save"]').first().simulate('click');
-
-    wrapper.update();
+    userEvent.click(screen.getByTestId('save'));
 
     expect(onDataProviderEdited).toBeCalledWith({
       andProviderId: undefined,

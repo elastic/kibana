@@ -35,6 +35,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingConfig, ReportingSetup } from '.';
@@ -52,6 +53,7 @@ export interface ReportingInternalSetup {
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  usageCounter?: UsageCounter;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   status: StatusServiceSetup;
@@ -242,6 +244,14 @@ export class ReportingCore {
    */
   public getDeprecatedAllowedRoles(): string[] | false {
     return this.deprecatedAllowedRoles;
+  }
+
+  /*
+   *
+   * Track usage of code paths for telemetry
+   */
+  public getUsageCounter(): UsageCounter | undefined {
+    return this.pluginSetupDeps?.usageCounter;
   }
 
   /*
