@@ -19,12 +19,12 @@ import {
   getData,
   getExecutionContext,
   getCoreChrome,
+  getIndexPatternService,
   getMapsCapabilities,
   getNavigation,
   getSpacesApi,
   getTimeFilter,
   getToasts,
-  getUiSettings,
 } from '../../../kibana_services';
 import {
   AppStateManager,
@@ -84,7 +84,6 @@ export interface Props {
 }
 
 export interface State {
-  defaultDataViewId: string | undefined;
   initialized: boolean;
   indexPatterns: DataView[];
   savedQuery?: SavedQuery;
@@ -113,8 +112,6 @@ export class MapApp extends React.Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-
-    this._loadDefaultDataViewId();
 
     getExecutionContext().set({
       type: 'application',
@@ -195,28 +192,24 @@ export class MapApp extends React.Component<Props, State> {
     this._onQueryChange({ time: globalState.time });
   };
 
-  async _loadDefaultDataViewId() {
-    const defaultDataViewId = await getUiSettings().get('defaultIndex');
-    if (this._isMounted && defaultDataViewId) {
-      this.setState({ defaultDataViewId });
-    }
-  }
-
   async _updateIndexPatterns() {
-    let nextIndexPatternIds = [...this.props.nextIndexPatternIds];
-    if (nextIndexPatternIds.length === 0 && this.props.filters.length && this.state.defaultDataViewId) {
-      // Use default data view to always show filter bar when filters are present
-      // Example scenario, global state has pinned filters and new map is created
-      nextIndexPatternIds = [this.state.defaultDataViewId];
-    }
-    
     if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       return;
     }
 
     this._prevIndexPatternIds = nextIndexPatternIds;
 
-    const indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
+    let indexPatterns: DataView[] = [];
+    if (nextIndexPatternIds.length === 0) {
+      // Use default data view to always show filter bar when filters are present
+      // Example scenario, global state has pinned filters and new map is created
+      const defaultDataView = getIndexPatternService().getDefaultDataView();
+      if (defaultDataView) {
+        indexPatterns = [indexPatterns];
+      }
+    } else {
+      indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
+    }
     if (this._isMounted) {
       this.setState({ indexPatterns });
     }
