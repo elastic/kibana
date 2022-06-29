@@ -46,8 +46,8 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
         data={ctx.samples}
         xAccessor={x}
         yAccessors={[y]}
+        stackAccessors={[x]}
         splitSeriesAccessors={[category]}
-        stackAccessors={[category]}
       />
       <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter('YYYY-MM-DD HH:mm:ss')} />
       <Axis id="left-axis" position="left" showGridLines tickFormat={(d) => Number(d).toFixed(0)} />

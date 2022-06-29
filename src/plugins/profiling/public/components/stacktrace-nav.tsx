@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react';
 
 import { EuiButtonGroup } from '@elastic/eui';
 
-import { getTopN, groupSamplesByCategory } from '../../common';
+import { groupSamplesByCategory, TopNSample, TopNSamples } from '../../common/topn';
 
 export const StackTraceNavigation = ({ index, projectID, n, timeRange, fetchTopN, setTopN }) => {
   const topnButtonGroupPrefix = 'topnButtonGroup';
@@ -59,11 +59,12 @@ export const StackTraceNavigation = ({ index, projectID, n, timeRange, fetchTopN
 
     console.log(new Date().toISOString(), 'started payload retrieval');
     fetchTopN(topnValue[0].value, index, projectID, timeRange.unixStart, timeRange.unixEnd, n).then(
-      (response) => {
+      (response: TopNSamples) => {
         console.log(new Date().toISOString(), 'finished payload retrieval');
-        const samples = getTopN(response);
+        const samples = response.TopN;
         const series = groupSamplesByCategory(samples);
-        setTopN({ samples, series });
+        const samplesWithoutZero = samples.filter((sample: TopNSample) => sample.Count > 0);
+        setTopN({ samples: samplesWithoutZero, series });
         console.log(new Date().toISOString(), 'updated local state');
       }
     );

@@ -15,7 +15,7 @@ import {
 import type { DataRequestHandlerContext } from '../../../data/server';
 import { fromMapToRecord, getRoutePaths } from '../../common';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
-import { createTopNBucketsByDate } from '../../common/topn';
+import { createTopNSamples } from '../../common/topn';
 import { findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './query';
@@ -69,11 +69,11 @@ export async function topNElasticSearchQuery(
   );
 
   const histogram = getAggs(resEvents)?.histogram as AggregationsHistogramAggregate;
-  const topN = createTopNBucketsByDate(histogram);
+  const topN = createTopNSamples(histogram);
 
   if (searchField !== 'StackTraceID') {
     return response.ok({
-      body: topN,
+      body: { TopN: topN },
     });
   }
 
@@ -113,7 +113,7 @@ export async function topNElasticSearchQuery(
     );
     return response.ok({
       body: {
-        ...topN,
+        TopN: topN,
         Metadata: metadata,
       },
     });
