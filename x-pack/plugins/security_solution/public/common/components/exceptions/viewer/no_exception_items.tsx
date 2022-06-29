@@ -6,12 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexItem,
-  EuiEmptyPrompt,
-  EuiButton,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiEmptyPrompt, EuiButton, useEuiTheme } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -20,7 +15,7 @@ interface ExeptionItemsViewerNoItemsComponentProps {
 }
 
 const ExeptionItemsViewerNoItemsComponent = ({
-  onCreateExceptionList
+  onCreateExceptionList,
 }: ExeptionItemsViewerNoItemsComponentProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
@@ -32,15 +27,9 @@ const ExeptionItemsViewerNoItemsComponent = ({
         iconType="plusInCircle"
         iconColor={euiTheme.colors.darkestShade}
         title={
-          <h2 data-test-subj="exceptionsEmptyPromptTitle">
-            {i18n.EXCEPTION_EMPTY_PROMPT_TITLE}
-          </h2>
+          <h2 data-test-subj="exceptionsEmptyPromptTitle">{i18n.EXCEPTION_EMPTY_PROMPT_TITLE}</h2>
         }
-        body={
-          <p data-test-subj="exceptionsEmptyPromptBody">
-            {i18n.EXCEPTION_EMPTY_PROMPT_BODY}
-          </p>
-        }
+        body={<p data-test-subj="exceptionsEmptyPromptBody">{i18n.EXCEPTION_EMPTY_PROMPT_BODY}</p>}
         actions={
           <EuiButton onClick={onCreateExceptionList} iconType="plusInCircle" color="primary" fill>
             {i18n.EXCEPTION_EMPTY_PROMPT_BUTTON}

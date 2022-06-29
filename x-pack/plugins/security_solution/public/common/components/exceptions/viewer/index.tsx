@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
-import { EuiSpacer, EuiPanel } from '@elastic/eui';
-import uuid from 'uuid';
+import React, { useCallback, useEffect, useReducer } from 'react';
+import { EuiPanel } from '@elastic/eui';
 
 import type {
-  ExceptionListTypeEnum,
   ExceptionListItemSchema,
   ExceptionListIdentifiers,
-  UseExceptionListItemsSuccess,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { useApi, useExceptionListItems, useExceptionLists } from '@kbn/securitysolution-list-hooks';
-import * as i18n from '../translations';
-import { useStateToaster } from '../../toasters';
+import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana } from '../../../lib/kibana';
 import { Loader } from '../../loader';
@@ -26,12 +21,10 @@ import { ExceptionListItemIdentifiers, Filter } from '../types';
 import { allExceptionItemsReducer, State, ViewerFlyoutName } from './reducer';
 
 import { ExceptionsViewerPagination } from './exceptions_pagination';
-import { ExceptionsViewerUtility } from './exceptions_utility';
 import { ExceptionItemsViewer } from './exceptions_viewer_items';
 import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
 import { CreateExceptionList } from '../create_exception_list';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../common/endpoint/service/artifacts/constants';
 
 const initialState: State = {
   filterOptions: { filter: '', tags: [] },
@@ -63,7 +56,9 @@ const ExceptionsViewerComponent = ({
   exceptionListsMeta,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
-  const { services: { http, notifications } } = useKibana();
+  const {
+    services: { http, notifications },
+  } = useKibana();
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
 
   const [
@@ -125,7 +120,7 @@ const ExceptionsViewerComponent = ({
   );
 
   const [loadingList, items, pag, fetchListItems] = useExceptionListItems({
-    http: http,
+    http,
     lists: undefined,
     filters: [],
     pagination: {
@@ -144,8 +139,6 @@ const ExceptionsViewerComponent = ({
   //     notifications,
   //     hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
   //   });
-  
-
 
   const refreshExceptionItems = useCallback((): void => {
     if (fetchListItems != null) {
@@ -153,12 +146,9 @@ const ExceptionsViewerComponent = ({
     }
   }, [fetchListItems]);
 
-  const handleAddException = useCallback(
-    (): void => {
-      setCurrentModal('addException');
-    },
-    [setCurrentModal]
-  );
+  const handleAddException = useCallback((): void => {
+    setCurrentModal('addException');
+  }, [setCurrentModal]);
 
   const handleOnCancelExceptionModal = useCallback((): void => {
     setCurrentModal(null);
@@ -189,26 +179,17 @@ const ExceptionsViewerComponent = ({
     [setLoadingItemIds, deleteExceptionItem, loadingItemIds, refreshExceptionItems]
   );
 
-  const handleCreateExceptionList = useCallback(
-    () => {
-      setCurrentModal('createExceptionList');
-    },
-    [setCurrentModal]
-  );
+  const handleCreateExceptionList = useCallback(() => {
+    setCurrentModal('createExceptionList');
+  }, [setCurrentModal]);
 
-  const handleCloseCreateExceptionListModal = useCallback(
-    () => {
-      setCurrentModal(null);
-    },
-    [setCurrentModal]
-  );
+  const handleCloseCreateExceptionListModal = useCallback(() => {
+    setCurrentModal(null);
+  }, [setCurrentModal]);
 
-  const handleCreateExceptionListModalSuccess = useCallback(
-    () => {
-      setCurrentModal('addException');
-    },
-    [handleCloseCreateExceptionListModal, setCurrentModal, onRuleChange]
-  );
+  const handleCreateExceptionListModalSuccess = useCallback(() => {
+    setCurrentModal('addException');
+  }, [handleCloseCreateExceptionListModal, setCurrentModal, onRuleChange]);
 
   // Logic for initial render
   useEffect((): void => {
@@ -220,28 +201,25 @@ const ExceptionsViewerComponent = ({
     }
   }, [isInitLoading, items, loadingList, dispatch]);
 
-  const showEmpty: boolean =
-    !isInitLoading && !loadingList && totalDetectionsItems === 0;
+  const showEmpty: boolean = !isInitLoading && !loadingList && totalDetectionsItems === 0;
 
-  const showNoResults: boolean =
-    items.length === 0 && (totalDetectionsItems > 0);
+  const showNoResults: boolean = items.length === 0 && totalDetectionsItems > 0;
 
   return (
     <>
-      {currentModal === 'editException' &&
-        exceptionToEdit != null && (
-          <EditExceptionFlyout
-            ruleName={rule.name}
-            ruleId={rule.id}
-            ruleIndices={ruleIndices}
-            dataViewId={dataViewId}
-            exceptionListType="detection"
-            exceptionItem={exceptionToEdit}
-            onCancel={handleOnCancelExceptionModal}
-            onConfirm={handleExceptionItemFlyoutSubmit}
-            onRuleChange={onRuleChange}
-          />
-        )}
+      {currentModal === 'editException' && exceptionToEdit != null && (
+        <EditExceptionFlyout
+          ruleName={rule.name}
+          ruleId={rule.id}
+          ruleIndices={ruleIndices}
+          dataViewId={dataViewId}
+          exceptionListType="detection"
+          exceptionItem={exceptionToEdit}
+          onCancel={handleOnCancelExceptionModal}
+          onConfirm={handleExceptionItemFlyoutSubmit}
+          onRuleChange={onRuleChange}
+        />
+      )}
 
       {currentModal === 'addException' && (
         <AddExceptionFlyout

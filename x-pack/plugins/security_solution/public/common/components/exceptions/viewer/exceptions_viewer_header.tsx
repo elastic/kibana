@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ExceptionListSchema, ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiSearchBar,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { Filter } from '../types';
@@ -100,16 +95,16 @@ const ExceptionsViewerHeaderComponent = ({
         />
       </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="exceptionsHeaderAddExceptionBtn"
-            onClick={onAddException}
-            isDisabled={isInitLoading}
-            fill
-          >
-            {i18n.CREATE_RULE_EXCEPTION_BUTTON}
-          </EuiButton>
-        </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          data-test-subj="exceptionsHeaderAddExceptionBtn"
+          onClick={onAddException}
+          isDisabled={isInitLoading}
+          fill
+        >
+          {i18n.CREATE_RULE_EXCEPTION_BUTTON}
+        </EuiButton>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

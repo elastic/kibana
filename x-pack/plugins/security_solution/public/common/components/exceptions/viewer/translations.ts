@@ -24,16 +24,14 @@ export const EXCEPTION_EMPTY_PROMPT_TITLE = i18n.translate(
 export const EXCEPTION_EMPTY_PROMPT_BODY = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.emptyPromptBody',
   {
-    defaultMessage:
-      'There are no exceptions on your rule. Create your first rule exception.',
+    defaultMessage: 'There are no exceptions on your rule. Create your first rule exception.',
   }
 );
 
 export const EXCEPTION_EMPTY_PROMPT_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.viewer.emptyPromptBody',
   {
-    defaultMessage:
-      'Add rule exception',
+    defaultMessage: 'Add rule exception',
   }
 );
 

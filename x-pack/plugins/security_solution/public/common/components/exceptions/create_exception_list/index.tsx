@@ -6,8 +6,24 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, EuiForm, EuiFormRow, EuiModalFooter, EuiButton, EuiSpacer, EuiButtonEmpty, EuiCallOut, EuiFieldText } from '@elastic/eui';
-import { CreateExceptionListSchema, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiForm,
+  EuiFormRow,
+  EuiModalFooter,
+  EuiButton,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldText,
+} from '@elastic/eui';
+import {
+  CreateExceptionListSchema,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
 import { useCreateAndAssociateExceptionList } from './use_create_and_associate_exception_list';
@@ -29,13 +45,19 @@ const CreateExceptionListComponent = ({
   const [listDescription, setListDescription] = useState('');
   const [isSavingExceptionList, createAndAssociateList] = useCreateAndAssociateExceptionList();
 
-  const onNameChange = useCallback((e) => {
-    setListName(e.target.value);
-  }, [setListName]);
+  const onNameChange = useCallback(
+    (e) => {
+      setListName(e.target.value);
+    },
+    [setListName]
+  );
 
-  const onDescriptionChange = useCallback((e) => {
-    setListDescription(e.target.value);
-  }, [setListDescription]);
+  const onDescriptionChange = useCallback(
+    (e) => {
+      setListDescription(e.target.value);
+    },
+    [setListDescription]
+  );
 
   const createAndAssociateExceptionList = useCallback(async () => {
     if (createAndAssociateList != null) {
@@ -48,12 +70,11 @@ const CreateExceptionListComponent = ({
         tags: undefined,
         meta: undefined,
       };
-  
-      const newExceptionList = await createAndAssociateList(
-        exceptionListToCreate,
-        [{id: rule.id, ruleId: rule.rule_id}]
-      );
-  
+
+      const newExceptionList = await createAndAssociateList(exceptionListToCreate, [
+        { id: rule.id, ruleId: rule.rule_id },
+      ]);
+
       handleCreateExceptionListSuccess(newExceptionList);
     }
   }, [rule, listName, listDescription]);
@@ -61,7 +82,6 @@ const CreateExceptionListComponent = ({
   const onCreateListSubmit = useCallback(() => {
     createAndAssociateExceptionList();
   }, [createAndAssociateExceptionList]);
-
 
   return (
     <EuiModal onClose={handleCloseModal} initialFocus="[name=exceptionListName]">
@@ -76,16 +96,17 @@ const CreateExceptionListComponent = ({
           <>
             <EuiCallOut
               title={i18n.FIRST_LINKED_LIST_CALLOUT_TITLE}
-              iconType="magnifyWithExclamation">
+              iconType="magnifyWithExclamation"
+            >
               <p>{i18n.FIRST_LINKED_LIST_CALLOUT_BODY}</p>
             </EuiCallOut>
-            <EuiSpacer size='m' />
+            <EuiSpacer size="m" />
           </>
         )}
         <EuiForm id="createExceptionListForm" component="form">
           <EuiFormRow label={i18n.EXCEPTION_LIST_NAME_LABEL}>
             <EuiFieldText
-              name="exceptionListName" 
+              name="exceptionListName"
               placeholder={i18n.EXCEPTION_LIST_NAME_PLACEHOLDER}
               value={listName}
               onChange={onNameChange}
@@ -93,7 +114,7 @@ const CreateExceptionListComponent = ({
           </EuiFormRow>
           <EuiFormRow label={i18n.EXCEPTION_LIST_DESCRIPTION_LABEL}>
             <EuiFieldText
-              name="exceptionListDescription" 
+              name="exceptionListDescription"
               placeholder={i18n.EXCEPTION_LIST_DESCRIPTION_PLACEHOLDER}
               value={listDescription}
               onChange={onDescriptionChange}

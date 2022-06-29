@@ -9,7 +9,7 @@
 import { ExceptionListIdentifiers, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getIdsAndNamespaces = ({
-  lists
+  lists,
 }: {
   lists: ExceptionListIdentifiers[];
 }): { ids: string[]; namespaces: NamespaceType[] } =>

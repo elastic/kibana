@@ -7,25 +7,40 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const EXCEPTION_ITEM_EDIT_BUTTON = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.editItemButton', {
-  defaultMessage: 'Edit item',
-});
+export const EXCEPTION_ITEM_EDIT_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.editItemButton',
+  {
+    defaultMessage: 'Edit item',
+  }
+);
 
-export const EXCEPTION_ITEM_DELETE_BUTTON = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.deleteItemButton', {
-  defaultMessage: 'Delete item',
-});
+export const EXCEPTION_ITEM_DELETE_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.deleteItemButton',
+  {
+    defaultMessage: 'Delete item',
+  }
+);
 
-export const EXCEPTION_ITEM_CREATED_LABEL = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.createdLabel', {
-  defaultMessage: 'Created',
-});
+export const EXCEPTION_ITEM_CREATED_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.createdLabel',
+  {
+    defaultMessage: 'Created',
+  }
+);
 
-export const EXCEPTION_ITEM_UPDATED_LABEL = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.updatedLabel', {
-  defaultMessage: 'Updated',
-});
+export const EXCEPTION_ITEM_UPDATED_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.updatedLabel',
+  {
+    defaultMessage: 'Updated',
+  }
+);
 
-export const EXCEPTION_ITEM_META_BY = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.metaDetailsBy', {
-  defaultMessage: 'by',
-});
+export const EXCEPTION_ITEM_META_BY = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.metaDetailsBy',
+  {
+    defaultMessage: 'by',
+  }
+);
 
 export const exceptionItemCommentsAccordion = (comments: number) =>
   i18n.translate('xpack.securitySolution.exceptions.exceptionItem.showCommentsLabel', {
@@ -39,7 +54,7 @@ export const DESCRIPTOR_WHEN = i18n.translate(
     defaultMessage: 'WHEN',
   }
 );
-  
+
 export const CONDITION_OPERATOR_TYPE_MATCH = i18n.translate(
   'xpack.securitySolution.exceptions.exceptionItem.conditions.matchOperator',
   {
@@ -96,6 +111,9 @@ export const CONDITION_OPERATOR_TYPE_LIST = i18n.translate(
   }
 );
 
-export const CONDITION_AND = i18n.translate('xpack.securitySolution.exceptions.exceptionItem.conditions.and', {
-  defaultMessage: 'AND',
-});
+export const CONDITION_AND = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionItem.conditions.and',
+  {
+    defaultMessage: 'AND',
+  }
+);

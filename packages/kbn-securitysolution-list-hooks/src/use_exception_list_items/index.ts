@@ -57,84 +57,78 @@ export const useExceptionListItems = ({
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
   const fetchExceptionListsItems = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
-  const { ids, namespaces }: { ids: string[] | undefined; namespaces: NamespaceType[] } = useMemo(() => {
-    if (lists != null) {
-      return getIdsAndNamespaces({ lists });
-    } else {
-      return { ids: undefined, namespaces: ['single', 'agnostic'] };
-    }
-  }, [lists]);
+  const { ids, namespaces }: { ids: string[] | undefined; namespaces: NamespaceType[] } =
+    useMemo(() => {
+      if (lists != null) {
+        return getIdsAndNamespaces({ lists });
+      } else {
+        return { ids: undefined, namespaces: ['single', 'agnostic'] };
+      }
+    }, [lists]);
 
-  useEffect(
-    () => {
-      let isSubscribed = true;
-      const abortCtrl = new AbortController();
+  useEffect(() => {
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
 
-      const fetchData = async (): Promise<void> => {
-        try {
-          setLoading(true);
+    const fetchData = async (): Promise<void> => {
+      try {
+        setLoading(true);
 
-          const {
-            page,
-            per_page: perPage,
-            total,
-            data,
-          } = await fetchExceptionItems({
-            filters,
-            http,
-            listIds: ids,
-            namespaceTypes: namespaces,
-            pagination: {
-              page: pagination.page,
-              perPage: pagination.perPage,
-            },
-            pit,
-            searchAfter,
-            signal: abortCtrl.signal,
-          });
+        const {
+          page,
+          per_page: perPage,
+          total,
+          data,
+        } = await fetchExceptionItems({
+          filters,
+          http,
+          listIds: ids,
+          namespaceTypes: namespaces,
+          pagination: {
+            page: pagination.page,
+            perPage: pagination.perPage,
+          },
+          pit,
+          searchAfter,
+          signal: abortCtrl.signal,
+        });
 
-          // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
-          // for context around the temporary `id`
-          const transformedData = data.map((item) => transformInput(item));
-
-          if (isSubscribed) {
-            setPagination({
-              page,
-              perPage,
-              total,
-            });
-            setExceptionListItems(transformedData);
-          }
-        } catch (error) {
-          if (isSubscribed) {
-            setExceptionListItems([]);
-            setPagination({
-              page: 1,
-              perPage: 20,
-              total: 0,
-            });
-          }
-        }
+        // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+        // for context around the temporary `id`
+        const transformedData = data.map((item) => transformInput(item));
 
         if (isSubscribed) {
-          setLoading(false);
+          setPagination({
+            page,
+            perPage,
+            total,
+          });
+          setExceptionListItems(transformedData);
         }
-      };
+      } catch (error) {
+        if (isSubscribed) {
+          setExceptionListItems([]);
+          setPagination({
+            page: 1,
+            perPage: 20,
+            total: 0,
+          });
+        }
+      }
 
-      fetchData();
+      if (isSubscribed) {
+        setLoading(false);
+      }
+    };
 
-      fetchExceptionListsItems.current = fetchData;
-      return (): void => {
-        isSubscribed = false;
-        abortCtrl.abort();
-      };
-    },
-    [
-      http,
-      ids,
-      namespaces
-    ]
-  );
+    fetchData();
+
+    fetchExceptionListsItems.current = fetchData;
+    return (): void => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
+  }, [http, ids, namespaces]);
 
   return [loading, exceptionItems, paginationInfo, fetchExceptionListsItems.current];
 };

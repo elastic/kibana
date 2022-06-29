@@ -331,7 +331,7 @@ export { fetchExceptionListByIdWithValidation as fetchExceptionListById };
  *
  * @throws An error if response is not OK
  */
- const fetchExceptionItems = async ({
+const fetchExceptionItems = async ({
   http,
   listIds,
   namespaceTypes,
@@ -391,7 +391,6 @@ const fetchExceptionItemsWithValidation = async ({
   )();
 
 export { fetchExceptionItemsWithValidation as fetchExceptionItems };
-
 
 /**
  * Fetch an ExceptionList's ExceptionItems by providing a ExceptionList list_id

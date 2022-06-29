@@ -19,7 +19,6 @@ export interface ExceptionItemCardMetaInfoProps {
 
 export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
   ({ item, dataTestSubj }) => {
-
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -28,13 +27,12 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         data-test-subj={dataTestSubj}
       >
         <EuiFlexItem grow={false}>
-          <MetaInfoDetails fieldName="created_by" label={i18n.EXCEPTION_ITEM_CREATED_LABEL} value1={(
-             <FormattedDate
-              fieldName="created_by"
-              value={item.created_at}
-              dateFormat="MM/DD/YY"
-            />
-            )}
+          <MetaInfoDetails
+            fieldName="created_by"
+            label={i18n.EXCEPTION_ITEM_CREATED_LABEL}
+            value1={
+              <FormattedDate fieldName="created_by" value={item.created_at} dateFormat="MM/DD/YY" />
+            }
             value2={item.created_by}
             dataTestSubj={`${dataTestSubj}-createdBy`}
           />
@@ -43,13 +41,13 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
           <MetaInfoDetails
             fieldName="updated_by"
             label={i18n.EXCEPTION_ITEM_UPDATED_LABEL}
-            value1={(
+            value1={
               <FormattedRelativePreferenceDate
                 value={item.updated_at}
                 tooltipFieldName="updated_by"
                 tooltipAnchorClassName="eui-textTruncate"
               />
-            )}
+            }
             value2={item.updated_by}
             dataTestSubj={`${dataTestSubj}-updatedBy`}
           />
@@ -70,36 +68,33 @@ interface MetaInfoDetailsProps {
 
 const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dataTestSubj }) => {
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      wrap={false}
-      responsive={false}
-    >
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiBetaBadge
-          color="subdued"
-          size='s'
-          style={{ fontFamily: 'Inter' }}
-          label={label}
-        />
+        <EuiBetaBadge color="subdued" size="s" style={{ fontFamily: 'Inter' }} label={label} />
       </EuiFlexItem>
       <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value1`}>
-        <EuiText size='xs' style={{ fontFamily: 'Inter' }}>{value1}</EuiText>
+        <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
+          {value1}
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size='xs' style={{ fontStyle: 'italic', fontFamily: 'Inter' }}>{i18n.EXCEPTION_ITEM_META_BY}</EuiText>
+        <EuiText size="xs" style={{ fontStyle: 'italic', fontFamily: 'Inter' }}>
+          {i18n.EXCEPTION_ITEM_META_BY}
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
           <EuiFlexItem grow={false}>
             <EuiAvatar initialsLength={2} name={value2.toUpperCase()} size="s" />
           </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            className="eui-textTruncate"
-          >
-            <EuiText size='xs' style={{ fontFamily: 'Inter' }} data-test-subj={`${dataTestSubj}-value2`}>{value2}</EuiText>
+          <EuiFlexItem grow={false} className="eui-textTruncate">
+            <EuiText
+              size="xs"
+              style={{ fontFamily: 'Inter' }}
+              data-test-subj={`${dataTestSubj}-value2`}
+            >
+              {value2}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

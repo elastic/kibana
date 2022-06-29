@@ -30,9 +30,7 @@ import { getIdsAndNamespaces } from '@kbn/securitysolution-list-utils';
 import { transformInput, transformNewItemOutput, transformOutput } from '../transforms';
 
 export interface ExceptionsApi {
-  addExceptionList: (arg: {
-    list: CreateExceptionListSchema;
-  }) => Promise<ExceptionListSchema>;
+  addExceptionList: (arg: { list: CreateExceptionListSchema }) => Promise<ExceptionListSchema>;
   addExceptionListItem: (arg: {
     listItem: CreateExceptionListItemSchema;
   }) => Promise<ExceptionListItemSchema>;
@@ -62,10 +60,10 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         const abortCtrl = new AbortController();
 
         return Api.addExceptionList({
-            http,
-            list,
-            signal: abortCtrl.signal,
-          });
+          http,
+          list,
+          signal: abortCtrl.signal,
+        });
       },
       async addExceptionListItem({
         listItem,

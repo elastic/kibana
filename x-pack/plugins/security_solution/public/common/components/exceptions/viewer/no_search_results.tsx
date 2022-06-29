@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexItem,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -26,8 +23,11 @@ const ExeptionItemsViewerEmptySearchResultsComponent = (): JSX.Element => (
   </EuiFlexItem>
 );
 
-ExeptionItemsViewerEmptySearchResultsComponent.displayName = 'ExeptionItemsViewerEmptySearchResultsComponent';
+ExeptionItemsViewerEmptySearchResultsComponent.displayName =
+  'ExeptionItemsViewerEmptySearchResultsComponent';
 
-export const ExeptionItemsViewerEmptySearchResults = React.memo(ExeptionItemsViewerEmptySearchResultsComponent);
+export const ExeptionItemsViewerEmptySearchResults = React.memo(
+  ExeptionItemsViewerEmptySearchResultsComponent
+);
 
 ExeptionItemsViewerEmptySearchResults.displayName = 'ExeptionItemsViewerEmptySearchResults';

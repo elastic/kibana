@@ -50,7 +50,7 @@ export interface UseExceptionListItemProps {
   filters: string[];
   pagination?: Pagination;
   searchAfter: string[] | undefined;
-  pit: { id: string; keepAlive: string; } | undefined;
+  pit: { id: string; keepAlive: string } | undefined;
 }
 
 export interface FilterExceptionsOptions {
@@ -174,7 +174,7 @@ export interface ApiCallFindItemsProps {
   namespaceTypes: NamespaceType[];
   filters: string[];
   searchAfter: string[] | undefined;
-  pit: { id: string; keepAlive: string; } | undefined;
+  pit: { id: string; keepAlive: string } | undefined;
   pagination: Partial<Pagination>;
   signal: AbortSignal;
 }

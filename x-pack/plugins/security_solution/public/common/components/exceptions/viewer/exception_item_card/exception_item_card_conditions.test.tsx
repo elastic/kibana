@@ -18,34 +18,34 @@ describe('ExceptionItemCardConditions', () => {
         <ExceptionItemCardConditions
           entries={[
             {
-              field: "host.name",
-              operator: "included",
-              type: "match",
-              value: "host",
+              field: 'host.name',
+              operator: 'included',
+              type: 'match',
+              value: 'host',
             },
             {
-              field: "threat.indicator.port",
-              operator: "included",
-              type: "exists",
+              field: 'threat.indicator.port',
+              operator: 'included',
+              type: 'exists',
             },
             {
               entries: [
                 {
-                  field: "valid",
-                  operator: "included",
-                  type: "match",
-                  value: "true"
-                }
+                  field: 'valid',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'true',
+                },
               ],
-              field: "file.Ext.code_signature",
-              type: "nested",
-            }
+              field: 'file.Ext.code_signature',
+              type: 'nested',
+            },
           ]}
           dataTestSubj="exceptionItemConditions"
         />
       </TestProviders>
     );
-    
+
     // Text is gonna look a bit off unformatted
     expect(
       wrapper.find('[data-test-subj="exceptionItemConditions-condition"]').at(0).text()

@@ -62,8 +62,7 @@ export const allExceptionItemsReducer =
   (state: State, action: Action): State => {
     switch (action.type) {
       case 'updateFilterOptions': {
-        const { filter, pagination } =
-          action.filters;
+        const { filter, pagination } = action.filters;
         return {
           ...state,
           filterOptions: {

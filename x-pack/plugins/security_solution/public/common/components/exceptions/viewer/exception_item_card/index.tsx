@@ -66,7 +66,7 @@ const ExceptionItemCardComponent = ({
 
   return (
     <EuiPanel paddingSize="l" data-test-subj={dataTestSubj} hasBorder hasShadow={false}>
-      <EuiFlexGroup gutterSize='m' direction="column">
+      <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem data-test-subj={`${dataTestSubj}-header`}>
           <ExceptionItemCardHeader
             item={exceptionItem}
@@ -75,17 +75,17 @@ const ExceptionItemCardComponent = ({
                 key: 'edit',
                 icon: 'pencil',
                 label: i18n.EXCEPTION_ITEM_EDIT_BUTTON,
-                onClick: handleEdit
+                onClick: handleEdit,
               },
               {
                 key: 'delete',
                 icon: 'trash',
                 label: i18n.EXCEPTION_ITEM_DELETE_BUTTON,
-                onClick: handleDelete
+                onClick: handleDelete,
               },
             ]}
             disableActions={disableItemActions}
-            dataTestSubj='exceptionItemCardHeader'
+            dataTestSubj="exceptionItemCardHeader"
           />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj={`${dataTestSubj}-meta`}>
@@ -95,20 +95,20 @@ const ExceptionItemCardComponent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <ExceptionItemCardConditions entries={exceptionItem.entries} dataTestSubj="exceptionItemCardConditions" />
+          <ExceptionItemCardConditions
+            entries={exceptionItem.entries}
+            dataTestSubj="exceptionItemCardConditions"
+          />
         </EuiFlexItem>
         {formattedComments.length > 0 && (
           <EuiFlexItem>
             <EuiAccordion
               id="exceptionItemCardComments"
-              buttonContent={(
-                <EuiText
-                  size="s"
-                  style={{ color: euiTheme.colors.primary }}
-                >
+              buttonContent={
+                <EuiText size="s" style={{ color: euiTheme.colors.primary }}>
                   {i18n.exceptionItemCommentsAccordion(formattedComments.length)}
                 </EuiText>
-              )}
+              }
               arrowDisplay="none"
               data-test-subj="exceptionsViewerCommentAccordion"
             >

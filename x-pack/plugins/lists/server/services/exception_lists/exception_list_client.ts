@@ -801,7 +801,7 @@ export class ExceptionListClient {
     //     this.getServerExtensionCallbackContext()
     //   );
     // }
-    console.log('IN tHE CLIENT')
+    console.log('IN tHE CLIENT');
     return findExceptionListsItem({
       filter,
       listId,

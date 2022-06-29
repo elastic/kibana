@@ -49,7 +49,7 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
   onEditExceptionItem,
   disableActions,
   onCreateExceptionList,
-}): JSX.Element => {  
+}): JSX.Element => {
   return (
     <EuiFlexGroup direction="column" className="eui-yScrollWithShadows">
       {isInitLoading && (
@@ -59,12 +59,8 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
           data-test-subj="exceptionsLoadingPrompt"
         />
       )}
-      {showNoResults && (
-        <ExeptionItemsViewerEmptySearchResults />
-      )}
-      {showEmpty && (
-        <ExeptionItemsViewerNoItems onCreateExceptionList={onCreateExceptionList} />
-      )}
+      {showNoResults && <ExeptionItemsViewerEmptySearchResults />}
+      {showEmpty && <ExeptionItemsViewerNoItems onCreateExceptionList={onCreateExceptionList} />}
       {!showEmpty && !showNoResults && !isInitLoading && (
         <EuiFlexItem grow={false} className="eui-yScrollWithShadows">
           <MyExceptionItemContainer
