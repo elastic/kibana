@@ -88,9 +88,8 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
     .resources.kibana[0].plan.kibana.user_settings_yaml = "logging.root.level: all"
     ' > /tmp/verbose_logging.json
-  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json &> "$JSON_FILE"
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/verbose_logging.json > "$JSON_FILE"
   echo "done"
-
 else
 ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload | jq '
   .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
