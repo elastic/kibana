@@ -233,9 +233,11 @@ export const ResponseActionsList = memo<
           parameters,
         } = item;
 
-        const parametersList = parameters ? Object.entries(parameters as Object).map(([key, value]) => {
-          return key + ':' + value;
-        }) : undefined;
+        const parametersList = parameters
+          ? Object.entries(parameters as Object).map(([key, value]) => {
+              return `${key}:${value}`;
+            })
+          : undefined;
 
         const command = getCommand(_command);
         const descriptionListLeft = [
