@@ -6,7 +6,6 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-
 import { Logger } from '@kbn/core/server';
 import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -118,6 +117,10 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
 
   public isTelemetryOptedIn(): Promise<boolean> {
     return this.composite.isTelemetryOptedIn();
+  }
+
+  public isTelemetryServicesReachable(): Promise<boolean> {
+    return this.composite.isTelemetryServicesReachable();
   }
 
   public sendIfDue(axiosInstance?: AxiosInstance): Promise<void> {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import {
   isPivotAggsConfigWithUiSupport,
   isSpecialSortField,
@@ -16,7 +17,6 @@ import {
 } from '../../../../../../common/pivot_aggs';
 import { PivotAggsConfigTopMetrics } from './types';
 import { TopMetricsAggForm } from './components/top_metrics_agg_form';
-import { isPopulatedObject } from '../../../../../../../../common/shared_imports';
 
 /**
  * Gets initial basic configuration of the top_metrics aggregation.

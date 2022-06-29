@@ -25,9 +25,16 @@ const createStartContract = (): Start => {
         fetchForWildcard: jest.fn(),
       },
     }),
+    hasData: {
+      hasESData: jest.fn().mockReturnValue(Promise.resolve(true)),
+      hasUserDataView: jest.fn().mockReturnValue(Promise.resolve(true)),
+      hasDataView: jest.fn().mockReturnValue(Promise.resolve(true)),
+    },
+    getDefaultDataView: jest.fn().mockReturnValue(Promise.resolve({})),
     get: jest.fn().mockReturnValue(Promise.resolve({})),
     clearCache: jest.fn(),
     getCanSaveSync: jest.fn(),
+    getIdsWithTitle: jest.fn(),
   } as unknown as jest.Mocked<DataViewsContract>;
 };
 

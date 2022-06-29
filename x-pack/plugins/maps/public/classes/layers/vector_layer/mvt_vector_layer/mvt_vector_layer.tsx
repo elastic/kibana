@@ -219,6 +219,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
 
     await syncMvtSourceData({
+      hasLabels: this.getCurrentStyle().hasLabels(),
       layerId: this.getId(),
       layerName: await this.getDisplayName(),
       prevDataRequest: this.getSourceDataRequest(),

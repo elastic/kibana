@@ -141,7 +141,14 @@ export const getDetailPanelProcess = (process: Process | null): DetailPanelProce
     }
   });
   if (!processData.executable.length) {
-    processData.executable = DEFAULT_PROCESS_DATA.executable;
+    // if there were no forks, execs (due to bad data), check if we at least have an executable for some event
+    const executable = process.getDetails().process?.executable;
+
+    if (executable) {
+      processData.executable.push([executable]);
+    } else {
+      processData.executable = DEFAULT_PROCESS_DATA.executable;
+    }
   }
 
   processData.entryLeader = getDetailPanelProcessLeader(details?.process?.entry_leader);

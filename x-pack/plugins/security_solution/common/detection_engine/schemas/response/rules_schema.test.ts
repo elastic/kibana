@@ -693,22 +693,22 @@ describe('rules_schema', () => {
 
     test('should return two fields for a rule of type "query"', () => {
       const fields = addQueryFields({ type: 'query' });
-      expect(fields.length).toEqual(2);
+      expect(fields.length).toEqual(3);
     });
 
     test('should return two fields for a rule of type "threshold"', () => {
       const fields = addQueryFields({ type: 'threshold' });
-      expect(fields.length).toEqual(2);
+      expect(fields.length).toEqual(3);
     });
 
     test('should return two fields for a rule of type "saved_query"', () => {
       const fields = addQueryFields({ type: 'saved_query' });
-      expect(fields.length).toEqual(2);
+      expect(fields.length).toEqual(3);
     });
 
     test('should return two fields for a rule of type "threat_match"', () => {
       const fields = addQueryFields({ type: 'threat_match' });
-      expect(fields.length).toEqual(2);
+      expect(fields.length).toEqual(3);
     });
   });
 
@@ -777,7 +777,7 @@ describe('rules_schema', () => {
 
     test('should return nine (9) fields for a rule of type "threat_match"', () => {
       const fields = addThreatMatchFields({ type: 'threat_match' });
-      expect(fields.length).toEqual(9);
+      expect(fields.length).toEqual(10);
     });
   });
 
@@ -790,7 +790,78 @@ describe('rules_schema', () => {
 
     test('should return 3 fields for a rule of type "eql"', () => {
       const fields = addEqlFields({ type: 'eql' });
-      expect(fields.length).toEqual(3);
+      expect(fields.length).toEqual(6);
+    });
+  });
+
+  describe('data_view_id', () => {
+    test('it should validate a type of "query" with "data_view_id" defined', () => {
+      const payload = { ...getRulesSchemaMock(), data_view_id: 'logs-*' };
+
+      const decoded = rulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getRulesSchemaMock(), data_view_id: 'logs-*' };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate a type of "saved_query" with "data_view_id" defined', () => {
+      const payload = getRulesSchemaMock();
+      payload.type = 'saved_query';
+      payload.saved_id = 'save id 123';
+      payload.data_view_id = 'logs-*';
+
+      const decoded = rulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getRulesSchemaMock();
+
+      expected.type = 'saved_query';
+      expected.saved_id = 'save id 123';
+      expected.data_view_id = 'logs-*';
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate a type of "eql" with "data_view_id" defined', () => {
+      const payload = { ...getRulesEqlSchemaMock(), data_view_id: 'logs-*' };
+
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getRulesEqlSchemaMock(), data_view_id: 'logs-*' };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate a type of "threat_match" with "data_view_id" defined', () => {
+      const payload = { ...getThreatMatchingSchemaMock(), data_view_id: 'logs-*' };
+
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getThreatMatchingSchemaMock(), data_view_id: 'logs-*' };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should NOT validate a type of "machine_learning" with "data_view_id" defined', () => {
+      const payload = { ...getRulesMlSchemaMock(), data_view_id: 'logs-*' };
+
+      const dependents = getDependents(payload);
+      const decoded = dependents.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "data_view_id"']);
+      expect(message.schema).toEqual({});
     });
   });
 });

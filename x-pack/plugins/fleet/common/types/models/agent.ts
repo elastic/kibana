@@ -34,7 +34,8 @@ export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
   | 'SETTINGS'
-  | 'POLICY_REASSIGN';
+  | 'POLICY_REASSIGN'
+  | 'CANCEL';
 
 export interface NewAgentAction {
   type: AgentActionType;
@@ -86,10 +87,20 @@ export interface Agent extends AgentBase {
   access_api_key?: string;
   status?: AgentStatus;
   packages: string[];
+  sort?: Array<number | string | null>;
 }
 
 export interface AgentSOAttributes extends AgentBase {
   packages?: string[];
+}
+
+export interface CurrentUpgrade {
+  actionId: string;
+  complete: boolean;
+  nbAgents: number;
+  nbAgentsAck: number;
+  version: string;
+  startTime?: string;
 }
 
 // Generated from FleetServer schema.json

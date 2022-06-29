@@ -23,7 +23,17 @@ export const ActionsMenu = React.memo<{}>(() => {
 
   const takeActionItems = useMemo(() => {
     return menuOptions.map((item) => {
-      return <ContextMenuItemNavByRouter {...item} onClick={closePopoverHandler} />;
+      return (
+        <ContextMenuItemNavByRouter
+          {...item}
+          onClick={(ev) => {
+            closePopoverHandler();
+            if (item.onClick) {
+              item.onClick(ev);
+            }
+          }}
+        />
+      );
     });
   }, [closePopoverHandler, menuOptions]);
 

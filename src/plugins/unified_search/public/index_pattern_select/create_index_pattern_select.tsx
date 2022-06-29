@@ -8,11 +8,11 @@
 
 import React from 'react';
 
-import { IndexPatternsContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { IndexPatternSelect, IndexPatternSelectProps } from '.';
 
 // Takes in stateful runtime dependencies and pre-wires them to the component
-export function createIndexPatternSelect(indexPatternService: IndexPatternsContract) {
+export function createIndexPatternSelect(indexPatternService: DataViewsContract) {
   return (props: IndexPatternSelectProps) => (
     <IndexPatternSelect {...props} indexPatternService={indexPatternService} />
   );

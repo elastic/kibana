@@ -171,5 +171,39 @@ export default ({ getService }: FtrProviderContext) => {
         .send({ job });
       ml.api.assertResponseStatusCode(403, status, body);
     });
+
+    it(`should validate a job with correct time range`, async () => {
+      const job = getBaseJobConfig();
+
+      const { body, status } = await supertest
+        .post('/api/ml/validate/datafeed_preview')
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ job, start: 1454889600000, end: 1454976000000 });
+      ml.api.assertResponseStatusCode(200, status, body);
+
+      expect(body.valid).to.eql(true, `valid should be true, but got ${body.valid}`);
+      expect(body.documentsFound).to.eql(
+        true,
+        `documentsFound should be true, but got ${body.documentsFound}`
+      );
+    });
+
+    it(`should validate a job, but with no docs with incorrect time range`, async () => {
+      const job = getBaseJobConfig();
+
+      const { body, status } = await supertest
+        .post('/api/ml/validate/datafeed_preview')
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ job, start: 0, end: 1249497607000 });
+      ml.api.assertResponseStatusCode(200, status, body);
+
+      expect(body.valid).to.eql(true, `valid should be true, but got ${body.valid}`);
+      expect(body.documentsFound).to.eql(
+        false,
+        `documentsFound should be false, but got ${body.documentsFound}`
+      );
+    });
   });
 };

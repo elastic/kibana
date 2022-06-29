@@ -69,6 +69,7 @@ const SortableControlInner = forwardRef<
     const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
     const { panels } = useEmbeddableSelector((state) => state);
 
+    const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
 
     const dragHandle = (
@@ -79,7 +80,7 @@ const SortableControlInner = forwardRef<
 
     return (
       <EuiFlexItem
-        grow={width === 'auto'}
+        grow={grow}
         data-control-id={embeddableId}
         data-test-subj={`control-frame`}
         data-render-complete="true"

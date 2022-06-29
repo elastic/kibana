@@ -415,7 +415,7 @@ describe('LayerPanel', () => {
       );
 
       act(() => {
-        instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').last().simulate('click');
       });
       instance.update();
 
@@ -580,9 +580,9 @@ describe('LayerPanel', () => {
 
       // Close without a state update
       mockDatasource.updateStateOnCloseDimension = jest.fn();
-      instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').last().simulate('click');
       act(() => {
-        (instance.find('DimensionContainer').first().prop('handleClose') as () => void)();
+        (instance.find('DimensionContainer').last().prop('handleClose') as () => void)();
       });
       instance.update();
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
@@ -591,9 +591,9 @@ describe('LayerPanel', () => {
       // Close with a state update
       mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValue({ newState: true });
 
-      instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').last().simulate('click');
       act(() => {
-        (instance.find('DimensionContainer').first().prop('handleClose') as () => void)();
+        (instance.find('DimensionContainer').last().prop('handleClose') as () => void)();
       });
       instance.update();
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
@@ -631,7 +631,7 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragging: draggingField,
+          source: draggingField,
         })
       );
 
@@ -644,7 +644,7 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          droppedItem: draggingField,
+          source: draggingField,
         })
       );
     });
@@ -663,8 +663,8 @@ describe('LayerPanel', () => {
         ],
       });
 
-      mockDatasource.getDropProps.mockImplementation(({ columnId }) =>
-        columnId !== 'a' ? { dropTypes: ['field_replace'], nextLabel: '' } : undefined
+      mockDatasource.getDropProps.mockImplementation(({ target }) =>
+        target.columnId !== 'a' ? { dropTypes: ['field_replace'], nextLabel: '' } : undefined
       );
 
       const { instance } = await mountWithProvider(
@@ -674,7 +674,9 @@ describe('LayerPanel', () => {
       );
 
       expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
-        expect.objectContaining({ columnId: 'a' })
+        expect.objectContaining({
+          target: expect.objectContaining({ columnId: 'a', groupId: 'a', layerId: 'first' }),
+        })
       );
 
       expect(
@@ -741,7 +743,7 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragging: draggingOperation,
+          source: draggingOperation,
         })
       );
 
@@ -755,8 +757,8 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          columnId: 'b',
-          droppedItem: draggingOperation,
+          target: expect.objectContaining({ columnId: 'b' }),
+          source: draggingOperation,
         })
       );
 
@@ -771,8 +773,8 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          columnId: 'newid',
-          droppedItem: draggingOperation,
+          target: expect.objectContaining({ columnId: 'newid' }),
+          source: draggingOperation,
         })
       );
     });
@@ -816,7 +818,7 @@ describe('LayerPanel', () => {
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'reorder',
-          droppedItem: draggingOperation,
+          source: draggingOperation,
         })
       );
       const secondButton = instance
@@ -865,9 +867,9 @@ describe('LayerPanel', () => {
       });
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          columnId: 'newid',
+          target: expect.objectContaining({ columnId: 'newid' }),
           dropType: 'duplicate_compatible',
-          droppedItem: draggingOperation,
+          source: draggingOperation,
         })
       );
     });
@@ -907,7 +909,7 @@ describe('LayerPanel', () => {
         humanData: { label: 'Label' },
       };
 
-      mockDatasource.onDrop.mockReturnValue({ deleted: 'a' });
+      mockDatasource.onDrop.mockReturnValue(true);
       const updateVisualization = jest.fn();
 
       const { instance } = await mountWithProvider(
@@ -925,9 +927,10 @@ describe('LayerPanel', () => {
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'replace_compatible',
-          droppedItem: draggingOperation,
+          source: draggingOperation,
         })
       );
+      // testing default onDropForVisualization path
       expect(mockVis.setDimension).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'c',
@@ -943,6 +946,85 @@ describe('LayerPanel', () => {
           prevState: 'modifiedState',
         })
       );
+      expect(updateVisualization).toHaveBeenCalledTimes(1);
+    });
+    it('should call onDrop and update visualization when replacing between compatible groups2', async () => {
+      const mockVis = {
+        ...mockVisualization,
+        removeDimension: jest.fn(),
+        setDimension: jest.fn(() => 'modifiedState'),
+        onDrop: jest.fn(() => 'modifiedState'),
+      };
+      jest.spyOn(mockVis.onDrop, 'bind').mockImplementation((thisVal, ...args) => mockVis.onDrop);
+
+      mockVis.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }, { columnId: 'b' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [{ columnId: 'c' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup2',
+          },
+        ],
+      });
+
+      const draggingOperation = {
+        layerId: 'first',
+        columnId: 'a',
+        groupId: 'a',
+        id: 'a',
+        humanData: { label: 'Label' },
+      };
+
+      mockDatasource.onDrop.mockReturnValue(true);
+      const updateVisualization = jest.fn();
+
+      const { instance } = await mountWithProvider(
+        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+          <LayerPanel
+            {...getDefaultProps()}
+            updateVisualization={updateVisualization}
+            activeVisualization={mockVis}
+          />
+        </ChildDragDropProvider>
+      );
+      act(() => {
+        instance.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
+      });
+
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dropType: 'replace_compatible',
+          source: draggingOperation,
+        })
+      );
+
+      expect(mockVis.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dropType: 'replace_compatible',
+          prevState: 'state',
+          source: draggingOperation,
+          target: expect.objectContaining({
+            columnId: 'c',
+            groupId: 'b',
+            id: 'c',
+            layerId: 'first',
+          }),
+        }),
+        mockVis
+      );
+      expect(mockVis.setDimension).not.toHaveBeenCalled();
+      expect(mockVis.removeDimension).not.toHaveBeenCalled();
       expect(updateVisualization).toHaveBeenCalledTimes(1);
     });
   });

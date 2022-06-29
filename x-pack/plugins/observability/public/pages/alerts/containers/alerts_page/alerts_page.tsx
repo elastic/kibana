@@ -20,7 +20,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
-import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
@@ -35,10 +34,9 @@ import {
   useAlertsPageStateContainer,
 } from '../state_container';
 import './styles.scss';
-import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
+import { AlertsStatusFilter, AlertsSearchBar } from '../../components';
 import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
-import { OBSERVABILITY_RULE_TYPES } from '../../../rules/config';
 
 interface RuleStatsState {
   total: number;
@@ -51,6 +49,7 @@ interface RuleStatsState {
 export interface TopAlert {
   fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
+  lastUpdated: number;
   reason: string;
   link?: string;
   active: boolean;
@@ -69,7 +68,7 @@ const ALERT_STATUS_REGEX = new RegExp(
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
 function AlertsPage() {
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
@@ -110,7 +109,7 @@ function AlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
-        typesFilter: OBSERVABILITY_RULE_TYPES,
+        typesFilter: observabilityRuleTypeRegistry.list(),
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
@@ -145,9 +144,7 @@ function AlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = config.unsafe.rules.enabled
-    ? http.basePath.prepend('/app/observability/alerts/rules')
-    : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules');
+  const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
@@ -237,21 +234,16 @@ function AlertsPage() {
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
+      isPageDataLoaded={Boolean(hasAnyData || isAllRequestsComplete)}
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       pageHeader={{
         pageTitle: (
-          <>
-            {i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}{' '}
-            <ExperimentalBadge />
-          </>
+          <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
         ),
         rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
       }}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <AlertsDisclaimer />
-        </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
             dynamicIndexPatterns={dynamicIndexPatternsAsyncState.value ?? NO_INDEX_PATTERNS}

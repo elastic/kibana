@@ -9,9 +9,9 @@ source .buildkite/scripts/common/util.sh
 
 export JOB=kibana-uptime-playwright
 
-echo "--- Uptime @elastic/synthetics Tests"
+echo "--- synthetics @elastic/synthetics Tests"
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "Uptime @elastic/synthetics Tests" \
+checks-reporter-with-killswitch "synthetics @elastic/synthetics Tests" \
   node plugins/synthetics/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --grep "MonitorManagement-monitor*"

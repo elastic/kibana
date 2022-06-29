@@ -1,0 +1,77 @@
+{
+  "id": "@kbn/scalability-simulation-generator",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/scalability-simulation-generator",
+        "id": "def-server.generateScalabilitySimulations",
+        "type": "Function",
+        "tags": [],
+        "label": "generateScalabilitySimulations",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-scalability-simulation-generator/src/cli.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scalability-simulation-generator",
+        "id": "def-server.generator",
+        "type": "Function",
+        "tags": [],
+        "label": "generator",
+        "description": [],
+        "signature": [
+          "({ dir, baseUrl, packageName, log }: ",
+          "CLIParams",
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-scalability-simulation-generator/src/generate_files.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scalability-simulation-generator",
+            "id": "def-server.generator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ dir, baseUrl, packageName, log }",
+            "description": [],
+            "signature": [
+              "CLIParams"
+            ],
+            "path": "packages/kbn-scalability-simulation-generator/src/generate_files.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

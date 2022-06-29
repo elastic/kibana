@@ -10,13 +10,13 @@ import supertest from 'supertest';
 import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { configServiceMock } from '@kbn/config-mocks';
 
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
 import { HttpServerSetup } from '../http_server';
 import { IRouter, RouteRegistrar } from '../router';
 
-import { configServiceMock } from '../../config/mocks';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 

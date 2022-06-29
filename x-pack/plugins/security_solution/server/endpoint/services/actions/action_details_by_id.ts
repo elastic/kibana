@@ -6,35 +6,33 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { getActionCompletionInfo, mapToNormalizedActionRequest } from './utils';
+
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import {
+  formatEndpointActionResults,
+  categorizeResponseResults,
+  getActionCompletionInfo,
+  mapToNormalizedActionRequest,
+} from './utils';
+import type {
   ActionDetails,
-  ActivityLogAction,
   ActivityLogActionResponse,
-  EndpointAction,
   EndpointActionResponse,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import {
-  ACTION_REQUEST_INDICES,
-  ACTION_RESPONSE_INDICES,
-  catchAndWrapError,
-  categorizeActionResults,
-  categorizeResponseResults,
-  getUniqueLogData,
-} from '../../utils';
+import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
-import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
   actionId: string
 ): Promise<ActionDetails> => {
-  let actionRequestsLogEntries: Array<ActivityLogAction | EndpointActivityLogAction>;
+  let actionRequestsLogEntries: EndpointActivityLogAction[];
 
   let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
   let actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
@@ -44,9 +42,9 @@ export const getActionDetailsById = async (
     const [actionRequestEsSearchResults, actionResponsesEsSearchResults] = await Promise.all([
       // Get the action request(s)
       esClient
-        .search<EndpointAction | LogsEndpointAction>(
+        .search<LogsEndpointAction>(
           {
-            index: ACTION_REQUEST_INDICES,
+            index: ENDPOINT_ACTIONS_INDEX,
             body: {
               query: {
                 bool: {
@@ -84,11 +82,9 @@ export const getActionDetailsById = async (
         .catch(catchAndWrapError),
     ]);
 
-    actionRequestsLogEntries = getUniqueLogData(
-      categorizeActionResults({
-        results: actionRequestEsSearchResults?.hits?.hits ?? [],
-      })
-    ) as Array<ActivityLogAction | EndpointActivityLogAction>;
+    actionRequestsLogEntries = formatEndpointActionResults(
+      actionRequestEsSearchResults?.hits?.hits ?? []
+    );
 
     // Multiple Action records could have been returned, but we only really
     // need one since they both hold similar data
@@ -110,7 +106,7 @@ export const getActionDetailsById = async (
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
-  const { isCompleted, completedAt } = getActionCompletionInfo(
+  const { isCompleted, completedAt, wasSuccessful, errors } = getActionCompletionInfo(
     normalizedActionRequest.agents,
     actionResponses
   );
@@ -120,10 +116,14 @@ export const getActionDetailsById = async (
     agents: normalizedActionRequest.agents,
     command: normalizedActionRequest.command,
     startedAt: normalizedActionRequest.createdAt,
-    logEntries: [...actionRequestsLogEntries, ...actionResponses],
     isCompleted,
     completedAt,
+    wasSuccessful,
+    errors,
     isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
+    createdBy: normalizedActionRequest.createdBy,
+    comment: normalizedActionRequest.comment,
+    parameters: normalizedActionRequest.parameters,
   };
 
   return actionDetails;

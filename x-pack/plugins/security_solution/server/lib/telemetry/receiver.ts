@@ -8,6 +8,7 @@
 import {
   Logger,
   CoreStart,
+  IScopedClusterClient,
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -37,8 +38,16 @@ import {
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
 } from './helpers';
+import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
+import type { TreeOptions } from '../../endpoint/routes/resolver/tree/utils/fetch';
+import type {
+  ResolverNode,
+  SafeEndpointEvent,
+  ResolverSchema,
+} from '../../../common/endpoint/types';
 import type {
   TelemetryEvent,
+  EnhancedAlertEvent,
   ESLicense,
   ESClusterInfo,
   GetEndpointListResponse,
@@ -134,6 +143,21 @@ export interface ITelemetryReceiver {
   };
 
   fetchPrebuiltRuleAlerts(): Promise<TelemetryEvent[]>;
+
+  fetchTimelineEndpointAlerts(
+    interval: number
+  ): Promise<SearchResponse<EnhancedAlertEvent, Record<string, AggregationsAggregate>>>;
+
+  buildProcessTree(
+    entityId: string,
+    resolverSchema: ResolverSchema,
+    startOfDay: string,
+    endOfDay: string
+  ): Promise<ResolverNode[]>;
+
+  fetchTimelineEvents(
+    nodeIds: string[]
+  ): Promise<SearchResponse<SafeEndpointEvent, Record<string, AggregationsAggregate>>>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -146,6 +170,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private kibanaIndex?: string;
   private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
+  private processTreeFetcher?: Fetcher;
   private readonly maxRecords = 10_000 as const;
 
   constructor(logger: Logger) {
@@ -168,6 +193,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
+
+    const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
+    this.processTreeFetcher = new Fetcher(elasticsearch);
   }
 
   public getClusterInfo(): ESClusterInfo | undefined {
@@ -176,7 +204,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public async fetchFleetAgents() {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
+      throw Error('elasticsearch client is unavailable: cannot retrieve fleet agents');
     }
 
     return this.agentClient?.listAgents({
@@ -430,7 +458,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
    */
   public async fetchDetectionRules() {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
+      throw Error('elasticsearch client is unavailable: cannot retrieve detection rules');
     }
 
     const query: SearchRequest = {
@@ -509,7 +537,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
    */
   public async fetchPrebuiltRuleAlerts() {
     if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve detection rule alerts');
+      throw Error('elasticsearch client is unavailable: cannot retrieve pre-built rule alerts');
     }
 
     const query: SearchRequest = {
@@ -628,6 +656,131 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     );
 
     return telemetryEvents;
+  }
+
+  public async fetchTimelineEndpointAlerts(interval: number) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
+    }
+
+    const query: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `${this.alertsIndex}*`,
+      ignore_unavailable: true,
+      size: 30,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'event.module': 'endpoint',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'kibana.alert.rule.parameters.immutable': 'true',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: `now-${interval}h`,
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    return this.esClient.search<EnhancedAlertEvent>(query);
+  }
+
+  public async buildProcessTree(
+    entityId: string,
+    resolverSchema: ResolverSchema,
+    startOfDay: string,
+    endOfDay: string
+  ): Promise<ResolverNode[]> {
+    if (this.processTreeFetcher === undefined || this.processTreeFetcher === null) {
+      throw Error(
+        'resolver tree builder is unavailable: cannot build encoded endpoint event graph'
+      );
+    }
+
+    const request: TreeOptions = {
+      ancestors: 200,
+      descendants: 500,
+      timeRange: {
+        from: startOfDay,
+        to: endOfDay,
+      },
+      schema: resolverSchema,
+      nodes: [entityId],
+      indexPatterns: [`${this.alertsIndex}*`, 'logs-*'],
+      descendantLevels: 20,
+    };
+
+    return this.processTreeFetcher.tree(request, true);
+  }
+
+  public async fetchTimelineEvents(nodeIds: string[]) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve timeline endpoint events');
+    }
+
+    const query: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: [`${this.alertsIndex}*`, 'logs-*'],
+      ignore_unavailable: true,
+      size: 100,
+      body: {
+        _source: {
+          include: [
+            '@timestamp',
+            'process',
+            'event',
+            'file',
+            'network',
+            'dns',
+            'kibana.rule.alert.uuid',
+          ],
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'process.entity_id': nodeIds,
+                },
+              },
+              {
+                term: {
+                  'event.category': 'process',
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    return this.esClient.search<SafeEndpointEvent>(query);
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {

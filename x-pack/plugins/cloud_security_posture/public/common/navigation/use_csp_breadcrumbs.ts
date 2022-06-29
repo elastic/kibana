@@ -8,33 +8,64 @@
 import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PLUGIN_ID } from '../../../common';
+import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import { string } from 'io-ts';
 import type { CspNavigationItem } from './types';
 import { CLOUD_POSTURE } from './translations';
+
+const getClickableBreadcrumb = (
+  routeMatch: RouteProps['path'],
+  breadcrumbPath: CspNavigationItem['path']
+) => {
+  const hasParams = breadcrumbPath.includes(':');
+  if (hasParams) return;
+
+  if (routeMatch !== breadcrumbPath) {
+    return breadcrumbPath.startsWith('/') ? `${breadcrumbPath}` : `/${breadcrumbPath}`;
+  }
+};
 
 export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
   const {
     services: {
-      chrome: { setBreadcrumbs },
+      chrome: { setBreadcrumbs, docTitle },
       application: { getUrlForApp },
     },
   } = useKibana<CoreStart>();
+  const match = useRouteMatch();
+  const history = useHistory();
 
   useEffect(() => {
-    const cspPath = getUrlForApp(PLUGIN_ID);
-    const additionalBreadCrumbs: ChromeBreadcrumb[] = breadcrumbs.map((breadcrumb) => ({
-      text: breadcrumb.name,
-      path: breadcrumb.path.startsWith('/')
-        ? `${cspPath}${breadcrumb.path}`
-        : `${cspPath}/${breadcrumb.path}`,
-    }));
+    const additionalBreadCrumbs: ChromeBreadcrumb[] = breadcrumbs.map((breadcrumb) => {
+      const clickableLink = getClickableBreadcrumb(match.path, breadcrumb.path);
 
-    setBreadcrumbs([
+      return {
+        text: breadcrumb.name,
+        ...(clickableLink && {
+          onClick: (e) => {
+            e.preventDefault();
+            history.push(clickableLink);
+          },
+        }),
+      };
+    });
+
+    const nextBreadcrumbs = [
       {
         text: CLOUD_POSTURE,
-        href: cspPath,
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+          e.preventDefault();
+          history.push(`/`);
+        },
       },
       ...additionalBreadCrumbs,
-    ]);
-  }, [getUrlForApp, setBreadcrumbs, breadcrumbs]);
+    ];
+
+    setBreadcrumbs(nextBreadcrumbs);
+    docTitle.change(getTextBreadcrumbs(nextBreadcrumbs));
+  }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs, history, docTitle]);
 };
+
+const getTextBreadcrumbs = (breadcrumbs: EuiBreadcrumb[]) =>
+  breadcrumbs.map((breadcrumb) => breadcrumb.text).filter(string.is);

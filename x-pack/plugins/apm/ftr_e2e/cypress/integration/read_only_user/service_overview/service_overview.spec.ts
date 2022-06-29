@@ -101,7 +101,7 @@ describe('Service Overview', () => {
 
   describe('renders', () => {
     before(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(baseUrl);
     });
 
@@ -121,7 +121,7 @@ describe('Service Overview', () => {
 
   describe('transactions', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(baseUrl);
     });
 
@@ -174,7 +174,7 @@ describe('Service Overview', () => {
 
   describe('when RUM service', () => {
     before(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(
         url.format({
           pathname: '/app/apm/services/opbeans-rum/overview',
@@ -203,7 +203,7 @@ describe('Service Overview', () => {
 
   describe('Calls APIs', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(baseUrl);
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);

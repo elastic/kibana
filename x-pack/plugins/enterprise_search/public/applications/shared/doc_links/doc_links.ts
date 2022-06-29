@@ -64,7 +64,9 @@ class DocLinks {
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
+  public workplaceSearchConfluenceCloudConnectorPackage: string;
   public workplaceSearchConfluenceServer: string;
+  public workplaceSearchCustomConnectorPackage: string;
   public workplaceSearchCustomSources: string;
   public workplaceSearchCustomSourcePermissions: string;
   public workplaceSearchDocumentPermissions: string;
@@ -78,7 +80,9 @@ class DocLinks {
   public workplaceSearchIndexingSchedule: string;
   public workplaceSearchJiraCloud: string;
   public workplaceSearchJiraServer: string;
+  public workplaceSearchNetworkDrive: string;
   public workplaceSearchOneDrive: string;
+  public workplaceSearchOutlook: string;
   public workplaceSearchPermissions: string;
   public workplaceSearchSalesforce: string;
   public workplaceSearchSecurity: string;
@@ -87,7 +91,9 @@ class DocLinks {
   public workplaceSearchSharePointServer: string;
   public workplaceSearchSlack: string;
   public workplaceSearchSynch: string;
+  public workplaceSearchTeams: string;
   public workplaceSearchZendesk: string;
+  public workplaceSearchZoom: string;
 
   constructor() {
     this.appSearchApis = '';
@@ -146,7 +152,9 @@ class DocLinks {
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
+    this.workplaceSearchConfluenceCloudConnectorPackage = '';
     this.workplaceSearchConfluenceServer = '';
+    this.workplaceSearchCustomConnectorPackage = '';
     this.workplaceSearchCustomSources = '';
     this.workplaceSearchCustomSourcePermissions = '';
     this.workplaceSearchDocumentPermissions = '';
@@ -160,7 +168,9 @@ class DocLinks {
     this.workplaceSearchIndexingSchedule = '';
     this.workplaceSearchJiraCloud = '';
     this.workplaceSearchJiraServer = '';
+    this.workplaceSearchNetworkDrive = '';
     this.workplaceSearchOneDrive = '';
+    this.workplaceSearchOutlook = '';
     this.workplaceSearchPermissions = '';
     this.workplaceSearchSalesforce = '';
     this.workplaceSearchSecurity = '';
@@ -169,7 +179,9 @@ class DocLinks {
     this.workplaceSearchSharePointServer = '';
     this.workplaceSearchSlack = '';
     this.workplaceSearchSynch = '';
+    this.workplaceSearchTeams = '';
     this.workplaceSearchZendesk = '';
+    this.workplaceSearchZoom = '';
   }
 
   public setDocLinks(docLinks: DocLinksStart): void {
@@ -230,7 +242,11 @@ class DocLinks {
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
+    this.workplaceSearchConfluenceCloudConnectorPackage =
+      docLinks.links.workplaceSearch.confluenceCloudConnectorPackage;
     this.workplaceSearchConfluenceServer = docLinks.links.workplaceSearch.confluenceServer;
+    this.workplaceSearchCustomConnectorPackage =
+      docLinks.links.workplaceSearch.customConnectorPackage;
     this.workplaceSearchCustomSources = docLinks.links.workplaceSearch.customSources;
     this.workplaceSearchCustomSourcePermissions =
       docLinks.links.workplaceSearch.customSourcePermissions;
@@ -246,6 +262,7 @@ class DocLinks {
     this.workplaceSearchIndexingSchedule = docLinks.links.workplaceSearch.indexingSchedule;
     this.workplaceSearchJiraCloud = docLinks.links.workplaceSearch.jiraCloud;
     this.workplaceSearchJiraServer = docLinks.links.workplaceSearch.jiraServer;
+    this.workplaceSearchNetworkDrive = docLinks.links.workplaceSearch.networkDrive;
     this.workplaceSearchOneDrive = docLinks.links.workplaceSearch.oneDrive;
     this.workplaceSearchPermissions = docLinks.links.workplaceSearch.permissions;
     this.workplaceSearchSalesforce = docLinks.links.workplaceSearch.salesforce;

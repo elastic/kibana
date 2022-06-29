@@ -5,23 +5,38 @@
  * 2.0.
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
+import { cspRuleMetadataSchema } from './csp_rule_metadata';
 
-// TODO: needs to be shared with cloudbeat
-export const cspRuleSchema = rt.object({
-  id: rt.string(),
-  name: rt.string(),
-  description: rt.string(),
-  rationale: rt.string(),
-  impact: rt.string(),
-  default_value: rt.string(),
-  remediation: rt.string(),
+export const cspRuleSchemaV830 = rt.object({
+  audit: rt.string(),
   benchmark: rt.object({ name: rt.string(), version: rt.string() }),
-  rego_rule_id: rt.string(),
-  tags: rt.arrayOf(rt.string()),
+  default_value: rt.nullable(rt.string()),
+  description: rt.string(),
   enabled: rt.boolean(),
+  id: rt.string(),
+  impact: rt.nullable(rt.string()),
+  muted: rt.boolean(),
+  name: rt.string(),
+  package_policy_id: rt.string(),
+  policy_id: rt.string(),
+  profile_applicability: rt.string(),
+  rationale: rt.string(),
+  references: rt.nullable(rt.string()),
+  rego_rule_id: rt.string(),
+  remediation: rt.string(),
+  section: rt.string(),
+  tags: rt.arrayOf(rt.string()),
+  version: rt.string(),
+});
+
+export const cspRuleSchemaV840 = rt.object({
+  enabled: rt.boolean(),
+  metadata: cspRuleMetadataSchema,
   muted: rt.boolean(),
   package_policy_id: rt.string(),
   policy_id: rt.string(),
 });
 
-export type CspRuleSchema = TypeOf<typeof cspRuleSchema>;
+export type CspRuleTypeV830 = TypeOf<typeof cspRuleSchemaV830>;
+export type CspRuleTypeV840 = TypeOf<typeof cspRuleSchemaV840>;
+export type CspRuleType = CspRuleTypeV840;

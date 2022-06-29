@@ -54,9 +54,15 @@ import {
   LicenseOrUndefined,
   RuleNameOverrideOrUndefined,
   TimestampOverrideOrUndefined,
+  TimestampFieldOrUndefined,
   EventCategoryOverrideOrUndefined,
+  TiebreakerFieldOrUndefined,
   NamespaceOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+  DataViewIdOrUndefined,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+} from '../../../../common/detection_engine/schemas/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import {
@@ -92,7 +98,9 @@ export interface UpdateProperties {
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
+  timestampField: TimestampFieldOrUndefined;
   eventCategoryOverride: EventCategoryOverrideOrUndefined;
+  tiebreakerField: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
@@ -105,13 +113,17 @@ export interface UpdateProperties {
   machineLearningJobId: MachineLearningJobIdOrUndefined;
   filters: PartialFilter[] | undefined;
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: IntervalOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScoreOrUndefined;
   riskScoreMapping: RiskScoreMappingOrUndefined;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
+  setup: SetupGuide | undefined;
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;

@@ -10,6 +10,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useGetAppInfo, UseGetAppInfo, UseGetAppInfoProps } from './use_get_app_info';
 import { getAppInfo } from './api';
 import { ServiceNowActionConnector } from './types';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('./api');
 jest.mock('../../../../common/lib/kibana');
@@ -40,6 +41,8 @@ const actionConnector = {
 } as ServiceNowActionConnector;
 
 describe('useGetAppInfo', () => {
+  const http = httpServiceMock.createStartContract();
+
   getAppInfoMock.mockResolvedValue(applicationInfoData);
 
   beforeEach(() => {
@@ -50,6 +53,7 @@ describe('useGetAppInfo', () => {
     const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
       useGetAppInfo({
         actionTypeId,
+        http,
       })
     );
 
@@ -63,6 +67,7 @@ describe('useGetAppInfo', () => {
     const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
       useGetAppInfo({
         actionTypeId,
+        http,
       })
     );
 
@@ -84,6 +89,7 @@ describe('useGetAppInfo', () => {
     const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
       useGetAppInfo({
         actionTypeId,
+        http,
       })
     );
 
@@ -92,5 +98,29 @@ describe('useGetAppInfo', () => {
         await result.current.fetchAppInfo(actionConnector);
       })
     ).rejects.toThrow('An error occurred');
+  });
+
+  it('it throws an error when fetch fails', async () => {
+    expect.assertions(1);
+    getAppInfoMock.mockImplementation(() => {
+      const error = new Error('An error occurred');
+      error.name = 'TypeError';
+      throw error;
+    });
+
+    const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
+      useGetAppInfo({
+        actionTypeId,
+        http,
+      })
+    );
+
+    await expect(() =>
+      act(async () => {
+        await result.current.fetchAppInfo(actionConnector);
+      })
+    ).rejects.toThrow(
+      'Failed to fetch. Check the URL or the CORS configuration of your ServiceNow instance.'
+    );
   });
 });

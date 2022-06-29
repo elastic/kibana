@@ -82,7 +82,7 @@ const StyledHoverActionsContainer = styled.div<{
 
 const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
   min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
-  padding: ${(props) => `0 ${props.theme.eui.paddingSizes.s}`};
+  padding: ${(props) => `0 ${props.theme.eui.euiSizeS}`};
   position: relative;
 `;
 
@@ -96,6 +96,8 @@ interface Props {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
+  fieldType: string;
+  isAggregatable: boolean;
   goGetTimelineId?: (args: boolean) => void;
   hideAddToTimeline?: boolean;
   hideTopN?: boolean;
@@ -136,6 +138,8 @@ export const HoverActions: React.FC<Props> = React.memo(
     enableOverflowButton = false,
     applyWidthAndPadding = true,
     field,
+    fieldType,
+    isAggregatable,
     goGetTimelineId,
     isObjectArray,
     hideAddToTimeline = false,
@@ -219,6 +223,8 @@ export const HoverActions: React.FC<Props> = React.memo(
       draggableId,
       enableOverflowButton: enableOverflowButton && !isCaseView,
       field,
+      fieldType,
+      isAggregatable,
       handleHoverActionClicked,
       hideAddToTimeline,
       hideTopN,

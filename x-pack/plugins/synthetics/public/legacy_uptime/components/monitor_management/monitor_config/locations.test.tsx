@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
+import { within } from '@testing-library/dom';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { ServiceLocations } from './locations';
+import { LocationStatus } from '../../../../../common/runtime_types';
 
 describe('<ServiceLocations />', () => {
   const setLocations = jest.fn();
@@ -93,5 +95,36 @@ describe('<ServiceLocations />', () => {
     fireEvent.click(checkbox);
     fireEvent.blur(checkbox);
     expect(onBlur).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows experimental badges next to experimental locations', () => {
+    const multiLocations = [
+      { ...location, id: 'L1', label: 'first', status: LocationStatus.EXPERIMENTAL },
+      { ...location, id: 'L2', label: 'second', status: LocationStatus.GA },
+      { ...location, id: 'L3', label: 'third', status: LocationStatus.EXPERIMENTAL },
+      { ...location, id: 'L4', label: 'fourth', status: LocationStatus.GA },
+    ];
+
+    const { getByTestId } = render(
+      <ServiceLocations selectedLocations={[]} setLocations={setLocations} isInvalid={true} />,
+      {
+        state: {
+          monitorManagementList: { ...state.monitorManagementList, locations: multiLocations },
+        },
+      }
+    );
+
+    multiLocations.forEach((expectedLocation) => {
+      const locationText = getByTestId(`syntheticsServiceLocationText--${expectedLocation.id}`);
+
+      within(locationText).getByText(expectedLocation.label);
+
+      if (expectedLocation.status !== LocationStatus.GA) {
+        within(locationText).getByText('Tech Preview');
+      } else {
+        const techPreviewBadge = within(locationText).queryByText('Tech Preview');
+        expect(techPreviewBadge).not.toBeInTheDocument();
+      }
+    });
   });
 });

@@ -6,9 +6,9 @@
  */
 
 import * as React from 'react';
+import { fireEvent, act, render, screen } from '@testing-library/react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList, percentileFields } from './rules_list';
@@ -23,8 +23,10 @@ import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/mon
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 import { useKibana } from '../../../../common/lib/kibana';
-jest.mock('../../../../common/lib/kibana');
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { IToasts } from '@kbn/core/public';
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),
@@ -33,6 +35,7 @@ jest.mock('../../../lib/rule_api', () => ({
   loadRules: jest.fn(),
   loadRuleTypes: jest.fn(),
   loadRuleAggregations: jest.fn(),
+  updateAPIKey: jest.fn(),
   loadRuleTags: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
@@ -67,12 +70,12 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRules, loadRuleTypes, loadRuleAggregations, loadRuleTags } =
+const { loadRules, loadRuleTypes, loadRuleAggregations, updateAPIKey, loadRuleTags } =
   jest.requireMock('../../../lib/rule_api');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
-
 const ruleType = {
   id: 'test_rule_type',
   description: 'test',
@@ -101,13 +104,305 @@ const ruleTypeFromApi = {
 };
 ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
+
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+const mockedRulesData = [
+  {
+    id: '1',
+    name: 'test rule',
+    tags: ['tag1'],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '1s' },
+    actions: [],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'active',
+      lastDuration: 500,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: null,
+    },
+    monitoring: {
+      execution: {
+        history: [
+          {
+            success: true,
+            duration: 1000000,
+          },
+          {
+            success: true,
+            duration: 200000,
+          },
+          {
+            success: false,
+            duration: 300000,
+          },
+        ],
+        calculated_metrics: {
+          success_ratio: 0.66,
+          p50: 200000,
+          p95: 300000,
+          p99: 300000,
+        },
+      },
+    },
+  },
+  {
+    id: '2',
+    name: 'test rule ok',
+    tags: ['tag1'],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'ok',
+      lastDuration: 61000,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: null,
+    },
+    monitoring: {
+      execution: {
+        history: [
+          {
+            success: true,
+            duration: 100000,
+          },
+          {
+            success: true,
+            duration: 500000,
+          },
+        ],
+        calculated_metrics: {
+          success_ratio: 1,
+          p50: 0,
+          p95: 100000,
+          p99: 500000,
+        },
+      },
+    },
+  },
+  {
+    id: '3',
+    name: 'test rule pending',
+    tags: ['tag1'],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'pending',
+      lastDuration: 30234,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: null,
+    },
+    monitoring: {
+      execution: {
+        history: [{ success: false, duration: 100 }],
+        calculated_metrics: {
+          success_ratio: 0,
+        },
+      },
+    },
+  },
+  {
+    id: '4',
+    name: 'test rule error',
+    tags: ['tag1'],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'error',
+      lastDuration: 122000,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: {
+        reason: RuleExecutionStatusErrorReasons.Unknown,
+        message: 'test',
+      },
+    },
+  },
+  {
+    id: '5',
+    name: 'test rule license error',
+    tags: [],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'error',
+      lastDuration: 500,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      error: {
+        reason: RuleExecutionStatusErrorReasons.License,
+        message: 'test',
+      },
+    },
+  },
+  {
+    id: '6',
+    name: 'test rule warning',
+    tags: [],
+    enabled: true,
+    ruleTypeId: 'test_rule_type',
+    schedule: { interval: '5d' },
+    actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
+    params: { name: 'test rule type name' },
+    scheduledTaskId: null,
+    createdBy: null,
+    updatedBy: null,
+    apiKeyOwner: null,
+    throttle: '1m',
+    muteAll: false,
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'warning',
+      lastDuration: 500,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+      warning: {
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        message: 'test',
+      },
+    },
+  },
+];
 
 beforeEach(() => {
   (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
 });
 
-describe('rules_list component empty', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/134922
+// FLAKY: https://github.com/elastic/kibana/issues/134923
+describe.skip('Update Api Key', () => {
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+
+  beforeAll(() => {
+    loadRules.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 0,
+      data: mockedRulesData,
+    });
+    loadActionTypes.mockResolvedValue([]);
+    loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    loadAllActions.mockResolvedValue([]);
+    useKibanaMock().services.notifications.toasts = {
+      addSuccess,
+      addError,
+    } as unknown as IToasts;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('Updates the Api Key successfully', async () => {
+    updateAPIKey.mockResolvedValueOnce(204);
+    render(
+      <IntlProvider locale="en">
+        <RulesList />
+      </IntlProvider>
+    );
+    expect(await screen.findByText('test rule ok')).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
+    expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update API key'));
+    expect(screen.getByText('You will not be able to recover the old API key')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(
+      screen.queryByText('You will not be able to recover the old API key')
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
+    expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update API key'));
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Update'));
+    });
+    expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
+    expect(loadRules).toHaveBeenCalledTimes(3);
+    expect(screen.queryByText("You can't recover the old API key")).not.toBeInTheDocument();
+    expect(addSuccess).toHaveBeenCalledWith('API key has been updated');
+  });
+
+  it('Update API key fails', async () => {
+    updateAPIKey.mockRejectedValueOnce(500);
+    render(
+      <IntlProvider locale="en">
+        <RulesList />
+      </IntlProvider>
+    );
+
+    expect(await screen.findByText('test rule ok')).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByTestId('selectActionButton')[1]);
+    expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Update API key'));
+    expect(screen.getByText('You will not be able to recover the old API key')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Update'));
+    });
+    expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: '2' }));
+    expect(loadRules).toHaveBeenCalledTimes(3);
+    expect(
+      screen.queryByText('You will not be able to recover the old API key')
+    ).not.toBeInTheDocument();
+    expect(addError).toHaveBeenCalledWith(500, { title: 'Failed to update the API key' });
+  });
+});
+
+// FLAKY: https://github.com/elastic/kibana/issues/134924
+describe.skip('rules_list component empty', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
     loadRules.mockResolvedValue({
@@ -174,208 +469,6 @@ describe('rules_list component empty', () => {
 describe('rules_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
-  const mockedRulesData = [
-    {
-      id: '1',
-      name: 'test rule',
-      tags: ['tag1'],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '1s' },
-      actions: [],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'active',
-        lastDuration: 500,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: null,
-      },
-      monitoring: {
-        execution: {
-          history: [
-            {
-              success: true,
-              duration: 1000000,
-            },
-            {
-              success: true,
-              duration: 200000,
-            },
-            {
-              success: false,
-              duration: 300000,
-            },
-          ],
-          calculated_metrics: {
-            success_ratio: 0.66,
-            p50: 200000,
-            p95: 300000,
-            p99: 300000,
-          },
-        },
-      },
-    },
-    {
-      id: '2',
-      name: 'test rule ok',
-      tags: ['tag1'],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'ok',
-        lastDuration: 61000,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: null,
-      },
-      monitoring: {
-        execution: {
-          history: [
-            {
-              success: true,
-              duration: 100000,
-            },
-            {
-              success: true,
-              duration: 500000,
-            },
-          ],
-          calculated_metrics: {
-            success_ratio: 1,
-            p50: 0,
-            p95: 100000,
-            p99: 500000,
-          },
-        },
-      },
-    },
-    {
-      id: '3',
-      name: 'test rule pending',
-      tags: ['tag1'],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'pending',
-        lastDuration: 30234,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: null,
-      },
-      monitoring: {
-        execution: {
-          history: [{ success: false, duration: 100 }],
-          calculated_metrics: {
-            success_ratio: 0,
-          },
-        },
-      },
-    },
-    {
-      id: '4',
-      name: 'test rule error',
-      tags: ['tag1'],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'error',
-        lastDuration: 122000,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: {
-          reason: RuleExecutionStatusErrorReasons.Unknown,
-          message: 'test',
-        },
-      },
-    },
-    {
-      id: '5',
-      name: 'test rule license error',
-      tags: [],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'error',
-        lastDuration: 500,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        error: {
-          reason: RuleExecutionStatusErrorReasons.License,
-          message: 'test',
-        },
-      },
-    },
-    {
-      id: '6',
-      name: 'test rule warning',
-      tags: [],
-      enabled: true,
-      ruleTypeId: 'test_rule_type',
-      schedule: { interval: '5d' },
-      actions: [{ id: 'test', group: 'rule', params: { message: 'test' } }],
-      params: { name: 'test rule type name' },
-      scheduledTaskId: null,
-      createdBy: null,
-      updatedBy: null,
-      apiKeyOwner: null,
-      throttle: '1m',
-      muteAll: false,
-      mutedInstanceIds: [],
-      executionStatus: {
-        status: 'warning',
-        lastDuration: 500,
-        lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-        warning: {
-          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-          message: 'test',
-        },
-      },
-    },
-  ];
-
   async function setup(editable: boolean = true) {
     loadRules.mockResolvedValue({
       page: 1,
@@ -425,7 +518,6 @@ describe('rules_list component with items', () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     wrapper = mountWithIntl(<RulesList />);
-
     await act(async () => {
       await nextTick();
       wrapper.update();
@@ -472,7 +564,7 @@ describe('rules_list component with items', () => {
       .simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last run.');
@@ -491,7 +583,7 @@ describe('rules_list component with items', () => {
     wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(
@@ -516,7 +608,7 @@ describe('rules_list component with items', () => {
     wrapper.find('[data-test-subj="rulesTableCell-durationTooltip"]').first().simulate('mouseOver');
 
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
 
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').text()).toBe(
@@ -538,7 +630,7 @@ describe('rules_list component with items', () => {
       wrapper.find('EuiButtonEmpty[data-test-subj="ruleStatus-error-license-fix"]').length
     ).toEqual(1);
 
-    expect(wrapper.find('[data-test-subj="refreshRulesButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="rulesListAutoRefresh"]').exists()).toBeTruthy();
 
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').first().text()).toEqual(
       'Error'
@@ -635,7 +727,7 @@ describe('rules_list component with items', () => {
       .first()
       .simulate('click');
 
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
     wrapper.update();
 
     // Percentile Selection
@@ -651,7 +743,7 @@ describe('rules_list component with items', () => {
     // Select P95
     percentileOptions.at(1).simulate('click');
 
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
     wrapper.update();
 
     expect(
@@ -706,18 +798,6 @@ describe('rules_list component with items', () => {
     jest.clearAllMocks();
   });
 
-  it('loads rules when refresh button is clicked', async () => {
-    await setup();
-    wrapper.find('[data-test-subj="refreshRulesButton"]').first().simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(loadRules).toHaveBeenCalled();
-  });
-
   it('renders license errors and manage license modal on click', async () => {
     global.open = jest.fn();
     await setup();
@@ -765,7 +845,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_enabled_8"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_enabled_9"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -834,21 +914,37 @@ describe('rules_list component with items', () => {
     loadRules.mockReset();
     await setup();
 
-    expect(loadRules.mock.calls[0][0].ruleStatusesFilter).toEqual([]);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: [],
+      })
+    );
 
     wrapper.find('[data-test-subj="ruleStatusFilterButton"] button').simulate('click');
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
 
-    expect(loadRules.mock.calls[1][0].ruleStatusesFilter).toEqual(['enabled']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: ['enabled'],
+      })
+    );
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
 
-    expect(loadRules.mock.calls[2][0].ruleStatusesFilter).toEqual(['enabled', 'snoozed']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: ['enabled', 'snoozed'],
+      })
+    );
 
     wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
 
-    expect(loadRules.mock.calls[3][0].ruleStatusesFilter).toEqual(['enabled']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        ruleStatusesFilter: ['enabled'],
+      })
+    );
   });
 
   it('does not render the tag filter is the feature flag is off', async () => {
@@ -867,7 +963,11 @@ describe('rules_list component with items', () => {
     loadRules.mockReset();
     await setup();
 
-    expect(loadRules.mock.calls[0][0].tagsFilter).toEqual([]);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        tagsFilter: [],
+      })
+    );
 
     wrapper.find('[data-test-subj="ruleTagFilterButton"] button').simulate('click');
 
@@ -878,11 +978,32 @@ describe('rules_list component with items', () => {
 
     tagFilterListItems.at(0).simulate('click');
 
-    expect(loadRules.mock.calls[1][0].tagsFilter).toEqual(['a']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        tagsFilter: ['a'],
+      })
+    );
 
     tagFilterListItems.at(1).simulate('click');
 
-    expect(loadRules.mock.calls[2][0].tagsFilter).toEqual(['a', 'b']);
+    expect(loadRules).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        tagsFilter: ['a', 'b'],
+      })
+    );
+  });
+
+  it('rule list items with actions are editable if canExecuteAction is true', async () => {
+    await setup();
+    expect(wrapper.find('.euiButtonIcon-isDisabled').length).toEqual(2);
+  });
+
+  it('rule list items with actions are not editable if canExecuteAction is false', async () => {
+    const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
+    hasExecuteActionsCapability.mockReturnValue(false);
+    await setup();
+    expect(wrapper.find('.euiButtonIcon-isDisabled').length).toEqual(8);
+    hasExecuteActionsCapability.mockReturnValue(true);
   });
 });
 
@@ -1039,6 +1160,7 @@ describe('rules_list with show only capability', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(wrapper.find('[data-test-subj="deleteActionHoverButton"]')).toHaveLength(0);
+    hasAllPrivilege.mockReturnValue(true);
   });
 
   it('renders table of rules with actions menu collapsedItemActions', async () => {
@@ -1165,5 +1287,21 @@ describe('rules_list with disabled items', () => {
     expect(
       wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().content
     ).toEqual('This rule type requires a Platinum license.');
+  });
+
+  it('clicking the notify badge shows the snooze panel', async () => {
+    await setup();
+    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeFalsy();
+
+    wrapper
+      .find('[data-test-subj="rulesTableCell-rulesListNotify"]')
+      .first()
+      .simulate('mouseenter');
+
+    expect(wrapper.find('[data-test-subj="rulesListNotifyBadge"]').exists()).toBeTruthy();
+
+    wrapper.find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]').first().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="snoozePanel"]').exists()).toBeTruthy();
   });
 });

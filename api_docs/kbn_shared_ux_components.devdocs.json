@@ -21,175 +21,49 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.AddFromLibraryButton",
+        "id": "def-common.KibanaPageTemplate",
         "type": "Function",
         "tags": [],
-        "label": "AddFromLibraryButton",
+        "label": "KibanaPageTemplate",
         "description": [],
         "signature": [
-          "({ onClick, ...rest }: ",
-          "Props",
-          ") => JSX.Element"
+          "({ template, className, children, solutionNav, noDataConfig, ...rest }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/shared-ux-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxComponentsPluginApi",
+            "section": "def-common.KibanaPageTemplateProps",
+            "text": "KibanaPageTemplateProps"
+          },
+          ">) => JSX.Element"
         ],
-        "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/add_from_library/add_from_library.tsx",
+        "path": "packages/kbn-shared-ux-components/src/page_template/page_template.tsx",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.AddFromLibraryButton.$1",
-            "type": "Object",
+            "id": "def-common.KibanaPageTemplate.$1",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{ onClick, ...rest }",
+            "label": "{\n  template,\n  className,\n  children,\n  solutionNav,\n  noDataConfig,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "Props"
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/shared-ux-components",
+                "scope": "common",
+                "docId": "kibKbnSharedUxComponentsPluginApi",
+                "section": "def-common.KibanaPageTemplateProps",
+                "text": "KibanaPageTemplateProps"
+              },
+              ">"
             ],
-            "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/add_from_library/add_from_library.tsx",
+            "path": "packages/kbn-shared-ux-components/src/page_template/page_template.tsx",
             "deprecated": false,
             "isRequired": true
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.IconButtonGroup",
-        "type": "Function",
-        "tags": [],
-        "label": "IconButtonGroup",
-        "description": [
-          "\nThe IconButtonGroup component that is wrapped by the `withSuspence` HOC."
-        ],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "Props",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.IconButtonGroup.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.KibanaPageTemplate",
-        "type": "Function",
-        "tags": [],
-        "label": "KibanaPageTemplate",
-        "description": [
-          "\nA `KibanaPageTemplate` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `KibanaPageTemplateLazy` component lazily with\na predefined fallback and error boundary."
-        ],
-        "signature": [
-          "React.ForwardRefExoticComponent<Omit<",
-          "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
-          "EuiBottomBarProps",
-          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
-          "MinHeightProperty",
-          "<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
-          "KibanaPageTemplateSolutionNavProps",
-          " | undefined; noDataConfig?: ",
-          "NoDataPageProps",
-          " | undefined; } & React.RefAttributes<{}>>"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.KibanaPageTemplate.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.KibanaPageTemplateLazy",
-        "type": "Function",
-        "tags": [],
-        "label": "KibanaPageTemplateLazy",
-        "description": [
-          "\nThe lazily loaded `KibanaPageTemplate` component that is wrapped by the `withSuspense` HOC. Consumers should use\n`React.Suspense` or `withSuspense` HOC to load this component."
-        ],
-        "signature": [
-          "React.ExoticComponent<Omit<",
-          "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
-          "EuiBottomBarProps",
-          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
-          "MinHeightProperty",
-          "<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
-          "KibanaPageTemplateSolutionNavProps",
-          " | undefined; noDataConfig?: ",
-          "NoDataPageProps",
-          " | undefined; } & { children?: React.ReactNode; }> & { readonly _result: React.FunctionComponent<",
-          "KibanaPageTemplateProps",
-          ">; }"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.KibanaPageTemplateLazy.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -199,463 +73,74 @@
         "tags": [],
         "label": "KibanaPageTemplateSolutionNav",
         "description": [
-          "\nA `KibanaPageTemplateSolutionNav` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `KibanaPageTemplateSolutionNavLazy` component lazily with\na predefined fallback and error boundary."
+          "\nA wrapper around EuiSideNav but also creates the appropriate title with optional solution logo"
         ],
         "signature": [
-          "React.ForwardRefExoticComponent<",
-          "CommonProps",
-          " & { children?: undefined; className?: string | undefined; heading?: React.ReactNode; headingProps?: ",
-          "EuiSideNavHeadingProps",
-          " | undefined; toggleOpenOnMobile?: React.MouseEventHandler<HTMLButtonElement> | undefined; isOpenOnMobile?: boolean | undefined; mobileTitle?: React.ReactNode; mobileBreakpoints?: ",
-          "EuiBreakpointSize",
-          "[] | undefined; items: ",
-          "EuiSideNavItemType",
-          "<{}>[]; renderItem?: ",
-          "RenderItem",
-          "<{}> | undefined; truncate?: boolean | undefined; } & { name: string; icon?: ",
-          "IconType",
-          " | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; } & React.RefAttributes<{}>>"
+          "({ children, headingProps, icon, isOpenOnDesktop, items, mobileBreakpoints, closeFlyoutButtonPosition, name, onCollapse, canBeCollapsed, ...rest }: React.PropsWithChildren<",
+          "KibanaPageTemplateSolutionNavProps",
+          ">) => JSX.Element"
         ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "path": "packages/kbn-shared-ux-components/src/page_template/solution_nav/solution_nav.tsx",
         "deprecated": false,
-        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-components",
             "id": "def-common.KibanaPageTemplateSolutionNav.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.KibanaPageTemplateSolutionNavLazy",
-        "type": "Function",
-        "tags": [],
-        "label": "KibanaPageTemplateSolutionNavLazy",
-        "description": [
-          "\nThe lazily loaded `KibanaPageTemplateSolutionNav` component that is wrapped by the `withSuspense` HOC. Consumers should use\n`React.Suspense` or `withSuspense` HOC to load this component."
-        ],
-        "signature": [
-          "React.ExoticComponent<",
-          "CommonProps",
-          " & { children?: undefined; className?: string | undefined; heading?: React.ReactNode; headingProps?: ",
-          "EuiSideNavHeadingProps",
-          " | undefined; toggleOpenOnMobile?: React.MouseEventHandler<HTMLButtonElement> | undefined; isOpenOnMobile?: boolean | undefined; mobileTitle?: React.ReactNode; mobileBreakpoints?: ",
-          "EuiBreakpointSize",
-          "[] | undefined; items: ",
-          "EuiSideNavItemType",
-          "<{}>[]; renderItem?: ",
-          "RenderItem",
-          "<{}> | undefined; truncate?: boolean | undefined; } & { name: string; icon?: ",
-          "IconType",
-          " | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; } & { children?: React.ReactNode; }> & { readonly _result: React.FunctionComponent<",
-          "KibanaPageTemplateSolutionNavProps",
-          ">; }"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.KibanaPageTemplateSolutionNavLazy.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.KibanaSolutionAvatar",
-        "type": "Function",
-        "tags": [],
-        "label": "KibanaSolutionAvatar",
-        "description": [
-          "\nA `KibanaSolutionAvatar` component that is wrapped by the `withSuspense` HOC. This component can\nbe used directly by consumers and will load the `KibanaPageTemplateSolutionNavAvatarLazy` component lazily with\na predefined fallback and error boundary."
-        ],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "KibanaSolutionAvatarProps",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.KibanaSolutionAvatar.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.KibanaSolutionAvatarLazy",
-        "type": "Function",
-        "tags": [],
-        "label": "KibanaSolutionAvatarLazy",
-        "description": [
-          "\nThe Lazily-loaded `KibanaSolutionAvatar` component.  Consumers should use `React.Suspense` or\nthe withSuspense` HOC to load this component."
-        ],
-        "signature": [
-          "React.ExoticComponent<",
-          "KibanaSolutionAvatarProps",
-          "> & { readonly _result: ({ className, size, ...rest }: ",
-          "KibanaSolutionAvatarProps",
-          ") => JSX.Element; }"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.KibanaSolutionAvatarLazy.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.LazyIconButtonGroup",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyIconButtonGroup",
-        "description": [
-          "\nThe Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspense` or the\n`withSuspense` HOC to load this component."
-        ],
-        "signature": [
-          "React.ExoticComponent<",
-          "Props",
-          "> & { readonly _result: ({ buttons, legend }: ",
-          "Props",
-          ") => JSX.Element; }"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.LazyIconButtonGroup.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.LazyNoDataViews",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyNoDataViews",
-        "description": [
-          "\nThe Lazily-loaded `NoDataViews` component.  Consumers should use `React.Suspense` or the\n`withSuspense` HOC to load this component."
-        ],
-        "signature": [
-          "React.ExoticComponent<",
-          "Props",
-          "> & { readonly _result: ({ onDataViewCreated }: ",
-          "Props",
-          ") => JSX.Element; }"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.LazyNoDataViews.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.LazyNoDataViewsComponent",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyNoDataViewsComponent",
-        "description": [
-          "\nA pure `NoDataViews` component, with no services hooks. Consumers should use `React.Suspense` or the\n`withSuspense` HOC to load this component."
-        ],
-        "signature": [
-          "React.ExoticComponent<",
-          "Props",
-          "> & { readonly _result: ({ onClickCreate, canCreateNewDataView, dataViewsDocLink, emptyPromptColor, }: ",
-          "Props",
-          ") => JSX.Element; }"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.LazyNoDataViewsComponent.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.LazyToolbarButton",
-        "type": "Function",
-        "tags": [],
-        "label": "LazyToolbarButton",
-        "description": [],
-        "signature": [
-          "React.ExoticComponent<",
-          "Props",
-          "> & { readonly _result: ({ label, iconSide, ...rest }: ",
-          "Props",
-          ") => JSX.Element; }"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.LazyToolbarButton.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.NoDataViews",
-        "type": "Function",
-        "tags": [],
-        "label": "NoDataViews",
-        "description": [
-          "\nA `NoDataViews` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `LazyNoDataViews` component lazily with\na predefined fallback and error boundary."
-        ],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "Props",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.NoDataViews.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.NoDataViewsComponent",
-        "type": "Function",
-        "tags": [],
-        "label": "NoDataViewsComponent",
-        "description": [
-          "\nA pure `NoDataViews` component, with no services hooks. The component is wrapped by the `withSuspense` HOC.\nThis component can be used directly by consumers and will load the `LazyNoDataViewsComponent` lazily with\na predefined fallback and error boundary."
-        ],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "Props",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.NoDataViewsComponent.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.RedirectAppLinks",
-        "type": "Function",
-        "tags": [],
-        "label": "RedirectAppLinks",
-        "description": [],
-        "signature": [
-          "React.ExoticComponent<Pick<",
-          "RedirectAppLinksProps",
-          " & { children?: React.ReactNode; }, \"children\" | \"color\" | \"className\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"key\" | \"id\" | \"css\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"currentAppId$\" | \"navigateToUrl\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: React.FC<",
-          "RedirectAppLinksProps",
-          ">; }"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.RedirectAppLinks.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.ToolbarButton",
-        "type": "Function",
-        "tags": [],
-        "label": "ToolbarButton",
-        "description": [
-          "\nA `ToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `LazyToolbarButton` component lazily with\na predefined fallback and error boundary."
-        ],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "Props",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.ToolbarButton.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-components",
-        "id": "def-common.ToolbarPopover",
-        "type": "Function",
-        "tags": [],
-        "label": "ToolbarPopover",
-        "description": [],
-        "signature": [
-          "({ label, iconType, children, iconSide, ...popover }: ",
-          "Props",
-          ") => JSX.Element"
-        ],
-        "path": "packages/kbn-shared-ux-components/src/toolbar/popovers/popover.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-components",
-            "id": "def-common.ToolbarPopover.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ label, iconType, children, iconSide, ...popover }",
+            "label": "{\n  children,\n  headingProps,\n  icon,\n  isOpenOnDesktop = false,\n  items,\n  mobileBreakpoints = ['xs', 's'],\n  closeFlyoutButtonPosition = 'outside',\n  name,\n  onCollapse,\n  canBeCollapsed = true,\n  ...rest\n}",
             "description": [],
             "signature": [
-              "Props"
+              "React.PropsWithChildren<",
+              "KibanaPageTemplateSolutionNavProps",
+              ">"
             ],
-            "path": "packages/kbn-shared-ux-components/src/toolbar/popovers/popover.tsx",
+            "path": "packages/kbn-shared-ux-components/src/page_template/solution_nav/solution_nav.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.NoDataConfigPage",
+        "type": "Function",
+        "tags": [],
+        "label": "NoDataConfigPage",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/shared-ux-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxComponentsPluginApi",
+            "section": "def-common.KibanaPageTemplateProps",
+            "text": "KibanaPageTemplateProps"
+          },
+          ") => JSX.Element | null"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/page_template/no_data_page/no_data_config_page/no_data_config_page.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.NoDataConfigPage.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-components",
+                "scope": "common",
+                "docId": "kibKbnSharedUxComponentsPluginApi",
+                "section": "def-common.KibanaPageTemplateProps",
+                "text": "KibanaPageTemplateProps"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-components/src/page_template/no_data_page/no_data_config_page/no_data_config_page.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -664,9 +149,146 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.NoDataPageProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "NoDataPageProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxComponentsPluginApi",
+            "section": "def-common.NoDataPageProps",
+            "text": "NoDataPageProps"
+          },
+          " extends ",
+          "CommonProps"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/page_template/no_data_page/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.NoDataPageProps.solution",
+            "type": "string",
+            "tags": [],
+            "label": "solution",
+            "description": [
+              "\nSingle name for the current solution, used to auto-generate the title, logo, description, and button label"
+            ],
+            "path": "packages/kbn-shared-ux-components/src/page_template/no_data_page/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.NoDataPageProps.logo",
+            "type": "string",
+            "tags": [],
+            "label": "logo",
+            "description": [
+              "\nOptionally replace the auto-generated logo"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-shared-ux-components/src/page_template/no_data_page/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.NoDataPageProps.docsLink",
+            "type": "string",
+            "tags": [],
+            "label": "docsLink",
+            "description": [
+              "\nRequired to set the docs link for the whole solution"
+            ],
+            "path": "packages/kbn-shared-ux-components/src/page_template/no_data_page/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.NoDataPageProps.pageTitle",
+            "type": "string",
+            "tags": [],
+            "label": "pageTitle",
+            "description": [
+              "\nOptionally replace the auto-generated page title (h1)"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-shared-ux-components/src/page_template/no_data_page/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.NoDataPageProps.action",
+            "type": "Object",
+            "tags": [],
+            "label": "action",
+            "description": [
+              "\nAn object of `NoDataPageActions`.\nUse `elasticAgent` as the primary key for pre-configured cards of this type.\nOtherwise use a custom key that contains `EuiCard` props."
+            ],
+            "signature": [
+              "{ [x: string]: ",
+              "NoDataCardProps",
+              "; }"
+            ],
+            "path": "packages/kbn-shared-ux-components/src/page_template/no_data_page/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.KibanaPageTemplateProps",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaPageTemplateProps",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "EuiPageProps",
+          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSideBarProps",
+          " | undefined; pageHeader?: ",
+          "EuiPageHeaderProps",
+          " | undefined; pageBodyProps?: ",
+          "EuiPageBodyProps",
+          "<\"main\"> | undefined; pageContentProps?: ",
+          "EuiPageContentProps",
+          " | undefined; pageContentBodyProps?: ",
+          "EuiPageContentBodyProps",
+          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
+          "EuiBottomBarProps",
+          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
+          "Property",
+          ".MinHeight<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          "KibanaPageTemplateSolutionNavProps",
+          " | undefined; noDataConfig?: ",
+          {
+            "pluginId": "@kbn/shared-ux-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxComponentsPluginApi",
+            "section": "def-common.NoDataPageProps",
+            "text": "NoDataPageProps"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/page_template/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

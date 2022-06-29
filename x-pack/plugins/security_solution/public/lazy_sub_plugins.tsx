@@ -17,6 +17,7 @@ import { Exceptions } from './exceptions';
 import { Hosts } from './hosts';
 import { Users } from './users';
 import { Network } from './network';
+import { Kubernetes } from './kubernetes';
 import { Overview } from './overview';
 import { Rules } from './rules';
 
@@ -34,6 +35,7 @@ const subPluginClasses = {
   Hosts,
   Users,
   Network,
+  Kubernetes,
 
   Overview,
   Rules,

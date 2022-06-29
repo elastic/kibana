@@ -3918,6 +3918,16 @@
             }
           }
         },
+        "service_groups": {
+          "properties": {
+            "kuery_fields": {
+              "type": "array",
+              "items": {
+                "type": "keyword"
+              }
+            }
+          }
+        },
         "tasks": {
           "properties": {
             "aggregated_transactions": {
@@ -4053,6 +4063,17 @@
               }
             },
             "environments": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "service_groups": {
               "properties": {
                 "took": {
                   "properties": {
@@ -6979,6 +7000,9 @@
                 },
                 "visual_reporting_soft_disabled_error": {
                   "type": "long"
+                },
+                "invalid_layout_parameters_error": {
+                  "type": "long"
                 }
               }
             }
@@ -7096,6 +7120,9 @@
                   "type": "long"
                 },
                 "visual_reporting_soft_disabled_error": {
+                  "type": "long"
+                },
+                "invalid_layout_parameters_error": {
                   "type": "long"
                 }
               }
@@ -7247,6 +7274,9 @@
                 },
                 "visual_reporting_soft_disabled_error": {
                   "type": "long"
+                },
+                "invalid_layout_parameters_error": {
+                  "type": "long"
                 }
               }
             }
@@ -7396,6 +7426,9 @@
                   "type": "long"
                 },
                 "visual_reporting_soft_disabled_error": {
+                  "type": "long"
+                },
+                "invalid_layout_parameters_error": {
                   "type": "long"
                 }
               }
@@ -8254,6 +8287,9 @@
                     },
                     "visual_reporting_soft_disabled_error": {
                       "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -8371,6 +8407,9 @@
                       "type": "long"
                     },
                     "visual_reporting_soft_disabled_error": {
+                      "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
                       "type": "long"
                     }
                   }
@@ -8522,6 +8561,9 @@
                     },
                     "visual_reporting_soft_disabled_error": {
                       "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -8671,6 +8713,9 @@
                       "type": "long"
                     },
                     "visual_reporting_soft_disabled_error": {
+                      "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
                       "type": "long"
                     }
                   }
@@ -12560,6 +12605,12 @@
           "type": "long",
           "_meta": {
             "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "anonymousCredentialType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The credential type that is configured for the anonymous authentication provider."
           }
         }
       }

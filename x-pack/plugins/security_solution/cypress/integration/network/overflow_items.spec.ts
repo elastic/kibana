@@ -16,7 +16,7 @@ import {
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 import { login, visit } from '../../tasks/login';
-import { openHoverActions } from '../../tasks/network/flows';
+import { mouseoverOnToOverflowItem, openHoverActions } from '../../tasks/network/flows';
 
 import { NETWORK_URL } from '../../urls/navigation';
 
@@ -29,8 +29,7 @@ describe('Overflow items', () => {
       esArchiverLoad('network');
       login();
       visit(NETWORK_URL);
-      cy.get(DESTINATION_DOMAIN(testDomainOne)).should('not.exist');
-      cy.get(DESTINATION_DOMAIN(testDomainTwo)).should('not.exist');
+      cy.get(DESTINATION_DOMAIN).should('not.exist');
       cy.get(FILTER_IN).should('not.exist');
       cy.get(FILTER_OUT).should('not.exist');
       cy.get(ADD_TO_TIMELINE).should('not.exist');
@@ -38,6 +37,7 @@ describe('Overflow items', () => {
       cy.get(COPY).should('not.exist');
 
       openHoverActions();
+      mouseoverOnToOverflowItem();
     });
 
     after(() => {
@@ -45,8 +45,8 @@ describe('Overflow items', () => {
     });
 
     it('Shows more items in the popover', () => {
-      cy.get(DESTINATION_DOMAIN(testDomainOne)).should('exist');
-      cy.get(DESTINATION_DOMAIN(testDomainTwo)).should('exist');
+      cy.get(DESTINATION_DOMAIN).eq(0).should('have.text', testDomainOne);
+      cy.get(DESTINATION_DOMAIN).eq(1).should('have.text', testDomainTwo);
     });
 
     it('Shows Hover actions for more items in the popover', () => {

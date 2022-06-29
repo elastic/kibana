@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import { UiSettingsParams, UserProvidedValues } from './types';
-import { Logger } from '../logging';
 import { BaseUiSettingsClient } from './base_ui_settings_client';
 
 export interface UiSettingsDefaultsClientOptions {

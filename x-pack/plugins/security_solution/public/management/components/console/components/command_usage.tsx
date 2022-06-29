@@ -7,6 +7,8 @@
 
 import React, { memo, useMemo } from 'react';
 import {
+  EuiBadge,
+  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,20 +17,20 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { usageFromCommandDefinition } from '../service/usage_from_command_definition';
+import { getArgumentsForCommand } from '../service/parsed_command_input';
 import { CommandDefinition } from '../types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
   const usageHelp = useMemo(() => {
-    return usageFromCommandDefinition(commandDef);
+    return getArgumentsForCommand(commandDef);
   }, [commandDef]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiText>
+        <EuiText size="s">
           <FormattedMessage
             id="xpack.securitySolution.console.commandUsage.inputUsage"
             defaultMessage="Usage:"
@@ -37,8 +39,9 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
       </EuiFlexItem>
       <EuiFlexItem grow>
         <code>
-          <EuiText>
-            <code>{usageHelp}</code>
+          <EuiText size="s">
+            <EuiBadge>{commandDef.name}</EuiBadge>
+            <EuiCode transparentBackground={true}>{usageHelp}</EuiCode>
           </EuiText>
         </code>
       </EuiFlexItem>

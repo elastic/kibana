@@ -60,13 +60,12 @@ describe('ConfigurationChoice', () => {
     );
 
     const externalConnectorCard = wrapper.find('[data-test-subj="ExternalConnectorCard"]');
-    expect(externalConnectorCard).toHaveLength(1);
     expect(externalConnectorCard.find(EuiButtonTo).prop('to')).toEqual(
       '/sources/add/share_point/external/connector_registration'
     );
   });
 
-  it('renders disabled message if external connector is available but user has already configured', () => {
+  it('directs user to external connector settings page if external connector is available but already configured', () => {
     setMockValues({ ...mockValues, externalConfigured: true });
 
     const wrapper = mount(
@@ -82,7 +81,9 @@ describe('ConfigurationChoice', () => {
     );
 
     const externalConnectorCard = wrapper.find('[data-test-subj="ExternalConnectorCard"]');
-    expect(externalConnectorCard.prop('disabledMessage')).toBeDefined();
+    expect(externalConnectorCard.find(EuiButtonTo).prop('to')).toEqual(
+      '/settings/connectors/external/edit'
+    );
   });
 
   it('renders custom connector if available', () => {

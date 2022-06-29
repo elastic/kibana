@@ -6,23 +6,37 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
-import { AiopsPluginSetup, AiopsPluginStart } from './types';
-import { defineRoutes } from './routes';
+import { AIOPS_ENABLED } from '../common';
 
-export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
+import {
+  AiopsPluginSetup,
+  AiopsPluginStart,
+  AiopsPluginSetupDeps,
+  AiopsPluginStartDeps,
+} from './types';
+import { defineExplainLogRateSpikesRoute } from './routes';
+
+export class AiopsPlugin
+  implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<AiopsPluginStartDeps>, deps: AiopsPluginSetupDeps) {
     this.logger.debug('aiops: Setup');
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
 
     // Register server side APIs
-    defineRoutes(router, this.logger);
+    if (AIOPS_ENABLED) {
+      core.getStartServices().then(([_, depsStart]) => {
+        defineExplainLogRateSpikesRoute(router, this.logger);
+      });
+    }
 
     return {};
   }

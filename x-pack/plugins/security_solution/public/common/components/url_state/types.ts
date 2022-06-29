@@ -13,13 +13,11 @@ import { RouteSpyState } from '../../utils/route/types';
 import { SecurityNav } from '../navigation/types';
 
 import { CONSTANTS, UrlStateType } from './constants';
-import { SourcererUrlState } from '../../store/sourcerer/model';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.appQuery,
   CONSTANTS.filters,
   CONSTANTS.savedQuery,
-  CONSTANTS.sourcerer,
   CONSTANTS.timerange,
   CONSTANTS.timeline,
 ];
@@ -32,6 +30,7 @@ export type LocationTypes =
   | CONSTANTS.alertsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
+  | CONSTANTS.kubernetesPage
   | CONSTANTS.networkDetails
   | CONSTANTS.networkPage
   | CONSTANTS.overviewPage
@@ -42,7 +41,6 @@ export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
-  [CONSTANTS.sourcerer]: SourcererUrlState;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: TimelineUrl;
 }

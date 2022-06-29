@@ -19,6 +19,10 @@ import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 interface SessionViewDetailPanelDeps {
   selectedProcess: Process | null;
   alerts?: ProcessEvent[];
+  alertsCount: number;
+  isFetchingAlerts: boolean;
+  hasNextPageAlerts?: boolean;
+  fetchNextPageAlerts: () => void;
   investigatedAlertId?: string;
   onJumpToEvent: (event: ProcessEvent) => void;
   onShowAlertDetails: (alertId: string) => void;
@@ -29,6 +33,10 @@ interface SessionViewDetailPanelDeps {
  */
 export const SessionViewDetailPanel = ({
   alerts,
+  alertsCount,
+  isFetchingAlerts,
+  hasNextPageAlerts,
+  fetchNextPageAlerts,
   selectedProcess,
   investigatedAlertId,
   onJumpToEvent,
@@ -36,13 +44,9 @@ export const SessionViewDetailPanel = ({
 }: SessionViewDetailPanelDeps) => {
   const [selectedTabId, setSelectedTabId] = useState('process');
 
-  const alertsCount = useMemo(() => {
-    if (!alerts) {
-      return 0;
-    }
-
-    return alerts.length >= ALERT_COUNT_THRESHOLD ? ALERT_COUNT_THRESHOLD + '+' : alerts.length;
-  }, [alerts]);
+  const alertsCountStr = useMemo(() => {
+    return alertsCount >= ALERT_COUNT_THRESHOLD ? ALERT_COUNT_THRESHOLD + '+' : alertsCount + '';
+  }, [alertsCount]);
 
   const tabs: EuiTabProps[] = useMemo(() => {
     const hasAlerts = !!alerts?.length;
@@ -75,12 +79,15 @@ export const SessionViewDetailPanel = ({
         }),
         append: hasAlerts && (
           <EuiNotificationBadge className="eui-alignCenter" size="m">
-            {alertsCount}
+            {alertsCountStr}
           </EuiNotificationBadge>
         ),
         content: alerts && (
           <DetailPanelAlertTab
             alerts={alerts}
+            isFetchingAlerts={isFetchingAlerts}
+            hasNextPageAlerts={hasNextPageAlerts}
+            fetchNextPageAlerts={fetchNextPageAlerts}
             onJumpToEvent={onJumpToEvent}
             onShowAlertDetails={onShowAlertDetails}
             investigatedAlertId={investigatedAlertId}
@@ -90,8 +97,11 @@ export const SessionViewDetailPanel = ({
     ];
   }, [
     alerts,
+    alertsCountStr,
+    fetchNextPageAlerts,
+    hasNextPageAlerts,
+    isFetchingAlerts,
     selectedProcess,
-    alertsCount,
     onJumpToEvent,
     onShowAlertDetails,
     investigatedAlertId,

@@ -15,7 +15,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+        className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable"
         onClick={[Function]}
       >
         <div
@@ -34,7 +34,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiCard__content"
         >
           <span
-            className="euiTitle euiTitle--small euiCard__title"
+            className="euiTitle euiCard__title emotion-euiTitle-s"
             id="generated-idTitle"
           >
             <button
@@ -47,7 +47,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
             </button>
           </span>
           <div
-            className="euiText euiText--small euiCard__description"
+            className="euiText euiCard__description emotion-euiText-s"
             id="generated-idDescription"
           >
             <p>
@@ -126,7 +126,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+        className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable"
         onClick={[Function]}
       >
         <div
@@ -145,7 +145,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiCard__content"
         >
           <span
-            className="euiTitle euiTitle--small euiCard__title"
+            className="euiTitle euiCard__title emotion-euiTitle-s"
             id="generated-idTitle"
           >
             <button
@@ -158,7 +158,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
             </button>
           </span>
           <div
-            className="euiText euiText--small euiCard__description"
+            className="euiText euiCard__description emotion-euiText-s"
             id="generated-idDescription"
           >
             <p>
@@ -237,7 +237,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
       className="euiFlexItem canvasElementCard__wrapper"
     >
       <div
-        className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+        className="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard emotion-euiPanel-grow-m-m-plain-hasShadow-isClickable"
         onClick={[Function]}
       >
         <div
@@ -256,7 +256,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
           className="euiCard__content"
         >
           <span
-            className="euiTitle euiTitle--small euiCard__title"
+            className="euiTitle euiCard__title emotion-euiTitle-s"
             id="generated-idTitle"
           >
             <button
@@ -269,7 +269,7 @@ exports[`Storyshots components/SavedElementsModal/ElementGrid default 1`] = `
             </button>
           </span>
           <div
-            className="euiText euiText--small euiCard__description"
+            className="euiText euiCard__description emotion-euiText-s"
             id="generated-idDescription"
           >
             <p>

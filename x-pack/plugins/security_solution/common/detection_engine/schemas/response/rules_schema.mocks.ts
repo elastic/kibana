@@ -68,6 +68,9 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   rule_id: 'query-rule-id',
   interval: '5m',
   exceptions_list: getListArrayMock(),
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });
 
 export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
@@ -132,6 +135,9 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     risk_score_mapping: [],
     name: 'Query with a rule id',
     references: [],
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
     severity: 'high',
     severity_mapping: [],
     updated_by: 'elastic',
@@ -146,7 +152,7 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     query: 'user.name: root or user.name: admin',
     language: 'kuery',
     threat_query: '*:*',
-    threat_index: ['list-index'],
+    threat_index: ['auditbeat-*'],
     threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
     threat_mapping: [
       {

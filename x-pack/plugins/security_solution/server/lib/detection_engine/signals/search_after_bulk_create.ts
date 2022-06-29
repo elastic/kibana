@@ -43,6 +43,7 @@ export const searchAfterAndBulkCreate = async ({
   trackTotalHits,
   tuple,
   wrapHits,
+  runtimeMappings,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     const ruleParams = completeRule.ruleParams;
@@ -73,17 +74,18 @@ export const searchAfterAndBulkCreate = async ({
         errors: ['malformed date tuple'],
       });
     }
+
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
         let mergedSearchResults = createSearchResultReturnType();
         logger.debug(buildRuleMessage(`sortIds: ${sortIds}`));
-
         if (hasSortId) {
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortIds: sortIds,
             index: inputIndexPattern,
+            runtimeMappings,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,

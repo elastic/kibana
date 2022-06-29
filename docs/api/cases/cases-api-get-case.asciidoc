@@ -59,6 +59,7 @@ The API returns a JSON object with the retrieved case. For example:
   "version": "Wzk4LDFd",
   "comments": [],
   "totalComment": 0,
+  "totalAlerts": 0,
   "closed_at": null,
   "closed_by": null,
   "created_at": "2020-03-29T11:30:02.658Z",
@@ -90,6 +91,8 @@ The API returns a JSON object with the retrieved case. For example:
     "syncAlerts": true
   },
   "owner": "securitySolution",
+  "severity": "low",
+  "duration": null, <1>
   "tags": [
     "phishing",
     "social engineering",
@@ -97,3 +100,7 @@ The API returns a JSON object with the retrieved case. For example:
   ]
 }
 --------------------------------------------------
+<1> Duration represents the elapsed time from the creation of the case to its
+closure (in seconds). If the case has not been closed, the duration is set to
+`null`. If the case was closed after less than half a second, the duration is
+rounded down to zero.

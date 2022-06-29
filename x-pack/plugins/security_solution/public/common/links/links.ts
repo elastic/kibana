@@ -5,172 +5,99 @@
  * 2.0.
  */
 
-import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { get } from 'lodash';
+import { useEffect, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../common/constants';
-import { appLinks, getAppLinks } from './app_links';
-import {
-  Feature,
+import type {
+  AppLinkItems,
   LinkInfo,
   LinkItem,
-  NavLinkItem,
   NormalizedLink,
   NormalizedLinks,
-  UserPermissions,
+  LinksPermissions,
 } from './types';
 
-const createDeepLink = (link: LinkItem, linkProps?: UserPermissions): AppDeepLink => ({
-  id: link.id,
-  path: link.path,
-  title: link.title,
-  ...(link.links && link.links.length
-    ? {
-        deepLinks: reduceLinks<AppDeepLink>({
-          links: link.links,
-          linkProps,
-          formatFunction: createDeepLink,
-        }),
-      }
-    : {}),
-  ...(link.icon != null ? { euiIconType: link.icon } : {}),
-  ...(link.image != null ? { icon: link.image } : {}),
-  ...(link.globalSearchKeywords != null ? { keywords: link.globalSearchKeywords } : {}),
-  ...(link.globalNavEnabled != null
-    ? { navLinkStatus: link.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden }
-    : {}),
-  ...(link.globalNavOrder != null ? { order: link.globalNavOrder } : {}),
-  ...(link.globalSearchEnabled != null ? { searchable: link.globalSearchEnabled } : {}),
+/**
+ * App links updater, it keeps the value of the app links in sync with all application.
+ * It can be updated using `updateAppLinks` or `excludeAppLink`
+ * Read it using `subscribeAppLinks` or `useAppLinks` hook.
+ */
+const appLinksUpdater$ = new BehaviorSubject<{
+  links: AppLinkItems;
+  normalizedLinks: NormalizedLinks;
+}>({
+  links: [], // stores the appLinkItems recursive hierarchy
+  normalizedLinks: {}, // stores a flatten normalized object for direct id access
 });
 
-const createNavLinkItem = (link: LinkItem, linkProps?: UserPermissions): NavLinkItem => ({
-  id: link.id,
-  path: link.path,
-  title: link.title,
-  ...(link.description != null ? { description: link.description } : {}),
-  ...(link.icon != null ? { icon: link.icon } : {}),
-  ...(link.image != null ? { image: link.image } : {}),
-  ...(link.links && link.links.length
-    ? {
-        links: reduceLinks<NavLinkItem>({
-          links: link.links,
-          linkProps,
-          formatFunction: createNavLinkItem,
-        }),
-      }
-    : {}),
-  ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
-});
+const getAppLinksValue = (): AppLinkItems => appLinksUpdater$.getValue().links;
+const getNormalizedLinksValue = (): NormalizedLinks => appLinksUpdater$.getValue().normalizedLinks;
 
-const hasFeaturesCapability = (
-  features: Feature[] | undefined,
-  capabilities: Capabilities
-): boolean => {
-  if (!features) {
-    return true;
-  }
-  return features.some((featureKey) => get(capabilities, featureKey, false));
+/**
+ * Subscribes to the updater to get the app links updates
+ */
+export const subscribeAppLinks = (onChange: (links: AppLinkItems) => void) =>
+  appLinksUpdater$.subscribe(({ links }) => onChange(links));
+
+/**
+ * Hook to get the app links updated value
+ */
+export const useAppLinks = (): AppLinkItems => {
+  const [appLinks, setAppLinks] = useState(getAppLinksValue);
+
+  useEffect(() => {
+    const linksSubscription = subscribeAppLinks((newAppLinks) => {
+      setAppLinks(newAppLinks);
+    });
+    return () => linksSubscription.unsubscribe();
+  }, []);
+
+  return appLinks;
 };
 
-const isLinkAllowed = (link: LinkItem, linkProps?: UserPermissions) =>
-  !(
-    linkProps != null &&
-    // exclude link when license is basic and link is premium
-    ((linkProps.license && !linkProps.license.isAtLeast(link.licenseType ?? 'basic')) ||
-      // exclude link when enableExperimental[hideWhenExperimentalKey] is enabled and link has hideWhenExperimentalKey
-      (link.hideWhenExperimentalKey != null &&
-        linkProps.enableExperimental[link.hideWhenExperimentalKey]) ||
-      // exclude link when enableExperimental[experimentalKey] is disabled and link has experimentalKey
-      (link.experimentalKey != null && !linkProps.enableExperimental[link.experimentalKey]) ||
-      // exclude link when link is not part of enabled feature capabilities
-      (linkProps.capabilities != null &&
-        !hasFeaturesCapability(link.features, linkProps.capabilities)))
-  );
+/**
+ * Hook to check if a link exists in the application links,
+ * It can be used to know if a link access is authorized.
+ */
+export const useLinkExists = (id: SecurityPageName): boolean => {
+  const [linkExists, setLinkExists] = useState(!!getNormalizedLink(id));
 
-export function reduceLinks<T>({
-  links,
-  linkProps,
-  formatFunction,
-}: {
-  links: Readonly<LinkItem[]>;
-  linkProps?: UserPermissions;
-  formatFunction: (link: LinkItem, linkProps?: UserPermissions) => T;
-}): T[] {
-  return links.reduce(
-    (deepLinks: T[], link: LinkItem) =>
-      isLinkAllowed(link, linkProps) ? [...deepLinks, formatFunction(link, linkProps)] : deepLinks,
-    []
-  );
-}
+  useEffect(() => {
+    const linksSubscription = subscribeAppLinks(() => {
+      setLinkExists(!!getNormalizedLink(id));
+    });
+    return () => linksSubscription.unsubscribe();
+  }, [id]);
 
-export const getInitialDeepLinks = (): AppDeepLink[] => {
-  return appLinks.map((link) => createDeepLink(link));
+  return linkExists;
 };
 
-export const getDeepLinks = async ({
-  enableExperimental,
-  license,
-  capabilities,
-}: UserPermissions): Promise<AppDeepLink[]> => {
-  const links = await getAppLinks({ enableExperimental, license, capabilities });
-  return reduceLinks<AppDeepLink>({
-    links,
-    linkProps: { enableExperimental, license, capabilities },
-    formatFunction: createDeepLink,
+/**
+ * Updates the app links applying the filter by permissions
+ */
+export const updateAppLinks = (
+  appLinksToUpdate: AppLinkItems,
+  linksPermissions: LinksPermissions
+) => {
+  const filteredAppLinks = getFilteredAppLinks(appLinksToUpdate, linksPermissions);
+  appLinksUpdater$.next({
+    links: Object.freeze(filteredAppLinks),
+    normalizedLinks: Object.freeze(getNormalizedLinks(filteredAppLinks)),
   });
 };
-
-export const getNavLinkItems = ({
-  enableExperimental,
-  license,
-  capabilities,
-}: UserPermissions): NavLinkItem[] =>
-  reduceLinks<NavLinkItem>({
-    links: appLinks,
-    linkProps: { enableExperimental, license, capabilities },
-    formatFunction: createNavLinkItem,
-  });
-
-/**
- * Recursive function to create the `NormalizedLinks` structure from a `LinkItem` array parameter
- */
-const getNormalizedLinks = (
-  currentLinks: Readonly<LinkItem[]>,
-  parentId?: SecurityPageName
-): NormalizedLinks => {
-  const result = currentLinks.reduce<Partial<NormalizedLinks>>(
-    (normalized, { links, ...currentLink }) => {
-      normalized[currentLink.id] = {
-        ...currentLink,
-        parentId,
-      };
-      if (links && links.length > 0) {
-        Object.assign(normalized, getNormalizedLinks(links, currentLink.id));
-      }
-      return normalized;
-    },
-    {}
-  );
-  return result as NormalizedLinks;
-};
-
-/**
- * Normalized indexed version of the global `links` array, referencing the parent by id, instead of having nested links children
- */
-const normalizedLinks: Readonly<NormalizedLinks> = Object.freeze(getNormalizedLinks(appLinks));
-
-/**
- * Returns the `NormalizedLink` from a link id parameter.
- * The object reference is frozen to make sure it is not mutated by the caller.
- */
-const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> =>
-  Object.freeze(normalizedLinks[id]);
 
 /**
  * Returns the `LinkInfo` from a link id parameter
  */
-export const getLinkInfo = (id: SecurityPageName): LinkInfo => {
+export const getLinkInfo = (id: SecurityPageName): LinkInfo | undefined => {
+  const normalizedLink = getNormalizedLink(id);
+  if (!normalizedLink) {
+    return undefined;
+  }
   // discards the parentId and creates the linkInfo copy.
-  const { parentId, ...linkInfo } = getNormalizedLink(id);
+  const { parentId, ...linkInfo } = normalizedLink;
   return linkInfo;
 };
 
@@ -181,9 +108,14 @@ export const getAncestorLinksInfo = (id: SecurityPageName): LinkInfo[] => {
   const ancestors: LinkInfo[] = [];
   let currentId: SecurityPageName | undefined = id;
   while (currentId) {
-    const { parentId, ...linkInfo } = getNormalizedLink(currentId);
-    ancestors.push(linkInfo);
-    currentId = parentId;
+    const normalizedLink = getNormalizedLink(currentId);
+    if (normalizedLink) {
+      const { parentId, ...linkInfo } = normalizedLink;
+      ancestors.push(linkInfo);
+      currentId = parentId;
+    } else {
+      currentId = undefined;
+    }
   }
   return ancestors.reverse();
 };
@@ -193,5 +125,82 @@ export const getAncestorLinksInfo = (id: SecurityPageName): LinkInfo[] => {
  * Defaults to `true` if the `skipUrlState` property of the `LinkItem` is `undefined`.
  */
 export const needsUrlState = (id: SecurityPageName): boolean => {
-  return !getNormalizedLink(id).skipUrlState;
+  return !getNormalizedLink(id)?.skipUrlState;
+};
+
+// Internal functions
+
+/**
+ * Creates the `NormalizedLinks` structure from a `LinkItem` array
+ */
+const getNormalizedLinks = (
+  currentLinks: AppLinkItems,
+  parentId?: SecurityPageName
+): NormalizedLinks => {
+  return currentLinks.reduce<NormalizedLinks>((normalized, { links, ...currentLink }) => {
+    normalized[currentLink.id] = {
+      ...currentLink,
+      parentId,
+    };
+    if (links && links.length > 0) {
+      Object.assign(normalized, getNormalizedLinks(links, currentLink.id));
+    }
+    return normalized;
+  }, {});
+};
+
+const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> | undefined =>
+  getNormalizedLinksValue()[id];
+
+const getFilteredAppLinks = (
+  appLinkToFilter: AppLinkItems,
+  linksPermissions: LinksPermissions
+): LinkItem[] =>
+  appLinkToFilter.reduce<LinkItem[]>((acc, { links, ...appLink }) => {
+    if (!isLinkAllowed(appLink, linksPermissions)) {
+      return acc;
+    }
+    if (links) {
+      const childrenLinks = getFilteredAppLinks(links, linksPermissions);
+      if (childrenLinks.length > 0) {
+        acc.push({ ...appLink, links: childrenLinks });
+      } else {
+        acc.push(appLink);
+      }
+    } else {
+      acc.push(appLink);
+    }
+    return acc;
+  }, []);
+
+// It checks if the user has at least one of the link capabilities needed
+const hasCapabilities = (linkCapabilities: string[], userCapabilities: Capabilities): boolean =>
+  linkCapabilities.some((linkCapability) => get(userCapabilities, linkCapability, false));
+
+const isLinkAllowed = (
+  link: LinkItem,
+  { license, experimentalFeatures, capabilities }: LinksPermissions
+) => {
+  const linkLicenseType = link.licenseType ?? 'basic';
+  if (license) {
+    if (!license.hasAtLeast(linkLicenseType)) {
+      return false;
+    }
+  } else if (linkLicenseType !== 'basic') {
+    return false;
+  }
+  if (link.hideWhenExperimentalKey && experimentalFeatures[link.hideWhenExperimentalKey]) {
+    return false;
+  }
+  if (link.experimentalKey && !experimentalFeatures[link.experimentalKey]) {
+    return false;
+  }
+  if (link.capabilities && !hasCapabilities(link.capabilities, capabilities)) {
+    return false;
+  }
+  return true;
+};
+
+export const getLinksWithHiddenTimeline = (): LinkInfo[] => {
+  return Object.values(getNormalizedLinksValue()).filter((link) => link.hideTimeline);
 };

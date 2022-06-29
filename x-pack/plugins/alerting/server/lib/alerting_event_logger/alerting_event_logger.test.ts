@@ -671,10 +671,11 @@ describe('AlertingEventLogger', () => {
                 metrics: {
                   number_of_triggered_actions: 1,
                   number_of_generated_actions: 2,
-                  number_of_active_alerts: 3,
-                  number_of_new_alerts: 4,
-                  number_of_recovered_alerts: 5,
-                  total_number_of_alerts: 8,
+                  alert_counts: {
+                    active: 3,
+                    new: 4,
+                    recovered: 5,
+                  },
                   number_of_searches: 6,
                   es_search_duration_ms: 3300,
                   total_search_duration_ms: 10333,
@@ -710,10 +711,11 @@ describe('AlertingEventLogger', () => {
                 metrics: {
                   number_of_triggered_actions: 0,
                   number_of_generated_actions: 0,
-                  number_of_active_alerts: 0,
-                  number_of_new_alerts: 0,
-                  number_of_recovered_alerts: 0,
-                  total_number_of_alerts: 0,
+                  alert_counts: {
+                    active: 0,
+                    new: 0,
+                    recovered: 0,
+                  },
                   number_of_searches: 0,
                   es_search_duration_ms: 0,
                   total_search_duration_ms: 0,

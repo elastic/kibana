@@ -7,7 +7,7 @@
  */
 
 import './annotations.scss';
-import './reference_lines.scss';
+import './reference_lines/reference_lines.scss';
 
 import React from 'react';
 import { snakeCase } from 'lodash';
@@ -155,7 +155,7 @@ export const getAnnotationsGroupedByInterval = (
     collectiveConfig = {
       ...configArr[0],
       roundedTimestamp: Number(roundedTimestamp),
-      axisMode: 'bottom',
+      position: 'bottom',
     };
     if (configArr.length > 1) {
       const commonStyles = getCommonStyles(configArr);

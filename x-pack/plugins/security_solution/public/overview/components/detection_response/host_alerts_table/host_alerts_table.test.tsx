@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
 import { parsedVulnerableHostsAlertsResult } from './mock_data';
@@ -30,6 +30,11 @@ const defaultUseHostAlertsItemsReturn: UseHostAlertsItemsReturn = {
   items: [],
   isLoading: false,
   updatedAt: Date.now(),
+  pagination: {
+    currentPage: 0,
+    pageCount: 0,
+    setPage: () => null,
+  },
 };
 const mockUseHostAlertsItems = jest.fn(() => defaultUseHostAlertsItemsReturn);
 const mockUseHostAlertsItemsReturn = (overrides: Partial<UseHostAlertsItemsReturn>) => {
@@ -47,34 +52,33 @@ const renderComponent = () =>
     </TestProviders>
   );
 
-// FLAKY: https://github.com/elastic/kibana/issues/131611
-describe.skip('HostAlertsTable', () => {
+describe('HostAlertsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render empty table', () => {
-    const { getByText, getByTestId } = renderComponent();
+    const { getByText, queryByTestId } = renderComponent();
 
-    expect(getByTestId('severityHostAlertsPanel')).toBeInTheDocument();
+    expect(queryByTestId('severityHostAlertsPanel')).toBeInTheDocument();
+    expect(queryByTestId('hostTablePaginator')).not.toBeInTheDocument();
     expect(getByText('No alerts to display')).toBeInTheDocument();
-    expect(getByTestId('severityHostAlertsButton')).toBeInTheDocument();
   });
 
   it('should render a loading table', () => {
     mockUseHostAlertsItemsReturn({ isLoading: true });
-    const { getByText, getByTestId } = renderComponent();
+    const { getByText, queryByTestId } = renderComponent();
 
     expect(getByText('Updating...')).toBeInTheDocument();
-    expect(getByTestId('severityHostAlertsButton')).toBeInTheDocument();
-    expect(getByTestId('severityHostAlertsTable')).toHaveClass('euiBasicTable-loading');
+    expect(queryByTestId('severityHostAlertsTable')).toHaveClass('euiBasicTable-loading');
+    expect(queryByTestId('hostTablePaginator')).not.toBeInTheDocument();
   });
 
   it('should render the updated at subtitle', () => {
     mockUseHostAlertsItemsReturn({ isLoading: false });
     const { getByText } = renderComponent();
 
-    expect(getByText('Updated now')).toBeInTheDocument();
+    expect(getByText(/Updated/)).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {
@@ -92,13 +96,32 @@ describe.skip('HostAlertsTable', () => {
 
   it('should render the table items', () => {
     mockUseHostAlertsItemsReturn({ items: [parsedVulnerableHostsAlertsResult[0]] });
-    const { getByTestId } = renderComponent();
+    const { queryByTestId } = renderComponent();
 
-    expect(getByTestId('hostSeverityAlertsTable-hostName')).toHaveTextContent('Host-342m5gl1g2');
-    expect(getByTestId('hostSeverityAlertsTable-totalAlerts')).toHaveTextContent('100');
-    expect(getByTestId('hostSeverityAlertsTable-critical')).toHaveTextContent('5');
-    expect(getByTestId('hostSeverityAlertsTable-high')).toHaveTextContent('50');
-    expect(getByTestId('hostSeverityAlertsTable-medium')).toHaveTextContent('5');
-    expect(getByTestId('hostSeverityAlertsTable-low')).toHaveTextContent('40');
+    expect(queryByTestId('hostSeverityAlertsTable-hostName')).toHaveTextContent('Host-342m5gl1g2');
+    expect(queryByTestId('hostSeverityAlertsTable-totalAlerts')).toHaveTextContent('100');
+    expect(queryByTestId('hostSeverityAlertsTable-critical')).toHaveTextContent('5');
+    expect(queryByTestId('hostSeverityAlertsTable-high')).toHaveTextContent('50');
+    expect(queryByTestId('hostSeverityAlertsTable-medium')).toHaveTextContent('5');
+    expect(queryByTestId('hostSeverityAlertsTable-low')).toHaveTextContent('40');
+    expect(queryByTestId('hostTablePaginator')).not.toBeInTheDocument();
+  });
+
+  it('should render the paginator if more than 4 results', () => {
+    const mockSetPage = jest.fn();
+
+    mockUseHostAlertsItemsReturn({
+      pagination: {
+        currentPage: 1,
+        pageCount: 3,
+        setPage: mockSetPage,
+      },
+    });
+    const { queryByTestId, getByText } = renderComponent();
+    const page3 = getByText('3');
+    expect(queryByTestId('hostTablePaginator')).toBeInTheDocument();
+
+    fireEvent.click(page3);
+    expect(mockSetPage).toHaveBeenCalledWith(2);
   });
 });

@@ -16,7 +16,7 @@ import {
 } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-
+import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createSavedQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<SavedQueryRuleParams, {}, {}, 'default'> => {
@@ -36,6 +36,18 @@ export const createSavedQueryAlertType = (
           }
           return validated;
         },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
+        },
       },
     },
     actionGroups: [
@@ -54,6 +66,8 @@ export const createSavedQueryAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
+          inputIndex,
+          runtimeMappings,
           buildRuleMessage,
           bulkCreate,
           exceptionItems,
@@ -68,6 +82,8 @@ export const createSavedQueryAlertType = (
       } = execOptions;
 
       const result = await queryExecutor({
+        inputIndex,
+        runtimeMappings,
         buildRuleMessage,
         bulkCreate,
         exceptionItems,

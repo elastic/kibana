@@ -5,159 +5,57 @@
  * 2.0.
  */
 import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { compact } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import {
-  BLOCKLIST,
-  ENDPOINTS,
-  EVENT_FILTERS,
-  EXCEPTIONS,
-  TRUSTED_APPLICATIONS,
-} from '../../app/translations';
+
 import { SecurityPageName } from '../../app/types';
 import { HeaderPage } from '../../common/components/header_page';
+import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
+import { NavLinkItem } from '../../common/components/navigation/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { LandingLinksIcons, NavItem } from '../components/landing_links_icons';
-import { IconBlocklist } from '../icons/blocklist';
-import { IconEndpoints } from '../icons/endpoints';
-import { IconEndpointPolicies } from '../icons/endpoint_policies';
-import { IconEventFilters } from '../icons/event_filters';
-import { IconExceptionLists } from '../icons/exception_lists';
-import { IconHostIsolation } from '../icons/host_isolation';
-import { IconSiemRules } from '../icons/siem_rules';
-import { IconTrustedApplications } from '../icons/trusted_applications';
+import { LandingLinksIcons } from '../components/landing_links_icons';
 import { MANAGE_PAGE_TITLE } from './translations';
-
-// TODO
-const FIX_ME_TEMPORARY_DESCRIPTION = 'Description here';
-
-export interface NavConfigType {
-  items: NavItem[];
-  categories: Array<{ label: string; itemIds: SecurityPageName[] }>;
-}
-
-const config: NavConfigType = {
-  categories: [
-    {
-      label: i18n.translate('xpack.securitySolution.landing.threatHunting.siemTitle', {
-        defaultMessage: 'SIEM',
-      }),
-      itemIds: [SecurityPageName.rules, SecurityPageName.exceptions],
-    },
-    {
-      label: i18n.translate('xpack.securitySolution.landing.threatHunting.endpointsTitle', {
-        defaultMessage: 'ENDPOINTS',
-      }),
-      itemIds: [
-        SecurityPageName.endpoints,
-        SecurityPageName.policies,
-        SecurityPageName.trustedApps,
-        SecurityPageName.eventFilters,
-        SecurityPageName.blocklist,
-        SecurityPageName.hostIsolationExceptions,
-      ],
-    },
-  ],
-  items: [
-    {
-      id: SecurityPageName.rules,
-      label: i18n.translate('xpack.securitySolution.landing.manage.rulesLabel', {
-        defaultMessage: 'SIEM rules',
-      }),
-      description: FIX_ME_TEMPORARY_DESCRIPTION,
-      icon: IconSiemRules,
-    },
-    {
-      id: SecurityPageName.exceptions,
-      label: EXCEPTIONS,
-      description: FIX_ME_TEMPORARY_DESCRIPTION,
-      icon: IconExceptionLists,
-    },
-    {
-      id: SecurityPageName.endpoints,
-      label: ENDPOINTS,
-      description: i18n.translate('xpack.securitySolution.landing.manage.endpointsDescription', {
-        defaultMessage: 'Hosts running endpoint security',
-      }),
-      icon: IconEndpoints,
-    },
-    {
-      id: SecurityPageName.policies,
-      label: i18n.translate('xpack.securitySolution.landing.manage.endpointPoliceLabel', {
-        defaultMessage: 'Endpoint policies',
-      }),
-      description: FIX_ME_TEMPORARY_DESCRIPTION,
-      icon: IconEndpointPolicies,
-    },
-    {
-      id: SecurityPageName.trustedApps,
-      label: TRUSTED_APPLICATIONS,
-      description: i18n.translate(
-        'xpack.securitySolution.landing.manage.trustedApplicationsDescription',
-        {
-          defaultMessage:
-            'Improve performance or alleviate conflicts with other applications running on your hosts',
-        }
-      ),
-      icon: IconTrustedApplications,
-    },
-    {
-      id: SecurityPageName.eventFilters,
-      label: EVENT_FILTERS,
-      description: i18n.translate('xpack.securitySolution.landing.manage.eventFiltersDescription', {
-        defaultMessage: 'Exclude unwanted applications from running on your hosts',
-      }),
-      icon: IconEventFilters,
-    },
-    {
-      id: SecurityPageName.blocklist,
-      label: BLOCKLIST,
-      description: FIX_ME_TEMPORARY_DESCRIPTION,
-      icon: IconBlocklist,
-    },
-    {
-      id: SecurityPageName.hostIsolationExceptions,
-      label: i18n.translate('xpack.securitySolution.landing.manage.hostIsolationLabel', {
-        defaultMessage: 'Host isolation IP exceptions',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.landing.manage.hostIsolationDescription',
-        {
-          defaultMessage: 'Allow isolated hosts to communicate with specific IPs',
-        }
-      ),
-
-      icon: IconHostIsolation,
-    },
-  ],
-};
 
 export const ManageLandingPage = () => (
   <SecuritySolutionPageWrapper>
     <HeaderPage title={MANAGE_PAGE_TITLE} />
-    <LandingCategories navConfig={config} />
-    <SpyRoute pageName={SecurityPageName.dashboardsLanding} />
+    <ManagementCategories />
+    <SpyRoute pageName={SecurityPageName.administration} />
   </SecuritySolutionPageWrapper>
 );
 
 const StyledEuiHorizontalRule = styled(EuiHorizontalRule)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
-const getNavItembyId = (navConfig: NavConfigType) => (itemId: string) =>
-  navConfig.items.find(({ id }: NavItem) => id === itemId);
+type ManagementCategories = Array<{ label: string; links: NavLinkItem[] }>;
+const useManagementCategories = (): ManagementCategories => {
+  const { links = [], categories = [] } = useAppRootNavLink(SecurityPageName.administration) ?? {};
 
-const navItemsFromIds = (itemIds: SecurityPageName[], navConfig: NavConfigType) =>
-  compact(itemIds.map(getNavItembyId(navConfig)));
+  const manageLinksById = Object.fromEntries(links.map((link) => [link.id, link]));
 
-export const LandingCategories = React.memo(({ navConfig }: { navConfig: NavConfigType }) => {
+  return categories.reduce<ManagementCategories>((acc, { label, linkIds }) => {
+    const linksItem = linkIds.reduce<NavLinkItem[]>((linksAcc, linkId) => {
+      if (manageLinksById[linkId]) {
+        linksAcc.push(manageLinksById[linkId]);
+      }
+      return linksAcc;
+    }, []);
+    if (linksItem.length > 0) {
+      acc.push({ label, links: linksItem });
+    }
+    return acc;
+  }, []);
+};
+
+export const ManagementCategories = () => {
+  const managementCategories = useManagementCategories();
+
   return (
     <>
-      {navConfig.categories.map(({ label, itemIds }, index) => (
+      {managementCategories.map(({ label, links }, index) => (
         <div key={label}>
           {index > 0 && (
             <>
@@ -169,11 +67,11 @@ export const LandingCategories = React.memo(({ navConfig }: { navConfig: NavConf
             <h2>{label}</h2>
           </EuiTitle>
           <StyledEuiHorizontalRule />
-          <LandingLinksIcons items={navItemsFromIds(itemIds, navConfig)} />
+          <LandingLinksIcons items={links} />
         </div>
       ))}
     </>
   );
-});
+};
 
-LandingCategories.displayName = 'LandingCategories';
+ManagementCategories.displayName = 'ManagementCategories';

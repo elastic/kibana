@@ -32,8 +32,11 @@ import { version } from '@kbn/securitysolution-io-ts-types';
 import {
   id,
   index,
+  data_view_id,
   filters,
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
   building_block_type,
   note,
   license,
@@ -67,6 +70,9 @@ import {
   created_by,
   namespace,
   ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../common';
 
 export const createSchema = <
@@ -209,8 +215,11 @@ const eqlRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
+    timestamp_field,
     event_category_override,
+    tiebreaker_field,
   },
   defaultable: {},
 };
@@ -231,6 +240,7 @@ const threatMatchRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     saved_id,
     threat_filters,
@@ -256,6 +266,7 @@ const queryRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     saved_id,
   },
@@ -281,6 +292,7 @@ const savedQueryRuleParams = {
     // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
     // if the saved object gets deleted for some reason
     index,
+    data_view_id,
     query,
     filters,
   },
@@ -304,6 +316,7 @@ const thresholdRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     saved_id,
   },
@@ -412,6 +425,14 @@ const responseRequiredFields = {
   updated_by,
   created_at,
   created_by,
+
+  // NOTE: For now, Related Integrations, Required Fields and Setup Guide are supported for prebuilt
+  // rules only. We don't want to allow users to edit these 3 fields via the API. If we added them
+  // to baseParams.defaultable, they would become a part of the request schema as optional fields.
+  // This is why we add them here, in order to add them only to the response schema.
+  related_integrations: RelatedIntegrationArray,
+  required_fields: RequiredFieldArray,
+  setup: SetupGuide,
 };
 
 const responseOptionalFields = {

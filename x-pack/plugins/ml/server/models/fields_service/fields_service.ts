@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { duration } from 'moment';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { AggCardinality } from '../../../common/types/fields';
@@ -15,7 +16,6 @@ import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 import { RuntimeMappings } from '../../../common/types/fields';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 
 /**
  * Service for carrying out queries to obtain data
@@ -45,10 +45,13 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     fieldNames: string[],
     datafeedConfig?: Datafeed
   ): Promise<string[]> {
-    const body = await asCurrentUser.fieldCaps({
-      index,
-      fields: fieldNames,
-    });
+    const body = await asCurrentUser.fieldCaps(
+      {
+        index,
+        fields: fieldNames,
+      },
+      { maxRetries: 0 }
+    );
     const aggregatableFields: string[] = [];
     const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
 
@@ -180,11 +183,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       ...runtimeMappings,
     };
 
-    const { aggregations } = await asCurrentUser.search({
-      index,
-      body,
-      ...(datafeedConfig?.indices_options ?? {}),
-    });
+    const { aggregations } = await asCurrentUser.search(
+      {
+        index,
+        body,
+        ...(datafeedConfig?.indices_options ?? {}),
+      },
+      { maxRetries: 0 }
+    );
 
     if (!aggregations) {
       return {};
@@ -222,27 +228,30 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   }> {
     const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-    const { aggregations } = await asCurrentUser.search({
-      index,
-      size: 0,
-      body: {
-        ...(query ? { query } : {}),
-        aggs: {
-          earliest: {
-            min: {
-              field: timeFieldName,
+    const { aggregations } = await asCurrentUser.search(
+      {
+        index,
+        size: 0,
+        body: {
+          ...(query ? { query } : {}),
+          aggs: {
+            earliest: {
+              min: {
+                field: timeFieldName,
+              },
+            },
+            latest: {
+              max: {
+                field: timeFieldName,
+              },
             },
           },
-          latest: {
-            max: {
-              field: timeFieldName,
-            },
-          },
+          ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
         },
-        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+        ...(indicesOptions ?? {}),
       },
-      ...(indicesOptions ?? {}),
-    });
+      { maxRetries: 0 }
+    );
 
     if (aggregations && aggregations.earliest && aggregations.latest) {
       // @ts-expect-error incorrect search response type
@@ -397,11 +406,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       },
     };
 
-    const { aggregations } = await asCurrentUser.search({
-      index,
-      body,
-      ...(datafeedConfig?.indices_options ?? {}),
-    });
+    const { aggregations } = await asCurrentUser.search(
+      {
+        index,
+        body,
+        ...(datafeedConfig?.indices_options ?? {}),
+      },
+      { maxRetries: 0 }
+    );
 
     if (!aggregations) {
       return cachedValues;

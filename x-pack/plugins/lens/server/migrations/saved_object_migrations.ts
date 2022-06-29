@@ -198,7 +198,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShapePre710, LensDocShap
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };
@@ -265,7 +265,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShapePre710, LensDocSh
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };

@@ -85,7 +85,7 @@ export const SourceConfig: React.FC = () => {
           {i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfig.message',
             {
-              defaultMessage: 'Are you sure you want to remove the OAuth configuration for {name}?',
+              defaultMessage: 'Are you sure you want to remove the configuration for {name}?',
               values: { name },
             }
           )}

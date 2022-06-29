@@ -486,13 +486,7 @@
             "text": "SerializedFieldFormat"
           },
           "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -522,13 +516,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
@@ -592,6 +580,14 @@
           },
           "; chartsThemeService: ",
           "Theme",
+          "; datatableUtilities: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.DatatableUtilitiesService",
+            "text": "DatatableUtilitiesService"
+          },
           "; onClickValue: (data: { data: { table: Pick<",
           {
             "pluginId": "expressions",
@@ -1454,7 +1450,26 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "\"number\"[]"
+                      "\"string\"[]"
+                    ],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.legendSize.default",
+                    "type": "Enum",
+                    "tags": [],
+                    "label": "default",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "visualizations",
+                        "scope": "common",
+                        "docId": "kibVisualizationsPluginApi",
+                        "section": "def-common.LegendSize",
+                        "text": "LegendSize"
+                      }
                     ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false
@@ -1466,6 +1481,39 @@
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.legendSize.options",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "visualizations",
+                        "scope": "common",
+                        "docId": "kibVisualizationsPluginApi",
+                        "section": "def-common.LegendSize",
+                        "text": "LegendSize"
+                      },
+                      "[]"
+                    ],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.legendSize.strict",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "strict",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false
                   }
@@ -1485,7 +1533,15 @@
               "HeatmapLegendConfig",
               ") => { isVisible: boolean; position: ",
               "Position",
-              "; maxLines?: number | undefined; shouldTruncate?: boolean | undefined; legendSize?: number | undefined; type: \"heatmap_legend\"; }"
+              "; maxLines?: number | undefined; shouldTruncate?: boolean | undefined; legendSize?: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.LegendSize",
+                "text": "LegendSize"
+              },
+              " | undefined; type: \"heatmap_legend\"; }"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
             "deprecated": false,

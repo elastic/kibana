@@ -137,7 +137,7 @@ const VerticalRule = styled.div`
 VerticalRule.displayName = 'VerticalRule';
 
 const EventsCountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
@@ -266,9 +266,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return [...columnFields, ...requiredFieldsForActions];
   };
 
-  const timelineQuerySortField = sort.map(({ columnId, columnType, sortDirection }) => ({
+  const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
     field: columnId,
     direction: sortDirection as Direction,
+    esTypes: esTypes ?? [],
     type: columnType,
   }));
 

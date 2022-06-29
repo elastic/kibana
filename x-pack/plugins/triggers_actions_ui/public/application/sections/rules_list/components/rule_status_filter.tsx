@@ -6,7 +6,13 @@
  */
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiFilterGroup,
+  EuiSelectableListItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { RuleStatus } from '../../../../types';
 
 const statuses: RuleStatus[] = ['enabled', 'disabled', 'snoozed'];
@@ -53,6 +59,24 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
     setIsPopoverOpen((prevIsOpen) => !prevIsOpen);
   }, [setIsPopoverOpen]);
 
+  const renderClearAll = () => {
+    return (
+      <div>
+        <EuiButtonEmpty
+          style={{
+            width: '100%',
+          }}
+          size="xs"
+          iconType="crossInACircleFilled"
+          color="danger"
+          onClick={() => onChange([])}
+        >
+          Clear all
+        </EuiButtonEmpty>
+      </div>
+    );
+  };
+
   return (
     <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
@@ -69,7 +93,7 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.ruleDetails.ruleStatusFilterButton"
-              defaultMessage="Status"
+              defaultMessage="View"
             />
           </EuiFilterButton>
         }
@@ -77,7 +101,7 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
         <div data-test-subj={selectDataTestSubj}>
           {statuses.map((status) => {
             return (
-              <EuiFilterSelectItem
+              <EuiSelectableListItem
                 key={status}
                 style={optionStyles}
                 data-test-subj={optionDataTestSubj(status)}
@@ -85,9 +109,10 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
                 checked={selectedStatuses.includes(status) ? 'on' : undefined}
               >
                 {status}
-              </EuiFilterSelectItem>
+              </EuiSelectableListItem>
             );
           })}
+          {renderClearAll()}
         </div>
       </EuiPopover>
     </EuiFilterGroup>

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 import { SavedObject, SavedObjectsClientContract } from '../types';
 import { SavedObjectsFindResult } from '../service';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
@@ -24,14 +24,34 @@ import { collectExportedObjects } from './collect_exported_objects';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
+ * Utility class used to export savedObjects.
+ *
  * @public
  */
-export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
+export interface ISavedObjectsExporter {
+  /**
+   * Generates an export stream for given types.
+   *
+   * See the {@link SavedObjectsExportByTypeOptions | options} for more detailed information.
+   *
+   * @throws SavedObjectsExportError
+   */
+  exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
+
+  /**
+   * Generates an export stream for given object references.
+   *
+   * See the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.
+   *
+   * @throws SavedObjectsExportError
+   */
+  exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+}
 
 /**
- * @public
+ * @internal
  */
-export class SavedObjectsExporter {
+export class SavedObjectsExporter implements ISavedObjectsExporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
   readonly #exportSizeLimit: number;
   readonly #typeRegistry: ISavedObjectTypeRegistry;
@@ -54,13 +74,6 @@ export class SavedObjectsExporter {
     this.#typeRegistry = typeRegistry;
   }
 
-  /**
-   * Generates an export stream for given types.
-   *
-   * See the {@link SavedObjectsExportByTypeOptions | options} for more detailed information.
-   *
-   * @throws SavedObjectsExportError
-   */
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
     this.#log.debug(`Initiating export for types: [${options.types}]`);
     const objects = await this.fetchByTypes(options);
@@ -73,13 +86,6 @@ export class SavedObjectsExporter {
     });
   }
 
-  /**
-   * Generates an export stream for given object references.
-   *
-   * See the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.
-   *
-   * @throws SavedObjectsExportError
-   */
   public async exportByObjects(options: SavedObjectsExportByObjectOptions) {
     this.#log.debug(`Initiating export of [${options.objects.length}] objects.`);
     if (options.objects.length > this.#exportSizeLimit) {
@@ -106,7 +112,7 @@ export class SavedObjectsExporter {
       includeNamespaces = false,
       namespace,
     }: SavedObjectExportBaseOptions
-  ) {
+  ): Promise<Readable> {
     this.#log.debug(`Processing [${savedObjects.length}] saved objects.`);
 
     const {

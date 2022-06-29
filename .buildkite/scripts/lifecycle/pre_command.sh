@@ -4,16 +4,21 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+echo '--- Setup environment vars'
+source .buildkite/scripts/common/env.sh
+source .buildkite/scripts/common/setup_node.sh
+
 BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
 export BUILDKITE_TOKEN
 
-echo '--- Install buildkite dependencies'
+echo '--- Install/build buildkite dependencies'
+npm install -g ts-node
 cd '.buildkite'
 retry 5 15 npm ci
 cd ..
 
 echo '--- Agent Debug/SSH Info'
-node .buildkite/scripts/lifecycle/print_agent_links.js || true
+ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
 
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   echo ""
@@ -21,7 +26,6 @@ if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   echo "gcloud compute ssh --tunnel-through-iap --project elastic-kibana-ci --zone \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone)\" \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/name)\""
   echo ""
 fi
-
 
 echo '--- Job Environment Setup'
 
@@ -87,6 +91,9 @@ EOF
 GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
 export GITHUB_TOKEN
 
+KIBANA_CI_GITHUB_TOKEN=$(retry 5 5 vault read -field=github_token secret/kibana-issues/dev/kibana-ci-github)
+export KIBANA_CI_GITHUB_TOKEN
+
 KIBANA_CI_REPORTER_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibanamachine-reporter)
 export KIBANA_CI_REPORTER_KEY
 
@@ -135,15 +142,6 @@ export KIBANA_BUILDBUDDY_CI_API_KEY
 BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
 export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
 retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
-
-# By default, all steps should set up these things to get a full environment before running
-# It can be skipped for pipeline upload steps though, to make job start time a little faster
-if [[ "${SKIP_CI_SETUP:-}" != "true" ]]; then
-  if [[ -d .buildkite/scripts && "${BUILDKITE_COMMAND:-}" != "buildkite-agent pipeline upload"* ]]; then
-    source .buildkite/scripts/common/env.sh
-    source .buildkite/scripts/common/setup_node.sh
-  fi
-fi
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

@@ -6,6 +6,7 @@
  */
 
 import { NerInference } from './ner';
+import { QuestionAnsweringInference } from './question_answering';
 import {
   TextClassificationInference,
   ZeroShotClassificationInference,
@@ -16,6 +17,7 @@ import { TextEmbeddingInference } from './text_embedding';
 
 export type InferrerType =
   | NerInference
+  | QuestionAnsweringInference
   | TextClassificationInference
   | TextEmbeddingInference
   | ZeroShotClassificationInference

@@ -30,6 +30,7 @@ import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
 import { UsePackQueryFormProps, PackFormData, usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
+import { useKibana } from '../../common/lib/kibana';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -46,6 +47,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onSave,
   onClose,
 }) => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const [isEditMode] = useState(!!defaultValue);
   const { form } = usePackQueryForm({
     uniqueQueryIds,
@@ -117,7 +119,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <Form form={form}>
-          {!isEditMode ? (
+          {!isEditMode && permissions.readSavedQueries ? (
             <>
               <SavedQueriesDropdown onChange={handleSetQueryValue} />
               <EuiSpacer />

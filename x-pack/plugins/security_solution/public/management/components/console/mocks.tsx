@@ -33,6 +33,8 @@ export interface ConsoleTestSetup {
       useKeyboard: boolean;
     }>
   ): void;
+
+  typeText(text: string, options?: Partial<{ dataTestSubj: string }>): void;
 }
 
 /**
@@ -68,6 +70,27 @@ export const enterConsoleCommand = (
   });
 };
 
+/**
+ * Types the given text into the console's command input using the keyboard (via `userEvent.keyboard`).
+ * Any keyboard key can be typed, including those that don't output anything, like `{enter}` or `{up}`.
+ * For more information, see keyboard user interactions in React Testing library
+ *
+ * @param renderResult
+ * @param text
+ * @param options
+ *
+ * @see https://testing-library.com/docs/user-event/keyboard
+ */
+export const typeConsoleText = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  text: string,
+  { dataTestSubj = 'test' }: Partial<{ dataTestSubj: string }> = {}
+) => {
+  const keyCaptureInput = renderResult.getByTestId(`${dataTestSubj}-keyCapture-input`);
+  userEvent.click(keyCaptureInput);
+  userEvent.keyboard(text);
+};
+
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
   const mockedContext = createAppRootMockRenderer();
 
@@ -90,10 +113,15 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     enterConsoleCommand(renderResult, cmd, options);
   };
 
+  const typeText: ConsoleTestSetup['typeText'] = (text, options) => {
+    typeConsoleText(renderResult, text, options);
+  };
+
   return {
     renderConsole,
     commands: commandList,
     enterCommand,
+    typeText,
   };
 };
 
@@ -109,7 +137,9 @@ export const getCommandListMock = (): CommandDefinition[] => {
       if (status !== 'success') {
         new Promise((r) => setTimeout(r, 500)).then(() => {
           setStatus('success');
-          setStore({ foo: 'bar' });
+          setStore((prevState) => {
+            return { foo: 'bar' };
+          });
         });
       }
     }, [setStatus, setStore, status]);

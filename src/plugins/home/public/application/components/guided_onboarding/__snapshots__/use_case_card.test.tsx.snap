@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`use case card should render use case card component for observability 1`] = `
+<EuiCard
+  data-test-subj="onboarding--observabilityUseCaseCard"
+  description={
+    <EuiText
+      color="subdued"
+      size="xs"
+    >
+      <p>
+        Monitor your infrastructure by consolidating your logs, metrics, and traces for end‑to‑end observability.
+      </p>
+    </EuiText>
+  }
+  display="subdued"
+  icon={
+    <EuiAvatar
+      color="plain"
+      iconSize="xl"
+      iconType="eye"
+      name="Observability icon"
+      size="xl"
+    />
+  }
+  image={
+    <div
+      css={
+        Object {
+          "backgroundColor": "#00BFB3",
+          "minHeight": 200,
+        }
+      }
+    />
+  }
+  onClick={[Function]}
+  textAlign="left"
+  title={
+    <EuiTitle
+      size="xs"
+    >
+      <h4>
+        <strong>
+          Monitor my infrastructure
+        </strong>
+      </h4>
+    </EuiTitle>
+  }
+/>
+`;
+
+exports[`use case card should render use case card component for search 1`] = `
+<EuiCard
+  data-test-subj="onboarding--searchUseCaseCard"
+  description={
+    <EuiText
+      color="subdued"
+      size="xs"
+    >
+      <p>
+        Create a search experience for your websites, applications, workplace content, or anything in between.
+      </p>
+    </EuiText>
+  }
+  display="subdued"
+  icon={
+    <EuiAvatar
+      color="plain"
+      iconSize="xl"
+      iconType="inspect"
+      name="Enterprise Search icon"
+      size="xl"
+    />
+  }
+  image={
+    <div
+      css={
+        Object {
+          "backgroundColor": "#FEC514",
+          "minHeight": 200,
+        }
+      }
+    />
+  }
+  onClick={[Function]}
+  textAlign="left"
+  title={
+    <EuiTitle
+      size="xs"
+    >
+      <h4>
+        <strong>
+          Search my data
+        </strong>
+      </h4>
+    </EuiTitle>
+  }
+/>
+`;
+
+exports[`use case card should render use case card component for security 1`] = `
+<EuiCard
+  data-test-subj="onboarding--securityUseCaseCard"
+  description={
+    <EuiText
+      color="subdued"
+      size="xs"
+    >
+      <p>
+        Protect your environment by unifying SIEM, endpoint security, and cloud security to protect against threats.
+      </p>
+    </EuiText>
+  }
+  display="subdued"
+  icon={
+    <EuiAvatar
+      color="plain"
+      iconSize="xl"
+      iconType="securitySignal"
+      name="Security icon"
+      size="xl"
+    />
+  }
+  image={
+    <div
+      css={
+        Object {
+          "backgroundColor": "#F04E98",
+          "minHeight": 200,
+        }
+      }
+    />
+  }
+  onClick={[Function]}
+  textAlign="left"
+  title={
+    <EuiTitle
+      size="xs"
+    >
+      <h4>
+        <strong>
+          Protect my environment
+        </strong>
+      </h4>
+    </EuiTitle>
+  }
+/>
+`;

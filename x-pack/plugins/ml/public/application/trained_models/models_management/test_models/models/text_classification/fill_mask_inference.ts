@@ -55,9 +55,10 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
 
   public getInputComponent(): JSX.Element {
     const placeholder = i18n.translate(
-      'xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText',
+      'xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText',
       {
-        defaultMessage: 'Mask token: [MASK]. e.g. Paris is the [MASK] of France.',
+        defaultMessage:
+          'Enter a phrase to test. Use [MASK] as a placeholder for the missing words.',
       }
     );
 

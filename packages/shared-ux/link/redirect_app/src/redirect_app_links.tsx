@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 
 import { useServices } from './services';
-import {
-  RedirectAppLinks as Component,
-  Props as ComponentProps,
-} from './redirect_app_links.component';
-
-type Props = Omit<ComponentProps, 'navigateToUrl' | 'currentAppId'>;
+import { RedirectAppLinks as Component } from './redirect_app_links.component';
 
 /**
  * A service-enabled component that provides Kibana-specific functionality to the `RedirectAppLinks`
@@ -27,4 +22,6 @@ type Props = Omit<ComponentProps, 'navigateToUrl' | 'currentAppId'>;
  * </RedirectAppLinks>
  * ```
  */
-export const RedirectAppLinks = (props: Props) => <Component {...useServices()} {...props} />;
+export const RedirectAppLinks: FC<{}> = ({ children }) => (
+  <Component {...useServices()}>{children}</Component>
+);

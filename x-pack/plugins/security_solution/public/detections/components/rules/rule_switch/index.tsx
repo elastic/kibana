@@ -17,6 +17,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useUpdateRulesCache } from '../../../containers/detection_engine/rules/use_find_rules_query';
 import { executeRulesBulkAction } from '../../../pages/detection_engine/rules/all/actions';
 import { useRulesTableContextOptional } from '../../../pages/detection_engine/rules/all/rules_table/rules_table_context';
@@ -52,10 +54,14 @@ export const RuleSwitchComponent = ({
   const rulesTableContext = useRulesTableContextOptional();
   const updateRulesCache = useUpdateRulesCache();
   const toasts = useAppToasts();
+  const { startTransaction } = useStartTransaction();
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
+      startTransaction({
+        name: enabled ? SINGLE_RULE_ACTIONS.DISABLE : SINGLE_RULE_ACTIONS.ENABLE,
+      });
       const bulkActionResponse = await executeRulesBulkAction({
         setLoadingRules: rulesTableContext?.actions.setLoadingRules,
         toasts,
@@ -71,7 +77,7 @@ export const RuleSwitchComponent = ({
       }
       setMyIsLoading(false);
     },
-    [id, onChange, rulesTableContext, toasts, updateRulesCache]
+    [enabled, id, onChange, rulesTableContext, startTransaction, toasts, updateRulesCache]
   );
 
   const showLoader = useMemo((): boolean => {

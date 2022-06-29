@@ -158,9 +158,20 @@ const NetworkStatsContainer = styled.div`
     width: 100%;
   }
 `;
-
-const Title = styled.div`
+const MoveItLeftTitle = styled.div`
   margin-left: 24px;
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    max-width: 40px;
+  }
+`;
+const MoveItLeft = styled.div`
+  margin-left: 24px;
+`;
+
+const NoMarginTopFlexItem = styled(EuiFlexItem)`
+  @media only screen and (max-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
+    margin-top: -10px !important;
+  }
 `;
 
 const AccordionContent = styled.div`
@@ -186,6 +197,7 @@ const OverviewNetworkStatsComponent: React.FC<OverviewNetworkProps> = ({ data, l
                 <EuiFlexGroup
                   data-test-subj={`network-stat-group-${statGroup.groupId}`}
                   justifyContent="spaceBetween"
+                  gutterSize="s"
                 >
                   <EuiFlexItem grow={false}>
                     <EuiText>{statGroup.name}</EuiText>
@@ -204,20 +216,22 @@ const OverviewNetworkStatsComponent: React.FC<OverviewNetworkProps> = ({ data, l
             >
               <AccordionContent>
                 {statsForGroup.map((stat) => (
-                  <EuiFlexGroup key={stat.id} justifyContent="spaceBetween">
+                  <EuiFlexGroup key={stat.id} gutterSize="s" justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
                       <EuiText color="subdued" size="s">
-                        <Title>{stat.title}</Title>
+                        <MoveItLeftTitle>{stat.title}</MoveItLeftTitle>
                       </EuiText>
                     </EuiFlexItem>
-                    <EuiFlexItem data-test-subj={`network-stat-${stat.id}`} grow={false}>
-                      <StatValue
-                        count={stat.count}
-                        isGroupStat={false}
-                        isLoading={loading}
-                        max={statsForGroupCount}
-                      />
-                    </EuiFlexItem>
+                    <NoMarginTopFlexItem data-test-subj={`network-stat-${stat.id}`} grow={false}>
+                      <MoveItLeft>
+                        <StatValue
+                          count={stat.count}
+                          isGroupStat={false}
+                          isLoading={loading}
+                          max={statsForGroupCount}
+                        />
+                      </MoveItLeft>
+                    </NoMarginTopFlexItem>
                   </EuiFlexGroup>
                 ))}
               </AccordionContent>

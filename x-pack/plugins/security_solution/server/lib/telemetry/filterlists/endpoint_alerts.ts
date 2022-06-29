@@ -75,6 +75,7 @@ const allowlistBaseEventFields: AllowlistFields = {
       quarantine_message: true,
     },
   },
+  message: true,
   process: {
     parent: baseAllowlistFields,
     ...baseAllowlistFields,

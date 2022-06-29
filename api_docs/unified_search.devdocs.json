@@ -5,6 +5,72 @@
     "functions": [
       {
         "parentPluginId": "unifiedSearch",
+        "id": "def-public.DataViewPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "DataViewPicker",
+        "description": [],
+        "signature": [
+          "({ isMissingCurrent, currentDataViewId, onChangeDataView, onAddField, onDataViewCreated, trigger, selectableProps, showNewMenuTour, }: ",
+          "DataViewPickerProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  onChangeDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  showNewMenuTour,\n}",
+            "description": [],
+            "signature": [
+              "DataViewPickerProps"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
+        "id": "def-public.DataViewsList",
+        "type": "Function",
+        "tags": [],
+        "label": "DataViewsList",
+        "description": [],
+        "signature": [
+          "({\n  dataViewsList,\n  onChangeDataView,\n  currentDataViewId,\n  selectableProps,\n  searchListInputId,\n}: ",
+          "DataViewsListProps",
+          ") => JSX.Element"
+        ],
+        "path": "src/plugins/unified_search/public/dataview_picker/dataview_list.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewsList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataViewsList,\n  onChangeDataView,\n  currentDataViewId,\n  selectableProps,\n  searchListInputId,\n}",
+            "description": [],
+            "signature": [
+              "DataViewsListProps"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/dataview_list.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedSearch",
         "id": "def-public.FilterItem",
         "type": "Function",
         "tags": [],
@@ -548,19 +614,6 @@
             "description": [],
             "signature": [
               "\"text\" | \"lucene\" | undefined"
-            ],
-            "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
-            "id": "def-public.QueryStringInputProps.nonKqlModeHelpText",
-            "type": "string",
-            "tags": [],
-            "label": "nonKqlModeHelpText",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
             "deprecated": false

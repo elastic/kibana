@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 import {
   filter,
   Subject,
+  ReplaySubject,
   interval,
   concatMap,
   merge,
@@ -19,7 +20,7 @@ import {
   retryWhen,
   tap,
   delayWhen,
-  takeWhile,
+  takeUntil,
 } from 'rxjs';
 import type {
   AnalyticsClientInitContext,
@@ -44,8 +45,14 @@ const HOUR = 60 * MINUTE;
 const KIB = 1024;
 const MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE = 1000;
 
+/**
+ * Elastic V3 shipper to use on the server side.
+ */
 export class ElasticV3ServerShipper implements IShipper {
+  /** Shipper's unique name */
   public static shipperName = 'elastic_v3_server';
+
+  /** Observable to emit the stats of the processed events. */
   public readonly telemetryCounter$ = new Subject<TelemetryCounter>();
 
   private readonly reportTelemetryCounters = createTelemetryCounterHelper(
@@ -54,7 +61,7 @@ export class ElasticV3ServerShipper implements IShipper {
   );
 
   private readonly internalQueue: Event[] = [];
-  private readonly shutdown$ = new Subject<void>();
+  private readonly shutdown$ = new ReplaySubject<void>(1);
 
   private readonly url: string;
 
@@ -73,6 +80,11 @@ export class ElasticV3ServerShipper implements IShipper {
    */
   private firstTimeOffline?: number | null;
 
+  /**
+   * Creates a new instance of the {@link ElasticV3ServerShipper}.
+   * @param options {@link ElasticV3ShipperOptions}
+   * @param initContext {@link AnalyticsClientInitContext}
+   */
   constructor(
     private readonly options: ElasticV3ShipperOptions,
     private readonly initContext: AnalyticsClientInitContext
@@ -85,6 +97,11 @@ export class ElasticV3ServerShipper implements IShipper {
     this.checkConnectivity();
   }
 
+  /**
+   * Uses the `cluster_uuid` and `license_id` from the context to hold them in memory for the generation of the headers
+   * used later on in the HTTP request.
+   * @param newContext The full new context to set {@link EventContext}
+   */
   public extendContext(newContext: EventContext) {
     if (newContext.cluster_uuid) {
       this.clusterUuid = newContext.cluster_uuid;
@@ -94,6 +111,10 @@ export class ElasticV3ServerShipper implements IShipper {
     }
   }
 
+  /**
+   * When `false`, it flushes the internal queue and stops sending events.
+   * @param isOptedIn `true` for resume sending events. `false` to stop.
+   */
   public optIn(isOptedIn: boolean) {
     this.isOptedIn = isOptedIn;
 
@@ -102,6 +123,10 @@ export class ElasticV3ServerShipper implements IShipper {
     }
   }
 
+  /**
+   * Enqueues the events to be sent via the leaky bucket algorithm.
+   * @param events batched events {@link Event}
+   */
   public reportEvents(events: Event[]) {
     if (
       this.isOptedIn === false ||
@@ -125,7 +150,12 @@ export class ElasticV3ServerShipper implements IShipper {
     this.internalQueue.push(...events);
   }
 
+  /**
+   * Shuts down the shipper.
+   * Triggers a flush of the internal queue to attempt to send any events held in the queue.
+   */
   public shutdown() {
+    this.shutdown$.next();
     this.shutdown$.complete();
   }
 
@@ -141,7 +171,7 @@ export class ElasticV3ServerShipper implements IShipper {
     let backoff = 1 * MINUTE;
     timer(0, 1 * MINUTE)
       .pipe(
-        takeWhile(() => this.shutdown$.isStopped === false),
+        takeUntil(this.shutdown$),
         filter(() => this.isOptedIn === true && this.firstTimeOffline !== null),
         concatMap(async () => {
           const { ok } = await fetch(this.url, {
@@ -157,7 +187,7 @@ export class ElasticV3ServerShipper implements IShipper {
         }),
         retryWhen((errors) =>
           errors.pipe(
-            takeWhile(() => this.shutdown$.isStopped === false),
+            takeUntil(this.shutdown$),
             tap(() => {
               if (!this.firstTimeOffline) {
                 this.firstTimeOffline = Date.now();
@@ -179,7 +209,7 @@ export class ElasticV3ServerShipper implements IShipper {
   private setInternalSubscriber() {
     // Check the status of the queues every 1 second.
     merge(
-      interval(1000),
+      interval(1000).pipe(takeUntil(this.shutdown$)),
       // Using a promise because complete does not emit through the pipe.
       from(firstValueFrom(this.shutdown$, { defaultValue: true }))
     )
@@ -207,10 +237,7 @@ export class ElasticV3ServerShipper implements IShipper {
           this.lastBatchSent = Date.now();
           const eventsToSend = this.getEventsToSend();
           await this.sendEvents(eventsToSend);
-        }),
-
-        // Stop the subscriber if we are shutting down.
-        takeWhile(() => !this.shutdown$.isStopped)
+        })
       )
       .subscribe();
   }

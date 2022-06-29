@@ -42,7 +42,7 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
-import { FieldBrowserOptions } from '../../fields_browser';
+import { FieldBrowserOptions } from '../../field_browser';
 import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
@@ -226,10 +226,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const sortField = useMemo(
     () =>
-      sort.map(({ columnId, columnType, sortDirection }) => ({
+      sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sort]
   );
@@ -352,7 +353,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   )}
               </UpdatedFlexGroup>
               <>
-                {!hasAlerts && !loading && <TGridEmpty height="short" />}
+                {!hasAlerts && !loading && !graphOverlay && <TGridEmpty height="short" />}
                 {hasAlerts && (
                   <FullWidthFlexGroup
                     $visible={!graphEventId && graphOverlay == null}

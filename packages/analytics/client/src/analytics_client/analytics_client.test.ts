@@ -935,7 +935,7 @@ describe('AnalyticsClient', () => {
 
     test('Discards events from the internal queue when there are shippers and an opt-in response is false', async () => {
       const telemetryCounterPromise = lastValueFrom(
-        analyticsClient.telemetryCounter$.pipe(take(3), toArray()) // Waiting for 3 enqueued
+        analyticsClient.telemetryCounter$.pipe(take(4), toArray()) // Waiting for 4 enqueued
       );
 
       // Send multiple events of 1 type to test the grouping logic as well
@@ -947,9 +947,12 @@ describe('AnalyticsClient', () => {
       analyticsClient.registerShipper(MockedShipper1, { reportEventsMock });
       analyticsClient.optIn({ global: { enabled: false } });
 
+      // Report event after opted-out
+      analyticsClient.reportEvent('event-type-a', { a_field: 'c' });
+
       expect(reportEventsMock).toHaveBeenCalledTimes(0);
 
-      // Expect 2 enqueued, but not shipped
+      // Expect 4 enqueued, but not shipped
       await expect(telemetryCounterPromise).resolves.toEqual([
         {
           type: 'enqueued',
@@ -972,7 +975,68 @@ describe('AnalyticsClient', () => {
           code: 'enqueued',
           count: 1,
         },
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-a',
+          code: 'enqueued',
+          count: 1,
+        },
       ]);
+
+      // eslint-disable-next-line dot-notation
+      expect(analyticsClient['internalEventQueue$'].observed).toBe(false);
+    });
+
+    test('Discards events from the internal queue when there are no shippers and an opt-in response is false', async () => {
+      const telemetryCounterPromise = lastValueFrom(
+        analyticsClient.telemetryCounter$.pipe(take(4), toArray()) // Waiting for 4 enqueued
+      );
+
+      // Send multiple events of 1 type to test the grouping logic as well
+      analyticsClient.reportEvent('event-type-a', { a_field: 'a' });
+      analyticsClient.reportEvent('event-type-b', { b_field: 100 });
+      analyticsClient.reportEvent('event-type-a', { a_field: 'b' });
+
+      analyticsClient.optIn({ global: { enabled: false } });
+
+      // Report event after opted-out
+      analyticsClient.reportEvent('event-type-a', { a_field: 'c' });
+
+      // Expect 4 enqueued, but not shipped
+      await expect(telemetryCounterPromise).resolves.toEqual([
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-a',
+          code: 'enqueued',
+          count: 1,
+        },
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-b',
+          code: 'enqueued',
+          count: 1,
+        },
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-a',
+          code: 'enqueued',
+          count: 1,
+        },
+        {
+          type: 'enqueued',
+          source: 'client',
+          event_type: 'event-type-a',
+          code: 'enqueued',
+          count: 1,
+        },
+      ]);
+
+      // eslint-disable-next-line dot-notation
+      expect(analyticsClient['internalEventQueue$'].observed).toBe(false);
     });
 
     test(

@@ -258,10 +258,12 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     const pagedRowIndex = rowIndex - pageIndex * pageSize;
 
     const value = logs[pagedRowIndex]?.[columnId as keyof IExecutionLog] as string;
+    const version = logs?.[pagedRowIndex]?.version;
     return (
       <RuleEventLogListCellRenderer
         columnId={columnId as ColumnId}
         value={value}
+        version={version}
         dateFormat={dateFormat}
       />
     );

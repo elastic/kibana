@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TimeRange } from '@kbn/data-plugin/common';
-import { Filter, Query, BoolQuery } from '@kbn/es-query';
+import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
 import { FieldSpec, DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { DataControlInput } from '../../types';
@@ -17,7 +16,6 @@ export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
   runPastTimeout?: boolean;
-  textFieldName?: string;
   singleSelect?: boolean;
   loading?: boolean;
 }

@@ -257,6 +257,7 @@ class TableVis extends Component {
       indexPattern,
       fields,
       this.fieldFormatsService,
+      undefined,
       model.drilldown_url ? [FIELD_FORMAT_IDS.URL] : []
     );
     const pivotIds = getFieldsForTerms(model.pivot_id);

@@ -26,6 +26,7 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getAnalysisType } from '../../data_frame_analytics/common';
 import { ModelsTableToConfigMapping } from '.';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
@@ -44,7 +45,6 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { usePageUrlState } from '../../util/url_state';
 import { ExpandedRow } from './expanded_row';
-import { isPopulatedObject } from '../../../../common';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
@@ -121,6 +121,7 @@ export const ModelsList: FC<Props> = ({
 
   const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
   const canStartStopTrainedModels = capabilities.ml.canStartStopTrainedModels as boolean;
+  const canTestTrainedModels = capabilities.ml.canTestTrainedModels as boolean;
 
   const trainedModelsApiService = useTrainedModelsApiService();
   const savedObjectsApiService = useSavedObjectsApiService();
@@ -274,10 +275,12 @@ export const ModelsList: FC<Props> = ({
       acc.add(item.model_type);
       return acc;
     }, new Set<string>());
-    return [...result].map((v) => ({
-      value: v,
-      name: v,
-    }));
+    return [...result]
+      .sort((a, b) => a.localeCompare(b))
+      .map((v) => ({
+        value: v,
+        name: v,
+      }));
   }, [items]);
 
   /**
@@ -482,7 +485,7 @@ export const ModelsList: FC<Props> = ({
           isPrimary: true,
           available: isTestable,
           onClick: setShowTestFlyout,
-          enabled: isTestEnabled,
+          enabled: (item) => canTestTrainedModels && isTestEnabled(item),
         },
       ] as Array<Action<ModelItem>>)
     );

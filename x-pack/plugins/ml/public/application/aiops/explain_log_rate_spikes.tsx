@@ -5,44 +5,70 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { useEffect, useState, FC } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ExplainLogRateSpikesSpec } from '@kbn/aiops-plugin/public';
-import { useMlKibana, useTimefilter } from '../contexts/kibana';
+import { ExplainLogRateSpikes } from '@kbn/aiops-plugin/public';
+import { getWindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-utils';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+
+import { useMlContext } from '../contexts/ml';
+import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
+import { ml } from '../services/ml_api_service';
 
 import { MlPageHeader } from '../components/page_header';
 
 export const ExplainLogRateSpikesPage: FC = () => {
-  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, aiops },
+    services: { docLinks },
   } = useMlKibana();
 
-  const [ExplainLogRateSpikes, setExplainLogRateSpikes] = useState<ExplainLogRateSpikesSpec | null>(
-    null
-  );
+  const context = useMlContext();
+  const dataView = context.currentDataView;
+
+  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
   useEffect(() => {
-    if (aiops !== undefined) {
-      const { getExplainLogRateSpikesComponent } = aiops;
-      getExplainLogRateSpikesComponent().then(setExplainLogRateSpikes);
+    async function fetchWindowParameters() {
+      if (dataView.timeFieldName) {
+        const stats: Array<{
+          data: Array<{ doc_count: number; key: number }>;
+          stats: [number, number];
+        }> = await ml.getVisualizerFieldHistograms({
+          indexPattern: dataView.title,
+          fields: [{ fieldName: dataView.timeFieldName, type: KBN_FIELD_TYPES.DATE }],
+          query: { match_all: {} },
+          samplerShardSize: -1,
+        });
+
+        const peak = stats[0].data.reduce((p, c) => (c.doc_count >= p.doc_count ? c : p), {
+          doc_count: 0,
+          key: 0,
+        });
+        const peakTimestamp = Math.round(peak.key);
+
+        setWindowParameters(
+          getWindowParameters(peakTimestamp, stats[0].stats[0], stats[0].stats[1])
+        );
+      }
     }
+
+    fetchWindowParameters();
   }, []);
 
   return (
     <>
-      {ExplainLogRateSpikes !== null ? (
-        <>
-          <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.explainLogRateSpikes.pageHeader"
-              defaultMessage="Explain log rate spikes"
-            />
-          </MlPageHeader>
-          <ExplainLogRateSpikes />
-        </>
-      ) : null}
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.explainLogRateSpikes.pageHeader"
+          defaultMessage="Explain log rate spikes"
+        />
+      </MlPageHeader>
+      {dataView.timeFieldName && windowParameters && (
+        <ExplainLogRateSpikes dataView={dataView} windowParameters={windowParameters} />
+      )}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </>
   );

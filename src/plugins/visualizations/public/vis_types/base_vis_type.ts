@@ -32,6 +32,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly icon;
   public readonly image;
   public readonly stage;
+  public readonly isDeprecated;
   public readonly group;
   public readonly titleInWizard;
   public readonly options: VisTypeOptions;
@@ -39,10 +40,12 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly editorConfig;
   public hidden;
   public readonly requiresSearch;
+  public readonly hasPartialRows;
   public readonly hierarchicalData;
   public readonly setup;
   public readonly getUsedIndexPattern;
   public readonly inspectorAdapters;
+  public readonly fetchDatatable: boolean;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
   public readonly updateVisTypeOnParamsChange;
@@ -65,14 +68,17 @@ export class BaseVisType<TVisParams = VisParams> {
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage ?? 'production';
+    this.isDeprecated = opts.isDeprecated ?? false;
     this.group = opts.group ?? VisGroups.AGGBASED;
     this.titleInWizard = opts.titleInWizard ?? '';
     this.hidden = opts.hidden ?? false;
     this.requiresSearch = opts.requiresSearch ?? false;
     this.setup = opts.setup;
+    this.hasPartialRows = opts.hasPartialRows ?? false;
     this.hierarchicalData = opts.hierarchicalData ?? false;
     this.getUsedIndexPattern = opts.getUsedIndexPattern;
     this.inspectorAdapters = opts.inspectorAdapters;
+    this.fetchDatatable = opts.fetchDatatable ?? false;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;
     this.updateVisTypeOnParamsChange = opts.updateVisTypeOnParamsChange;

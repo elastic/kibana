@@ -669,6 +669,7 @@ export const App = (props: {
                         value={undefined}
                         onChange={(e) => switchChartPreset(Number(e.target.value))}
                         aria-label="Load from a preset"
+                        prepend={'Load preset'}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

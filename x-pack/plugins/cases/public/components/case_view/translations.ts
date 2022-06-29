@@ -163,3 +163,10 @@ export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity',
 export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
   defaultMessage: 'Alerts',
 });
+
+export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.tabs.alerts.emptyDescription',
+  {
+    defaultMessage: 'No alerts have been added to this case.',
+  }
+);

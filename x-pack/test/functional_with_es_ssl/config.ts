@@ -50,8 +50,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     pageObjects,
     // list paths to the files that contain your plugins tests
     testFiles: [
-      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/triggers_actions_ui'),
+      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/ml'),
       resolve(__dirname, './apps/cases'),

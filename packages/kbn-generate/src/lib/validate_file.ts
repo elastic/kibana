@@ -9,7 +9,8 @@
 import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { createFailError, diffStrings } from '@kbn/dev-utils';
+import { diffStrings } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { ToolingLog } from '@kbn/tooling-log';
 
 export async function validateFile(log: ToolingLog, usage: string, path: string, expected: string) {

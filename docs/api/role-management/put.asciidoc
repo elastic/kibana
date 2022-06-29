@@ -51,11 +51,20 @@ To use the create or update role API, you must have the `manage_security` cluste
   To grant access to all spaces, set to `["*"]`, or omit the value.
 =====
 
+[[role-management-api-put-query-params]]
+==== Query parameters
+
+`createOnly`::
+  (Optional, boolean) When `true`, will prevent overwriting the role if it already exists.
+
 [[role-management-api-put-response-codes]]
 ==== Response code
 
 `204`::
   Indicates a successful call.
+
+'409'::
+  When `createOnly` is true, indicates a conflict with an existing role.
 
 ==== Examples
 

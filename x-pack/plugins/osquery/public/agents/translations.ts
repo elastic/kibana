@@ -40,7 +40,7 @@ export const AGENT_SELECTION_LABEL = i18n.translate('xpack.osquery.agents.select
 });
 
 export const SELECT_AGENT_LABEL = i18n.translate('xpack.osquery.agents.selectAgentLabel', {
-  defaultMessage: `Select agents or groups`,
+  defaultMessage: `Select agents or groups to query`,
 });
 
 export const ERROR_ALL_AGENTS = i18n.translate('xpack.osquery.agents.errorSearchDescription', {

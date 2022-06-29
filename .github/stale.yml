@@ -8,10 +8,10 @@ daysUntilStale: 180
 daysUntilClose: false
 
 # Only issues or pull requests with all of these labels are check if stale. Defaults to `[]` (disabled)
-onlyLabels: ["Team:apm"]
+onlyLabels: ['Team:apm', 'Team:Infra Monitoring UI']
 
 # Issues or Pull Requests with these labels will never be considered stale. Set to `[]` to disable
-exemptLabels: ["technical debt", "prevent stale"]
+exemptLabels: ['technical debt', 'prevent stale']
 
 # Set to true to ignore issues in a project (defaults to false)
 exemptProjects: false
@@ -44,7 +44,6 @@ limitPerRun: 30
 
 # Limit to only `issues` or `pulls`
 only: issues
-
 # Optionally, specify configuration settings that are specific to just 'issues' or 'pulls':
 # pulls:
 #   daysUntilStale: 30

@@ -30,6 +30,7 @@ exports[`should render BoundaryIndexExpression 1`] = `
               "ensureDefaultIndexPattern": [MockFunction],
               "find": [MockFunction],
               "get": [MockFunction],
+              "getIdsWithTitle": [MockFunction],
               "make": [Function],
             }
           }
@@ -106,6 +107,7 @@ exports[`should render EntityIndexExpression 1`] = `
               "ensureDefaultIndexPattern": [MockFunction],
               "find": [MockFunction],
               "get": [MockFunction],
+              "getIdsWithTitle": [MockFunction],
               "make": [Function],
             }
           }
@@ -188,6 +190,7 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
               "ensureDefaultIndexPattern": [MockFunction],
               "find": [MockFunction],
               "get": [MockFunction],
+              "getIdsWithTitle": [MockFunction],
               "make": [Function],
             }
           }

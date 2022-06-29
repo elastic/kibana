@@ -71,7 +71,6 @@ import {
   RULES_PLURAL_TITLE,
   SEARCH_PLACEHOLDER,
 } from './translations';
-import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 const ENTER_KEY = 13;
 
 function RulesPage() {
@@ -200,7 +199,7 @@ function RulesPage() {
         'data-test-subj': 'rulesTableCell-tagsPopover',
         render: (ruleTags: string[], item: RuleTableItem) => {
           return ruleTags.length > 0
-            ? triggersActionsUi.getRuleTagBadge({
+            ? triggersActionsUi.getRuleTagBadge<'default'>({
                 isOpen: tagPopoverOpenIndex === item.index,
                 tags: ruleTags,
                 onClick: () => setTagPopoverOpenIndex(item.index),
@@ -234,6 +233,7 @@ function RulesPage() {
         field: 'enabled',
         name: STATUS_COLUMN_TITLE,
         sortable: true,
+        'data-test-subj': 'rulesTableCell-ContextStatus',
         render: (_enabled: boolean, item: RuleTableItem) => {
           return triggersActionsUi.getRuleStatusDropdown({
             rule: item,
@@ -241,10 +241,11 @@ function RulesPage() {
             disableRule: async () => await disableRule({ http, id: item.id }),
             onRuleChanged: () => reload(),
             isEditable: item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId),
-            snoozeRule: async (snoozeEndTime: string | -1) => {
-              await snoozeRule({ http, id: item.id, snoozeEndTime });
+            snoozeRule: async (snoozeSchedule) => {
+              await snoozeRule({ http, id: item.id, snoozeSchedule });
             },
-            unsnoozeRule: async () => await unsnoozeRule({ http, id: item.id }),
+            unsnoozeRule: async (scheduleIds) =>
+              await unsnoozeRule({ http, id: item.id, scheduleIds }),
           });
         },
       },
@@ -401,7 +402,6 @@ function RulesPage() {
                 defaultMessage="Refresh"
               />
             </EuiButton>
-            ,
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup>
@@ -441,11 +441,7 @@ function RulesPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: (
-          <>
-            {RULES_PAGE_TITLE} <ExperimentalBadge />
-          </>
-        ),
+        pageTitle: <>{RULES_PAGE_TITLE}</>,
         rightSideItems: [
           authorizedToCreateAnyRules && (
             <EuiButton

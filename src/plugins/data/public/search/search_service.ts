@@ -17,12 +17,14 @@ import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import moment from 'moment';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ISearchSetup, ISearchStart } from './types';
 
 import { handleResponse } from './fetch';
@@ -54,11 +56,11 @@ import {
   selectFilterFunction,
   eqlRawResponse,
 } from '../../common/search';
-import { AggsService, AggsStartDependencies } from './aggs';
-import { IKibanaSearchResponse, IndexPatternsContract, SearchRequest } from '..';
+import { AggsService } from './aggs';
+import { IKibanaSearchResponse, SearchRequest } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
-import { getEsaggs, getEsdsl, getEql } from './expressions';
+import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
 import {
@@ -78,15 +80,16 @@ export interface SearchServiceSetupDependencies {
   bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
-  nowProvider: NowProviderInternalContract;
   management: ManagementSetup;
+  nowProvider: NowProviderInternalContract;
 }
 
 /** @internal */
 export interface SearchServiceStartDependencies {
-  fieldFormats: AggsStartDependencies['fieldFormats'];
-  indexPatterns: IndexPatternsContract;
+  fieldFormats: FieldFormatsStart;
+  indexPatterns: DataViewsContract;
   screenshotMode: ScreenshotModePluginStart;
+  nowProvider: NowProviderInternalContract;
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -173,6 +176,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       })
     );
     expressions.registerFunction(
+      getEssql({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
+    expressions.registerFunction(
       getEql({ getStartServices } as {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
@@ -181,9 +189,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerType(eqlRawResponse);
 
     const aggs = this.aggsService.setup({
-      registerFunction: expressions.registerFunction,
       uiSettings,
-      nowProvider,
+      registerFunction: expressions.registerFunction,
     });
 
     if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {
@@ -216,7 +223,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public start(
     { http, theme, uiSettings, chrome, application }: CoreStart,
-    { fieldFormats, indexPatterns, screenshotMode }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns, screenshotMode, nowProvider }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
@@ -225,7 +232,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
+    const aggs = this.aggsService.start({ fieldFormats, indexPatterns, nowProvider });
+
     const searchSourceDependencies: SearchSourceDependencies = {
+      aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: (request: SearchRequest, response: IKibanaSearchResponse) =>
@@ -255,7 +265,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
 
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      aggs,
       search,
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);

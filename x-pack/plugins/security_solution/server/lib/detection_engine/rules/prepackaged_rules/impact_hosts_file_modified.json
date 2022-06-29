@@ -58,5 +58,5 @@
   "timeline_title": "Comprehensive File Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 8
+  "version": 9
 }

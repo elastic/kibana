@@ -32,6 +32,7 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
+  SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../common/constants';
 import { ExperimentalFeatures } from '../common/experimental_features';
 
@@ -149,14 +150,15 @@ export const initUiSettings = (
       ? {
           [ENABLE_GROUPED_NAVIGATION]: {
             name: i18n.translate('xpack.securitySolution.uiSettings.enableGroupedNavigation', {
-              defaultMessage: 'Enable grouped navigation',
+              defaultMessage: 'New streamlined navigation',
             }),
             value: false,
             type: 'boolean',
             description: i18n.translate(
               'xpack.securitySolution.uiSettings.enableGroupedNavigationDescription',
               {
-                defaultMessage: '<p>Enables the grouped side navigation for Security Solution</p>',
+                defaultMessage:
+                  '<p>Improve your experience with the new navigation organized and optimized around the most important workflows.</p>',
               }
             ),
             category: [APP_ID],
@@ -186,7 +188,7 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.rulesTableRefreshDescription',
         {
           defaultMessage:
-            '<p>Enables auto refresh on the all rules and monitoring tables, in milliseconds</p>',
+            '<p>Enables auto refresh on the rules and monitoring tables, in milliseconds</p>',
         }
       ),
       type: 'json',
@@ -248,6 +250,22 @@ export const initUiSettings = (
       type: 'boolean',
       category: [APP_ID],
       requiresPageReload: false,
+      schema: schema.boolean(),
+    },
+    [SHOW_RELATED_INTEGRATIONS_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
+        defaultMessage: 'Related integrations',
+      }),
+      value: true,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.showRelatedIntegrationsDescription',
+        {
+          defaultMessage: '<p>Shows related integrations on the rules and monitoring tables</p>',
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
       schema: schema.boolean(),
     },
   };

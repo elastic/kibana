@@ -4,33 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTitle,
-  IconType,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { SecurityPageName } from '../../app/types';
+
 import {
   SecuritySolutionLinkAnchor,
   withSecuritySolutionLink,
 } from '../../common/components/links';
+import { NavLinkItem } from '../../common/components/navigation/types';
 
 interface LandingLinksImagesProps {
-  items: NavItem[];
-}
-
-export interface NavItem {
-  id: SecurityPageName;
-  label: string;
-  icon: IconType;
-  description: string;
-  path?: string;
+  items: NavLinkItem[];
 }
 
 const Link = styled.a`
@@ -44,13 +29,13 @@ const Description = styled(EuiFlexItem)`
 `;
 
 const StyledEuiTitle = styled(EuiTitle)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.xs};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) => (
   <EuiFlexGrid columns={3} gutterSize="xl">
-    {items.map(({ label, description, path, id, icon }) => (
+    {items.map(({ title, description, id, icon }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
         <EuiFlexGroup
           direction="column"
@@ -59,14 +44,14 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <SecuritySolutionLink tabIndex={-1} deepLinkId={id} path={path}>
-              <EuiIcon aria-hidden="true" size="xl" type={icon} role="presentation" />
+            <SecuritySolutionLink tabIndex={-1} deepLinkId={id}>
+              <EuiIcon aria-hidden="true" size="xl" type={icon ?? ''} role="presentation" />
             </SecuritySolutionLink>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <StyledEuiTitle size="xxs">
-              <SecuritySolutionLinkAnchor deepLinkId={id} path={path}>
-                <h2>{label}</h2>
+              <SecuritySolutionLinkAnchor deepLinkId={id}>
+                <h2>{title}</h2>
               </SecuritySolutionLinkAnchor>
             </StyledEuiTitle>
           </EuiFlexItem>

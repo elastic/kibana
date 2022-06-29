@@ -9,6 +9,7 @@ import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from '../dynamic_style_property';
 import { OrdinalLegend } from '../../components/legend/ordinal_legend';
+import { MarkerSizeLegend } from '../../components/legend/marker_size_legend';
 import { makeMbClampedNumberExpression } from '../../style_util';
 import {
   FieldFormatter,
@@ -141,6 +142,10 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
   }
 
   renderLegendDetailRow() {
-    return <OrdinalLegend style={this} />;
+    return this.getStyleName() === VECTOR_STYLES.ICON_SIZE && !this._isSymbolizedAsIcon ? (
+      <MarkerSizeLegend style={this} />
+    ) : (
+      <OrdinalLegend style={this} />
+    );
   }
 }

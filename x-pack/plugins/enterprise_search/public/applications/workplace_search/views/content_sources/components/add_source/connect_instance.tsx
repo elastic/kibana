@@ -42,7 +42,7 @@ interface ConnectInstanceProps {
 }
 
 export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
-  configuration: { needsSubdomain, hasOauthRedirect },
+  configuration: { needsSubdomain, hasOauthRedirect, needsCredentials },
   features,
   objTypes,
   name,
@@ -61,8 +61,14 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue,
   } = useActions(AddSourceLogic);
 
-  const { buttonLoading, loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
-    useValues(AddSourceLogic);
+  const {
+    buttonLoading,
+    loginValue,
+    passwordValue,
+    indexPermissionsValue,
+    subdomainValue,
+    sourceConfigData: { connectionRequiresRedirect },
+  } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -71,6 +77,8 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
 
+  const doRedirect = hasOauthRedirect || connectionRequiresRedirect;
+
   const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
   const onOauthFormSubmit = () => getSourceConnectData(redirectOauth);
@@ -78,7 +86,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const onSubmit = hasOauthRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
+    const onSubmit = doRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
     onSubmit();
   };
 
@@ -94,6 +102,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           name="login"
           value={loginValue}
           onChange={(e) => setSourceLoginValue(e.target.value)}
+          data-test-subj="LoginField"
         />
       </EuiFormRow>
       <EuiFormRow label="Password">
@@ -103,6 +112,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           type="password"
           value={passwordValue}
           onChange={(e) => setSourcePasswordValue(e.target.value)}
+          data-test-subj="PasswordField"
         />
       </EuiFormRow>
       <EuiSpacer size="xxl" />
@@ -134,7 +144,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   const formFields = (
     <>
       {isOrganization && hasPlatinumLicense && permissionField}
-      {!hasOauthRedirect && credentialsFields}
+      {needsCredentials && credentialsFields}
       {needsSubdomain && subdomainField}
       {permissionsExcluded && !hasPlatinumLicense && <DocumentPermissionsCallout />}
 

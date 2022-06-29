@@ -46,10 +46,12 @@ describe('SourcesLogic', () => {
       ...data,
       connected: false,
     })),
-    availableSources: mergeServerAndStaticData([], staticSourceData, []).map((data) => ({
-      ...data,
-      connected: false,
-    })),
+    availableSources: mergeServerAndStaticData([], staticSourceData, [])
+      .map((data) => ({
+        ...data,
+        connected: false,
+      }))
+      .filter((source) => source.serviceType !== 'external'),
     configuredSources: [],
     serviceTypes: [],
     permissionsModal: null,
@@ -333,7 +335,7 @@ describe('SourcesLogic', () => {
     it('availableSources & configuredSources have correct length', () => {
       SourcesLogic.actions.onInitializeSources(serverResponse);
 
-      expect(SourcesLogic.values.availableSources).toHaveLength(19);
+      expect(SourcesLogic.values.availableSources).toHaveLength(14);
       expect(SourcesLogic.values.configuredSources).toHaveLength(5);
     });
     it('externalConfigured is set to true if external is configured', () => {

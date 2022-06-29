@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const esArchiver = getService('esArchiver');
 
@@ -30,25 +29,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.find('ruleTagFilter');
       const exists = await testSubjects.exists('ruleTagFilter');
       expect(exists).to.be(true);
-    });
-
-    it('should allow tag filters to be selected', async () => {
-      let badge = await find.byCssSelector('.euiFilterButton__notification');
-      expect(await badge.getVisibleText()).to.be('0');
-
-      await testSubjects.click('ruleTagFilter');
-      await testSubjects.click('ruleTagFilterOption-tag1');
-
-      badge = await find.byCssSelector('.euiFilterButton__notification');
-      expect(await badge.getVisibleText()).to.be('1');
-
-      await testSubjects.click('ruleTagFilterOption-tag2');
-
-      badge = await find.byCssSelector('.euiFilterButton__notification');
-      expect(await badge.getVisibleText()).to.be('2');
-
-      await testSubjects.click('ruleTagFilterOption-tag1');
-      expect(await badge.getVisibleText()).to.be('1');
     });
   });
 };

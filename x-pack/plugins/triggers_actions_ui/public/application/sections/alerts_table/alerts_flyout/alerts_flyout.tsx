@@ -4,46 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { get } from 'lodash';
+import React, { Suspense, lazy, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
   EuiProgress,
-  EuiLoadingContent,
+  EuiFlyoutSize,
 } from '@elastic/eui';
-import { AlertsField, AlertsData } from '../../../../types';
+import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { AlertsTableConfigurationRegistry } from '../../../../types';
 
-const SAMPLE_TITLE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.sampleTitle',
-  {
-    defaultMessage: 'Sample title',
-  }
-);
-
-const NAME_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.name',
-  {
-    defaultMessage: 'Name',
-  }
-);
-
-const REASON_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.reason',
-  {
-    defaultMessage: 'Reason',
-  }
-);
-
+const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
 const PAGINATION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.paginationLabel',
   {
@@ -52,8 +28,10 @@ const PAGINATION_LABEL = i18n.translate(
 );
 
 interface AlertsFlyoutProps {
-  alert: AlertsData;
+  alert: EcsFieldsResponse;
+  alertsTableConfiguration: AlertsTableConfigurationRegistry;
   flyoutIndex: number;
+  flyoutSize?: EuiFlyoutSize;
   alertsCount: number;
   isLoading: boolean;
   onClose: () => void;
@@ -61,19 +39,69 @@ interface AlertsFlyoutProps {
 }
 export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
   alert,
+  alertsTableConfiguration,
   flyoutIndex,
+  flyoutSize = 'm',
   alertsCount,
   isLoading,
   onClose,
   onPaginate,
 }: AlertsFlyoutProps) => {
+  const {
+    header: Header,
+    body: Body,
+    footer: Footer,
+  } = alertsTableConfiguration?.useInternalFlyout?.() ?? {
+    header: AlertsFlyoutHeader,
+    body: null,
+    footer: null,
+  };
+
+  const passedProps = useMemo(
+    () => ({
+      alert,
+      isLoading,
+    }),
+    [alert, isLoading]
+  );
+
+  const FlyoutBody = useCallback(
+    () =>
+      Body ? (
+        <Suspense fallback={null}>
+          <Body {...passedProps} />
+        </Suspense>
+      ) : null,
+    [Body, passedProps]
+  );
+
+  const FlyoutFooter = useCallback(
+    () =>
+      Footer ? (
+        <Suspense fallback={null}>
+          <Footer {...passedProps} />
+        </Suspense>
+      ) : null,
+    [Footer, passedProps]
+  );
+
+  const FlyoutHeader = useCallback(
+    () =>
+      Header ? (
+        <Suspense fallback={null}>
+          <Header {...passedProps} />
+        </Suspense>
+      ) : null,
+    [Header, passedProps]
+  );
+
   return (
-    <EuiFlyout onClose={onClose} size="s" data-test-subj="alertsFlyout">
+    <EuiFlyout onClose={onClose} size={flyoutSize} data-test-subj="alertsFlyout">
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{SAMPLE_TITLE_LABEL}</h2>
-        </EuiTitle>
+        <Suspense fallback={null}>
+          <FlyoutHeader />
+        </Suspense>
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
@@ -88,38 +116,8 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h4>{NAME_LABEL}</h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            {isLoading ? (
-              <EuiLoadingContent lines={1} />
-            ) : (
-              <EuiText size="s" data-test-subj="alertsFlyoutName">
-                {get(alert, AlertsField.name, [])[0]}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h4>{REASON_LABEL}</h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            {isLoading ? (
-              <EuiLoadingContent lines={3} />
-            ) : (
-              <EuiText size="s" data-test-subj="alertsFlyoutReason">
-                {get(alert, AlertsField.reason, [])[0]}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiHorizontalRule size="full" />
-      </EuiFlyoutBody>
+      <FlyoutBody />
+      <FlyoutFooter />
     </EuiFlyout>
   );
 };

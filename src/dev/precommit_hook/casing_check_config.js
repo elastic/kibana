@@ -59,6 +59,10 @@ export const IGNORE_FILE_GLOBS = [
   // filename must match upstream filenames from lodash
   'packages/elastic-safer-lodash-set/**/*',
 
+  // filename must match upstream filenames from handlebars
+  'packages/kbn-handlebars/src/upstream/**/*',
+  'packages/kbn-handlebars/.patches/**/*',
+
   'x-pack/plugins/maps/server/fonts/**/*',
 
   // Bazel default files
@@ -98,6 +102,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
+  'packages/core/*/*',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',

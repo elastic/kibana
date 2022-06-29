@@ -57,7 +57,7 @@ export const mapFiltersToKql = ({
 
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
     const enablementFilter = getEnablementFilter(ruleStatusesFilter);
-    const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)`;
+    const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)`;
     const hasEnablement =
       ruleStatusesFilter.includes('enabled') || ruleStatusesFilter.includes('disabled');
     const hasSnoozed = ruleStatusesFilter.includes('snoozed');

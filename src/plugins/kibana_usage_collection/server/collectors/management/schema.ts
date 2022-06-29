@@ -75,10 +75,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'timelion:legacyChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'timelion:target_buckets': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },

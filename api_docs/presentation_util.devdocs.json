@@ -1819,8 +1819,8 @@
               "\nThe CodeEditor requires a set height, either on itself, or set to 100% with the parent\ncontainer controlling the height.  This prop is required so consumers understand this\nlimitation and are intentional in using the component."
             ],
             "signature": [
-              "HeightProperty",
-              "<string | number> | undefined"
+              "Property",
+              ".Height<string | number> | undefined"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
             "deprecated": false
@@ -2229,7 +2229,7 @@
             "label": "getProjects",
             "description": [],
             "signature": [
-              "(solutions?: (\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
+              "(solutions?: (\"dashboard\" | \"presentation\" | \"canvas\")[] | undefined) => Record<\"labs:dashboard:deferBelowFold\" | \"labs:dashboard:dashboardControls\" | \"labs:canvas:byValueEmbeddable\", ",
               {
                 "pluginId": "presentationUtil",
                 "scope": "common",
@@ -2250,7 +2250,7 @@
                 "label": "solutions",
                 "description": [],
                 "signature": [
-                  "(\"dashboard\" | \"canvas\" | \"presentation\")[] | undefined"
+                  "(\"dashboard\" | \"presentation\" | \"canvas\")[] | undefined"
                 ],
                 "path": "src/plugins/presentation_util/public/services/labs.ts",
                 "deprecated": false,
@@ -2752,7 +2752,7 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          ">, \"untilEmbeddableLoaded\" | \"removeEmbeddable\" | \"addNewEmbeddable\" | \"updateInputForChild\">; }"
+          ">, \"untilEmbeddableLoaded\" | \"removeEmbeddable\" | \"addNewEmbeddable\" | \"updateInputForChild\" | \"replaceEmbeddable\">; }"
         ],
         "path": "src/plugins/presentation_util/public/components/redux_embeddables/types.ts",
         "deprecated": false,
@@ -2785,13 +2785,7 @@
         "signature": [
           "Observable",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
+          "CoreTheme",
           ">"
         ],
         "path": "src/plugins/presentation_util/common/lib/utils/default_theme.ts",
@@ -3320,7 +3314,7 @@
             "label": "solutions",
             "description": [],
             "signature": [
-              "(\"dashboard\" | \"canvas\" | \"presentation\")[]"
+              "(\"dashboard\" | \"presentation\" | \"canvas\")[]"
             ],
             "path": "src/plugins/presentation_util/common/labs.ts",
             "deprecated": false
@@ -3531,7 +3525,7 @@
         "label": "SolutionName",
         "description": [],
         "signature": [
-          "\"dashboard\" | \"canvas\" | \"presentation\""
+          "\"dashboard\" | \"presentation\" | \"canvas\""
         ],
         "path": "src/plugins/presentation_util/common/labs.ts",
         "deprecated": false,
@@ -3707,7 +3701,7 @@
                 "label": "isActive",
                 "description": [],
                 "signature": [
-                  "false"
+                  "true"
                 ],
                 "path": "src/plugins/presentation_util/common/labs.ts",
                 "deprecated": false

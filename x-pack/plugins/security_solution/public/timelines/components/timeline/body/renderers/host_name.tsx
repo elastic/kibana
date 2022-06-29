@@ -27,6 +27,8 @@ interface Props {
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   isButton?: boolean;
   onClick?: () => void;
@@ -36,6 +38,8 @@ interface Props {
 
 const HostNameComponent: React.FC<Props> = ({
   fieldName,
+  fieldType,
+  isAggregatable,
   Component,
   contextId,
   eventId,
@@ -103,6 +107,8 @@ const HostNameComponent: React.FC<Props> = ({
     isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
         isDraggable={isDraggable}
         tooltipContent={fieldName}

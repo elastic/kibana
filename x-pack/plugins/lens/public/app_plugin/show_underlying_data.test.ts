@@ -17,7 +17,13 @@ describe('getLayerMetaInfo', () => {
   };
   it('should return error in case of no data', () => {
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, undefined, capabilities).error
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        {},
+        undefined,
+        undefined,
+        capabilities
+      ).error
     ).toBe('Visualization has no data available to show');
   });
 
@@ -30,20 +36,27 @@ describe('getLayerMetaInfo', () => {
           datatable1: { type: 'datatable', columns: [], rows: [] },
           datatable2: { type: 'datatable', columns: [], rows: [] },
         },
+        undefined,
         capabilities
       ).error
     ).toBe('Cannot show underlying data for visualizations with multiple layers');
   });
 
   it('should return error in case of missing activeDatasource', () => {
-    expect(getLayerMetaInfo(undefined, {}, undefined, capabilities).error).toBe(
+    expect(getLayerMetaInfo(undefined, {}, undefined, undefined, capabilities).error).toBe(
       'Visualization has no data available to show'
     );
   });
 
   it('should return error in case of missing configuration/state', () => {
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), undefined, {}, capabilities).error
+      getLayerMetaInfo(
+        createMockDatasource('testDatasource'),
+        undefined,
+        {},
+        undefined,
+        capabilities
+      ).error
     ).toBe('Visualization has no data available to show');
   });
 
@@ -67,8 +80,33 @@ describe('getLayerMetaInfo', () => {
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, capabilities).error
+      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, undefined, capabilities)
+        .error
     ).toBe('Visualization has no data available to show');
+  });
+
+  it('should return error in case of getFilters returning errors', () => {
+    const mockDatasource = createMockDatasource('testDatasource');
+    const updatedPublicAPI: DatasourcePublicAPI = {
+      datasourceId: 'indexpattern',
+      getOperationForColumnId: jest.fn(),
+      getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
+      getVisualDefaults: jest.fn(),
+      getSourceId: jest.fn(),
+      getFilters: jest.fn(() => ({ error: 'filters error' })),
+    };
+    mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
+    expect(
+      getLayerMetaInfo(
+        mockDatasource,
+        {}, // the publicAPI has been mocked, so no need for a state here
+        {
+          datatable1: { type: 'datatable', columns: [], rows: [] },
+        },
+        undefined,
+        capabilities
+      ).error
+    ).toBe('filters error');
   });
 
   it('should not be visible if discover is not available', () => {
@@ -80,6 +118,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        undefined,
         {
           navLinks: { discover: false },
           discover: { show: true },
@@ -93,6 +132,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        undefined,
         {
           navLinks: { discover: true },
           discover: { show: false },
@@ -124,6 +164,7 @@ describe('getLayerMetaInfo', () => {
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
+      undefined,
       capabilities
     );
     expect(error).toBeUndefined();

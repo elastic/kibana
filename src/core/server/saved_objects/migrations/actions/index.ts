@@ -88,11 +88,12 @@ export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
+import { ClusterShardLimitExceeded } from './create_index';
 
 export type {
   CheckForUnknownDocsParams,
   UnknownDocsFound,
-  CheckForUnknownDocsFoundDoc,
+  DocumentIdAndType,
 } from './check_for_unknown_docs';
 export { checkForUnknownDocs } from './check_for_unknown_docs';
 
@@ -153,12 +154,13 @@ export interface ActionErrorTypeMap {
   unknown_docs_found: UnknownDocsFound;
   incompatible_cluster_routing_allocation: IncompatibleClusterRoutingAllocation;
   index_not_yellow_timeout: IndexNotYellowTimeout;
+  cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
 }
 
 /**
  * Type guard for narrowing the type of a left
  */
-export function isLeftTypeof<T extends keyof ActionErrorTypeMap>(
+export function isTypeof<T extends keyof ActionErrorTypeMap>(
   res: any,
   typeString: T
 ): res is ActionErrorTypeMap[T] {

@@ -254,6 +254,21 @@
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.ConfigDeprecationContext.docLinks",
+            "type": "Object",
+            "tags": [],
+            "label": "docLinks",
+            "description": [
+              "Allow direct access to the doc links from the deprecation handler"
+            ],
+            "signature": [
+              "DocLinks"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -661,6 +676,120 @@
       },
       {
         "parentPluginId": "@kbn/config",
+        "id": "def-server.DeprecatedConfigDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeprecatedConfigDetails",
+        "description": [
+          "\nDeprecated Config Details\n"
+        ],
+        "path": "packages/kbn-config/src/deprecation/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.configPath",
+            "type": "string",
+            "tags": [],
+            "label": "configPath",
+            "description": [
+              "The path of the deprecated config setting"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "The title to be displayed for the deprecation."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "The message to be displayed for the deprecation."
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [
+              "\nlevels:\n- warning: will not break deployment upon upgrade\n- critical: needs to be addressed before upgrade."
+            ],
+            "signature": [
+              "\"warning\" | \"critical\""
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.silent",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "silent",
+            "description": [
+              "(optional) set to `true` to prevent the config service from logging the deprecation message."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.documentationUrl",
+            "type": "string",
+            "tags": [],
+            "label": "documentationUrl",
+            "description": [
+              "(optional) link to the documentation for more details on the deprecation."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/config",
+            "id": "def-server.DeprecatedConfigDetails.correctiveActions",
+            "type": "Object",
+            "tags": [],
+            "label": "correctiveActions",
+            "description": [
+              "corrective action needed to fix this deprecation."
+            ],
+            "signature": [
+              "{ manualSteps: string[]; }"
+            ],
+            "path": "packages/kbn-config/src/deprecation/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config",
         "id": "def-server.EnvironmentMode",
         "type": "Interface",
         "tags": [],
@@ -782,7 +911,13 @@
         ],
         "signature": [
           "(details: ",
-          "DeprecatedConfigDetails",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "server",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-server.DeprecatedConfigDetails",
+            "text": "DeprecatedConfigDetails"
+          },
           ") => void"
         ],
         "path": "packages/kbn-config/src/deprecation/types.ts",
@@ -797,7 +932,13 @@
             "label": "details",
             "description": [],
             "signature": [
-              "DeprecatedConfigDetails"
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.DeprecatedConfigDetails",
+                "text": "DeprecatedConfigDetails"
+              }
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false
@@ -878,7 +1019,13 @@
             "description": [],
             "signature": [
               "(details: ",
-              "DeprecatedConfigDetails",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "server",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-server.DeprecatedConfigDetails",
+                "text": "DeprecatedConfigDetails"
+              },
               ") => void"
             ],
             "path": "packages/kbn-config/src/deprecation/types.ts",
@@ -893,7 +1040,13 @@
                 "label": "details",
                 "description": [],
                 "signature": [
-                  "DeprecatedConfigDetails"
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "server",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-server.DeprecatedConfigDetails",
+                    "text": "DeprecatedConfigDetails"
+                  }
                 ],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false

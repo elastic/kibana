@@ -371,13 +371,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         body: inferTrainedModelBody,
       },
       options: {
-        tags: ['access:ml:canStartStopTrainedModels'],
+        tags: ['access:ml:canTestTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
-        const body = await mlClient.inferTrainedModelDeployment({
+        const body = await mlClient.inferTrainedModel({
           model_id: modelId,
           body: {
             docs: request.body.docs,

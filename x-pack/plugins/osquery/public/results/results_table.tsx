@@ -315,8 +315,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           id: 'timeline',
           width: 38,
           headerCellRender: () => null,
-          rowCellRender: (actionProps: EuiDataGridCellValueElementProps) => {
-            const eventId = data[actionProps.rowIndex]._id;
+          rowCellRender: (actionProps) => {
+            const { visibleRowIndex } = actionProps as EuiDataGridCellValueElementProps & {
+              visibleRowIndex: number;
+            };
+            const eventId = data[visibleRowIndex]?._id;
 
             return addToTimeline({ query: ['_id', eventId], isIcon: true });
           },

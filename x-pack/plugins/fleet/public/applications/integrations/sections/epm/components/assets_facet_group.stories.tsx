@@ -39,6 +39,7 @@ export const AssetsFacetGroup = ({ width }: Args) => {
             ml_module: [],
             tag: [],
             osquery_pack_asset: [],
+            osquery_saved_query: [],
           },
           elasticsearch: {
             component_template: [],

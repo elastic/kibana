@@ -22,7 +22,7 @@ import type { Duration } from 'moment';
 import { firstValueFrom, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
-import { Logger, LoggerFactory } from '../logging';
+import type { Logger, LoggerFactory } from '@kbn/logging';
 import { HttpConfig } from './http_config';
 import type { InternalExecutionContextSetup } from '../execution_context';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';

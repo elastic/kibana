@@ -10,10 +10,11 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import { EuiResizeObserver } from '@elastic/eui';
-import reactcss from 'reactcss';
 
 import { getLastValue } from '../../../../common/last_value_utils';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
+
+import './_metric.scss';
 
 export class Metric extends Component {
   constructor(props) {
@@ -54,25 +55,16 @@ export class Metric extends Component {
     const primaryFormatter = (metric && (metric.tickFormatter || metric.formatter)) || ((n) => n);
     const primaryValue = primaryFormatter(getLastValue(metric?.data));
 
-    const styles = reactcss(
-      {
-        default: {
-          container: {},
-          inner: {
-            top: this.state.top || 0,
-            left: this.state.left || 0,
-            transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
-          },
-          primary_value: {},
-          secondary_value: {},
-        },
-        reversed: {
-          primary_value: {},
-          secondary_value: {},
-        },
+    const styles = {
+      container: {},
+      inner: {
+        top: `${this.state.top || 0}px`,
+        left: `${this.state.left || 0}px`,
+        transform: `matrix(${scale}, 0, 0, ${scale}, ${translateX}, ${translateY})`,
       },
-      this.props
-    );
+      primary_value: {},
+      secondary_value: {},
+    };
 
     if (this.props.backgroundColor) styles.container.backgroundColor = this.props.backgroundColor;
     if (metric && metric.color) styles.primary_value.color = metric.color;
@@ -110,7 +102,7 @@ export class Metric extends Component {
     }
 
     let className = 'tvbVisMetric';
-    if (!styles.container.backgroundColor) {
+    if (!this.props.backgroundColor) {
       className += ' tvbVisMetric--noBackground';
     }
     if (this.props.reversed) {

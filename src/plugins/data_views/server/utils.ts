@@ -9,6 +9,9 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewAttributes, SavedObject, FieldSpec } from '../common';
 
+/**
+ * @deprecated Use data views api instead
+ */
 export const getFieldByName = (
   fieldName: string,
   indexPattern: SavedObject<DataViewAttributes>
@@ -19,6 +22,9 @@ export const getFieldByName = (
   return field;
 };
 
+/**
+ * @deprecated Use data views api instead
+ */
 export const findIndexPatternById = async (
   savedObjectsClient: SavedObjectsClientContract,
   index: string

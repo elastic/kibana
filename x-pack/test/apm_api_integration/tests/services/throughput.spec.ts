@@ -150,11 +150,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             );
           });
 
-          it('has a bucket size of 10 seconds for transactions data', () => {
+          it('has a bucket size of 30 seconds for transactions data', () => {
             const firstTimerange = throughputTransactions.currentPeriod[0].x;
             const secondTimerange = throughputTransactions.currentPeriod[1].x;
             const timeIntervalAsSeconds = (secondTimerange - firstTimerange) / 1000;
-            expect(timeIntervalAsSeconds).to.equal(10);
+            expect(timeIntervalAsSeconds).to.equal(30);
           });
 
           it('has a bucket size of 1 minute for metrics data', () => {

@@ -33,7 +33,7 @@ export default function ({ getService }) {
         .send({ timeRange })
         .expect(200);
 
-      const expected = {
+      const expectedWithoutCgroup = {
         stats: {
           totalEvents: 18,
           apms: {
@@ -67,10 +67,14 @@ export default function ({ getService }) {
             time_of_last_event: '2018-08-31T13:59:21.163Z',
           },
         ],
-        cgroup: false,
       };
 
-      expect(body).to.eql(expected);
+      // Due to the lack of `expect`s expressiveness this is an awkward way to
+      // tolate cgroup being false or true, which depends on the test execution
+      // environment. On cloud it is always true.
+      const { cgroup, ...bodyWithoutCgroup } = body;
+      expect(bodyWithoutCgroup).to.eql(expectedWithoutCgroup);
+      expect(cgroup).to.be.a('boolean');
     });
   });
 }

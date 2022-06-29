@@ -103,6 +103,8 @@ export const SystemGenericLine = React.memo<Props>(
             isDraggable={isDraggable}
             queryValue={outcome}
             value={outcome}
+            isAggregatable={true}
+            fieldType="keyword"
           />
         </TokensFlexItem>
         <AuthSsh

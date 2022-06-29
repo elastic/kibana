@@ -8,7 +8,7 @@
 import { resolve } from 'path';
 import Url from 'url';
 
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import { FtrProviderContext } from './ftr_provider_context';
 

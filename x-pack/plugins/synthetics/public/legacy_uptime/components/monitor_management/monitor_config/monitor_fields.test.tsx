@@ -9,7 +9,13 @@ import { fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import React from 'react';
-import { ConfigKey, DataStream, HTTPFields } from '../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  DataStream,
+  HTTPFields,
+  BrowserFields,
+  SourceType,
+} from '../../../../../common/runtime_types';
 import { render } from '../../../lib/helper/rtl_helpers';
 import {
   BrowserContextProvider,
@@ -19,26 +25,51 @@ import {
   TCPContextProvider,
   TLSFieldsContextProvider,
 } from '../../fleet_package/contexts';
-import { defaultConfig } from '../../fleet_package/synthetics_policy_create_extension';
+import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import { MonitorFields } from './monitor_fields';
 
-const defaultHTTPConfig = defaultConfig[DataStream.HTTP] as HTTPFields;
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
+    ),
+  };
+});
+
+const defaultHTTPConfig = DEFAULT_FIELDS[DataStream.HTTP] as HTTPFields;
+const defaultBrowserConfig = DEFAULT_FIELDS[DataStream.BROWSER];
 
 describe('<MonitorFields />', () => {
   const WrappedComponent = ({
     isEditable = true,
     isFormSubmitted = false,
     defaultSimpleHttpFields = defaultHTTPConfig,
+    defaultBrowserFields = defaultBrowserConfig,
+    readOnly = false,
   }: {
     isEditable?: boolean;
     isFormSubmitted?: boolean;
     defaultSimpleHttpFields?: HTTPFields;
+    defaultBrowserFields?: BrowserFields;
+    readOnly?: boolean;
   }) => {
     return (
       <HTTPContextProvider defaultValues={defaultSimpleHttpFields}>
-        <PolicyConfigContextProvider isEditable={isEditable}>
+        <PolicyConfigContextProvider
+          isEditable={isEditable}
+          sourceType={readOnly ? SourceType.PROJECT : SourceType.UI}
+        >
           <TCPContextProvider>
-            <BrowserContextProvider>
+            <BrowserContextProvider defaultValues={defaultBrowserFields}>
               <ICMPSimpleFieldsContextProvider>
                 <TLSFieldsContextProvider>
                   <MonitorFields isFormSubmitted={isFormSubmitted} />
@@ -82,13 +113,20 @@ describe('<MonitorFields />', () => {
     expect(queryByText('URL is required')).not.toBeNull();
   });
 
-  it('does not show validation errors initially', async () => {
-    const httpInvalidValues = { ...defaultHTTPConfig, [ConfigKey.NAME]: '', [ConfigKey.URLS]: '' };
-    const { queryByText } = render(
-      <WrappedComponent isFormSubmitted={false} defaultSimpleHttpFields={httpInvalidValues} />
+  it('is reradonly when source type is project', async () => {
+    const name = 'monitor name';
+    const browserFields = {
+      ...defaultBrowserConfig,
+      [ConfigKey.NAME]: name,
+    };
+    const { getByText } = render(
+      <WrappedComponent
+        isFormSubmitted={false}
+        defaultBrowserFields={browserFields}
+        readOnly={true}
+      />
     );
 
-    expect(queryByText('Monitor name is required')).toBeNull();
-    expect(queryByText('URL is required')).toBeNull();
+    expect(getByText('Read only')).toBeInTheDocument();
   });
 });

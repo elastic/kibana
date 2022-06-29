@@ -16,10 +16,6 @@ import {
 import React, { useMemo, useCallback, SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
-import {
-  DefaultFieldRendererOverflow,
-  DEFAULT_MORE_MAX_HEIGHT,
-} from '../../../timelines/components/field_renderers/field_renderers';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
   getCaseDetailsUrl,
@@ -40,13 +36,24 @@ import { isUrlInvalid } from '../../utils/validators';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
 import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
-import { LinkAnchor, GenericLinkButton, PortContainer, Comma, LinkButton } from './helpers';
+import {
+  LinkAnchor,
+  GenericLinkButton,
+  PortContainer,
+  Comma,
+  LinkButton,
+  ReputationLinkSetting,
+  ReputationLinksOverflow,
+} from './helpers';
 import { HostsTableType } from '../../../hosts/store/model';
 import { UsersTableType } from '../../../users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
+
+/** The default max-height of the Reputation Links popover used to show "+n More" items (e.g. `+9 More`) */
+export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
 // Internal Links
 const UserDetailsLinkComponent: React.FC<{
@@ -402,11 +409,6 @@ enum DefaultReputationLink {
   'talosIntelligence.com' = 'talosIntelligence.com',
 }
 
-export interface ReputationLinkSetting {
-  name: string;
-  url_template: string;
-}
-
 function isDefaultReputationLink(name: string): name is DefaultReputationLink {
   return (
     name === DefaultReputationLink['virustotal.com'] ||
@@ -500,9 +502,8 @@ const ReputationLinkComponent: React.FC<{
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <DefaultFieldRendererOverflow
+          <ReputationLinksOverflow
             rowItems={ipReputationLinks}
-            idPrefix="moreReputationLink"
             render={renderCallback}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={overflowIndexStart}

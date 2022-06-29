@@ -19,7 +19,7 @@
   "query": "process where event.type in (\"start\", \"process_started\") and process.name: (\"cmd.exe\", \"powershell.exe\") and\nprocess.parent.name: (\n     \"ConfigurationWizard*.exe\",\n     \"NetflowDatabaseMaintenance*.exe\",\n     \"NetFlowService*.exe\",\n     \"SolarWinds.Administration*.exe\",\n     \"SolarWinds.Collector.Service*.exe\",\n     \"SolarwindsDiagnostics*.exe\"\n     )\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2020/12/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor.html",
-    "https://github.com/fireeye/sunburst_countermeasures/blob/main/rules/SUNBURST/hxioc/SOLARWINDS%20SUSPICIOUS%20FILEWRITES%20(METHODOLOGY).ioc"
+    "https://github.com/mandiant/sunburst_countermeasures/blob/main/rules/SUNBURST/hxioc/SUNBURST%20SUSPICIOUS%20FILEWRITES%20(METHODOLOGY).ioc"
   ],
   "risk_score": 47,
   "rule_id": "d72e33fc-6e91-42ff-ac8b-e573268c5a87",
@@ -72,5 +72,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

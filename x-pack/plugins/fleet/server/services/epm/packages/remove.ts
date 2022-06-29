@@ -44,11 +44,9 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, pkgVersion, esClient, force } = options;
+  const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
-  if (installation.removable === false && !force)
-    throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
 
   const { total } = await packagePolicyService.list(savedObjectsClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,

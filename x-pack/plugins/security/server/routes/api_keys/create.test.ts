@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
@@ -42,6 +42,7 @@ describe('Create API Key route', () => {
   });
 
   describe('failure', () => {
+    test.todo('actually exercise different types of payload validation');
     test('returns result of license checker', async () => {
       const mockContext = getMockContext({ state: 'invalid', message: 'test forbidden message' });
       const response = await routeHandler(

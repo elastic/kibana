@@ -9,15 +9,10 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
-import { NavItem } from './solution_grouped_nav_item';
 import { SolutionGroupedNav, SolutionGroupedNavProps } from './solution_grouped_nav';
+import { SideNavItem } from './types';
 
-const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
-jest.mock('../../../utils/timeline/use_show_timeline', () => ({
-  useShowTimeline: () => mockUseShowTimeline(),
-}));
-
-const mockItems: NavItem[] = [
+const mockItems: SideNavItem[] = [
   {
     id: SecurityPageName.dashboardsLanding,
     label: 'Dashboards',
@@ -74,14 +69,14 @@ describe('SolutionGroupedNav', () => {
       const items = [
         ...mockItems,
         {
-          id: SecurityPageName.threatHuntingLanding,
-          label: 'Threat Hunting',
-          href: '/threat_hunting',
+          id: SecurityPageName.exploreLanding,
+          label: 'Explore',
+          href: '/explore',
           onClick: mockOnClick,
         },
       ];
       const result = renderNav({ items });
-      result.getByTestId(`groupedNavItemLink-${SecurityPageName.threatHuntingLanding}`).click();
+      result.getByTestId(`groupedNavItemLink-${SecurityPageName.exploreLanding}`).click();
       expect(mockOnClick).toHaveBeenCalled();
     });
   });
@@ -122,9 +117,9 @@ describe('SolutionGroupedNav', () => {
       const items = [
         ...mockItems,
         {
-          id: SecurityPageName.threatHuntingLanding,
-          label: 'Threat Hunting',
-          href: '/threat_hunting',
+          id: SecurityPageName.exploreLanding,
+          label: 'Explore',
+          href: '/explore',
           items: [
             {
               id: SecurityPageName.users,
@@ -141,7 +136,7 @@ describe('SolutionGroupedNav', () => {
       expect(result.getByTestId('groupedNavPanel')).toBeInTheDocument();
       expect(result.getByText('Overview')).toBeInTheDocument();
 
-      result.getByTestId(`groupedNavItemButton-${SecurityPageName.threatHuntingLanding}`).click();
+      result.getByTestId(`groupedNavItemButton-${SecurityPageName.exploreLanding}`).click();
       expect(result.queryByTestId('groupedNavPanel')).toBeInTheDocument();
       expect(result.getByText('Users')).toBeInTheDocument();
     });

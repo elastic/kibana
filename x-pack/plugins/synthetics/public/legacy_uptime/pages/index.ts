@@ -14,3 +14,4 @@ export { AddMonitorPage } from './monitor_management/add_monitor';
 export { EditMonitorPage } from './monitor_management/edit_monitor';
 export { MonitorManagementPage } from './monitor_management/monitor_management';
 export { MonitorManagementBottomBar } from './monitor_management/bottom_bar';
+export { APIKeysButton } from './monitor_management/api_keys_btn';

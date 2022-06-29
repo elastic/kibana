@@ -36,6 +36,8 @@ import {
   getServiceNowSimulationServer,
   createConfiguration,
   getSignalsWithES,
+  delay,
+  calculateDuration,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -294,6 +296,30 @@ export default ({ getService }: FtrProviderContext): void => {
         caseId: postedCase.id,
         connectorId: connector.id,
         expectedHttpCode: 409,
+      });
+    });
+
+    describe('duration', () => {
+      it('updates the duration correctly when pushed a case and case closure options is set to automatically', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          configureReq: {
+            closure_type: 'close-by-pushing',
+          },
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await delay(1000);
+
+        const pushedCase = await pushCase({
+          supertest,
+          caseId: postedCase.id,
+          connectorId: connector.id,
+        });
+
+        const duration = calculateDuration(pushedCase.closed_at, postedCase.created_at);
+        expect(duration).to.be(pushedCase.duration);
       });
     });
 

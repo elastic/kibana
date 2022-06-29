@@ -9,8 +9,7 @@
 import type { HttpSetup, IHttpFetchError } from '@kbn/core/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { extractWarningMessages } from '../../../lib/utils';
-// @ts-ignore
-import * as es from '../../../lib/es/es';
+import { send } from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';
 
 const { collapseLiteralStrings } = XJson;
@@ -72,7 +71,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       const startTime = Date.now();
 
       try {
-        const { response, body } = await es.send({
+        const { response, body } = await send({
           http: args.http,
           method,
           path,
@@ -106,7 +105,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
             }
 
             if (isMultiRequest) {
-              value = '# ' + req.method + ' ' + req.url + '\n' + value;
+              value = `# ${req.method} ${req.url} ${response.status} ${response.statusText}\n${value}`;
             }
 
             results.push({
@@ -141,7 +140,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
 
         if (isMultiRequest) {
-          value = '# ' + req.method + ' ' + req.url + '\n' + value;
+          value = `# ${req.method} ${req.url} ${statusCode} ${statusText}\n${value}`;
         }
 
         const result = {

@@ -17,8 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect } from 'react';
 import type { Query } from '@kbn/es-query';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { OverlayRef } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
@@ -33,6 +37,51 @@ export interface LogEntryFlyoutProps {
   onSetFieldFilter?: (filter: Query, logEntryId: string, timeKey?: TimeKey) => void;
   sourceId: string | null | undefined;
 }
+
+export const useLogEntryFlyout = (sourceId: string) => {
+  const flyoutRef = useRef<OverlayRef>();
+  const {
+    services: { http, data, uiSettings, application },
+    overlays: { openFlyout },
+  } = useKibana<{ data: DataPublicPluginStart }>();
+
+  const closeLogEntryFlyout = useCallback(() => {
+    flyoutRef.current?.close();
+  }, []);
+
+  const openLogEntryFlyout = useCallback(
+    (logEntryId) => {
+      const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+        http,
+        data,
+        uiSettings,
+        application,
+      });
+
+      flyoutRef.current = openFlyout(
+        <KibanaReactContextProvider>
+          <LogEntryFlyout
+            logEntryId={logEntryId}
+            onCloseFlyout={closeLogEntryFlyout}
+            sourceId={sourceId}
+          />
+        </KibanaReactContextProvider>
+      );
+    },
+    [http, data, uiSettings, application, openFlyout, sourceId, closeLogEntryFlyout]
+  );
+
+  useEffect(() => {
+    return () => {
+      closeLogEntryFlyout();
+    };
+  }, [closeLogEntryFlyout]);
+
+  return {
+    openLogEntryFlyout,
+    closeLogEntryFlyout,
+  };
+};
 
 export const LogEntryFlyout = ({
   logEntryId,

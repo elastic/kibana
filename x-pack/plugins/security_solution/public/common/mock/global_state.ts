@@ -327,7 +327,14 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: Direction.desc,
+          },
+        ],
         isSaving: false,
         version: null,
         status: TimelineStatus.active,
@@ -381,6 +388,7 @@ export const mockGlobalState: State = {
       },
     },
   },
+  globalUrlParam: {},
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.

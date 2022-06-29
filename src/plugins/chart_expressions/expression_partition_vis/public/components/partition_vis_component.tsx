@@ -18,6 +18,7 @@ import {
   TooltipProps,
   TooltipType,
   SeriesIdentifier,
+  PartitionElementEvent,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -397,9 +398,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 flatLegend={flatLegend}
                 tooltip={tooltip}
                 showLegendExtra={visParams.showValuesInLegend}
-                onElementClick={(args) => {
+                onElementClick={([elementEvent]) => {
+                  // this cast is safe because we are rendering a partition chart
+                  const [layerValues] = elementEvent as PartitionElementEvent;
                   handleSliceClick(
-                    args[0][0] as LayerValue[],
+                    layerValues,
                     bucketColumns,
                     visData,
                     splitChartDimension,

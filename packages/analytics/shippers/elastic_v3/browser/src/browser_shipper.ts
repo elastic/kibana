@@ -22,8 +22,14 @@ import {
   eventsToNDJSON,
 } from '@kbn/analytics-shippers-elastic-v3-common';
 
+/**
+ * Elastic V3 shipper to use in the browser.
+ */
 export class ElasticV3BrowserShipper implements IShipper {
+  /** Shipper's unique name */
   public static shipperName = 'elastic_v3_browser';
+
+  /** Observable to emit the stats of the processed events. */
   public readonly telemetryCounter$ = new Subject<TelemetryCounter>();
 
   private readonly reportTelemetryCounters = createTelemetryCounterHelper(
@@ -38,6 +44,11 @@ export class ElasticV3BrowserShipper implements IShipper {
   private clusterUuid: string = 'UNKNOWN';
   private licenseId: string | undefined;
 
+  /**
+   * Creates a new instance of the {@link ElasticV3BrowserShipper}.
+   * @param options {@link ElasticV3ShipperOptions}
+   * @param initContext {@link AnalyticsClientInitContext}
+   */
   constructor(
     private readonly options: ElasticV3ShipperOptions,
     private readonly initContext: AnalyticsClientInitContext
@@ -49,6 +60,11 @@ export class ElasticV3BrowserShipper implements IShipper {
     });
   }
 
+  /**
+   * Uses the `cluster_uuid` and `license_id` from the context to hold them in memory for the generation of the headers
+   * used later on in the HTTP request.
+   * @param newContext The full new context to set {@link EventContext}
+   */
   public extendContext(newContext: EventContext) {
     if (newContext.cluster_uuid) {
       this.clusterUuid = newContext.cluster_uuid;
@@ -58,16 +74,28 @@ export class ElasticV3BrowserShipper implements IShipper {
     }
   }
 
+  /**
+   * When `false`, it flushes the internal queue and stops sending events.
+   * @param isOptedIn `true` for resume sending events. `false` to stop.
+   */
   public optIn(isOptedIn: boolean) {
     this.isOptedIn$.next(isOptedIn);
   }
 
+  /**
+   * Enqueues the events to be sent to in a batched approach.
+   * @param events batched events {@link Event}
+   */
   public reportEvents(events: Event[]) {
     events.forEach((event) => {
       this.internalQueue$.next(event);
     });
   }
 
+  /**
+   * Shuts down the shipper.
+   * Triggers a flush of the internal queue to attempt to send any events held in the queue.
+   */
   public shutdown() {
     this.internalQueue$.complete(); // NOTE: When completing the observable, the buffer logic does not wait and releases any buffered events.
   }

@@ -11,6 +11,10 @@ import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/se
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
+import { useDateFormat } from '../../hooks';
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 describe('SessionView component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -25,6 +29,7 @@ describe('SessionView component', () => {
     mockedApi = mockedContext.coreStart.http.get;
     render = () =>
       (renderResult = mockedContext.render(<SessionView sessionEntityId="test-entity-id" />));
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 
   describe('When SessionView is mounted', () => {
@@ -121,6 +126,13 @@ describe('SessionView component', () => {
         expect(renderResult.getByText('Display options')).toBeTruthy();
         expect(renderResult.getByText('Timestamp')).toBeTruthy();
         expect(renderResult.getByText('Verbose mode')).toBeTruthy();
+      });
+
+      it('should show refresh button', async () => {
+        render();
+        await waitForApiCall();
+
+        expect(renderResult.getAllByTestId('sessionView:sessionViewRefreshButton')).toBeTruthy();
       });
     });
   });

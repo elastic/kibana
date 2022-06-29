@@ -32,7 +32,6 @@ describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
     [CONSTANTS.appQuery]: { query: 'host.name:"security-solution-es"', language: 'kuery' },
     [CONSTANTS.savedQuery]: '',
-    [CONSTANTS.sourcerer]: {},
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',
@@ -108,174 +107,7 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    expect(result.current).toMatchInlineSnapshot(`
-      Object {
-        "icon": "logoSecurity",
-        "items": Array [
-          Object {
-            "id": "main",
-            "items": Array [
-              Object {
-                "data-href": "securitySolutionUI/get_started?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "data-test-subj": "navigation-get_started",
-                "disabled": false,
-                "href": "securitySolutionUI/get_started?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "id": "get_started",
-                "isSelected": false,
-                "name": "Getting started",
-                "onClick": [Function],
-              },
-              Object {
-                "data-href": "securitySolutionUI/overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "data-test-subj": "navigation-overview",
-                "disabled": false,
-                "href": "securitySolutionUI/overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "id": "overview",
-                "isSelected": false,
-                "name": "Overview",
-                "onClick": [Function],
-              },
-            ],
-            "name": "",
-          },
-          Object {
-            "id": "detect",
-            "items": Array [
-              Object {
-                "data-href": "securitySolutionUI/alerts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "data-test-subj": "navigation-alerts",
-                "disabled": false,
-                "href": "securitySolutionUI/alerts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "id": "alerts",
-                "isSelected": false,
-                "name": "Alerts",
-                "onClick": [Function],
-              },
-              Object {
-                "data-href": "securitySolutionUI/rules?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "data-test-subj": "navigation-rules",
-                "disabled": false,
-                "href": "securitySolutionUI/rules?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "id": "rules",
-                "isSelected": false,
-                "name": "Rules",
-                "onClick": [Function],
-              },
-              Object {
-                "data-href": "securitySolutionUI/exceptions?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "data-test-subj": "navigation-exceptions",
-                "disabled": false,
-                "href": "securitySolutionUI/exceptions?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "id": "exceptions",
-                "isSelected": false,
-                "name": "Exception lists",
-                "onClick": [Function],
-              },
-            ],
-            "name": "Detect",
-          },
-          Object {
-            "id": "explore",
-            "items": Array [
-              Object {
-                "data-href": "securitySolutionUI/hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "data-test-subj": "navigation-hosts",
-                "disabled": false,
-                "href": "securitySolutionUI/hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "id": "hosts",
-                "isSelected": true,
-                "name": "Hosts",
-                "onClick": [Function],
-              },
-              Object {
-                "data-href": "securitySolutionUI/network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "data-test-subj": "navigation-network",
-                "disabled": false,
-                "href": "securitySolutionUI/network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "id": "network",
-                "isSelected": false,
-                "name": "Network",
-                "onClick": [Function],
-              },
-            ],
-            "name": "Explore",
-          },
-          Object {
-            "id": "investigate",
-            "items": Array [
-              Object {
-                "data-href": "securitySolutionUI/timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "data-test-subj": "navigation-timelines",
-                "disabled": false,
-                "href": "securitySolutionUI/timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                "id": "timelines",
-                "isSelected": false,
-                "name": "Timelines",
-                "onClick": [Function],
-              },
-            ],
-            "name": "Investigate",
-          },
-          Object {
-            "id": "manage",
-            "items": Array [
-              Object {
-                "data-href": "securitySolutionUI/endpoints",
-                "data-test-subj": "navigation-endpoints",
-                "disabled": false,
-                "href": "securitySolutionUI/endpoints",
-                "id": "endpoints",
-                "isSelected": false,
-                "name": "Endpoints",
-                "onClick": [Function],
-              },
-              Object {
-                "data-href": "securitySolutionUI/trusted_apps",
-                "data-test-subj": "navigation-trusted_apps",
-                "disabled": false,
-                "href": "securitySolutionUI/trusted_apps",
-                "id": "trusted_apps",
-                "isSelected": false,
-                "name": "Trusted applications",
-                "onClick": [Function],
-              },
-              Object {
-                "data-href": "securitySolutionUI/event_filters",
-                "data-test-subj": "navigation-event_filters",
-                "disabled": false,
-                "href": "securitySolutionUI/event_filters",
-                "id": "event_filters",
-                "isSelected": false,
-                "name": "Event filters",
-                "onClick": [Function],
-              },
-              Object {
-                "data-href": "securitySolutionUI/host_isolation_exceptions",
-                "data-test-subj": "navigation-host_isolation_exceptions",
-                "disabled": false,
-                "href": "securitySolutionUI/host_isolation_exceptions",
-                "id": "host_isolation_exceptions",
-                "isSelected": false,
-                "name": "Host isolation exceptions",
-                "onClick": [Function],
-              },
-              Object {
-                "data-href": "securitySolutionUI/blocklist",
-                "data-test-subj": "navigation-blocklist",
-                "disabled": false,
-                "href": "securitySolutionUI/blocklist",
-                "id": "blocklist",
-                "isSelected": false,
-                "name": "Blocklist",
-                "onClick": [Function],
-              },
-            ],
-            "name": "Manage",
-          },
-        ],
-        "name": "Security",
-      }
-    `);
+    expect(result.current).toMatchSnapshot();
   });
 
   // TODO: Steph/users remove when no longer experimental
@@ -286,19 +118,17 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.users);
+    expect(result?.current?.items?.[3].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
-  // TODO: [detectionResponse] remove when page is no longer experimental
-  it('should include detectionAndResponse when feature flag is on', async () => {
+  // TODO: [kubernetes] remove when no longer experimental
+  it('should include kubernetes when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-    expect(result?.current?.items?.[0].items?.[2].id).toEqual(
-      SecurityPageName.detectionAndResponse
-    );
+    expect(result?.current?.items?.[1].items?.[2].id).toEqual(SecurityPageName.kubernetes);
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {
@@ -329,15 +159,15 @@ describe('useSecuritySolutionNavigation', () => {
           { wrapper: TestProviders }
         );
 
-        const caseNavItem = (result.current?.items || [])[3].items?.find(
+        const caseNavItem = (result.current?.items || [])[4].items?.find(
           (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toMatchInlineSnapshot(`
           Object {
-            "data-href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "data-href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
             "data-test-subj": "navigation-cases",
             "disabled": false,
-            "href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
             "id": "cases",
             "isSelected": false,
             "name": "Cases",

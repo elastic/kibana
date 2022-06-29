@@ -147,7 +147,7 @@ export const renderRuleStats = (
     snoozedStatsComponent,
     errorStatsComponent,
     <Divider />,
-    <EuiButtonEmpty href={manageRulesHref}>
+    <EuiButtonEmpty data-test-subj="manageRulesPageButton" href={manageRulesHref}>
       {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
         defaultMessage: 'Manage Rules',
       })}

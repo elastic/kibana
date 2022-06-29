@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export const PLUGIN_ID = 'discover';
 export const APP_ICON = 'discoverApp';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
@@ -25,3 +26,4 @@ export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
 export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
 export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';
+export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';

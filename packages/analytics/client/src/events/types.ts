@@ -33,6 +33,10 @@ export interface EventContext {
    */
   cloudId?: string;
   /**
+   * `true` if the user is logged in via the Elastic Cloud authentication provider.
+   */
+  isElasticCloudUser?: boolean;
+  /**
    * The product's version.
    */
   version?: string;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { GetDataStreamsListRequestSchema } from '../../../common/constants/data_streams';
 import { DATA_STREAM_API_ROUTES } from '../../constants';
 import type { FleetAuthzRouter } from '../security';
 
@@ -16,7 +15,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: DATA_STREAM_API_ROUTES.LIST_PATTERN,
-      validate: GetDataStreamsListRequestSchema,
+      validate: false,
       fleetAuthz: {
         fleet: { all: true },
       },

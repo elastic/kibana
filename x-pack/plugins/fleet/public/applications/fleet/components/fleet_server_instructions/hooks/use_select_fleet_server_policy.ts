@@ -28,7 +28,7 @@ export const useSelectFleetServerPolicy = (defaultAgentPolicyId?: string) => {
 
   useEffect(() => {
     // Default to the first policy found with a fleet server integration installed
-    if (eligibleFleetServerPolicies.length && !fleetServerPolicyId) {
+    if (eligibleFleetServerPolicies.length === 1 && !fleetServerPolicyId) {
       setFleetServerPolicyId(eligibleFleetServerPolicies[0].id);
     }
   }, [eligibleFleetServerPolicies, fleetServerPolicyId]);

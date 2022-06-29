@@ -20,6 +20,7 @@ const ACTION_FIELD = 'event.action';
 const OUTCOME_FIELD = 'event.outcome';
 const DURATION_FIELD = 'event.duration';
 const MESSAGE_FIELD = 'message';
+const VERSION_FIELD = 'kibana.version';
 const ERROR_MESSAGE_FIELD = 'error.message';
 const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
 const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_duration_ms';
@@ -28,6 +29,10 @@ const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
 const NUMBER_OF_GENERATED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_generated_actions';
+const NUMBER_OF_ACTIVE_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_counts.active';
+const NUMBER_OF_NEW_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_counts.new';
+const NUMBER_OF_RECOVERED_ALERTS_FIELD =
+  'kibana.alert.rule.execution.metrics.alert_counts.recovered';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
@@ -36,14 +41,6 @@ export const EMPTY_EXECUTION_LOG_RESULT = {
   total: 0,
   data: [],
 };
-
-interface IAlertCounts extends estypes.AggregationsMultiBucketAggregateBase {
-  buckets: {
-    activeAlerts: estypes.AggregationsSingleBucketAggregateBase;
-    newAlerts: estypes.AggregationsSingleBucketAggregateBase;
-    recoveredAlerts: estypes.AggregationsSingleBucketAggregateBase;
-  };
-}
 
 interface IActionExecution
   extends estypes.AggregationsTermsAggregateBase<{ key: string; doc_count: number }> {
@@ -60,9 +57,11 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     totalSearchDuration: estypes.AggregationsMaxAggregate;
     numTriggeredActions: estypes.AggregationsMaxAggregate;
     numGeneratedActions: estypes.AggregationsMaxAggregate;
+    numActiveAlerts: estypes.AggregationsMaxAggregate;
+    numRecoveredAlerts: estypes.AggregationsMaxAggregate;
+    numNewAlerts: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
   };
-  alertCounts: IAlertCounts;
   actionExecution: {
     actionOutcomes: IActionExecution;
   };
@@ -91,6 +90,9 @@ const ExecutionLogSortFields: Record<string, string> = {
   schedule_delay: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
   num_generated_actions: 'ruleExecution>numGeneratedActions',
+  num_active_alerts: 'ruleExecution>numActiveAlerts',
+  num_recovered_alerts: 'ruleExecution>numRecoveredAlerts',
+  num_new_alerts: 'ruleExecution>numNewAlerts',
 };
 
 export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLogAggOptions) {
@@ -153,16 +155,6 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                 gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
               },
             },
-            // Get counts for types of alerts and whether there was an execution timeout
-            alertCounts: {
-              filters: {
-                filters: {
-                  newAlerts: { match: { [ACTION_FIELD]: 'new-instance' } },
-                  activeAlerts: { match: { [ACTION_FIELD]: 'active-instance' } },
-                  recoveredAlerts: { match: { [ACTION_FIELD]: 'recovered-instance' } },
-                },
-              },
-            },
             // Filter by action execute doc and get information from this event
             actionExecution: {
               filter: getProviderAndActionFilter('actions', 'execute'),
@@ -209,6 +201,21 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                     field: NUMBER_OF_GENERATED_ACTIONS_FIELD,
                   },
                 },
+                numActiveAlerts: {
+                  max: {
+                    field: NUMBER_OF_ACTIVE_ALERTS_FIELD,
+                  },
+                },
+                numRecoveredAlerts: {
+                  max: {
+                    field: NUMBER_OF_RECOVERED_ALERTS_FIELD,
+                  },
+                },
+                numNewAlerts: {
+                  max: {
+                    field: NUMBER_OF_NEW_ALERTS_FIELD,
+                  },
+                },
                 executionDuration: {
                   max: {
                     field: DURATION_FIELD,
@@ -218,7 +225,7 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                   top_hits: {
                     size: 1,
                     _source: {
-                      includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD],
+                      includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD, VERSION_FIELD],
                     },
                   },
                 },
@@ -275,15 +282,17 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     status === 'failure'
       ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
       : outcomeAndMessage?.message ?? '';
+  const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / Millis2Nanos,
     status,
     message,
-    num_active_alerts: bucket?.alertCounts?.buckets?.activeAlerts?.doc_count ?? 0,
-    num_new_alerts: bucket?.alertCounts?.buckets?.newAlerts?.doc_count ?? 0,
-    num_recovered_alerts: bucket?.alertCounts?.buckets?.recoveredAlerts?.doc_count ?? 0,
+    version,
+    num_active_alerts: bucket?.ruleExecution?.numActiveAlerts?.value ?? 0,
+    num_new_alerts: bucket?.ruleExecution?.numNewAlerts?.value ?? 0,
+    num_recovered_alerts: bucket?.ruleExecution?.numRecoveredAlerts?.value ?? 0,
     num_triggered_actions: bucket?.ruleExecution?.numTriggeredActions?.value ?? 0,
     num_generated_actions: bucket?.ruleExecution?.numGeneratedActions?.value ?? 0,
     num_succeeded_actions: actionExecutionSuccess,

@@ -8,49 +8,36 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
-import { capitalize, sortBy } from 'lodash';
 import moment from 'moment';
+import { capitalize, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState, useMemo, ReactNode, useCallback } from 'react';
+import React, { useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import {
-  EuiBasicTable,
   EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
+  EuiFilterGroup,
   EuiSpacer,
   EuiLink,
   EuiEmptyPrompt,
-  EuiButtonEmpty,
   EuiHealth,
   EuiText,
-  EuiToolTip,
   EuiTableSortingType,
   EuiButtonIcon,
   EuiHorizontalRule,
   EuiSelectableOption,
   EuiIcon,
-  EuiScreenReaderOnly,
-  RIGHT_ALIGNMENT,
   EuiDescriptionList,
-  EuiTableFieldDataColumnType,
-  EuiTableComputedColumnType,
-  EuiTableActionsColumnType,
   EuiCallOut,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
 
-import { isEmpty } from 'lodash';
 import {
   RuleExecutionStatus,
-  RuleExecutionStatusValues,
   ALERTS_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
-  formatDuration,
-  parseDuration,
-  MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
 import {
   ActionType,
@@ -62,6 +49,7 @@ import {
   Pagination,
   Percentiles,
   TriggersActionsUiConfig,
+  SnoozeSchedule,
 } from '../../../../types';
 import { RuleAdd, RuleEdit } from '../../rule_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -69,40 +57,37 @@ import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../commo
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
-import { RuleExecutionStatusFilter, getHealthColor } from './rule_execution_status_filter';
+import { RuleExecutionStatusFilter } from './rule_execution_status_filter';
 import {
-  loadRules,
-  loadRuleAggregations,
-  loadRuleTags,
   loadRuleTypes,
   disableRule,
   enableRule,
   snoozeRule,
   unsnoozeRule,
   deleteRules,
+  updateAPIKey,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
-import { rulesStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
+import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import './rules_list.scss';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ManageLicenseModal } from './manage_license_modal';
-import { checkRuleTypeEnabled } from '../../../lib/check_rule_type_enabled';
-import { RuleStatusDropdown } from './rule_status_dropdown';
-import { RuleTagBadge } from './rule_tag_badge';
-import { PercentileSelectablePopover } from './percentile_selectable_popover';
-import { RuleDurationFormat } from './rule_duration_format';
-import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
-import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useLoadRules } from '../../../hooks/use_load_rules';
+import { useLoadTags } from '../../../hooks/use_load_tags';
+import { useLoadRuleAggregations } from '../../../hooks/use_load_rule_aggregations';
+import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
+import { RulesListAutoRefresh } from './rules_list_auto_refresh';
+import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 
 const ENTER_KEY = 13;
 
@@ -111,17 +96,6 @@ interface RuleTypeState {
   isInitialized: boolean;
   data: RuleTypeIndex;
 }
-interface RuleState {
-  isLoading: boolean;
-  data: Rule[];
-  totalItemCount: number;
-}
-
-const percentileOrdinals = {
-  [Percentiles.P50]: '50th',
-  [Percentiles.P95]: '95th',
-  [Percentiles.P99]: '99th',
-};
 
 export const percentileFields = {
   [Percentiles.P50]: 'monitoring.execution.calculated_metrics.p50',
@@ -147,9 +121,7 @@ export const RulesList: React.FunctionComponent = () => {
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
-  const [initialLoad, setInitialLoad] = useState<boolean>(true);
-  const [noData, setNoData] = useState<boolean>(true);
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -160,16 +132,15 @@ export const RulesList: React.FunctionComponent = () => {
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
-  const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<string>('');
 
   const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('ruleTagFilter');
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
@@ -183,13 +154,6 @@ export const RulesList: React.FunctionComponent = () => {
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
 
-  const selectedPercentile = useMemo(() => {
-    const selectedOption = percentileOptions.find((option) => option.checked === 'on');
-    if (selectedOption) {
-      return Percentiles[selectedOption.key as Percentiles];
-    }
-  }, [percentileOptions]);
-
   const [sort, setSort] = useState<EuiTableSortingType<RuleTableItem>['sort']>({
     field: 'name',
     direction: 'asc',
@@ -198,27 +162,53 @@ export const RulesList: React.FunctionComponent = () => {
     licenseType: string;
     ruleTypeId: string;
   } | null>(null);
-  const [rulesStatusesTotal, setRulesStatusesTotal] = useState<Record<string, number>>(
-    RuleExecutionStatusValues.reduce(
-      (prev: Record<string, number>, status: string) =>
-        ({
-          ...prev,
-          [status]: 0,
-        } as Record<string, number>),
-      {}
-    )
-  );
   const [ruleTypesState, setRuleTypesState] = useState<RuleTypeState>({
     isLoading: false,
     isInitialized: false,
     data: new Map(),
   });
-  const [rulesState, setRulesState] = useState<RuleState>({
-    isLoading: false,
-    data: [],
-    totalItemCount: 0,
-  });
+
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
+
+  const hasAnyAuthorizedRuleType = useMemo(() => {
+    return ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
+  }, [ruleTypesState]);
+
+  const onError = useCallback(
+    (message: string) => {
+      toasts.addDanger(message);
+    },
+    [toasts]
+  );
+
+  const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
+    page,
+    searchText,
+    typesFilter,
+    actionTypesFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+    tagsFilter,
+    sort,
+    onPage: setPage,
+    onError,
+  });
+
+  const { tags, loadTags } = useLoadTags({
+    onError,
+  });
+
+  const { loadRuleAggregations, rulesStatusesTotal } = useLoadRuleAggregations({
+    searchText,
+    typesFilter,
+    actionTypesFilter,
+    ruleExecutionStatusesFilter,
+    ruleStatusesFilter,
+    tagsFilter,
+    onError,
+  });
+
+  const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setEditFlyoutVisibility(true);
     setCurrentRuleToEdit(ruleItem);
@@ -227,19 +217,29 @@ export const RulesList: React.FunctionComponent = () => {
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
-  useEffect(() => {
-    loadRulesData();
+  const loadData = useCallback(async () => {
+    if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
+      return;
+    }
+    await loadRules();
+    await loadRuleAggregations();
+    if (isRuleStatusFilterEnabled) {
+      await loadTags();
+    }
+    setLastUpdate(moment().format());
   }, [
+    loadRules,
+    loadTags,
+    loadRuleAggregations,
+    setLastUpdate,
+    isRuleStatusFilterEnabled,
+    hasAnyAuthorizedRuleType,
     ruleTypesState,
-    page,
-    searchText,
-    percentileOptions,
-    JSON.stringify(typesFilter),
-    JSON.stringify(actionTypesFilter),
-    JSON.stringify(ruleExecutionStatusesFilter),
-    JSON.stringify(ruleStatusesFilter),
-    JSON.stringify(tagsFilter),
   ]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData, percentileOptions]);
 
   useEffect(() => {
     (async () => {
@@ -285,218 +285,6 @@ export const RulesList: React.FunctionComponent = () => {
       }
     })();
   }, []);
-
-  async function loadRulesData() {
-    const hasAnyAuthorizedRuleType = ruleTypesState.isInitialized && ruleTypesState.data.size > 0;
-    if (hasAnyAuthorizedRuleType) {
-      setRulesState({ ...rulesState, isLoading: true });
-      try {
-        const rulesResponse = await loadRules({
-          http,
-          page,
-          searchText,
-          typesFilter,
-          actionTypesFilter,
-          ruleExecutionStatusesFilter,
-          ruleStatusesFilter,
-          tagsFilter,
-          sort,
-        });
-        await loadRuleTagsAggs();
-        await loadRuleAggs();
-        setRulesState({
-          isLoading: false,
-          data: rulesResponse.data,
-          totalItemCount: rulesResponse.total,
-        });
-
-        if (!rulesResponse.data?.length && page.index > 0) {
-          setPage({ ...page, index: 0 });
-        }
-
-        const isFilterApplied = !(
-          isEmpty(searchText) &&
-          isEmpty(typesFilter) &&
-          isEmpty(actionTypesFilter) &&
-          isEmpty(ruleExecutionStatusesFilter) &&
-          isEmpty(ruleStatusesFilter) &&
-          isEmpty(tagsFilter)
-        );
-
-        setNoData(rulesResponse.data.length === 0 && !isFilterApplied);
-      } catch (e) {
-        toasts.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage',
-            {
-              defaultMessage: 'Unable to load rules',
-            }
-          ),
-        });
-        setRulesState({ ...rulesState, isLoading: false });
-      }
-      setInitialLoad(false);
-    }
-  }
-
-  async function loadRuleAggs() {
-    try {
-      const rulesAggs = await loadRuleAggregations({
-        http,
-        searchText,
-        typesFilter,
-        actionTypesFilter,
-        ruleExecutionStatusesFilter,
-        ruleStatusesFilter,
-        tagsFilter,
-      });
-      if (rulesAggs?.ruleExecutionStatus) {
-        setRulesStatusesTotal(rulesAggs.ruleExecutionStatus);
-      }
-    } catch (e) {
-      toasts.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage',
-          {
-            defaultMessage: 'Unable to load rule status info',
-          }
-        ),
-      });
-    }
-  }
-
-  async function loadRuleTagsAggs() {
-    if (!isRuleTagFilterEnabled) {
-      return;
-    }
-    try {
-      const ruleTagsAggs = await loadRuleTags({ http });
-      if (ruleTagsAggs?.ruleTags) {
-        setTags(ruleTagsAggs.ruleTags);
-      }
-    } catch (e) {
-      toasts.addDanger({
-        title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTags', {
-          defaultMessage: 'Unable to load rule tags',
-        }),
-      });
-    }
-  }
-
-  const renderRuleStatusDropdown = (ruleEnabled: boolean | undefined, item: RuleTableItem) => {
-    return (
-      <RuleStatusDropdown
-        disableRule={async () => await disableRule({ http, id: item.id })}
-        enableRule={async () => await enableRule({ http, id: item.id })}
-        snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
-          await snoozeRule({ http, id: item.id, snoozeEndTime });
-        }}
-        unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
-        rule={item}
-        onRuleChanged={() => loadRulesData()}
-        isEditable={item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)}
-      />
-    );
-  };
-
-  const renderRuleExecutionStatus = (executionStatus: RuleExecutionStatus, item: RuleTableItem) => {
-    const healthColor = getHealthColor(executionStatus.status);
-    const tooltipMessage =
-      executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
-    const isLicenseError =
-      executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
-    const statusMessage = isLicenseError
-      ? ALERT_STATUS_LICENSE_ERROR
-      : rulesStatusesTranslationsMapping[executionStatus.status];
-
-    const health = (
-      <EuiHealth data-test-subj={`ruleStatus-${executionStatus.status}`} color={healthColor}>
-        {statusMessage}
-      </EuiHealth>
-    );
-
-    const healthWithTooltip = tooltipMessage ? (
-      <EuiToolTip data-test-subj="ruleStatus-error-tooltip" position="top" content={tooltipMessage}>
-        {health}
-      </EuiToolTip>
-    ) : (
-      health
-    );
-
-    return (
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>{healthWithTooltip}</EuiFlexItem>
-        {isLicenseError && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              data-test-subj="ruleStatus-error-license-fix"
-              onClick={() =>
-                setManageLicenseModalOpts({
-                  licenseType: ruleTypesState.data.get(item.ruleTypeId)?.minimumLicenseRequired!,
-                  ruleTypeId: item.ruleTypeId,
-                })
-              }
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.rulesList.fixLicenseLink"
-                defaultMessage="Fix"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  };
-
-  const renderPercentileColumnName = () => {
-    return (
-      <span data-test-subj={`rulesTable-${selectedPercentile}ColumnName`}>
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip',
-            {
-              defaultMessage: `{percentileOrdinal} percentile of this rule's past {sampleLimit} run durations (mm:ss).`,
-              values: {
-                percentileOrdinal: percentileOrdinals[selectedPercentile!],
-                sampleLimit: MONITORING_HISTORY_LIMIT,
-              },
-            }
-          )}
-        >
-          <span>
-            {selectedPercentile}&nbsp;
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-        <PercentileSelectablePopover
-          options={percentileOptions}
-          onOptionsChange={setPercentileOptions}
-        />
-      </span>
-    );
-  };
-
-  const renderPercentileCellValue = (value: number) => {
-    return (
-      <span data-test-subj={`${selectedPercentile}Percentile`}>
-        <RuleDurationFormat allowZero={false} duration={value} />
-      </span>
-    );
-  };
-
-  const getPercentileColumn = () => {
-    return {
-      mobileOptions: { header: false },
-      field: percentileFields[selectedPercentile!],
-      width: '16%',
-      name: renderPercentileColumnName(),
-      'data-test-subj': 'rulesTableCell-ruleExecutionPercentile',
-      sortable: true,
-      truncateText: false,
-      render: renderPercentileCellValue,
-    };
-  };
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -560,382 +348,6 @@ export const RulesList: React.FunctionComponent = () => {
     });
   }, [showErrors, rulesState]);
 
-  const getRulesTableColumns = (): Array<
-    | EuiTableFieldDataColumnType<RuleTableItem>
-    | EuiTableComputedColumnType<RuleTableItem>
-    | EuiTableActionsColumnType<RuleTableItem>
-  > => {
-    return [
-      {
-        field: 'name',
-        name: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.nameTitle',
-          { defaultMessage: 'Name' }
-        ),
-        sortable: true,
-        truncateText: true,
-        width: '30%',
-        'data-test-subj': 'rulesTableCell-name',
-        render: (name: string, rule: RuleTableItem) => {
-          const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
-          const checkEnabledResult = checkRuleTypeEnabled(ruleType);
-          const link = (
-            <>
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiLink
-                        title={name}
-                        onClick={() => {
-                          history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
-                        }}
-                      >
-                        {name}
-                      </EuiLink>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {!checkEnabledResult.isEnabled && (
-                        <EuiIconTip
-                          anchorClassName="ruleDisabledQuestionIcon"
-                          data-test-subj="ruleDisabledByLicenseTooltip"
-                          type="questionInCircle"
-                          content={checkEnabledResult.message}
-                          position="right"
-                        />
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs">
-                    {rule.ruleType}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          );
-          return <>{link}</>;
-        },
-      },
-      {
-        field: 'tags',
-        name: '',
-        sortable: false,
-        width: '50px',
-        'data-test-subj': 'rulesTableCell-tagsPopover',
-        render: (ruleTags: string[], item: RuleTableItem) => {
-          return ruleTags.length > 0 ? (
-            <RuleTagBadge
-              isOpen={tagPopoverOpenIndex === item.index}
-              tags={ruleTags}
-              onClick={() => setTagPopoverOpenIndex(item.index)}
-              onClose={() => setTagPopoverOpenIndex(-1)}
-            />
-          ) : null;
-        },
-      },
-      {
-        field: 'executionStatus.lastExecutionDate',
-        name: (
-          <EuiToolTip
-            data-test-subj="rulesTableCell-lastExecutionDateTooltip"
-            content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle',
-              {
-                defaultMessage: 'Start time of the last run.',
-              }
-            )}
-          >
-            <span>
-              Last run{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
-        sortable: true,
-        width: '15%',
-        'data-test-subj': 'rulesTableCell-lastExecutionDate',
-        render: (date: Date) => {
-          if (date) {
-            return (
-              <>
-                <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    {moment(date).format('MMM D, YYYY HH:mm:ssa')}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText color="subdued" size="xs">
-                      {moment(date).fromNow()}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            );
-          }
-        },
-      },
-      {
-        field: 'schedule.interval',
-        width: '6%',
-        name: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.scheduleTitle',
-          { defaultMessage: 'Interval' }
-        ),
-        sortable: false,
-        truncateText: false,
-        'data-test-subj': 'rulesTableCell-interval',
-        render: (interval: string, item: RuleTableItem) => {
-          const durationString = formatDuration(interval);
-          return (
-            <>
-              <EuiFlexGroup direction="row" gutterSize="xs">
-                <EuiFlexItem grow={false}>{durationString}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {item.showIntervalWarning && (
-                    <EuiToolTip
-                      data-test-subj={`ruleInterval-config-tooltip-${item.index}`}
-                      title={i18n.translate(
-                        'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipTitle',
-                        {
-                          defaultMessage: 'Below configured minimum interval',
-                        }
-                      )}
-                      content={i18n.translate(
-                        'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipText',
-                        {
-                          defaultMessage:
-                            'Rule interval of {interval} is below the minimum configured interval of {minimumInterval}. This may impact alerting performance.',
-                          values: {
-                            minimumInterval: formatDuration(
-                              config.minimumScheduleInterval!.value,
-                              true
-                            ),
-                            interval: formatDuration(interval, true),
-                          },
-                        }
-                      )}
-                      position="top"
-                    >
-                      <EuiButtonIcon
-                        color="text"
-                        data-test-subj={`ruleInterval-config-icon-${item.index}`}
-                        onClick={() => {
-                          if (item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)) {
-                            onRuleEdit(item);
-                          }
-                        }}
-                        iconType="flag"
-                        aria-label={i18n.translate(
-                          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalIconAriaLabel',
-                          { defaultMessage: 'Below configured minimum interval' }
-                        )}
-                      />
-                    </EuiToolTip>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          );
-        },
-      },
-      {
-        field: 'executionStatus.lastDuration',
-        width: '12%',
-        name: (
-          <EuiToolTip
-            data-test-subj="rulesTableCell-durationTooltip"
-            content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.durationTitle',
-              {
-                defaultMessage: 'The length of time it took for the rule to run (mm:ss).',
-              }
-            )}
-          >
-            <span>
-              Duration{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
-        sortable: true,
-        truncateText: false,
-        'data-test-subj': 'rulesTableCell-duration',
-        render: (value: number, item: RuleTableItem) => {
-          const showDurationWarning = shouldShowDurationWarning(
-            ruleTypesState.data.get(item.ruleTypeId),
-            value
-          );
-
-          return (
-            <>
-              {<RuleDurationFormat duration={value} />}
-              {showDurationWarning && (
-                <EuiIconTip
-                  data-test-subj="ruleDurationWarning"
-                  anchorClassName="ruleDurationWarningIcon"
-                  type="rule"
-                  color="warning"
-                  content={i18n.translate(
-                    'xpack.triggersActionsUI.sections.rulesList.ruleTypeExcessDurationMessage',
-                    {
-                      defaultMessage: `Duration exceeds the rule's expected run time.`,
-                    }
-                  )}
-                  position="right"
-                />
-              )}
-            </>
-          );
-        },
-      },
-      getPercentileColumn(),
-      {
-        field: 'monitoring.execution.calculated_metrics.success_ratio',
-        width: '12%',
-        name: (
-          <EuiToolTip
-            data-test-subj="rulesTableCell-successRatioTooltip"
-            content={i18n.translate(
-              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.successRatioTitle',
-              {
-                defaultMessage: 'How often this rule runs successfully.',
-              }
-            )}
-          >
-            <span>
-              Success ratio{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
-        sortable: true,
-        truncateText: false,
-        'data-test-subj': 'rulesTableCell-successRatio',
-        render: (value: number) => {
-          return (
-            <span data-test-subj="successRatio">
-              {value !== undefined ? getFormattedSuccessRatio(value) : 'N/A'}
-            </span>
-          );
-        },
-      },
-      {
-        field: 'executionStatus.status',
-        name: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastResponseTitle',
-          { defaultMessage: 'Last response' }
-        ),
-        sortable: true,
-        truncateText: false,
-        width: '120px',
-        'data-test-subj': 'rulesTableCell-lastResponse',
-        render: (_executionStatus: RuleExecutionStatus, item: RuleTableItem) => {
-          return renderRuleExecutionStatus(item.executionStatus, item);
-        },
-      },
-      {
-        field: 'enabled',
-        name: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.stateTitle',
-          { defaultMessage: 'State' }
-        ),
-        sortable: true,
-        truncateText: false,
-        width: '10%',
-        'data-test-subj': 'rulesTableCell-status',
-        render: (_enabled: boolean | undefined, item: RuleTableItem) => {
-          return renderRuleStatusDropdown(item.enabled, item);
-        },
-      },
-      {
-        name: '',
-        width: '90px',
-        render(item: RuleTableItem) {
-          return (
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-              <EuiFlexItem grow={false} className="ruleSidebarItem">
-                <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
-                  {item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId) ? (
-                    <EuiFlexItem grow={false} data-test-subj="ruleSidebarEditAction">
-                      <EuiButtonIcon
-                        color={'primary'}
-                        title={i18n.translate(
-                          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editButtonTooltip',
-                          { defaultMessage: 'Edit' }
-                        )}
-                        className="ruleSidebarItem__action"
-                        data-test-subj="editActionHoverButton"
-                        onClick={() => onRuleEdit(item)}
-                        iconType={'pencil'}
-                        aria-label={i18n.translate(
-                          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editAriaLabel',
-                          { defaultMessage: 'Edit' }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                  {item.isEditable ? (
-                    <EuiFlexItem grow={false} data-test-subj="ruleSidebarDeleteAction">
-                      <EuiButtonIcon
-                        color={'danger'}
-                        title={i18n.translate(
-                          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteButtonTooltip',
-                          { defaultMessage: 'Delete' }
-                        )}
-                        className="ruleSidebarItem__action"
-                        data-test-subj="deleteActionHoverButton"
-                        onClick={() => setRulesToDelete([item.id])}
-                        iconType={'trash'}
-                        aria-label={i18n.translate(
-                          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.deleteAriaLabel',
-                          { defaultMessage: 'Delete' }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <CollapsedItemActions
-                  key={item.id}
-                  item={item}
-                  onRuleChanged={() => loadRulesData()}
-                  setRulesToDelete={setRulesToDelete}
-                  onEditRule={() => onRuleEdit(item)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
-      },
-      {
-        align: RIGHT_ALIGNMENT,
-        width: '40px',
-        isExpander: true,
-        name: (
-          <EuiScreenReaderOnly>
-            <span>Expand rows</span>
-          </EuiScreenReaderOnly>
-        ),
-        render: (item: RuleTableItem) => {
-          const _executionStatus = item.executionStatus;
-          const hasErrorMessage = _executionStatus.status === 'error';
-          const isLicenseError =
-            _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
-
-          return isLicenseError || hasErrorMessage ? (
-            <EuiButtonIcon
-              onClick={() => toggleErrorMessage(_executionStatus, item)}
-              aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
-              iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-            />
-          ) : null;
-        },
-      },
-    ];
-  };
-
   const authorizedRuleTypes = [...ruleTypesState.data.values()];
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
@@ -970,18 +382,36 @@ export const RulesList: React.FunctionComponent = () => {
 
   const getRuleTagFilter = () => {
     if (isRuleTagFilterEnabled) {
-      return [<RuleTagFilter tags={tags} selectedTags={tagsFilter} onChange={setTagsFilter} />];
+      return [
+        <RuleTagFilter isGrouped tags={tags} selectedTags={tagsFilter} onChange={setTagsFilter} />,
+      ];
     }
     return [];
   };
 
-  const getRuleStatusFilter = () => {
+  const renderRuleStatusFilter = () => {
     if (isRuleStatusFilterEnabled) {
-      return [
-        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusesFilter} />,
-      ];
+      return (
+        <RuleStatusFilter selectedStatuses={ruleStatusesFilter} onChange={setRuleStatusesFilter} />
+      );
     }
-    return [];
+    return null;
+  };
+
+  const onDisableRule = (rule: RuleTableItem) => {
+    return disableRule({ http, id: rule.id });
+  };
+
+  const onEnableRule = (rule: RuleTableItem) => {
+    return enableRule({ http, id: rule.id });
+  };
+
+  const onSnoozeRule = (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => {
+    return snoozeRule({ http, id: rule.id, snoozeSchedule });
+  };
+
+  const onUnsnoozeRule = (rule: RuleTableItem, scheduleIds?: string[]) => {
+    return unsnoozeRule({ http, id: rule.id, scheduleIds });
   };
 
   const toolsRight = [
@@ -995,8 +425,6 @@ export const RulesList: React.FunctionComponent = () => {
         })
       )}
     />,
-    ...getRuleTagFilter(),
-    ...getRuleStatusFilter(),
     <ActionTypeFilter
       key="action-type-filter"
       actionTypes={actionTypes}
@@ -1007,18 +435,7 @@ export const RulesList: React.FunctionComponent = () => {
       selectedStatuses={ruleExecutionStatusesFilter}
       onChange={(ids: string[]) => setRuleExecutionStatusesFilter(ids)}
     />,
-    <EuiButtonEmpty
-      data-test-subj="refreshRulesButton"
-      iconType="refresh"
-      onClick={loadRulesData}
-      name="refresh"
-      color="primary"
-    >
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel"
-        defaultMessage="Refresh"
-      />
-    </EuiButtonEmpty>,
+    ...getRuleTagFilter(),
   ];
 
   const authorizedToModifySelectedRules = selectedIds.length
@@ -1070,7 +487,7 @@ export const RulesList: React.FunctionComponent = () => {
                 })}
                 onPerformingAction={() => setIsPerformingAction(true)}
                 onActionPerformed={() => {
-                  loadRulesData();
+                  loadData();
                   setIsPerformingAction(false);
                 }}
                 setRulesToDelete={setRulesToDelete}
@@ -1115,20 +532,19 @@ export const RulesList: React.FunctionComponent = () => {
             )}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>{renderRuleStatusFilter()}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
+          <EuiFilterGroup>
             {toolsRight.map((tool, index: number) => (
-              <EuiFlexItem key={index} grow={false}>
-                {tool}
-              </EuiFlexItem>
+              <React.Fragment key={index}>{tool}</React.Fragment>
             ))}
-          </EuiFlexGroup>
+          </EuiFilterGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none">
+          <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued" data-test-subj="totalRulesCount">
                 <FormattedMessage
@@ -1203,6 +619,7 @@ export const RulesList: React.FunctionComponent = () => {
                 />
               </EuiHealth>
             </EuiFlexItem>
+            <RulesListAutoRefresh lastUpdate={lastUpdate} onRefresh={loadData} />
           </EuiFlexGroup>
         </EuiFlexItem>
         {rulesStatusesTotal.error > 0 && (
@@ -1231,64 +648,68 @@ export const RulesList: React.FunctionComponent = () => {
         )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
-
-      <EuiBasicTable
-        loading={rulesState.isLoading || ruleTypesState.isLoading || isPerformingAction}
-        /* Don't display rules until we have the rule types initialized */
-        items={
-          ruleTypesState.isInitialized === false
-            ? []
-            : convertRulesToTableItems({
-                rules: rulesState.data,
-                ruleTypeIndex: ruleTypesState.data,
-                canExecuteActions,
-                config,
-              })
-        }
-        itemId="id"
-        columns={getRulesTableColumns()}
-        sorting={{ sort }}
-        rowProps={(item: RuleTableItem) => ({
-          'data-test-subj': 'rule-row',
-          className: !ruleTypesState.data.get(item.ruleTypeId)?.enabledInLicense
-            ? 'actRulesList__tableRowDisabled'
-            : '',
-        })}
-        cellProps={(item: RuleTableItem) => ({
-          'data-test-subj': 'cell',
-          className: !ruleTypesState.data.get(item.ruleTypeId)?.enabledInLicense
-            ? 'actRulesList__tableCellDisabled'
-            : '',
-        })}
-        data-test-subj="rulesList"
-        pagination={{
-          pageIndex: page.index,
-          pageSize: page.size,
-          /* Don't display rule count until we have the rule types initialized */
-          totalItemCount: ruleTypesState.isInitialized === false ? 0 : rulesState.totalItemCount,
-        }}
-        selection={{
-          selectable: (rule: RuleTableItem) => rule.isEditable,
-          onSelectionChange(updatedSelectedItemsList: RuleTableItem[]) {
-            setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
-          },
-        }}
-        onChange={({
-          page: changedPage,
-          sort: changedSort,
-        }: {
-          page?: Pagination;
-          sort?: EuiTableSortingType<RuleTableItem>['sort'];
-        }) => {
-          if (changedPage) {
-            setPage(changedPage);
-          }
-          if (changedSort) {
-            setSort(changedSort);
-          }
-        }}
+      <RulesListTable
+        canExecuteActions={canExecuteActions}
+        isLoading={rulesState.isLoading || ruleTypesState.isLoading || isPerformingAction}
+        rulesState={rulesState}
+        ruleTypesState={ruleTypesState}
+        ruleTypeRegistry={ruleTypeRegistry}
+        sort={sort}
+        page={page}
+        percentileOptions={percentileOptions}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        isExpandable={true}
+        onSort={setSort}
+        onPage={setPage}
+        onRuleChanged={() => loadData()}
+        onRuleClick={(rule) => {
+          history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
+        }}
+        onRuleEditClick={(rule) => {
+          if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
+            onRuleEdit(rule);
+          }
+        }}
+        onRuleDeleteClick={(rule) => setRulesToDelete([rule.id])}
+        onManageLicenseClick={(rule) =>
+          setManageLicenseModalOpts({
+            licenseType: ruleTypesState.data.get(rule.ruleTypeId)?.minimumLicenseRequired!,
+            ruleTypeId: rule.ruleTypeId,
+          })
+        }
+        onSelectionChange={(updatedSelectedItemsList) =>
+          setSelectedIds(updatedSelectedItemsList.map((item) => item.id))
+        }
+        onPercentileOptionsChange={setPercentileOptions}
+        onDisableRule={onDisableRule}
+        onEnableRule={onEnableRule}
+        onSnoozeRule={onSnoozeRule}
+        onUnsnoozeRule={onUnsnoozeRule}
+        renderCollapsedItemActions={(rule, onLoading) => (
+          <CollapsedItemActions
+            key={rule.id}
+            item={rule}
+            onLoading={onLoading}
+            onRuleChanged={() => loadData()}
+            setRulesToDelete={setRulesToDelete}
+            onEditRule={() => onRuleEdit(rule)}
+            onUpdateAPIKey={setRulesToUpdateAPIKey}
+          />
+        )}
+        renderRuleError={(rule) => {
+          const _executionStatus = rule.executionStatus;
+          const hasErrorMessage = _executionStatus.status === 'error';
+          const isLicenseError =
+            _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
+
+          return isLicenseError || hasErrorMessage ? (
+            <EuiButtonIcon
+              onClick={() => toggleErrorMessage(_executionStatus, rule)}
+              aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+              iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
+            />
+          ) : null;
+        }}
+        config={config}
       />
       {manageLicenseModalOpts && (
         <ManageLicenseModal
@@ -1327,11 +748,11 @@ export const RulesList: React.FunctionComponent = () => {
         onDeleted={async () => {
           setRulesToDelete([]);
           setSelectedIds([]);
-          await loadRulesData();
+          await loadData();
         }}
         onErrors={async () => {
           // Refresh the rules from the server, some rules may have beend deleted
-          await loadRulesData();
+          await loadData();
           setRulesToDelete([]);
         }}
         onCancel={() => {
@@ -1349,6 +770,20 @@ export const RulesList: React.FunctionComponent = () => {
           setRulesState({ ...rulesState, isLoading });
         }}
       />
+      <UpdateApiKeyModalConfirmation
+        onCancel={() => {
+          setRulesToUpdateAPIKey([]);
+        }}
+        idsToUpdate={rulesToUpdateAPIKey}
+        apiUpdateApiKeyCall={updateAPIKey}
+        setIsLoadingState={(isLoading: boolean) => {
+          setRulesState({ ...rulesState, isLoading });
+        }}
+        onUpdated={async () => {
+          setRulesToUpdateAPIKey([]);
+          await loadData();
+        }}
+      />
       <EuiSpacer size="xs" />
       {getRulesList()}
       {ruleFlyoutVisible && (
@@ -1360,7 +795,7 @@ export const RulesList: React.FunctionComponent = () => {
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           ruleTypeIndex={ruleTypesState.data}
-          onSave={loadRulesData}
+          onSave={loadData}
         />
       )}
       {editFlyoutVisible && currentRuleToEdit && (
@@ -1374,7 +809,7 @@ export const RulesList: React.FunctionComponent = () => {
           ruleType={
             ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
           }
-          onSave={loadRulesData}
+          onSave={loadData}
         />
       )}
     </section>
@@ -1408,31 +843,4 @@ const noPermissionPrompt = (
 
 function filterRulesById(rules: Rule[], ids: string[]): Rule[] {
   return rules.filter((rule) => ids.includes(rule.id));
-}
-
-interface ConvertRulesToTableItemsOpts {
-  rules: Rule[];
-  ruleTypeIndex: RuleTypeIndex;
-  canExecuteActions: boolean;
-  config: TriggersActionsUiConfig;
-}
-
-function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): RuleTableItem[] {
-  const { rules, ruleTypeIndex, canExecuteActions, config } = opts;
-  const minimumDuration = config.minimumScheduleInterval
-    ? parseDuration(config.minimumScheduleInterval.value)
-    : 0;
-  return rules.map((rule, index: number) => {
-    return {
-      ...rule,
-      index,
-      actionsCount: rule.actions.length,
-      ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
-      isEditable:
-        hasAllPrivilege(rule, ruleTypeIndex.get(rule.ruleTypeId)) &&
-        (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
-      enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
-      showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
-    };
-  });
 }

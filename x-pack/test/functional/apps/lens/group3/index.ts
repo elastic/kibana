@@ -86,7 +86,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./lens_tagging'));
     loadTestFile(require.resolve('./lens_reporting'));
     loadTestFile(require.resolve('./tsvb_open_in_lens'));
-    // has to be last one in the suite because it overrides saved objects
+    // keep these two last in the group in this order because they are messing with the default saved objects
     loadTestFile(require.resolve('./rollup'));
+    loadTestFile(require.resolve('./no_data'));
   });
 };

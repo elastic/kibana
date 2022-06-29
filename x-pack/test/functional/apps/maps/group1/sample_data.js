@@ -29,61 +29,16 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       await PageObjects.home.addSampleDataSet('ecommerce');
       await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.home.addSampleDataSet('logs');
+
+      // Sample data is shifted to be relative to current time
+      // This means that a static timerange will return different documents
+      // Setting the time range to a window larger than the sample data set
+      // ensures all documents are coverered by time query so the ES results will always be the same
       const SAMPLE_DATA_RANGE = `[
         {
-          "from": "now-30d",
-          "to": "now+40d",
+          "from": "now-180d",
+          "to": "now+180d",
           "display": "sample data range"
-        },
-        {
-          "from": "now/d",
-          "to": "now/d",
-          "display": "Today"
-        },
-        {
-          "from": "now/w",
-          "to": "now/w",
-          "display": "This week"
-        },
-        {
-          "from": "now-15m",
-          "to": "now",
-          "display": "Last 15 minutes"
-        },
-        {
-          "from": "now-30m",
-          "to": "now",
-          "display": "Last 30 minutes"
-        },
-        {
-          "from": "now-1h",
-          "to": "now",
-          "display": "Last 1 hour"
-        },
-        {
-          "from": "now-24h",
-          "to": "now",
-          "display": "Last 24 hours"
-        },
-        {
-          "from": "now-7d",
-          "to": "now",
-          "display": "Last 7 days"
-        },
-        {
-          "from": "now-30d",
-          "to": "now",
-          "display": "Last 30 days"
-        },
-        {
-          "from": "now-90d",
-          "to": "now",
-          "display": "Last 90 days"
-        },
-        {
-          "from": "now-1y",
-          "to": "now",
-          "display": "Last 1 year"
         }
       ]`;
 
@@ -165,8 +120,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     describe('web logs', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
-        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
+        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();

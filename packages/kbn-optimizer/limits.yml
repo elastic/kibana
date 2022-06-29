@@ -27,7 +27,7 @@ pageLoadAssetSize:
   indexLifecycleManagement: 107090
   indexManagement: 140608
   infra: 184320
-  fleet: 250000
+  fleet: 126917
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
@@ -52,13 +52,13 @@ pageLoadAssetSize:
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 95864
+  security: 115240
   snapshotRestore: 79032
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
   transform: 41007
-  triggersActionsUi: 104400
+  triggersActionsUi: 119000 #This is temporary. Check https://github.com/elastic/kibana/pull/130710#issuecomment-1119843458 & https://github.com/elastic/kibana/issues/130728
   upgradeAssistant: 81241
   urlForwarding: 32579
   usageCollection: 39762
@@ -128,5 +128,6 @@ pageLoadAssetSize:
   eventAnnotation: 19334
   screenshotting: 22870
   synthetics: 40958
-  expressionXY: 30000
+  expressionXY: 34000
   kibanaUsageCollection: 16463
+  kubernetesSecurity: 77234

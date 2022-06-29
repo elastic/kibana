@@ -8,24 +8,23 @@
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_INDEX } from '../constants';
+import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
 import {
+  ActionDetails,
   ActivityLogItemTypes,
+  EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
-  ISOLATION_ACTIONS,
+  EndpointPendingActions,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  RESPONSE_ACTION_COMMANDS,
 } from '../types';
-
-const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
   generate(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    const timeStamp = overrides['@timestamp']
-      ? new Date(overrides['@timestamp'])
-      : new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -39,8 +38,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           type: 'INPUT_ACTION',
           input_type: 'endpoint',
           data: {
-            command: this.randomIsolateCommand(),
+            command: this.randomResponseActionCommand(),
             comment: this.randomString(15),
+            parameters: undefined,
           },
         },
         error: undefined,
@@ -56,7 +56,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     overrides: DeepPartial<LogsEndpointAction> = {}
   ): estypes.SearchHit<LogsEndpointAction> {
     return Object.assign(this.toEsSearchHit(this.generate(overrides)), {
-      _index: `.ds-${ENDPOINT_ACTIONS_INDEX}-some_namespace`,
+      _index: `.ds-${ENDPOINT_ACTIONS_DS}-some_namespace`,
     });
   }
 
@@ -74,6 +74,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   ): LogsEndpointActionResponse {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
+    const startedAtTimes: number[] = [];
+    [2, 3, 5, 8, 13, 21].forEach((n) => {
+      startedAtTimes.push(
+        timeStamp.setMinutes(-this.randomN(n)),
+        timeStamp.setSeconds(-this.randomN(n))
+      );
+    });
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
@@ -84,10 +92,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           action_id: this.seededUUIDv4(),
           completed_at: timeStamp.toISOString(),
           data: {
-            command: this.randomIsolateCommand(),
+            command: this.randomResponseActionCommand(),
             comment: '',
+            parameters: undefined,
           },
-          started_at: this.randomPastDate(),
+          // randomly before a few hours/minutes/seconds later
+          started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
         },
         error: undefined,
       },
@@ -101,6 +111,40 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return Object.assign(this.toEsSearchHit(this.generateResponse(overrides)), {
       _index: `.ds-${ENDPOINT_ACTION_RESPONSES_DS}-some_namespace-something`,
     });
+  }
+
+  generateActionDetails(overrides: DeepPartial<ActionDetails> = {}): ActionDetails {
+    const details: ActionDetails = {
+      agents: ['agent-a'],
+      command: 'isolate',
+      completedAt: '2022-04-30T16:08:47.449Z',
+      id: '123',
+      isCompleted: true,
+      isExpired: false,
+      wasSuccessful: true,
+      errors: undefined,
+      startedAt: '2022-04-27T16:08:47.449Z',
+      comment: 'thisisacomment',
+      createdBy: 'auserid',
+      parameters: undefined,
+    };
+
+    return merge(details, overrides);
+  }
+
+  generateActivityLogAction(
+    overrides: DeepPartial<EndpointActivityLogAction>
+  ): EndpointActivityLogAction {
+    return merge(
+      {
+        type: ActivityLogItemTypes.ACTION,
+        item: {
+          id: this.seededUUIDv4(),
+          data: this.generate(),
+        },
+      },
+      overrides
+    );
   }
 
   generateActivityLogActionResponse(
@@ -118,6 +162,21 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     );
   }
 
+  generateAgentPendingActionsSummary(
+    overrides: Partial<EndpointPendingActions> = {}
+  ): EndpointPendingActions {
+    return merge(
+      {
+        agent_id: this.seededUUIDv4(),
+        pending_actions: {
+          isolate: 2,
+          unisolate: 0,
+        },
+      },
+      overrides
+    );
+  }
+
   randomFloat(): number {
     return this.random();
   }
@@ -126,7 +185,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
-  protected randomIsolateCommand() {
-    return this.randomChoice(ISOLATION_COMMANDS);
+  protected randomResponseActionCommand() {
+    return this.randomChoice(RESPONSE_ACTION_COMMANDS);
   }
 }

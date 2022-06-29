@@ -6,15 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { writeFileSync } from 'fs';
-import path from 'path';
+import Fsp from 'fs/promises';
+import Path from 'path';
 import Mustache from 'mustache';
 
-import { run, createFailError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
-import { getAllRepoRelativeBazelPackageDirs } from '@kbn/bazel-packages';
+import { discoverBazelPackageLocations } from '@kbn/bazel-packages';
 
-import { JestConfigs, CONFIG_NAMES } from './configs';
+import {
+  getAllTestFiles,
+  groupTestFiles,
+  findMissingConfigFiles,
+  UNIT_CONFIG_NAME,
+} from './configs';
 
 const unitTestingTemplate: string = `module.exports = {
   preset: '@kbn/test/jest_node',
@@ -37,16 +43,33 @@ const roots: string[] = [
   'x-pack/plugins',
   'src/plugins',
   'test',
+  'src/core',
   'src',
-  ...getAllRepoRelativeBazelPackageDirs(),
-];
+].map((rel) => Path.resolve(REPO_ROOT, rel));
 
 export async function runCheckJestConfigsCli() {
   run(
     async ({ flags: { fix = false }, log }) => {
-      const jestConfigs = new JestConfigs(REPO_ROOT, roots);
+      const packageDirs = [
+        ...discoverBazelPackageLocations(REPO_ROOT),
+        // kbn-pm is a weird package currently and needs to be added explicitly
+        Path.resolve(REPO_ROOT, 'packages/kbn-pm'),
+      ];
 
-      const missing = await jestConfigs.allMissing();
+      const testFiles = await getAllTestFiles();
+      const { grouped, invalid } = groupTestFiles(testFiles, roots, packageDirs);
+
+      if (invalid.length) {
+        const paths = invalid.map((path) => Path.relative(REPO_ROOT, path)).join('\n  - ');
+        log.error(
+          `The following test files exist outside packages or pre-defined roots:\n  - ${paths}`
+        );
+        throw createFailError(
+          `Move the above files a pre-defined test root, a package, or configure an additional root to handle this file.`
+        );
+      }
+
+      const missing = await findMissingConfigFiles(grouped);
 
       if (missing.length) {
         log.error(
@@ -58,20 +81,21 @@ export async function runCheckJestConfigsCli() {
         );
 
         if (fix) {
-          missing.forEach((file) => {
-            const template = file.endsWith(CONFIG_NAMES.unit)
-              ? unitTestingTemplate
-              : integrationTestingTemplate;
+          for (const file of missing) {
+            const template =
+              Path.basename(file) === UNIT_CONFIG_NAME
+                ? unitTestingTemplate
+                : integrationTestingTemplate;
 
-            const modulePath = path.dirname(file);
+            const modulePath = Path.dirname(file);
             const content = Mustache.render(template, {
-              relToRoot: path.relative(modulePath, '.'),
+              relToRoot: Path.relative(modulePath, REPO_ROOT),
               modulePath,
             });
 
-            writeFileSync(file, content);
+            await Fsp.writeFile(file, content);
             log.info('created %s', file);
-          });
+          }
         } else {
           throw createFailError(
             `Run 'node scripts/check_jest_configs --fix' to create the missing config files`
@@ -84,8 +108,8 @@ export async function runCheckJestConfigsCli() {
       flags: {
         boolean: ['fix'],
         help: `
-        --fix           Attempt to create missing config files
-      `,
+          --fix           Attempt to create missing config files
+        `,
       },
     }
   );

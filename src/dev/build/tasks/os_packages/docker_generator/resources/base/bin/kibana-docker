@@ -27,6 +27,7 @@ kibana_vars=(
     console.proxyFilter
     csp.strict
     csp.warnLegacyBrowsers
+    csp.disableUnsafeEval
     csp.script_src
     csp.worker_src
     csp.style_src
@@ -125,6 +126,7 @@ kibana_vars=(
     monitoring.ui.max_bucket_size
     monitoring.ui.min_interval_seconds
     newsfeed.enabled
+    node.roles
     ops.cGroupOverrides.cpuAcctPath
     ops.cGroupOverrides.cpuPath
     ops.interval
@@ -291,8 +293,6 @@ kibana_vars=(
     xpack.ingestManager.fleet.tlsCheckDisabled
     xpack.ingestManager.registryUrl
     xpack.observability.annotations.index
-    xpack.observability.unsafe.alertingExperience.enabled
-    xpack.observability.unsafe.cases.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect

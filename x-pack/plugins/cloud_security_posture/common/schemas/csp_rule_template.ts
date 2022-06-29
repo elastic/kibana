@@ -5,20 +5,34 @@
  * 2.0.
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
+import { cspRuleMetadataSchema } from './csp_rule_metadata';
 
-const cspRuleTemplateSchema = rt.object({
-  id: rt.string(),
-  name: rt.string(),
-  tags: rt.arrayOf(rt.string()),
-  description: rt.string(),
-  rationale: rt.string(),
-  default_value: rt.string(),
-  impact: rt.string(),
-  remediation: rt.string(),
+export const cspRuleTemplateSchemaV830 = rt.object({
+  audit: rt.string(),
   benchmark: rt.object({ name: rt.string(), version: rt.string() }),
-  rego_rule_id: rt.string(),
+  default_value: rt.maybe(rt.string()),
+  description: rt.string(),
   enabled: rt.boolean(),
+  id: rt.string(),
+  impact: rt.maybe(rt.string()),
+  muted: rt.boolean(),
+  name: rt.string(),
+  profile_applicability: rt.string(),
+  rationale: rt.string(),
+  references: rt.maybe(rt.string()),
+  rego_rule_id: rt.string(),
+  remediation: rt.string(),
+  section: rt.string(),
+  tags: rt.arrayOf(rt.string()),
+  version: rt.string(),
+});
+
+export const cspRuleTemplateSchemaV840 = rt.object({
+  enabled: rt.boolean(),
+  metadata: cspRuleMetadataSchema,
   muted: rt.boolean(),
 });
-export const cloudSecurityPostureRuleTemplateSavedObjectType = 'csp-rule-template';
-export type CloudSecurityPostureRuleTemplateSchema = TypeOf<typeof cspRuleTemplateSchema>;
+
+export type CspRuleTemplateTypeV830 = TypeOf<typeof cspRuleTemplateSchemaV830>;
+export type CspRuleTemplateTypeV840 = TypeOf<typeof cspRuleTemplateSchemaV840>;
+export type CspRuleTemplateType = CspRuleTemplateTypeV840;

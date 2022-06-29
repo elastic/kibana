@@ -8,7 +8,7 @@
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { get } from 'lodash';
-import { from } from 'rxjs';
+import { from, lastValueFrom } from 'rxjs';
 import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsDataService } from '../data';
 import { ControlsPluginStartDeps } from '../../types';
@@ -78,7 +78,7 @@ export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
     searchSource.setField('filter', ignoreParentSettings?.ignoreFilters ? [] : filters);
     searchSource.setField('query', ignoreParentSettings?.ignoreQuery ? undefined : query);
 
-    const resp = await searchSource.fetch$().toPromise();
+    const resp = await lastValueFrom(searchSource.fetch$());
 
     const min = get(resp, 'rawResponse.aggregations.minAgg.value', undefined);
     const max = get(resp, 'rawResponse.aggregations.maxAgg.value', undefined);

@@ -12,6 +12,7 @@ import {
   BrowserCouldNotLaunchError,
   BrowserUnexpectedlyClosedError,
   BrowserScreenshotError,
+  InvalidLayoutParametersError,
 } from '.';
 
 describe('mapToReportingError', () => {
@@ -22,6 +23,9 @@ describe('mapToReportingError', () => {
   });
 
   test('Screenshotting error', () => {
+    expect(mapToReportingError(new errors.InvalidLayoutParametersError())).toBeInstanceOf(
+      InvalidLayoutParametersError
+    );
     expect(mapToReportingError(new errors.BrowserClosedUnexpectedly())).toBeInstanceOf(
       BrowserUnexpectedlyClosedError
     );
