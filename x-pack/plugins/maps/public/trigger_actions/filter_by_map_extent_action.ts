@@ -20,12 +20,16 @@ interface FilterByMapExtentActionContext {
   embeddable: Embeddable<FilterByMapExtentInput>;
 }
 
+export function getFilterByMapExtent(input: { filterByMapExtent?: boolean }) {
+  return input.filterByMapExtent === undefined ? false : input.filterByMapExtent;
+}
+
 export const filterByMapExtentAction = createAction<FilterByMapExtentActionContext>({
   id: FILTER_BY_MAP_EXTENT,
   type: FILTER_BY_MAP_EXTENT,
   order: 20,
   getDisplayName: ({ embeddable }: FilterByMapExtentActionContext) => {
-    return embeddable.getInput().filterByMapExtent
+    return getFilterByMapExtent(embeddable.getInput())
       ? i18n.translate('xpack.maps.filterByMapExtentMenuItem.disableDisplayName', {
           defaultMessage: 'Disable filter by map extent',
         })
@@ -45,7 +49,7 @@ export const filterByMapExtentAction = createAction<FilterByMapExtentActionConte
   },
   execute: async ({ embeddable }: FilterByMapExtentActionContext) => {
     embeddable.updateInput({
-      filterByMapExtent: !embeddable.getInput().filterByMapExtent,
+      filterByMapExtent: !getFilterByMapExtent(embeddable.getInput()),
     });
   },
 });

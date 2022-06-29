@@ -15,6 +15,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -124,6 +125,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
       configs: ['/some/path/to/config/kibana.yml'],
     },
     config: pluginInitializerContextConfigMock<T>(config),
+    node: nodeServiceMock.createInternalPrebootContract(),
   };
 
   return mock;

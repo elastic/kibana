@@ -16,6 +16,7 @@ import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
 import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
+import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
 import {
@@ -84,6 +85,7 @@ export type PluginsServiceStartDeps = InternalCoreStart;
 /** @internal */
 export interface PluginsServiceDiscoverDeps {
   environment: InternalEnvironmentServicePreboot;
+  node: InternalNodeServicePreboot;
 }
 
 /** @internal */
@@ -109,11 +111,21 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
   }
 
-  public async discover({ environment }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
+  public async discover({
+    environment,
+    node,
+  }: PluginsServiceDiscoverDeps): Promise<DiscoveredPlugins> {
     const config = await firstValueFrom(this.config$);
 
-    const { error$, plugin$ } = discover(config, this.coreContext, {
-      uuid: environment.instanceUuid,
+    const { error$, plugin$ } = discover({
+      config,
+      coreContext: this.coreContext,
+      instanceInfo: {
+        uuid: environment.instanceUuid,
+      },
+      nodeInfo: {
+        roles: node.roles,
+      },
     });
 
     await this.handleDiscoveryErrors(error$);
