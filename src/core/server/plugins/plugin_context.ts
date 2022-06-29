@@ -194,9 +194,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
     },
-    context: {
-      createContextContainer: deps.context.createContextContainer,
-    },
     docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,

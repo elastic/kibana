@@ -22,7 +22,7 @@ import type {
   InternalExecutionContextStart,
 } from '@kbn/core-execution-context-server-internal';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { InternalContextPreboot, ContextSetup } from './context';
+import { InternalContextPreboot, InternalContextSetup } from './context';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
@@ -67,7 +67,7 @@ export interface InternalCorePreboot {
 export interface InternalCoreSetup {
   analytics: AnalyticsServiceSetup;
   capabilities: CapabilitiesSetup;
-  context: ContextSetup;
+  context: InternalContextSetup;
   docLinks: DocLinksServiceSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;

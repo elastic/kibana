@@ -17,7 +17,7 @@ import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 
 import type { RequestHandlerContext } from '..';
-import { ContextSetup, InternalContextPreboot } from '../context';
+import { InternalContextSetup, InternalContextPreboot } from '../context';
 import { CspConfigType, config as cspConfig } from '../csp';
 
 import { Router } from './router';
@@ -45,7 +45,7 @@ export interface PrebootDeps {
 }
 
 export interface SetupDeps {
-  context: ContextSetup;
+  context: InternalContextSetup;
   executionContext: InternalExecutionContextSetup;
 }
 
