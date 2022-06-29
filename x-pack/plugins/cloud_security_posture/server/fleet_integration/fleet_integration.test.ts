@@ -53,6 +53,10 @@ describe('create CSP rules with post package create callback', () => {
   it('should create stateful rules based on rule template', async () => {
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+    // @ts-ignore
+    mockPackagePolicy.inputs[0].streams[0] = {
+      vars: { benchmark: { value: 'cis_k8s' } },
+    };
     mockSoClient.find.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -81,6 +85,10 @@ describe('create CSP rules with post package create callback', () => {
   it('validate that all rules templates are fetched', async () => {
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+    // @ts-ignore
+    mockPackagePolicy.inputs[0].streams[0] = {
+      vars: { benchmark: { value: 'cis_k8s' } },
+    };
     mockSoClient.find.mockResolvedValueOnce({
       saved_objects: [
         {

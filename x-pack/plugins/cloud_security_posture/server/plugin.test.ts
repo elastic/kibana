@@ -142,6 +142,10 @@ describe('Cloud Security Posture Plugin', () => {
 
       const packageMock = createPackagePolicyMock();
       packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+      // @ts-ignore
+      packageMock.inputs[0].streams[0] = {
+        vars: { benchmark: { value: 'cis_k8s' } },
+      };
 
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {
@@ -231,6 +235,10 @@ describe('Cloud Security Posture Plugin', () => {
       const packageMock = createPackagePolicyMock();
       packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
       packageMock.vars = { dataYaml: { type: 'foo' } };
+      // @ts-ignore
+      packageMock.inputs[0].streams[0] = {
+        vars: { benchmark: { value: 'cis_k8s' } },
+      };
 
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {
