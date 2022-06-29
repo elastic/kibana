@@ -79,9 +79,9 @@ function RulesPage() {
               showCreateRuleButton: false,
               ruleDetailsRoute: 'alerts/rules/:ruleId',
               statusFilter: status,
-              setStatusFilter: setStatus,
+              onStatusFilterChange: setStatus,
               lastResponseFilter: lastResponse,
-              setLastResponseFilter: setLastResponse,
+              onLastResponseFilterChange: setLastResponse,
               refresh,
             })}
           </EuiFlexItem>

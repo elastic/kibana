@@ -97,15 +97,15 @@ interface RulesPageContainerState {
 }
 
 export interface RulesListProps {
-  filteredRuleTypes?: string[] | undefined;
-  filteredSolutions?: string[] | undefined;
+  filteredRuleTypes?: string[];
+  filteredSolutions?: string[];
   showActionFilter?: boolean;
-  ruleDetailsRoute?: string | undefined;
+  ruleDetailsRoute?: string;
   showCreateRuleButton?: boolean;
   statusFilter?: RuleStatus[];
-  setStatusFilter?: (status: RuleStatus[]) => RulesPageContainerState;
+  onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
   lastResponseFilter?: string[];
-  setLastResponseFilter?: (lastResponse: string[]) => RulesPageContainerState;
+  onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
   refresh?: Date;
 }
 
@@ -134,9 +134,9 @@ export const RulesList = ({
   ruleDetailsRoute,
   showCreateRuleButton = true,
   statusFilter,
-  setStatusFilter,
+  onStatusFilterChange,
   lastResponseFilter,
-  setLastResponseFilter,
+  onLastResponseFilterChange,
   refresh,
 }: RulesListProps) => {
   const history = useHistory();
@@ -330,8 +330,8 @@ export const RulesList = ({
   }, []);
 
   useEffect(() => {
-    if (setStatusFilter) {
-      setStatusFilter(ruleStatusesFilter);
+    if (onStatusFilterChange) {
+      onStatusFilterChange(ruleStatusesFilter);
     }
   }, [ruleStatusesFilter]);
 
@@ -348,8 +348,8 @@ export const RulesList = ({
   }, [lastResponseFilter]);
 
   useEffect(() => {
-    if (setLastResponseFilter) {
-      setLastResponseFilter(ruleExecutionStatusesFilter);
+    if (onLastResponseFilterChange) {
+      onLastResponseFilterChange(ruleExecutionStatusesFilter);
     }
   }, [ruleExecutionStatusesFilter]);
 
@@ -623,7 +623,6 @@ export const RulesList = ({
             />
           </EuiButton>
         </EuiFlexItem>
-        ,
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">

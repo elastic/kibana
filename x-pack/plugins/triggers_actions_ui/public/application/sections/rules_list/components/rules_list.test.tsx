@@ -518,7 +518,7 @@ describe('rules_list component with props', () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
       wrapper = mountWithIntl(
-        <RulesList statusFilter={['disabled']} setStatusFilter={jest.fn()} />
+        <RulesList statusFilter={['disabled']} onStatusFilterChange={jest.fn()} />
       );
       await act(async () => {
         await nextTick();
@@ -550,8 +550,11 @@ describe('rules_list component with props', () => {
         })
       );
 
-      expect(wrapper.prop('setStatusFilter')).toHaveBeenCalled();
-      expect(wrapper.prop('setStatusFilter')).toHaveBeenLastCalledWith(['disabled', 'enabled']);
+      expect(wrapper.prop('onStatusFilterChange')).toHaveBeenCalled();
+      expect(wrapper.prop('onStatusFilterChange')).toHaveBeenLastCalledWith([
+        'disabled',
+        'enabled',
+      ]);
     });
   });
 
@@ -606,7 +609,7 @@ describe('rules_list component with props', () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
       wrapper = mountWithIntl(
-        <RulesList lastResponseFilter={['error']} setLastResponseFilter={jest.fn()} />
+        <RulesList lastResponseFilter={['error']} onLastResponseFilterChange={jest.fn()} />
       );
       await act(async () => {
         await nextTick();
@@ -641,8 +644,11 @@ describe('rules_list component with props', () => {
         })
       );
 
-      expect(wrapper.prop('setLastResponseFilter')).toHaveBeenCalled();
-      expect(wrapper.prop('setLastResponseFilter')).toHaveBeenLastCalledWith(['error', 'active']);
+      expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenCalled();
+      expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenLastCalledWith([
+        'error',
+        'active',
+      ]);
 
       wrapper.find('[data-test-subj="ruleExecutionStatusFilterButton"] button').simulate('click');
       wrapper
@@ -656,8 +662,8 @@ describe('rules_list component with props', () => {
         })
       );
 
-      expect(wrapper.prop('setLastResponseFilter')).toHaveBeenCalled();
-      expect(wrapper.prop('setLastResponseFilter')).toHaveBeenLastCalledWith(['active']);
+      expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenCalled();
+      expect(wrapper.prop('onLastResponseFilterChange')).toHaveBeenLastCalledWith(['active']);
     });
   });
 
