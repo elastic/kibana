@@ -65,6 +65,26 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
   meta?: Meta;
 };
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type PublicFileSavedObjectAttributes = {
+  created_at: string;
+
+  /**
+   * The date-time this file share will expire.
+   *
+   * @note default date-time is determined by this application
+   *
+   * TODO: in future we could add a special value like "forever", but this should
+   * not be the default.
+   */
+  valid_until?: string;
+
+  /**
+   * ID of the file being shared publicly
+   */
+  file: string;
+};
+
 export type FileJSON = FileSavedObjectAttributes & { id: string };
 
 export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;

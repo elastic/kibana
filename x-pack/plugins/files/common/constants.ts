@@ -12,5 +12,9 @@ export const PLUGIN_NAME = 'files' as const;
  * Unique type name of the file saved object
  */
 export const FILE_SO_TYPE = 'file';
+/**
+ * Unique type name of the public file saved object
+ */
+export const PUBLIC_FILE_SO_TYPE = 'publicFile';
 
 export const ES_FIXED_SIZE_INDEX_BLOB_STORE = 'esFixedSizeIndex' as const;
