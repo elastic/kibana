@@ -129,6 +129,8 @@ export interface TrainedModelDeploymentStatsResponse {
   inference_threads: number;
   model_threads: number;
   state: DeploymentState;
+  threads_per_allocation: number;
+  number_of_allocations: number;
   allocation_status: { target_allocation_count: number; state: string; allocation_count: number };
   nodes: Array<{
     node: Record<
@@ -153,6 +155,8 @@ export interface TrainedModelDeploymentStatsResponse {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
+    threads_per_allocation: number;
+    number_of_allocations: number;
   }>;
 }
 
@@ -163,6 +167,8 @@ export interface AllocatedModel {
     state: string;
     allocation_count: number;
   };
+  number_of_allocations: number;
+  threads_per_allocation: number;
   /**
    * Not required for rendering in the Model stats
    */
@@ -186,6 +192,8 @@ export interface AllocatedModel {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
+    number_of_allocations: number;
+    threads_per_allocation: number;
   };
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { FC } from 'react';
-import { EuiBadge, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -60,6 +60,28 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       'data-test-subj': 'mlAllocatedModelsTableSize',
       render: (v: AllocatedModel) => {
         return bytesFormatter(v.required_native_memory_bytes);
+      },
+    },
+    {
+      name: (
+        <EuiToolTip
+          content={i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationTooltip', {
+            defaultMessage: 'number_of_allocations times threads_per_allocation',
+          })}
+        >
+          <span>
+            {i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationHeader', {
+              defaultMessage: 'Allocation',
+            })}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      width: '100px',
+      truncateText: false,
+      'data-test-subj': 'mlAllocatedModelsTableAllocation',
+      render: (v: AllocatedModel) => {
+        return `${v.node.number_of_allocations} * ${v.node.threads_per_allocation}`;
       },
     },
     {
