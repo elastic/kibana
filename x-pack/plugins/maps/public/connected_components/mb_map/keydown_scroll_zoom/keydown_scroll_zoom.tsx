@@ -55,7 +55,7 @@ export class KeydownScrollZoom extends Component<Props, State> {
       if (this._isMounted) {
         this.setState({ show: false });
       }
-    }, 500);
+    }, 1500);
     event.preventDefault();
   };
 
