@@ -29,3 +29,7 @@ export interface FilesClient {
   update: ClientMethodFrom<UpdateHttpEndpoint>;
   upload: ClientMethodFrom<UploadHttpEndpoint>;
 }
+
+export interface FilesClientFactory {
+  asScoped(fileKind: string): FilesClient;
+}

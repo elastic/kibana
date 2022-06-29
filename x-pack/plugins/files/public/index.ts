@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { FilesPlugin } from './plugin';
 
-export function plugin(ctx: PluginInitializerContext) {
-  return new FilesPlugin(ctx);
+export type { FilesClient, FilesClientFactory } from './types';
+
+export function plugin() {
+  return new FilesPlugin();
 }

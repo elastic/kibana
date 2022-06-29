@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { FilesClient } from '../types';
-import { FILE_KIND_API_ROUTES_FILLED } from '../../common/api_routes';
+import { FILE_KIND_API_ROUTES_CLIENT } from '../../common/api_routes';
 
 interface Args {
   fileKind: string;
@@ -17,7 +17,7 @@ interface Args {
 export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
   return {
     create(args) {
-      return http.post(FILE_KIND_API_ROUTES_FILLED.getCreateFileRoute(fileKind), {
+      return http.post(FILE_KIND_API_ROUTES_CLIENT.getCreateFileRoute(fileKind), {
         headers: {
           'content-type': 'application/json',
         },
@@ -25,21 +25,21 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
       });
     },
     delete(args) {
-      return http.delete(FILE_KIND_API_ROUTES_FILLED.getDeleteRoute(fileKind, args.id));
+      return http.delete(FILE_KIND_API_ROUTES_CLIENT.getDeleteRoute(fileKind, args.id));
     },
     download(args) {
       return http.get(
-        FILE_KIND_API_ROUTES_FILLED.getDownloadRoute(fileKind, args.id, args.fileName)
+        FILE_KIND_API_ROUTES_CLIENT.getDownloadRoute(fileKind, args.id, args.fileName)
       );
     },
     getById(args) {
-      return http.get(FILE_KIND_API_ROUTES_FILLED.getByIdRoute(fileKind, args.id));
+      return http.get(FILE_KIND_API_ROUTES_CLIENT.getByIdRoute(fileKind, args.id));
     },
     list(args) {
-      return http.get(FILE_KIND_API_ROUTES_FILLED.getListRoute(fileKind, args.page, args.perPage));
+      return http.get(FILE_KIND_API_ROUTES_CLIENT.getListRoute(fileKind, args.page, args.perPage));
     },
     update({ id, ...body }) {
-      return http.patch(FILE_KIND_API_ROUTES_FILLED.getUpdateRoute(fileKind, id), {
+      return http.patch(FILE_KIND_API_ROUTES_CLIENT.getUpdateRoute(fileKind, id), {
         headers: {
           'content-type': 'application/json',
         },
@@ -47,7 +47,7 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
       });
     },
     upload(args) {
-      return http.put(FILE_KIND_API_ROUTES_FILLED.getUploadRoute(fileKind, args.id), {
+      return http.put(FILE_KIND_API_ROUTES_CLIENT.getUploadRoute(fileKind, args.id), {
         body: args.body,
       });
     },

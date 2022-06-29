@@ -13,7 +13,7 @@ const API_BASE_PATH = `/api/${PLUGIN_ID}`;
 
 const FILES_API_BASE_PATH = `${API_BASE_PATH}/files`;
 
-export const FILE_KIND_API_ROUTES = {
+export const FILE_KIND_API_ROUTES_SERVER = {
   getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
   getUploadRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}/blob`,
   getDownloadRoute: (fileKind: string) =>
@@ -24,7 +24,7 @@ export const FILE_KIND_API_ROUTES = {
   getByIdRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
 };
 
-export const FILE_KIND_API_ROUTES_FILLED = {
+export const FILE_KIND_API_ROUTES_CLIENT = {
   getCreateFileRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}`,
   getUploadRoute: (fileKind: string, id: string) => `${FILES_API_BASE_PATH}/${fileKind}/${id}/blob`,
   getDownloadRoute: (fileKind: string, id: string, fileName?: string) =>

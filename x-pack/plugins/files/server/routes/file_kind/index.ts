@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FILE_KIND_API_ROUTES } from '../../../common/api_routes';
+import { FILE_KIND_API_ROUTES_SERVER } from '../../../common/api_routes';
 import { fileKindsRegistry } from '../../file_kinds_registry';
 
 import { FilesRouter } from '../types';
@@ -25,7 +25,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
     if (fileKind.http.create) {
       fileKindRouter[create.method](
         {
-          path: FILE_KIND_API_ROUTES.getCreateFileRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES_SERVER.getCreateFileRoute(fileKind.id),
           validate: {
             body: create.bodySchema,
           },
@@ -38,7 +38,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
 
       fileKindRouter[upload.method](
         {
-          path: FILE_KIND_API_ROUTES.getUploadRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES_SERVER.getUploadRoute(fileKind.id),
           validate: {
             body: upload.bodySchema,
             params: upload.paramsSchema,
@@ -58,7 +58,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
     if (fileKind.http.update) {
       fileKindRouter[update.method](
         {
-          path: FILE_KIND_API_ROUTES.getUpdateRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES_SERVER.getUpdateRoute(fileKind.id),
           validate: {
             body: update.bodySchema,
             params: update.paramsSchema,
@@ -73,7 +73,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
     if (fileKind.http.delete) {
       fileKindRouter[deleteEndpoint.method](
         {
-          path: FILE_KIND_API_ROUTES.getDeleteRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES_SERVER.getDeleteRoute(fileKind.id),
           validate: {
             params: deleteEndpoint.paramsSchema,
           },
@@ -87,7 +87,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
     if (fileKind.http.list) {
       fileKindRouter[list.method](
         {
-          path: FILE_KIND_API_ROUTES.getListRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES_SERVER.getListRoute(fileKind.id),
           validate: {
             query: list.querySchema,
           },
@@ -101,7 +101,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
     if (fileKind.http.download) {
       fileKindRouter[download.method](
         {
-          path: FILE_KIND_API_ROUTES.getDownloadRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES_SERVER.getDownloadRoute(fileKind.id),
           validate: {
             params: download.paramsSchema,
           },
@@ -115,7 +115,7 @@ export function registerFileKindRoutes(router: FilesRouter) {
     if (fileKind.http.getById) {
       fileKindRouter[getById.method](
         {
-          path: FILE_KIND_API_ROUTES.getByIdRoute(fileKind.id),
+          path: FILE_KIND_API_ROUTES_SERVER.getByIdRoute(fileKind.id),
           validate: {
             params: getById.paramsSchema,
           },

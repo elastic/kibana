@@ -8,6 +8,8 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { FilesPlugin } from './plugin';
 
+export type { FilesSetup, FilesStart } from './types';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new FilesPlugin(initializerContext);
 }

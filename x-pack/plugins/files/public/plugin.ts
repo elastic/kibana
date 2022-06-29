@@ -5,10 +5,31 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { FilesClientFactory } from './types';
+import { createFilesClient } from './files_client';
 
-export class FilesPlugin implements Plugin {
-  constructor(private readonly ctx: PluginInitializerContext) {}
-  setup(core: CoreSetup, plugins: object): void {}
-  start(core: CoreStart, plugins: object): void {}
+export interface FilesSetup {
+  filesClientFactory: FilesClientFactory;
+}
+
+export type FilesStart = FilesSetup;
+
+export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
+  private api: undefined | FilesSetup;
+
+  setup(core: CoreSetup): FilesSetup {
+    this.api = {
+      filesClientFactory: {
+        asScoped(fileKind: string) {
+          return createFilesClient({ fileKind, http: core.http });
+        },
+      },
+    };
+    return this.api;
+  }
+
+  start(core: CoreStart): FilesStart {
+    return this.api!;
+  }
 }
