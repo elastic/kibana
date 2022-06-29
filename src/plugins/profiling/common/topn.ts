@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { orderBy } from 'lodash';
+
 import {
   AggregationsHistogramAggregate,
   AggregationsHistogramBucket,
@@ -13,42 +15,62 @@ import {
 
 import { StackFrameMetadata } from './profiling';
 
-type TopNBucket = {
-  Value: string;
+export interface TopNSample {
+  Timestamp: number;
   Count: number;
-};
+  Category: string;
+}
 
-type TopNBucketsByDate = {
-  TopN: Record<number, TopNBucket[]>;
-};
+export interface TopNSamples {
+  TopN: TopNSample[];
+}
 
-type TopNContainers = TopNBucketsByDate;
-type TopNDeployments = TopNBucketsByDate;
-type TopNHosts = TopNBucketsByDate;
-type TopNThreads = TopNBucketsByDate;
-
-type TopNTraces = TopNBucketsByDate & {
+interface TopNTraces extends TopNSamples {
   Metadata: Record<string, StackFrameMetadata[]>;
-};
+}
 
-type TopN = TopNContainers | TopNDeployments | TopNHosts | TopNThreads | TopNTraces;
+export function createTopNSamples(histogram: AggregationsHistogramAggregate): TopNSample[] {
+  const bucketsByTimestamp = new Map();
+  const uniqueCategories = new Set<string>();
 
-export function createTopNBucketsByDate(
-  histogram: AggregationsHistogramAggregate
-): TopNBucketsByDate {
-  const topNBucketsByDate: Record<number, TopNBucket[]> = {};
-
+  // Convert the histogram into nested maps and record the unique categories
   const histogramBuckets = (histogram?.buckets as AggregationsHistogramBucket[]) ?? [];
   for (let i = 0; i < histogramBuckets.length; i++) {
-    const key = histogramBuckets[i].key / 1000;
-    topNBucketsByDate[key] = [];
-    histogramBuckets[i].group_by.buckets.forEach((item: any) => {
-      topNBucketsByDate[key].push({
-        Value: item.key,
-        Count: item.count.value,
-      });
-    });
+    const frameCountsByCategory = new Map();
+    const items = histogramBuckets[i].group_by.buckets;
+    for (let j = 0; j < items.length; j++) {
+      uniqueCategories.add(items[j].key);
+      frameCountsByCategory.set(items[j].key, items[j].count.value);
+    }
+    bucketsByTimestamp.set(histogramBuckets[i].key, frameCountsByCategory);
   }
 
-  return { TopN: topNBucketsByDate };
+  // Normalize samples so there are an equal number of data points per each timestamp
+  const samples: TopNSample[] = [];
+  for (const timestamp of bucketsByTimestamp.keys()) {
+    for (const category of uniqueCategories.values()) {
+      const frameCountsByCategory = bucketsByTimestamp.get(timestamp);
+      const sample: TopNSample = {
+        Timestamp: timestamp,
+        Count: frameCountsByCategory.get(category) ?? 0,
+        Category: category,
+      };
+      samples.push(sample);
+    }
+  }
+
+  return orderBy(samples, ['Timestamp', 'Count', 'Category'], ['asc', 'desc', 'asc']);
+}
+
+export function groupSamplesByCategory(samples: TopNSample[]) {
+  const series = new Map();
+  for (let i = 0; i < samples.length; i++) {
+    const v = samples[i];
+    if (!series.has(v.Category)) {
+      series.set(v.Category, []);
+    }
+    const value = series.get(v.Category);
+    value.push([v.Timestamp, v.Count]);
+  }
+  return series;
 }

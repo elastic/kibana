@@ -137,7 +137,14 @@ function App({ fetchTopN, fetchElasticFlamechart }: Props) {
               fetchTopN={fetchTopN}
               setTopN={setTopN}
             />
-            <StackedBarChart id="topn" name="topn" height={400} x="x" y="y" category="g" />
+            <StackedBarChart
+              id="topn"
+              name="topn"
+              height={400}
+              x="Timestamp"
+              y="Count"
+              category="Category"
+            />
             <ChartGrid maximum={10} />
           </TopNContext.Provider>
         </>
