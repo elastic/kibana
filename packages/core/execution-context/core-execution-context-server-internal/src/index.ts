@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type { KibanaExecutionContext } from '../../types';
 export { ExecutionContextService } from './execution_context_service';
 export type {
   InternalExecutionContextSetup,
   InternalExecutionContextStart,
-  ExecutionContextSetup,
-  ExecutionContextStart,
   IExecutionContext,
 } from './execution_context_service';
-export type { IExecutionContextContainer } from './execution_context_container';
-export { config } from './execution_context_config';
+export { executionContextConfig } from './execution_context_config';
