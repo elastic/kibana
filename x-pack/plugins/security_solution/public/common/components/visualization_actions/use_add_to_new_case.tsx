@@ -9,11 +9,10 @@ import { useCallback, useMemo } from 'react';
 import { CommentType } from '@kbn/cases-plugin/common';
 
 import { APP_ID } from '../../../../common/constants';
-import { useKibana } from '../../lib/kibana/kibana_react';
+import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
 import { LensAttributes } from './types';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 export interface UseAddToNewCaseProps {
   onClick?: () => void;

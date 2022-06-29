@@ -106,7 +106,10 @@ describe('AddToCaseAction', function () {
     expect(core?.cases?.ui.getAllCasesSelectorModal).toHaveBeenCalledWith(
       expect.objectContaining({
         owner: ['observability'],
-        userCanCrud: true,
+        permissions: {
+          all: false,
+          read: false,
+        },
       })
     );
   });
