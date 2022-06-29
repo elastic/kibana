@@ -13,7 +13,7 @@ import { KibanaServices } from '../../lib/kibana';
 
 import * as alertsApi from '../../../detections/containers/detection_engine/alerts/api';
 import * as listsApi from '@kbn/securitysolution-list-api';
-import * as getQueryFilterHelper from '../../../../common/detection_engine/get_query_filter';
+import * as getQueryFilterHelper from '../../../detections/containers/detection_engine/exceptions/get_query_filter';
 import * as buildFilterHelpers from '../../../detections/components/alerts_table/default_config';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getCreateExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';

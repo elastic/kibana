@@ -26,12 +26,7 @@ import {
   entriesList,
   Entry,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { Filter } from '@kbn/es-query';
-import { ListClient } from '@kbn/lists-plugin/server';
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { partition } from 'lodash';
-import { hasLargeValueList } from '../has_large_value_list';
 
 type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists | EntryMatchWildcard;
 interface ExceptionListItemNonLargeList extends ExceptionListItemSchema {
@@ -142,126 +137,6 @@ export const createOrClauses = (
   exceptionItems: ExceptionItemSansLargeValueLists[]
 ): Array<BooleanFilter | NestedFilter> => {
   return exceptionItems.flatMap((exceptionItem) => buildExceptionItemFilter(exceptionItem));
-};
-
-export const filterOutLargeValueLists = async (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  listClient: ListClient
-) => {
-  return await Promise.all(
-    exceptionItems.map(async (exceptionItem) => {
-      const listEntries = exceptionItem.entries.filter((entry): entry is EntryList =>
-        entriesList.is(entry)
-      );
-      exceptionItem.entries = await Promise.all(
-        listEntries.filter(async (entry) => {
-          const {
-            list: { id },
-          } = entry;
-          const valueList = await listClient.findListItem({
-            listId: id,
-            perPage: 0,
-            page: 0,
-            filter: '',
-            currentIndexPosition: 0,
-          });
-          // Limit for value list size to be put into the initial ES request
-          if (valueList && valueList.total <= 500) {
-            return entry;
-          }
-        })
-      );
-      return exceptionItem;
-    })
-  );
-};
-
-export const buildExceptionFilter = ({
-  lists,
-  excludeExceptions,
-  chunkSize,
-  alias = null,
-  listClient,
-}: {
-  lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
-  excludeExceptions: boolean;
-  chunkSize: number;
-  alias: string | null;
-  listClient?: ListClient;
-}): Filter | undefined => {
-  // Remove exception items with large value lists. These are evaluated
-  // elsewhere for the moment being.
-
-  const [exceptionsWithoutValueLists, valueListExceptions] = partition(
-    lists,
-    (item): item is ExceptionListItemSchema | CreateExceptionListItemSchema =>
-      !hasLargeValueList(item.entries)
-  );
-
-  const smallValueListExceptions: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
-    [];
-  if (listClient) {
-    filterOutLargeValueLists(valueListExceptions, listClient).then((filteredExceptions) => {
-      smallValueListExceptions.push(...filteredExceptions);
-    });
-  }
-
-  exceptionsWithoutValueLists.push(...smallValueListExceptions);
-
-  const exceptionFilter: Filter = {
-    meta: {
-      alias,
-      disabled: false,
-      negate: excludeExceptions,
-    },
-    query: {
-      bool: {
-        should: undefined,
-      },
-    },
-  };
-
-  if (exceptionsWithoutValueLists.length === 0) {
-    return undefined;
-  } else if (exceptionsWithoutValueLists.length <= chunkSize) {
-    const clause = createOrClauses(exceptionsWithoutValueLists);
-    exceptionFilter.query!.bool!.should = clause;
-    return exceptionFilter;
-  } else {
-    const chunks = chunkExceptions(exceptionsWithoutValueLists, chunkSize);
-
-    const filters = chunks.map((exceptionsChunk) => {
-      const orClauses = createOrClauses(exceptionsChunk);
-
-      return {
-        meta: {
-          alias: null,
-          disabled: false,
-          negate: false,
-        },
-        query: {
-          bool: {
-            should: orClauses,
-          },
-        },
-      };
-    });
-
-    const clauses = filters.map<BooleanFilter>(({ query }) => query);
-
-    return {
-      meta: {
-        alias,
-        disabled: false,
-        negate: excludeExceptions,
-      },
-      query: {
-        bool: {
-          should: clauses,
-        },
-      },
-    };
-  }
 };
 
 export const buildExclusionClause = (booleanFilter: BooleanFilter): BooleanFilter => {
@@ -390,20 +265,6 @@ const isBooleanFilter = (clause: object): clause is BooleanFilter => {
   return keys.includes('bool') != null;
 };
 
-export const buildListClause = async (entry: EntryList, listClient: ListClient): BooleanFilter => {
-  const { field, operator } = entry;
-  const list = await listClient.findListItem({ listId: entry.list.id });
-  return {
-    bool: {
-      [operator === 'excluded' ? 'must_not' : 'must']: {
-        terms: {
-          [field]: list,
-        },
-      },
-    },
-  };
-};
-
 export const getBaseNestedClause = (
   entries: NonListEntry[],
   parentField: string
@@ -436,7 +297,7 @@ export const buildNestedClause = (entry: EntryNested): NestedFilter => {
 };
 
 export const createInnerAndClauses = (
-  entry: Entry,
+  entry: NonListEntry,
   parent?: string
 ): BooleanFilter | NestedFilter => {
   const field = parent != null ? `${parent}.${entry.field}` : entry.field;

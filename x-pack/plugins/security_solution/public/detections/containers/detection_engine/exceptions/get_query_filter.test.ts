@@ -12,8 +12,8 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 describe('get_filter', () => {
   describe('getQueryFilter', () => {
     describe('kuery', () => {
-      test('it should work with an empty filter as kuery', () => {
-        const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
+      test('it should work with an empty filter as kuery', async () => {
+        const esQuery = await getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
         expect(esQuery).toEqual({
           bool: {
             must: [],
@@ -37,8 +37,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter as a kuery', () => {
-        const esQuery = getQueryFilter(
+      test('it should work with a simple filter as a kuery', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: windows',
           'kuery',
           [
@@ -91,8 +91,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should ignore disabled filters as a kuery', () => {
-        const esQuery = getQueryFilter(
+      test('it should ignore disabled filters as a kuery', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: windows',
           'kuery',
           [
@@ -162,8 +162,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter as a kuery without meta information', () => {
-        const esQuery = getQueryFilter(
+      test('it should work with a simple filter as a kuery without meta information', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: windows',
           'kuery',
           [
@@ -206,7 +206,7 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter as a kuery without meta information with an exists', () => {
+      test('it should work with a simple filter as a kuery without meta information with an exists', async () => {
         const query: Partial<Filter> = {
           query: {
             match_phrase: {
@@ -223,7 +223,7 @@ describe('get_filter', () => {
           },
         } as Partial<Filter>;
 
-        const esQuery = getQueryFilter(
+        const esQuery = await getQueryFilter(
           'host.name: windows',
           'kuery',
           [query, exists],
@@ -263,8 +263,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter that is disabled as a kuery', () => {
-        const esQuery = getQueryFilter(
+      test('it should work with a simple filter that is disabled as a kuery', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: windows',
           'kuery',
           [
@@ -314,8 +314,8 @@ describe('get_filter', () => {
     });
 
     describe('lucene', () => {
-      test('it should work with an empty filter as lucene', () => {
-        const esQuery = getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*'], []);
+      test('it should work with an empty filter as lucene', async () => {
+        const esQuery = await getQueryFilter('host.name: linux', 'lucene', [], ['auditbeat-*'], []);
         expect(esQuery).toEqual({
           bool: {
             must: [
@@ -334,8 +334,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter as a lucene', () => {
-        const esQuery = getQueryFilter(
+      test('it should work with a simple filter as a lucene', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: windows',
           'lucene',
           [
@@ -384,8 +384,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should ignore disabled lucene filters', () => {
-        const esQuery = getQueryFilter(
+      test('it should ignore disabled lucene filters', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: windows',
           'lucene',
           [
@@ -451,8 +451,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter that is disabled as a lucene', () => {
-        const esQuery = getQueryFilter(
+      test('it should work with a simple filter that is disabled as a lucene', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: windows',
           'lucene',
           [
@@ -495,8 +495,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a list', () => {
-        const esQuery = getQueryFilter(
+      test('it should work with a list', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: linux',
           'kuery',
           [],
@@ -559,8 +559,8 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work with a list with multiple items', () => {
-      const esQuery = getQueryFilter(
+    test('it should work with a list with multiple items', async () => {
+      const esQuery = await getQueryFilter(
         'host.name: linux',
         'kuery',
         [],
@@ -658,8 +658,8 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work with an exception list that includes a nested typ', () => {
-      const esQuery = getQueryFilter(
+    test('it should work with an exception list that includes a nested typ', async () => {
+      const esQuery = await getQueryFilter(
         'host.name: linux',
         'kuery',
         [],
@@ -714,8 +714,8 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work with an empty list', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
+    test('it should work with an empty list', async () => {
+      const esQuery = await getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
       expect(esQuery).toEqual({
         bool: {
           filter: [
@@ -728,8 +728,8 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work when lists has value undefined', () => {
-      const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
+    test('it should work when lists has value undefined', async () => {
+      const esQuery = await getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], []);
       expect(esQuery).toEqual({
         bool: {
           filter: [
@@ -743,8 +743,8 @@ describe('get_filter', () => {
     });
 
     describe('when "excludeExceptions" is false', () => {
-      test('it should work with a list', () => {
-        const esQuery = getQueryFilter(
+      test('it should work with a list', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: linux',
           'kuery',
           [],
@@ -806,8 +806,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a list with multiple items', () => {
-        const esQuery = getQueryFilter(
+      test('it should work with a list with multiple items', async () => {
+        const esQuery = await getQueryFilter(
           'host.name: linux',
           'kuery',
           [],
@@ -905,8 +905,15 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with an empty list', () => {
-        const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], [], false);
+      test('it should work with an empty list', async () => {
+        const esQuery = await getQueryFilter(
+          'host.name: linux',
+          'kuery',
+          [],
+          ['auditbeat-*'],
+          [],
+          false
+        );
         expect(esQuery).toEqual({
           bool: {
             filter: [
@@ -920,8 +927,8 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work with a nested object queries', () => {
-      const esQuery = getQueryFilter(
+    test('it should work with a nested object queries', async () => {
+      const esQuery = await getQueryFilter(
         'category:{ name:Frank and trusted:true }',
         'kuery',
         [],
@@ -975,8 +982,8 @@ describe('get_filter', () => {
       });
     });
 
-    test('it works with references and does not add indexes', () => {
-      const esQuery = getQueryFilter(
+    test('it works with references and does not add indexes', async () => {
+      const esQuery = await getQueryFilter(
         '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',
         'kuery',
         [],

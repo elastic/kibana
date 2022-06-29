@@ -7,7 +7,6 @@
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { sampleEmptyDocSearchResults } from '../__mocks__/es_results';
 import * as single_search_after from '../single_search_after';
 import { findThresholdSignals } from './find_threshold_signals';
@@ -15,8 +14,17 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { buildTimestampRuntimeMapping } from '../../rule_types/utils';
 import { TIMESTAMP_RUNTIME_FIELD } from '../../rule_types/constants';
+import { getQueryFilter } from '../get_query_filter';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 
-const queryFilter = getQueryFilter('', 'kuery', [], ['*'], []);
+const queryFilter = getQueryFilter({
+  query: '',
+  language: 'kuery',
+  filters: [],
+  index: ['*'],
+  lists: [],
+  listClient: getListClientMock(),
+});
 const mockSingleSearchAfter = jest.fn(async () => ({
   searchResult: {
     ...sampleEmptyDocSearchResults(),

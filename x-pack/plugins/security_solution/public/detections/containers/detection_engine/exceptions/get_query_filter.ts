@@ -10,21 +10,21 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 
 import type { ESBoolQuery } from '../typed_json';
 import type { Query, Index } from './schemas/common/schemas';
+import { getExceptionFilterFromExceptions } from './api';
 
-export const getQueryFilter = (
+export const getQueryFilter = async (
   query: Query,
   language: Language,
   filters: unknown,
   index: Index,
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
-): ESBoolQuery => {
+): Promise<ESBoolQuery> => {
   const indexPattern: DataViewBase = {
     fields: [],
     title: index.join(),
@@ -40,14 +40,13 @@ export const getQueryFilter = (
   // allowing us to make 1024-item chunks of exception list items.
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
   // very conservative value.
-  const exceptionFilter = buildExceptionFilter({
-    lists,
+  const { filter } = await getExceptionFilterFromExceptions({
+    exceptions: lists,
     excludeExceptions,
     chunkSize: 1024,
-    alias: null,
   });
   const initialQuery = { query, language };
-  const allFilters = getAllFilters(filters as Filter[], exceptionFilter);
+  const allFilters = getAllFilters(filters as Filter[], filter);
 
   return buildEsQuery(indexPattern, initialQuery, allFilters, config);
 };

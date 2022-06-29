@@ -99,6 +99,7 @@ export const mlExecutor = async ({
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
       exceptionItems,
+      listClient,
     });
 
     const [filteredAnomalyHits, _] = await filterEventsAgainstList({

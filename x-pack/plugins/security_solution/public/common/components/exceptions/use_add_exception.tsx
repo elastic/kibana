@@ -20,7 +20,7 @@ import {
   buildAlertsFilter,
   buildAlertStatusesFilter,
 } from '../../../detections/components/alerts_table/default_config';
-import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
+import { getQueryFilter } from '../../../detections/containers/detection_engine/exceptions/get_query_filter';
 import type { Index } from '../../../../common/detection_engine/schemas/common/schemas';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
 import { useKibana } from '../../lib/kibana';
@@ -133,7 +133,7 @@ export const useAddOrUpdateException = ({
             'in-progress',
           ]);
 
-          const filter = getQueryFilter(
+          const filter = await getQueryFilter(
             '',
             'kuery',
             [...buildAlertsFilter(ruleStaticId), ...alertStatusFilter],

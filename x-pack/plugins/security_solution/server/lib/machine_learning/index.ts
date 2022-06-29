@@ -8,8 +8,9 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
+import type { ListClient } from '@kbn/lists-plugin/server';
 import type { MlAnomalyRecordDoc as Anomaly } from '@kbn/ml-plugin/server';
+import { buildExceptionFilter } from '../detection_engine/exceptions/build_exception_filter';
 
 export type { Anomaly };
 export type AnomalyResults = estypes.SearchResponse<Anomaly>;
@@ -29,10 +30,17 @@ export interface AnomaliesSearchParams {
 
 export const getAnomalies = async (
   params: AnomaliesSearchParams,
-  mlAnomalySearch: MlAnomalySearch
+  mlAnomalySearch: MlAnomalySearch,
+  listClient: ListClient
 ): Promise<AnomalyResults> => {
   const boolCriteria = buildCriteria(params);
-
+  const { filter } = await buildExceptionFilter({
+    lists: params.exceptionItems,
+    excludeExceptions: true,
+    chunkSize: 1024,
+    alias: null,
+    listClient,
+  });
   return mlAnomalySearch(
     {
       size: params.maxRecords || 100,
@@ -53,12 +61,7 @@ export const getAnomalies = async (
                 },
               },
             ],
-            must_not: buildExceptionFilter({
-              lists: params.exceptionItems,
-              excludeExceptions: true,
-              chunkSize: 1024,
-              alias: null,
-            })?.query,
+            must_not: filter?.query,
           },
         },
         fields: [

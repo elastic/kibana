@@ -16,7 +16,13 @@ export const exceptions = t.type({
   exceptions: t.array(exceptionListItemSchema),
   type: t.literal('exceptionItems'),
 });
+const optionalExceptionParams = t.exact(
+  t.partial({ chunkSize: t.number, excludeExceptions: t.boolean, alias: t.string })
+);
 
-export const getExceptionFilterSchema = t.union([exceptions, exceptionListId]);
+export const getExceptionFilterSchema = t.intersection([
+  t.union([exceptions, exceptionListId]),
+  optionalExceptionParams,
+]);
 
 export type GetExceptionFilterSchema = t.TypeOf<typeof getExceptionFilterSchema>;

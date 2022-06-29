@@ -10,6 +10,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
 import type { AnomalyResults } from '../../machine_learning';
 import { getAnomalies } from '../../machine_learning';
 
@@ -22,6 +23,7 @@ export const findMlSignals = async ({
   from,
   to,
   exceptionItems,
+  listClient,
 }: {
   ml: MlPluginSetup;
   request: KibanaRequest;
@@ -31,6 +33,7 @@ export const findMlSignals = async ({
   from: string;
   to: string;
   exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
 }): Promise<AnomalyResults> => {
   const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
   const params = {
@@ -40,5 +43,5 @@ export const findMlSignals = async ({
     latestMs: dateMath.parse(to)?.valueOf() ?? 0,
     exceptionItems,
   };
-  return getAnomalies(params, mlAnomalySearch);
+  return getAnomalies(params, mlAnomalySearch, listClient);
 };

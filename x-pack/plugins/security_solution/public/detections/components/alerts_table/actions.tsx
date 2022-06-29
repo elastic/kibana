@@ -25,7 +25,6 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 
 import type { TGridModel } from '@kbn/timelines-plugin/public';
 
@@ -78,6 +77,7 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
+import { getExceptionFilterFromExceptions } from '../../containers/detection_engine/exceptions/api';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -449,13 +449,12 @@ const createThresholdTimeline = async (
 
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(alertDoc);
     const exceptions = await getExceptions(ecsData);
-    const exceptionsFilter =
-      buildExceptionFilter({
-        lists: exceptions,
-        excludeExceptions: true,
-        chunkSize: 10000,
-        alias: 'Exceptions',
-      }) ?? [];
+    const { filter: exceptionsFilter } = await getExceptionFilterFromExceptions({
+      exceptions,
+      excludeExceptions: true,
+      chunkSize: 10000,
+      alias: 'Exceptions',
+    });
     const allFilters = (templateValues.filters ?? augmentedFilters).concat(exceptionsFilter);
 
     return createTimeline({

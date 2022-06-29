@@ -64,11 +64,12 @@ export const getExceptionFilterRoute = (
           exceptionItems.push(...exceptions);
         }
 
+        const { alias = null, excludeExceptions = true, chunkSize = 1024 } = request.body;
         const { filter } = await buildExceptionFilter({
           lists: exceptionItems,
-          alias: null,
-          excludeExceptions: true,
-          chunkSize: 1024,
+          alias,
+          excludeExceptions,
+          chunkSize,
           listClient,
         });
 
