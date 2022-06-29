@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`cases feature_privilege_builder within feature grants all privileges under feature with id observability 1`] = `
+Array [
+  "cases:1.0.0-zeta1:observability/pushCase",
+  "cases:1.0.0-zeta1:observability/createCase",
+  "cases:1.0.0-zeta1:observability/createComment",
+  "cases:1.0.0-zeta1:observability/createConfiguration",
+  "cases:1.0.0-zeta1:observability/getCase",
+  "cases:1.0.0-zeta1:observability/getComment",
+  "cases:1.0.0-zeta1:observability/getTags",
+  "cases:1.0.0-zeta1:observability/getReporters",
+  "cases:1.0.0-zeta1:observability/getUserActions",
+  "cases:1.0.0-zeta1:observability/findConfigurations",
+  "cases:1.0.0-zeta1:observability/updateCase",
+  "cases:1.0.0-zeta1:observability/updateComment",
+  "cases:1.0.0-zeta1:observability/updateConfiguration",
+  "cases:1.0.0-zeta1:observability/deleteCase",
+  "cases:1.0.0-zeta1:observability/deleteComment",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants create privileges under feature with id securitySolution 1`] = `
+Array [
+  "cases:1.0.0-zeta1:securitySolution/createCase",
+  "cases:1.0.0-zeta1:securitySolution/createComment",
+  "cases:1.0.0-zeta1:securitySolution/createConfiguration",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants delete privileges under feature with id securitySolution 1`] = `
+Array [
+  "cases:1.0.0-zeta1:securitySolution/deleteCase",
+  "cases:1.0.0-zeta1:securitySolution/deleteComment",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants push privileges under feature with id obs 1`] = `
+Array [
+  "cases:1.0.0-zeta1:obs/pushCase",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants read privileges under feature with id observability 1`] = `
+Array [
+  "cases:1.0.0-zeta1:observability/getCase",
+  "cases:1.0.0-zeta1:observability/getComment",
+  "cases:1.0.0-zeta1:observability/getTags",
+  "cases:1.0.0-zeta1:observability/getReporters",
+  "cases:1.0.0-zeta1:observability/getUserActions",
+  "cases:1.0.0-zeta1:observability/findConfigurations",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants update privileges under feature with id observability 1`] = `
+Array [
+  "cases:1.0.0-zeta1:observability/updateCase",
+  "cases:1.0.0-zeta1:observability/updateComment",
+  "cases:1.0.0-zeta1:observability/updateConfiguration",
+]
+`;

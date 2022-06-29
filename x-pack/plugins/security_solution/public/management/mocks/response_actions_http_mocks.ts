@@ -10,6 +10,7 @@ import { EndpointActionGenerator } from '../../../common/endpoint/data_generator
 import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
+  GET_RUNNING_PROCESSES_ROUTE,
   ENDPOINTS_ACTION_LIST_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
@@ -24,6 +25,7 @@ import {
   ActionListApiResponse,
   HostIsolationResponse,
   PendingActionsResponse,
+  RunningProcessesEntry,
   ActionDetails,
 } from '../../../common/endpoint/types';
 
@@ -39,6 +41,10 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   actionList: (options: HttpFetchOptionsWithPath) => ActionListApiResponse;
 
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
+
+  runningProcesses: (
+    options: HttpFetchOptionsWithPath
+  ) => ActionDetailsApiResponse<RunningProcessesEntry>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -113,6 +119,26 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           generator.generateAgentPendingActionsSummary({ agent_id: id })
         ),
       };
+    },
+  },
+  {
+    id: 'runningProcesses',
+    path: GET_RUNNING_PROCESSES_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<RunningProcessesEntry> => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails({
+        outputs: {
+          '1': {
+            type: 'json',
+            content: {
+              entries: generator.randomResponseActionRunningProcesses(3),
+            },
+          },
+        },
+      }) as ActionDetails<RunningProcessesEntry>;
+
+      return { data: response };
     },
   },
 ]);
