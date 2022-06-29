@@ -9,9 +9,13 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, ReactNode, Suspense } from 'react';
 import { CasesContextProps } from '../../components/cases_context';
 
-export type GetCasesContextProps = CasesContextProps;
+export type GetCasesContextPropsInternal = CasesContextProps;
+export type GetCasesContextProps = Omit<
+  CasesContextProps,
+  'externalReferenceAttachmentTypeRegistry'
+>;
 
-const CasesProviderLazy: React.FC<{ value: GetCasesContextProps }> = lazy(
+const CasesProviderLazy: React.FC<{ value: GetCasesContextPropsInternal }> = lazy(
   () => import('../../components/cases_context')
 );
 
@@ -22,7 +26,7 @@ const CasesProviderLazyWrapper = ({
   features,
   children,
   releasePhase,
-}: GetCasesContextProps & { children: ReactNode }) => {
+}: GetCasesContextPropsInternal & { children: ReactNode }) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesProviderLazy
@@ -43,10 +47,10 @@ CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 
 export const getCasesContextLazy = ({
   externalReferenceAttachmentTypeRegistry,
-}: Pick<GetCasesContextProps, 'externalReferenceAttachmentTypeRegistry'>) => {
+}: Pick<GetCasesContextPropsInternal, 'externalReferenceAttachmentTypeRegistry'>) => {
   // eslint-disable-next-line react/display-name
   return (
-    props: Omit<GetCasesContextProps, 'externalReferenceAttachmentTypeRegistry'> & {
+    props: GetCasesContextProps & {
       children: ReactNode;
     }
   ) => (

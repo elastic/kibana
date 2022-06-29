@@ -15,7 +15,7 @@ export class AttachmentTypeRegistry<T extends BaseAttachmentType> {
   private readonly attachmentTypes: Map<string, T> = new Map();
 
   /**
-   * Returns if the attachment type registry has the given type registered
+   * Returns true if the attachment type registry has the given type registered
    */
   public has(id: string) {
     return this.attachmentTypes.has(id);

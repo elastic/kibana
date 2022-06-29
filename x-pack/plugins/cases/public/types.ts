@@ -95,11 +95,9 @@ export interface CasesUiStart {
      * @param props GetCasesProps
      * @return {ReactElement<GetCasesProps>}
      */
-    getCases: (
-      props: Omit<GetCasesProps, 'externalReferenceAttachmentTypeRegistry'>
-    ) => ReactElement<GetCasesProps>;
+    getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
     getCasesContext: () => (
-      props: Omit<GetCasesContextProps, 'externalReferenceAttachmentTypeRegistry'> & {
+      props: GetCasesContextProps & {
         children: ReactNode;
       }
     ) => ReactElement<GetCasesContextProps>;
@@ -109,7 +107,7 @@ export interface CasesUiStart {
      * @returns A react component that is a modal for selecting a case
      */
     getAllCasesSelectorModal: (
-      props: Omit<GetAllCasesSelectorModalProps, 'externalReferenceAttachmentTypeRegistry'>
+      props: GetAllCasesSelectorModalProps
     ) => ReactElement<GetAllCasesSelectorModalProps>;
     /**
      * Flyout with the form to create a case for the owner
@@ -117,16 +115,14 @@ export interface CasesUiStart {
      * @returns A react component that is a flyout for creating a case
      */
     getCreateCaseFlyout: (
-      props: Omit<GetCreateCaseFlyoutProps, 'externalReferenceAttachmentTypeRegistry'>
+      props: GetCreateCaseFlyoutProps
     ) => ReactElement<GetCreateCaseFlyoutProps>;
     /**
      * Get the recent cases component
      * @param props GetRecentCasesProps
      * @returns A react component for showing recent cases
      */
-    getRecentCases: (
-      props: Omit<GetRecentCasesProps, 'externalReferenceAttachmentTypeRegistry'>
-    ) => ReactElement<GetRecentCasesProps>;
+    getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
   };
   hooks: {
     getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;

@@ -10,7 +10,11 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import type { CreateCaseFlyoutProps } from '../../components/create/flyout';
 import { CasesProvider, CasesContextProps } from '../../components/cases_context';
 
-export type GetCreateCaseFlyoutProps = CreateCaseFlyoutProps & CasesContextProps;
+type GetCreateCaseFlyoutPropsInternal = CreateCaseFlyoutProps & CasesContextProps;
+export type GetCreateCaseFlyoutProps = Omit<
+  GetCreateCaseFlyoutPropsInternal,
+  'externalReferenceAttachmentTypeRegistry'
+>;
 
 export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
   () => import('../../components/create/flyout')
@@ -24,7 +28,7 @@ export const getCreateCaseFlyoutLazy = ({
   onClose,
   onSuccess,
   attachments,
-}: GetCreateCaseFlyoutProps) => (
+}: GetCreateCaseFlyoutPropsInternal) => (
   <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, userCanCrud, features }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CreateCaseFlyoutLazy
