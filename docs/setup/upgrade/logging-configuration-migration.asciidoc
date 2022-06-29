@@ -28,6 +28,11 @@ All log messages handled by `root` context are forwarded to the legacy logging s
 When you switch to the new logging configuration, you will start seeing duplicate log entries in both legacy and current formats. The legacy format will be removed when the `default` appender is no longer required. 
 To override this behavior for specific log messages, configure an appender for the logger.
 
+[float]
+==== Memory consumption
+If you log large volumes to file, such as logging in `verbose` mode, be aware that by using the legacy logging system, your cluster may experience increased memory consumption. We recommend switching over to the current logging system to avoid out of memory issues.
+Refer to the https://github.com/elastic/kibana/issues/134724[public issue] for more information.
+
 [[logging-pattern-format-old-and-new-example]]
 [options="header"]
 |===
