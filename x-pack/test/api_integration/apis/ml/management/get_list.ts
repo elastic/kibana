@@ -48,6 +48,8 @@ export default ({ getService }: FtrProviderContext) => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
 
+      await ml.api.initSavedObjects();
+
       // Create AD jobs
       const jobConfig1 = ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdSpace1);
       await ml.api.createAnomalyDetectionJob(jobConfig1, idSpace1);
@@ -113,7 +115,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(resp).to.eql(
         expectedResponse,
-        `Response for space ${idSpace1} should be ${expectedResponse} entries (got ${resp})`
+        `Response for space ${idSpace1} should be ${JSON.stringify(
+          expectedResponse
+        )} entries (got ${JSON.stringify(resp)})`
       );
     });
 
@@ -132,7 +136,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(resp).to.eql(
         expectedResponse,
-        `Response for space ${idSpace1} should be ${expectedResponse} entries (got ${resp})`
+        `Response for space ${idSpace1} should be ${JSON.stringify(
+          expectedResponse
+        )} entries (got ${JSON.stringify(resp)})`
       );
     });
 
@@ -161,7 +167,9 @@ export default ({ getService }: FtrProviderContext) => {
       ];
       expect(resp).to.eql(
         expectedResponse,
-        `Response for space ${idSpace1} should be ${expectedResponse} entries (got ${resp})`
+        `Response for space ${idSpace1} should be ${JSON.stringify(
+          expectedResponse
+        )} entries (got ${JSON.stringify(resp)})`
       );
     });
 
@@ -181,7 +189,9 @@ export default ({ getService }: FtrProviderContext) => {
       ];
       expect(resp).to.eql(
         expectedResponse,
-        `Response for space ${idSpace1} should be ${expectedResponse} entries (got ${resp})`
+        `Response for space ${idSpace1} should be ${JSON.stringify(
+          expectedResponse
+        )} entries (got ${JSON.stringify(resp)})`
       );
     });
 
@@ -213,7 +223,9 @@ export default ({ getService }: FtrProviderContext) => {
       ];
       expect(resp).to.eql(
         expectedResponse,
-        `Response for space ${idSpace1} should be ${expectedResponse} entries (got ${resp})`
+        `Response for space ${idSpace1} should be ${JSON.stringify(
+          expectedResponse
+        )} entries (got ${JSON.stringify(resp)})`
       );
     });
 
@@ -239,7 +251,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(resp).to.eql(
         expectedResponse,
-        `Response for space ${idSpace1} should be ${expectedResponse} entries (got ${resp})`
+        `Response for space ${idSpace1} should be ${JSON.stringify(
+          expectedResponse
+        )} entries (got ${JSON.stringify(resp)})`
       );
     });
   });
