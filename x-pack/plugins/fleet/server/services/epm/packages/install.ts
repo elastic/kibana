@@ -51,6 +51,7 @@ import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
+import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants/fleet_es_assets';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -213,6 +214,13 @@ interface InstallRegistryPackageParams {
   spaceId: string;
   force?: boolean;
   ignoreConstraints?: boolean;
+}
+interface InstallUploadedArchiveParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  archiveBuffer: Buffer;
+  contentType: string;
+  spaceId: string;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -389,14 +397,6 @@ async function installPackageFromRegistry({
   }
 }
 
-interface InstallUploadedArchiveParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
-  archiveBuffer: Buffer;
-  contentType: string;
-  spaceId: string;
-}
-
 async function installPackageByUpload({
   savedObjectsClient,
   esClient,
@@ -497,6 +497,33 @@ export type InstallPackageParams = {
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
   | ({ installSource: Extract<InstallSource, 'bundled'> } & InstallUploadedArchiveParams)
 );
+
+export async function reinstallPackageFromInstallation({
+  soClient,
+  esClient,
+  installation,
+}: {
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  installation: Installation;
+}) {
+  if (installation.install_source === 'upload') {
+    throw new Error('Cannot reinstall an uploaded package');
+  }
+  return installPackage({
+    // If the package is bundled reinstall from the registry will still use the bundled package.
+    installSource: 'registry',
+    savedObjectsClient: soClient,
+    pkgkey: Registry.pkgToPkgKey({
+      name: installation.name,
+      version: installation.version,
+    }),
+    esClient,
+    spaceId: installation.installed_kibana_space_id || DEFAULT_SPACE_ID,
+    // Force install the package will update the index template and the datastream write indices
+    force: true,
+  });
+}
 
 export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
   if (!('installSource' in args)) {
@@ -612,6 +639,7 @@ export async function createInstallation(options: {
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
       install_source: installSource,
+      install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
       keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     },
     { id: pkgName, overwrite: true }

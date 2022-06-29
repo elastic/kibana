@@ -39,6 +39,8 @@ import { pkgToPkgKey } from './epm/registry';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { getBundledPackages } from './epm/packages';
+import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
+
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<
@@ -121,6 +123,9 @@ async function createSetupSideEffects(
   ).filter((result) => (result.errors ?? []).length > 0);
 
   const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
+
+  logger.debug('Upgrade Fleet package instal versions');
+  await upgradePackageInstallVersion({ soClient, esClient, logger });
 
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
