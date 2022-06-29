@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
+import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { Spaces, Superuser } from '../../../scenarios';
 import {
   getUrlPrefix,
   getEventLog,
   getTestRuleData,
-  TaskManagerDoc,
   ESTestIndexTool,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -216,22 +217,32 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
       // request telemetry task to run
       await supertest
-        .post('/api/alerting_actions_telemetry/run_now')
+        .post('/api/alerting_actions_telemetry/run_soon')
         .set('kbn-xsrf', 'xxx')
         .send({ taskId: 'Alerting-alerting_telemetry' })
         .expect(200);
 
-      // get telemetry task doc
-      const telemetryTask = await es.get<TaskManagerDoc>({
-        id: `task:Alerting-alerting_telemetry`,
-        index: '.kibana_task_manager',
-      });
-      const taskState = telemetryTask?._source?.task?.state;
-      expect(taskState).not.to.be(undefined);
-      const telemetry = JSON.parse(taskState!);
+      let telemetry: any;
 
-      // total number of rules
-      expect(telemetry.count_total).to.equal(21);
+      await retry.try(async () => {
+        const resp = await es.search<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>({
+          index: '.kibana_task_manager',
+          body: {
+            query: {
+              term: {
+                _id: `task:Alerting-alerting_telemetry`,
+              },
+            },
+          },
+        });
+        const task = resp.hits.hits[0]?._source?.task;
+        expect(task?.status).to.be('idle');
+        const taskState = task?.state;
+        expect(taskState).not.to.be(undefined);
+        telemetry = JSON.parse(String(taskState!));
+        // total number of rules
+        expect(telemetry.count_total).to.equal(21);
+      });
 
       // total number of enabled rules
       expect(telemetry.count_active_total).to.equal(18);

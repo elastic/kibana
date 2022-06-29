@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-// TODO: Replace these with kbn packaged versions once we have those available to us.
-// At the moment imports from runtime plugins into packages are not supported.
-// import type { Headers } from '@kbn/core/server';
+/**
+ * TODO: Replace these with kbn packaged versions once we have those available to us.
+ * At the moment imports from runtime plugins into packages are not supported.
+ * import type { Headers } from '@kbn/core/server';
+ */
 type Headers = Record<string, string | string[] | undefined>;
 
 function containsGzip(s: string) {
