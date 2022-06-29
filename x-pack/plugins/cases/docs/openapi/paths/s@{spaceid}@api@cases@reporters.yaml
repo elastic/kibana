@@ -26,6 +26,9 @@ get:
                   type: string
                 username: 
                   type: string
+          examples:
+            getReportersResponse:
+              $ref: '../components/examples/get_reporters_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

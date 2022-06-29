@@ -45,5 +45,7 @@ The API returns a JSON object with the retrieved reporters. For example:
 
 [source,json]
 --------------------------------------------------
-[{"username":"elastic","full_name":null,"email":null}]
+[
+   {"username":"elastic","full_name":null,"email":null},{"username":"user1","full_name":"User 1","email":"user1@elastic.co"},{"username":"user2","full_name":"User 2","email":"user2@elastic.co"}
+]
 --------------------------------------------------
