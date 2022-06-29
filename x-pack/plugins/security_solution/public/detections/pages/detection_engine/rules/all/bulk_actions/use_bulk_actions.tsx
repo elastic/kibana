@@ -88,7 +88,7 @@ export const useBulkActions = ({
   );
 
   const {
-    state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
+    state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds, isRefreshOn },
     actions: { setLoadingRules, setIsRefreshOn },
   } = rulesTableContext;
 
@@ -107,7 +107,9 @@ export const useBulkActions = ({
 
       const handleEnableAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
+        setIsRefreshOn(false);
         closePopover();
+
         const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
         const disabledRulesNoML = disabledRules.filter(({ type }) => !isMlRule(type));
 
@@ -128,11 +130,14 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
         });
         updateRulesCache(res?.attributes?.results?.updated ?? []);
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDisableActions = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
+        setIsRefreshOn(false);
         closePopover();
+
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
 
         const res = await executeRulesBulkAction({
@@ -143,11 +148,14 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
         });
         updateRulesCache(res?.attributes?.results?.updated ?? []);
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDuplicateAction = async () => {
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
+        setIsRefreshOn(false);
         closePopover();
+
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.duplicate,
@@ -156,13 +164,17 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleDeleteAction = async () => {
+        setIsRefreshOn(false);
         closePopover();
+
         if (isAllSelected) {
+          // User has cancelled deletion
           if ((await confirmDeletion()) === false) {
-            // User has cancelled deletion
+            setIsRefreshOn(isRefreshOn);
             return;
           }
         }
@@ -176,9 +188,11 @@ export const useBulkActions = ({
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         invalidateRules();
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleExportAction = async () => {
+        setIsRefreshOn(false);
         closePopover();
 
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
@@ -189,6 +203,7 @@ export const useBulkActions = ({
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
+        setIsRefreshOn(isRefreshOn);
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -205,13 +220,13 @@ export const useBulkActions = ({
 
         // User has cancelled edit action or there are no custom rules to proceed
         if ((await confirmBulkEdit()) === false) {
-          setIsRefreshOn(true);
+          setIsRefreshOn(isRefreshOn);
           return;
         }
 
         const editPayload = await completeBulkEditForm(bulkEditActionType);
         if (editPayload == null) {
-          setIsRefreshOn(true);
+          setIsRefreshOn(isRefreshOn);
           return;
         }
 
@@ -273,6 +288,7 @@ export const useBulkActions = ({
 
         isBulkEditFinished = true;
         updateRulesCache(res?.attributes?.results?.updated ?? []);
+        setIsRefreshOn(isRefreshOn);
         if (getIsMounted()) {
           await resolveTagsRefetch(bulkEditActionType);
         }
@@ -445,6 +461,7 @@ export const useBulkActions = ({
       getIsMounted,
       resolveTagsRefetch,
       updateRulesCache,
+      isRefreshOn,
     ]
   );
 };
