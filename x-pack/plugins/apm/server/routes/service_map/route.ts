@@ -19,6 +19,56 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
+import { getServiceMapTracePathsPreview } from './trace_path_preview';
+import { getServiceMapTracePathsPreviewOriginal } from './trace_path_preview_original';
+
+const serviceMapTracePathsOriginalRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/trace_path_preview_original',
+  params: t.type({
+    query: rangeRt,
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<any> => {
+    const { params } = resources;
+    const setup = await setupRequest(resources);
+
+    const {
+      query: { start, end },
+    } = params;
+
+    const res = await getServiceMapTracePathsPreviewOriginal({
+      setup,
+      start,
+      end,
+    });
+
+    return res;
+  },
+});
+
+const serviceMapTracePathsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/trace_path_preview',
+  params: t.type({
+    query: rangeRt,
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<any> => {
+    const { params } = resources;
+    const setup = await setupRequest(resources);
+
+    const {
+      query: { start, end },
+    } = params;
+
+    const tracePaths = await getServiceMapTracePathsPreview({
+      setup,
+      start,
+      end,
+    });
+
+    return { tracePaths };
+  },
+});
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -254,6 +304,8 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
 });
 
 export const serviceMapRouteRepository = {
+  ...serviceMapTracePathsOriginalRoute,
+  ...serviceMapTracePathsRoute,
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
   ...serviceMapBackendNodeRoute,
