@@ -631,13 +631,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         ...layer,
                         columns: {
                           ...layer.columns,
-                          [columnId]: setter,
+                          [referenceId]: setter,
                         },
                       };
                     } else {
                       newLayer = setter;
                     }
-                    return updateLayer(adjustColumnReferencesForChangedColumn(newLayer, columnId));
+                    return updateLayer(
+                      adjustColumnReferencesForChangedColumn(newLayer, referenceId)
+                    );
                   }}
                   validation={validation}
                   currentIndexPattern={currentIndexPattern}
