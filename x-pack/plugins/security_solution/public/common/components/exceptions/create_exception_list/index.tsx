@@ -7,15 +7,13 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, EuiForm, EuiFormRow, EuiModalFooter, EuiButton, EuiSpacer, EuiButtonEmpty, EuiCallOut, EuiFieldText } from '@elastic/eui';
-import { useApi } from '@kbn/securitysolution-list-hooks';
-import { CreateExceptionListSchema, ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { CreateExceptionListSchema, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
-import { useKibana } from '../../../lib/kibana';
-import { patchRule } from '../../../../detections/containers/detection_engine/rules/api';
+import { useCreateAndAssociateExceptionList } from './use_create_and_associate_exception_list';
 
 interface CreateExceptionListComponentProps {
-  rule?: Rule;
+  rule: Rule;
   showFirstLinkedListCallout: boolean;
   handleCloseModal: () => void;
   handleCreateExceptionListSuccess: (list: ExceptionListSchema) => void;
@@ -27,11 +25,9 @@ const CreateExceptionListComponent = ({
   handleCloseModal,
   handleCreateExceptionListSuccess,
 }: CreateExceptionListComponentProps): JSX.Element => {
-  const { http, notifications } = useKibana().services;
-  const { addExceptionList } = useApi(http);
-
   const [listName, setListName] = useState(rule != null ? `${rule.name} Exception List` : '');
   const [listDescription, setListDescription] = useState('');
+  const [isSavingExceptionList, createAndAssociateList] = useCreateAndAssociateExceptionList();
 
   const onNameChange = useCallback((e) => {
     setListName(e.target.value);
@@ -41,64 +37,31 @@ const CreateExceptionListComponent = ({
     setListDescription(e.target.value);
   }, [setListDescription]);
 
-  const handleListCreationSuccess = useCallback(
-    (listId: string) => () => {
-      notifications.toasts.addSuccess({
-        title: i18n.exceptionListCreateSuccessMessage(listId),
-      });
-    },
-    [notifications.toasts]
-  );
-
-  const handleListCreationError = useCallback(
-    (err: Error & { body?: { message: string } }): void => {
-      notifications.toasts.addError(err, {
-        title: i18n.EXCEPTION_LIST_CREATE_TOAST_ERROR,
-      });
-    },
-    [notifications.toasts]
-  );
-
-  const onCreateListSubmit = useCallback(async () => {
-    const exceptionListToCreate: CreateExceptionListSchema = {
-      name: listName,
-      description: listDescription ?? '',
-      type: 'detection',
-      namespace_type: 'single',
-      list_id: undefined,
-      tags: undefined,
-      meta: undefined,
-    };
-
-    try {
-      const newExceptionList = await addExceptionList({
-        list: exceptionListToCreate,
-      });
-
-      if (rule != null) {
-        const abortCtrl = new AbortController();
-        const newExceptionListReferences: ListArray = [
-          ...(rule.exceptions_list ?? []),
-          newExceptionList,
-        ];
-        console.log(newExceptionListReferences)
-        await patchRule({
-          ruleProperties: {
-            rule_id: rule.rule_id,
-            exceptions_list: newExceptionListReferences,
-          },
-          signal: abortCtrl.signal,
-        });
-      }
-
-      handleListCreationSuccess(newExceptionList.list_id);
+  const createAndAssociateExceptionList = useCallback(async () => {
+    if (createAndAssociateList != null) {
+      const exceptionListToCreate: CreateExceptionListSchema = {
+        name: listName,
+        description: listDescription ?? '',
+        type: 'detection',
+        namespace_type: 'single',
+        list_id: undefined,
+        tags: undefined,
+        meta: undefined,
+      };
+  
+      const newExceptionList = await createAndAssociateList(
+        exceptionListToCreate,
+        [{id: rule.id, ruleId: rule.rule_id}]
+      );
+  
       handleCreateExceptionListSuccess(newExceptionList);
-    } catch (e) {
-      console.log({e})
-      handleListCreationError(e);
     }
+  }, [rule, listName, listDescription]);
 
-  }, [handleListCreationError, addExceptionList, listName, listDescription]);
+  const onCreateListSubmit = useCallback(() => {
+    createAndAssociateExceptionList();
+  }, [createAndAssociateExceptionList]);
+
 
   return (
     <EuiModal onClose={handleCloseModal} initialFocus="[name=exceptionListName]">
@@ -142,7 +105,12 @@ const CreateExceptionListComponent = ({
       <EuiModalFooter>
         <EuiButtonEmpty onClick={handleCloseModal}>Cancel</EuiButtonEmpty>
 
-        <EuiButton isDisabled={listName.trim() === ''} type="submit" form="createExceptionListForm" onClick={onCreateListSubmit} fill>
+        <EuiButton
+          isDisabled={listName.trim() === ''}
+          onClick={onCreateListSubmit}
+          isLoading={isSavingExceptionList || createAndAssociateList == null}
+          fill
+        >
           {i18n.CREATE_EXCEPTION_LIST_BUTTON}
         </EuiButton>
       </EuiModalFooter>

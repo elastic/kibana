@@ -841,8 +841,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               )}
               {ruleDetailTab === RuleDetailTabs.exceptions && (
                 <ExceptionsViewer
-                  ruleId={ruleId ?? ''}
-                  ruleName={rule?.name ?? ''}
+                  rule={rule}
                   ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
                   dataViewId={rule?.data_view_id}
                   availableListTypes={exceptionLists.allowedExceptionListTypes}

@@ -41,15 +41,11 @@ const initialState: State = {
     totalItemCount: 0,
     pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
   },
-  exceptions: [],
   exceptionToEdit: null,
   loadingItemIds: [],
   isInitLoading: true,
   currentModal: null,
-  exceptionListTypeToEdit: null,
   totalDetectionsItems: 0,
-  showEndpointListsOnly: false,
-  showDetectionsListsOnly: false,
 };
 
 interface ExceptionsViewerProps {
@@ -72,57 +68,18 @@ const ExceptionsViewerComponent = ({
 
   const [
     {
-      exceptions,
       filterOptions,
       pagination,
       loadingItemIds,
       isInitLoading,
       currentModal,
       exceptionToEdit,
-      exceptionListTypeToEdit,
       totalDetectionsItems,
-      showDetectionsListsOnly,
-      showEndpointListsOnly,
     },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), { ...initialState });
   const { deleteExceptionItem } = useApi(http);
 
-  const setExceptions = useCallback(
-    ({
-      exceptions: newExceptions,
-      pagination: newPagination,
-    }: UseExceptionListItemsSuccess): void => {
-      dispatch({
-        type: 'setExceptions',
-        lists: exceptionListsMeta,
-        exceptions: newExceptions,
-        pagination: newPagination,
-      });
-    },
-    [dispatch, exceptionListsMeta]
-  );
-  const [loadingList, , , fetchListItems] = useExceptionListItems({
-    http: http,
-    lists: undefined,
-    filters: [],
-    pagination: {
-      page: pagination.pageIndex + 1,
-      perPage: pagination.pageSize,
-      total: pagination.totalItemCount,
-    },
-  });
-
-  // const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
-  //   useExceptionLists({
-  //     errorMessage: i18n.EXCEPTION_LISTS_FETCH_ERROR_TOASTER,
-  //     filterOptions: filters,
-  //     http,
-  //     namespaceTypes: ['single', 'agnostic'],
-  //     notifications,
-  //     hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
-  //   });
-  
   // REDUCER ACTION DISPATCHERS
   const setCurrentModal = useCallback(
     (modalName: ViewerFlyoutName): void => {
@@ -167,6 +124,29 @@ const ExceptionsViewerComponent = ({
     [setCurrentModal, exceptionListsMeta]
   );
 
+  const [loadingList, items, pag, fetchListItems] = useExceptionListItems({
+    http: http,
+    lists: undefined,
+    filters: [],
+    pagination: {
+      page: pagination.pageIndex + 1,
+      perPage: pagination.pageSize,
+      total: pagination.totalItemCount,
+    },
+  });
+
+  // const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
+  //   useExceptionLists({
+  //     errorMessage: i18n.EXCEPTION_LISTS_FETCH_ERROR_TOASTER,
+  //     filterOptions: filters,
+  //     http,
+  //     namespaceTypes: ['single', 'agnostic'],
+  //     notifications,
+  //     hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+  //   });
+  
+
+
   const refreshExceptionItems = useCallback((): void => {
     if (fetchListItems != null) {
       fetchListItems();
@@ -185,7 +165,7 @@ const ExceptionsViewerComponent = ({
     refreshExceptionItems();
   }, [setCurrentModal, refreshExceptionItems]);
 
-  const handleOnConfirmExceptionModal = useCallback((): void => {
+  const handleExceptionItemFlyoutSubmit = useCallback((): void => {
     setCurrentModal(null);
     refreshExceptionItems();
   }, [setCurrentModal, refreshExceptionItems]);
@@ -225,55 +205,53 @@ const ExceptionsViewerComponent = ({
 
   const handleCreateExceptionListModalSuccess = useCallback(
     () => {
-      handleCloseCreateExceptionListModal();
       setCurrentModal('addException');
     },
-    [handleCloseCreateExceptionListModal, setCurrentModal]
+    [handleCloseCreateExceptionListModal, setCurrentModal, onRuleChange]
   );
 
   // Logic for initial render
   useEffect((): void => {
-    if (isInitLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
+    if (isInitLoading && !loadingList && (items.length === 0 || items != null)) {
       dispatch({
         type: 'updateIsInitLoading',
         loading: false,
       });
     }
-  }, [isInitLoading, exceptions, loadingList, dispatch]);
+  }, [isInitLoading, items, loadingList, dispatch]);
 
   const showEmpty: boolean =
     !isInitLoading && !loadingList && totalDetectionsItems === 0;
 
   const showNoResults: boolean =
-    exceptions.length === 0 && (totalDetectionsItems > 0);
+    items.length === 0 && (totalDetectionsItems > 0);
 
   return (
     <>
       {currentModal === 'editException' &&
-        exceptionToEdit != null &&
-        exceptionListTypeToEdit != null && (
+        exceptionToEdit != null && (
           <EditExceptionFlyout
             ruleName={rule.name}
-            ruleId={rule.rule_id}
+            ruleId={rule.id}
             ruleIndices={ruleIndices}
             dataViewId={dataViewId}
-            exceptionListType={exceptionListTypeToEdit}
+            exceptionListType="detection"
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
-            onConfirm={handleOnConfirmExceptionModal}
+            onConfirm={handleExceptionItemFlyoutSubmit}
             onRuleChange={onRuleChange}
           />
         )}
 
-      {currentModal === 'addException' && exceptionListTypeToEdit != null && (
+      {currentModal === 'addException' && (
         <AddExceptionFlyout
           ruleName={rule.name}
           ruleIndices={ruleIndices}
           dataViewId={dataViewId}
-          ruleId={rule.rule_id}
-          exceptionListType={exceptionListTypeToEdit}
+          ruleId={rule.id}
+          exceptionListType="detection"
           onCancel={handleOnCancelExceptionModal}
-          onConfirm={handleOnConfirmExceptionModal}
+          onConfirm={handleExceptionItemFlyoutSubmit}
           onRuleChange={onRuleChange}
         />
       )}
@@ -305,7 +283,7 @@ const ExceptionsViewerComponent = ({
           showEmpty={showEmpty}
           showNoResults={showNoResults}
           isInitLoading={isInitLoading}
-          exceptions={exceptions}
+          exceptions={items}
           loadingItemIds={loadingItemIds}
           onDeleteException={handleDeleteException}
           onEditExceptionItem={handleEditException}
