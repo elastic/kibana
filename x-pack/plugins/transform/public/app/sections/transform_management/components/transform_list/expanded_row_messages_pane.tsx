@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { MouseEvent, useState } from 'react';
 
-import { EuiSpacer, EuiBasicTable, EuiBasicTableProps } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiBasicTable,
+  EuiBasicTableProps,
+  EuiToolTip,
+  EuiButtonIcon,
+} from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { euiLightVars as theme } from '@kbn/ui-theme';
@@ -96,11 +102,31 @@ export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
       }
     };
   };
-  useRefreshTransformList({ onRefresh: getMessagesFactory() });
+  const { refresh: refreshMessage } = useRefreshTransformList({ onRefresh: getMessagesFactory() });
 
   const columns = [
     {
-      name: '',
+      name: refreshMessage ? (
+        <EuiToolTip
+          content={i18n.translate('xpack.transform.transformList.refreshLabel', {
+            defaultMessage: 'Refresh',
+          })}
+        >
+          <EuiButtonIcon
+            // TODO: Replace this with ML's blurButtonOnClick when it's moved to a shared package
+            onClick={(e: MouseEvent<HTMLButtonElement>) => {
+              (e.currentTarget as HTMLButtonElement).blur();
+              refreshMessage();
+            }}
+            iconType="refresh"
+            aria-label={i18n.translate('xpack.transform.transformList.refreshAriaLabel', {
+              defaultMessage: 'Refresh',
+            })}
+          />
+        </EuiToolTip>
+      ) : (
+        ''
+      ),
       render: (message: TransformMessage) => <JobIcon message={message} />,
       width: theme.euiSizeXL,
     },
