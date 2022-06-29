@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import { useStepFromQueryString } from './component_template_edit';
 
-describe('useTabFromQueryString', () => {
+describe('useStepFromQueryString', () => {
   it('should return undefined if no step is set in the url', () => {
     const history = createMemoryHistory();
     history.push('/app/management/data/index_management/edit_component_template');
