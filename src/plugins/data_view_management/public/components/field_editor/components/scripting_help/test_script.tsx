@@ -83,8 +83,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     let query;
     if (searchContext) {
       const esQueryConfigs = getEsQueryConfig(this.context.services.uiSettings);
-      const searchContextQuery = searchContext.query as Query;
-      query = buildEsQuery(this.props.indexPattern, searchContextQuery || [], [], esQueryConfigs);
+      query = buildEsQuery(this.props.indexPattern, searchContext.query || [], [], esQueryConfigs);
     }
 
     const scriptResponse = await executeScript({
