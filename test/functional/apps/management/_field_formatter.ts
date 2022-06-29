@@ -21,7 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const indexPatterns = getService('indexPatterns');
   const toasts = getService('toasts');
 
-  describe('field formatter', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/135110
+  describe.skip('field formatter', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {

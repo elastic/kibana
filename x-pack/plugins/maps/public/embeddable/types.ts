@@ -33,13 +33,14 @@ interface MapEmbeddableState {
   filters?: Filter[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
+  filterByMapExtent?: boolean;
+  isMovementSynchronized?: boolean;
 }
 export type MapByValueInput = {
   attributes: MapSavedObjectAttributes;
-} & EmbeddableInput & { filterByMapExtent?: boolean } & MapEmbeddableState;
-export type MapByReferenceInput = SavedObjectEmbeddableInput & {
-  filterByMapExtent?: boolean;
-} & MapEmbeddableState;
+} & EmbeddableInput &
+  MapEmbeddableState;
+export type MapByReferenceInput = SavedObjectEmbeddableInput & MapEmbeddableState;
 export type MapEmbeddableInput = MapByValueInput | MapByReferenceInput;
 
 export type MapEmbeddableOutput = EmbeddableOutput & {

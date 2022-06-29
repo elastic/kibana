@@ -1235,7 +1235,31 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; })) & { id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
+          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }) | (({ externalReferenceId: string; externalReferenceStorage: { type: ",
+          "ExternalReferenceStorageType",
+          ".elasticSearchDoc; }; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
+          "JsonValue",
+          "; } | null; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".externalReference; owner: string; } | { externalReferenceStorage: { type: ",
+          "ExternalReferenceStorageType",
+          ".savedObject; soType: string; }; externalReferenceId: string; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
+          "JsonValue",
+          "; } | null; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".externalReference; owner: string; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; })) & { id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
           "Comment",
           "[]; }"
         ],

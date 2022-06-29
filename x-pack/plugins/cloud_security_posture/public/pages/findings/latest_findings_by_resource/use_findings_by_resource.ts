@@ -47,10 +47,10 @@ export interface FindingsByResourcePage {
     total_findings: number;
   };
   resource_id: string;
-  resource_name: string;
-  resource_subtype: string;
   cluster_id: string;
-  cis_sections: string[];
+  'resource.name': string;
+  'resource.sub_type': string;
+  'rule.section': string[];
 }
 
 interface FindingsByResourceAggs {
@@ -176,10 +176,10 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
 
   return {
     resource_id: resource.key,
-    resource_name: resource.name.buckets[0]?.key,
-    resource_subtype: resource.subtype.buckets[0]?.key,
+    ['resource.name']: resource.name.buckets[0]?.key,
+    ['resource.sub_type']: resource.subtype.buckets[0]?.key,
     cluster_id: resource.cluster_id.buckets[0]?.key,
-    cis_sections: resource.cis_sections.buckets.map((v) => v.key),
+    ['rule.section']: resource.cis_sections.buckets.map((v) => v.key),
     failed_findings: {
       count: resource.failed_findings.doc_count,
       normalized:
