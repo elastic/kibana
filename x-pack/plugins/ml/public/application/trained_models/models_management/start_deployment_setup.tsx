@@ -31,6 +31,7 @@ import {
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
 import type { CoreTheme, OverlayStart } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import { isCloud } from '../../services/ml_server_info';
 import {
   composeValidators,
@@ -216,12 +217,6 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
             <EuiFlexItem grow={false} />
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
-        <EuiLink href={startModelDeploymentDocUrl} external target={'_blank'}>
-          <FormattedMessage
-            id="xpack.ml.trainedModels.modelsList.startDeployment.docLinkTitle"
-            defaultMessage="Learn more"
-          />
-        </EuiLink>
       </EuiModalHeader>
 
       <EuiModalBody>
@@ -268,6 +263,20 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
+        <EuiLink
+          href={startModelDeploymentDocUrl}
+          external
+          target={'_blank'}
+          css={css`
+            align-self: center;
+          `}
+        >
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.startDeployment.docLinkTitle"
+            defaultMessage="Learn more"
+          />
+        </EuiLink>
+
         <EuiButtonEmpty onClick={onClose}>
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.cancelButton"
