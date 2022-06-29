@@ -146,6 +146,10 @@ export const createHandler =
       const host = hosts[idx];
       try {
         const uri = toURL(host, path);
+        // Invalid URL characters included in uri pathname will be percent-encoded by Node URL method, and results in a faulty request in some cases.
+        // To fix this issue, we need to extract the original request path and supply it to proxyRequest function to encode it correctly with encodeURIComponent.
+        // We ignore the search params here, since we are extracting them from the uri constructed by Node URL method.
+        const [requestPath] = path.split('?');
 
         // Because this can technically be provided by a settings-defined proxy config, we need to
         // preserve these property names to maintain BWC.
@@ -175,6 +179,7 @@ export const createHandler =
           payload: body,
           rejectUnauthorized,
           agent,
+          requestPath,
         });
 
         break;
