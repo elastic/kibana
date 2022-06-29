@@ -34,7 +34,7 @@ import { SearchIndicesLogic } from '../search_indices/search_indices_logic';
 import { SearchIndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api';
 import { MethodConnector } from './method_connector';
-import { MethodCrawler } from './method_crawler';
+import { MethodCrawler } from './method_crawler/method_crawler';
 import { MethodEs } from './method_es';
 import { MethodJson } from './method_json';
 
@@ -49,14 +49,13 @@ interface ButtonGroupOption {
 
 export const NewIndex: React.FC = () => {
   const [selectedMethod, setSelectedMethod] = useState({ id: '', label: '' });
-  const [methodIsSelected, setMethodIsSelected] = useState(false);
 
   const { loadSearchEngines } = useActions(SearchIndicesLogic);
   useEffect(() => {
     loadSearchEngines();
   }, []);
 
-  const buttonGroupOptions = [
+  const buttonGroupOptions: ButtonGroupOption[] = [
     {
       id: 'crawler',
       icon: 'globe',
@@ -67,20 +66,6 @@ export const NewIndex: React.FC = () => {
         'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
         {
           defaultMessage: 'Index content from your websites',
-        }
-      ),
-    },
-    {
-      id: 'connector',
-      icon: 'package',
-      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
-        defaultMessage: 'Use a data integration',
-      }),
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
-        {
-          defaultMessage:
-            'Index content frrom third-party services such as SharePoint and Google Drive',
         }
       ),
     },
@@ -98,27 +83,25 @@ export const NewIndex: React.FC = () => {
       ),
     },
     {
-      id: 'customIntegration',
+      id: 'connector',
       icon: 'package',
-      label: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.customIntegration.label',
-        {
-          defaultMessage: 'Build a custom data integration',
-        }
-      ),
+      label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
+        defaultMessage: 'Build a connector package',
+      }),
       description: i18n.translate(
-        'xpack.enterpriseSearch.content.newIndex.buttonGroup.customIntegration.description',
+        'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
         {
-          defaultMessage: 'Clone the connector package repo and start customizing.',
+          defaultMessage: 'Clone the connector package repo and build a custom connector',
         }
       ),
     },
-  ] as ButtonGroupOption[];
+  ];
 
   const handleMethodChange = (val: string) => {
-    const selected = buttonGroupOptions.find((b) => b.id === val) as ButtonGroupOption;
-    setSelectedMethod(selected);
-    setMethodIsSelected(true);
+    const selected = buttonGroupOptions.find((b) => b.id === val);
+    if (selected) {
+      setSelectedMethod(selected);
+    }
   };
 
   const NewSearchIndexLayout = () => (
@@ -198,7 +181,7 @@ export const NewIndex: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          {methodIsSelected ? <NewSearchIndexLayout /> : <SearchIndexEmptyState />}
+          {selectedMethod ? <NewSearchIndexLayout /> : <SearchIndexEmptyState />}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

@@ -44,7 +44,7 @@ export const locationRenderer = (
   isDraggable?: boolean
 ): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every((fieldName) => getOr(null, fieldName, data)) ? (
-    <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj="location-field">
+    <EuiFlexGroup alignItems="center" gutterSize="none">
       {fieldNames.map((fieldName, index) => {
         const locationValue = getOr('', fieldName, data);
         return (
@@ -236,7 +236,12 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
     });
 
     return draggables.length > 0 ? (
-      <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
+      <DraggableContainerFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        component="span"
+        data-test-subj="DefaultFieldRendererComponent"
+      >
         <EuiFlexItem grow={false}>{draggables} </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
@@ -397,7 +402,11 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
       () => (
         <>
           {' ,'}
-          <EuiButtonEmpty size="xs" onClick={togglePopover}>
+          <EuiButtonEmpty
+            size="xs"
+            onClick={togglePopover}
+            data-test-subj="DefaultFieldRendererOverflow-button"
+          >
             {`+${rowItems.length - overflowIndexStart} `}
             <FormattedMessage
               id="xpack.securitySolution.fieldRenderers.moreLabel"
