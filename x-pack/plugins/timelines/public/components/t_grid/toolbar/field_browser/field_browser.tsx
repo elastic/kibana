@@ -31,9 +31,10 @@ FieldBrowserButtonContainer.displayName = 'FieldBrowserButtonContainer';
  * Manages the state of the field browser
  */
 export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
-  timelineId,
   columnHeaders,
   browserFields,
+  onResetColumns,
+  onToggleColumn,
   options,
   width,
 }) => {
@@ -149,13 +150,14 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
           setSelectedCategoryIds={setSelectedCategoryIds}
           onFilterSelectedChange={onFilterSelectedChange}
           onHide={onHide}
+          onResetColumns={onResetColumns}
           onSearchInputChange={updateFilter}
+          onToggleColumn={onToggleColumn}
           options={options}
           restoreFocusTo={customizeColumnsButtonRef}
           searchInput={filterInput}
           appliedFilterInput={appliedFilterInput}
           selectedCategoryIds={selectedCategoryIds}
-          timelineId={timelineId}
           width={width}
         />
       )}

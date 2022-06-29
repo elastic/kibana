@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/data-plugin/common';
 import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { GEO_JSON_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';

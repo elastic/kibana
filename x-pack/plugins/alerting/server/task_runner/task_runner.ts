@@ -397,7 +397,10 @@ export class TaskRunner<
         `rule execution failure: ${ruleLabel}`,
         err.message
       );
-
+      this.logger.error(err, {
+        tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+        error: { stack_trace: err.stack },
+      });
       throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
     }
 
@@ -724,7 +727,10 @@ export class TaskRunner<
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
             this.logger.debug(message);
           } else {
-            this.logger.error(message);
+            this.logger.error(message, {
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+              error: { stack_trace: err.stack },
+            });
           }
           return originalState;
         }

@@ -29,6 +29,8 @@ describe('Endpoint Authz service', () => {
         ['canIsolateHost'],
         ['canUnIsolateHost'],
         ['canKillProcess'],
+        ['canSuspendProcess'],
+        ['canGetRunningProcesses'],
       ])('should set `%s` to `true`', (authProperty) => {
         expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)[authProperty]).toBe(
           true
@@ -49,6 +51,22 @@ describe('Endpoint Authz service', () => {
         expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canKillProcess).toBe(
           false
         );
+      });
+
+      it('should set `canSuspendProcess` to false if not proper license', () => {
+        licenseService.isPlatinumPlus.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canSuspendProcess
+        ).toBe(false);
+      });
+
+      it('should set `canGetRunningProcesses` to false if not proper license', () => {
+        licenseService.isPlatinumPlus.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canGetRunningProcesses
+        ).toBe(false);
       });
 
       it('should set `canUnIsolateHost` to true even if not proper license', () => {
@@ -72,6 +90,8 @@ describe('Endpoint Authz service', () => {
         ['canIsolateHost'],
         ['canUnIsolateHost'],
         ['canKillProcess'],
+        ['canSuspendProcess'],
+        ['canGetRunningProcesses'],
       ])('should set `%s` to `false`', (authProperty) => {
         expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)[authProperty]).toBe(
           false
@@ -97,6 +117,8 @@ describe('Endpoint Authz service', () => {
         canUnIsolateHost: true,
         canCreateArtifactsByPolicy: false,
         canKillProcess: false,
+        canSuspendProcess: false,
+        canGetRunningProcesses: false,
       });
     });
   });

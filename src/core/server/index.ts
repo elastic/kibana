@@ -31,6 +31,13 @@
 import { AwaitedProperties } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
+import { appendersSchema } from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsServicePreboot,
+} from '@kbn/core-analytics-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -56,7 +63,6 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
-import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
@@ -84,11 +90,6 @@ export type {
 };
 
 import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
-import type {
-  AnalyticsServicePreboot,
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-} from './analytics';
 
 export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
 
@@ -247,7 +248,7 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   AppenderConfigType,
-} from './logging';
+} from '@kbn/core-logging-server';
 export type {
   Logger,
   LoggerFactory,
@@ -260,6 +261,8 @@ export type {
   LogRecord,
   LogLevel,
 } from '@kbn/logging';
+
+export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
 export { PluginType } from '@kbn/core-base-common';
 
@@ -452,9 +455,6 @@ export type {
 export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
 export type {
-  AnalyticsServiceSetup,
-  AnalyticsServicePreboot,
-  AnalyticsServiceStart,
   AnalyticsClient,
   Event,
   EventContext,
@@ -465,8 +465,13 @@ export type {
   OptInConfig,
   ShipperClassConstructor,
   TelemetryCounter,
-} from './analytics';
-export { TelemetryCounterType } from './analytics';
+} from '@kbn/analytics-client';
+export { TelemetryCounterType } from '@kbn/analytics-client';
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServicePreboot,
+  AnalyticsServiceStart,
+} from '@kbn/core-analytics-server';
 
 /** @public **/
 export interface RequestHandlerContextBase {

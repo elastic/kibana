@@ -84,7 +84,7 @@ export const getBreadcrumbsForRoute = (
   }
 
   const newMenuLeadingBreadcrumbs = getLeadingBreadcrumbsForSecurityPage(
-    spyState.pageName as SecurityPageName,
+    spyState.pageName,
     getSecuritySolutionUrl,
     object.navTabs,
     isGroupedNavigationEnabled

@@ -7,7 +7,7 @@
 
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -183,7 +183,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       'filter',
       timeFilter ? [timeFilter, ...ruleConfiguration.filter] : ruleConfiguration.filter
     );
-    const { rawResponse } = await firstValueFrom(testSearchSource.fetch$());
+    const { rawResponse } = await lastValueFrom(testSearchSource.fetch$());
     return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
   }, [searchSource, timeWindowSize, timeWindowUnit, ruleConfiguration]);
 

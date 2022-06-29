@@ -7,20 +7,18 @@
 
 import React from 'react';
 import { render, Matcher } from '@testing-library/react';
-import * as fetcherHook from '../../../../hooks/use_fetcher';
+import * as queryHook from '../../../../hooks/use_long_task_metrics_query';
 import { KeyUXMetrics } from './key_ux_metrics';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 
 describe('KeyUXMetrics', () => {
   it('renders metrics with correct formats', () => {
-    jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+    jest.spyOn(queryHook, 'useLongTaskMetricsQuery').mockReturnValue({
       data: {
         noOfLongTasks: 3.0009765625,
         sumOfLongTasks: 520.4375,
         longestLongTask: 271.4375,
       },
-      status: FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
+      loading: false,
     });
     const { getAllByText } = render(
       <KeyUXMetrics

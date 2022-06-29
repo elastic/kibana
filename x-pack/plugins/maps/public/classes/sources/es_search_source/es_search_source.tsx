@@ -9,11 +9,11 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import { type Filter, buildPhraseFilter } from '@kbn/es-query';
+import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { SortDirection, SortDirectionNumeric, TimeRange } from '@kbn/data-plugin/common';
+import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -589,27 +589,39 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       return {};
     }
 
-    const { docValueFields } = getDocValueAndSourceFields(
-      indexPattern,
-      this._getTooltipPropertyNames(),
-      'strict_date_optional_time'
-    );
-
-    const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
     const searchService = getSearchService();
-    const searchSource = await searchService.searchSource.create(initialSearchContext as object);
+    const searchSource = await searchService.searchSource.create();
     searchSource.setField('trackTotalHits', false);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
-
     const query = {
       language: 'kuery',
       query: `_id:"${docId}" and _index:"${index}"`,
     };
-
     searchSource.setField('query', query);
-    searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
+
+    // searchSource calls dataView.getComputedFields to seed docvalueFields
+    // dataView.getComputedFields adds each date field in the dataView to docvalueFields to ensure standardized date format across kibana
+    // we don't need these as they request unneeded fields and bloat responses
+    // setting fieldsFromSource notifies searchSource to filterout unused docvalueFields
+    // '_id' is used since the value of 'fieldsFromSource' is irreverent because '_source: false'.
+    searchSource.setField('fieldsFromSource', ['_id']);
+    searchSource.setField('source', false);
+
+    // Get all tooltip properties from fields API
+    searchSource.setField(
+      'fields',
+      this._getTooltipPropertyNames().map((fieldName) => {
+        const field = indexPattern.fields.getByName(fieldName);
+        return field && field.type === 'date'
+          ? {
+              field: fieldName,
+              format: 'strict_date_optional_time',
+            }
+          : fieldName;
+      })
+    );
 
     const { rawResponse: resp } = await lastValueFrom(
       searchSource.fetch$({
@@ -827,41 +839,50 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
-    const fieldNames = searchFilters.fieldNames.filter(
-      (fieldName) => fieldName !== this._descriptor.geoField
-    );
-    const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
-      indexPattern,
-      fieldNames,
-      'epoch_millis'
-    );
-
-    const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
-
-    const searchSource = await this.makeSearchSource(
-      searchFilters,
-      indexSettings.maxResultWindow,
-      initialSearchContext
-    );
-    searchSource.setField('fieldsFromSource', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
-    if (sourceOnlyFields.length === 0) {
-      searchSource.setField('source', false); // do not need anything from _source
-    } else {
-      searchSource.setField('source', sourceOnlyFields);
-    }
+    const searchSource = await this.makeSearchSource(searchFilters, indexSettings.maxResultWindow);
+    // searchSource calls dataView.getComputedFields to seed docvalueFields
+    // dataView.getComputedFields adds each date field in the dataView to docvalueFields to ensure standardized date format across kibana
+    // we don't need these as they request unneeded fields and bloat responses
+    // setting fieldsFromSource notifies searchSource to filterout unused docvalueFields
+    // '_id' is used since the value of 'fieldsFromSource' is irreverent because '_source: false'.
+    searchSource.setField('fieldsFromSource', ['_id']);
+    searchSource.setField('source', false);
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());
     }
+
+    // use fields API
+    searchSource.setField(
+      'fields',
+      searchFilters.fieldNames
+        .filter((fieldName) => {
+          return fieldName !== this._descriptor.geoField;
+        })
+        .map((fieldName) => {
+          const field = indexPattern.fields.getByName(fieldName);
+          return field && field.type === 'date'
+            ? {
+                field: fieldName,
+                format: 'epoch_millis',
+              }
+            : fieldName;
+        })
+    );
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
+    const requestBody = searchSource.getSearchRequestBody();
+    // Remove keys not supported by elasticsearch vector tile search API
+    delete requestBody.script_fields;
+    delete requestBody.stored_fields;
+
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &hasLabels=${hasLabels}\
-&requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
+&requestBody=${encodeMvtResponseBody(requestBody)}\
 &token=${refreshToken}`;
   }
 
