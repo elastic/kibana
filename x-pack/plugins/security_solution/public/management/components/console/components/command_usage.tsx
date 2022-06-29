@@ -52,7 +52,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.securitySolution.console.commandUsage.inputUsage"
+                id="xpack.securitySolution.console.commandUsage.exampleUsage"
                 defaultMessage="Example:"
               />
             </EuiText>
