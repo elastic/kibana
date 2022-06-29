@@ -111,7 +111,7 @@ cd "$destination"
 find ./* -exec bash -c "shasum -a 512 {} > {}.sha512" \;
 
 cd "$BUILDKITE_BUILD_CHECKOUT_PATH"
-node "$(dirname "${0}")/create_manifest.js" "$destination"
+ts-node "$(dirname "${0}")/create_manifest.ts" "$destination"
 
 ES_SNAPSHOT_MANIFEST="$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST)"
 
