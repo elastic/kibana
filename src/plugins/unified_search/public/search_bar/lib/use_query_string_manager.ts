@@ -9,15 +9,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 import type { Query, AggregateQuery } from '@kbn/es-query';
+import { isOfQueryType } from '@kbn/es-query';
 import type { QueryStringContract } from '@kbn/data-plugin/public';
 
 interface UseQueryStringProps {
   query?: Query | AggregateQuery;
   queryStringManager: QueryStringContract;
 }
-function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
-}
+
 export const useQueryStringManager = (props: UseQueryStringProps) => {
   // Filters should be either what's passed in the initial state or the current state of the filter manager
   const [query, setQuery] = useState<Query | AggregateQuery>(

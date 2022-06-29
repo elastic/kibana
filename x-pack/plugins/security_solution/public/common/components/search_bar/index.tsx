@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query, TimeRange, AggregateQuery } from '@kbn/es-query';
+import { isOfQueryType } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
@@ -39,10 +40,6 @@ import { useKibana } from '../../lib/kibana';
 import { usersActions } from '../../../users/store';
 import { hostsActions } from '../../../hosts/store';
 import { networkActions } from '../../../network/store';
-
-function isOfQueryType(arg?: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
-}
 
 const APP_STATE_STORAGE_KEY = 'securitySolution.searchBar.appState';
 

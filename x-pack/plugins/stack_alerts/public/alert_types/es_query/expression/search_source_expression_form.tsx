@@ -8,7 +8,7 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { lastValueFrom } from 'rxjs';
-import { Filter, AggregateQuery } from '@kbn/es-query';
+import { Filter, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,10 +28,6 @@ import { DataViewSelectPopover } from '../../components/data_view_select_popover
 import { useTriggersAndActionsUiDeps } from '../util';
 import { totalHitsToNumber } from './use_test_query';
 import { TestQueryRow } from './test_query_row';
-
-function isOfQueryType(arg?: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
-}
 
 interface LocalState {
   index: DataView;

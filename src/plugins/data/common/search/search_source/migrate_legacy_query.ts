@@ -5,12 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Query, AggregateQuery } from '@kbn/es-query';
+import { Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import { has } from 'lodash';
-
-function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
-  return Boolean(query && 'sql' in query);
-}
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL

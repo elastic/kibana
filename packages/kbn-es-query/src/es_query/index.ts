@@ -13,6 +13,7 @@ export { buildEsQuery } from './build_es_query';
 export { buildQueryFromFilters } from './from_filters';
 export { luceneStringToDsl } from './lucene_string_to_dsl';
 export { decorateQuery } from './decorate_query';
+export { isOfQueryType, isOfAggregateQueryType, getAggregateQueryMode } from './es_query.sql';
 export type {
   IFieldSubType,
   BoolQuery,

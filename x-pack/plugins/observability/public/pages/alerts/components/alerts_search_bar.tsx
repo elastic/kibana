@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewBase, Query, AggregateQuery } from '@kbn/es-query';
+import { DataViewBase, isOfQueryType } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -14,9 +14,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { translations } from '../../../config';
 
 type QueryLanguageType = 'lucene' | 'kuery';
-function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
-}
 
 export function AlertsSearchBar({
   dynamicIndexPatterns,

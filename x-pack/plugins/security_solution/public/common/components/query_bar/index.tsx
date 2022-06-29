@@ -9,6 +9,7 @@ import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query, TimeRange, AggregateQuery } from '@kbn/es-query';
+import { isOfQueryType } from '@kbn/es-query';
 import {
   FilterManager,
   TimeHistory,
@@ -18,10 +19,6 @@ import {
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-
-function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
-}
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;

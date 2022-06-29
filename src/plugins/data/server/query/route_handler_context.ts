@@ -7,13 +7,9 @@
  */
 
 import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
-import { isFilters, Query, AggregateQuery } from '@kbn/es-query';
+import { isFilters, isOfQueryType } from '@kbn/es-query';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
-
-function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
-}
 
 function injectReferences({
   id,

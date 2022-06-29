@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
@@ -15,16 +15,6 @@ import {
   aggregateQueryToAst,
   timerangeToAst,
 } from '..';
-
-import type { Query, AggregateQuery } from './types';
-
-function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
-  return Boolean(query && 'sql' in query);
-}
-
-function getAggregateQueryMode(query: AggregateQuery): string {
-  return Object.keys(query)[0];
-}
 
 function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
   const sql = sqlQuery?.replaceAll('"', '');

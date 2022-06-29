@@ -210,11 +210,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     (width: number, force?: boolean) => {
       const containerWidth = containerRef.current?.offsetWidth;
       if (containerWidth && (!isCompactFocused || force)) {
-        const hasLines = /\r|\n/.exec(code);
+        const hasLines = /\r|\n/.exec(query.sql);
         if (hasLines && !updateLinesFromModel) {
-          setLines(code.split(/\r|\n/).length);
+          setLines(query.sql.split(/\r|\n/).length);
         }
-        const text = hasLines ? code.split(/\r|\n/)[0] : code;
+        const text = hasLines ? query.sql.split(/\r|\n/)[0] : query.sql;
         const queryLength = text.length;
         const unusedSpace =
           errors && errors.length
@@ -230,8 +230,21 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
       }
     },
-    [code, errors, isCompactFocused]
+    [query.sql, errors, isCompactFocused]
   );
+
+  useEffect(() => {
+    if (editor1.current) {
+      const editorElement = editor1.current.getDomNode();
+      if (editorElement) {
+        const contentWidth = Number(editorElement?.style.width.replace('px', ''));
+        if (code !== query.sql) {
+          setCode(query.sql);
+          calculateVisibleCode(contentWidth);
+        }
+      }
+    }
+  }, [calculateVisibleCode, code, query.sql]);
 
   const onResize = ({ width }: { width: number }) => {
     calculateVisibleCode(width);
@@ -258,7 +271,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     wordWrap: isWordWrapped ? 'on' : 'off',
     lineNumbers: showLineNumbers ? 'on' : 'off',
     lineDecorationsWidth: 16,
-    autoIndent: 'brackets',
+    accessibilitySupport: 'off',
+    autoIndent: 'none',
     wrappingIndent: 'none',
     overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,

@@ -15,7 +15,7 @@ import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Query, Filter, TimeRange, AggregateQuery } from '@kbn/es-query';
+import { Query, Filter, TimeRange, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
@@ -108,10 +108,6 @@ interface State {
   query?: Query | AggregateQuery;
   dateRangeFrom: string;
   dateRangeTo: string;
-}
-
-function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
 }
 
 class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {

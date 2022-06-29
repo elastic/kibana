@@ -15,6 +15,7 @@ import {
   Query,
   AggregateQuery,
   Filter,
+  isOfQueryType,
 } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SearchSource } from '@kbn/data-plugin/common';
@@ -37,9 +38,6 @@ const DEFAULT_QUERY = {
 
 export function getDefaultQuery() {
   return cloneDeep(DEFAULT_QUERY);
-}
-function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
 }
 
 /**

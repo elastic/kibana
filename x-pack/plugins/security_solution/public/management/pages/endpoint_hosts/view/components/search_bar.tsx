@@ -9,6 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
 import type { Query, AggregateQuery } from '@kbn/es-query';
+import { isOfQueryType } from '@kbn/es-query';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
@@ -17,10 +18,6 @@ import { urlFromQueryParams } from '../url_from_query_params';
 import { useEndpointSelector } from '../hooks';
 import * as selectors from '../../store/selectors';
 import { clone } from '../../models/index_pattern';
-
-function isOfQueryType(arg?: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
-}
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();

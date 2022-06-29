@@ -5,15 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { AggregateQuery, Query } from '@kbn/es-query';
-
-function isOfAggregateQueryType(query: AggregateQuery | Query): query is AggregateQuery {
-  return Boolean(query && 'sql' in query);
-}
-
-function getAggregateQueryMode(query: AggregateQuery): string {
-  return Object.keys(query)[0];
-}
+import {
+  AggregateQuery,
+  Query,
+  isOfAggregateQueryType,
+  getAggregateQueryMode,
+} from '@kbn/es-query';
 
 export function getTextBasedLanguageMode(query: Query | AggregateQuery): string {
   let textBasedLanguageMode = '';

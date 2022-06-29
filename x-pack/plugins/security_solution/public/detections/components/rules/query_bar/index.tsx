@@ -11,6 +11,7 @@ import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import type { DataViewBase, Filter, Query, AggregateQuery } from '@kbn/es-query';
+import { isOfQueryType } from '@kbn/es-query';
 import { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 
 import { BrowserFields } from '../../../../common/containers/source';
@@ -25,10 +26,6 @@ import { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
-
-function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
-}
 
 export interface FieldValueQueryBar {
   filters: Filter[];
