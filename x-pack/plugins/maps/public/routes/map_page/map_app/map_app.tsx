@@ -207,7 +207,7 @@ export class MapApp extends React.Component<Props, State> {
       // Example scenario, global state has pinned filters and new map is created
       const defaultDataView = await getIndexPatternService().getDefaultDataView();
       if (defaultDataView) {
-        indexPatterns = [indexPatterns];
+        indexPatterns = [defaultDataView];
       }
     } else {
       indexPatterns = await getIndexPatternsFromIds(nextIndexPatternIds);
