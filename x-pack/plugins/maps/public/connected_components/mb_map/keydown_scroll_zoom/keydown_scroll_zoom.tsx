@@ -72,7 +72,7 @@ export class KeydownScrollZoom extends Component<Props, State> {
             <EuiTextColor color="ghost">
               {i18n.translate('xpack.maps.keydownScrollZoom.keydownToZoomInstructions', {
                 defaultMessage: 'Use {key} + scroll to zoom the map',
-                values: { key: isMac ? '⌘' : 'ctrl' }
+                values: { key: isMac ? '⌘' : 'ctrl' },
               })}
             </EuiTextColor>
           </h2>
