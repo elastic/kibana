@@ -262,6 +262,8 @@ export type {
   LogLevel,
 } from '@kbn/logging';
 
+export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
+
 export { PluginType } from '@kbn/core-base-common';
 
 export type {
