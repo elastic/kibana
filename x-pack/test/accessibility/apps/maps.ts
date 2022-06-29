@@ -61,13 +61,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('map inspector view chooser requests', async function () {
-      await testSubjects.click('inspectorViewChooserRequests');
+    it('map inspector panel - view requests', async function () {
+      await PageObjects.maps.openInspectorView('Requests');
       await a11y.testAppSnapshot();
     });
 
-    it('map inspector view chooser requests', async function () {
-      await PageObjects.maps.openInspectorMapView();
+    it('map inspector panel - view maps', async function () {
+      await PageObjects.maps.openInspectorView('Map');
       await a11y.testAppSnapshot();
     });
 
