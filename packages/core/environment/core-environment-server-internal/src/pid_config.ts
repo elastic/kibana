@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type { CoreContext } from './core_context';
-export type { CoreService, ServiceConfigDescriptor } from './services';
-export { CriticalError } from './errors';
-export { uuidRegexp } from './regexp';
-export { coreConfigPaths } from './config';
+import { TypeOf, schema } from '@kbn/config-schema';
+
+export const pidConfig = {
+  path: 'pid',
+  schema: schema.object({
+    file: schema.maybe(schema.string()),
+    exclusive: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export type PidConfigType = TypeOf<typeof pidConfig.schema>;

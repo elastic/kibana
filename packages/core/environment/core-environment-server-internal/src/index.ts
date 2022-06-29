@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-export type { CoreContext } from './core_context';
-export type { CoreService, ServiceConfigDescriptor } from './services';
-export { CriticalError } from './errors';
-export { uuidRegexp } from './regexp';
-export { coreConfigPaths } from './config';
+export { EnvironmentService } from './environment_service';
+export type {
+  InternalEnvironmentServicePreboot,
+  InternalEnvironmentServiceSetup,
+  EnvironmentServicePrebootDeps,
+} from './environment_service';
+export { pidConfig } from './pid_config';
+export type { PidConfigType } from './pid_config';

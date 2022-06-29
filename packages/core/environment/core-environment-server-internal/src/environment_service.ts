@@ -10,10 +10,10 @@ import { firstValueFrom, of } from 'rxjs';
 import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
-import type { CoreContext } from '@kbn/core-base-server-internal';
+import { CoreContext, coreConfigPaths } from '@kbn/core-base-server-internal';
 import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
-import { HttpConfigType, config as httpConfigDef } from '../http';
-import { PidConfigType, config as pidConfigDef } from './pid_config';
+import { HttpConfigType } from './types';
+import { PidConfigType, pidConfig as pidConfigDef } from './pid_config';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
@@ -21,7 +21,7 @@ import { writePidFile } from './write_pid_file';
 /**
  * @internal
  */
-export interface PrebootDeps {
+export interface EnvironmentServicePrebootDeps {
   /**
    * {@link AnalyticsServicePreboot}
    */
@@ -56,12 +56,12 @@ export class EnvironmentService {
     this.configService = core.configService;
   }
 
-  public async preboot({ analytics }: PrebootDeps) {
+  public async preboot({ analytics }: EnvironmentServicePrebootDeps) {
     // IMPORTANT: This code is based on the assumption that none of the configuration values used
     // here is supposed to change during preboot phase and it's safe to read them only once.
     const [pathConfig, serverConfig, pidConfig] = await Promise.all([
       firstValueFrom(this.configService.atPath<PathConfigType>(pathConfigDef.path)),
-      firstValueFrom(this.configService.atPath<HttpConfigType>(httpConfigDef.path)),
+      firstValueFrom(this.configService.atPath<HttpConfigType>(coreConfigPaths.http)),
       firstValueFrom(this.configService.atPath<PidConfigType>(pidConfigDef.path)),
     ]);
 

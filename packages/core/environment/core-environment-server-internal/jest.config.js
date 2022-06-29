@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { CoreContext } from './core_context';
-export type { CoreService, ServiceConfigDescriptor } from './services';
-export { CriticalError } from './errors';
-export { uuidRegexp } from './regexp';
-export { coreConfigPaths } from './config';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/environment/core-environment-server-internal'],
+};
