@@ -263,6 +263,8 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
         <EuiSpacer size={'m'} />
 
         <StartDeploymentSetup config={config} onConfigChange={setConfig} />
+
+        <EuiSpacer size={'m'} />
       </EuiModalBody>
 
       <EuiModalFooter>
