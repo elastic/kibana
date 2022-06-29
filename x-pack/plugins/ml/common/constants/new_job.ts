@@ -21,6 +21,7 @@ export enum CREATED_BY_LABEL {
   CATEGORIZATION = 'categorization-wizard',
   RARE = 'rare-wizard',
   APM_TRANSACTION = 'ml-module-apm-transaction',
+  APM_SPAN = 'ml-module-apm-span',
 }
 
 export const DEFAULT_MODEL_MEMORY_LIMIT = '10MB';

@@ -15,6 +15,7 @@ import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/commo
 const moduleIds = [
   'apache_data_stream',
   'apache_ecs',
+  'apm_span',
   'apm_transaction',
   'auditbeat_process_docker_ecs',
   'logs_ui_analysis',

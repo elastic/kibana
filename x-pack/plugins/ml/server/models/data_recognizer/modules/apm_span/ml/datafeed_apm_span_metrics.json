@@ -1,0 +1,116 @@
+{
+  "job_id": "JOB_ID",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "chunking_config" : {
+    "mode" : "off"
+  },
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "processor.event": "metric" } },
+        { "term": { "metricset.name": "service_destination" } },
+        { "bool": { "must_not": { "terms": { "agent.name": [ "rum-js" ]} } }}
+      ]
+    }
+  },
+  "aggregations" : {
+    "buckets" : {
+      "composite" : {
+        "size" : 5000,
+        "sources" : [
+          {
+            "date" : {
+              "date_histogram" : {
+                "field" : "@timestamp",
+                "fixed_interval" : "60s"
+              }
+            }
+          },
+          {
+            "span.destination.service.resource" : {
+              "terms" : {
+                "field" : "span.destination.service.resource"
+              }
+            }
+          },
+          {
+            "service.name": {
+              "terms": {
+                "field": "service.name"
+              }
+            }
+          }
+        ]
+      },
+      "aggs" : {
+       "@timestamp": {
+          "max": {
+            "field": "@timestamp"
+          }
+        },
+        "total_count": {
+          "rate": {
+            "unit": "minute",
+            "field": "span.destination.service.response_time.count"
+          }
+        },
+        "total_duration": {
+          "sum": {
+            "field": "span.destination.service.response_time.sum"
+          }
+        },
+        "span_latency": {
+          "bucket_script": {
+            "buckets_path": {
+              "total_count": "total_count",
+              "total_duration": "total_duration"
+            },
+            "script": "return params.total_duration / params.total_count;"
+          }
+        },
+        "error_count": {
+          "filter": {
+            "term": {
+              "event.outcome": "failure"
+            }
+          },
+          "aggs": {
+            "actual_error_count": {
+              "sum": {
+                "field": "span.destination.service.response_time.count"
+              }
+            }
+          }
+        },
+        "success_count": {
+          "filter": {
+            "term": {
+              "event.outcome": "success"
+            }
+          },
+          "aggs": {
+            "actual_success_count": {
+              "sum": {
+                "field": "span.destination.service.response_time.count"
+              }
+            }
+          }
+        },
+        "failed_span_rate": {
+          "bucket_script": {
+            "buckets_path": {
+              "failure_count": "error_count>actual_error_count",
+              "success_count": "success_count>actual_success_count"
+            },
+            "script": "if ((params.failure_count + params.success_count)==0){return 0;}else{return 100 * (params.failure_count/(params.failure_count + params.success_count));}"
+          }
+        }
+      }
+    }
+  },
+  "indices_options": {
+    "ignore_unavailable": true
+  }
+}
