@@ -22,7 +22,7 @@ import {
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import {enrichEvents} from './enrichments'
+import { enrichEvents } from './enrichments';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -56,8 +56,6 @@ export const searchAfterAndBulkCreate = async ({
     // signalsCreatedCount keeps track of how many signals we have created,
     // to ensure we don't exceed maxSignals
     let signalsCreatedCount = 0;
-
-  
 
     if (tuple == null || tuple.to == null || tuple.from == null) {
       logger.error(buildRuleMessage(`[-] malformed date tuple`));
@@ -149,7 +147,7 @@ export const searchAfterAndBulkCreate = async ({
           // make sure we are not going to create more signals than maxSignals allows
           const limitedEvents = includedEvents.slice(0, tuple.maxSignals - signalsCreatedCount);
           // const enrichedEvents = await enrichment(limitedEvents);
-          
+
           const enrichedEvents = await enrichEvents({
             events: limitedEvents,
             services,
@@ -158,7 +156,7 @@ export const searchAfterAndBulkCreate = async ({
           });
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
-          let {
+          const {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
             createdItems,
@@ -167,7 +165,6 @@ export const searchAfterAndBulkCreate = async ({
           } = await bulkCreate(wrappedDocs);
 
           logger.debug(`---- wrappedDocs ----- ${JSON.stringify(createdItems.length)}`);
-         
 
           toReturn = mergeReturns([
             toReturn,
