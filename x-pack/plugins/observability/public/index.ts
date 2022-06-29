@@ -8,7 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110905
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializer } from '@kbn/core/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
 import {
   Plugin,
@@ -38,8 +38,8 @@ export const plugin: PluginInitializer<
   ObservabilityPublicStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart
-> = () => {
-  return new Plugin();
+> = (initializerContext: PluginInitializerContext) => {
+  return new Plugin(initializerContext);
 };
 
 export * from './components/shared/action_menu';
@@ -104,6 +104,7 @@ export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_
 export {
   ReportTypes,
   FILTER_RECORDS,
+  ENVIRONMENT_ALL,
   REPORT_METRIC_FIELD,
   USE_BREAK_DOWN_COLUMN,
   RECORDS_FIELD,
