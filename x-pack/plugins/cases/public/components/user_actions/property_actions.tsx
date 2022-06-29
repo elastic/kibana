@@ -88,7 +88,7 @@ const UserActionPropertyActionsComponent = ({
         canUseEditor && actionConfig ? [actionConfig] : [],
       ].flat(),
     [
-      permissions,
+      permissions.all,
       editLabel,
       onEditClick,
       deleteLabel,

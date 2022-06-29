@@ -114,7 +114,7 @@ export const usePushToService = ({
 
     return errors;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, permissions]);
+  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, permissions.all]);
 
   const pushToServiceButton = useMemo(
     () => (
@@ -146,29 +146,26 @@ export const usePushToService = ({
       hasDataToPush,
       isLoading,
       loadingLicense,
-      permissions,
+      permissions.all,
       isValidConnector,
     ]
   );
 
-  const objToReturn = useMemo(
-    () => ({
-      pushButton:
-        errorsMsg.length > 0 || !hasDataToPush ? (
-          <EuiToolTip
-            position="top"
-            title={
-              errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connector.name)
-            }
-            content={
-              <p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>
-            }
-          >
-            {pushToServiceButton}
-          </EuiToolTip>
-        ) : (
-          <>{pushToServiceButton}</>
-        ),
+  const objToReturn = useMemo(() => {
+    const hidePushButton = errorsMsg.length > 0 || !hasDataToPush || !permissions.all;
+
+    return {
+      pushButton: hidePushButton ? (
+        <EuiToolTip
+          position="top"
+          title={errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connector.name)}
+          content={<p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>}
+        >
+          {pushToServiceButton}
+        </EuiToolTip>
+      ) : (
+        <>{pushToServiceButton}</>
+      ),
       pushCallouts:
         errorsMsg.length > 0 ? (
           <CaseCallOut
@@ -178,17 +175,17 @@ export const usePushToService = ({
             onEditClick={onEditClick}
           />
         ) : null,
-    }),
-    [
-      connector.name,
-      connectors.length,
-      errorsMsg,
-      hasDataToPush,
-      hasLicenseError,
-      onEditClick,
-      pushToServiceButton,
-    ]
-  );
+    };
+  }, [
+    connector.name,
+    connectors.length,
+    errorsMsg,
+    hasDataToPush,
+    hasLicenseError,
+    onEditClick,
+    pushToServiceButton,
+    permissions.all,
+  ]);
 
   return objToReturn;
 };
