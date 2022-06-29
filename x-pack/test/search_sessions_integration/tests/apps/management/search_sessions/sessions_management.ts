@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.openPopover();
         await searchSessions.viewSearchSessions();
 
-        await retry.waitFor(`wait for first item to complete`, async function () {
+        await retry.waitFor(`first item to complete`, async function () {
           const s = await PageObjects.searchSessionsManagement.getList();
           if (!s[0]) {
             log.warning(`Expected item is not in the table!`);
