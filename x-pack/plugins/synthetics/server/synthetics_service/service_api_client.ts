@@ -55,8 +55,11 @@ export class ServiceAPIClient {
     this.server = server;
   }
 
-  getHttpsAgent() {
+  getHttpsAgent(url: string) {
     const config = this.config;
+    if (url !== this.config.devUrl && this.authorization && this.server.isDev) {
+      return;
+    }
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
 
@@ -92,29 +95,31 @@ export class ServiceAPIClient {
       return { allowed: true, signupUrl: null };
     }
 
-    const httpsAgent = this.getHttpsAgent();
-
-    if (this.locations.length > 0 && httpsAgent) {
+    if (this.locations.length > 0) {
       // get a url from a random location
       const url = this.locations[Math.floor(Math.random() * this.locations.length)].url;
 
-      try {
-        const { data } = await axios({
-          method: 'GET',
-          url: url + '/allowed',
-          headers:
-            process.env.NODE_ENV !== 'production' && this.authorization
-              ? {
-                  Authorization: this.authorization,
-                }
-              : undefined,
-          httpsAgent,
-        });
+      const httpsAgent = this.getHttpsAgent(url);
 
-        const { allowed, signupUrl } = data;
-        return { allowed, signupUrl };
-      } catch (e) {
-        this.logger.error(e);
+      if (httpsAgent) {
+        try {
+          const { data } = await axios({
+            method: 'GET',
+            url: url + '/allowed',
+            headers:
+              process.env.NODE_ENV !== 'production' && this.authorization
+                ? {
+                    Authorization: this.authorization,
+                  }
+                : undefined,
+            httpsAgent,
+          });
+
+          const { allowed, signupUrl } = data;
+          return { allowed, signupUrl };
+        } catch (e) {
+          this.logger.error(e);
+        }
       }
     }
 
@@ -151,7 +156,7 @@ export class ServiceAPIClient {
                 Authorization: this.authorization,
               }
             : undefined,
-        httpsAgent: this.getHttpsAgent(),
+        httpsAgent: this.getHttpsAgent(url),
       });
     };
 
@@ -183,6 +188,7 @@ export class ServiceAPIClient {
                 code: err.code,
                 status: err.response?.data?.status,
                 url,
+                kibanaVersion: this.server.kibanaVersion,
               });
               if (err.response?.data?.reason) {
                 this.logger.error(err.response?.data?.reason);

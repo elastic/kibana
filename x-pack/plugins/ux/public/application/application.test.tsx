@@ -31,9 +31,7 @@ const mockPlugin = {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
   },
-  observability: {
-    isAlertingExperienceEnabled: () => false,
-  },
+  observability: {},
 };
 
 const mockEmbeddable = embeddablePluginMock.createStartContract();

@@ -53,6 +53,5 @@ export function urlSearchQuery(
       },
     },
   });
-  const { apm: _apm, ...rest } = params;
-  return rest;
+  return params;
 }

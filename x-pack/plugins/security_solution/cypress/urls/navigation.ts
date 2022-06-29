@@ -36,7 +36,6 @@ export const userDetailsUrl = (userName: string) => `/app/security/users/${userN
 export const HOSTS_PAGE_TAB_URLS = {
   allHosts: '/app/security/hosts/allHosts',
   anomalies: '/app/security/hosts/anomalies',
-  authentications: '/app/security/hosts/authentications',
   events: '/app/security/hosts/events',
   uncommonProcesses: '/app/security/hosts/uncommonProcesses',
 };

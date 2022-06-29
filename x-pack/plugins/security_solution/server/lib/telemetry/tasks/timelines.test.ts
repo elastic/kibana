@@ -36,5 +36,29 @@ describe('timeline telemetry task test', () => {
     expect(mockTelemetryReceiver.buildProcessTree).toHaveBeenCalled();
     expect(mockTelemetryReceiver.fetchTimelineEvents).toHaveBeenCalled();
     expect(mockTelemetryReceiver.fetchTimelineEndpointAlerts).toHaveBeenCalled();
+    expect(mockTelemetryEventsSender.sendOnDemand).toHaveBeenCalled();
+  });
+
+  test('if no timeline events received it should not send a telemetry record', async () => {
+    const testTaskExecutionPeriod = {
+      last: undefined,
+      current: new Date().toISOString(),
+    };
+    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
+    const mockTelemetryReceiver = createMockTelemetryReceiver(null, true);
+    const telemetryTelemetryTaskConfig = createTelemetryTimelineTaskConfig();
+
+    await telemetryTelemetryTaskConfig.runTask(
+      'test-timeline-task-id',
+      logger,
+      mockTelemetryReceiver,
+      mockTelemetryEventsSender,
+      testTaskExecutionPeriod
+    );
+
+    expect(mockTelemetryReceiver.buildProcessTree).toHaveBeenCalled();
+    expect(mockTelemetryReceiver.fetchTimelineEvents).toHaveBeenCalled();
+    expect(mockTelemetryReceiver.fetchTimelineEndpointAlerts).toHaveBeenCalled();
+    expect(mockTelemetryEventsSender.sendOnDemand).not.toHaveBeenCalled();
   });
 });

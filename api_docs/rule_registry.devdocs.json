@@ -566,14 +566,15 @@
             "label": "getWriter",
             "description": [],
             "signature": [
-              "(options?: { namespace?: string | undefined; }) => ",
+              "(options?: { namespace?: string | undefined; }) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
                 "docId": "kibRuleRegistryPluginApi",
                 "section": "def-server.IRuleDataWriter",
                 "text": "IRuleDataWriter"
-              }
+              },
+              ">"
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
             "deprecated": false,
@@ -1047,16 +1048,53 @@
               {
                 "parentPluginId": "ruleRegistry",
                 "id": "def-server.RuleDataWriteDisabledError.Unnamed.$1",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "message",
+                "label": "{\n    reason,\n    registrationContext,\n    message,\n  }",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
                 "deprecated": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.RuleDataWriteDisabledError.Unnamed.$1.reason",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "reason",
+                    "description": [],
+                    "signature": [
+                      "\"error\" | \"config\""
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.RuleDataWriteDisabledError.Unnamed.$1.registrationContext",
+                    "type": "string",
+                    "tags": [],
+                    "label": "registrationContext",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.RuleDataWriteDisabledError.Unnamed.$1.message",
+                    "type": "string",
+                    "tags": [],
+                    "label": "message",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/errors.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -1710,7 +1748,7 @@
               "\nID of the Kibana feature associated with the index.\nUsed by alerts-as-data RBAC.\n\nNote from @dhurley14\nThe purpose of the `feature` param is to force the user to update\nthe data structure which contains the mapping of consumers to alerts\nas data indices. The idea is it is typed such that it forces the\nuser to go to the code and modify it. At least until a better system\nis put in place or we move the alerts as data client out of rule registry.\n"
             ],
             "signature": [
-              "\"logs\" | \"apm\" | \"observability\" | \"uptime\" | \"infrastructure\" | \"siem\""
+              "\"logs\" | \"apm\" | \"infrastructure\" | \"observability\" | \"uptime\" | \"siem\""
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false
@@ -2022,14 +2060,15 @@
             "label": "getWriter",
             "description": [],
             "signature": [
-              "(options?: { namespace?: string | undefined; } | undefined) => ",
+              "(options?: { namespace?: string | undefined; } | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
                 "docId": "kibRuleRegistryPluginApi",
                 "section": "def-server.IRuleDataWriter",
                 "text": "IRuleDataWriter"
-              }
+              },
+              ">"
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/types.ts",
             "deprecated": false,

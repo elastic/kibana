@@ -11,8 +11,7 @@
   "interval": "15m",
   "license": "Elastic License v2",
   "machine_learning_job_id": [
-    "linux_anomalous_network_port_activity_ecs",
-    "v2_linux_anomalous_network_port_activity_ecs"
+    "v3_linux_anomalous_network_port_activity"
   ],
   "name": "Unusual Linux Network Port Activity",
   "references": [
@@ -29,5 +28,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 5
+  "version": 6
 }

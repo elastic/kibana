@@ -22,6 +22,7 @@
     { "path": "../../../src/plugins/navigation/tsconfig.json" },
     { "path": "../../../x-pack/plugins/fleet/tsconfig.json" },
     { "path": "../../../x-pack/plugins/fleet/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/task_manager/tsconfig.json" }
+    { "path": "../../../x-pack/plugins/task_manager/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/security/tsconfig.json" }
   ]
 }

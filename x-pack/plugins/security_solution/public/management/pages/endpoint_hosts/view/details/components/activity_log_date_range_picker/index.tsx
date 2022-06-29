@@ -38,7 +38,7 @@ const StickyFlexItem = styled(EuiFlexItem)`
   position: sticky;
   top: 0;
   z-index: 1;
-  padding: ${(props) => `${props.theme.eui.paddingSizes.m}`};
+  padding: ${(props) => `${props.theme.eui.euiSizeM}`};
 `;
 
 export const DateRangePicker = memo(() => {

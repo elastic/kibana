@@ -39,6 +39,7 @@ import { getTimelineNoteSelector } from './selectors';
 import { DetailsPanel } from '../../side_panel';
 import { getScrollToTopSelector } from '../tabs_content/selectors';
 import { useScrollToTop } from '../../../../common/components/scroll_to_top';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -131,6 +132,7 @@ interface NotesTabContentProps {
 
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
   const getScrollToTop = useMemo(() => getScrollToTopSelector(), []);
   const scrollToTop = useShallowEqualSelector((state) => getScrollToTop(state, timelineId));
@@ -229,7 +231,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
             showTimelineDescription
           />
           <EuiSpacer size="s" />
-          {!isImmutable && (
+          {!isImmutable && kibanaSecuritySolutionsPrivileges.crud === true && (
             <AddNote
               associateNote={associateNote}
               newNote={newNote}

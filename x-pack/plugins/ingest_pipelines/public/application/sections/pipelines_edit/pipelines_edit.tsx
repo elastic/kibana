@@ -22,6 +22,7 @@ import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_i
 
 import { getListPath } from '../../services/navigation';
 import { PipelineForm } from '../../components';
+import { useRedirectToPathOrRedirectPath } from '../../hooks';
 
 interface MatchParams {
   name: string;
@@ -37,6 +38,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
+  const redirectToPathOrRedirectPath = useRedirectToPathOrRedirectPath(history);
 
   const decodedPipelineName = attemptToURIDecode(name)!;
 
@@ -60,11 +62,11 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(getListPath({ inspectedPipelineName: updatedPipeline.name }));
+    redirectToPathOrRedirectPath(getListPath({ inspectedPipelineName: updatedPipeline.name }));
   };
 
   const onCancel = () => {
-    history.push(getListPath());
+    redirectToPathOrRedirectPath(getListPath());
   };
 
   useEffect(() => {

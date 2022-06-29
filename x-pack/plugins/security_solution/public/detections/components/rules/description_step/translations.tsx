@@ -118,17 +118,3 @@ export const EQL_TIMESTAMP_FIELD_LABEL = i18n.translate(
     defaultMessage: 'Timestamp field',
   }
 );
-
-export const RELATED_INTEGRATIONS_INSTALLED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrationsInstalledDescription',
-  {
-    defaultMessage: 'Installed',
-  }
-);
-
-export const RELATED_INTEGRATIONS_UNINSTALLED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.relatedIntegrationsUninstalledDescription',
-  {
-    defaultMessage: 'Uninstalled',
-  }
-);

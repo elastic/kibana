@@ -17,22 +17,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "index-pattern:with-timefield",
-    "index": ".kibana",
-    "source": {
-      "index-pattern": {
-        "fields": "[]",
-        "title": "with-timefield",
-        "timeFieldName": "@timestamp"
-      },
-      "type": "index-pattern"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "AU_x3-TaGFA8no6QjiSJ",
     "index": "with-timefield",
     "source": {

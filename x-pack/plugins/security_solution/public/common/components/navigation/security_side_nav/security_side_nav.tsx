@@ -16,7 +16,9 @@ import { SolutionGroupedNav } from '../solution_grouped_nav';
 import { CustomSideNavItem, DefaultSideNavItem, SideNavItem } from '../solution_grouped_nav/types';
 import { NavLinkItem } from '../types';
 import { EuiIconLaunch } from './icons/launch';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
+import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
+import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
+import { bottomNavOffset } from '../../../lib/helpers';
 
 const isFooterNavItem = (id: SecurityPageName) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
@@ -52,7 +54,6 @@ const GetStartedCustomLink = React.memo(GetStartedCustomLinkComponent);
  * Returns a function to format generic `NavLinkItem` array to the `SideNavItem` type
  */
 const useFormatSideNavItem = (): FormatSideNavItems => {
-  const hideHostIsolationExceptions = !useCanSeeHostIsolationExceptionsMenu();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
 
   const formatSideNavItem: FormatSideNavItems = useCallback(
@@ -66,21 +67,17 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
           : {}),
         ...(navItem.links && navItem.links.length > 0
           ? {
-              items: navItem.links
-                .filter(
-                  (link) =>
-                    !link.disabled &&
-                    !(
-                      link.id === SecurityPageName.hostIsolationExceptions &&
-                      hideHostIsolationExceptions
-                    )
-                )
-                .map((panelNavItem) => ({
-                  id: panelNavItem.id,
-                  label: panelNavItem.title,
-                  description: panelNavItem.description,
-                  ...getSecuritySolutionLinkProps({ deepLinkId: panelNavItem.id }),
-                })),
+              items: navItem.links.reduce<DefaultSideNavItem[]>((acc, current) => {
+                if (!current.disabled) {
+                  acc.push({
+                    id: current.id,
+                    label: current.title,
+                    description: current.description,
+                    ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
+                  });
+                }
+                return acc;
+              }, []),
             }
           : {}),
       });
@@ -97,7 +94,7 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
       }
       return formatDefaultItem(navLinkItem);
     },
-    [getSecuritySolutionLinkProps, hideHostIsolationExceptions]
+    [getSecuritySolutionLinkProps]
   );
 
   return formatSideNavItem;
@@ -133,7 +130,7 @@ const useSideNavItems = () => {
 const useSelectedId = (): SecurityPageName => {
   const [{ pageName }] = useRouteSpy();
   const selectedId = useMemo(() => {
-    const [rootLinkInfo] = getAncestorLinksInfo(pageName as SecurityPageName);
+    const [rootLinkInfo] = getAncestorLinksInfo(pageName);
     return rootLinkInfo?.id ?? '';
   }, [pageName]);
 
@@ -148,9 +145,21 @@ export const SecuritySideNav: React.FC = () => {
   const [items, footerItems] = useSideNavItems();
   const selectedId = useSelectedId();
 
+  const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
+  const [isTimelineBottomBarVisible] = useShowTimeline();
+  const bottomOffset =
+    isTimelineBottomBarVisible || isPolicySettingsVisible ? bottomNavOffset : undefined;
+
   if (items.length === 0 && footerItems.length === 0) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
   }
 
-  return <SolutionGroupedNav items={items} footerItems={footerItems} selectedId={selectedId} />;
+  return (
+    <SolutionGroupedNav
+      items={items}
+      footerItems={footerItems}
+      selectedId={selectedId}
+      bottomOffset={bottomOffset}
+    />
+  );
 };

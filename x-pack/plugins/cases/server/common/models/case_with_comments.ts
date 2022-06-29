@@ -43,7 +43,7 @@ import {
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
-const ALERT_LIMIT_MSG = `Case has already reach the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts on a case`;
+const ALERT_LIMIT_MSG = `Case has reached the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts.`;
 
 /**
  * This class represents a case that can have a comment attached to it.
@@ -386,6 +386,7 @@ export class CaseCommentModel {
       });
     }
   }
+
   public async bulkCreate({
     attachments,
   }: {

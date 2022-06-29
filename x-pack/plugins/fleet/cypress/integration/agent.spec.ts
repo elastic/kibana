@@ -257,8 +257,8 @@ describe('View agents', () => {
       cy.getBySel('checkboxSelectAll').click();
       // Trigger a bulk upgrade
       cy.getBySel('agentBulkActionsButton').click();
-      cy.get('button').contains('Upgrade agents').click();
       cy.get('button').contains('Upgrade 15 agents').click();
+      cy.get('.euiModalFooter button').contains('Upgrade 15 agents').click();
       // Cancel upgrade
       cy.getBySel('abortUpgradeBtn').click();
       cy.get('button').contains('Confirm').click();

@@ -23,7 +23,7 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useKibana } from '../../../common/lib/kibana';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
@@ -66,7 +66,7 @@ describe('Details Panel Component', () => {
       panelView: 'networkDetail',
       params: {
         ip: 'woohoo!',
-        flowTarget: FlowTarget.source,
+        flowTarget: FlowTargetSourceDest.source,
       },
     },
   };
@@ -187,8 +187,9 @@ describe('Details Panel Component', () => {
           <DetailsPanel {...currentProps} />
         </TestProviders>
       );
-
-      expect(wrapper.find('[data-test-subj="timeline:details-panel:flyout"]')).toMatchSnapshot();
+      expect(
+        wrapper.find('[data-test-subj="timeline:details-panel:flyout"]').first().render()
+      ).toMatchSnapshot();
     });
 
     test('it should have the attributes isDraggable to be false when timelineId !== "active" and activeTab === "query"', () => {
@@ -261,7 +262,7 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableHostDetails')).toMatchSnapshot();
+      expect(wrapper.find('ExpandableHostDetails').first().render()).toMatchSnapshot();
     });
   });
 
@@ -280,7 +281,7 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableNetworkDetails')).toMatchSnapshot();
+      expect(wrapper.find('ExpandableNetworkDetails').render()).toMatchSnapshot();
     });
   });
 });

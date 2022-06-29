@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IRouter } from '@kbn/core/server';
@@ -14,6 +15,10 @@ import {
   AGGREGATE_MAX_BUCKETS,
 } from '../../common/constants';
 
+// sort by values
+const ASC = 'asc';
+const DESC = 'desc';
+
 export const registerAggregateRoute = (router: IRouter) => {
   router.get(
     {
@@ -21,18 +26,20 @@ export const registerAggregateRoute = (router: IRouter) => {
       validate: {
         query: schema.object({
           query: schema.string(),
+          countBy: schema.maybe(schema.string()),
           groupBy: schema.string(),
           page: schema.number(),
           index: schema.maybe(schema.string()),
+          sortByCount: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { query, groupBy, page, index } = request.query;
+      const { query, countBy, sortByCount, groupBy, page, index } = request.query;
 
       try {
-        const body = await doSearch(client, query, groupBy, page, index);
+        const body = await doSearch(client, query, groupBy, page, index, countBy, sortByCount);
 
         return response.ok({ body });
       } catch (err) {
@@ -47,9 +54,26 @@ export const doSearch = async (
   query: string,
   groupBy: string,
   page: number, // zero based
-  index?: string
+  index?: string,
+  countBy?: string,
+  sortByCount?: string
 ) => {
   const queryDSL = JSON.parse(query);
+
+  const countByAggs = countBy
+    ? {
+        count_by_aggs: {
+          cardinality: {
+            field: countBy,
+          },
+        },
+      }
+    : undefined;
+
+  let sort: SortCombinations = { _key: { order: ASC } };
+  if (sortByCount === ASC || sortByCount === DESC) {
+    sort = { 'count_by_aggs.value': { order: sortByCount } };
+  }
 
   const search = await client.search({
     index: [index || PROCESS_EVENTS_INDEX],
@@ -63,9 +87,10 @@ export const doSearch = async (
             size: AGGREGATE_MAX_BUCKETS,
           },
           aggs: {
+            ...countByAggs,
             bucket_sort: {
               bucket_sort: {
-                sort: [{ _key: { order: 'asc' } }], // defaulting to alphabetic sort
+                sort: [sort], // defaulting to alphabetic sort
                 size: AGGREGATE_PAGE_SIZE,
                 from: AGGREGATE_PAGE_SIZE * page,
               },

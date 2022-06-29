@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useMemo, useState, useEffect } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiButtonGroup,
+  EuiButtonGroupOptionProps,
+  EuiText,
+} from '@elastic/eui';
+import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
+
 import styled from 'styled-components';
+import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual, isEmpty } from 'lodash';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
@@ -56,13 +69,29 @@ import {
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
+import { DataViewSelector } from '../data_view_selector';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
+import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
+
+const DATA_VIEW_SELECT_ID = 'dataView';
+const INDEX_PATTERN_SELECT_ID = 'indexPatterns';
 
 const CommonUseField = getUseField({ component: Field });
 
+const StyledButtonGroup = styled(EuiButtonGroup)`
+  display: flex;
+  justify-content: right;
+  .euiButtonGroupButton {
+    padding-right: ${(props) => props.theme.eui.euiSizeL};
+  }
+`;
+
+const StyledFlexGroup = styled(EuiFlexGroup)`
+  margin-bottom: -21px;
+`;
 interface StepDefineRuleProps extends RuleStepProps {
   defaultValues?: DefineStepRule;
 }
@@ -146,11 +175,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isUpdateView = false,
   onSubmit,
   setForm,
+  kibanaDataViews,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
   const [threatIndexModified, setThreatIndexModified] = useState(false);
+
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const initialState = defaultValues ?? {
@@ -158,17 +189,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     index: indicesConfig,
     threatIndex: threatIndicesConfig,
   };
+
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
+
   const { getFields, getFormData, reset, submit } = form;
   const [
     {
       index: formIndex,
       ruleType: formRuleType,
       queryBar: formQuery,
+      dataViewId: formDataViewId,
       threatIndex: formThreatIndex,
       threatQueryBar: formThreatQuery,
       threshold: formThreshold,
@@ -183,6 +217,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'ruleType',
       'queryBar',
       'threshold',
+      'dataViewId',
       'threshold.field',
       'threshold.value',
       'threshold.cardinality.field',
@@ -197,16 +232,43 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
+  const dataView = formDataViewId || initialState.dataViewId;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
+
+  // if 'index' is selected, use these browser fields
+  // otherwise use the dataview browserfields
   const previousRuleType = usePrevious(ruleType);
-  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
-  const fields: Readonly<BrowserFields> = aggregatableFields(browserFields);
   const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
     defaultValues?.eqlOptions || {}
   );
+  const [initIsIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
+    useFetchIndex(index, false);
+  const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
+  const [isIndexPatternLoading, setIsIndexPatternLoading] = useState(initIsIndexPatternLoading);
+  const [dataSourceRadioIdSelected, setDataSourceRadioIdSelected] = useState(
+    dataView == null || dataView === '' ? INDEX_PATTERN_SELECT_ID : DATA_VIEW_SELECT_ID
+  );
+
+  useEffect(() => {
+    if (dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID) {
+      setIndexPattern(initIndexPattern);
+    }
+  }, [initIndexPattern, dataSourceRadioIdSelected]);
+
+  // Callback for when user toggles between Data Views and Index Patterns
+  const onChangeDataSource = (optionId: string) => {
+    setDataSourceRadioIdSelected(optionId);
+  };
+
+  const [aggFields, setAggregatableFields] = useState<DataViewFieldBase[]>([]);
+
+  useEffect(() => {
+    const { fields } = indexPattern;
+    setAggregatableFields(fields);
+  }, [indexPattern]);
 
   const [
     threatIndexPatternsLoading,
@@ -331,21 +393,26 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const ThresholdInputChildren = useCallback(
     ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
       <ThresholdInput
-        browserFields={fields}
+        browserFields={aggFields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
         thresholdCardinalityField={thresholdCardinalityField}
         thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
-    [fields]
+    [aggFields]
   );
+  const SourcererFlex = styled(EuiFlexItem)`
+    align-items: flex-end;
+  `;
+
+  SourcererFlex.displayName = 'SourcererFlex';
 
   const ThreatMatchInputChildren = useCallback(
     ({ threatMapping }) => (
       <ThreatMatchInput
         handleResetThreatIndices={handleResetThreatIndices}
-        indexPatterns={indexPatterns}
+        indexPatterns={indexPattern}
         threatBrowserFields={threatBrowserFields}
         threatIndexModified={threatIndexModified}
         threatIndexPatterns={threatIndexPatterns}
@@ -356,7 +423,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [
       handleResetThreatIndices,
-      indexPatterns,
+      indexPattern,
       threatBrowserFields,
       threatIndexModified,
       threatIndexPatterns,
@@ -364,6 +431,166 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ]
   );
 
+  const dataViewIndexPatternToggleButtonOptions: EuiButtonGroupOptionProps[] = useMemo(
+    () => [
+      {
+        id: INDEX_PATTERN_SELECT_ID,
+        label: i18nCore.translate(
+          'xpack.securitySolution.ruleDefine.indexTypeSelect.indexPattern',
+          {
+            defaultMessage: 'Index Patterns',
+          }
+        ),
+        iconType:
+          dataSourceRadioIdSelected === INDEX_PATTERN_SELECT_ID ? 'checkInCircleFilled' : 'empty',
+        'data-test-subj': `rule-index-toggle-${INDEX_PATTERN_SELECT_ID}`,
+      },
+      {
+        id: DATA_VIEW_SELECT_ID,
+        label: i18nCore.translate('xpack.securitySolution.ruleDefine.indexTypeSelect.dataView', {
+          defaultMessage: 'Data View',
+        }),
+        iconType:
+          dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID ? 'checkInCircleFilled' : 'empty',
+        'data-test-subj': `rule-index-toggle-${DATA_VIEW_SELECT_ID}`,
+      },
+    ],
+    [dataSourceRadioIdSelected]
+  );
+
+  const DataViewSelectorMemo = useMemo(() => {
+    return (
+      <UseField
+        key="DataViewSelector"
+        path="dataViewId"
+        component={DataViewSelector}
+        componentProps={{
+          kibanaDataViews,
+          setIndexPattern,
+          setIsIndexPatternLoading,
+        }}
+      />
+    );
+  }, [kibanaDataViews]);
+  const DataSource = useMemo(() => {
+    return (
+      <RuleTypeEuiFormRow $isVisible={true} fullWidth>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <StyledFlexGroup direction="row" alignItems="stretch">
+              <EuiFlexItem grow={1}>
+                <StyledButtonGroup
+                  legend="Rule index pattern or data view selector"
+                  idSelected={dataSourceRadioIdSelected}
+                  onChange={onChangeDataSource}
+                  options={dataViewIndexPatternToggleButtonOptions}
+                  color="primary"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={2}>
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.securitySolution.dataViewSelectorText1"
+                    defaultMessage="Use Kibana "
+                  />
+                  <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
+                  <FormattedMessage
+                    id="xpack.securitySolution.dataViewSelectorText2"
+                    defaultMessage=" or specify individual "
+                  />
+                  <DocLink
+                    guidePath="kibana"
+                    docPath="index-patterns-api-create.html"
+                    linkText="index patterns"
+                  />
+                  <FormattedMessage
+                    id="xpack.securitySolution.dataViewSelectorText3"
+                    defaultMessage=" as your rule's data source to be searched."
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </StyledFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            {dataSourceRadioIdSelected === DATA_VIEW_SELECT_ID ? (
+              DataViewSelectorMemo
+            ) : (
+              <CommonUseField
+                path="index"
+                config={{
+                  ...schema.index,
+                  labelAppend: indexModified ? (
+                    <MyLabelButton onClick={handleResetIndices} iconType="refresh">
+                      {i18n.RESET_DEFAULT_INDEX}
+                    </MyLabelButton>
+                  ) : null,
+                }}
+                componentProps={{
+                  idAria: 'detectionEngineStepDefineRuleIndices',
+                  'data-test-subj': 'detectionEngineStepDefineRuleIndices',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    placeholder: '',
+                  },
+                }}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </RuleTypeEuiFormRow>
+    );
+  }, [
+    dataSourceRadioIdSelected,
+    dataViewIndexPatternToggleButtonOptions,
+    DataViewSelectorMemo,
+    indexModified,
+    handleResetIndices,
+  ]);
+
+  const QueryBarMemo = useMemo(
+    () => (
+      <UseField
+        key="QueryBarDefineRule"
+        path="queryBar"
+        config={{
+          ...schema.queryBar,
+          label: i18n.QUERY_BAR_LABEL,
+          labelAppend: (
+            <MyLabelButton
+              data-test-subj="importQueryFromSavedTimeline"
+              onClick={handleOpenTimelineSearch}
+            >
+              {i18n.IMPORT_TIMELINE_QUERY}
+            </MyLabelButton>
+          ),
+        }}
+        component={QueryBarDefineRule}
+        componentProps={{
+          browserFields,
+          // docValueFields,
+          // runtimeMappings,
+          idAria: 'detectionEngineStepDefineRuleQueryBar',
+          indexPattern,
+          isDisabled: isLoading,
+          isLoading: isIndexPatternLoading,
+          dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+          openTimelineSearch,
+          onValidityChange: setIsQueryBarValid,
+          onCloseTimelineSearch: handleCloseTimelineSearch,
+        }}
+      />
+    ),
+    [
+      browserFields,
+      handleCloseTimelineSearch,
+      handleOpenTimelineSearch,
+      indexPattern,
+      isIndexPatternLoading,
+      isLoading,
+      openTimelineSearch,
+    ]
+  );
   const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {
     setOptionsSelected((prevOptions) => ({
       ...prevOptions,
@@ -373,31 +600,31 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const optionsData = useMemo(
     () =>
-      isEmpty(indexPatterns.fields)
+      isEmpty(indexPattern.fields)
         ? {
             keywordFields: [],
             dateFields: [],
             nonDateFields: [],
           }
         : {
-            keywordFields: (indexPatterns.fields as FieldSpec[])
+            keywordFields: (indexPattern.fields as FieldSpec[])
               .filter((f) => f.esTypes?.includes('keyword'))
               .map((f) => ({ label: f.name })),
-            dateFields: indexPatterns.fields
+            dateFields: indexPattern.fields
               .filter((f) => f.type === 'date')
               .map((f) => ({ label: f.name })),
-            nonDateFields: indexPatterns.fields
+            nonDateFields: indexPattern.fields
               .filter((f) => f.type !== 'date')
               .map((f) => ({ label: f.name })),
           },
-    [indexPatterns]
+    [indexPattern]
   );
 
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
-        indexPatterns={indexPatterns}
+        indexPatterns={indexPattern}
         schema={filterRuleFieldsForType(schema, ruleType)}
         data={filterRuleFieldsForType(initialState, ruleType)}
       />
@@ -418,25 +645,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
-              <CommonUseField
-                path="index"
-                config={{
-                  ...schema.index,
-                  labelAppend: indexModified ? (
-                    <MyLabelButton onClick={handleResetIndices} iconType="refresh">
-                      {i18n.RESET_DEFAULT_INDEX}
-                    </MyLabelButton>
-                  ) : null,
-                }}
-                componentProps={{
-                  idAria: 'detectionEngineStepDefineRuleIndices',
-                  'data-test-subj': 'detectionEngineStepDefineRuleIndices',
-                  euiFieldProps: {
-                    fullWidth: true,
-                    placeholder: '',
-                  },
-                }}
-              />
+              <EuiSpacer size="s" />
+              {DataSource}
+              <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <UseField
                   key="EqlQueryBar"
@@ -450,9 +661,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
-                    indexPattern: indexPatterns,
+                    isLoading: isIndexPatternLoading,
+                    indexPattern,
                     showFilterBar: true,
-                    isLoading: indexPatternsLoading,
+                    // isLoading: indexPatternsLoading,
                     dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
                   }}
                   config={{
@@ -461,34 +673,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   }}
                 />
               ) : (
-                <UseField
-                  key="QueryBarDefineRule"
-                  path="queryBar"
-                  config={{
-                    ...schema.queryBar,
-                    label: i18n.QUERY_BAR_LABEL,
-                    labelAppend: (
-                      <MyLabelButton
-                        data-test-subj="importQueryFromSavedTimeline"
-                        onClick={handleOpenTimelineSearch}
-                      >
-                        {i18n.IMPORT_TIMELINE_QUERY}
-                      </MyLabelButton>
-                    ),
-                  }}
-                  component={QueryBarDefineRule}
-                  componentProps={{
-                    browserFields,
-                    idAria: 'detectionEngineStepDefineRuleQueryBar',
-                    indexPattern: indexPatterns,
-                    isDisabled: isLoading,
-                    isLoading: indexPatternsLoading,
-                    dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-                    openTimelineSearch,
-                    onValidityChange: setIsQueryBarValid,
-                    onCloseTimelineSearch: handleCloseTimelineSearch,
-                  }}
-                />
+                QueryBarMemo
               )}
             </>
           </RuleTypeEuiFormRow>
@@ -566,11 +751,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         <EuiSpacer size="s" />
         <RulePreview
           index={index}
+          dataViewId={formDataViewId}
           isDisabled={getIsRulePreviewDisabled({
             ruleType,
             isQueryBarValid,
             isThreatQueryBarValid,
             index,
+            dataViewId: formDataViewId,
             threatIndex,
             threatMapping: formThreatMapping,
             machineLearningJobId,
@@ -594,7 +781,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     </>
   );
 };
-
 export const StepDefineRule = memo(StepDefineRuleComponent);
 
 export function aggregatableFields(browserFields: BrowserFields): BrowserFields {

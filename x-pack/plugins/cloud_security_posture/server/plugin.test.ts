@@ -40,6 +40,7 @@ import {
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 const chance = new Chance();
 
@@ -74,6 +75,7 @@ describe('Cloud Security Posture Plugin', () => {
       fleet: fleetMock,
       data: dataPluginMock.createStartContract(),
       taskManager: taskManagerMock.createStart(),
+      security: securityMock.createStart(),
     };
 
     const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);

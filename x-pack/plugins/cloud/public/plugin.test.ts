@@ -170,13 +170,10 @@ describe('Cloud Plugin', () => {
         expect(hashId1).not.toEqual(hashId2);
       });
 
-      test('user hash does not include cloudId when authenticated via Cloud SAML', async () => {
+      test('user hash does not include cloudId when user is an Elastic Cloud user', async () => {
         const { coreSetup } = await setupPlugin({
           config: { id: 'cloudDeploymentId' },
-          currentUserProps: {
-            username,
-            authentication_realm: { type: 'saml', name: 'cloud-saml-kibana' },
-          },
+          currentUserProps: { username, elastic_cloud_user: true },
         });
 
         expect(coreSetup.analytics.registerContextProvider).toHaveBeenCalled();

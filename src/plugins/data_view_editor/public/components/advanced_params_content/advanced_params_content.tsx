@@ -28,9 +28,13 @@ const customIndexPatternIdLabel = i18n.translate(
 
 interface AdvancedParamsContentProps {
   disableAllowHidden: boolean;
+  disableId: boolean;
 }
 
-export const AdvancedParamsContent = ({ disableAllowHidden }: AdvancedParamsContentProps) => (
+export const AdvancedParamsContent = ({
+  disableAllowHidden,
+  disableId,
+}: AdvancedParamsContentProps) => (
   <AdvancedParamsSection>
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -57,6 +61,7 @@ export const AdvancedParamsContent = ({ disableAllowHidden }: AdvancedParamsCont
           componentProps={{
             euiFieldProps: {
               'aria-label': customIndexPatternIdLabel,
+              disabled: disableId,
             },
           }}
         />

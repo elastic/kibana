@@ -26,6 +26,7 @@ export interface NavGroupTab {
   name: string;
 }
 export enum SecurityNavGroupKey {
+  dashboards = 'dashboards',
   detect = 'detect',
   explore = 'explore',
   investigate = 'investigate',
@@ -57,6 +58,7 @@ export const securityNavKeys = [
   SecurityPageName.hosts,
   SecurityPageName.network,
   SecurityPageName.overview,
+  SecurityPageName.responseActions,
   SecurityPageName.rules,
   SecurityPageName.timelines,
   SecurityPageName.trustedApps,

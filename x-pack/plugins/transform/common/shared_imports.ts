@@ -8,7 +8,6 @@
 export type { ChartData } from '@kbn/ml-plugin/common';
 export {
   composeValidators,
-  isPopulatedObject,
   isRuntimeMappings,
   patternValidator,
   isRuntimeField,

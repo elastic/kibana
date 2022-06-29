@@ -49,6 +49,7 @@ export type UpdatePackagePolicyResponse = CreatePackagePolicyResponse;
 export interface DeletePackagePoliciesRequest {
   body: {
     packagePolicyIds: string[];
+    force?: boolean;
   };
 }
 

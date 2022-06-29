@@ -7,6 +7,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
 import type { SavedObjectsMigrationVersion } from '../types';
@@ -18,7 +19,6 @@ import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { DocLinksServiceStart } from '../../doc_links';
 
 /**
  * Migrates the provided indexPrefix index using a resilient algorithm that is

@@ -1,0 +1,88 @@
+{
+  "id": "@kbn/core-doc-links-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-doc-links-server-mocks",
+        "id": "def-server.docLinksServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "docLinksServiceMock",
+        "description": [],
+        "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-doc-links-server-mocks",
+            "id": "def-server.docLinksServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<DocLinksServiceContract>"
+            ],
+            "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-doc-links-server-mocks",
+            "id": "def-server.docLinksServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "DocLinksServiceSetup"
+            ],
+            "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-doc-links-server-mocks",
+            "id": "def-server.docLinksServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "DocLinksServiceSetup"
+            ],
+            "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

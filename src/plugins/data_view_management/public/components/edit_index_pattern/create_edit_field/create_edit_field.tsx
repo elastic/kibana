@@ -59,7 +59,7 @@ export const CreateEditField = withRouter(
 
     const docFieldName = spec?.name || newFieldPlaceholder;
 
-    chrome.docTitle.change([docFieldName, indexPattern.title]);
+    chrome.docTitle.change([docFieldName, indexPattern.getName()]);
 
     const redirectAway = () => {
       history.push(

@@ -21,7 +21,7 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
