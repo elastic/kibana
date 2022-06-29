@@ -2140,7 +2140,11 @@ paths:
       description: >
         You must have read privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're seeking.
+        feature privileges, depending on the owner of the cases. The API returns
+        information about the users as they existed at the time of the case
+        creation, including their name, full name, and email address. If any of
+        those details change thereafter or if a user is deleted, the information
+        returned by this API is unchanged.
       tags:
         - cases
         - kibana
@@ -2162,6 +2166,9 @@ paths:
                       type: string
                     username:
                       type: string
+              examples:
+                getReportersResponse:
+                  $ref: '#/components/examples/get_reporters_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -4845,7 +4852,11 @@ paths:
       description: >
         You must have read privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're seeking.
+        feature privileges, depending on the owner of the cases. The API returns
+        information about the users as they existed at the time of the case
+        creation, including their name, full name, and email address. If any of
+        those details change thereafter or if a user is deleted, the information
+        returned by this API is unchanged.
       tags:
         - cases
         - kibana
@@ -4868,6 +4879,9 @@ paths:
                       type: string
                     username:
                       type: string
+              examples:
+                getReportersResponse:
+                  $ref: '#/components/examples/get_reporters_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -6046,6 +6060,18 @@ components:
           isPreconfigured: false
           isDeprecated: false
           referencedByCount: 0
+    get_reporters_response:
+      summary: A list of three users that opened cases
+      value:
+        - username: elastic
+          full_name: null
+          email: null
+        - username: user1
+          full_name: User 1
+          email: user1@elastic.co
+        - username: user2
+          full_name: User 2
+          email: user2@elastic.co
     add_comment_request:
       summary: Adds a comment to a case.
       value:
