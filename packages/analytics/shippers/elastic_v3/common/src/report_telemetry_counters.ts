@@ -32,7 +32,7 @@ export function createTelemetryCounterHelper(
       code,
       error,
     }: {
-      type?: keyof typeof TelemetryCounterType;
+      type?: TelemetryCounterType;
       code?: string;
       error?: Error;
     } = {}

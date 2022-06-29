@@ -37,7 +37,6 @@ import type {
   ShipperClassConstructor,
 } from './types';
 import type { Event, EventContext, EventType, TelemetryCounter } from '../events';
-import { TelemetryCounterType } from '../events';
 import { ShippersRegistry } from './shippers_registry';
 import { OptInConfigService } from './opt_in_config';
 import { ContextService } from './context_service';
@@ -97,7 +96,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     const timestamp = new Date().toISOString();
 
     this.internalTelemetryCounter$.next({
-      type: TelemetryCounterType.enqueued,
+      type: 'enqueued',
       source: 'client',
       event_type: eventType,
       code: 'enqueued',
@@ -107,7 +106,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     const eventTypeOpts = this.eventTypeRegistry.get(eventType);
     if (!eventTypeOpts) {
       this.internalTelemetryCounter$.next({
-        type: TelemetryCounterType.dropped,
+        type: 'dropped',
         source: 'client',
         event_type: eventType,
         code: 'UnregisteredType',
@@ -276,7 +275,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     });
     if (sentToShipper) {
       this.internalTelemetryCounter$.next({
-        type: TelemetryCounterType.sent_to_shipper,
+        type: 'sent_to_shipper',
         source: 'client',
         event_type: eventType,
         code: 'OK',

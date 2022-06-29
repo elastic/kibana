@@ -14,7 +14,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { AnalyticsClient } from './analytics_client';
 import { shippersMock } from '../shippers/mocks';
 import type { TelemetryCounter } from '../events';
-import { TelemetryCounterType } from '../events';
 import { ContextService } from './context_service';
 
 describe('AnalyticsClient', () => {
@@ -288,7 +287,7 @@ describe('AnalyticsClient', () => {
       const counterEventPromise = lastValueFrom(analyticsClient.telemetryCounter$.pipe(take(1)));
 
       const counter: TelemetryCounter = {
-        type: TelemetryCounterType.succeeded,
+        type: 'succeeded',
         source: 'a random value',
         event_type: 'eventTypeA',
         code: '200',
