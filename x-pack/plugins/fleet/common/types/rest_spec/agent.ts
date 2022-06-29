@@ -143,7 +143,8 @@ export interface UpdateAgentRequest {
     agentId: string;
   };
   body: {
-    user_provided_metadata: Record<string, any>;
+    user_provided_metadata?: Record<string, any>;
+    tags?: string[];
   };
 }
 
