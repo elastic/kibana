@@ -148,6 +148,10 @@ export const searchAfterAndBulkCreate = async ({
           const limitedEvents = includedEvents.slice(0, tuple.maxSignals - signalsCreatedCount);
           // const enrichedEvents = await enrichment(limitedEvents);
 
+<<<<<<< HEAD
+=======
+          logger.debug(buildRuleMessage(`--------- Start enrichments`));
+>>>>>>> 23008188737 (some temp logs)
           const enrichedEvents = await enrichEvents({
             events: limitedEvents,
             services,

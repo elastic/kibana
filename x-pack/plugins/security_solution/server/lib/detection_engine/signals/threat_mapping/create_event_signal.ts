@@ -65,6 +65,7 @@ export const createEventSignal = async ({
     );
     return currentResult;
   } else {
+    logger.debug(buildRuleMessage(`create event list get threat lsit`));
     const threatListHits = await getAllThreatListHits({
       esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
@@ -83,6 +84,7 @@ export const createEventSignal = async ({
       runtimeMappings,
       listClient,
     });
+    logger.debug(buildRuleMessage(`create event list get threat lsit finish`));
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);
 
