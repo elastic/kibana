@@ -11,6 +11,8 @@ import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap, MapMouseEvent } from '@kbn/mapbox-gl';
 
+const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
+
 interface Props {
   mbMap: MbMap;
 }
@@ -43,7 +45,7 @@ export class KeydownScrollZoom extends Component<Props, State> {
       this._hideTimeout = undefined;
     }
 
-    if (event.originalEvent.shiftKey) {
+    if ((isMac && event.originalEvent.metaKey) || (!isMac && event.originalEvent.ctrlKey)) {
       this.setState({ show: false });
       return;
     }
@@ -69,7 +71,8 @@ export class KeydownScrollZoom extends Component<Props, State> {
           <h2>
             <EuiTextColor color="ghost">
               {i18n.translate('xpack.maps.keydownScrollZoom.keydownToZoomInstructions', {
-                defaultMessage: 'Use shift + scroll to zoom the map',
+                defaultMessage: 'Use {key} + scroll to zoom the map',
+                values: { key: isMac ? '⌘' : 'ctrl' }
               })}
             </EuiTextColor>
           </h2>
