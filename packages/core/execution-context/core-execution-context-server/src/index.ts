@@ -7,3 +7,4 @@
  */
 
 export type { ExecutionContextSetup, ExecutionContextStart } from './contracts';
+export type { IExecutionContextContainer } from './types';

@@ -89,9 +89,13 @@ export type {
   ConfigUsageData,
 };
 
-import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+import type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from '@kbn/core-execution-context-server';
 
-export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
+export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
 
 export { bootstrap } from './bootstrap';
 export type {

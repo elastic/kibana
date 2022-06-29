@@ -7,6 +7,7 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
 
 // Switch to the standard Baggage header. blocked by
 // https://github.com/elastic/apm-agent-nodejs/issues/2102
@@ -40,14 +41,6 @@ const MAX_BAGGAGE_LENGTH = BAGGAGE_MAX_PER_NAME_VALUE_PAIRS / 4;
 // The trimmed value in the logs is better than nothing.
 function enforceMaxLength(header: string): string {
   return header.slice(0, MAX_BAGGAGE_LENGTH);
-}
-
-/**
- * @public
- */
-export interface IExecutionContextContainer {
-  toString(): string;
-  toJSON(): Readonly<KibanaExecutionContext>;
 }
 
 function stringify(ctx: KibanaExecutionContext): string {
