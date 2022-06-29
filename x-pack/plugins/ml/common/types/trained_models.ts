@@ -155,6 +155,8 @@ export interface TrainedModelDeploymentStatsResponse {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
+    threads_per_allocation: number;
+    number_of_allocations: number;
   }>;
 }
 
