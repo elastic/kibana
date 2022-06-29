@@ -8,8 +8,9 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-Review important information about the {kib} 8.x releases.
+Review important information about the {kib} 8.3.x releases.
 
+* <<release-notes-8.3.1>>
 * <<release-notes-8.3.0>>
 //* <<release-notes-8.2.3>>
 //* <<release-notes-8.2.2>>
@@ -29,6 +30,65 @@ Review important information about the {kib} 8.x releases.
 
 --
 
+[[release-notes-8.3.1]]
+== {kib} 8.3.1
+
+coming::[8.3.1]
+
+Review the following information about the {kib} 8.3.1 release.
+
+[float]
+[[breaking-changes-8.3.1]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+
+There are no breaking changes in {kib} 8.3.1.
+
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following:
+
+{kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[enhancement-v8.3.1]]
+=== Enhancements
+Operations::
+Adds EsArchiver datastream support {kibana-pull}132853[#132853]
+
+[float]
+[[fixes-v8.3.1]]
+=== Bug fixes
+Alerting::
+Prevent negative snooze intervals {kibana-pull}134935[#134935]
+
+Elastic Security::
+For the Elastic Security 8.3.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Fixes dropping select all {kibana-pull}135124[#135124]
+* Improves bulk actions for more than 10k agents {kibana-pull}134565[#134565]
+
+Infrastructure::
+Query persistent queue size for metricbeat documents {kibana-pull}134569[#134569]
+
+Machine Learning::
+* Fixes put job endpoint when payload contains datafeed {kibana-pull}134986[#134986]
+* Fixes trained model map associating wrong model to job {kibana-pull}134849[#134849]
+* Use time range when validating datafeed preview {kibana-pull}134073[#134073]
+
+Observability::
+* Fixes a bug that displayed a toast error when deleting a rule {kibana-pull}135132[#135132]
+* Fixes viewInAppUrl for custom metrics for Inventory Threshold Rule {kibana-pull}134114[#134114]
+
+Platform::
+* Fixes an issue where importing/copying the same saved object to the same space multiple times using the "Check for existing objects" option could fail or cause duplicates to be created {kibana-pull}135358[#135358]
+* Fixes a bug where {es} nodes that stopped, then started again, were unreachable by {kib} for a given amount of requests when {kib} was configured to connect to multiple {es} nodes {kibana-pull}134628[#134628]
+
 [[release-notes-8.3.0]]
 == {kib} 8.3.0
 
@@ -40,8 +100,6 @@ Review the following information about the {kib} 8.3.0 release.
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
-
-// tag::notable-breaking-changes[]
 
 [discrete]
 [[breaking-129581]]
@@ -68,8 +126,6 @@ The Osquery {kib} privilege has been updated, so that when the *Privileges for a
 *Impact* +
 This impacts user roles that have *Privileges for all features* set to *All*. After this update, users with this role will have access to the Osquery page in {kib}. However, to use the Osquery feature fully, these requirements remain the same: users also need Read access to the logs-osquery_manager.result* index and the Osquery Manager integration must be deployed to Elastic Agents.
 ====
-
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following:
 
