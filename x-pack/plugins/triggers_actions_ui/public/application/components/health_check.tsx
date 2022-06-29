@@ -53,9 +53,10 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
         hasPermanentEncryptionKey: false,
       };
       if (healthStatus.isRulesAvailable) {
-        // get the framework health, but if not available, do NOT cause the
+        // Get the framework health, but if not available, do NOT cause the
         // framework health errors/toasts to appear, since the state is
-        // actually unknown; these also need to be set to clear the
+        // actually unknown. These also need to be set to clear the busy
+        // indicator.
         const alertingHealthResult = await getAlertingFrameworkHealth(http);
         if (isSome(alertingHealthResult)) {
           healthStatus.isSufficientlySecure = alertingHealthResult.value.isSufficientlySecure;
