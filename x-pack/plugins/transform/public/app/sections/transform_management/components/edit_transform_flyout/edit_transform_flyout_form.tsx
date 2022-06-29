@@ -375,12 +375,9 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
                   'Defines number of retries on a recoverable failure before the transform task is marked as `failed`. If not set, the cluster setting `xpack.transform.num_transform_failure_retries` or a default of 10 will be used.',
               }
             )}
-            label={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel',
-              {
-                defaultMessage: 'Number of failure retries',
-              }
-            )}
+            label={i18n.translate('xpack.transform.transformList.numFailureRetriesLabel', {
+              defaultMessage: 'Number of failure retries',
+            })}
             onChange={(value) => dispatch({ field: 'numFailureRetries', value })}
             value={formFields.numFailureRetries.value}
           />

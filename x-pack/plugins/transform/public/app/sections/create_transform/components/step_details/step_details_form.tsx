@@ -346,7 +346,10 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         transformFrequency,
         transformSettingsMaxPageSearchSize,
         transformSettingsDocsPerSecond,
-        transformSettingsNumFailureRetries,
+        transformSettingsNumFailureRetries:
+          typeof transformSettingsNumFailureRetries === 'number'
+            ? transformSettingsNumFailureRetries
+            : parseInt(transformSettingsNumFailureRetries ?? '', 10),
         destinationIndex,
         destinationIngestPipeline,
         touched: true,
@@ -853,13 +856,16 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               />
             </EuiFormRow>
             <EuiFormRow
-              label={i18n.translate('xpack.transform.stepDetailsForm.transformNumRetriesLabel', {
-                defaultMessage: 'Number of failure retries',
-              })}
+              label={i18n.translate(
+                'xpack.transform.stepDetailsForm.transformNumFailureRetriesLabel',
+                {
+                  defaultMessage: 'Number of failure retries',
+                }
+              )}
               isInvalid={!isTransformSettingsNumFailureRetriesValid}
               error={
                 !isTransformSettingsNumFailureRetriesValid && [
-                  i18n.translate('xpack.transform.stepDetailsForm.maxPageSearchSizeError', {
+                  i18n.translate('xpack.transform.stepDetailsForm.NumFailureRetriesError', {
                     defaultMessage:
                       'Number of retries needs to be a number greater than or equal to -1. The minimum value is `0` and the maximum is `100`.\n' +
                       '`-1` can be used to denote infinity. In this case, the transform never gives up on retrying a recoverable failure.',
@@ -892,7 +898,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                   );
                 }}
                 aria-label={i18n.translate(
-                  'xpack.transform.stepDetailsForm.maxPageSearchSizeAriaLabel',
+                  'xpack.transform.stepDetailsForm.numFailureRetriesAriaLabel',
                   {
                     defaultMessage: 'Choose a maximum number of retries.',
                   }
