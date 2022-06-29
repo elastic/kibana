@@ -24,7 +24,7 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
   .euiTableHeaderCell {
     border-bottom: ${(props) => props.theme.eui.euiBorderThin};
     .euiTableCellContent__text {
-      font-weight: 400;
+      font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
     }
   }
   .euiTableRow {
@@ -82,28 +82,8 @@ export const GetRunningProcessesActionResult = memo<
       setStore((prevState) => {
         return { ...prevState, actionId: getRunningProcessesApi.data.data.id };
       });
-    } else {
-      setStore((prevState) => {
-        if (prevState.completedActionDetails) {
-          return {
-            ...prevState,
-            completedActionDetails: {
-              ...prevState.completedActionDetails,
-              isCompleted: true,
-              errors: [getRunningProcessesApi.error?.message ?? ''],
-            },
-          };
-        }
-        return prevState;
-      });
     }
-  }, [
-    actionId,
-    getRunningProcessesApi.data?.data.id,
-    getRunningProcessesApi.error,
-    getRunningProcessesApi.isSuccess,
-    setStore,
-  ]);
+  }, [actionId, getRunningProcessesApi.data?.data.id, getRunningProcessesApi.isSuccess, setStore]);
 
   useEffect(() => {
     if (actionDetails?.data.isCompleted) {
