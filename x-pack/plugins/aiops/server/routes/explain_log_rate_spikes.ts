@@ -20,6 +20,8 @@ import {
 import { API_ENDPOINT } from '../../common/api';
 import type { ChangePoint } from '../../common/types';
 
+import type { AiopsLicense } from '../types';
+
 import { fetchFieldCandidates } from './queries/fetch_field_candidates';
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
 
@@ -29,6 +31,7 @@ const PROGRESS_STEP_P_VALUES = 0.8;
 
 export const defineExplainLogRateSpikesRoute = (
   router: IRouter<DataRequestHandlerContext>,
+  license: AiopsLicense,
   logger: Logger
 ) => {
   router.post(
@@ -39,6 +42,10 @@ export const defineExplainLogRateSpikesRoute = (
       },
     },
     async (context, request, response) => {
+      if (!license.isActivePlatinumLicense) {
+        response.forbidden();
+      }
+
       const client = (await context.core).elasticsearch.client.asCurrentUser;
 
       const controller = new AbortController();
