@@ -74,7 +74,8 @@ export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';
 
-export const EXCEPTION_ITEM_ACTIONS_BUTTON = 'button[data-test-subj="exceptionItemHeader-actionButton"]';
+export const EXCEPTION_ITEM_ACTIONS_BUTTON =
+  'button[data-test-subj="exceptionItemHeader-actionButton"]';
 
 export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-delete"]';
 

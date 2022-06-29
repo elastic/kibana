@@ -106,7 +106,7 @@ export const editException = () => {
     })
     .should('be.visible');
 
-    cy.get(EDIT_EXCEPTION_BTN).click();
+  cy.get(EDIT_EXCEPTION_BTN).click();
 };
 
 export const removeException = () => {
@@ -117,7 +117,7 @@ export const removeException = () => {
     })
     .should('be.visible');
 
-    cy.get(REMOVE_EXCEPTION_BTN).click();
+  cy.get(REMOVE_EXCEPTION_BTN).click();
 };
 
 export const waitForTheRuleToBeExecuted = () => {
