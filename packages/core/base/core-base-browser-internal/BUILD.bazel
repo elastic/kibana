@@ -36,6 +36,7 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-config:npm_module_types",
+  "//packages/kbn-config-schema:npm_module_types",
   "//packages/core/base/core-base-common-internal:npm_module_types",
 ]
 
@@ -67,6 +68,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
