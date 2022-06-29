@@ -16,14 +16,14 @@ export type {
   RouteRegistrar,
   RouterRoute,
 } from './router';
-export { isKibanaRequest, isRealRequest, ensureRawRequest, KibanaRequest } from './request';
+export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './request';
 export type {
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   KibanaRouteOptions,
   KibanaRequestState,
-  IKibanaRequest,
+  KibanaRequest,
 } from './request';
 export { isSafeMethod, validBodyOutput } from './route';
 export type {

@@ -234,8 +234,7 @@ export type {
 } from './http';
 
 export { kibanaResponseFactory, validBodyOutput } from './http';
-// using named export for backward compatibility
-export type { IKibanaRequest as KibanaRequest, IKibanaRequest } from './http';
+export type { KibanaRequest } from './http';
 
 export type {
   HttpResourcesRenderOptions,

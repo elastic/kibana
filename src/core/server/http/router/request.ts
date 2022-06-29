@@ -90,7 +90,7 @@ export interface KibanaRequestAuth {
  * Kibana specific abstraction for an incoming request.
  * @public
  */
-export interface IKibanaRequest<
+export interface KibanaRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
@@ -177,12 +177,12 @@ export interface IKibanaRequest<
  * Core internal implementation of {@link IKibanaRequest}
  * @internal
  */
-export class KibanaRequest<
+export class CoreKibanaRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
   Method extends RouteMethod = any
-> implements IKibanaRequest<Params, Query, Body, Method>
+> implements KibanaRequest<Params, Query, Body, Method>
 {
   /**
    * Factory for creating requests. Validates the request before creating an
@@ -195,8 +195,8 @@ export class KibanaRequest<
     withoutSecretHeaders: boolean = true
   ) {
     const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
-    const requestParts = KibanaRequest.validate(req, routeValidator);
-    return new KibanaRequest(
+    const requestParts = CoreKibanaRequest.validate(req, routeValidator);
+    return new CoreKibanaRequest(
       req,
       requestParts.params,
       requestParts.query,
@@ -383,14 +383,14 @@ export class KibanaRequest<
  * @internal
  */
 export const ensureRawRequest = (request: KibanaRequest | Request) =>
-  isKibanaRequest(request) ? request[requestSymbol] : request;
+  isKibanaRequest(request) ? request[requestSymbol] : (request as Request);
 
 /**
  * Checks if an incoming request is a {@link KibanaRequest}
  * @internal
  */
-export function isKibanaRequest(request: unknown): request is KibanaRequest {
-  return request instanceof KibanaRequest;
+export function isKibanaRequest(request: unknown): request is CoreKibanaRequest {
+  return request instanceof CoreKibanaRequest;
 }
 
 function isRequest(request: any): request is Request {

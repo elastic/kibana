@@ -14,7 +14,7 @@ export type { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_sto
 export {
   isKibanaRequest,
   isRealRequest,
-  KibanaRequest,
+  CoreKibanaRequest,
   kibanaResponseFactory,
   validBodyOutput,
 } from './router';
@@ -25,6 +25,7 @@ export type {
   HttpResponseOptions,
   HttpResponsePayload,
   ErrorHttpResponseOptions,
+  KibanaRequest,
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
@@ -54,7 +55,6 @@ export type {
   RouteValidationResultFactory,
   DestructiveRouteMethod,
   SafeRouteMethod,
-  IKibanaRequest,
 } from './router';
 export type { OnPreRoutingHandler, OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 export type {
