@@ -427,6 +427,21 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataView.isPersisted",
+            "type": "Function",
+            "tags": [],
+            "label": "isPersisted",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataView.toSpec",
             "type": "Function",
             "tags": [],
@@ -3429,7 +3444,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "(spec: ",
+              "({ id, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3455,10 +3470,8 @@
                 "id": "def-public.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "spec",
-                "description": [
-                  "data view spec"
-                ],
+                "label": "{ id, ...restOfSpec }",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -3660,7 +3673,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -4726,7 +4739,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nSaved object id"
+              "\nSaved object id (or generated id if in-memory only)"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
@@ -6499,6 +6512,21 @@
               ">; docvalueFields: { field: string; format: string; }[]; runtimeFields: ",
               "MappingRuntimeFields",
               "; }"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataView.isPersisted",
+            "type": "Function",
+            "tags": [],
+            "label": "isPersisted",
+            "description": [],
+            "signature": [
+              "() => boolean"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -8720,7 +8748,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "(spec: ",
+              "({ id, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -8746,10 +8774,8 @@
                 "id": "def-server.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "spec",
-                "description": [
-                  "data view spec"
-                ],
+                "label": "{ id, ...restOfSpec }",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -8951,7 +8977,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -12506,6 +12532,21 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataView.isPersisted",
+            "type": "Function",
+            "tags": [],
+            "label": "isPersisted",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataView.toSpec",
             "type": "Function",
             "tags": [],
@@ -15161,7 +15202,7 @@
               "\nCreate a new data view instance."
             ],
             "signature": [
-              "(spec: ",
+              "({ id, ...restOfSpec }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -15187,10 +15228,8 @@
                 "id": "def-common.DataViewsService.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "spec",
-                "description": [
-                  "data view spec"
-                ],
+                "label": "{ id, ...restOfSpec }",
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "dataViews",
@@ -15392,7 +15431,7 @@
             "tags": [],
             "label": "updateSavedObject",
             "description": [
-              "\nSave existing dat aview. Will attempt to merge differences if there are conflicts."
+              "\nSave existing data view. Will attempt to merge differences if there are conflicts."
             ],
             "signature": [
               "(indexPattern: ",
@@ -16055,7 +16094,7 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nSaved object id"
+              "\nSaved object id (or generated id if in-memory only)"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false
@@ -16357,7 +16396,7 @@
             "tags": [],
             "label": "onNotification",
             "description": [
-              "\nHander for service notifications"
+              "\nHandler for service notifications"
             ],
             "signature": [
               "(toastInputFields: ",
@@ -16510,6 +16549,23 @@
             "label": "getCanSave",
             "description": [
               "\nDetermines whether the user can save data views"
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewsServiceDeps.getCanSaveAdvancedSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "getCanSaveAdvancedSettings",
+            "description": [
+              "\nDetermines whether the user can save advancedSettings (used for defaultIndex)"
             ],
             "signature": [
               "() => Promise<boolean>"
@@ -19528,7 +19584,7 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ create: (spec: ",
+          "{ create: ({ id, ...restOfSpec }: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20242,6 +20298,237 @@
     "objects": [
       {
         "parentPluginId": "dataViews",
+        "id": "def-common.DataViewPersistableStateService",
+        "type": "Object",
+        "tags": [],
+        "label": "DataViewPersistableStateService",
+        "description": [],
+        "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.inject",
+            "type": "Function",
+            "tags": [],
+            "label": "inject",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", references: ",
+              "SavedObjectReference",
+              "[]) => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              }
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewPersistableStateService.inject.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewPersistableStateService.inject.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  "SavedObjectReference",
+                  "[]"
+                ],
+                "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.extract",
+            "type": "Function",
+            "tags": [],
+            "label": "extract",
+            "description": [],
+            "signature": [
+              "(state: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => { state: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              "; references: never[]; }"
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewPersistableStateService.extract.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.getAllMigrations",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllMigrations",
+            "description": [],
+            "signature": [
+              "() => {}"
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.migrateToLatest",
+            "type": "Function",
+            "tags": [],
+            "label": "migrateToLatest",
+            "description": [],
+            "signature": [
+              "({ state }: ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.VersionedState",
+                "text": "VersionedState"
+              },
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ">) => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              }
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewPersistableStateService.migrateToLatest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ state }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "kibanaUtils",
+                    "scope": "common",
+                    "docId": "kibKibanaUtilsPluginApi",
+                    "section": "def-common.VersionedState",
+                    "text": "VersionedState"
+                  },
+                  "<",
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewPersistableStateService.telemetry",
+            "type": "Function",
+            "tags": [],
+            "label": "telemetry",
+            "description": [],
+            "signature": [
+              "() => {}"
+            ],
+            "path": "src/plugins/data_views/common/data_views/persistable_state.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-common.DEFAULT_ASSETS_TO_IGNORE",
         "type": "Object",
         "tags": [],
@@ -20264,16 +20551,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_INDEX_PATTERN",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
@@ -20284,30 +20561,10 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
             "type": "string",
             "tags": [],
             "label": "ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "METRICS_ENDPOINT_INDEX_TO_IGNORE",
             "description": [],
             "path": "src/plugins/data_views/common/constants.ts",
             "deprecated": false
