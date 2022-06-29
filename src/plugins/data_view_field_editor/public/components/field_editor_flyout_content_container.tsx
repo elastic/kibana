@@ -178,21 +178,26 @@ export const FieldEditorFlyoutContentContainer = ({
       setIsSaving(true);
 
       try {
-        const editedFields: DataViewField[] =
-          fieldTypeToProcess === 'runtime'
-            ? updateRuntimeField(updatedField)
-            : updateConcreteField(updatedField as Field);
+        const afterSave = () => {
+          const editedFields: DataViewField[] =
+            fieldTypeToProcess === 'runtime'
+              ? updateRuntimeField(updatedField)
+              : updateConcreteField(updatedField as Field);
+          const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
+            defaultMessage: "Saved '{fieldName}'",
+            values: { fieldName: updatedField.name },
+          });
+          notifications.toasts.addSuccess(message);
+          setIsSaving(false);
+          onSave(editedFields);
+        };
 
-        await dataViews.updateSavedObject(dataView);
-
-        const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
-          defaultMessage: "Saved '{fieldName}'",
-          values: { fieldName: updatedField.name },
-        });
-        notifications.toasts.addSuccess(message);
+        if (dataView.isPersisted()) {
+          await dataViews.updateSavedObject(dataView);
+        }
+        afterSave();
 
         setIsSaving(false);
-        onSave(editedFields);
       } catch (e) {
         const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
           defaultMessage: 'Failed to save field changes',

@@ -20,6 +20,7 @@ export type {
   FieldSpec,
   DataViewAttributes,
   SavedObjectsClientCommon,
+  RuntimeField,
 } from '../common';
 export {
   DataViewField,
@@ -29,7 +30,6 @@ export {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
-  RuntimeField,
 } from '../common';
 
 export type { DataViewsPublicSetupDependencies, DataViewsPublicStartDependencies } from './types';

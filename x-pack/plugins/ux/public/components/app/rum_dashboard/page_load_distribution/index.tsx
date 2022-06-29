@@ -23,11 +23,7 @@ import { PageLoadDistChart } from '../charts/page_load_dist_chart';
 import { ResetPercentileZoom } from './reset_percentile_zoom';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
-
-export interface PercentileRange {
-  min?: number | null;
-  max?: number | null;
-}
+import { PercentileRange } from './types';
 
 export function PageLoadDistribution() {
   const { http } = useKibanaServices();
