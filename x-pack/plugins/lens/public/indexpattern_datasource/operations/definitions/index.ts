@@ -454,11 +454,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
   ) => ExpressionAstFunction;
 }
 
-interface FieldBasedOperationDefinition<
-  C extends BaseIndexPatternColumn,
-  P = {},
-  AR extends boolean = false
-> {
+interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
   input: 'field';
 
   /**
@@ -646,12 +642,8 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
   ) => Record<string, IndexPatternLayer>;
 }
 
-interface OperationDefinitionMap<
-  C extends BaseIndexPatternColumn,
-  AR extends boolean = false,
-  P = {}
-> {
-  field: FieldBasedOperationDefinition<C, P, AR>;
+interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
+  field: FieldBasedOperationDefinition<C, P>;
   none: FieldlessOperationDefinition<C, P>;
   fullReference: FullReferenceOperationDefinition<C>;
   managedReference: ManagedReferenceOperationDefinition<C>;
@@ -667,7 +659,7 @@ export type OperationDefinition<
   Input extends keyof OperationDefinitionMap<C>,
   P = {},
   AR extends boolean = false
-> = BaseOperationDefinitionProps<C, AR> & OperationDefinitionMap<C, AR, P>[Input];
+> = BaseOperationDefinitionProps<C, AR> & OperationDefinitionMap<C, P>[Input];
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.
