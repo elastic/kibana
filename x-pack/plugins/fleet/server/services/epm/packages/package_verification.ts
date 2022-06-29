@@ -10,6 +10,8 @@ import { readFile } from 'fs/promises';
 import * as openpgp from 'openpgp';
 import type { Logger } from '@kbn/logging';
 
+import type { PackageVerificationStatus } from '../../../../common';
+
 import * as Registry from '../registry';
 
 import { appContextService } from '../../app_context';
@@ -20,9 +22,10 @@ interface VerificationResult {
   keyId: string;
 }
 
-export type PackageVerificationResult =
-  | { verificationAttempted: false }
-  | ({ verificationAttempted: true } & VerificationResult);
+export interface PackageVerificationResult {
+  verificationKeyId?: string;
+  verificationStatus: PackageVerificationStatus;
+}
 
 let cachedKey: openpgp.Key | undefined | null = null;
 
@@ -69,10 +72,10 @@ export async function verifyPackageArchiveSignature({
   logger: Logger;
 }): Promise<PackageVerificationResult> {
   const verificationKey = await getGpgKeyOrUndefined();
-
+  const result: PackageVerificationResult = { verificationStatus: 'unknown' };
   if (!verificationKey) {
     logger.warn(`Not performing package verification as no local verification key found`);
-    return { verificationAttempted: false };
+    return result;
   }
   const pkgArchiveSignature = await Registry.getPackageArchiveSignatureOrUndefined({
     pkgName,
@@ -82,7 +85,7 @@ export async function verifyPackageArchiveSignature({
 
   if (!pkgArchiveSignature) {
     logger.warn(`Not performing package verification as package has no signature file`);
-    return { verificationAttempted: false };
+    return result;
   }
 
   const { archiveBuffer: pkgArchiveBuffer } = await Registry.fetchArchiveBuffer(
@@ -90,14 +93,14 @@ export async function verifyPackageArchiveSignature({
     pkgVersion
   );
 
-  const verificationResult = await _verifyPackageSignature({
+  const { isVerified, keyId } = await _verifyPackageSignature({
     pkgArchiveBuffer,
     pkgArchiveSignature,
     verificationKey,
     logger,
   });
 
-  return { verificationAttempted: true, ...verificationResult };
+  return { verificationStatus: isVerified ? 'verified' : 'unverified', verificationKeyId: keyId };
 }
 
 async function _verifyPackageSignature({
@@ -136,16 +139,20 @@ async function _verifyPackageSignature({
   return { isVerified, keyId: verificationKey.getKeyID().toHex() };
 }
 
+type InstallationVerificationKeys = Pick<
+  Installation,
+  'verification_status' | 'verification_key_id'
+>;
+
 export function formatVerificationResultForSO(
   verificationResult: PackageVerificationResult
-): Installation['verification'] {
-  const verification: Installation['verification'] = {
-    verification_attempted: verificationResult.verificationAttempted,
+): InstallationVerificationKeys {
+  const verification: InstallationVerificationKeys = {
+    verification_status: verificationResult.verificationStatus,
   };
 
-  if (verificationResult.verificationAttempted) {
-    verification.is_verified = verificationResult.isVerified;
-    verification.key_id = verificationResult.keyId;
+  if (verificationResult.verificationKeyId) {
+    verification.verification_key_id = verificationResult.verificationKeyId;
   }
 
   return verification;

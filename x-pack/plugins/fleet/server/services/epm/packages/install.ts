@@ -357,9 +357,8 @@ async function installPackageFromRegistry({
         pkgVersion,
         logger,
       });
-      const isUnverified =
-        verificationResult.verificationAttempted && !verificationResult.isVerified;
-      if (isUnverified && !force) {
+
+      if (verificationResult.verificationStatus === 'unverified' && !force) {
         throw new PackageFailedVerificationError(pkgkey);
       }
     }
@@ -613,7 +612,7 @@ export async function restartInstallation(options: {
 }) {
   const { savedObjectsClient, pkgVersion, pkgName, installSource, verificationResult } = options;
 
-  const savedObjectUpdate: Partial<Installation> = {
+  let savedObjectUpdate: Partial<Installation> = {
     install_version: pkgVersion,
     install_status: 'installing',
     install_started_at: new Date().toISOString(),
@@ -621,7 +620,10 @@ export async function restartInstallation(options: {
   };
 
   if (verificationResult) {
-    savedObjectUpdate.verification = formatVerificationResultForSO(verificationResult);
+    savedObjectUpdate = {
+      ...savedObjectUpdate,
+      ...formatVerificationResultForSO(verificationResult),
+    };
   }
 
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, savedObjectUpdate);
@@ -661,6 +663,7 @@ export async function createInstallation(options: {
     install_source: installSource,
     install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
+    verification_status: 'unknown',
   };
 
   if (verificationResult) {

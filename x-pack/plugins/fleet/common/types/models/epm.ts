@@ -401,6 +401,7 @@ export interface IntegrationCardItem {
   fromIntegrations?: string;
 }
 
+export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
@@ -420,11 +421,8 @@ export interface Installation extends SavedObjectAttributes {
   installed_kibana_space_id?: string;
   keep_policies_up_to_date?: boolean;
   install_format_schema_version?: string;
-  verification?: {
-    verification_attempted?: boolean;
-    is_verified?: boolean;
-    key_id?: string;
-  };
+  verification_status: PackageVerificationStatus;
+  verification_key_id?: string;
 }
 
 export interface PackageUsageStats {
