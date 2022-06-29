@@ -100,7 +100,7 @@ export const ModelsList: FC<Props> = ({
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
 
-  const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeployment;
+  const startModelDeploymentDocUrl = docLinks.links.ml.startTrainedModelsDeploymentQueryParams;
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
