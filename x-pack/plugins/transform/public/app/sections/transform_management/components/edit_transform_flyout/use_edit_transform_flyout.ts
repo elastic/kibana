@@ -121,11 +121,6 @@ const numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage = i18n.translate
   }
 );
 
-export const integerAboveZeroValidator: Validator = (value) =>
-  !isNaN(value) && Number.isInteger(+value) && +value > 0 && !(value + '').includes('.')
-    ? []
-    : [numberAboveZeroNotValidErrorMessage];
-
 export const integerGreaterThanOrEqualToValidatorFactory =
   (threshold: number, message: string): Validator =>
   (value) => {
@@ -136,6 +131,18 @@ export const integerGreaterThanOrEqualToValidatorFactory =
       ? []
       : [message];
   };
+
+export const integerAboveZeroValidator: Validator = integerGreaterThanOrEqualToValidatorFactory(
+  0,
+  numberAboveZeroNotValidErrorMessage
+);
+
+export const integerGreaterThanOrEqualToNegativeOne: Validator =
+  integerGreaterThanOrEqualToValidatorFactory(
+    -1,
+    numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage
+  );
+
 const numberRange10To10000NotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberRange10To10000NotValidErrorMessage',
   {

@@ -27,6 +27,7 @@ import {
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
+import { integerGreaterThanOrEqualToNegativeOne } from '../../../transform_management/components/edit_transform_flyout/use_edit_transform_flyout';
 import {
   isEsIndices,
   isEsIngestPipelines,
@@ -304,14 +305,14 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       transformSettingsMaxPageSearchSize
     );
 
-    const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState(
-      defaults.transformSettingsNumFailureRetries
-    );
+    const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState<
+      string | number | undefined
+    >(defaults.transformSettingsNumFailureRetries);
 
     const isTransformSettingsNumFailureRetriesValid =
       transformSettingsNumFailureRetries === undefined ||
-      (typeof transformSettingsNumFailureRetries === 'number' &&
-        transformSettingsNumFailureRetries >= -1);
+      transformSettingsNumFailureRetries === '-' ||
+      integerGreaterThanOrEqualToNegativeOne(transformSettingsNumFailureRetries).length === 0;
 
     const valid =
       !transformIdEmpty &&
@@ -875,13 +876,21 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             >
               <EuiFieldText
                 value={
-                  transformSettingsNumFailureRetries
+                  transformSettingsNumFailureRetries ||
+                  (transformSettingsNumFailureRetries !== undefined &&
+                    transformSettingsNumFailureRetries >= -1)
                     ? transformSettingsNumFailureRetries.toString()
                     : ''
                 }
-                onChange={(e) =>
-                  setTransformSettingsNumFailureRetries(parseInt(e.target.value, 10))
-                }
+                onChange={(e) => {
+                  if (e.target.value === '') {
+                    setTransformSettingsNumFailureRetries(undefined);
+                    return;
+                  }
+                  setTransformSettingsNumFailureRetries(
+                    e.target.value === '-' ? '-' : parseInt(e.target.value, 10)
+                  );
+                }}
                 aria-label={i18n.translate(
                   'xpack.transform.stepDetailsForm.maxPageSearchSizeAriaLabel',
                   {
