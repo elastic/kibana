@@ -50,7 +50,7 @@ const ConsoleWindow = styled.div`
 
     &-rightPanel {
       width: 35%;
-      background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
+      background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
       border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
         ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
     }

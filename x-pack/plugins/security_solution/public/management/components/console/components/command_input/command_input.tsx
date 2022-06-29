@@ -27,7 +27,7 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 
 const CommandInputContainer = styled.div`
-  background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
+  background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
   border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
   padding: ${({ theme: { eui } }) => eui.euiSizeS};
 
