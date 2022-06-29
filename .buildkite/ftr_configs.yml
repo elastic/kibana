@@ -56,6 +56,7 @@ disabled:
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
 
+defaultQueue: 'n2-2-spot'
 enabled:
   - test/accessibility/config.ts
   - test/analytics/config.ts
@@ -151,7 +152,8 @@ enabled:
   - x-pack/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/test/functional/apps/dashboard/group1/config.ts
   - x-pack/test/functional/apps/dashboard/group2/config.ts
-  - x-pack/test/functional/apps/dashboard/group3/config.ts
+  - x-pack/test/functional/apps/dashboard/group3/config.ts:
+      queue: n2-4-spot-2
   - x-pack/test/functional/apps/data_views/config.ts
   - x-pack/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/config.ts
@@ -221,7 +223,8 @@ enabled:
   - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/test/saved_object_tagging/functional/config.ts
   - x-pack/test/saved_objects_field_count/config.ts
-  - x-pack/test/search_sessions_integration/config.ts
+  - x-pack/test/search_sessions_integration/config.ts:
+      queue: n2-4-spot-2
   - x-pack/test/security_api_integration/anonymous_es_anonymous.config.ts
   - x-pack/test/security_api_integration/anonymous.config.ts
   - x-pack/test/security_api_integration/audit.config.ts
