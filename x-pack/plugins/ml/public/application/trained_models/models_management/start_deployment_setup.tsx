@@ -269,6 +269,7 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
           target={'_blank'}
           css={css`
             align-self: center;
+            margin-right: auto;
           `}
         >
           <FormattedMessage
