@@ -18,11 +18,11 @@ import {
 } from '@elastic/eui';
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
 import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
+import { Indicator as CommonIndicator } from '../../../../common/types/Indicator';
 
-export interface Indicator {
+export interface Indicator extends CommonIndicator {
   id: string;
   name: string;
-  last_seen: string;
   first_seen: string;
 }
 
@@ -56,31 +56,29 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
     [indicator]
   );
   const onSelectedTabChanged = (id: number) => setSelectedTabId(id);
-  const renderTabs = useMemo(
-    () =>
-      tabs.map((tab, index) => (
-        <EuiTab
-          onClick={() => onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === selectedTabId}
-          key={index}
-        >
-          {tab.name}
-        </EuiTab>
-      )),
-    [selectedTabId, tabs]
-  );
+
+  const renderTabs = tabs.map((tab, index) => (
+    <EuiTab
+      onClick={() => onSelectedTabChanged(tab.id)}
+      isSelected={tab.id === selectedTabId}
+      key={index}
+    >
+      {tab.name}
+    </EuiTab>
+  ));
+
   const selectedTabContent = useMemo(
     () => tabs.find((obj) => obj.id === selectedTabId)?.content,
     [selectedTabId, tabs]
   );
-  const formattedFirstSeen = useMemo((): string => {
-    if (indicator.first_seen) {
-      const date = new Date(indicator.first_seen);
-      return isNaN(date.getTime()) ? 'N/A' : date.toDateString();
-    } else {
-      return 'N/A';
-    }
-  }, [indicator.first_seen]);
+
+  let formattedFirstSeen: string;
+  if (indicator.first_seen) {
+    const date = new Date(indicator.first_seen);
+    formattedFirstSeen = isNaN(date.getTime()) ? 'N/A' : date.toDateString();
+  } else {
+    formattedFirstSeen = 'N/A';
+  }
 
   return (
     <EuiFlyout onClose={closeFlyout}>

@@ -18,8 +18,10 @@ import {
 
 const mockIndicator: Indicator = {
   id: '12.68.554.87',
+  value: 'value',
+  feed: 'feed',
+  type: 'type',
   name: 'first indicator',
-  last_seen: '2022-06-03T11:41:06.000Z',
   first_seen: '2022-06-03T11:41:06.000Z',
 };
 
