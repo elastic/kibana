@@ -13,7 +13,10 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { PackagePolicy, DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
-import { createCspRuleSearchFilterByPackagePolicy } from '../../common/utils/helpers';
+import {
+  createCspRuleSearchFilterByPackagePolicy,
+  isNonNullable,
+} from '../../common/utils/helpers';
 import {
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
@@ -26,12 +29,13 @@ type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends Read
   ? ElementType
   : never;
 
-const getActivatedBenchmark = (packagePolicy: PackagePolicy): string => {
-  const activatedBenchmark = packagePolicy.inputs[0].streams[0].vars?.benchmark.value;
+const foo = { 'cloudbeat/vanilla': 'cis_k8s', 'cloudbeat/eks': 'cis_eks' };
+type BenchmarkTypes = 'cloudbeat/vanilla' | 'cloudbeat/eks';
 
-  if (activatedBenchmark === 'cis_k8s' || activatedBenchmark === 'cis_eks')
-    return activatedBenchmark;
-  return 'cis_k8s';
+const getActivatedBenchmark = (packagePolicy: PackagePolicy): string => {
+  const activateBenchmarks = packagePolicy.inputs
+    .map((input) => (input.enabled ? input.type : undefined))
+    .filter(isNonNullable);
 };
 
 /**
@@ -42,6 +46,9 @@ export const onPackagePolicyPostCreateCallback = async (
   packagePolicy: PackagePolicy,
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
+  console.log({ packagePolicy });
+  console.log(packagePolicy.inputs);
+  console.log(packagePolicy.inputs[0]);
   const activatedBenchmark = getActivatedBenchmark(packagePolicy);
 
   // Create csp-rules from the generic asset
