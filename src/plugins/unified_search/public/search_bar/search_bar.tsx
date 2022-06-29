@@ -15,7 +15,7 @@ import { get, isEqual } from 'lodash';
 import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Query, Filter, TimeRange } from '@kbn/es-query';
+import { Query, Filter, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
@@ -61,12 +61,15 @@ export interface SearchBarOwnProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
-  query?: Query;
+  query?: Query | AggregateQuery;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
-  onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
-  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
+  onQueryChange?: (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => void;
+  onQuerySubmit?: (
+    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
+    isUpdate?: boolean
+  ) => void;
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
@@ -102,12 +105,12 @@ interface State {
   openQueryBarMenu: boolean;
   showSavedQueryPopover: boolean;
   currentProps?: SearchBarProps;
-  query?: Query;
+  query?: Query | AggregateQuery;
   dateRangeFrom: string;
   dateRangeTo: string;
 }
 
-function isOfQueryType(arg: any): arg is Query {
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
   return Boolean(arg && 'query' in arg);
 }
 
@@ -129,23 +132,27 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     }
 
     let nextQuery = null;
-    if (isOfQueryType(nextProps.query)) {
-      if (nextProps.query && nextProps.query.query !== get(prevState, 'currentProps.query.query')) {
-        nextQuery = {
-          query: nextProps.query.query,
-          language: nextProps.query.language,
-        };
-      } else if (
-        nextProps.query &&
-        prevState.query &&
-        nextProps.query.language !== prevState.query.language
-      ) {
-        nextQuery = {
-          query: '',
-          language: nextProps.query.language,
-        };
-      }
-    } else {
+    if (
+      nextProps.query &&
+      isOfQueryType(nextProps.query) &&
+      nextProps.query.query !== get(prevState, 'currentProps.query.query')
+    ) {
+      nextQuery = {
+        query: nextProps.query.query,
+        language: nextProps.query.language,
+      };
+    } else if (
+      nextProps.query &&
+      prevState.query &&
+      isOfQueryType(nextProps.query) &&
+      isOfQueryType(prevState.query) &&
+      nextProps.query.language !== prevState.query.language
+    ) {
+      nextQuery = {
+        query: '',
+        language: nextProps.query.language,
+      };
+    } else if (nextProps.query && !isOfQueryType(nextProps.query)) {
       nextQuery = nextProps.query;
     }
 
@@ -197,11 +204,10 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
 
   public isDirty = () => {
     if (!this.props.showDatePicker && this.state.query && this.props.query) {
-      return this.state.query.query !== this.props.query.query;
+      return !isEqual(this.state.query, this.props.query);
     }
 
     return (
-      (this.state.query && this.props.query && this.state.query.query !== this.props.query.query) ||
       (this.state.query && this.props.query && !isEqual(this.state.query, this.props.query)) ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
       this.state.dateRangeTo !== this.props.dateRangeTo
@@ -296,7 +302,10 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     }
   };
 
-  public onQueryBarChange = (queryAndDateRange: { dateRange: TimeRange; query?: Query }) => {
+  public onQueryBarChange = (queryAndDateRange: {
+    dateRange: TimeRange;
+    query?: Query | AggregateQuery;
+  }) => {
     this.setState({
       query: queryAndDateRange.query,
       dateRangeFrom: queryAndDateRange.dateRange.from,
@@ -349,7 +358,10 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     );
   };
 
-  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
+  public onQueryBarSubmit = (queryAndDateRange: {
+    dateRange?: TimeRange;
+    query?: Query | AggregateQuery;
+  }) => {
     this.setState(
       {
         query: queryAndDateRange.query,
@@ -438,7 +450,11 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
     const queryBarMenu = (
       <QueryBarMenu
         nonKqlMode={this.props.nonKqlMode}
-        language={this.state?.query?.language ?? 'kuery'}
+        language={
+          this.state.query && isOfQueryType(this.state?.query)
+            ? this.state?.query?.language
+            : 'kuery'
+        }
         onQueryChange={this.onQueryBarChange}
         onQueryBarSubmit={this.onQueryBarSubmit}
         dateRangeFrom={this.state.dateRangeFrom}
@@ -451,7 +467,7 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
         onFiltersUpdated={this.props.onFiltersUpdated}
         filters={this.props.filters}
         hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
-        query={this.state.query}
+        query={this.state.query as Query}
         savedQuery={this.props.savedQuery}
         onClearSavedQuery={this.props.onClearSavedQuery}
         showQueryInput={this.props.showQueryInput}
@@ -547,7 +563,9 @@ class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
 
   private hasFiltersOrQuery() {
     const hasFilters = Boolean(this.props.filters && this.props.filters.length > 0);
-    const hasQuery = Boolean(this.state.query && this.state.query.query);
+    const hasQuery = Boolean(
+      this.state.query && isOfQueryType(this.state.query) && this.state.query.query
+    );
     return hasFilters || hasQuery;
   }
 

@@ -22,7 +22,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';
+import type { EsQueryConfig, Query, Filter, AggregateQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -100,7 +100,7 @@ const fieldTypeNames: Record<DataType, string> = {
 // returning a query dsl object not matching anything
 function buildSafeEsQuery(
   indexPattern: IndexPattern,
-  query: Query,
+  query: Query | AggregateQuery,
   filters: Filter[],
   queryConfig: EsQueryConfig
 ) {

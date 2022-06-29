@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Query } from '@kbn/es-query';
 import { LayerConfig, LensAttributes } from './lens_attributes';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
@@ -438,7 +438,8 @@ describe('Lens Attribute', () => {
       reportViewConfig.reportType,
       formulaHelper
     ).getJSON();
-    expect(multiSeriesLensAttr.state.query.query).toEqual('transaction.duration.us < 60000000');
+    const query = multiSeriesLensAttr.state.query as Query;
+    expect(query.query).toEqual('transaction.duration.us < 60000000');
   });
 
   describe('Layer breakdowns', function () {

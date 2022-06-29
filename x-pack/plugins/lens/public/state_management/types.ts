@@ -7,7 +7,7 @@
 
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
+import { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { SavedQuery } from '@kbn/data-plugin/public';
 import { Document } from '../persistence';
 
@@ -47,7 +47,7 @@ export interface LensAppState extends EditorFrameState {
   isSaveable: boolean;
 
   isLoading: boolean;
-  query: Query;
+  query: Query | AggregateQuery;
   filters: Filter[];
   savedQuery?: SavedQuery;
   searchSessionId: string;

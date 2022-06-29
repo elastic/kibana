@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { encode, RisonValue } from 'rison-node';
-import type { Query } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { TimeHistory } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
@@ -17,6 +17,10 @@ import { urlFromQueryParams } from '../url_from_query_params';
 import { useEndpointSelector } from '../hooks';
 import * as selectors from '../../store/selectors';
 import { clone } from '../../models/index_pattern';
+
+function isOfQueryType(arg?: Query | AggregateQuery): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
 
 export const AdminSearchBar = memo(() => {
   const history = useHistory();
@@ -29,14 +33,17 @@ export const AdminSearchBar = memo(() => {
   );
 
   const onQuerySubmit = useCallback(
-    (params: { query?: Query }) => {
+    (params: { query?: Query | AggregateQuery }) => {
       history.push(
         urlFromQueryParams({
           ...queryParams,
           // if query is changed, reset back to first page
           // so that user is not (possibly) being left on an invalid page
-          page_index: params.query?.query === searchBarQuery.query ? queryParams.page_index : '0',
-          ...(params.query?.query.trim()
+          page_index:
+            isOfQueryType(params.query) && params.query?.query === searchBarQuery.query
+              ? queryParams.page_index
+              : '0',
+          ...(isOfQueryType(params.query) && params.query?.query.trim()
             ? { admin_query: encode(params.query as unknown as RisonValue) }
             : {}),
         })

@@ -9,6 +9,7 @@
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SimpleSavedObject, SavedObjectAttributes } from '@kbn/core/public';
 import React from 'react';
 import { IUiSettingsClient, SavedObjectsStart } from '@kbn/core/public';
 
@@ -22,6 +23,9 @@ interface SearchSelectionProps {
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
   goBack: () => void;
+}
+interface SavedSearchesAttributes extends SavedObjectAttributes {
+  isTextBasedQuery: boolean;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {
@@ -67,8 +71,9 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                   }
                 ),
                 includeFields: ['isTextBasedQuery'],
-                showSavedObject: (savedObject: any) => {
-                  return !savedObject.attributes.isTextBasedQuery;
+                showSavedObject: (savedObject) => {
+                  const so = savedObject as unknown as SimpleSavedObject<SavedSearchesAttributes>;
+                  return !so.attributes.isTextBasedQuery;
                 },
               },
               {

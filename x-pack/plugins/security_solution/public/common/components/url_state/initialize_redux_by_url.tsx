@@ -10,7 +10,7 @@ import { Dispatch } from 'redux';
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import type { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -29,6 +29,10 @@ import {
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
 import { timelineActions } from '../../../timelines/store/timeline';
+
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
 
 export const useSetInitialStateFromUrl = () => {
   const dispatch = useDispatch();
@@ -77,12 +81,14 @@ export const useSetInitialStateFromUrl = () => {
           if (savedQueryId != null && savedQueryId !== '') {
             savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
               filterManager.setFilters(savedQueryData.attributes.filters || []);
-              dispatch(
-                inputsActions.setFilterQuery({
-                  id: 'global',
-                  ...savedQueryData.attributes.query,
-                })
-              );
+              if (isOfQueryType(savedQueryData.attributes.query)) {
+                dispatch(
+                  inputsActions.setFilterQuery({
+                    id: 'global',
+                    ...savedQueryData.attributes.query,
+                  })
+                );
+              }
               dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
             });
           }

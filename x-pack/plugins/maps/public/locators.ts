@@ -9,7 +9,13 @@
 
 import rison from 'rison-node';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { type Filter, isFilterPinned, type TimeRange, type Query } from '@kbn/es-query';
+import {
+  type Filter,
+  isFilterPinned,
+  type TimeRange,
+  type Query,
+  type AggregateQuery,
+} from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
@@ -48,7 +54,7 @@ export interface MapsAppLocatorParams extends SerializableRecord {
    * Optionally set a query. NOTE: if given and used in conjunction with `mapId`, and the
    * saved map has a query saved with it, this will _replace_ that query.
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
 
   /**
    * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
@@ -74,7 +80,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     const { mapId, filters, query, refreshInterval, timeRange, initialLayers, hash } = params;
     const useHash = hash ?? this.deps.useHash;
     const appState: {
-      query?: Query;
+      query?: Query | AggregateQuery;
       filters?: Filter[];
       vis?: unknown;
     } = {};

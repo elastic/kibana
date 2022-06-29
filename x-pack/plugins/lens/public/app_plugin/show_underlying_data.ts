@@ -13,6 +13,7 @@ import {
   buildEsQuery,
   FilterStateStore,
   TimeRange,
+  AggregateQuery,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -20,6 +21,10 @@ import { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource } from '../types';
+
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
 
 /**
  * Joins a series of queries.
@@ -153,7 +158,7 @@ type QueryLanguage = 'lucene' | 'kuery';
  * extra filter pill.
  */
 export function combineQueryAndFilters(
-  query: Query | Query[] | undefined,
+  query: Query | AggregateQuery | Array<Query | AggregateQuery> | undefined,
   filters: Filter[],
   meta: LayerMetaInfo,
   dataViews: DataViewBase[] | undefined
@@ -167,7 +172,8 @@ export function combineQueryAndFilters(
   };
 
   const allQueries = Array.isArray(query) ? query : query ? [query] : [];
-  const nonEmptyQueries = allQueries.filter((q) => Boolean(q.query.trim()));
+  const queryTypeQueries = allQueries.filter(isOfQueryType);
+  const nonEmptyQueries = queryTypeQueries.filter((q) => Boolean(q.query.trim()));
 
   [queries.lucene, queries.kuery] = partition(nonEmptyQueries, (q) => q.language === 'lucene');
 

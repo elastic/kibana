@@ -8,7 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
@@ -65,7 +65,7 @@ export type DashboardAppLocatorParams = {
    * Optionally set a query. NOTE: if given and used in conjunction with `dashboardId`, and the
    * saved dashboard has a query saved with it, this will _replace_ that query.
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
    * whether to hash the data in the url to avoid url length issues.

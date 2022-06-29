@@ -49,7 +49,7 @@ const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
 
-function isOfQueryType(arg: any): arg is Query {
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
   return Boolean(arg && 'query' in arg);
 }
 
@@ -71,13 +71,13 @@ export interface QueryBarTopRowProps {
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   nonKqlMode?: 'lucene' | 'text';
-  onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onChange: (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onSubmit: (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => void;
   placeholder?: string;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
-  query?: Query;
+  query?: Query | AggregateQuery;
   refreshInterval?: number;
   screenTitle?: string;
   showQueryInput?: boolean;
@@ -96,8 +96,8 @@ export interface QueryBarTopRowProps {
   showSubmitButton?: boolean;
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
-  onTextLangQuerySubmit: (query: any) => void;
-  onTextLangQueryChange: (query: any) => void;
+  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
+  onTextLangQueryChange: (query: AggregateQuery) => void;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -164,8 +164,8 @@ export const QueryBarTopRow = React.memo(
     const { uiSettings, storage, appName } = kibana.services;
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
-    const queryLanguage = props.query && props.query.language;
-    const queryRef = useRef<Query | undefined>(props.query);
+    const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
+    const queryRef = useRef<Query | AggregateQuery | undefined>(props.query);
     queryRef.current = props.query;
 
     const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -222,7 +222,7 @@ export const QueryBarTopRow = React.memo(
     });
 
     const onSubmit = useCallback(
-      ({ query, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+      ({ query, dateRange }: { query?: Query | AggregateQuery; dateRange: TimeRange }) => {
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
@@ -234,7 +234,7 @@ export const QueryBarTopRow = React.memo(
 
     const onClickSubmitButton = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
-        if (persistedLog && queryRef.current) {
+        if (persistedLog && queryRef.current && isOfQueryType(queryRef.current)) {
           persistedLog.add(queryRef.current.query);
         }
         event.preventDefault();
@@ -494,7 +494,7 @@ export const QueryBarTopRow = React.memo(
               <QueryStringInput
                 disableAutoFocus={props.disableAutoFocus}
                 indexPatterns={props.indexPatterns!}
-                query={props.query!}
+                query={props.query! as Query}
                 screenTitle={props.screenTitle}
                 onChange={onQueryChange}
                 onChangeQueryInputFocus={onChangeQueryInputFocus}

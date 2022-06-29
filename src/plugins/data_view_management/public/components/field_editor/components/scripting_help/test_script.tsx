@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { Query, buildEsQuery } from '@kbn/es-query';
+import { Query, buildEsQuery, AggregateQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
@@ -69,7 +69,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     }
   }
 
-  previewScript = async (searchContext?: { query?: Query | undefined }) => {
+  previewScript = async (searchContext?: { query?: Query | AggregateQuery | undefined }) => {
     const { indexPattern, name, script, executeScript } = this.props;
 
     if (!script || script.length === 0) {
@@ -83,7 +83,8 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     let query;
     if (searchContext) {
       const esQueryConfigs = getEsQueryConfig(this.context.services.uiSettings);
-      query = buildEsQuery(this.props.indexPattern, searchContext.query || [], [], esQueryConfigs);
+      const searchContextQuery = searchContext.query as Query;
+      query = buildEsQuery(this.props.indexPattern, searchContextQuery || [], [], esQueryConfigs);
     }
 
     const scriptResponse = await executeScript({

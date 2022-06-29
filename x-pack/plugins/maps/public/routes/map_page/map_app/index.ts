@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
 import { Filter } from '@kbn/es-query';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { MapApp } from './map_app';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
 import {
@@ -48,7 +48,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       searchSessionId,
     }: {
       filters?: Filter[];
-      query?: Query;
+      query?: Query | AggregateQuery;
       timeFilters?: TimeRange;
       forceRefresh?: boolean;
       searchSessionId?: string;

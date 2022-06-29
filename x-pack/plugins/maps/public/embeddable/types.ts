@@ -13,7 +13,7 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapSettings } from '../reducers/map';
@@ -31,7 +31,7 @@ interface MapEmbeddableState {
   hiddenLayers?: string[];
   hideFilterActions?: boolean;
   filters?: Filter[];
-  query?: Query;
+  query?: Query | AggregateQuery;
   timeRange?: TimeRange;
 }
 export type MapByValueInput = {

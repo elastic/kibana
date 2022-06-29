@@ -7,9 +7,13 @@
  */
 
 import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
-import { isFilters } from '@kbn/es-query';
+import { isFilters, Query, AggregateQuery } from '@kbn/es-query';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
+
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
 
 function injectReferences({
   id,
@@ -17,7 +21,7 @@ function injectReferences({
   references,
 }: Pick<SavedObject<SavedQueryAttributes>, 'id' | 'attributes' | 'references'>) {
   const { query } = attributes;
-  if (typeof query.query === 'string') {
+  if (isOfQueryType(query) && typeof query.query === 'string') {
     try {
       const parsed = JSON.parse(query.query);
       query.query = parsed instanceof Object ? parsed : query.query;
@@ -37,13 +41,22 @@ function extractReferences({
   timefilter,
 }: SavedQueryAttributes) {
   const { state: extractedFilters, references } = extract(filters);
+  const isOfQueryTypeQuery = isOfQueryType(query);
+  let queryString = '';
+  if (isOfQueryTypeQuery) {
+    if (typeof query.query === 'string') {
+      queryString = query.query;
+    } else {
+      queryString = JSON.stringify(query.query);
+    }
+  }
 
   const attributes: SavedQueryAttributes = {
     title: title.trim(),
     description: description.trim(),
     query: {
       ...query,
-      query: typeof query.query === 'string' ? query.query : JSON.stringify(query.query),
+      ...(queryString && { query: queryString }),
     },
     filters: extractedFilters,
     ...(timefilter && { timefilter }),

@@ -9,7 +9,6 @@
 import _ from 'lodash';
 import { merge } from 'rxjs';
 import { debounceTime, finalize, map, switchMap, tap } from 'rxjs/operators';
-
 import { setQuery } from '../state';
 import { DashboardBuildContext, DashboardState } from '../../types';
 import { DashboardSavedObject } from '../../saved_dashboards';
@@ -18,6 +17,7 @@ import {
   syncQueryStateWithUrl,
   connectToQueryState,
   Filter,
+  AggregateQuery,
   Query,
   waitUntilNextSessionCompletes$,
   GlobalQueryStateFromUrl,
@@ -57,7 +57,7 @@ export const syncDashboardFilterState = ({
   });
 
   // this callback will be used any time new filters and query need to be applied.
-  const applyFilters = (query: Query, filters: Filter[]) => {
+  const applyFilters = (query: Query | AggregateQuery, filters: Filter[]) => {
     savedDashboard.searchSource.setField('query', query);
     savedDashboard.searchSource.setField('filter', filters);
     dispatchDashboardStateChange(setQuery(query));
@@ -70,7 +70,7 @@ export const syncDashboardFilterState = ({
   );
 
   // starts syncing app filters between dashboard state and filterManager
-  const intermediateFilterState: { filters: Filter[]; query: Query } = {
+  const intermediateFilterState: { filters: Filter[]; query: Query | AggregateQuery } = {
     query: initialDashboardState.query ?? queryString.getDefaultQuery(),
     filters: initialDashboardState.filters ?? [],
   };

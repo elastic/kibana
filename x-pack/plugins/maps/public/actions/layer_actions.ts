@@ -7,7 +7,7 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import type { Query } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
@@ -543,7 +543,7 @@ export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
   };
 }
 
-export function setLayerQuery(id: string, query: Query) {
+export function setLayerQuery(id: string, query: Query | AggregateQuery) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({
       type: UPDATE_LAYER_PROP,

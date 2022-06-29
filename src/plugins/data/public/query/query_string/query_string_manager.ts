@@ -10,23 +10,19 @@ import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart } from '@kbn/core/public';
-import type { Query } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
 
-function isOfQueryType(arg: any): arg is Query {
-  return Boolean(arg && 'query' in arg);
-}
-
 export class QueryStringManager {
-  private query$: BehaviorSubject<Query>;
+  private query$: BehaviorSubject<Query | AggregateQuery>;
 
   constructor(
     private readonly storage: IStorageWrapper,
     private readonly uiSettings: CoreStart['uiSettings']
   ) {
-    this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
+    this.query$ = new BehaviorSubject<Query | AggregateQuery>(this.getDefaultQuery());
   }
 
   private getDefaultLanguage() {
@@ -43,7 +39,7 @@ export class QueryStringManager {
     };
   }
 
-  public formatQuery(query: Query | string | undefined): Query {
+  public formatQuery(query: Query | AggregateQuery | string | undefined): Query | AggregateQuery {
     if (!query) {
       return this.getDefaultQuery();
     } else if (typeof query === 'string') {
@@ -60,23 +56,17 @@ export class QueryStringManager {
     return this.query$.asObservable().pipe(skip(1));
   };
 
-  public getQuery = (): Query => {
+  public getQuery = (): Query | AggregateQuery => {
     return this.query$.getValue();
   };
 
   /**
    * Updates the query.
-   * @param {Query} query
+   * @param {Query | AggregateQuery} query
    */
-  public setQuery = (query: Query) => {
+  public setQuery = (query: Query | AggregateQuery) => {
     const curQuery = this.query$.getValue();
-    const isOfTypeQuery = isOfQueryType(query);
-    if (
-      (isOfTypeQuery && query?.language !== curQuery.language) ||
-      query?.query !== curQuery.query
-    ) {
-      this.query$.next(query);
-    } else if (!isOfTypeQuery && !isEqual(query, curQuery)) {
+    if (!isEqual(query, curQuery)) {
       this.query$.next(query);
     }
   };

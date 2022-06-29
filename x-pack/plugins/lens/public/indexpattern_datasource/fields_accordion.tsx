@@ -19,7 +19,7 @@ import {
 import classNames from 'classnames';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { Filter } from '@kbn/es-query';
-import type { Query } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { IndexPatternField } from './types';
@@ -33,7 +33,7 @@ export interface FieldItemSharedProps {
   chartsThemeService: ChartsPluginSetup['theme'];
   indexPattern: IndexPattern;
   highlight?: string;
-  query: Query;
+  query: Query | AggregateQuery;
   dateRange: DatasourceDataPanelProps['dateRange'];
   filters: Filter[];
 }

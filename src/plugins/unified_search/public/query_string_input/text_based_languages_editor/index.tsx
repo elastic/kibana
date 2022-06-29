@@ -8,6 +8,7 @@
 
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import { EsqlLang, monaco } from '@kbn/monaco';
+import type { AggregateQuery } from '@kbn/es-query';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,7 +37,7 @@ import { EditorFooter } from './editor_footer';
 
 interface TextBasedLanguagesEditorProps {
   query: any;
-  onTextLangQueryChange: (query: any) => void;
+  onTextLangQueryChange: (query: AggregateQuery) => void;
   onTextLangQuerySubmit: () => void;
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;

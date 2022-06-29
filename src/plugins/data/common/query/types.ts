@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Query, Filter } from '@kbn/es-query';
+import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
 import type { RefreshInterval, TimeRange } from './timefilter/types';
 
 export type { RefreshInterval, TimeRange, TimeRangeBounds } from './timefilter/types';
@@ -24,7 +24,7 @@ export interface SavedQuery {
 export interface SavedQueryAttributes {
   title: string;
   description: string;
-  query: Query;
+  query: Query | AggregateQuery;
   filters?: Filter[];
   timefilter?: SavedQueryTimeFilter;
 }

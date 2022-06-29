@@ -12,7 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { Query } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SearchBar } from '.';
@@ -59,13 +59,13 @@ const defaultOnRefreshChange = (queryService: QueryStart) => {
 const defaultOnQuerySubmit = (
   props: StatefulSearchBarProps,
   queryService: QueryStart,
-  currentQuery: Query
+  currentQuery: Query | AggregateQuery
 ) => {
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
 
   const { timefilter } = queryService.timefilter;
 
-  return (payload: { dateRange: TimeRange; query?: Query }) => {
+  return (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
     const isUpdate =
       !_.isEqual(timefilter.getTime(), payload.dateRange) ||
       !_.isEqual(payload.query, currentQuery);
