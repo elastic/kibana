@@ -16,7 +16,7 @@ import {
 } from '../../routes';
 
 import { NewIndex } from '../new_index';
-import { SearchIndex } from '../search_index';
+import { SearchIndex } from '../search_index/search_index';
 
 import { SearchIndices } from './search_indices';
 
