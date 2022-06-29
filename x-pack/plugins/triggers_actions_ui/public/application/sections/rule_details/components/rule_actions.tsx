@@ -15,10 +15,10 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeRegistryContract, suspendedComponentWithProps } from '../../../..';
+import { ActionTypeRegistryContract, RuleAction, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 export interface RuleActionsProps {
-  ruleActions: any[];
+  ruleActions: RuleAction[];
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 export function RuleActions({ ruleActions, actionTypeRegistry }: RuleActionsProps) {
