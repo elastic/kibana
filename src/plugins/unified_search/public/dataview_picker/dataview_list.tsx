@@ -56,6 +56,7 @@ export function DataViewsList({
         placeholder: i18n.translate('unifiedSearch.query.queryBar.indexPattern.findDataView', {
           defaultMessage: 'Find a data view',
         }),
+        'data-test-subj': 'indexPattern-switcher--input',
         ...(selectableProps ? selectableProps.searchProps : undefined),
       }}
     >
