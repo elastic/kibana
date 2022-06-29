@@ -6,9 +6,14 @@
  */
 
 import type { ArchivePackage, RegistryPackage } from '../../../../common';
+import type { PackageVerificationResult } from '../packages/package_verification';
 import { appContextService } from '../..';
 
 import type { ArchiveEntry } from '.';
+
+type SharedKeyString = string;
+
+const sharedKey = ({ name, version }: SharedKey): SharedKeyString => `${name}-${version}`;
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);
@@ -17,11 +22,21 @@ export const hasArchiveEntry = (key: string) => archiveEntryCache.has(key);
 export const clearArchiveEntries = () => archiveEntryCache.clear();
 export const deleteArchiveEntry = (key: string) => archiveEntryCache.delete(key);
 
+const verificationResultCache: Map<SharedKeyString, PackageVerificationResult> = new Map();
+export const getVerificationResult = (key: SharedKey) =>
+  verificationResultCache.get(sharedKey(key));
+export const setVerificationResult = (key: SharedKey, value: PackageVerificationResult) =>
+  verificationResultCache.set(sharedKey(key), value);
+export const hasVerificationResult = (key: SharedKey) =>
+  verificationResultCache.has(sharedKey(key));
+export const clearVerificationResults = () => verificationResultCache.clear();
+export const deleteVerificationResult = (key: SharedKey) =>
+  verificationResultCache.delete(sharedKey(key));
+
 export interface SharedKey {
   name: string;
   version: string;
 }
-type SharedKeyString = string;
 
 const archiveFilelistCache: Map<SharedKeyString, string[]> = new Map();
 export const getArchiveFilelist = (keyArgs: SharedKey) =>
@@ -38,7 +53,6 @@ export const deleteArchiveFilelist = (keyArgs: SharedKey) =>
   archiveFilelistCache.delete(sharedKey(keyArgs));
 
 const packageInfoCache: Map<SharedKeyString, ArchivePackage | RegistryPackage> = new Map();
-const sharedKey = ({ name, version }: SharedKey) => `${name}-${version}`;
 
 export const getPackageInfo = (args: SharedKey) => {
   return packageInfoCache.get(sharedKey(args));

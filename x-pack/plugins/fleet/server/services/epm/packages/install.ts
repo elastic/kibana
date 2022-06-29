@@ -29,11 +29,7 @@ import type {
   InstallSource,
 } from '../../../../common';
 import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
-import {
-  IngestManagerError,
-  PackageOutdatedError,
-  PackageFailedVerificationError,
-} from '../../../errors';
+import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
 import { licenseService } from '../..';
@@ -44,6 +40,7 @@ import {
   setPackageInfo,
   generatePackageInfoFromArchiveBuffer,
   unpackBufferToCache,
+  deleteVerificationResult,
 } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
@@ -52,10 +49,7 @@ import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
 import type { PackageVerificationResult } from './package_verification';
-import {
-  verifyPackageArchiveSignature,
-  formatVerificationResultForSO,
-} from './package_verification';
+import { formatVerificationResultForSO } from './package_verification';
 
 import { getInstallation, getInstallationObject } from '.';
 import { removeInstallation } from './remove';
@@ -287,11 +281,11 @@ async function installPackageFromRegistry({
     });
 
     // get latest package version and requested version in parallel for performance
-    const [latestPackage, { paths, packageInfo }] = await Promise.all([
+    const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
       }),
-      Registry.getRegistryPackage(pkgName, pkgVersion),
+      Registry.getRegistryPackage(pkgName, pkgVersion, { ignoreUnverified: force }),
     ]);
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
@@ -350,18 +344,6 @@ async function installPackageFromRegistry({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
-    let verificationResult;
-    if (appContextService.getExperimentalFeatures().packageVerification) {
-      verificationResult = await verifyPackageArchiveSignature({
-        pkgName,
-        pkgVersion,
-        logger,
-      });
-
-      if (verificationResult.verificationStatus === 'unverified' && !force) {
-        throw new PackageFailedVerificationError(pkgkey);
-      }
-    }
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return await _installPackage({
@@ -458,10 +440,11 @@ async function installPackageByUpload({
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
     const installSource = 'upload';
+    // as we do not verify uploaded packages, we must set the
+    deleteVerificationResult(packageInfo);
     const paths = await unpackBufferToCache({
       name: packageInfo.name,
       version: packageInfo.version,
-      installSource,
       archiveBuffer,
       contentType,
     });

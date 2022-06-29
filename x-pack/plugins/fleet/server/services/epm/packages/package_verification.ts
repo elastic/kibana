@@ -65,10 +65,12 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
 export async function verifyPackageArchiveSignature({
   pkgName,
   pkgVersion,
+  pkgArchiveBuffer,
   logger,
 }: {
   pkgName: string;
   pkgVersion: string;
+  pkgArchiveBuffer: Buffer;
   logger: Logger;
 }): Promise<PackageVerificationResult> {
   const verificationKey = await getGpgKeyOrUndefined();
@@ -87,11 +89,6 @@ export async function verifyPackageArchiveSignature({
     logger.warn(`Not performing package verification as package has no signature file`);
     return result;
   }
-
-  const { archiveBuffer: pkgArchiveBuffer } = await Registry.fetchArchiveBuffer(
-    pkgName,
-    pkgVersion
-  );
 
   const { isVerified, keyId } = await _verifyPackageSignature({
     pkgArchiveBuffer,
