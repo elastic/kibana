@@ -19,6 +19,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pRetry from 'p-retry';
 
+import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
+
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import type {
   BulkInstallPackageInfo,
@@ -51,7 +53,6 @@ import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
-import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants/fleet_es_assets';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
