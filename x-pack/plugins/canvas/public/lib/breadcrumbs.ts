@@ -47,8 +47,6 @@ export const getBaseBreadcrumb = (history: History): ChromeBreadcrumb => {
   };
 };
 
-export const getWorkpadBreadcrumb = ({
-  name = 'Workpad',
-}: { name?: string } = {}): ChromeBreadcrumb => ({
+export const getWorkpadBreadcrumb = ({ name }: { name: string }): ChromeBreadcrumb => ({
   text: name,
 });
