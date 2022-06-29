@@ -17,6 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { buildDataTableRecord } from '../utils/build_data_record';
 
+const index = 'test-index';
 const mockSearchResult = new Subject();
 const services = {
   data: {
@@ -40,16 +41,27 @@ describe('Test of <Doc /> helper / hook', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, false);
+    const actual = buildSearchBody('1', index, indexPattern, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
           "_source": true,
           "fields": Array [],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
+              ],
+              "must": Array [
+                Object {
+                  "match": Object {
+                    "_id": "1",
+                  },
+                },
               ],
             },
           },
@@ -65,7 +77,7 @@ describe('Test of <Doc /> helper / hook', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, true);
+    const actual = buildSearchBody('1', index, indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -76,9 +88,20 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           ],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
+              ],
+              "must": Array [
+                Object {
+                  "match": Object {
+                    "_id": "1",
+                  },
+                },
               ],
             },
           },
@@ -95,7 +118,7 @@ describe('Test of <Doc /> helper / hook', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, true, true);
+    const actual = buildSearchBody('1', index, indexPattern, true, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -107,9 +130,20 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           ],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
+              ],
+              "must": Array [
+                Object {
+                  "match": Object {
+                    "_id": "1",
+                  },
+                },
               ],
             },
           },
@@ -138,7 +172,7 @@ describe('Test of <Doc /> helper / hook', () => {
         },
       }),
     } as unknown as DataView;
-    const actual = buildSearchBody('1', indexPattern, true);
+    const actual = buildSearchBody('1', index, indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -149,9 +183,20 @@ describe('Test of <Doc /> helper / hook', () => {
             },
           ],
           "query": Object {
-            "ids": Object {
-              "values": Array [
-                "1",
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "term": Object {
+                    "_index": "test-index",
+                  },
+                },
+              ],
+              "must": Array [
+                Object {
+                  "match": Object {
+                    "_id": "1",
+                  },
+                },
               ],
             },
           },

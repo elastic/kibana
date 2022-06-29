@@ -38,8 +38,8 @@ export function useEsDocSearch({
       const result = await lastValueFrom(
         data.search.search({
           params: {
-            index,
-            body: buildSearchBody(id, indexPattern, useNewFieldsApi, requestSource)?.body,
+            index: indexPattern.title,
+            body: buildSearchBody(id, index, indexPattern, useNewFieldsApi, requestSource)?.body,
           },
         })
       );
@@ -77,6 +77,7 @@ export function useEsDocSearch({
  */
 export function buildSearchBody(
   id: string,
+  index: string,
   indexPattern: DataView,
   useNewFieldsApi: boolean,
   requestAllFields?: boolean
@@ -86,8 +87,9 @@ export function buildSearchBody(
   const request: RequestBody = {
     body: {
       query: {
-        ids: {
-          values: [id],
+        bool: {
+          must: [{ match: { _id: id } }],
+          filter: [{ term: { _index: index } }],
         },
       },
       stored_fields: computedFields.storedFields,

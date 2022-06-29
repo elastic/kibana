@@ -96,7 +96,7 @@ export function DiscoverGridFlyout({
   );
 
   const { singleDocProps, surrDocsProps } = useNavigationProps({
-    indexPatternId: indexPattern.id!,
+    indexPatternId: indexPattern.id!, // TODO
     rowIndex: hit.raw._index,
     rowId: hit.raw._id,
     filterManager: services.filterManager,
