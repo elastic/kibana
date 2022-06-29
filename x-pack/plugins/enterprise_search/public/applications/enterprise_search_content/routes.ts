@@ -19,7 +19,8 @@ export const NEW_ES_INDEX_PATH = `${NEW_INDEX_PATH}/elasticsearch`;
 export const NEW_DIRECT_UPLOAD_PATH = `${NEW_INDEX_PATH}/upload`;
 
 export const SEARCH_INDEX_PATH = `${SEARCH_INDICES_PATH}/:indexSlug`;
-export const SEARCH_INDEX_OVERVIEW_PATH = `${SEARCH_INDEX_PATH}`;
+export const SEARCH_INDEX_OVERVIEW_PATH = `${SEARCH_INDEX_PATH}/`;
+export const SEARCH_INDEX_CONFIGURATION_PATH = `${SEARCH_INDEX_PATH}/configuration`;
 export const SEARCH_INDEX_DOCUMENTS_PATH = `${SEARCH_INDEX_PATH}/documents`;
 export const SEARCH_INDEX_SCHEMA_PATH = `${SEARCH_INDEX_PATH}/schema`;
 export const SEARCH_INDEX_LOGS_PATH = `${SEARCH_INDEX_PATH}/logs`;
