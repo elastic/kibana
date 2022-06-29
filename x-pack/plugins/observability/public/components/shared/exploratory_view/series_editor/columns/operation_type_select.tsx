@@ -71,6 +71,12 @@ export function OperationTypeComponent({
       }),
     },
     {
+      value: '25th' as OperationType,
+      inputDisplay: i18n.translate('xpack.observability.expView.operationType.25thPercentile', {
+        defaultMessage: '25th Percentile',
+      }),
+    },
+    {
       value: '75th' as OperationType,
       inputDisplay: i18n.translate('xpack.observability.expView.operationType.75thPercentile', {
         defaultMessage: '75th Percentile',

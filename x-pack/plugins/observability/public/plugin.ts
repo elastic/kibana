@@ -17,6 +17,7 @@ import {
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -130,6 +131,8 @@ export class Plugin
     }),
   ];
 
+  constructor(private readonly initContext: PluginInitializerContext) {}
+
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
@@ -167,6 +170,7 @@ export class Plugin
         ObservabilityPageTemplate: navigation.PageTemplate,
         kibanaFeatures,
         usageCollection: pluginsSetup.usageCollection,
+        isDev: this.initContext.env.mode.dev,
       });
     };
 
