@@ -29,7 +29,7 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
         />
       </EuiButton>
       {showActionLogFlyout && (
-        <EuiFlyout onClose={toggleActionLog} size="l" paddingSize="l">
+        <EuiFlyout onClose={toggleActionLog} size="m" paddingSize="l">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h1>{UX_MESSAGES.flyoutTitle(props.meta.endpoint.host.hostname)}</h1>

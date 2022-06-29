@@ -259,11 +259,13 @@ export const ResponseActionsList = memo<
 
   // table column
   const responseActionListColumns = useMemo(() => {
+    const hideHostColumn = typeof agentIds === 'string';
+
     const columns = [
       {
         field: 'startedAt',
         name: TABLE_COLUMN_NAMES.time,
-        width: '15%',
+        width: hideHostColumn ? '21%' : '15%',
         truncateText: true,
         render: (startedAt: ActionDetails['startedAt']) => {
           return (
@@ -278,7 +280,7 @@ export const ResponseActionsList = memo<
       {
         field: 'command',
         name: TABLE_COLUMN_NAMES.command,
-        width: '10%',
+        width: hideHostColumn ? '21%' : '10%',
         truncateText: true,
         render: (_command: ActionDetails['command']) => {
           const command = getCommand(_command);
@@ -296,7 +298,7 @@ export const ResponseActionsList = memo<
       {
         field: 'createdBy',
         name: TABLE_COLUMN_NAMES.user,
-        width: '14%',
+        width: hideHostColumn ? '21%' : '14%',
         truncateText: true,
         render: (userId: ActionDetails['createdBy']) => {
           return (
@@ -347,7 +349,7 @@ export const ResponseActionsList = memo<
       {
         field: 'comment',
         name: TABLE_COLUMN_NAMES.comments,
-        width: '30%',
+        width: hideHostColumn ? '21%' : '30%',
         truncateText: true,
         render: (comment: ActionDetails['comment']) => {
           return (
@@ -366,7 +368,7 @@ export const ResponseActionsList = memo<
       {
         field: 'isCompleted',
         name: TABLE_COLUMN_NAMES.status,
-        width: '10%',
+        width: hideHostColumn ? '15%' : '10%',
         render: (isCompleted: ActionDetails['isCompleted'], data: ActionDetails) => {
           const status = data.isExpired
             ? UX_MESSAGES.badge.failed
@@ -423,7 +425,7 @@ export const ResponseActionsList = memo<
       },
     ];
     // filter out the host column
-    if (typeof agentIds === 'string') {
+    if (hideHostColumn) {
       return columns.filter((column) => column.field !== 'agents');
     }
     return columns;
