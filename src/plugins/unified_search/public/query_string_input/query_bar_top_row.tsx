@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
-import { isOfQueryType } from '@kbn/es-query';
+import { getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -436,7 +436,7 @@ export const QueryBarTopRow = React.memo(
       let textBasedLanguage;
       if (Boolean(isQueryLangSelected)) {
         const query = props.query as AggregateQuery;
-        textBasedLanguage = Object.keys(query)[0];
+        textBasedLanguage = getAggregateQueryMode(query);
       }
       return (
         <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>

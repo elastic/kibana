@@ -8,9 +8,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Subscription } from 'rxjs';
-import type { Query, AggregateQuery } from '@kbn/es-query';
-import { isOfQueryType } from '@kbn/es-query';
+import { Query, AggregateQuery } from '@kbn/es-query';
 import type { QueryStringContract } from '@kbn/data-plugin/public';
+
+function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
+  return Boolean(arg && 'query' in arg);
+}
 
 interface UseQueryStringProps {
   query?: Query | AggregateQuery;

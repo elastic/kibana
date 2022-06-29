@@ -12,6 +12,7 @@ import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 import { Filter, Query, AggregateQuery } from '../filters';
+import { isOfQueryType } from './es_query.sql';
 import { BoolQuery, DataViewBase } from './types';
 import type { KueryQueryOptions } from '../kuery';
 import type { EsQueryFiltersConfig } from './from_filters';
@@ -30,9 +31,6 @@ function removeMatchAll<T>(filters: T[]) {
   return filters.filter(
     (filter) => !filter || typeof filter !== 'object' || !isEqual(filter, { match_all: {} })
   );
-}
-function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
-  return Boolean(arg && 'query' in arg);
 }
 
 /**
