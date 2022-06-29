@@ -12,15 +12,15 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
 >
   <div>
     <h6
-      className="euiTitle css-1a3pmln-euiTitle-uppercase-xxxs"
+      className="euiTitle emotion-euiTitle-uppercase-xxxs"
     >
       Appearance
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -225,18 +225,18 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+      className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
     />
     <h6
-      className="euiTitle css-1a3pmln-euiTitle-uppercase-xxxs"
+      className="euiTitle emotion-euiTitle-uppercase-xxxs"
     >
       Border
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -395,7 +395,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
               >
                 <button
                   aria-label="Border white"
-                  className="euiLink css-102pf9n-euiLink-primary"
+                  className="euiLink emotion-euiLink-primary"
                   disabled={false}
                   onClick={[Function]}
                   style={
@@ -813,7 +813,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
             >
               <button
                 aria-label="Border black"
-                className="euiLink css-102pf9n-euiLink-primary"
+                className="euiLink emotion-euiLink-primary"
                 disabled={false}
                 onClick={[Function]}
                 style={
@@ -860,15 +860,15 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
 >
   <div>
     <h6
-      className="euiTitle css-1a3pmln-euiTitle-uppercase-xxxs"
+      className="euiTitle emotion-euiTitle-uppercase-xxxs"
     >
       Appearance
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1073,18 +1073,18 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+      className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
     />
     <h6
-      className="euiTitle css-1a3pmln-euiTitle-uppercase-xxxs"
+      className="euiTitle emotion-euiTitle-uppercase-xxxs"
     >
       Border
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+      className="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1243,7 +1243,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
               >
                 <button
                   aria-label="Border white"
-                  className="euiLink css-102pf9n-euiLink-primary"
+                  className="euiLink emotion-euiLink-primary"
                   disabled={false}
                   onClick={[Function]}
                   style={

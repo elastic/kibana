@@ -27,7 +27,7 @@ exports[`Storyshots arguments/ContainerStyle simple 1`] = `
       >
         <button
           aria-label="Container style white"
-          className="euiLink css-102pf9n-euiLink-primary"
+          className="euiLink emotion-euiLink-primary"
           disabled={false}
           onClick={[Function]}
           style={
@@ -86,7 +86,7 @@ exports[`Storyshots arguments/ContainerStyle/components simple template 1`] = `
       >
         <button
           aria-label="Container style white"
-          className="euiLink css-102pf9n-euiLink-primary"
+          className="euiLink emotion-euiLink-primary"
           disabled={false}
           onClick={[Function]}
           style={
