@@ -42,13 +42,14 @@ import {
 } from './saved_object_types';
 
 import { CasesClient } from './client';
-import type { CasesRequestHandlerContext } from './types';
+import type { CasesRequestHandlerContext, CasesSetup } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeature } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
+import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -86,14 +87,16 @@ export class CasePlugin {
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
   private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
+  private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.logger = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.logger);
+    this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup) {
+  public setup(core: CoreSetup, plugins: PluginsSetup): CasesSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
@@ -145,6 +148,14 @@ export class CasePlugin {
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,
     });
+
+    return {
+      attachmentFramework: {
+        registerPersistableState: (persistableStateAttachmentType) => {
+          this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
+        },
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {

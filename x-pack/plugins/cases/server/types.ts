@@ -14,6 +14,7 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/actions-plugin/server/types';
 import { CasesClient } from './client';
+import { AttachmentFramework } from './attachment_framework/types';
 
 export interface CaseRequestContext {
   getCasesClient: () => Promise<CasesClient>;
@@ -39,3 +40,7 @@ export type RegisterActionType = <
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
 ) => void;
+
+export interface CasesSetup {
+  attachmentFramework: AttachmentFramework;
+}
