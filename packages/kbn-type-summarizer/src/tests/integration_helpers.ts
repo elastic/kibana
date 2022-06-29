@@ -6,21 +6,28 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable no-console */
-
 import Path from 'path';
 import Fsp from 'fs/promises';
 
 import * as ts from 'typescript';
 import stripAnsi from 'strip-ansi';
 import normalizePath from 'normalize-path';
+import { TestLog } from '@kbn/type-summarizer-core';
 
 import { loadTsConfigFile } from '../lib/tsconfig_file';
 import { createTsProject } from '../lib/ts_project';
-import { TestLog } from '../lib/log';
 import { summarizePackage } from '../summarize_package';
+import { SourceFileMapper } from '../lib/source_file_mapper';
+import { AstIndexer } from '../lib/ast_indexer';
+import { SourceMapReader } from './source_map_reader';
 
-const TMP_DIR = Path.resolve(__dirname, '../../__tmp__');
+type DiagFilter = (msg: string) => boolean;
+
+interface InitOptions {
+  ignoreDiags?: DiagFilter;
+}
+
+export const TMP_DIR = Path.resolve(__dirname, '../../__tmp__');
 
 const DIAGNOSTIC_HOST = {
   getCanonicalFileName: (p: string) => p,
@@ -47,80 +54,43 @@ function ensureDts(path: string) {
   return `${path.slice(0, -3)}.d.ts`;
 }
 
-interface Options {
-  /* Other files which should be available to the test execution */
-  otherFiles?: Record<string, string>;
-}
-
-class MockCli {
-  /* file contents which will be fed into TypeScript for this test */
-  public readonly mockFiles: Record<string, string>;
-
+export class TestProject<FileName extends string> {
   /* directory where mockFiles pretend to be from */
-  public readonly sourceDir = Path.resolve(TMP_DIR, 'src');
+  private readonly sourceDir = Path.resolve(TMP_DIR, 'src');
   /* directory where we will write .d.ts versions of mockFiles */
-  public readonly dtsOutputDir = Path.resolve(TMP_DIR, 'dist_dts');
-  /* directory where output will be written */
-  public readonly outputDir = Path.resolve(TMP_DIR, 'dts');
+  private readonly dtsOutputDir = Path.resolve(TMP_DIR, 'dist_dts');
   /* path where the tsconfig.json file will be written */
-  public readonly tsconfigPath = Path.resolve(this.sourceDir, 'tsconfig.json');
+  private readonly tsconfigPath = Path.resolve(this.sourceDir, 'tsconfig.json');
 
   /* .d.ts file which we will read to discover the types we need to summarize */
-  public readonly inputPath = ensureDts(Path.resolve(this.dtsOutputDir, 'index.ts'));
-  /* the location we will write the summarized .d.ts file */
-  public readonly outputPath = Path.resolve(this.outputDir, Path.basename(this.inputPath));
-  /* the location we will write the sourcemaps for the summaried .d.ts file */
-  public readonly mapOutputPath = `${this.outputPath}.map`;
+  private readonly inputPath = ensureDts(Path.resolve(this.dtsOutputDir, 'index.ts'));
 
-  constructor(tsContent: string, options?: Options) {
-    this.mockFiles = {
-      ...options?.otherFiles,
-      'index.ts': tsContent,
-    };
-  }
+  private readonly log = new TestLog();
 
-  private buildDts() {
-    const program = createTsProject(
-      loadTsConfigFile(this.tsconfigPath),
-      Object.keys(this.mockFiles).map((n) => Path.resolve(this.sourceDir, n))
-    );
+  constructor(
+    /* file contents which will be fed into TypeScript for this test */
+    private readonly _mockFiles: Record<FileName, string>
+  ) {}
 
-    this.printDiagnostics(`dts/config`, program.getConfigFileParsingDiagnostics());
-    this.printDiagnostics(`dts/global`, program.getGlobalDiagnostics());
-    this.printDiagnostics(`dts/options`, program.getOptionsDiagnostics());
-    this.printDiagnostics(`dts/semantic`, program.getSemanticDiagnostics());
-    this.printDiagnostics(`dts/syntactic`, program.getSyntacticDiagnostics());
-    this.printDiagnostics(`dts/declaration`, program.getDeclarationDiagnostics());
-
-    const result = program.emit(undefined, undefined, undefined, true);
-    this.printDiagnostics('dts/results', result.diagnostics);
-  }
-
-  private printDiagnostics(type: string, diagnostics: readonly ts.Diagnostic[]) {
-    const errors = diagnostics.filter((d) => d.category === ts.DiagnosticCategory.Error);
-    if (!errors.length) {
-      return;
+  private *mockFiles() {
+    for (const [key, value] of Object.entries(this._mockFiles)) {
+      yield [key, value] as [FileName, string];
     }
-
-    const message = ts.formatDiagnosticsWithColorAndContext(errors, DIAGNOSTIC_HOST);
-
-    console.error(
-      `TS Errors (${type}):\n${message
-        .split('\n')
-        .map((l) => `  ${l}`)
-        .join('\n')}`
-    );
   }
 
-  async run() {
-    const log = new TestLog('debug');
+  private *fileRels() {
+    for (const key of Object.keys(this._mockFiles)) {
+      yield key as FileName;
+    }
+  }
 
-    // wipe out the tmp dir
-    await Fsp.rm(TMP_DIR, { recursive: true, force: true });
-
+  /**
+   * Initialize the TMP_DIR and write files to the sourceDir
+   */
+  private async setupTempDir() {
     // write mock files to the filesystem
     await Promise.all(
-      Object.entries(this.mockFiles).map(async ([rel, content]) => {
+      Array.from(this.mockFiles()).map(async ([rel, content]) => {
         const path = Path.resolve(this.sourceDir, rel);
         await Fsp.mkdir(Path.dirname(path), { recursive: true });
         await Fsp.writeFile(path, dedent(content));
@@ -143,44 +113,132 @@ class MockCli {
           emitDeclarationOnly: true,
           declarationDir: '../dist_dts',
           declarationMap: true,
+          types: ['node'],
           // prevent loading all @types packages
           typeRoots: [],
         },
       })
     );
+  }
 
-    // convert the source files to .d.ts files
-    this.buildDts();
+  /**
+   * convert the source files in the sourceDir to .d.ts files in the dtrOutputDir
+   */
+  private async buildDtsOutput(ignoreDiags?: DiagFilter) {
+    const program = createTsProject(
+      loadTsConfigFile(this.tsconfigPath),
+      Array.from(this.fileRels()).map((n) => Path.resolve(this.sourceDir, n))
+    );
+
+    this.printDiagnostics(
+      [
+        [`dts/config`, program.getConfigFileParsingDiagnostics()],
+        [`dts/global`, program.getGlobalDiagnostics()],
+        [`dts/options`, program.getOptionsDiagnostics()],
+        [`dts/semantic`, program.getSemanticDiagnostics()],
+        [`dts/syntactic`, program.getSyntacticDiagnostics()],
+        [`dts/declaration`, program.getDeclarationDiagnostics()],
+      ],
+      ignoreDiags
+    );
+
+    const result = program.emit(undefined, undefined, undefined, true);
+
+    this.printDiagnostics([['dts/results', result.diagnostics]], ignoreDiags);
 
     // copy .d.ts files from source to dist
-    for (const [rel, content] of Object.entries(this.mockFiles)) {
+    for (const [rel, content] of this.mockFiles()) {
       if (rel.endsWith('.d.ts')) {
         const path = Path.resolve(this.dtsOutputDir, rel);
         await Fsp.mkdir(Path.dirname(path), { recursive: true });
-        await Fsp.writeFile(path, dedent(content));
+        await Fsp.writeFile(path, dedent(content as string));
       }
     }
+  }
+
+  /**
+   * Print diagnostics from TS so we know when something is wrong in the tests
+   */
+  private printDiagnostics(
+    types: Array<[type: string, diagnostics: readonly ts.Diagnostic[]]>,
+    ignoreDiags?: DiagFilter
+  ) {
+    const messages = [];
+    for (const [type, diagnostics] of types) {
+      const errors = diagnostics.filter((d) => d.category === ts.DiagnosticCategory.Error);
+      if (!errors.length) {
+        continue;
+      }
+
+      const message = ts.formatDiagnosticsWithColorAndContext(errors, DIAGNOSTIC_HOST);
+      if (ignoreDiags && ignoreDiags(message)) {
+        continue;
+      }
+      messages.push(
+        `  type(${type}):\n${message
+          .split('\n')
+          .map((l) => `    ${l}`)
+          .join('\n')}`
+      );
+    }
+
+    if (messages.length) {
+      throw new Error(`TS produced error diagnostics:\n${messages}`);
+    }
+  }
+
+  async runTypeSummarizer() {
+    await this.setupTempDir();
+    await this.buildDtsOutput();
 
     // summarize the .d.ts files into the output dir
-    await summarizePackage(log, {
+    const sourceNode = await summarizePackage(this.log, {
       dtsDir: normalizePath(this.dtsOutputDir),
-      inputPaths: [normalizePath(this.inputPath)],
-      outputDir: normalizePath(this.outputDir),
+      inputPath: normalizePath(this.inputPath),
       repoRelativePackageDir: 'src',
       tsconfigPath: normalizePath(this.tsconfigPath),
-      strictPrinting: true,
     });
+
+    const { map, code } = sourceNode.toStringWithSourceMap();
 
     // return the results
     return {
-      code: await Fsp.readFile(this.outputPath, 'utf8'),
-      map: JSON.parse(await Fsp.readFile(this.mapOutputPath, 'utf8')),
-      logs: stripAnsi(log.messages.join('')),
+      code,
+      map: await SourceMapReader.snapshot(map, code, this.sourceDir),
+      logs: stripAnsi(this.log.messages.splice(0).join('')),
     };
   }
-}
 
-export async function run(tsContent: string, options?: Options) {
-  const project = new MockCli(tsContent, options);
-  return await project.run();
+  async initAstIndexer(options?: InitOptions) {
+    await this.setupTempDir();
+    await this.buildDtsOutput(options?.ignoreDiags);
+
+    const tsConfig = loadTsConfigFile(this.tsconfigPath);
+    const program = createTsProject(tsConfig, [this.inputPath]);
+    const typeChecker = program.getTypeChecker();
+    const sources = new SourceFileMapper(this.dtsOutputDir);
+    const indexer = new AstIndexer(typeChecker, sources, this.log);
+
+    const sourceFiles = Object.fromEntries(
+      Array.from(this.fileRels()).map((rel) => [
+        rel,
+        program.getSourceFile(Path.resolve(this.dtsOutputDir, this.getDtsRel(rel)))!,
+      ])
+    ) as Record<FileName, ts.SourceFile>;
+
+    return { program, typeChecker, indexer, sourceFiles };
+  }
+
+  private getDtsRel(rel: string) {
+    if (!rel.endsWith('.d.ts') && rel.endsWith('.ts')) {
+      return `${rel.slice(0, -3)}.d.ts`;
+    }
+
+    return rel;
+  }
+
+  async cleanup() {
+    // wipe out the tmp dir
+    await Fsp.rm(TMP_DIR, { recursive: true, force: true });
+  }
 }

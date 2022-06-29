@@ -8,8 +8,7 @@
 
 import * as ts from 'typescript';
 
-import * as Path from './path';
-import { CliError } from './cli_error';
+import { CliError, Path } from '@kbn/type-summarizer-core';
 
 export function readTsConfigFile(path: string) {
   const json = ts.readConfigFile(path, ts.sys.readFile);

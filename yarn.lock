@@ -3551,6 +3551,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/type-summarizer-cli@link:bazel-bin/packages/kbn-type-summarizer-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/type-summarizer-core@link:bazel-bin/packages/kbn-type-summarizer-core":
+  version "0.0.0"
+  uid ""
+
 "@kbn/type-summarizer@link:bazel-bin/packages/kbn-type-summarizer":
   version "0.0.0"
   uid ""
@@ -7028,6 +7036,18 @@
   uid ""
 
 "@types/kbn__tooling-log@link:bazel-bin/packages/kbn-tooling-log/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__type-summarizer-cli@link:bazel-bin/packages/kbn-type-summarizer-cli/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__type-summarizer-core@link:bazel-bin/packages/kbn-type-summarizer-core/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__type-summarizer@link:bazel-bin/packages/kbn-type-summarizer/npm_module_types":
   version "0.0.0"
   uid ""
 

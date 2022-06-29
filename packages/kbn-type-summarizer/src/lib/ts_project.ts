@@ -8,9 +8,9 @@
 
 import * as ts from 'typescript';
 
-export function createTsProject(tsConfig: ts.ParsedCommandLine, inputPaths: string[]) {
+export function createTsProject(tsConfig: ts.ParsedCommandLine, rootNames: string[]) {
   return ts.createProgram({
-    rootNames: inputPaths,
+    rootNames,
     options: {
       ...tsConfig.options,
       skipLibCheck: false,

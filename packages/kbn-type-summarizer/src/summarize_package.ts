@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-import Fsp from 'fs/promises';
-import Path from 'path';
+import { Logger } from '@kbn/type-summarizer-core';
 
-import normalizePath from 'normalize-path';
-
-import { SourceMapper } from './lib/source_mapper';
 import { createTsProject } from './lib/ts_project';
 import { loadTsConfigFile } from './lib/tsconfig_file';
-import { ExportCollector } from './lib/export_collector';
-import { isNodeModule } from './lib/is_node_module';
-import { Printer } from './lib/printer';
-import { Logger } from './lib/log';
+import { SourceMapper } from './lib/source_mapper';
+import { AstIndexer } from './lib/ast_indexer';
+import { SourceFileMapper } from './lib/source_file_mapper';
+import { TypeSummary } from './lib/type_summary';
 
 /**
  * Options used to customize the summarizePackage function
@@ -37,87 +33,59 @@ export interface SummarizePacakgeOptions {
    * array will cause an output .d.ts summary file to be created containing all the AST nodes
    * which are exported or referenced by those exports.
    */
-  inputPaths: string[];
+  inputPath: string;
   /**
-   * Absolute path to the output directory where the summary .d.ts files should be written
-   */
-  outputDir: string;
-  /**
-   * Repo-relative path to the package source, for example `packages/kbn-type-summarizer` for
+   * Repo-relative path to the package source, for example `packages/kbn-type-summarizer-core` for
    * this package. This is used to provide the correct `sourceRoot` path in the resulting source
    * map files.
    */
   repoRelativePackageDir: string;
-  /**
-   * Should the printer throw an error if it doesn't know how to print an AST node? Primarily
-   * used for testing
-   */
-  strictPrinting?: boolean;
 }
 
 /**
  * Produce summary .d.ts files for a package
  */
 export async function summarizePackage(log: Logger, options: SummarizePacakgeOptions) {
-  const tsConfig = loadTsConfigFile(options.tsconfigPath);
-  log.verbose('Created tsconfig', tsConfig);
+  const tsConfig = log.step('load config', options.tsconfigPath, () =>
+    loadTsConfigFile(options.tsconfigPath)
+  );
 
   if (tsConfig.options.sourceRoot) {
     throw new Error(`${options.tsconfigPath} must not define "compilerOptions.sourceRoot"`);
   }
 
-  const program = createTsProject(tsConfig, options.inputPaths);
-  log.verbose('Loaded typescript program');
-
-  const typeChecker = program.getTypeChecker();
-  log.verbose('Typechecker loaded');
-
-  const sourceFiles = program
-    .getSourceFiles()
-    .filter((f) => !isNodeModule(options.dtsDir, f.fileName))
-    .sort((a, b) => a.fileName.localeCompare(b.fileName));
-
-  const sourceMapper = await SourceMapper.forSourceFiles(
-    log,
-    options.dtsDir,
-    options.repoRelativePackageDir,
-    sourceFiles
+  const program = log.step('create project', options.inputPath, () =>
+    createTsProject(tsConfig, [options.inputPath])
   );
 
-  // value that will end up as the `sourceRoot` in the final sourceMaps
-  const sourceRoot = `../../../${normalizePath(options.repoRelativePackageDir)}`;
+  const typeChecker = log.step('create type checker', null, () => program.getTypeChecker());
 
-  for (const input of options.inputPaths) {
-    const outputPath = Path.resolve(options.outputDir, Path.basename(input));
-    const mapOutputPath = `${outputPath}.map`;
-    const sourceFile = program.getSourceFile(input);
-    if (!sourceFile) {
-      throw new Error(`input file wasn't included in the program`);
-    }
+  const sources = new SourceFileMapper(options.dtsDir);
+  const indexer = new AstIndexer(typeChecker, sources, log);
 
-    const results = new ExportCollector(
-      log,
-      typeChecker,
-      sourceFile,
-      options.dtsDir,
-      sourceMapper
-    ).run();
-
-    const printer = new Printer(
-      sourceMapper,
-      results.getAll(),
-      outputPath,
-      mapOutputPath,
-      sourceRoot,
-      !!options.strictPrinting
-    );
-
-    const summary = await printer.print();
-
-    await Fsp.mkdir(options.outputDir, { recursive: true });
-    await Fsp.writeFile(outputPath, summary.code);
-    await Fsp.writeFile(mapOutputPath, JSON.stringify(summary.map));
-
-    sourceMapper.close();
+  const sourceFile = program.getSourceFile(options.inputPath);
+  if (!sourceFile) {
+    throw new Error(`input file wasn't included in the program`);
   }
+
+  const index = indexer.indexExports(sourceFile);
+  const sourceMaps = await SourceMapper.forSourceFiles(
+    log,
+    sources,
+    options.repoRelativePackageDir,
+    program
+  );
+
+  const summary = new TypeSummary(
+    indexer,
+    sourceMaps,
+    log,
+    index.locals,
+    index.imports,
+    index.ambientRefs
+  ).getSourceNode();
+
+  sourceMaps.close();
+
+  return summary;
 }
