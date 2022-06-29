@@ -37,10 +37,8 @@ import { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import { Cases, CasesStatus, CasesMetrics } from '../common/ui';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
-import {
-  AttachmentFramework,
-  ExternalReferenceAttachmentTypeRegistry,
-} from './client/attachment_framework/types';
+import { AttachmentFramework } from './client/attachment_framework/types';
+import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;

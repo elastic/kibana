@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { APP_OWNER } from '../../../common/constants';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/types';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 

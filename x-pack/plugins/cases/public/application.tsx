@@ -19,7 +19,7 @@ import {
 import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RenderAppProps } from './types';
 import { CasesApp } from './components/app';
-import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/types';
+import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;

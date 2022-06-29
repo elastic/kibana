@@ -18,7 +18,7 @@ import {
 import { CasesFeaturesAllRequired, CasesFeatures } from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
 import { ReleasePhase } from '../types';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/types';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
