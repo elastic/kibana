@@ -8,37 +8,37 @@
 import { filter, take } from 'rxjs/operators';
 import pMap from 'p-map';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option';
+import { getOrElse, isSome, map as mapOptional, Option } from 'fp-ts/lib/Option';
 
 import uuid from 'uuid';
-import { pick, chunk } from 'lodash';
+import { chunk, pick } from 'lodash';
 import { merge, Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
 import { mustBeAllOf } from './queries/query_clauses';
-import { asOk, either, map, mapErr, promiseResult, isErr } from './lib/result_type';
+import { asOk, either, isErr, map, mapErr, promiseResult } from './lib/result_type';
 import {
-  isTaskRunEvent,
-  isTaskClaimEvent,
-  isTaskRunRequestEvent,
-  RanTask,
-  ErroredTask,
-  OkResultOf,
-  ErrResultOf,
   ClaimTaskErr,
+  ErroredTask,
+  ErrResultOf,
+  isTaskClaimEvent,
+  isTaskRunEvent,
+  isTaskRunRequestEvent,
+  OkResultOf,
+  RanTask,
   TaskClaimErrorType,
 } from './task_events';
 import { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
   ConcreteTaskInstance,
-  TaskInstanceWithId,
+  EphemeralTask,
+  IntervalSchedule,
   TaskInstanceWithDeprecatedFields,
+  TaskInstanceWithId,
   TaskLifecycle,
   TaskLifecycleResult,
   TaskStatus,
-  EphemeralTask,
-  IntervalSchedule,
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
@@ -73,6 +73,10 @@ export interface BulkUpdateSchedulesResult {
    */
   errors: Array<{ task: ConcreteTaskInstance; error: Error }>;
 }
+export interface RunSoonResult {
+  id: ConcreteTaskInstance['id'];
+}
+
 export interface RunNowResult {
   id: ConcreteTaskInstance['id'];
   state?: ConcreteTaskInstance['state'];
@@ -201,23 +205,28 @@ export class TaskScheduling {
    * Run  task.
    *
    * @param taskId - The task being scheduled.
-   * @returns {Promise<ConcreteTaskInstance>}
+   * @returns {Promise<RunSoonResult>}
    */
-  public async runNow(taskId: string): Promise<RunNowResult> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        this.awaitTaskRunResult(taskId) // don't expose state on runNow
-          .then(({ id }) =>
-            resolve({
-              id,
-            })
-          )
-          .catch(reject);
-        this.taskPollingLifecycle.attemptToRun(taskId);
-      } catch (error) {
-        reject(error);
+  public async runSoon(taskId: string): Promise<RunSoonResult> {
+    const task = await this.getNonRunningTask(taskId);
+    try {
+      await this.store.update({
+        ...task,
+        status: TaskStatus.Idle,
+        scheduledAt: new Date(),
+        runAt: new Date(),
+      });
+    } catch (e) {
+      if (e.statusCode === 409) {
+        this.logger.debug(
+          `Failed to update the task (${taskId}) for runSoon due to conflict (409)`
+        );
+      } else {
+        this.logger.error(`Failed to update the task (${taskId}) for runSoon`);
+        throw e;
       }
-    });
+    }
+    return { id: task.id };
   }
 
   /**
@@ -394,6 +403,20 @@ export class TaskScheduling {
           `Failed to run task "${taskId}" and failed to get current Status:${getLifecycleError}`
         )
     );
+  }
+
+  private async getNonRunningTask(taskId: string) {
+    const task = await this.store.get(taskId);
+    switch (task.status) {
+      case TaskStatus.Claiming:
+      case TaskStatus.Running:
+        throw Error(`Failed to run task "${taskId}" as it is currently running`);
+      case TaskStatus.Unrecognized:
+        throw Error(`Failed to run task "${taskId}" with status ${task.status}`);
+      case TaskStatus.Failed:
+      default:
+        return task;
+    }
   }
 }
 
