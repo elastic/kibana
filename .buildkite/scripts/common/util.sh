@@ -163,9 +163,10 @@ npm_install_global() {
   fi
 
   if [[ ! $(npm install -g "$toInstall" && touch "$successFlag") ]]; then
-    npmRoot=$(npm root -g)
     rm -rf "$packageRoot"
     echo "Trying again to install $toInstall..."
     npm install -g "$toInstall" && touch "$successFlag"
   fi
+
+  ls -alh "$packageRoot"
 }
