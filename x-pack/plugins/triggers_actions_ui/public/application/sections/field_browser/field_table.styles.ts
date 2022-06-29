@@ -4,13 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 
 export const styles = {
-  tableContainer: ({ height, theme }: { height: number; theme: EuiTheme }) => css`
-    margin-top: ${theme.eui.euiSizeXS};
-    border-top: ${theme.eui.euiBorderThin};
+  tableContainer: ({
+    height,
+    euiTheme,
+  }: {
+    height: number;
+    euiTheme: UseEuiTheme['euiTheme'];
+  }) => css`
+    margin-top: ${euiTheme.size.xs};
+    border-top: ${euiTheme.border.thin};
     height: ${height}px;
     overflow: hidden;
   `,

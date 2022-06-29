@@ -10,8 +10,6 @@ import React from 'react';
 
 import { mockBrowserFields } from './mock';
 import { FieldBrowserModal, FieldBrowserModalProps } from './field_browser_modal';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { ThemeProvider } from 'styled-components';
 
 const mockOnHide = jest.fn();
 const mockOnToggleColumn = jest.fn();
@@ -35,11 +33,7 @@ const testProps: FieldBrowserModalProps = {
 };
 
 const mountComponent = (props: Partial<FieldBrowserModalProps> = {}) =>
-  mount(
-    <ThemeProvider theme={() => ({ eui: { euiSizeXS: '12px' } })}>
-      <FieldBrowserModal {...{ ...testProps, ...props }} />
-    </ThemeProvider>
-  );
+  mount(<FieldBrowserModal {...{ ...testProps, ...props }} />);
 
 describe('FieldBrowserModal', () => {
   beforeEach(() => {

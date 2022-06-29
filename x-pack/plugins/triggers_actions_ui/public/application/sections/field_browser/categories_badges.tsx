@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/** @jsx jsx */
-import { jsx } from '@emotion/react';
 import React, { useCallback } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { styles } from './categories_badges.styles';
 
 export interface CategoriesBadgesProps {
@@ -16,13 +13,11 @@ export interface CategoriesBadgesProps {
   selectedCategoryIds: string[];
 }
 
-type CategoriesBadgesWithThemeProps = CategoriesBadgesProps & { theme: EuiTheme };
-
-const CategoriesBadgesComponent: React.FC<CategoriesBadgesWithThemeProps> = ({
+const CategoriesBadgesComponent: React.FC<CategoriesBadgesProps> = ({
   setSelectedCategoryIds,
   selectedCategoryIds,
-  theme,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const onUnselectCategory = useCallback(
     (categoryId: string) => {
       setSelectedCategoryIds(
@@ -34,7 +29,7 @@ const CategoriesBadgesComponent: React.FC<CategoriesBadgesWithThemeProps> = ({
 
   return (
     <EuiFlexGroup
-      css={styles.badgesGroup({ theme })}
+      css={styles.badgesGroup({ euiTheme })}
       data-test-subj="category-badges"
       gutterSize="xs"
       wrap
@@ -57,4 +52,4 @@ const CategoriesBadgesComponent: React.FC<CategoriesBadgesWithThemeProps> = ({
   );
 };
 
-export const CategoriesBadges = React.memo(withTheme(CategoriesBadgesComponent));
+export const CategoriesBadges = React.memo(CategoriesBadgesComponent);

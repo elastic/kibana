@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/** @jsx jsx */
-import { jsx } from '@emotion/react';
-import { Fragment } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiCheckbox,
   EuiIcon,
@@ -27,7 +25,6 @@ import type {
   FieldTableColumns,
   GetFieldTableColumns,
 } from './types';
-import { TruncatableText } from './truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
 import { styles } from './field_items.style';
@@ -105,11 +102,11 @@ const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
           <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
             <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
           </EuiScreenReaderOnly>
-          <TruncatableText>
+          <span css={styles.truncatable}>
             <span css={styles.description} data-test-subj={`field-${name}-description`}>
               {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
             </span>
-          </TruncatableText>
+          </span>
         </Fragment>
       </EuiToolTip>
     ),

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { css } from '@emotion/react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { UseEuiTheme } from '@elastic/eui';
 
 export const styles = {
-  badgesGroup: ({ theme }: { theme: EuiTheme }) => css`
-    margin-top: ${theme.eui.euiSizeXS};
+  badgesGroup: ({ euiTheme }: { euiTheme: UseEuiTheme['euiTheme'] }) => css`
+    margin-top: ${euiTheme.size.xs};
     min-height: 24px;
   `,
 };

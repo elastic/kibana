@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/** @jsx jsx */
-import { jsx } from '@emotion/react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';

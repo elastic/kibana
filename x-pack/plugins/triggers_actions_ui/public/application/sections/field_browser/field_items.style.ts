@@ -13,6 +13,17 @@ export const styles = {
     position: relative;
     top: -1px;
   `,
+  truncatable: css`
+    &,
+    & * {
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+  `,
   description: css`
     user-select: text;
     width: 400px;

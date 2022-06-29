@@ -10,8 +10,6 @@ import { render, RenderResult } from '@testing-library/react';
 import { mockBrowserFields } from './mock';
 
 import { FieldTable, FieldTableProps } from './field_table';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { ThemeProvider } from 'styled-components';
 
 const timestampFieldId = '@timestamp';
 
@@ -31,11 +29,8 @@ const defaultProps: FieldTableProps = {
 };
 
 const getComponent = (props: Partial<FieldTableProps> = {}) => (
-  <ThemeProvider theme={() => ({ eui: { euiSizeXS: '12px', euiBorderThin: '1px' } })}>
-    <FieldTable {...{ ...defaultProps, ...props }} />
-  </ThemeProvider>
+  <FieldTable {...{ ...defaultProps, ...props }} />
 );
-
 const renderComponent = (props: Partial<FieldTableProps> = {}) => render(getComponent(props));
 
 describe('FieldTable', () => {

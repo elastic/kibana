@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/** @jsx jsx */
-import { jsx } from '@emotion/react';
+import React from 'react';
 import { render } from '@testing-library/react';
 import { matchers } from '@emotion/jest';
 import { mockBrowserFields } from './mock';
@@ -62,10 +61,7 @@ describe('CategoriesSelector', () => {
 
     expect(result.getByTestId('categories-selector-search')).toBeInTheDocument();
     expect(result.getByTestId(`categories-selector-option-base`)).toBeInTheDocument();
-    expect(result.getByTestId(`categories-selector-option-name-base`)).toHaveStyleRule(
-      'font-weight',
-      'bold'
-    );
+    expect(result.getByTestId(`categories-selector-option-name-base`)).toBeInTheDocument();
   });
 
   it('should call setSelectedCategoryIds when category selected', () => {

@@ -7,9 +7,6 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { ThemeProvider } from 'styled-components';
-
 import { CategoriesBadges, CategoriesBadgesProps } from './categories_badges';
 
 const mockSetSelectedCategoryIds = jest.fn();
@@ -19,11 +16,7 @@ const defaultProps = {
 };
 
 const renderComponent = (props: Partial<CategoriesBadgesProps> = {}) =>
-  render(
-    <ThemeProvider theme={() => ({ eui: { euiSizeXS: '12px' } })}>
-      <CategoriesBadges {...{ ...defaultProps, ...props }} />
-    </ThemeProvider>
-  );
+  render(<CategoriesBadges {...{ ...defaultProps, ...props }} />);
 
 describe('CategoriesBadges', () => {
   beforeEach(() => {
