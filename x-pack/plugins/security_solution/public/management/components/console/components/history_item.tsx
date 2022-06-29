@@ -14,7 +14,7 @@ import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 const StyledEuiFlexItemHistoryItem = styled(EuiFlexItem)`
   border-bottom: ${({ theme: { eui } }) => eui.euiBorderWidthThin} dashed
     ${({ theme: { eui } }) => eui.euiBorderColor};
-  padding: ${({ theme: { eui } }) => eui.euiSizeXL} 0;
+  padding-bottom: ${({ theme: { eui } }) => eui.euiSizeL};
 `;
 
 export type HistoryItemProps = PropsWithChildren<{}>;
