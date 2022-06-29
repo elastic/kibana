@@ -142,8 +142,9 @@ set_git_merge_base() {
   export GITHUB_PR_MERGE_BASE
 }
 
-# If this command is terminated early, e.g. because the build was cancelled in buildkite,
+# If npm install is terminated early, e.g. because the build was cancelled in buildkite,
 # a package directory is left behind in a bad state that can cause all subsequent installs to fail
+# So this function contains some cleanup/retry logic to try to recover from this kind of situation
 npm_install_global() {
   package="$1"
   version="${2:-}"
