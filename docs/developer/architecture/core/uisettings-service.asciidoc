@@ -30,7 +30,7 @@ Use the top-level `uiSettings` key for this, for example:
 
 [source,yaml]
 ----
-# Fewer marketing messages
+# Less feature announcement messages
 uiSettings:
   overrides:
     hideAnnouncements: true
