@@ -315,7 +315,6 @@ export class SavedObjectsRepository {
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
-      originId,
       initialNamespaces,
       version,
     } = options;
@@ -323,6 +322,7 @@ export class SavedObjectsRepository {
     const namespace = normalizeNamespace(options.namespace);
 
     this.validateInitialNamespaces(type, initialNamespaces);
+    this.validateOriginId(type, options);
 
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
@@ -331,6 +331,7 @@ export class SavedObjectsRepository {
     const time = getCurrentTime();
     let savedObjectNamespace: string | undefined;
     let savedObjectNamespaces: string[] | undefined;
+    let existingOriginId: string | undefined;
 
     if (this._registry.isSingleNamespace(type)) {
       savedObjectNamespace = initialNamespaces
@@ -354,11 +355,17 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces =
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
+        existingOriginId = existingDocument?._source?.originId;
       } else {
         savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
       }
     }
 
+    // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
+    // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
+    const originId = Object.keys(options).includes('originId')
+      ? options.originId
+      : existingOriginId;
     const migrated = this._migrator.migrateDocument({
       id,
       type,
@@ -442,6 +449,7 @@ export class SavedObjectsRepository {
       } else {
         try {
           this.validateInitialNamespaces(type, initialNamespaces);
+          this.validateOriginId(type, object);
         } catch (e) {
           error = e;
         }
@@ -499,6 +507,7 @@ export class SavedObjectsRepository {
 
       let savedObjectNamespace: string | undefined;
       let savedObjectNamespaces: string[] | undefined;
+      let existingOriginId: string | undefined;
       let versionProperties;
       const {
         preflightCheckIndex,
@@ -525,6 +534,7 @@ export class SavedObjectsRepository {
         savedObjectNamespaces =
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
         versionProperties = getExpectedVersionProperties(version);
+        existingOriginId = existingDocument?._source?.originId;
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = initialNamespaces
@@ -536,6 +546,11 @@ export class SavedObjectsRepository {
         versionProperties = getExpectedVersionProperties(version);
       }
 
+      // 1. If the originId has been *explicitly set* for the object (defined or undefined), respect that.
+      // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
+      const originId = Object.keys(object).includes('originId')
+        ? object.originId
+        : existingOriginId;
       const migrated = this._migrator.migrateDocument({
         id: object.id,
         type: object.type,
@@ -546,7 +561,7 @@ export class SavedObjectsRepository {
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         updated_at: time,
         references: object.references || [],
-        originId: object.originId,
+        originId,
       }) as SavedObjectSanitizedDoc<T>;
 
       /**
@@ -2333,6 +2348,18 @@ export class SavedObjectsRepository {
       validator.validate(this._migrator.kibanaVersion, doc);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
+    }
+  }
+
+  /** This is used when objects are created. */
+  private validateOriginId(type: string, objectOrOptions: { originId?: string }) {
+    if (
+      Object.keys(objectOrOptions).includes('originId') &&
+      !this._registry.isMultiNamespace(type)
+    ) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"originId" can only be set for multi-namespace object types'
+      );
     }
   }
 }
