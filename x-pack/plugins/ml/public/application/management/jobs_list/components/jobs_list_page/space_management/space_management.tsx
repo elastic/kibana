@@ -28,6 +28,7 @@ import { useManagementApiService } from '../../../../../services/ml_api_service/
 import { getColumns } from './columns';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
 import { getFilters } from './filters';
+import { useTableState } from './use_table_state';
 
 interface Props {
   spacesApi: SpacesPluginStart | undefined;
@@ -41,6 +42,11 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   const [columns, setColumns] = useState<Array<EuiBasicTableColumn<ManagementItems>>>([]);
   const [filters, setFilters] = useState<SearchFilterConfig[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+
+  const { onTableChange, pagination, sorting, setPageIndex } = useTableState<ManagementItems>(
+    items ?? [],
+    'id'
+  );
 
   const isMounted = useRef(true);
   useEffect(() => {
@@ -79,6 +85,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
       setColumns(createColumns());
       setCurrentTab(currentTabId);
       refresh(currentTabId);
+      setPageIndex(0);
     },
     [currentTabId]
   );
@@ -139,15 +146,9 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
                 },
                 filters,
               }}
-              pagination={{
-                pageSizeOptions: [10, 25, 50],
-              }}
-              sorting={{
-                sort: {
-                  field: 'id',
-                  direction: 'asc',
-                },
-              }}
+              onTableChange={onTableChange}
+              pagination={pagination}
+              sorting={sorting}
               rowProps={(item) => ({
                 'data-test-subj': `mlSpacesManagementTable-${currentTabId} row-${item.id}`,
               })}
@@ -156,7 +157,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
         )}
       </>
     );
-  }, [items, columns, isLoading, filters, currentTabId, refresh]);
+  }, [items, columns, isLoading, filters, currentTabId, refresh, onTableChange]);
 
   const tabs = useMemo(
     () => [

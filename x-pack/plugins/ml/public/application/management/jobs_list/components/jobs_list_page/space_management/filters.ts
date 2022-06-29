@@ -24,7 +24,7 @@ export function getFilters(mlSavedObjectType: MlSavedObjectType, items: Manageme
         [
           [
             'jobState',
-            i18n.translate('xpack.ml.management.spaceManagementFilters.ada.jobState', {
+            i18n.translate('xpack.ml.management.spaceManagementFilters.ad.jobState', {
               defaultMessage: 'Job state',
             }),
           ],
