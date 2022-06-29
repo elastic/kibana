@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { EnvironmentService } from './environment_service';
-export type {
-  InternalEnvironmentServicePreboot,
-  InternalEnvironmentServiceSetup,
-} from './environment_service';
-export { config } from './pid_config';
-export type { PidConfigType } from './pid_config';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/environment/core-environment-server-mocks'],
+};

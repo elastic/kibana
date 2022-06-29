@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
-
-export const config = {
-  path: 'pid',
-  schema: schema.object({
-    file: schema.maybe(schema.string()),
-    exclusive: schema.boolean({ defaultValue: false }),
-  }),
-};
-
-export type PidConfigType = TypeOf<typeof config.schema>;
+export type { NodeInfo, NodeRoles } from './types';
