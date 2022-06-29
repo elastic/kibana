@@ -43,6 +43,8 @@ import { trackUiEvent } from '../../lens_ui_telemetry';
 import type { ParamEditorCustomProps } from '../../types';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 
+const operationDisplay = getOperationDisplay();
+
 const getFunctionOptions = (
   operationSupportMatrix: OperationSupportMatrix & {
     operationTypes: Set<OperationType>;
@@ -51,7 +53,7 @@ const getFunctionOptions = (
 ): Array<EuiComboBoxOptionOption<OperationType>> => {
   return Array.from(operationSupportMatrix.operationTypes).map((operationType) => {
     const def = operationDefinitionMap[operationType];
-    const label = getOperationDisplay()[operationType].displayName;
+    const label = operationDisplay[operationType].displayName;
     const isCompatible =
       !column ||
       (column &&
@@ -204,7 +206,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
   if (showSelectionFunctionInvalid) {
     const selectedOperationType = incompleteOperation || column?.operationType;
     const brokenFunctionOption = {
-      label: selectedOperationType && getOperationDisplay()[selectedOperationType].displayName,
+      label: selectedOperationType && operationDisplay[selectedOperationType].displayName,
       value: selectedOperationType,
       className: 'lnsIndexPatternDimensionEditor__operation',
       'data-test-subj': `lns-indexPatternDimension-${selectedOperationType} incompatible`,
