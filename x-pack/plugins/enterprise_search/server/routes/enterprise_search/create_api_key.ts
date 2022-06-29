@@ -10,10 +10,12 @@ import { schema } from '@kbn/config-schema';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { RouteDependencies } from '../../plugin';
 
+import { createApiKey } from '../../lib/indices/create_api_key';
+
 export function registerCreateAPIKeyRoute({ router }: RouteDependencies, security: SecurityPluginStart) {
   router.post(
     {
-      path: '/internal/enterprise_search/{indexName}/api_keys}',
+      path: '/internal/enterprise_search/{indexName}/api_keys',
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -26,17 +28,7 @@ export function registerCreateAPIKeyRoute({ router }: RouteDependencies, securit
       const { indexName } = request.params;
       const { keyName } = request.body;
       try {
-        const createResponse = await security.authc.apiKeys.create(request, {name: keyName, role_descriptors: {
-          [`${indexName}-key-role`]: {
-            cluster: [],
-            index: [
-              {
-                names: [indexName],
-                privileges: ['all'],
-              },
-            ],
-          },
-        }});
+        const createResponse = await createApiKey(request, security, indexName, keyName);
         if (!createResponse) {
           throw 'Unable to create API Key';
         }
