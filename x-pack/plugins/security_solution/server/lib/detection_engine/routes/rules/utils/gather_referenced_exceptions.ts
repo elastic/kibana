@@ -11,7 +11,7 @@ import {
   getAllListTypes,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
-import { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 
 /**
  * Helper that takes rules, goes through their referenced exception lists and

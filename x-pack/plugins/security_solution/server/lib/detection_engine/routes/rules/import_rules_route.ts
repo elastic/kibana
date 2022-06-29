@@ -45,7 +45,7 @@ import {
 } from './utils/import_rules_utils';
 import { getReferencedExceptionLists } from './utils/gather_referenced_exceptions';
 import { importRuleExceptions } from './utils/import_rule_exceptions';
-import { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -91,7 +91,6 @@ export const importRulesRoute = (
         });
         const savedObjectsClient = ctx.core.savedObjects.client;
         const exceptionsClient = ctx.lists?.getExceptionListClient();
-        const siemClient = ctx.securitySolution.getAppClient();
 
         const mlAuthz = buildMlAuthz({
           license: ctx.licensing.license,
@@ -172,7 +171,6 @@ export const importRulesRoute = (
           exceptionsClient,
           spaceId: ctx.securitySolution.getSpaceId(),
           existingLists: foundReferencedExceptionLists,
-          siemClient,
         });
 
         const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];

@@ -14,7 +14,7 @@ import { SavedObjectAttributes } from '@kbn/core/types';
 import {
   addPrepackagedRulesSchema,
   AddPrepackagedRulesSchema,
-} from '../../../../common/detection_engine/schemas/request/rule_schemas';
+} from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 
 // TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';

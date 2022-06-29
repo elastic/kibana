@@ -10,16 +10,6 @@ import { PatchRulesSchema } from './patch_rules_schema';
 import { patchRuleValidateTypeDependents } from './patch_rules_type_dependents';
 
 describe('patch_rules_type_dependents', () => {
-  test('saved_id is required when type is saved_query and validates with it', () => {
-    const schema: PatchRulesSchema = {
-      ...getPatchRulesSchemaMock(),
-      type: 'saved_query',
-      saved_id: '123',
-    };
-    const errors = patchRuleValidateTypeDependents(schema);
-    expect(errors).toEqual([]);
-  });
-
   test('You cannot omit timeline_title when timeline_id is present', () => {
     const schema: PatchRulesSchema = {
       ...getPatchRulesSchemaMock(),
@@ -78,59 +68,5 @@ describe('patch_rules_type_dependents', () => {
     delete schema.rule_id;
     const errors = patchRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['either "id" or "rule_id" must be set']);
-  });
-
-  test('threshold is required when type is threshold and validates with it', () => {
-    const schema: PatchRulesSchema = {
-      ...getPatchRulesSchemaMock(),
-      type: 'threshold',
-    };
-    const errors = patchRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['when "type" is "threshold", "threshold" is required']);
-  });
-
-  test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
-    const schema: PatchRulesSchema = {
-      ...getPatchRulesSchemaMock(),
-      type: 'threshold',
-      threshold: {
-        field: '',
-        value: -1,
-      },
-    };
-    const errors = patchRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
-  });
-
-  test('threshold.field should contain 3 items or less', () => {
-    const schema: PatchRulesSchema = {
-      ...getPatchRulesSchemaMock(),
-      type: 'threshold',
-      threshold: {
-        field: ['field-1', 'field-2', 'field-3', 'field-4'],
-        value: 1,
-      },
-    };
-    const errors = patchRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['Number of fields must be 3 or less']);
-  });
-
-  test('threshold.cardinality[0].field should not be in threshold.field', () => {
-    const schema: PatchRulesSchema = {
-      ...getPatchRulesSchemaMock(),
-      type: 'threshold',
-      threshold: {
-        field: ['field-1', 'field-2', 'field-3'],
-        value: 1,
-        cardinality: [
-          {
-            field: 'field-1',
-            value: 2,
-          },
-        ],
-      },
-    };
-    const errors = patchRuleValidateTypeDependents(schema);
-    expect(errors).toEqual(['Cardinality of a field that is being aggregated on is always 1']);
   });
 });

@@ -27,7 +27,7 @@ import { importRuleValidateTypeDependents } from '../../../../common/detection_e
 import {
   importRulesSchema,
   ImportRulesSchema,
-} from '../../../../common/detection_engine/schemas/request/rule_schemas';
+} from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   parseNdjsonStrings,
   createRulesLimitStream,
@@ -62,7 +62,7 @@ export const validateRules = (
         if (validationErrors.length) {
           return new BadRequestError(validationErrors.join());
         } else {
-          return schema as ImportRulesSchema;
+          return schema;
         }
       };
       return pipe(checked, fold(onLeft, onRight));

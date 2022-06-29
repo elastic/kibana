@@ -16,14 +16,13 @@ import { RulesClient } from '@kbn/alerting-plugin/server';
 import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { legacyMigrate } from '../../../rules/utils';
 import { createBulkErrorObject, ImportRuleResponse } from '../../utils';
+import { createRules } from '../../../rules/create_rules';
 import { readRules } from '../../../rules/read_rules';
 import { patchRules } from '../../../rules/patch_rules';
-import { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
-import { convertCreateAPIToInternalSchema } from '../../../schemas/rule_converters';
-import { AppClient } from '../../../../../types';
 
 export type PromiseFromStreams = ImportRulesSchema | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -58,7 +57,6 @@ export const importRules = async ({
   exceptionsClient,
   spaceId,
   existingLists,
-  siemClient,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
@@ -69,7 +67,6 @@ export const importRules = async ({
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
   existingLists: Record<string, ExceptionListSchema>;
-  siemClient: AppClient;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
 
@@ -112,14 +109,9 @@ export const importRules = async ({
                 });
 
                 if (rule == null) {
-                  const internalRule = convertCreateAPIToInternalSchema(
-                    parsedRule,
-                    siemClient,
-                    false
-                  );
-
-                  await rulesClient.create({
-                    data: internalRule,
+                  await createRules({
+                    rulesClient,
+                    params: parsedRule,
                   });
                   resolve({
                     rule_id: parsedRule.rule_id,

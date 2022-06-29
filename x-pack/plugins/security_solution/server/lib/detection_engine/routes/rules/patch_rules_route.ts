@@ -6,8 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { patchRulesSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
+import { buildRouteValidationNonExact } from '../../../../utils/build_validation/route_validation';
+import { patchRulesSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -26,7 +27,10 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation<typeof patchRulesSchema>(patchRulesSchema),
+        // Use non-exact validation because everything is optional in patch - since everything is optional,
+        // io-ts can't find the right schema from the type specific union and the exact check breaks.
+        // We do type specific exact validation after fetching the existing rule so we know the rule type.
+        body: buildRouteValidationNonExact<typeof patchRulesSchema>(patchRulesSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -34,6 +38,10 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const validationErrors = patchRuleValidateTypeDependents(request.body);
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
       try {
         const params = request.body;
         const rulesClient = (await context.alerting).getRulesClient();

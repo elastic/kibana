@@ -8,17 +8,17 @@
 import { chunk } from 'lodash/fp';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
-import { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
+import { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../common/constants';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
-import { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
+import { RuleParams } from '../schemas/rule_schemas';
 import { legacyMigrate } from './utils';
 import { deleteRules } from './delete_rules';
 import { PrepackagedRulesError } from '../routes/rules/add_prepackaged_rules_route';
 import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
-import { AppClient } from '../../../types';
-import { convertCreateAPIToInternalSchema } from '../schemas/rule_converters';
+import { createRules } from './create_rules';
+import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
 /**
  * Updates the prepackaged rules given a set of rules and output index.
@@ -27,13 +27,11 @@ import { convertCreateAPIToInternalSchema } from '../schemas/rule_converters';
  * @param rulesClient Alerting client
  * @param spaceId Current user spaceId
  * @param rules The rules to apply the update for
- * @param outputIndex The output index to apply the update to.
  */
 export const updatePrepackagedRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   rules: AddPrepackagedRulesSchema[],
-  siemClient: AppClient,
   ruleExecutionLog: IRuleExecutionLogForRoutes
 ): Promise<void> => {
   const ruleChunks = chunk(MAX_RULES_TO_UPDATE_IN_PARALLEL, rules);
@@ -42,7 +40,6 @@ export const updatePrepackagedRules = async (
       rulesClient,
       savedObjectsClient,
       ruleChunk,
-      siemClient,
       ruleExecutionLog
     );
     await Promise.all(rulePromises);
@@ -54,14 +51,12 @@ export const updatePrepackagedRules = async (
  * @param rulesClient Alerting client
  * @param spaceId Current user spaceId
  * @param rules The rules to apply the update for
- * @param outputIndex The output index to apply the update to.
  * @returns Promise of what was updated.
  */
 export const createPromises = (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
   rules: AddPrepackagedRulesSchema[],
-  siemClient: AppClient,
   ruleExecutionLog: IRuleExecutionLogForRoutes
 ): Array<Promise<PartialRule<RuleParams> | null>> => {
   return rules.map(async (rule) => {
@@ -91,15 +86,15 @@ export const createPromises = (
         ruleExecutionLog,
       });
 
-      const internalRuleCreate: InternalRuleCreate = {
-        ...convertCreateAPIToInternalSchema(rule, siemClient, true),
-        // Force the prepackaged rule to use the enabled state from the existing rule,
-        // regardless of what the prepackaged rule says
-        enabled: migratedRule.enabled,
-      };
-
-      return rulesClient.create({
-        data: internalRuleCreate,
+      return createRules({
+        rulesClient,
+        params: {
+          ...rule,
+          // Force the prepackaged rule to use the enabled state from the existing rule,
+          // regardless of what the prepackaged rule says
+          enabled: migratedRule.enabled,
+          actions: migratedRule.actions.map(transformAlertToRuleAction),
+        },
       });
     } else {
       return patchRules({
@@ -107,8 +102,9 @@ export const createPromises = (
         rule: migratedRule,
         params: {
           ...rule,
-          // Again, force enabled to use the enabled state from the existing rule
-          enabled: migratedRule.enabled,
+          // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
+          enabled: undefined,
+          actions: undefined,
         },
       });
     }

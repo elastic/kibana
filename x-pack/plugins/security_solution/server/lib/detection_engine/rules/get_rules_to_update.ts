@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
+import { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { RuleAlertType } from './types';
 
 /**

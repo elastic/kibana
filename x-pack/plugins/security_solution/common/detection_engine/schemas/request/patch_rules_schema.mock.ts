@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatchRulesSchema, PatchRulesSchemaDecoded } from './patch_rules_schema';
+import { PatchRulesSchema } from './patch_rules_schema';
 
 export const getPatchRulesSchemaMock = (): PatchRulesSchema => ({
   description: 'some description',
@@ -17,6 +17,3 @@ export const getPatchRulesSchemaMock = (): PatchRulesSchema => ({
   language: 'kuery',
   rule_id: 'rule-1',
 });
-
-export const getPatchRulesSchemaDecodedMock = (): PatchRulesSchemaDecoded =>
-  getPatchRulesSchemaMock();

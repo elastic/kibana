@@ -6,7 +6,7 @@
  */
 import { ListArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { BulkError, createBulkErrorObject } from '../../utils';
 
 /**

@@ -8,7 +8,7 @@
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { Logger } from '@kbn/core/server';
 import { patchRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_bulk_schema';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { buildRouteValidationNonExact } from '../../../../utils/build_validation/route_validation';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../common/constants';
@@ -35,7 +35,7 @@ export const patchRulesBulkRoute = (
     {
       path: DETECTION_ENGINE_RULES_BULK_UPDATE,
       validate: {
-        body: buildRouteValidation<typeof patchRulesBulkSchema>(patchRulesBulkSchema),
+        body: buildRouteValidationNonExact<typeof patchRulesBulkSchema>(patchRulesBulkSchema),
       },
       options: {
         tags: ['access:securitySolution'],

@@ -119,7 +119,7 @@ export const createPrepackagedRules = async (
   const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
 
-  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall, siemClient));
+  await Promise.all(installPrepackagedRules(rulesClient, rulesToInstall));
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
     frameworkRequest,
@@ -133,7 +133,6 @@ export const createPrepackagedRules = async (
     rulesClient,
     savedObjectsClient,
     rulesToUpdate,
-    siemClient,
     context.getRuleExecutionLog()
   );
 

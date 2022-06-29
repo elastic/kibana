@@ -15,7 +15,7 @@ import { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { RuleAlertType, isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';

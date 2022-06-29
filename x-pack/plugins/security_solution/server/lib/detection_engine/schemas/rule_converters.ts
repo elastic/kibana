@@ -6,13 +6,10 @@
  */
 
 import uuid from 'uuid';
-import * as t from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
@@ -43,24 +40,27 @@ import { RuleExecutionSummary } from '../../../../common/detection_engine/schema
 import {
   CreateRulesSchema,
   CreateTypeSpecific,
-  eqlFullPatchSchema,
+  eqlPatchParams,
   EqlPatchParams,
   FullResponseSchema,
-  machineLearningFullPatchSchema,
+  machineLearningPatchParams,
   MachineLearningPatchParams,
-  queryFullPatchSchema,
+  queryPatchParams,
   QueryPatchParams,
   ResponseTypeSpecific,
-  savedQueryFullPatchSchema,
+  savedQueryPatchParams,
   SavedQueryPatchParams,
-  threatMatchFullPatchSchema,
+  threatMatchPatchParams,
   ThreatMatchPatchParams,
-  thresholdFullPatchSchema,
+  thresholdPatchParams,
   ThresholdPatchParams,
 } from '../../../../common/detection_engine/schemas/request';
-import { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
-import { AppClient } from '../../../types';
-import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
+import { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import {
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  DEFAULT_MAX_SIGNALS,
+  SERVER_APP_ID,
+} from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import {
   transformFromAlertThrottle,
@@ -109,7 +109,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         threatMapping: params.threat_mapping,
         threatLanguage: params.threat_language,
         threatIndex: params.threat_index,
-        threatIndicatorPath: params.threat_indicator_path,
+        threatIndicatorPath: params.threat_indicator_path ?? DEFAULT_INDICATOR_SOURCE_PATH,
         concurrentSearches: params.concurrent_searches,
         itemsPerSearch: params.items_per_search,
       };
@@ -159,18 +159,6 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
       return assertUnreachable(params);
     }
   }
-};
-
-const validateSchema = <A>(input: unknown, schema: t.Type<A>): A | BadRequestError => {
-  const decoded = schema.decode(input);
-  const checked = exactCheck(input, decoded);
-  const onLeft = (errors: t.Errors): BadRequestError | A => {
-    return new BadRequestError(formatErrors(errors).join());
-  };
-  const onRight = (value: A): BadRequestError | A => {
-    return value;
-  };
-  return pipe(checked, fold(onLeft, onRight));
 };
 
 const patchEqlParams = (
@@ -274,56 +262,64 @@ const patchMachineLearningParams = (
   };
 };
 
+export const parseValidationError = (error: string | null): BadRequestError => {
+  if (error != null) {
+    return new BadRequestError(error);
+  } else {
+    return new BadRequestError('unknown validation error');
+  }
+};
+
 // TODO: unit test this function to make sure schemas pass validation as expected
 export const patchTypeSpecificSnakeToCamel = (
   params: PatchRulesSchema,
   existingRule: RuleParams
 ): TypeSpecificRuleParams | BadRequestError => {
-  // Each rule type validates the full patch schema for the specific type of rule to ensure that
-  // params from other rule types are not being passed in. Otherwise, since the `type` is not required
-  // on patch requests, type specific params from one rule type could be passed in when patching a
-  // different rule type and they'd be ignored without a warning or error.
-  // This validation ensures that e.g. only valid EQL rule params are passed in when patching an EQL rule.
+  // Here we do the validation of patch params by rule type to ensure that the fields that are
+  // passed in to patch are of the correct type, e.g. `query` is a string. Since the combined patch schema
+  // is a union of types where everything is optional, it's hard to do the validation before we know the rule type -
+  // a patch request that defines `event_category_override` as a number would not be assignable to the EQL patch schema,
+  // but would be assignable to the other rule types since they don't specify `event_category_override`.
   switch (existingRule.type) {
     case 'eql': {
-      const validated = validateSchema(params, eqlFullPatchSchema);
-      if (validated instanceof BadRequestError) {
-        return validated;
+      const [validated, error] = validateNonExact(params, eqlPatchParams);
+      if (validated == null) {
+        return parseValidationError(error);
       }
       return patchEqlParams(validated, existingRule);
     }
     case 'threat_match': {
-      const validated = validateSchema(params, threatMatchFullPatchSchema);
-      if (validated instanceof BadRequestError) {
-        return validated;
+      const [validated, error] = validateNonExact(params, threatMatchPatchParams);
+      if (validated == null) {
+        return parseValidationError(error);
       }
       return patchThreatMatchParams(validated, existingRule);
     }
     case 'query': {
-      const validated = validateSchema(params, queryFullPatchSchema);
-      if (validated instanceof BadRequestError) {
-        return validated;
+      const [validated, error] = validateNonExact(params, queryPatchParams);
+      if (validated == null) {
+        return parseValidationError(error);
       }
       return patchQueryParams(validated, existingRule);
     }
     case 'saved_query': {
-      const validated = validateSchema(params, savedQueryFullPatchSchema);
-      if (validated instanceof BadRequestError) {
-        return validated;
+      const [validated, error] = validateNonExact(params, savedQueryPatchParams);
+      if (validated == null) {
+        return parseValidationError(error);
       }
       return patchSavedQueryParams(validated, existingRule);
     }
     case 'threshold': {
-      const validated = validateSchema(params, thresholdFullPatchSchema);
-      if (validated instanceof BadRequestError) {
-        return validated;
+      const [validated, error] = validateNonExact(params, thresholdPatchParams);
+      if (validated == null) {
+        return parseValidationError(error);
       }
       return patchThresholdParams(validated, existingRule);
     }
     case 'machine_learning': {
-      const validated = validateSchema(params, machineLearningFullPatchSchema);
-      if (validated instanceof BadRequestError) {
-        return validated;
+      const [validated, error] = validateNonExact(params, machineLearningPatchParams);
+      if (validated == null) {
+        return parseValidationError(error);
       }
       return patchMachineLearningParams(validated, existingRule);
     }
@@ -332,6 +328,7 @@ export const patchTypeSpecificSnakeToCamel = (
     }
   }
 };
+
 const versionExcludedKeys = ['enabled', 'id', 'rule_id'];
 const shouldUpdateVersion = (params: PatchRulesSchema): boolean => {
   for (const key in params) {
@@ -404,7 +401,6 @@ export const convertPatchAPIToInternalSchema = (
 
 export const convertCreateAPIToInternalSchema = (
   input: CreateRulesSchema,
-  siemClient: AppClient,
   immutable = false,
   defaultEnabled = true
 ): InternalRuleCreate => {
@@ -424,7 +420,9 @@ export const convertCreateAPIToInternalSchema = (
       from: input.from ?? 'now-6m',
       immutable,
       license: input.license,
-      outputIndex: input.output_index ?? siemClient.getSignalsIndex(),
+      // outputIndex is no longer used in the detection engine so there's no point in adding it
+      // to rules
+      outputIndex: '',
       timelineId: input.timeline_id,
       timelineTitle: input.timeline_title,
       meta: input.meta,

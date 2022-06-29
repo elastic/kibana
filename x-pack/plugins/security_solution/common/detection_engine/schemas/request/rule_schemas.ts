@@ -27,7 +27,7 @@ import {
   throttle,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
-import { OnlyFalseAllowed, version } from '@kbn/securitysolution-io-ts-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
 
 import {
   id,
@@ -190,6 +190,7 @@ const {
   patch: basePatchParams,
   response: baseResponseParams,
 } = buildAPISchemas(baseParams);
+export { baseCreateParams };
 
 // "shared" types are the same across all rule types, and built from "baseParams" above
 // with some variations for each route. These intersect with type specific schemas below
@@ -209,8 +210,7 @@ export type SharedUpdateSchema = t.TypeOf<typeof sharedUpdateSchema>;
 
 export const sharedPatchSchema = t.intersection([
   basePatchParams,
-  t.exact(t.partial({ rule_id })),
-  t.exact(t.partial({ id })),
+  t.exact(t.partial({ rule_id, id })),
 ]);
 
 // START type specific parameter definitions
@@ -359,7 +359,7 @@ export { machineLearningCreateParams };
 // ---------------------------------------
 // END type specific parameter definitions
 
-const createTypeSpecific = t.union([
+export const createTypeSpecific = t.union([
   eqlCreateParams,
   threatMatchCreateParams,
   queryCreateParams,
@@ -389,43 +389,6 @@ export const previewRulesSchema = t.intersection([
 ]);
 export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
 
-// TODO: test `version` overwriting `version` from baseParams
-export const addPrepackagedRulesSchema = t.intersection([
-  baseCreateParams,
-  createTypeSpecific,
-  // version is required in addPrepackagedRulesSchema, so this supercedes the defaultable
-  // version in baseParams
-  t.exact(t.type({ rule_id, version })),
-  t.exact(
-    t.partial({
-      related_integrations: RelatedIntegrationArray,
-      required_fields: RequiredFieldArray,
-      setup: SetupGuide,
-    })
-  ),
-]);
-export type AddPrepackagedRulesSchema = t.TypeOf<typeof addPrepackagedRulesSchema>;
-
-export const importRulesSchema = t.intersection([
-  baseCreateParams,
-  createTypeSpecific,
-  t.exact(t.type({ rule_id })),
-  t.exact(
-    t.partial({
-      id,
-      immutable: OnlyFalseAllowed,
-      updated_at,
-      updated_by,
-      created_at,
-      created_by,
-      related_integrations: RelatedIntegrationArray,
-      required_fields: RequiredFieldArray,
-      setup: SetupGuide,
-    })
-  ),
-]);
-export type ImportRulesSchema = t.TypeOf<typeof importRulesSchema>;
-
 type UpdateSchema<T> = SharedUpdateSchema & T;
 export type EqlUpdateSchema = UpdateSchema<t.TypeOf<typeof eqlCreateParams>>;
 export type ThreatMatchUpdateSchema = UpdateSchema<t.TypeOf<typeof threatMatchCreateParams>>;
@@ -436,7 +399,7 @@ export type MachineLearningUpdateSchema = UpdateSchema<
   t.TypeOf<typeof machineLearningCreateParams>
 >;
 
-const patchTypeSpecific = t.union([
+export const patchTypeSpecific = t.union([
   eqlPatchParams,
   threatMatchPatchParams,
   queryPatchParams,
@@ -492,9 +455,6 @@ export const machineLearningFullPatchSchema = t.intersection([
   sharedPatchSchema,
 ]);
 export type MachineLearningFullPatchSchema = t.TypeOf<typeof machineLearningFullPatchSchema>;
-
-export const patchRulesSchema = t.intersection([patchTypeSpecific, sharedPatchSchema]);
-export type PatchRulesSchema = t.TypeOf<typeof patchRulesSchema>;
 
 const responseRequiredFields = {
   id,
