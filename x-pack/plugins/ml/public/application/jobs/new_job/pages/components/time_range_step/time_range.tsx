@@ -108,6 +108,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
                 query={mlContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}
+                allowFutureTime={true}
               />
             </EuiFlexItem>
             <EuiFlexItem />

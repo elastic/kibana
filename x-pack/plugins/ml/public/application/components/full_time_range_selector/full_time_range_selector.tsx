@@ -25,12 +25,14 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { setFullTimeRange } from './full_time_range_selector_service';
 import { useStorage } from '../../contexts/ml/use_storage';
 import { ML_FROZEN_TIER_PREFERENCE } from '../../../../common/types/storage';
+import { GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 
 interface Props {
   dataView: DataView;
   query: QueryDslQueryContainer;
   disabled: boolean;
-  callback?: (a: any) => void;
+  callback?: (a: GetTimeFieldRangeResponse) => void;
+  allowFutureTime?: boolean;
 }
 
 const FROZEN_TIER_PREFERENCE = {
@@ -42,10 +44,18 @@ type FrozenTierPreference = typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TI
 
 // Component for rendering a button which automatically sets the range of the time filter
 // to the time range of data in the index(es) mapped to the supplied Kibana index pattern or query.
-export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, callback }) => {
+export const FullTimeRangeSelector: FC<Props> = ({
+  dataView,
+  query,
+  disabled,
+  callback,
+  allowFutureTime = false,
+}) => {
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   async function setRange(i: DataView, q: QueryDslQueryContainer, excludeFrozenData = true) {
-    const fullTimeRange = await setFullTimeRange(i, q, excludeFrozenData);
+    const nowEpoch = allowFutureTime ? Date.now() : undefined;
+    const fullTimeRange = await setFullTimeRange(i, q, excludeFrozenData, nowEpoch);
+
     if (typeof callback === 'function') {
       callback(fullTimeRange);
     }
