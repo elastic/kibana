@@ -29,6 +29,8 @@ import {
   INDEX_PATTERNS_DETAILS,
   DETAILS_TITLE,
   DETAILS_DESCRIPTION,
+  EXCEPTION_ITEM_ACTIONS_BUTTON,
+  EDIT_EXCEPTION_BTN,
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -96,8 +98,26 @@ export const goToExceptionsTab = () => {
     .should('be.visible');
 };
 
+export const editException = () => {
+  cy.root()
+    .pipe(($el) => {
+      $el.find(EXCEPTION_ITEM_ACTIONS_BUTTON).trigger('click');
+      return $el.find(EDIT_EXCEPTION_BTN);
+    })
+    .should('be.visible');
+
+    cy.get(EDIT_EXCEPTION_BTN).click();
+};
+
 export const removeException = () => {
-  cy.get(REMOVE_EXCEPTION_BTN).click();
+  cy.root()
+    .pipe(($el) => {
+      $el.find(EXCEPTION_ITEM_ACTIONS_BUTTON).trigger('click');
+      return $el.find(REMOVE_EXCEPTION_BTN);
+    })
+    .should('be.visible');
+
+    cy.get(REMOVE_EXCEPTION_BTN).click();
 };
 
 export const waitForTheRuleToBeExecuted = () => {
