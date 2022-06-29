@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { KibanaRequest } from '@kbn/core/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-export const createApiKey = async (request: KibanaRequest, security: SecurityPluginStart, indexName: string, keyName: string) => {
-  return await security.authc.apiKeys.create(request, {name: keyName, role_descriptors: {
-    [`${indexName}-key-role`]: {
-      cluster: [],
-      index: [
-        {
-          names: [indexName],
-          privileges: ['all'],
-        },
-      ],
+export const createApiKey = async (
+  request: KibanaRequest,
+  security: SecurityPluginStart,
+  indexName: string,
+  keyName: string
+) => {
+  return await security.authc.apiKeys.create(request, {
+    name: keyName,
+    role_descriptors: {
+      [`${indexName}-key-role`]: {
+        cluster: [],
+        index: [
+          {
+            names: [indexName],
+            privileges: ['all'],
+          },
+        ],
+      },
     },
-  }});
+  });
 };
