@@ -22,6 +22,21 @@ A headless browser is a browser simulation program that does not have a user int
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/fleet_cypress`
 
+## Test Artifacts
+
+When Cypress tests are run headless on the command line, artifacts
+are generated under the `target` directory in the root of Kibana as follows:
+
+- HTML Reports
+  - location: `target/kibana-fleet/cypress/results/output.html`
+- `junit` Reports
+  - location: `target/kibana-fleet/cypress/results`
+- Screenshots (of failed tests)
+  - location: `target/kibana-fleet/cypress/screenshots`
+- Videos
+  - disabled by default, can be enabled by setting env var `CYPRESS_video=true`
+  - location: `target/kibana-fleet/cypress/videos`
+
 ### Test Execution: Examples
 
 #### FTR + Headless (Chrome)

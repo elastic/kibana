@@ -15,5 +15,10 @@
   "videosFolder": "../../../target/kibana-fleet/cypress/videos",
   "viewportHeight": 900,
   "viewportWidth": 1440,
-  "screenshotOnRunFailure": true
+  "screenshotOnRunFailure": true,
+  "env": {
+    "protocol": "http",
+    "hostname": "localhost",
+    "configport": "5601"
+  }
 }
