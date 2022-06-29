@@ -10,7 +10,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { QueryClientProvider } from 'react-query';
 
-import { OsqueryResults } from '.';
+import { OsqueryActionResults } from '.';
 import { queryClient } from '../../query_client';
 import { useKibana } from '../../common/lib/kibana';
 import * as useActions from '../../actions/use_all_actions';
@@ -34,7 +34,7 @@ const enablePrivileges = () => {
 const defaultProps = {
   agentIds: [TEST_AGENT],
   ruleName: 'Test-rule',
-  ruleActions: ['action1', 'action2'],
+  ruleActions: [{ action_type_id: 'action1' }, { action_type_id: 'action2' }],
   eventDetailId: '123',
 };
 
@@ -100,13 +100,13 @@ describe('Osquery Results', () => {
     }));
   });
   it('should validate permissions', async () => {
-    const { queryByText } = renderWithContext(<OsqueryResults {...defaultProps} />);
+    const { queryByText } = renderWithContext(<OsqueryActionResults {...defaultProps} />);
     expect(queryByText(PERMISSION_DENIED)).toBeInTheDocument();
   });
   it('return results table', async () => {
     enablePrivileges();
     const { getByText, queryByText, getByTestId } = renderWithContext(
-      <OsqueryResults {...defaultProps} />
+      <OsqueryActionResults {...defaultProps} />
     );
     expect(queryByText(PERMISSION_DENIED)).not.toBeInTheDocument();
     expect(getByTestId('osquery-results-comment')).toBeInTheDocument();
