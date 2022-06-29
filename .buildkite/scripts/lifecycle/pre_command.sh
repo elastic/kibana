@@ -11,6 +11,10 @@ source .buildkite/scripts/common/setup_node.sh
 BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/kibana-issues/dev/buildkite-ci)"
 export BUILDKITE_TOKEN
 
+# TODO remove after testing
+mkdir -p "$(npm root -g)/pnpm/test"
+npm_install_global pnpm
+
 echo '--- Install/build buildkite dependencies'
 npm_install_global ts-node
 cd '.buildkite'

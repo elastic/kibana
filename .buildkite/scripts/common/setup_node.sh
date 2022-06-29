@@ -65,7 +65,6 @@ YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yar
 export YARN_VERSION
 
 if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
-  rm -rf "$(npm root -g)/yarn" # in case the directory is in a bad state
   npm_install_global yarn "^$YARN_VERSION"
 fi
 

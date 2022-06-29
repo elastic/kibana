@@ -148,15 +148,24 @@ npm_install_global() {
   package="$1"
   version="${2:-}"
 
+  npmRoot=$(npm root -g)
+  packageRoot="${npmRoot:?}/$package"
+  successFlag="${packageRoot:?}/.install-success"
+
   toInstall="$package"
   if [[ "$version" ]]; then
     toInstall="$package@$version"
   fi
 
-  if [[ ! $(npm install -g "$toInstall") ]]; then
+  if [[ -d "$packageRoot" && ! -f "$successFlag" ]]; then
+    echo "Removing existing package directory $packageRoot before install, seems previous installation was not successful"
+    rm -rf "$packageRoot"
+  fi
+
+  if [[ ! $(npm install -g "$toInstall" && touch "$successFlag") ]]; then
     npmRoot=$(npm root -g)
-    rm -rf "${npmRoot:?}/$package"
+    rm -rf "$packageRoot"
     echo "Trying again to install $toInstall..."
-    npm install -g "$toInstall"
+    npm install -g "$toInstall" && touch "$successFlag"
   fi
 }
