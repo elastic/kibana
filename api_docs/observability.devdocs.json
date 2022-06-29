@@ -4592,6 +4592,20 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.ENVIRONMENT_ALL",
+        "type": "string",
+        "tags": [],
+        "label": "ENVIRONMENT_ALL",
+        "description": [],
+        "signature": [
+          "\"ENVIRONMENT_ALL\""
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.FetchData",
         "type": "Type",
         "tags": [],
