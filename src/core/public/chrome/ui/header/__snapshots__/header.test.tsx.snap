@@ -2100,7 +2100,7 @@ exports[`Header renders 1`] = `
                                 onClick={[Function]}
                                 type="button"
                               >
-                                <EuiButtonContent
+                                <EuiButtonContentDeprecated
                                   className="euiButtonEmpty__content"
                                   iconSide="left"
                                   iconSize="m"
@@ -2131,7 +2131,7 @@ exports[`Header renders 1`] = `
                                       </span>
                                     </span>
                                   </span>
-                                </EuiButtonContent>
+                                </EuiButtonContentDeprecated>
                               </button>
                             </EuiButtonEmpty>
                           </EuiHeaderSectionItemButton>
@@ -2505,7 +2505,7 @@ exports[`Header renders 1`] = `
                             onTouchEnd={[Function]}
                             type="button"
                           >
-                            <EuiButtonContent
+                            <EuiButtonContentDeprecated
                               className="euiButtonEmpty__content"
                               iconSide="left"
                               iconSize="m"
@@ -2536,7 +2536,7 @@ exports[`Header renders 1`] = `
                                   </span>
                                 </span>
                               </span>
-                            </EuiButtonContent>
+                            </EuiButtonContentDeprecated>
                           </button>
                         </EuiButtonEmpty>
                       </EuiHeaderSectionItemButton>

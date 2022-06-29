@@ -58,7 +58,7 @@ const getSteps = ({
           data-test-subj="onboarding--observTourSkipButton"
         >
           {i18n.translate('xpack.observability.tour.skipButtonLabel', {
-            defaultMessage: 'Skip',
+            defaultMessage: 'Skip tour',
           })}
         </EuiButtonEmpty>
       </EuiFlexItem>

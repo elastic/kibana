@@ -1,0 +1,70 @@
+{
+  "id": "@kbn/core-node-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-node-server-internal",
+        "id": "def-server.nodeConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "nodeConfig",
+        "description": [],
+        "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-node-server-internal",
+            "id": "def-server.nodeConfig.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "\"node\""
+            ],
+            "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-node-server-internal",
+            "id": "def-server.nodeConfig.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ObjectType",
+              "<{ roles: ",
+              "Type",
+              "<(\"ui\" | \"background_tasks\")[] | \"*\"[]>; }>"
+            ],
+            "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

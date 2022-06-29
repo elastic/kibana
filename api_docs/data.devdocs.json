@@ -9465,7 +9465,15 @@
           },
           "[] | undefined; fieldsFromSource?: ",
           "Fields",
-          " | undefined; index?: string | undefined; searchAfter?: ",
+          " | undefined; index?: string | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          " | undefined; searchAfter?: ",
           {
             "pluginId": "data",
             "scope": "common",
