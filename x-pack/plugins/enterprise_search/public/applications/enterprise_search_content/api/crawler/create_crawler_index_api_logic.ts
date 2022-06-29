@@ -22,7 +22,7 @@ export interface CreateCrawlerIndexResponse {
   created: string; // the name of the newly created index
 }
 
-const createCrawerIndex = async ({ indexName, language }: CreateCrawlerIndexArgs) => {
+const createCrawlerIndex = async ({ indexName, language }: CreateCrawlerIndexArgs) => {
   const route = '/internal/enterprise_search/crawler';
 
   const params: CreateCrawlerIndexRequest = {
@@ -37,5 +37,5 @@ const createCrawerIndex = async ({ indexName, language }: CreateCrawlerIndexArgs
 
 export const CreateCrawlerIndexApiLogic = createApiLogic(
   ['create_crawler_index_api_logic'],
-  createCrawerIndex
+  createCrawlerIndex
 );
