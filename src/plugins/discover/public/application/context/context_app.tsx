@@ -15,6 +15,7 @@ import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
@@ -143,12 +144,29 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     };
   };
 
+  const contextAppTitle = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    contextAppTitle.current?.focus();
+  }, []);
+
   return (
     <Fragment>
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
         <ContextErrorMessage status={fetchedState.anchorStatus} />
       ) : (
         <Fragment>
+          <h1
+            id="contextAppTitle"
+            className="euiScreenReaderOnly"
+            data-test-subj="discoverContextAppTitle"
+            tabIndex={-1}
+            ref={contextAppTitle}
+          >
+            {i18n.translate('discover.context.pageTitle', {
+              defaultMessage: 'Documents surrounding #{anchorId}',
+              values: { anchorId },
+            })}
+          </h1>
           <TopNavMenu {...getNavBarProps()} />
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageContent paddingSize="s" className="dscDocsContent">

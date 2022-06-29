@@ -84,7 +84,6 @@ export const TabNavigationComponent: React.FC<
         navTabs={navTabs}
         pageName={pageName}
         pathName={pathName}
-        sourcerer={urlState.sourcerer}
         savedQuery={urlState.savedQuery}
         tabName={tabName}
         timeline={urlState.timeline}
