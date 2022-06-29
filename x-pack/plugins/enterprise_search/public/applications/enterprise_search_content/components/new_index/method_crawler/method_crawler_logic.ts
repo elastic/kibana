@@ -34,7 +34,7 @@ export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
       flashAPIErrors(error);
     },
     apiSuccess: ({ created }) => {
-      KibanaLogic.values.navigateToUrl(SEARCH_INDEX_PATH.replace(':indexSlug', encodeURI(created)));
+      KibanaLogic.values.navigateToUrl(SEARCH_INDEX_PATH.replace(':indexName', encodeURI(created)));
     },
     makeRequest: () => clearFlashMessages(),
   },

@@ -60,10 +60,12 @@ export const createApiLogic = <Result, Args>(
             data,
             status: Status.SUCCESS,
           }),
-          makeRequest: ({ data }) => ({
-            ...data,
-            status: Status.LOADING,
-          }),
+          makeRequest: (state) => {
+            return {
+              ...{ data: state.data || undefined },
+              status: Status.LOADING,
+            };
+          },
         },
       ],
     }),

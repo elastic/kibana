@@ -73,12 +73,12 @@ export const SearchIndices: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
         defaultMessage: 'Index name',
       }),
-      render: (indexName: string) => (
+      render: (name: string) => (
         <EuiLinkTo
           data-test-subj="search-index-link"
-          to={generatePath(SEARCH_INDEX_PATH, { indexSlug: indexName })}
+          to={generatePath(SEARCH_INDEX_PATH, { indexName: encodeURIComponent(name) })}
         >
-          {indexName}
+          {name}
         </EuiLinkTo>
       ),
       sortable: true,
@@ -139,7 +139,7 @@ export const SearchIndices: React.FC = () => {
               iconType="eye"
               data-test-subj="view-search-index-button"
               to={generatePath(SEARCH_INDEX_PATH, {
-                indexSlug: name,
+                indexName: encodeURIComponent(name),
               })}
             />
           ),
