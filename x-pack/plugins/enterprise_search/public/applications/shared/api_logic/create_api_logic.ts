@@ -16,14 +16,14 @@ export interface Values<T> {
   status: Status;
 }
 
-export interface Actions<Args extends Record<string, unknown> | undefined, Result> {
+export interface Actions<Args, Result> {
   apiError(error: HttpError): HttpError;
   apiReset(): void;
   apiSuccess(result: Result): Result;
   makeRequest(args: Args): Args;
 }
 
-export const createApiLogic = <Result, Args extends Record<string, unknown> | undefined>(
+export const createApiLogic = <Result, Args>(
   path: string[],
   apiFunction: (args: Args) => Promise<Result>
 ) =>

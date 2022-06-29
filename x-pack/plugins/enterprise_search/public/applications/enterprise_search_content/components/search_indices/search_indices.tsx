@@ -32,7 +32,7 @@ import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
 import { useLocalStorage } from '../../../shared/use_local_storage';
-import { SEARCH_INDEX_OVERVIEW_PATH, NEW_INDEX_PATH } from '../../routes';
+import { NEW_INDEX_PATH, SEARCH_INDEX_PATH } from '../../routes';
 import { SearchIndex } from '../../types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
@@ -76,9 +76,7 @@ export const SearchIndices: React.FC = () => {
       render: (indexName: string) => (
         <EuiLinkTo
           data-test-subj="search-index-link"
-          to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, {
-            indexSlug: encodeURIComponent(indexName),
-          })}
+          to={generatePath(SEARCH_INDEX_PATH, { indexSlug: indexName })}
         >
           {indexName}
         </EuiLinkTo>
@@ -140,8 +138,8 @@ export const SearchIndices: React.FC = () => {
             <EuiButtonIconTo
               iconType="eye"
               data-test-subj="view-search-index-button"
-              to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, {
-                indexSlug: encodeURIComponent(name),
+              to={generatePath(SEARCH_INDEX_PATH, {
+                indexSlug: name,
               })}
             />
           ),

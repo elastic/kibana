@@ -31,7 +31,7 @@ import { baseBreadcrumbs } from '../search_indices';
 import { SearchIndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api';
 import { MethodConnector } from './method_connector';
-import { MethodCrawler } from './method_crawler';
+import { MethodCrawler } from './method_crawler/method_crawler';
 import { MethodEs } from './method_es';
 import { MethodJson } from './method_json';
 

@@ -33,6 +33,7 @@ import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { MapsStartApi } from '@kbn/maps-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -54,6 +55,7 @@ export interface ApmPluginStartDeps {
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
   dataViews: DataViewsPublicPluginStart;
+  lens: LensPublicStart;
 }
 
 async function getDataStartPlugin(core: CoreSetup) {
@@ -66,7 +68,6 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
-
     if (plugins.observability) {
       const getUxDataHelper = async () => {
         const { fetchUxOverviewDate, hasRumData, createCallApmApi } =
