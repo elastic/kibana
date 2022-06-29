@@ -271,16 +271,22 @@ export class DataView implements DataViewBase {
 
   /**
    * Creates static representation of the data view.
+   * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
+   * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
-  public toSpec(): DataViewSpec {
-    return {
+  public toSpec(includeFields = true): DataViewSpec {
+    const fields =
+      includeFields && this.fields
+        ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
+        : undefined;
+
+    const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
-
       title: this.title,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
-      fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
+      fields,
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: this.fieldFormatMap,
@@ -289,6 +295,9 @@ export class DataView implements DataViewBase {
       allowNoIndex: this.allowNoIndex,
       name: this.name,
     };
+
+    // Filter any undefined values from the spec
+    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
   }
 
   /**
