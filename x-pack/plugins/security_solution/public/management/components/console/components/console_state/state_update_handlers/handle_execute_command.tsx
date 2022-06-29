@@ -45,16 +45,6 @@ const getRequiredArguments = (argDefinitions: CommandDefinition['args']): string
     .map(([argName]) => argName);
 };
 
-const getExclusiveOrArgs = (argDefinitions: CommandDefinition['args']): string[] => {
-  if (!argDefinitions) {
-    return [];
-  }
-
-  return Object.entries(argDefinitions)
-    .filter(([_, argDef]) => argDef.exclusiveOr)
-    .map(([argName]) => argName);
-};
-
 const getUnknownArguments = (
   inputArgs: ParsedCommandInterface['args'],
   argDefinitions: CommandDefinition['args'] | undefined
@@ -150,7 +140,6 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     commandDefinition,
   };
   const requiredArgs = getRequiredArguments(commandDefinition.args);
-  const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
 
   // If args were entered, then validate them
   if (parsedInput.hasArgs) {
@@ -225,27 +214,6 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           }),
         });
       }
-    }
-
-    // Validate exclusiveOr arguments, can only have one.
-    const exclusiveArgsUsed = exclusiveOrArgs.filter((arg) => parsedInput.args[arg]);
-    if (exclusiveArgsUsed.length > 1) {
-      return updateStateWithNewCommandHistoryItem(state, {
-        id: uuidV4(),
-        command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-        state: createCommandExecutionState({
-          errorMessage: i18n.translate(
-            'xpack.securitySolution.console.commandValidation.exclusiveArgs',
-            {
-              defaultMessage:
-                'This command supports one and only one of the following arguments: {argNames}',
-              values: {
-                argNames: toCliArgumentOptions(exclusiveOrArgs),
-              },
-            }
-          ),
-        }),
-      });
     }
 
     // Validate each argument given to the command
@@ -332,24 +300,6 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           'xpack.securitySolution.console.commandValidation.oneArgIsRequired',
           {
             defaultMessage: 'At least one argument must be used',
-          }
-        ),
-      }),
-    });
-  } else if (exclusiveOrArgs.length > 0) {
-    // Validate exclusiveOr arguments, can only have one.
-    return updateStateWithNewCommandHistoryItem(state, {
-      id: uuidV4(),
-      command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
-      state: createCommandExecutionState({
-        errorMessage: i18n.translate(
-          'xpack.securitySolution.console.commandValidation.exclusiveArgs',
-          {
-            defaultMessage:
-              'This command supports one and only one of the following arguments: {argNames}',
-            values: {
-              argNames: toCliArgumentOptions(exclusiveOrArgs),
-            },
           }
         ),
       }),
