@@ -193,6 +193,8 @@ export class MapApp extends React.Component<Props, State> {
   };
 
   async _updateIndexPatterns() {
+    const { nextIndexPatternIds } = this.props;
+    
     if (_.isEqual(nextIndexPatternIds, this._prevIndexPatternIds)) {
       return;
     }
