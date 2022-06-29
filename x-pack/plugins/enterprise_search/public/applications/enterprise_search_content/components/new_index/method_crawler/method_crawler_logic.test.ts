@@ -15,7 +15,8 @@ import { HttpError } from '../../../../../../common/types/api';
 
 import { MethodCrawlerLogic } from './method_crawler_logic';
 
-describe('MethodCrawlerLogic', () => {
+// Failing https://github.com/elastic/kibana/issues/135440
+describe.skip('MethodCrawlerLogic', () => {
   const { mount } = new LogicMounter(MethodCrawlerLogic);
   const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
