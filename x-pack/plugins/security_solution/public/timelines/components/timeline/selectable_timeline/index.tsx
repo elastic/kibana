@@ -15,6 +15,7 @@ import {
   EuiSelectableOption,
   EuiSelectableProps,
   EuiFilterButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty, debounce } from 'lodash/fp';
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
@@ -34,12 +35,8 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import * as i18n from '../translations';
 import { Direction } from '../../../../../common/search_strategy';
 
-const MyEuiFlexItem = styled(EuiFlexItem)`
-  display: inline-block;
-  max-width: 296px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+const TimelineContentItem = styled(EuiFlexItem)`
+  max-width: calc(100% - 56px);
 `;
 
 const StyledEuiFilterButton = styled(EuiFilterButton)`
@@ -126,9 +123,15 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     [heightTrigger, pageSize]
   );
 
-  const renderTimelineOption = useCallback(
-    (option, searchValue) => (
+  const renderTimelineOption = useCallback((option, searchValue) => {
+    const title = isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.label;
+    const isDescriptionNonEmpty =
+      option.description != null && option.description.trim().length > 0;
+    const description = isDescriptionNonEmpty ? option.description : getEmptyTagValue();
+
+    return (
       <EuiFlexGroup
+        title=""
         gutterSize="s"
         justifyContent="spaceBetween"
         alignItems="center"
@@ -137,24 +140,25 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         <EuiFlexItem grow={false}>
           <EuiIcon type={`${option.checked === 'on' ? 'check' : 'empty'}`} color="primary" />
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
+        <TimelineContentItem grow={true}>
           <EuiFlexGroup gutterSize="none" direction="column">
-            <MyEuiFlexItem data-test-subj="timeline" grow={false}>
-              <EuiHighlight search={searchValue}>
-                {isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title}
-              </EuiHighlight>
-            </MyEuiFlexItem>
-            <MyEuiFlexItem grow={false}>
-              <EuiTextColor color="subdued" component="span">
-                <small>
-                  {option.description != null && option.description.trim().length > 0
-                    ? option.description
-                    : getEmptyTagValue()}
-                </small>
-              </EuiTextColor>
-            </MyEuiFlexItem>
+            <EuiFlexItem data-test-subj="timeline">
+              <EuiToolTip content={title} anchorClassName="eui-textTruncate eui-alignMiddle">
+                <EuiHighlight search={searchValue}>{title}</EuiHighlight>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiToolTip
+                content={isDescriptionNonEmpty ? description : null}
+                anchorClassName="eui-textTruncate eui-alignMiddle"
+              >
+                <EuiTextColor color="subdued" component="span">
+                  <small>{description}</small>
+                </EuiTextColor>
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
+        </TimelineContentItem>
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={`${
@@ -163,9 +167,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    ),
-    []
-  );
+    );
+  }, []);
 
   const handleTimelineChange = useCallback(
     (options) => {
