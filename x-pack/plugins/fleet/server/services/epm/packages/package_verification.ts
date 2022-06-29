@@ -13,6 +13,7 @@ import type { Logger } from '@kbn/logging';
 import * as Registry from '../registry';
 
 import { appContextService } from '../../app_context';
+import type { Installation } from '../../../types';
 
 interface VerificationResult {
   isVerified: boolean;
@@ -133,4 +134,19 @@ async function _verifyPackageSignature({
     logger.error(`Error verifying package signature: ${e}`);
   }
   return { isVerified, keyId: verificationKey.getKeyID().toHex() };
+}
+
+export function formatVerificationResultForSO(
+  verificationResult: PackageVerificationResult
+): Installation['verification'] {
+  const verification: Installation['verification'] = {
+    verification_attempted: verificationResult.verificationAttempted,
+  };
+
+  if (verificationResult.verificationAttempted) {
+    verification.is_verified = verificationResult.isVerified;
+    verification.key_id = verificationResult.keyId;
+  }
+
+  return verification;
 }

@@ -39,7 +39,7 @@ import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { packagePolicyService } from '../..';
 
-import { createInstallation, updateEsAssetReferences } from './install';
+import { createInstallation, updateEsAssetReferences, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
 import type { PackageVerificationResult } from './package_verification';
 
@@ -91,11 +91,12 @@ export async function _installPackage({
       } else {
         // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
         // (it might be stuck) update the saved object and proceed
-        await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-          install_version: pkgVersion,
-          install_status: 'installing',
-          install_started_at: new Date().toISOString(),
-          install_source: installSource,
+        await restartInstallation({
+          savedObjectsClient,
+          pkgName,
+          pkgVersion,
+          installSource,
+          verificationResult,
         });
       }
     } else {

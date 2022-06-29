@@ -52,7 +52,10 @@ import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
 import type { PackageVerificationResult } from './package_verification';
-import { verifyPackageArchiveSignature } from './package_verification';
+import {
+  verifyPackageArchiveSignature,
+  formatVerificationResultForSO,
+} from './package_verification';
 
 import { getInstallation, getInstallationObject } from '.';
 import { removeInstallation } from './remove';
@@ -601,6 +604,29 @@ export const updateInstallStatus = async ({
   });
 };
 
+export async function restartInstallation(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  pkgVersion: string;
+  installSource: InstallSource;
+  verificationResult?: PackageVerificationResult;
+}) {
+  const { savedObjectsClient, pkgVersion, pkgName, installSource, verificationResult } = options;
+
+  const savedObjectUpdate: Partial<Installation> = {
+    install_version: pkgVersion,
+    install_status: 'installing',
+    install_started_at: new Date().toISOString(),
+    install_source: installSource,
+  };
+
+  if (verificationResult) {
+    savedObjectUpdate.verification = formatVerificationResultForSO(verificationResult);
+  }
+
+  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, savedObjectUpdate);
+}
+
 export async function createInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
   packageInfo: InstallablePackage;
@@ -638,16 +664,7 @@ export async function createInstallation(options: {
   };
 
   if (verificationResult) {
-    const verification: Installation['verification'] = {
-      verification_attempted: verificationResult.verificationAttempted,
-    };
-
-    if (verificationResult.verificationAttempted) {
-      verification.is_verified = verificationResult.isVerified;
-      verification.key_id = verificationResult.keyId;
-    }
-
-    savedObject.verification = verification;
+    savedObject.verification = formatVerificationResultForSO(verificationResult);
   }
 
   const created = await savedObjectsClient.create<Installation>(
