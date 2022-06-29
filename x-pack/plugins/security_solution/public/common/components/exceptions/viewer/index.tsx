@@ -15,7 +15,7 @@ import type {
   ExceptionListIdentifiers,
   UseExceptionListItemsSuccess,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { useApi, useExceptionListItems } from '@kbn/securitysolution-list-hooks';
+import { useApi, useExceptionListItems, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import * as i18n from '../translations';
 import { useStateToaster } from '../../toasters';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -31,6 +31,7 @@ import { ExceptionItemsViewer } from './exceptions_viewer_items';
 import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
 import { CreateExceptionList } from '../create_exception_list';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../common/endpoint/service/artifacts/constants';
 
 const initialState: State = {
   filterOptions: { filter: '', tags: [] },
@@ -46,7 +47,6 @@ const initialState: State = {
   isInitLoading: true,
   currentModal: null,
   exceptionListTypeToEdit: null,
-  totalEndpointItems: 0,
   totalDetectionsItems: 0,
   showEndpointListsOnly: false,
   showDetectionsListsOnly: false,
@@ -54,42 +54,22 @@ const initialState: State = {
 
 interface ExceptionsViewerProps {
   rule: Rule;
-  ruleId: string;
-  ruleName: string;
   ruleIndices: string[];
   dataViewId?: string;
   exceptionListsMeta: ExceptionListIdentifiers[];
-  availableListTypes: ExceptionListTypeEnum[];
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
   rule,
-  ruleId,
-  ruleName,
   ruleIndices,
   dataViewId,
   exceptionListsMeta,
-  availableListTypes,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
-  const { services } = useKibana();
-  const [, dispatchToaster] = useStateToaster();
-  const onDispatchToaster = useCallback(
-    ({ title, color, iconType }) =>
-      (): void => {
-        dispatchToaster({
-          type: 'addToaster',
-          toast: {
-            id: uuid.v4(),
-            title,
-            color,
-            iconType,
-          },
-        });
-      },
-    [dispatchToaster]
-  );
+  const { services: { http, notifications } } = useKibana();
+  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+
   const [
     {
       exceptions,
@@ -100,25 +80,13 @@ const ExceptionsViewerComponent = ({
       currentModal,
       exceptionToEdit,
       exceptionListTypeToEdit,
-      totalEndpointItems,
       totalDetectionsItems,
       showDetectionsListsOnly,
       showEndpointListsOnly,
     },
     dispatch,
   ] = useReducer(allExceptionItemsReducer(), { ...initialState });
-  const { deleteExceptionItem, getExceptionListsItems } = useApi(services.http);
-  const [supportedListTypes, setSupportedListTypes] = useState<ExceptionListTypeEnum[]>([]);
-
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
-
-  useEffect((): void => {
-    if (!canUserCRUD || !hasIndexWrite) {
-      setSupportedListTypes([]);
-    } else {
-      setSupportedListTypes(availableListTypes);
-    }
-  }, [availableListTypes, canUserCRUD, hasIndexWrite]);
+  const { deleteExceptionItem } = useApi(http);
 
   const setExceptions = useCallback(
     ({
@@ -135,26 +103,27 @@ const ExceptionsViewerComponent = ({
     [dispatch, exceptionListsMeta]
   );
   const [loadingList, , , fetchListItems] = useExceptionListItems({
-    http: services.http,
-    lists: exceptionListsMeta,
-    filterOptions:
-      filterOptions.filter !== '' || filterOptions.tags.length > 0 ? [filterOptions] : [],
+    http: http,
+    lists: undefined,
+    filters: [],
     pagination: {
       page: pagination.pageIndex + 1,
       perPage: pagination.pageSize,
       total: pagination.totalItemCount,
     },
-    showDetectionsListsOnly,
-    showEndpointListsOnly,
-    matchFilters: true,
-    onSuccess: setExceptions,
-    onError: onDispatchToaster({
-      color: 'danger',
-      title: i18n.FETCH_LIST_ERROR,
-      iconType: 'alert',
-    }),
   });
 
+  // const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
+  //   useExceptionLists({
+  //     errorMessage: i18n.EXCEPTION_LISTS_FETCH_ERROR_TOASTER,
+  //     filterOptions: filters,
+  //     http,
+  //     namespaceTypes: ['single', 'agnostic'],
+  //     notifications,
+  //     hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+  //   });
+  
+  // REDUCER ACTION DISPATCHERS
   const setCurrentModal = useCallback(
     (modalName: ViewerFlyoutName): void => {
       dispatch({
@@ -165,72 +134,15 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const setExceptionItemTotals = useCallback(
-    (endpointItemTotals: number | null, detectionItemTotals: number | null): void => {
+  const setLoadingItemIds = useCallback(
+    (items: ExceptionListItemIdentifiers[]): void => {
       dispatch({
-        type: 'setExceptionItemTotals',
-        totalEndpointItems: endpointItemTotals,
-        totalDetectionsItems: detectionItemTotals,
+        type: 'updateLoadingItemIds',
+        items,
       });
     },
     [dispatch]
   );
-
-  const handleGetTotals = useCallback(async (): Promise<void> => {
-    await getExceptionListsItems({
-      lists: exceptionListsMeta,
-      filterOptions: [],
-      pagination: {
-        page: 0,
-        perPage: 1,
-        total: 0,
-      },
-      showDetectionsListsOnly: true,
-      showEndpointListsOnly: false,
-      onSuccess: ({ pagination: detectionPagination }) => {
-        setExceptionItemTotals(null, detectionPagination.total ?? 0);
-      },
-      onError: () => {
-        const dispatchToasterError = onDispatchToaster({
-          color: 'danger',
-          title: i18n.TOTAL_ITEMS_FETCH_ERROR,
-          iconType: 'alert',
-        });
-
-        dispatchToasterError();
-      },
-    });
-    await getExceptionListsItems({
-      lists: exceptionListsMeta,
-      filterOptions: [],
-      pagination: {
-        page: 0,
-        perPage: 1,
-        total: 0,
-      },
-      showDetectionsListsOnly: false,
-      showEndpointListsOnly: true,
-      onSuccess: ({ pagination: endpointPagination }) => {
-        setExceptionItemTotals(endpointPagination.total ?? 0, null);
-      },
-      onError: () => {
-        const dispatchToasterError = onDispatchToaster({
-          color: 'danger',
-          title: i18n.TOTAL_ITEMS_FETCH_ERROR,
-          iconType: 'alert',
-        });
-
-        dispatchToasterError();
-      },
-    });
-  }, [setExceptionItemTotals, exceptionListsMeta, getExceptionListsItems, onDispatchToaster]);
-
-  const handleFetchList = useCallback((): void => {
-    if (fetchListItems != null) {
-      fetchListItems();
-      handleGetTotals();
-    }
-  }, [fetchListItems, handleGetTotals]);
 
   const handleFilterChange = useCallback(
     (filters: Partial<Filter>): void => {
@@ -240,17 +152,6 @@ const ExceptionsViewerComponent = ({
       });
     },
     [dispatch]
-  );
-
-  const handleAddException = useCallback(
-    (): void => {
-      dispatch({
-        type: 'updateExceptionListTypeToEdit',
-        exceptionListType: 'detection',
-      });
-      setCurrentModal('addException');
-    },
-    [setCurrentModal]
   );
 
   const handleEditException = useCallback(
@@ -266,25 +167,28 @@ const ExceptionsViewerComponent = ({
     [setCurrentModal, exceptionListsMeta]
   );
 
+  const refreshExceptionItems = useCallback((): void => {
+    if (fetchListItems != null) {
+      fetchListItems();
+    }
+  }, [fetchListItems]);
+
+  const handleAddException = useCallback(
+    (): void => {
+      setCurrentModal('addException');
+    },
+    [setCurrentModal]
+  );
+
   const handleOnCancelExceptionModal = useCallback((): void => {
     setCurrentModal(null);
-    handleFetchList();
-  }, [setCurrentModal, handleFetchList]);
+    refreshExceptionItems();
+  }, [setCurrentModal, refreshExceptionItems]);
 
   const handleOnConfirmExceptionModal = useCallback((): void => {
     setCurrentModal(null);
-    handleFetchList();
-  }, [setCurrentModal, handleFetchList]);
-
-  const setLoadingItemIds = useCallback(
-    (items: ExceptionListItemIdentifiers[]): void => {
-      dispatch({
-        type: 'updateLoadingItemIds',
-        items,
-      });
-    },
-    [dispatch]
-  );
+    refreshExceptionItems();
+  }, [setCurrentModal, refreshExceptionItems]);
 
   const handleDeleteException = useCallback(
     ({ id: itemId, namespaceType }: ExceptionListItemIdentifiers) => {
@@ -295,21 +199,14 @@ const ExceptionsViewerComponent = ({
         namespaceType,
         onSuccess: () => {
           setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
-          handleFetchList();
+          refreshExceptionItems();
         },
         onError: () => {
-          const dispatchToasterError = onDispatchToaster({
-            color: 'danger',
-            title: i18n.DELETE_EXCEPTION_ERROR,
-            iconType: 'alert',
-          });
-
-          dispatchToasterError();
           setLoadingItemIds(loadingItemIds.filter(({ id }) => id !== itemId));
         },
       });
     },
-    [setLoadingItemIds, deleteExceptionItem, loadingItemIds, handleFetchList, onDispatchToaster]
+    [setLoadingItemIds, deleteExceptionItem, loadingItemIds, refreshExceptionItems]
   );
 
   const handleCreateExceptionList = useCallback(
@@ -337,24 +234,18 @@ const ExceptionsViewerComponent = ({
   // Logic for initial render
   useEffect((): void => {
     if (isInitLoading && !loadingList && (exceptions.length === 0 || exceptions != null)) {
-      handleGetTotals();
       dispatch({
         type: 'updateIsInitLoading',
         loading: false,
       });
     }
-  }, [handleGetTotals, isInitLoading, exceptions, loadingList, dispatch]);
-
-  // Used in utility bar info text
-  const ruleSettingsUrl = services.application.getUrlForApp(
-    `security/detections/rules/id/${encodeURI(ruleId)}/edit`
-  );
+  }, [isInitLoading, exceptions, loadingList, dispatch]);
 
   const showEmpty: boolean =
-    !isInitLoading && !loadingList && totalEndpointItems === 0 && totalDetectionsItems === 0;
+    !isInitLoading && !loadingList && totalDetectionsItems === 0;
 
   const showNoResults: boolean =
-    exceptions.length === 0 && (totalEndpointItems > 0 || totalDetectionsItems > 0);
+    exceptions.length === 0 && (totalDetectionsItems > 0);
 
   return (
     <>
@@ -362,8 +253,8 @@ const ExceptionsViewerComponent = ({
         exceptionToEdit != null &&
         exceptionListTypeToEdit != null && (
           <EditExceptionFlyout
-            ruleName={ruleName}
-            ruleId={ruleId}
+            ruleName={rule.name}
+            ruleId={rule.rule_id}
             ruleIndices={ruleIndices}
             dataViewId={dataViewId}
             exceptionListType={exceptionListTypeToEdit}
@@ -376,10 +267,10 @@ const ExceptionsViewerComponent = ({
 
       {currentModal === 'addException' && exceptionListTypeToEdit != null && (
         <AddExceptionFlyout
-          ruleName={ruleName}
+          ruleName={rule.name}
           ruleIndices={ruleIndices}
           dataViewId={dataViewId}
-          ruleId={ruleId}
+          ruleId={rule.rule_id}
           exceptionListType={exceptionListTypeToEdit}
           onCancel={handleOnCancelExceptionModal}
           onConfirm={handleOnConfirmExceptionModal}

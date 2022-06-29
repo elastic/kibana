@@ -9,9 +9,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   ExceptionListItemSchema,
+  NamespaceType,
   Pagination,
-  UseExceptionListProps,
-  FilterExceptionsOptions,
+  UseExceptionListItemProps,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { fetchExceptionItems } from '@kbn/securitysolution-list-api';
 
@@ -52,20 +52,14 @@ export const useExceptionListItems = ({
     perPage: 20,
     total: 0,
   },
-  onError,
-  onSuccess,
-}: UseExceptionListProps): ReturnExceptionListAndItems => {
+}: UseExceptionListItemProps): ReturnExceptionListAndItems => {
   const [exceptionItems, setExceptionListItems] = useState<ExceptionListItemSchema[]>([]);
   const [paginationInfo, setPagination] = useState<Pagination>(pagination);
   const fetchExceptionListsItems = useRef<Func | null>(null);
   const [loading, setLoading] = useState(true);
-  const { ids, namespaces } = useMemo(() => {
+  const { ids, namespaces }: { ids: string[] | undefined; namespaces: NamespaceType[] } = useMemo(() => {
     if (lists != null) {
-      return getIdsAndNamespaces({
-        lists,
-        showDetection: true,
-        showEndpoint: false,
-      });
+      return getIdsAndNamespaces({ lists });
     } else {
       return { ids: undefined, namespaces: ['single', 'agnostic'] };
     }
@@ -84,8 +78,6 @@ export const useExceptionListItems = ({
             page,
             per_page: perPage,
             total,
-            pit: pitId,
-            search_after: searchAfterValue,
             data,
           } = await fetchExceptionItems({
             filters,
@@ -112,19 +104,6 @@ export const useExceptionListItems = ({
               total,
             });
             setExceptionListItems(transformedData);
-
-            if (onSuccess != null) {
-              onSuccess({
-                items: transformedData,
-                pagination: {
-                  page,
-                  perPage,
-                  total,
-                },
-                pit: pitId,
-                searchAfter: searchAfterValue,
-              });
-            }
           }
         } catch (error) {
           if (isSubscribed) {
@@ -134,9 +113,6 @@ export const useExceptionListItems = ({
               perPage: 20,
               total: 0,
             });
-            if (onError != null) {
-              onError(error);
-            }
           }
         }
 

@@ -189,17 +189,11 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         lists,
         filterOptions,
         pagination,
-        showDetectionsListsOnly,
-        showEndpointListsOnly,
         onSuccess,
         onError,
       }: ApiCallFindListsItemsMemoProps): Promise<void> {
         const abortCtrl = new AbortController();
-        const { ids, namespaces } = getIdsAndNamespaces({
-          lists,
-          showDetection: showDetectionsListsOnly,
-          showEndpoint: showEndpointListsOnly,
-        });
+        const { ids, namespaces } = getIdsAndNamespaces({ lists });
 
         try {
           if (ids.length > 0 && namespaces.length > 0) {

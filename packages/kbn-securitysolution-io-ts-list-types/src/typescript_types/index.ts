@@ -44,16 +44,13 @@ export interface UseExceptionListsProps {
   hideLists?: readonly string[];
 }
 
-export interface UseExceptionListProps {
+export interface UseExceptionListItemProps {
   http: HttpStart;
   lists: ExceptionListIdentifiers[];
-  onError?: (arg: string[]) => void;
-  filterOptions: FilterExceptionsOptions[];
+  filters: string[];
   pagination?: Pagination;
-  showDetectionsListsOnly: boolean;
-  showEndpointListsOnly: boolean;
-  matchFilters: boolean;
-  onSuccess?: (arg: UseExceptionListItemsSuccess) => void;
+  searchAfter: string[] | undefined;
+  pit: { id: string; keepAlive: string; } | undefined;
 }
 
 export interface FilterExceptionsOptions {
@@ -101,8 +98,6 @@ export interface ApiCallFindListsItemsMemoProps {
   lists: ExceptionListIdentifiers[];
   filterOptions: FilterExceptionsOptions[];
   pagination: Partial<Pagination>;
-  showDetectionsListsOnly: boolean;
-  showEndpointListsOnly: boolean;
   onError: (arg: string[]) => void;
   onSuccess: (arg: UseExceptionListItemsSuccess) => void;
 }

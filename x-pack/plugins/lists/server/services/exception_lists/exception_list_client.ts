@@ -782,25 +782,26 @@ export class ExceptionListClient {
     namespaceType,
   }: FindExceptionListsItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+    console.log('IM REACHING HERE 10', this.enableServerExtensionPoints);
 
-    if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
-        'exceptionsListPreMultiListFind',
-        {
-          filter,
-          listId,
-          namespaceType,
-          page,
-          perPage,
-          pit,
-          searchAfter,
-          sortField,
-          sortOrder,
-        },
-        this.getServerExtensionCallbackContext()
-      );
-    }
-
+    // if (this.enableServerExtensionPoints) {
+    //   await this.serverExtensionsClient.pipeRun(
+    //     'exceptionsListPreMultiListFind',
+    //     {
+    //       filter,
+    //       listId,
+    //       namespaceType,
+    //       page,
+    //       perPage,
+    //       pit,
+    //       searchAfter,
+    //       sortField,
+    //       sortOrder,
+    //     },
+    //     this.getServerExtensionCallbackContext()
+    //   );
+    // }
+    console.log('IN tHE CLIENT')
     return findExceptionListsItem({
       filter,
       listId,

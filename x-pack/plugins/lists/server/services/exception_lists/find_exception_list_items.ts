@@ -52,8 +52,10 @@ export const findExceptionListsItem = async ({
   sortField,
   sortOrder,
 }: FindExceptionListItemsOptions): Promise<FoundExceptionListItemSchema | null> => {
+  console.log('IN THE HELPER', namespaceType)
+
   const savedObjectType = getSavedObjectTypes({ namespaceType });
-  
+  console.log({FILTER: getExceptionListsItemFilter({ filter, listId, savedObjectType })})
   const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
     filter: getExceptionListsItemFilter({ filter, listId, savedObjectType }),
     page,

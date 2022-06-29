@@ -9,24 +9,12 @@
 import { ExceptionListIdentifiers, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getIdsAndNamespaces = ({
-  lists,
-  showDetection,
-  showEndpoint,
+  lists
 }: {
   lists: ExceptionListIdentifiers[];
-  showDetection: boolean;
-  showEndpoint: boolean;
 }): { ids: string[]; namespaces: NamespaceType[] } =>
   lists
-    .filter((list) => {
-      if (showDetection) {
-        return list.type === 'detection';
-      } else if (showEndpoint) {
-        return list.type === 'endpoint';
-      } else {
-        return true;
-      }
-    })
+    .filter((list) => list.type === 'detection')
     .reduce<{ ids: string[]; namespaces: NamespaceType[] }>(
       (acc, { listId, namespaceType }) => ({
         ids: [...acc.ids, listId],

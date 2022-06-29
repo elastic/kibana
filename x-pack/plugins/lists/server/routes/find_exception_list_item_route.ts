@@ -33,6 +33,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
       },
     },
     async (context, request, response) => {
+      console.log('IM REACHING HERE')
       const siemResponse = buildSiemResponse(response);
       try {
         const exceptionLists = await getExceptionListClient(context);
@@ -49,18 +50,27 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
         } = request.query;
 
         if (listId != null && listId.length !== namespaceType.length) {
+          console.log('IM REACHING HERE 2')
+
           return siemResponse.error({
             body: `list_id and namespace_id need to have the same comma separated number of values. Expected list_id length: ${listId.length} to equal namespace_type length: ${namespaceType.length}`,
             statusCode: 400,
           });
         } else {
+          console.log('IM REACHING HERE 3')
+
           const core = await context.core;
+          console.log('IM REACHING HERE 4')
+
           const savedObjectsClient = core.savedObjects.getClient();
+          console.log('IM REACHING HERE 5', savedObjectsClient)
+
           const pitId = pit ?? await savedObjectsClient.openPointInTimeForType(
-            'exceptionItems',
+            ['exception-list', 'exception-list-agnostic'],
             { keepAlive: '5m' },
           );
-        
+        console.log({PIT: pitId});
+        console.log('IM REACHING HERE 6')
           const items = await exceptionLists.findExceptionListsItem({
             filter,
             listId,
@@ -72,8 +82,10 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
             sortField,
             sortOrder,
           });
-          
-          const searchAfterValue = items.saved_objects[items.saved_objects.length - 1].sort;
+          console.log('IM REACHING HERE 7')
+
+          console.log({ items: JSON.stringify(items)})
+          const searchAfterValue = items.data[items.data.length - 1].sort;
 
           const [validated, errors] = validate(items, foundExceptionListItemSchema);
           if (errors != null) {
@@ -89,6 +101,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
           }
         }
       } catch (err) {
+        console.log({ERROR: err})
         const error = transformError(err);
         return siemResponse.error({
           body: error.message,
