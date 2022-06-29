@@ -24,12 +24,12 @@ import type { DateRange } from '../../../common';
 import type { OperationSupportMatrix } from './operation_support';
 import type { GenericIndexPatternColumn, OperationType } from '../indexpattern';
 import {
-  operationDefinitionMap,
   getOperationDisplay,
   isOperationAllowedAsReference,
   FieldBasedIndexPatternColumn,
   RequiredReference,
   IncompleteColumn,
+  GenericOperationDefinition,
 } from '../operations';
 import { FieldChoice, FieldSelect } from './field_select';
 import { hasField } from '../pure_utils';
@@ -49,6 +49,7 @@ const getFunctionOptions = (
   operationSupportMatrix: OperationSupportMatrix & {
     operationTypes: Set<OperationType>;
   },
+  operationDefinitionMap: Record<string, GenericOperationDefinition>,
   column?: GenericIndexPatternColumn
 ): Array<EuiComboBoxOptionOption<OperationType>> => {
   return Array.from(operationSupportMatrix.operationTypes).map((operationType) => {
@@ -85,6 +86,7 @@ export interface ReferenceEditorProps {
   currentIndexPattern: IndexPattern;
   functionLabel?: string;
   fieldLabel?: string;
+  operationDefinitionMap: Record<string, GenericOperationDefinition>;
 
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
@@ -127,6 +129,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     onDeleteColumn,
     onChooseFunction,
     fieldLabel,
+    operationDefinitionMap,
   } = props;
 
   const selectedOperationDefinition = column && operationDefinitionMap[column.operationType];
@@ -181,7 +184,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
       operationByField,
       fieldByOperation,
     };
-  }, [currentIndexPattern, validation]);
+  }, [currentIndexPattern, validation, operationDefinitionMap]);
 
   if (selectionStyle === 'hidden') {
     return null;
@@ -190,7 +193,11 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
   const incompleteOperation = incompleteColumn?.operationType;
   const incompleteField = incompleteColumn?.sourceField ?? null;
 
-  const functionOptions = getFunctionOptions(operationSupportMatrix, column);
+  const functionOptions = getFunctionOptions(
+    operationSupportMatrix,
+    operationDefinitionMap,
+    column
+  );
 
   const selectedOption = incompleteOperation
     ? [functionOptions?.find(({ value }) => value === incompleteOperation)!]

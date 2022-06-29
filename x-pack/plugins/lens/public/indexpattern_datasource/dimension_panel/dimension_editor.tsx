@@ -541,6 +541,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     isFullscreen,
     setIsCloseable,
     paramEditorCustomProps,
+    ReferenceEditor,
     existingFields: state.existingFields,
     ...services,
   };
@@ -574,6 +575,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               const layer = state.layers[layerId];
               return (
                 <ReferenceEditor
+                  operationDefinitionMap={operationDefinitionMap}
                   key={index}
                   layer={layer}
                   layerId={layerId}
@@ -716,6 +718,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         indexPattern={currentIndexPattern}
         toggleFullscreen={toggleFullscreen}
         setIsCloseable={setIsCloseable}
+        ReferenceEditor={ReferenceEditor}
         {...services}
       />
     </>

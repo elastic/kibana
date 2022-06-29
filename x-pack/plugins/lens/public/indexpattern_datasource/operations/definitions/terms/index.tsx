@@ -53,8 +53,6 @@ import {
   MAXIMUM_MAX_DOC_COUNT,
   supportedTypes,
 } from './constants';
-import { operationDefinitionMap } from '..';
-import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -234,7 +232,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  toEsAggsFn: (column, columnId, _indexPattern, layer, uiSettings, orderedColumnIds) => {
+  toEsAggsFn: (
+    column,
+    columnId,
+    _indexPattern,
+    layer,
+    uiSettings,
+    orderedColumnIds,
+    operationDefinitionMap
+  ) => {
     if (column.params?.orderBy.type === 'rare') {
       return buildExpressionFunction<AggFunctionsMapping['aggRareTerms']>('aggRareTerms', {
         id: columnId,
@@ -266,7 +272,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     let orderAgg;
     if (orderAggColumn) {
       orderBy = 'custom';
-      const def = operationDefinitionMap[orderAggColumn?.operationType];
+      const def = operationDefinitionMap?.[orderAggColumn?.operationType];
       if (def && 'toEsAggsFn' in def) {
         orderAgg = [
           {
@@ -539,6 +545,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     columnId,
     indexPattern,
     existingFields,
+    operationDefinitionMap,
+    ReferenceEditor,
     ...rest
   }) {
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
@@ -736,9 +744,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             })}
           />
         </EuiFormRow>
-        {currentColumn.params.orderAgg && (
+        {currentColumn.params.orderAgg && ReferenceEditor && (
           <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s" style={{ margin: `8px 0` }}>
             <ReferenceEditor
+              operationDefinitionMap={operationDefinitionMap}
               functionLabel={i18n.translate('xpack.lens.indexPattern.terms.orderAgg.rankFunction', {
                 defaultMessage: 'Rank function',
               })}

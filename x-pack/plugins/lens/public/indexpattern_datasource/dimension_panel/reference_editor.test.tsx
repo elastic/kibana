@@ -21,6 +21,7 @@ import { ReferenceEditor, ReferenceEditorProps } from './reference_editor';
 import {
   insertOrReplaceColumn,
   LastValueIndexPatternColumn,
+  operationDefinitionMap,
   TermsIndexPatternColumn,
 } from '../operations';
 import { FieldSelect } from './field_select';
@@ -78,6 +79,7 @@ describe('reference editor', () => {
       toggleFullscreen: jest.fn(),
       setIsCloseable: jest.fn(),
       layerId: '1',
+      operationDefinitionMap,
     };
   }
 

@@ -64,6 +64,7 @@ import { DateRange, LayerType } from '../../../../common';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
+import { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
 
 export type {
   IncompleteColumn,
@@ -167,6 +168,7 @@ export interface ParamEditorProps<
   currentColumn: C;
   layer: IndexPatternLayer;
   paramEditorUpdater: (setter: U) => void;
+  ReferenceEditor?: (props: ReferenceEditorProps) => JSX.Element | null;
   toggleFullscreen: () => void;
   setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
@@ -233,7 +235,6 @@ export interface AdvancedOption {
 interface BaseOperationDefinitionProps<
   C extends BaseIndexPatternColumn,
   AR extends boolean,
-  U = IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer),
   P = {}
 > {
   type: C['operationType'];
@@ -268,9 +269,9 @@ interface BaseOperationDefinitionProps<
    */
   allowAsReference?: AR;
   paramEditor?: React.ComponentType<
-    AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C, U>
+    AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C>
   >;
-  getAdvancedOptions?: (params: ParamEditorProps<C, U>) => AdvancedOption[] | undefined;
+  getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
    * If this function returns false, the column is removed when switching index pattern
@@ -509,7 +510,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
     indexPattern: IndexPattern,
     layer: IndexPatternLayer,
     uiSettings: IUiSettingsClient,
-    orderedColumnIds: string[]
+    orderedColumnIds: string[],
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => ExpressionAstFunction;
   /**
    * Validate that the operation has the right preconditions in the state. For example:

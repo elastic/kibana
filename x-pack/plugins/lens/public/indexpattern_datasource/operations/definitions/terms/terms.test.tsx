@@ -22,12 +22,18 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
-import { GenericOperationDefinition, termsOperation, LastValueIndexPatternColumn } from '..';
+import {
+  GenericOperationDefinition,
+  termsOperation,
+  LastValueIndexPatternColumn,
+  operationDefinitionMap,
+} from '..';
 import { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../../../types';
 import { FrameDatasourceAPI } from '../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
+import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -65,11 +71,12 @@ const defaultProps = {
   http: {} as HttpSetup,
   indexPattern: createMockedIndexPattern(),
   // need to provide the terms operation as some helpers use operation specific features
-  operationDefinitionMap: { terms: termsOperation as unknown as GenericOperationDefinition },
+  operationDefinitionMap,
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
+  ReferenceEditor,
   existingFields: {
     'my-fake-index-pattern': {
       timestamp: true,
@@ -144,7 +151,8 @@ describe('terms', () => {
         {} as IndexPattern,
         layer,
         uiSettingsMock,
-        []
+        [],
+        operationDefinitionMap
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -261,7 +269,8 @@ describe('terms', () => {
         {} as IndexPattern,
         layer,
         uiSettingsMock,
-        []
+        [],
+        operationDefinitionMap
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
