@@ -76,7 +76,7 @@ export const SearchIndices: React.FC = () => {
       render: (name: string) => (
         <EuiLinkTo
           data-test-subj="search-index-link"
-          to={generatePath(SEARCH_INDEX_PATH, { indexName: encodeURIComponent(name) })}
+          to={generatePath(SEARCH_INDEX_PATH, { indexName: name })}
         >
           {name}
         </EuiLinkTo>
@@ -139,7 +139,7 @@ export const SearchIndices: React.FC = () => {
               iconType="eye"
               data-test-subj="view-search-index-button"
               to={generatePath(SEARCH_INDEX_PATH, {
-                indexName: encodeURIComponent(name),
+                indexName: name,
               })}
             />
           ),
