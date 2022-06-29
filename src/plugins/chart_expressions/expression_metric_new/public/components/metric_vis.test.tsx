@@ -13,6 +13,7 @@ import MetricVis, { MetricVisComponentProps } from './metric_vis';
 import { LayoutDirection, Metric, MetricWProgress, Settings } from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import numeral from '@elastic/numeral';
 
 const mockDeserialize = jest.fn(() => ({
   getConverterFor: jest.fn(() => () => 'formatted duration'),
@@ -37,12 +38,12 @@ jest.mock('../services', () => ({
 }));
 
 jest.mock('@elastic/numeral', () => ({
-  language: () => 'en',
-  languageData: () => ({
+  language: jest.fn(() => 'en'),
+  languageData: jest.fn(() => ({
     currency: {
       symbol: '$',
     },
-  }),
+  })),
 }));
 
 type Props = MetricVisComponentProps;
@@ -766,19 +767,22 @@ describe('MetricVisComponent', function () {
     });
 
     it('correctly formats currency', () => {
-      // TODO - figure out how to test another language
-      // jest.mock('@elastic/numeral', () => ({
-      //   language: () => 'da-dk',
-      //   languageData: () => ({
-      //     currency: {
-      //       symbol: 'DKK',
-      //     },
-      //   }),
-      // }));
-
       const { primary, secondary } = getFormattedMetrics(1000.839, 11.2, { id: 'currency' });
       expect(primary).toBe('$1.00K');
       expect(secondary).toBe('$11.20');
+
+      (numeral.language as jest.Mock).mockReturnValueOnce('be-nl');
+      // @ts-expect-error
+      (numeral.languageData as jest.Mock).mockReturnValueOnce({
+        currency: {
+          symbol: '€',
+        },
+      });
+
+      const { primary: primaryEuro } = getFormattedMetrics(1000.839, 0, {
+        id: 'currency',
+      });
+      expect(primaryEuro).toBe('1,00 тыс. €');
     });
 
     it('correctly formats percentages', () => {
