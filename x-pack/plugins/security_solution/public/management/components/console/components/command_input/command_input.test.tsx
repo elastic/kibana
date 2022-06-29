@@ -75,7 +75,7 @@ describe('When entering data into the Console input', () => {
     enterCommand('cmd2 ', { inputOnly: true });
 
     expect(renderResult.getByTestId('test-footer').textContent).toEqual(
-      'Hint: cmd2 --file [--ext --bad]'
+      'cmd2 --file [--ext --bad]'
     );
   });
 
@@ -84,7 +84,16 @@ describe('When entering data into the Console input', () => {
     enterCommand('abc ', { inputOnly: true });
 
     expect(renderResult.getByTestId('test-footer').textContent).toEqual(
-      'Hint: unknown command abc'
+      'Unknown command abc'
+    );
+  });
+
+  it('should display a custom hint when provided by a command', () => {
+    render();
+    enterCommand('cmd6 ', { inputOnly: true });
+
+    expect(renderResult.getByTestId('test-footer').textContent).toEqual(
+      'Enter --foo to execute Ex: [cmd --foo 123]'
     );
   });
 

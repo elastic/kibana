@@ -234,7 +234,7 @@ export const ResponseActionsList = memo<
         } = item;
 
         const parametersList = parameters
-          ? Object.entries(parameters as Object).map(([key, value]) => {
+          ? Object.entries(parameters).map(([key, value]) => {
               return `${key}:${value}`;
             })
           : undefined;
