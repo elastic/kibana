@@ -7,18 +7,18 @@ exports[`EMSVectorTileStyleEditor is rendered 1`] = `
   fullWidth={false}
   hasChildLabel={true}
   hasEmptyLabelSpace={false}
-  label="Color filter"
+  label="Color blend"
   labelType="label"
 >
   <EuiColorPicker
-    aria-label="Color"
-    aria-placeholder="No filter"
+    aria-label="Color blend"
+    aria-placeholder="No color"
     color="#4A412A"
     compressed={true}
     format="hex"
     isClearable={true}
     onChange={[Function]}
-    placeholder="No filter"
+    placeholder="No color"
     secondaryInputDisplay="top"
   />
 </EuiFormRow>

@@ -7,7 +7,7 @@
  */
 
 import { Router } from './router';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { schema } from '@kbn/config-schema';
 
 const logger = loggingSystemMock.create().get();

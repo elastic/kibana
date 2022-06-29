@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 export KBN_NP_PLUGINS_BUILT=true
 
 echo "--- Build Kibana Distribution"

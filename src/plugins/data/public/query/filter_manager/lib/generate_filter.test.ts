@@ -22,6 +22,7 @@ import {
 } from '@kbn/es-query';
 
 const INDEX_NAME = 'my-index';
+const MOCKED_INDEX = { id: INDEX_NAME } as unknown as DataViewBase;
 const EXISTS_FIELD_NAME = '_exists_';
 const FIELD = {
   name: 'my-field',
@@ -47,7 +48,7 @@ describe('Generate filters', () => {
       EXISTS_FIELD_NAME,
       FIELD.name,
       '',
-      INDEX_NAME
+      MOCKED_INDEX
     );
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
@@ -61,7 +62,7 @@ describe('Generate filters', () => {
       EXISTS_FIELD_NAME,
       FIELD.name,
       '-',
-      INDEX_NAME
+      MOCKED_INDEX
     );
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
@@ -74,7 +75,7 @@ describe('Generate filters', () => {
     filter.meta.disabled = true;
     filtersArray.push(filter);
 
-    const filters = generateFilters(mockFilterManager, '_exists_', FIELD.name, '-', INDEX_NAME);
+    const filters = generateFilters(mockFilterManager, '_exists_', FIELD.name, '-', MOCKED_INDEX);
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
     expect(filters[0].meta.negate).toBeTruthy();
@@ -83,7 +84,7 @@ describe('Generate filters', () => {
   });
 
   it('should create phrase filter', () => {
-    const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '', INDEX_NAME);
+    const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '', MOCKED_INDEX);
     expect(filters).toHaveLength(1);
 
     const [filter] = filters as PhraseFilter[];
@@ -96,7 +97,7 @@ describe('Generate filters', () => {
   });
 
   it('should create negated phrase filter', () => {
-    const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '-', INDEX_NAME);
+    const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '-', MOCKED_INDEX);
     expect(filters).toHaveLength(1);
     const [filter] = filters as PhraseFilter[];
     expect(filter.meta.index === INDEX_NAME);
@@ -119,7 +120,7 @@ describe('Generate filters', () => {
         lte: '192.168.255.255',
       },
       '+',
-      INDEX_NAME
+      MOCKED_INDEX
     ) as RangeFilter[];
     expect(filters).toHaveLength(1);
     const [filter] = filters;
@@ -143,7 +144,7 @@ describe('Generate filters', () => {
       } as DataViewFieldBase,
       10000,
       '+',
-      INDEX_NAME
+      MOCKED_INDEX
     );
 
     expect(filters).toHaveLength(1);
@@ -164,7 +165,7 @@ describe('Generate filters', () => {
       FIELD,
       [PHRASE_VALUE, ANOTHER_PHRASE],
       '',
-      INDEX_NAME
+      MOCKED_INDEX
     );
     expect(filters).toHaveLength(2);
     expect(filters[0].meta.index === INDEX_NAME);
@@ -188,7 +189,7 @@ describe('Generate filters', () => {
       FIELD,
       [PHRASE_VALUE, ANOTHER_PHRASE, PHRASE_VALUE, ANOTHER_PHRASE],
       '',
-      INDEX_NAME
+      MOCKED_INDEX
     );
     expect(filters).toHaveLength(2);
     expect(filters[0].query?.match_phrase).toEqual({

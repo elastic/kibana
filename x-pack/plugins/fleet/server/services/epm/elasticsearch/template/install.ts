@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
+import { getPipelineNameForDatastream } from '../../../../../common';
 import type {
   RegistryDataStream,
   IndexTemplateEntry,
@@ -22,9 +23,7 @@ import type {
   EsAssetReference,
   PackageInfo,
 } from '../../../../types';
-
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
-import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
 import { getAsset, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
@@ -365,14 +364,7 @@ export function prepareTemplate({
   const templateIndexPattern = generateTemplateIndexPattern(dataStream);
   const templatePriority = getTemplatePriority(dataStream);
 
-  let pipelineName;
-  if (dataStream.ingest_pipeline) {
-    pipelineName = getPipelineNameForInstallation({
-      pipelineName: dataStream.ingest_pipeline,
-      dataStream,
-      packageVersion,
-    });
-  }
+  const pipelineName = getPipelineNameForDatastream({ dataStream, packageVersion });
 
   const defaultSettings = buildDefaultSettings({
     templateName,

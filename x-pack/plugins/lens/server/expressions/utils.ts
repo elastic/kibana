@@ -43,3 +43,20 @@ export const getTimeZoneFactory =
     /** if `Browser`, hardcode it to 'UTC' so the export has data that makes sense **/
     return timezone === 'Browser' ? 'UTC' : timezone;
   };
+
+/** @internal **/
+export const getDatatableUtilitiesFactory =
+  (core: CoreSetup<PluginStartContract>) => async (context: ExecutionContext) => {
+    const kibanaRequest = context.getKibanaRequest?.();
+
+    if (!kibanaRequest) {
+      throw new Error('expression function cannot be executed without a KibanaRequest');
+    }
+
+    const [{ elasticsearch, savedObjects }, { data }] = await core.getStartServices();
+    const elasticsearchClient = elasticsearch.client.asScoped(kibanaRequest).asCurrentUser;
+    const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
+    const { datatableUtilities } = data;
+
+    return datatableUtilities.asScopedToClient(savedObjectsClient, elasticsearchClient);
+  };

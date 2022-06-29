@@ -112,7 +112,13 @@ export async function validateJob(
       }
 
       validationMessages.push(
-        ...(await validateDatafeedPreviewWithMessages(mlClient, authHeader, job))
+        ...(await validateDatafeedPreviewWithMessages(
+          mlClient,
+          authHeader,
+          job,
+          duration?.start,
+          duration?.end
+        ))
       );
     } else {
       validationMessages = basicValidation.messages;

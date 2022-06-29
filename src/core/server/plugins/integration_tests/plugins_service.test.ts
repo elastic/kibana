@@ -14,10 +14,11 @@ import { join } from 'path';
 
 import { ConfigPath, ConfigService, Env } from '@kbn/config';
 import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { PluginsService } from '../plugins_service';
 import { BehaviorSubject, from } from 'rxjs';
 import { config } from '../plugins_config';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { environmentServiceMock } from '../../environment/environment_service.mock';
 import { coreMock } from '../../mocks';
 import { AsyncPlugin, PluginType } from '../types';
@@ -26,6 +27,7 @@ import { PluginWrapper } from '../plugin';
 describe('PluginsService', () => {
   const logger = loggingSystemMock.create();
   const environmentPreboot = environmentServiceMock.createPrebootContract();
+  const nodePreboot = nodeServiceMock.createInternalPrebootContract();
   let pluginsService: PluginsService;
 
   const createPlugin = (
@@ -156,7 +158,7 @@ describe('PluginsService', () => {
       }
     );
 
-    await pluginsService.discover({ environment: environmentPreboot });
+    await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
 
     const prebootDeps = coreMock.createInternalPreboot();
     await pluginsService.preboot(prebootDeps);

@@ -21,14 +21,19 @@ import {
 } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
-import { RuleTableItem } from '../../../../types';
+import { RuleTableItem, SnoozeSchedule } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
-import { RulesListSnoozePanel } from './rules_list_snooze_panel';
 import { isRuleSnoozed } from './rule_status_dropdown';
 import './collapsed_item_actions.scss';
+import { futureTimeToInterval, SnoozePanel } from './rule_snooze';
+import {
+  SNOOZE_FAILED_MESSAGE,
+  SNOOZE_SUCCESS_MESSAGE,
+  UNSNOOZE_SUCCESS_MESSAGE,
+} from './rules_list_notify_badge';
 
 export type ComponentOpts = {
   item: RuleTableItem;
@@ -51,7 +56,10 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   snoozeRule,
   unsnoozeRule,
 }: ComponentOpts) => {
-  const { ruleTypeRegistry } = useKibana().services;
+  const {
+    ruleTypeRegistry,
+    notifications: { toasts },
+  } = useKibana().services;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
@@ -59,20 +67,44 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     setIsDisabled(!item.enabled);
   }, [item.enabled]);
 
-  const snoozeRuleInternal = useCallback(
-    async (snoozeEndTime: string | -1, interval: string | null) => {
-      await snoozeRule(item, snoozeEndTime);
-    },
-    [snoozeRule, item]
-  );
-
-  const unsnoozeRuleInternal = useCallback(async () => {
-    await unsnoozeRule(item);
-  }, [unsnoozeRule, item]);
-
   const onClose = useCallback(() => {
     setIsPopoverOpen(false);
   }, [setIsPopoverOpen]);
+
+  const snoozeRuleInternal = useCallback(
+    async (snoozeSchedule: SnoozeSchedule) => {
+      try {
+        onLoading(true);
+        await snoozeRule(item, snoozeSchedule);
+        onRuleChanged();
+        toasts.addSuccess(SNOOZE_SUCCESS_MESSAGE);
+      } catch (e) {
+        toasts.addDanger(SNOOZE_FAILED_MESSAGE);
+      } finally {
+        onLoading(false);
+        onClose();
+      }
+      await snoozeRule(item, snoozeSchedule);
+    },
+    [onLoading, snoozeRule, item, onRuleChanged, toasts, onClose]
+  );
+
+  const unsnoozeRuleInternal = useCallback(
+    async (scheduleIds?: string[]) => {
+      try {
+        onLoading(true);
+        await unsnoozeRule(item, scheduleIds);
+        onRuleChanged();
+        toasts.addSuccess(UNSNOOZE_SUCCESS_MESSAGE);
+      } catch (e) {
+        toasts.addDanger(SNOOZE_FAILED_MESSAGE);
+      } finally {
+        onLoading(false);
+        onClose();
+      }
+    },
+    [onLoading, unsnoozeRule, item, onRuleChanged, toasts, onClose]
+  );
 
   const isRuleTypeEditableInContext = ruleTypeRegistry.has(item.ruleTypeId)
     ? !ruleTypeRegistry.get(item.ruleTypeId).requiresAppContext
@@ -224,7 +256,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiFlexItem grow={false}>
             {i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.snoozeActions',
-              { defaultMessage: 'Snooze actions' }
+              { defaultMessage: 'Snooze notifications' }
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -232,11 +264,11 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       width: 500,
       content: (
         <EuiPanel>
-          <RulesListSnoozePanel
-            rule={item}
-            onClose={onClose}
-            onLoading={onLoading}
-            onRuleChanged={onRuleChanged}
+          <SnoozePanel
+            interval={futureTimeToInterval(item.isSnoozedUntil)}
+            hasTitle={false}
+            scheduledSnoozes={item.snoozeSchedule ?? []}
+            showCancel={isRuleSnoozed(item)}
             snoozeRule={snoozeRuleInternal}
             unsnoozeRule={unsnoozeRuleInternal}
           />

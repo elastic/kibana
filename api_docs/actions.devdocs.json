@@ -3250,6 +3250,27 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.ActionTypeExecutorRawResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionTypeExecutorRawResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ActionTypeExecutorResult",
+            "text": "ActionTypeExecutorResult"
+          },
+          "<Data> & { error?: Error | undefined; }"
+        ],
+        "path": "x-pack/plugins/actions/common/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.ALERT_HISTORY_PREFIX",
         "type": "string",
         "tags": [],

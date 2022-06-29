@@ -70,7 +70,7 @@ export const hydrateSavedObjects = async ({
       monitors
         .filter((monitor) => missingInfoIds.includes(monitor.id))
         .forEach((monitor) => {
-          let resultAttributes: Partial<SyntheticsMonitor> = monitor.attributes;
+          let resultAttributes: SyntheticsMonitor = monitor.attributes;
 
           let isUpdated = false;
 

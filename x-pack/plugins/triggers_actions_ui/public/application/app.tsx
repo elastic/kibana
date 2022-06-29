@@ -23,6 +23,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -32,7 +33,8 @@ import {
 import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
-import { KibanaContextProvider } from '../common/lib/kibana';
+import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
+import { ConnectorProvider } from './context/connector_context';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -40,6 +42,7 @@ const RuleDetailsRoute = lazy(
 );
 
 export interface TriggersAndActionsUiServices extends CoreStart {
+  actions: ActionsPublicPluginSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
@@ -89,23 +92,29 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 };
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
+  const {
+    actions: { validateEmailAddresses },
+  } = useKibana().services;
+
   return (
-    <Switch>
-      <Route
-        path={`/:section(${sectionsRegex})`}
-        component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
-      />
-      <Route
-        path={routeToRuleDetails}
-        component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
-      />
-      <Route
-        exact
-        path={legacyRouteToRuleDetails}
-        render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
-      />
-      <Redirect from={'/'} to="rules" />
-      <Redirect from={'/alerts'} to="rules" />
-    </Switch>
+    <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
+      <Switch>
+        <Route
+          path={`/:section(${sectionsRegex})`}
+          component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
+        />
+        <Route
+          path={routeToRuleDetails}
+          component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
+        />
+        <Route
+          exact
+          path={legacyRouteToRuleDetails}
+          render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
+        />
+        <Redirect from={'/'} to="rules" />
+        <Redirect from={'/alerts'} to="rules" />
+      </Switch>
+    </ConnectorProvider>
   );
 };

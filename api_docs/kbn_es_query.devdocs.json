@@ -1070,7 +1070,15 @@
             "section": "def-common.DataViewBase",
             "text": "DataViewBase"
           },
-          " | undefined, ignoreFilterIfFieldNotInIndex?: boolean) => ",
+          " | undefined, { ignoreFilterIfFieldNotInIndex, nestedIgnoreUnmapped }?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryFiltersConfig",
+            "text": "EsQueryFiltersConfig"
+          },
+          ") => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1127,14 +1135,18 @@
           {
             "parentPluginId": "@kbn/es-query",
             "id": "def-common.buildQueryFromFilters.$3",
-            "type": "boolean",
+            "type": "Object",
             "tags": [],
-            "label": "ignoreFilterIfFieldNotInIndex",
-            "description": [
-              "by default filters that use fields that can't be found in the specified index pattern are not applied. Set this to true if you want to apply them anyway."
-            ],
+            "label": "{ ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped }",
+            "description": [],
             "signature": [
-              "boolean"
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.EsQueryFiltersConfig",
+                "text": "EsQueryFiltersConfig"
+              }
             ],
             "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
             "deprecated": false,
@@ -3353,6 +3365,51 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.EsQueryFiltersConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsQueryFiltersConfig",
+        "description": [
+          "\nOptions for building query for filters"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.EsQueryFiltersConfig.ignoreFilterIfFieldNotInIndex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreFilterIfFieldNotInIndex",
+            "description": [
+              "\nby default filters that use fields that can't be found in the specified index pattern are not applied. Set this to true if you want to apply them anyway."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.EsQueryFiltersConfig.nestedIgnoreUnmapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nestedIgnoreUnmapped",
+            "description": [
+              "\nthe nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.\nThe optional ignore_unmapped parameter defaults to false.\nThis `nestedIgnoreUnmapped` param allows creating queries with \"ignore_unmapped\": true"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/from_filters.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.FilterCompareOptions",
         "type": "Interface",
         "tags": [],
@@ -3604,6 +3661,21 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/kuery/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.KueryQueryOptions.nestedIgnoreUnmapped",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nestedIgnoreUnmapped",
+            "description": [
+              "\nthe Nested field type requires a special query syntax, which includes an optional ignore_unmapped parameter that indicates whether to ignore an unmapped path and not return any documents instead of an error.\nThe optional ignore_unmapped parameter defaults to false.\nThe `nestedIgnoreUnmapped` param allows creating queries with \"ignore_unmapped\": true"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/kbn-es-query/src/kuery/types.ts",
             "deprecated": false
@@ -3891,9 +3963,17 @@
             "section": "def-common.KueryQueryOptions",
             "text": "KueryQueryOptions"
           },
-          " & { allowLeadingWildcards: boolean; queryStringOptions: ",
+          " & ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryFiltersConfig",
+            "text": "EsQueryFiltersConfig"
+          },
+          " & { allowLeadingWildcards?: boolean | undefined; queryStringOptions?: ",
           "SerializableRecord",
-          "; ignoreFilterIfFieldNotInIndex: boolean; }"
+          " | undefined; }"
         ],
         "path": "packages/kbn-es-query/src/es_query/build_es_query.ts",
         "deprecated": false,

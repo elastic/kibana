@@ -158,6 +158,5 @@ export function coreWebVitalsQuery(
       },
     },
   });
-  const { apm, ...rest } = params;
-  return rest;
+  return params;
 }

@@ -15,8 +15,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/132195
-  describe.skip('bulkEdit', () => {
+  describe('bulkEdit', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -25,7 +24,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ tags: ['default'] }));
+        .send(getTestRuleData({ enabled: false, tags: ['default'] }));
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -71,7 +70,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             supertest
               .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
-              .send(getTestRuleData({ tags: [`multiple-rules-edit`] }))
+              .send(getTestRuleData({ enabled: false, tags: [`multiple-rules-edit`] }))
               .expect(200)
           )
         )
@@ -119,11 +118,140 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should bulk edit rule with schedule operation', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: false, schedule: { interval: '10m' } }));
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'schedule',
+            value: { interval: '1h' },
+          },
+        ],
+      };
+
+      const bulkEditResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkEditResponse.body.errors).to.have.length(0);
+      expect(bulkEditResponse.body.rules).to.have.length(1);
+      expect(bulkEditResponse.body.rules[0].schedule).to.eql({ interval: '1h' });
+
+      const { body: updatedRule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+        .set('kbn-xsrf', 'foo');
+
+      expect(updatedRule.schedule).to.eql({ interval: '1h' });
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
+    });
+
+    it('should bulk edit rule with throttle operation', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: false }));
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'throttle',
+            value: '1h',
+          },
+        ],
+      };
+
+      const bulkEditResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkEditResponse.body.errors).to.have.length(0);
+      expect(bulkEditResponse.body.rules).to.have.length(1);
+      expect(bulkEditResponse.body.rules[0]).property('throttle', '1h');
+
+      const { body: updatedRule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+        .set('kbn-xsrf', 'foo');
+
+      expect(updatedRule).property('throttle', '1h');
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
+    });
+
+    it('should bulk edit rule with notifyWhen operation', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestRuleData({ enabled: false, throttle: '1h' }));
+
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'set',
+            field: 'notifyWhen',
+            value: 'onActionGroupChange',
+          },
+        ],
+      };
+
+      const bulkEditResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
+
+      expect(bulkEditResponse.body.errors).to.have.length(0);
+      expect(bulkEditResponse.body.rules).to.have.length(1);
+      expect(bulkEditResponse.body.rules[0]).property('notify_when', 'onActionGroupChange');
+
+      const { body: updatedRule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
+        .set('kbn-xsrf', 'foo');
+
+      expect(updatedRule).property('notify_when', 'onActionGroupChange');
+
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: createdRule.id,
+      });
+    });
+
     it(`shouldn't bulk edit rule from another space`, async () => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ tags: ['default'] }));
+        .send(getTestRuleData({ enabled: false, tags: ['default'] }));
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -150,7 +278,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestRuleData({ tags: ['default'], params: { risk_score: 40, severity: 'medium' } })
+          getTestRuleData({
+            enabled: false,
+            tags: ['default'],
+            params: { risk_score: 40, severity: 'medium' },
+          })
         );
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');

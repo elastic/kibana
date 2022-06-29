@@ -23,12 +23,14 @@ export const wrapSequencesFactory =
     ignoreFields,
     mergeStrategy,
     spaceId,
+    indicesToQuery,
   }: {
     logger: Logger;
     completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
     mergeStrategy: ConfigType['alertMergeStrategy'];
     spaceId: string | null | undefined;
+    indicesToQuery: string[];
   }): WrapSequences =>
   (sequences, buildReasonMessage) =>
     sequences.reduce(
@@ -40,7 +42,8 @@ export const wrapSequencesFactory =
           completeRule,
           mergeStrategy,
           spaceId,
-          buildReasonMessage
+          buildReasonMessage,
+          indicesToQuery
         ),
       ],
       []

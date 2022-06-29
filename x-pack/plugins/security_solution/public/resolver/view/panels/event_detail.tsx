@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiDescriptionList,
+  EuiHorizontalRule,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
@@ -330,20 +331,12 @@ const StyledDescriptiveName = memo(styled(EuiText)`
 `);
 
 const StyledFlexTitle = memo(styled('h3')`
+  align-items: center;
   display: flex;
   flex-flow: row;
   font-size: 1.2em;
 `);
-const StyledTitleRule = memo(styled('hr')`
-  &.euiHorizontalRule.euiHorizontalRule--full.euiHorizontalRule--marginSmall.override {
-    display: block;
-    flex: 1;
-    margin-left: 0.5em;
-  }
-`);
 
 const TitleHr = memo(() => {
-  return (
-    <StyledTitleRule className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall override" />
-  );
+  return <EuiHorizontalRule margin="none" size="half" />;
 });

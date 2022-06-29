@@ -8,3 +8,4 @@
 
 export type { CoreContext } from './core_context';
 export type { CoreService, ServiceConfigDescriptor } from './services';
+export { CriticalError } from './errors';

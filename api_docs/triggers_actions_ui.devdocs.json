@@ -314,14 +314,14 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ConnectorAddFlyout",
+        "id": "def-public.CreateConnectorFlyout",
         "type": "Function",
         "tags": [],
-        "label": "ConnectorAddFlyout",
+        "label": "CreateConnectorFlyout",
         "description": [],
         "signature": [
           "(props: ",
-          "ConnectorAddFlyoutProps",
+          "CreateConnectorFlyoutProps",
           ") => JSX.Element"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
@@ -330,39 +330,7 @@
         "children": [
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.ConnectorAddFlyout.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ConnectorEditFlyout",
-        "type": "Function",
-        "tags": [],
-        "label": "ConnectorEditFlyout",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "ConnectorEditFlyoutProps",
-          ") => JSX.Element"
-        ],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-public.ConnectorEditFlyout.$1",
+            "id": "def-public.CreateConnectorFlyout.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -509,6 +477,38 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.EditConnectorFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "EditConnectorFlyout",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "EditConnectorFlyoutProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.EditConnectorFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1536,7 +1536,9 @@
         "label": "snoozeRule",
         "description": [],
         "signature": [
-          "({\n  id,\n  snoozeEndTime,\n  http,\n}: { id: string; snoozeEndTime: string | -1; http: ",
+          "({\n  id,\n  snoozeSchedule,\n  http,\n}: { id: string; snoozeSchedule: ",
+          "SnoozeSchedule",
+          "; http: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1554,7 +1556,7 @@
             "id": "def-public.snoozeRule.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  id,\n  snoozeEndTime,\n  http,\n}",
+            "label": "{\n  id,\n  snoozeSchedule,\n  http,\n}",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
             "deprecated": false,
@@ -1571,13 +1573,13 @@
               },
               {
                 "parentPluginId": "triggersActionsUi",
-                "id": "def-public.snoozeRule.$1.snoozeEndTime",
-                "type": "CompoundType",
+                "id": "def-public.snoozeRule.$1.snoozeSchedule",
+                "type": "Object",
                 "tags": [],
-                "label": "snoozeEndTime",
+                "label": "snoozeSchedule",
                 "description": [],
                 "signature": [
-                  "string | -1"
+                  "SnoozeSchedule"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/snooze.ts",
                 "deprecated": false
@@ -1758,7 +1760,7 @@
         "label": "unsnoozeRule",
         "description": [],
         "signature": [
-          "({ id, http }: { id: string; http: ",
+          "({\n  id,\n  http,\n  scheduleIds,\n}: { id: string; http: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1766,7 +1768,7 @@
             "section": "def-public.HttpSetup",
             "text": "HttpSetup"
           },
-          "; }) => Promise<void>"
+          "; scheduleIds?: string[] | undefined; }) => Promise<void>"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
         "deprecated": false,
@@ -1776,7 +1778,7 @@
             "id": "def-public.unsnoozeRule.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ id, http }",
+            "label": "{\n  id,\n  http,\n  scheduleIds,\n}",
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
             "deprecated": false,
@@ -1806,6 +1808,19 @@
                     "section": "def-public.HttpSetup",
                     "text": "HttpSetup"
                   }
+                ],
+                "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.unsnoozeRule.$1.scheduleIds",
+                "type": "Array",
+                "tags": [],
+                "label": "scheduleIds",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/unsnooze.ts",
                 "deprecated": false
@@ -3441,6 +3456,25 @@
         "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.TriggersAndActionsUiServices.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "public",
+                "docId": "kibActionsPluginApi",
+                "section": "def-public.ActionsPublicPluginSetup",
+                "text": "ActionsPublicPluginSetup"
+              }
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
+            "deprecated": false
+          },
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.TriggersAndActionsUiServices.data",
@@ -5095,6 +5129,42 @@
         },
         {
           "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getActionForm",
+          "type": "Function",
+          "tags": [],
+          "label": "getActionForm",
+          "description": [],
+          "signature": [
+            "(props: Omit<",
+            "ActionAccordionFormProps",
+            ", \"actionTypeRegistry\">) => React.ReactElement<",
+            "ActionAccordionFormProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getActionForm.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "Omit<",
+                "ActionAccordionFormProps",
+                ", \"actionTypeRegistry\">"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
           "id": "def-public.TriggersAndActionsUIPublicPluginStart.getAddConnectorFlyout",
           "type": "Function",
           "tags": [],
@@ -5102,9 +5172,9 @@
           "description": [],
           "signature": [
             "(props: Omit<",
-            "ConnectorAddFlyoutProps",
+            "CreateConnectorFlyoutProps",
             ", \"actionTypeRegistry\">) => React.ReactElement<",
-            "ConnectorAddFlyoutProps",
+            "CreateConnectorFlyoutProps",
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -5119,7 +5189,7 @@
               "description": [],
               "signature": [
                 "Omit<",
-                "ConnectorAddFlyoutProps",
+                "CreateConnectorFlyoutProps",
                 ", \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -5138,9 +5208,9 @@
           "description": [],
           "signature": [
             "(props: Omit<",
-            "ConnectorEditFlyoutProps",
+            "EditConnectorFlyoutProps",
             ", \"actionTypeRegistry\">) => React.ReactElement<",
-            "ConnectorEditFlyoutProps",
+            "EditConnectorFlyoutProps",
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -5155,7 +5225,7 @@
               "description": [],
               "signature": [
                 "Omit<",
-                "ConnectorEditFlyoutProps",
+                "EditConnectorFlyoutProps",
                 ", \"actionTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -5433,11 +5503,13 @@
           "label": "getRuleTagBadge",
           "description": [],
           "signature": [
-            "(props: ",
+            "<T extends ",
+            "RuleTagBadgeOptions",
+            ">(props: ",
             "RuleTagBadgeProps",
-            ") => React.ReactElement<",
+            "<T>) => React.ReactElement<",
             "RuleTagBadgeProps",
-            ", string | React.JSXElementConstructor<any>>"
+            "<T>, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -5445,12 +5517,13 @@
             {
               "parentPluginId": "triggersActionsUi",
               "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleTagBadge.$1",
-              "type": "Object",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "RuleTagBadgeProps"
+                "RuleTagBadgeProps",
+                "<T>"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,

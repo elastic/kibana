@@ -48,7 +48,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             {templateActionVariable(variable)}
           </EuiText>
           <EuiText size="m" color="subdued">
-            <div className="euiTextColor--subdued">{variable.description}</div>
+            <div>{variable.description}</div>
           </EuiText>
         </>
       </EuiContextMenuItem>
