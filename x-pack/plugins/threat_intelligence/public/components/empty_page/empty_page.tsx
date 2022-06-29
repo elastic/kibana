@@ -44,7 +44,13 @@ export const EmptyPage: VFC<EmptyPageProps> = ({ integrationsPageLink }) => (
       </>
     }
     actions={
-      <EuiButton href={integrationsPageLink} color="primary" iconType="plusInCircle" fill>
+      <EuiButton
+        data-test-subj={`${displayName}-integrations-page-link`}
+        href={integrationsPageLink}
+        color="primary"
+        iconType="plusInCircle"
+        fill
+      >
         Add Integrations
       </EuiButton>
     }
