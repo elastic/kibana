@@ -9,6 +9,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { DataTableRecord } from '../types';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
 
@@ -23,19 +24,19 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
  * @param fieldsToShow A list of fields that should be included in the document summary.
  */
 export function formatHit(
-  hit: estypes.SearchHit,
+  hit: DataTableRecord,
   dataView: DataView,
   fieldsToShow: string[],
   maxEntries: number
 ): FormattedHit {
-  const cached = formattedHitCache.get(row.raw);
+  const cached = formattedHitCache.get(hit.raw);
   if (cached) {
     return cached;
   }
-  console.log(row);
 
-  const highlights = row.raw.highlight ?? {};
-  const flattened = row.flattened;
+  const highlights = hit.raw.highlight ?? {};
+  // Flatten the object using the flattenHit implementation we use across Discover for flattening documents.
+  const flattened = hit.flattened;
 
   const highlightPairs: Array<[fieldName: string, formattedValue: string]> = [];
   const sourcePairs: Array<[fieldName: string, formattedValue: string]> = [];
@@ -48,7 +49,7 @@ export function formatHit(
     const displayKey = dataView.fields.getByName(key)?.displayName;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     // Format the raw value using the regular field formatters for that field
-    const formattedValue = row.renderFormatted(key);
+    const formattedValue = hit.renderFormatted(key);
     // If the field was a mapped field, we validate it against the fieldsToShow list, if not
     // we always include it into the result.
     if (displayKey) {
@@ -75,6 +76,6 @@ export function formatHit(
             '',
           ] as const,
         ];
-  formattedHitCache.set(row.raw, formatted);
+  formattedHitCache.set(hit.raw, formatted);
   return formatted;
 }

@@ -17,8 +17,6 @@ export interface ConvertedResult {
 }
 
 export const convertValueToString = ({
-  rowIndex,
-  rows,
   row,
   columnId,
   dataView,

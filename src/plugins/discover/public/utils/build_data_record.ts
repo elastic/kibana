@@ -24,25 +24,26 @@ export function buildDataTableRecord(
   dataView?: DataView,
   isAnchor?: boolean
 ): DataTableRecord {
-  return {
+  const record = {
     id: getDocId(doc),
     raw: doc,
     flattened: flattenHit(doc, dataView, { includeIgnoredValues: true }),
     isAnchor,
     renderFormatted: (fieldName: string) => {
-      return formatFieldValue(fieldName, record, dataView);
+      return formatFieldValue(fieldName, record, dataView!);
     },
     renderText: (fieldName: string) => {
       return convertValueToString({
         columnId: fieldName,
         row: record,
-        dataView,
+        dataView: dataView!,
         options: {
           disableMultiline: true,
         },
       });
     },
   };
+  return record;
 }
 
 /**

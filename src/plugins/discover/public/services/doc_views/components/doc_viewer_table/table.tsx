@@ -7,7 +7,7 @@
  */
 
 import './table.scss';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,7 +39,6 @@ import { getIgnoredReason } from '../../../../utils/get_ignored_reason';
 import { isNestedFieldParent } from '../../../../application/main/utils/nested_fields';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 export interface FieldRecord {
   action: Omit<FieldRecordLegacy['action'], 'isActive'>;
@@ -117,7 +116,6 @@ export const DocViewerTable = ({
   const [pinnedFields, setPinnedFields] = useState<string[]>(
     getPinnedFields(currentDataViewId, storage)
   );
-  const doc = useMemo(() => buildDataTableRecord(hit, dataView), [hit, dataView]);
 
   const flattened = hit.flattened;
   const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
@@ -171,7 +169,7 @@ export const DocViewerTable = ({
           onToggleColumn,
           onFilter: filter,
           isActive: !!columns?.includes(field),
-          flattenedField: doc.flattened[field],
+          flattenedField: hit.flattened[field],
         },
         field: {
           field,
@@ -183,12 +181,23 @@ export const DocViewerTable = ({
           onTogglePinned,
         },
         value: {
-          formattedValue: doc.renderFormatted!(field),
+          formattedValue: hit.renderFormatted!(field),
           ignored,
         },
       };
     },
-    [doc, mapping, dataView, onToggleColumn, filter, columns, pinnedFields, onTogglePinned]
+    [
+      mapping,
+      dataView,
+      hit.raw._ignored,
+      onToggleColumn,
+      filter,
+      columns,
+      hit.flattened,
+      hit.renderFormatted,
+      pinnedFields,
+      onTogglePinned,
+    ]
   );
 
   const handleOnChange = useCallback(
@@ -200,7 +209,7 @@ export const DocViewerTable = ({
     [storage]
   );
 
-  const { pinnedItems, restItems } = Object.keys(doc.flattened)
+  const { pinnedItems, restItems } = Object.keys(hit.flattened)
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
       const mappingB = mapping(fieldB);
