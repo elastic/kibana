@@ -192,14 +192,21 @@ export class InspectorService extends FtrService {
   /**
    * Opens inspector view
    * @param viewId
+   *  This method was flaky. So we changed viewId to the substring of the dts which is visible
+   *  so we can verify if the selection worked
    */
+
   public async openInspectorView(viewId: string): Promise<void> {
     this.log.debug(`Open Inspector view ${viewId}`);
+    const dtsViewId = 'inspectorViewChooser' + viewId;
     await this.retry.try(async () => {
       await this.testSubjects.click('inspectorViewChooser');
       // check whether popover menu opens, if not, fail and retry opening
-      await this.testSubjects.existOrFail(viewId, { timeout: 2000 });
-      await this.testSubjects.click(viewId);
+      await this.testSubjects.existOrFail(dtsViewId, { timeout: 2000 });
+      await this.testSubjects.click(dtsViewId);
+      const selection = await this.testSubjects.getVisibleText('inspectorViewChooser');
+      this.log.debug(`inspector view selection = ${selection}`);
+      expect(selection.includes(viewId)).to.be(true);
     });
   }
 
@@ -207,7 +214,7 @@ export class InspectorService extends FtrService {
    * Opens inspector requests view
    */
   public async openInspectorRequestsView(): Promise<void> {
-    await this.openInspectorView('inspectorViewChooserRequests');
+    await this.openInspectorView('Requests');
   }
 
   /**

@@ -564,7 +564,7 @@ export class GisPageObject extends FtrService {
   }
 
   async openInspectorMapView() {
-    await this.inspector.openInspectorView('~inspectorViewChooserMap');
+    await this.inspector.openInspectorView('Map');
   }
 
   // Method should only be used when multiple requests are expected
@@ -608,7 +608,7 @@ export class GisPageObject extends FtrService {
   }
 
   async _getResponse(requestName: string) {
-    await this.inspector.openInspectorView('inspectorViewChooserRequests');
+    await this.inspector.openInspectorView('Requests');
     if (requestName) {
       await this.testSubjects.click('inspectorRequestChooser');
       await this.testSubjects.click(`inspectorRequestChooser${requestName}`);
