@@ -27,13 +27,6 @@ import { BadArgument } from '../../bad_argument';
 import { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
 
 const toCliArgumentOption = (argName: string) => `--${argName}`;
-const toCliArgumentOptions = (argNames: string[]) => {
-  let argNamesResult = '';
-  for (const argName of argNames) {
-    argNamesResult += `--${argName} `;
-  }
-  return argNamesResult;
-};
 
 const getRequiredArguments = (argDefinitions: CommandDefinition['args']): string[] => {
   if (!argDefinitions) {
