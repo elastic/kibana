@@ -14,12 +14,16 @@ import { LayoutDirection, Metric, MetricWProgress, Settings } from '@elastic/cha
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 
+const mockDeserialize = jest.fn(() => ({
+  getConverterFor: jest.fn(() => () => 'formatted duration'),
+}));
+
 jest.mock('../services', () => ({
-  // getFormatService: () => {
-  //   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  //   const { getFormatService } = require('../__mocks__/services');
-  //   return getFormatService();
-  // },
+  getFormatService: () => {
+    return {
+      deserialize: mockDeserialize,
+    };
+  },
   getPaletteService: () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { getPaletteService } = require('../__mocks__/palette_service');
@@ -805,6 +809,31 @@ describe('MetricVisComponent', function () {
       expect(moreThanPetaValue).toBe('1,024 PB');
     });
 
-    it('correctly formats durations', () => {});
+    it('correctly formats durations', () => {
+      const { primary, secondary } = getFormattedMetrics(1, 1, {
+        id: 'duration',
+        params: {
+          // the following params should be preserved
+          inputFormat: 'minutes',
+          // the following params should be overridden
+          outputFormat: 'precise',
+          outputPrecision: 2,
+          useShortSuffix: false,
+        },
+      });
+
+      expect(primary).toBe('formatted duration');
+      expect(secondary).toBe('formatted duration');
+      expect(mockDeserialize).toHaveBeenCalledTimes(2);
+      expect(mockDeserialize).toHaveBeenCalledWith({
+        id: 'duration',
+        params: {
+          inputFormat: 'minutes',
+          outputFormat: 'humanizePrecise',
+          outputPrecision: 1,
+          useShortSuffix: true,
+        },
+      });
+    });
   });
 });
