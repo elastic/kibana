@@ -14,7 +14,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
+import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiIcon, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { useInputHints } from './hooks/use_input_hints';
@@ -29,6 +29,7 @@ import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj'
 const CommandInputContainer = styled.div`
   background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
   border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
+  outline: 1px solid ${({ theme: { eui } }) => eui.euiFormBorderColor};
   padding: ${({ theme: { eui } }) => eui.euiSizeS};
 
   .prompt {
@@ -41,9 +42,9 @@ const CommandInputContainer = styled.div`
 
   .cursor {
     display: inline-block;
-    width: 2px;
+    width: 1px;
     height: ${({ theme: { eui } }) => eui.euiLineHeight}em;
-    background-color: ${({ theme }) => theme.eui.euiColorPrimaryText};
+    background-color: ${({ theme: { eui } }) => eui.euiTextColor};
 
     animation: cursor-blink-animation 1s steps(5, start) infinite;
     -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
@@ -171,7 +172,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         <EuiFlexGroup
           wrap={true}
           responsive={false}
-          alignItems="flexStart"
+          alignItems="center"
           gutterSize="none"
           justifyContent="flexStart"
           ref={textDisplayRef}
@@ -187,6 +188,9 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           </EuiFlexItem>
           <EuiFlexItem grow>
             <span className={cursorClassName} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="playFilled" color="subdued" />
           </EuiFlexItem>
         </EuiFlexGroup>
         <KeyCapture
