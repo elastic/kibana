@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const configSchema = schema.object({
@@ -16,9 +16,11 @@ const configSchema = schema.object({
 /**
  * @internal
  */
-export type ExecutionContextConfigType = TypeOf<typeof configSchema>;
+export interface ExecutionContextConfigType {
+  enabled: boolean;
+}
 
-export const config: ServiceConfigDescriptor<ExecutionContextConfigType> = {
+export const executionContextConfig: ServiceConfigDescriptor<ExecutionContextConfigType> = {
   path: 'execution_context',
   schema: configSchema,
 };

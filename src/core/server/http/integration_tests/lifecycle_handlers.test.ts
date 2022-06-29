@@ -18,7 +18,7 @@ import { HttpServerSetup } from '../http_server';
 import { IRouter, RouteRegistrar } from '../router';
 
 import { contextServiceMock } from '../../context/context_service.mock';
-import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../../../../package.json');

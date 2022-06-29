@@ -16,6 +16,7 @@ import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -39,7 +40,6 @@ import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
-import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 import { prebootServiceMock } from './preboot/preboot_service.mock';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -63,7 +63,7 @@ export { capabilitiesServiceMock } from './capabilities/capabilities_service.moc
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
-export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
+export { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 

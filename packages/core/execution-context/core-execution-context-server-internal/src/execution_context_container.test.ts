@@ -7,7 +7,7 @@
  */
 
 import { Blob } from 'buffer';
-import type { KibanaExecutionContext } from '../../types';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 import {
   ExecutionContextContainer,
