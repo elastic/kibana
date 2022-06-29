@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
 import {
   CriteriaWithPagination,
   EuiAvatar,
@@ -28,10 +27,6 @@ import {
 } from '@elastic/eui';
 import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 
-import type {
-  DurationRange,
-  OnRefreshChangeProps,
-} from '@elastic/eui/src/components/date_picker/types';
 import type { HorizontalAlignment } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,18 +40,9 @@ import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from './translations
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionListDateRangePicker } from './components/action_list_date_range_picker';
-import type { DateRangePickerValues } from './components/action_list_date_range_picker';
+import { useDateRangePicker } from './components/hooks';
 
 const emptyValue = getEmptyValue();
-const defaultDateRangeOptions = Object.freeze({
-  autoRefreshOptions: {
-    enabled: false,
-    duration: 10000,
-  },
-  startDate: 'now-1d',
-  endDate: 'now',
-  recentlyUsedDateRanges: [],
-});
 
 const getCommand = (
   command: ActionDetails['command']
@@ -129,9 +115,8 @@ export const ResponseActionsList = memo<
     userIds,
   });
 
-  // date range picker settings
-  const [dateRangePickerState, setDateRangePickerState] =
-    useState<DateRangePickerValues>(defaultDateRangeOptions);
+  // date range picker state and handlers
+  const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
 
   // initial fetch of list data
   const {
@@ -146,69 +131,12 @@ export const ResponseActionsList = memo<
     endDate: dateRangePickerState.endDate,
   });
 
-  const updateActionListDateRanges = useCallback(
-    ({ start, end }) => {
-      setDateRangePickerState((prevState) => ({
-        ...prevState,
-        startDate: dateMath.parse(start)?.toISOString(),
-        endDate: dateMath.parse(end)?.toISOString(),
-      }));
-    },
-    [setDateRangePickerState]
-  );
-
-  const updateActionListRecentlyUsedDateRanges = useCallback(
-    (recentlyUsedDateRanges) => {
-      setDateRangePickerState((prevState) => ({
-        ...prevState,
-        recentlyUsedDateRanges,
-      }));
-    },
-    [setDateRangePickerState]
-  );
-
-  // handle refresh timer update
-  const onRefreshChange = useCallback(
-    (evt: OnRefreshChangeProps) => {
-      setDateRangePickerState((prevState) => ({
-        ...prevState,
-        autoRefreshOptions: { enabled: !evt.isPaused, duration: evt.refreshInterval },
-      }));
-    },
-    [setDateRangePickerState]
-  );
-
   // handle auto refresh data
   const onRefresh = useCallback(() => {
     if (dateRangePickerState.autoRefreshOptions.enabled) {
       reFetchEndpointActionList();
     }
   }, [dateRangePickerState.autoRefreshOptions.enabled, reFetchEndpointActionList]);
-
-  // handle manual time change on date picker
-  const onTimeChange = useCallback(
-    ({ start: newStart, end: newEnd }: DurationRange) => {
-      const newRecentlyUsedDateRanges = [
-        { start: newStart, end: newEnd },
-        ...dateRangePickerState.recentlyUsedDateRanges
-          .filter(
-            (recentlyUsedRange: DurationRange) =>
-              !(recentlyUsedRange.start === newStart && recentlyUsedRange.end === newEnd)
-          )
-          .slice(0, 9),
-      ];
-
-      // update date ranges
-      updateActionListDateRanges({ start: newStart, end: newEnd });
-      // update recently used date ranges
-      updateActionListRecentlyUsedDateRanges(newRecentlyUsedDateRanges);
-    },
-    [
-      dateRangePickerState.recentlyUsedDateRanges,
-      updateActionListDateRanges,
-      updateActionListRecentlyUsedDateRanges,
-    ]
-  );
 
   // total actions
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
