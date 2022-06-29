@@ -132,7 +132,7 @@ export const ALERTS_HEADERS_THRESHOLD_TERMS = i18n.translate(
 export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCardinality',
   {
-    defaultMessage: 'Threshold Cardinality',
+    defaultMessage: 'Event Cardinality',
   }
 );
 

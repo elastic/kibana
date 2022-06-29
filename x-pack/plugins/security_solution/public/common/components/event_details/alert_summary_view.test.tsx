@@ -569,13 +569,7 @@ describe('AlertSummaryView', () => {
         </TestProvidersComponent>
       );
 
-      [
-        'Event Count',
-        'host.name [threshold]',
-        'host.id [threshold]',
-        'Event Cardinality',
-        'count(host.name) >= 9001',
-      ].forEach((fieldId) => {
+      ['Event Count', 'Event Cardinality', 'host.name', 'host.id'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
     });

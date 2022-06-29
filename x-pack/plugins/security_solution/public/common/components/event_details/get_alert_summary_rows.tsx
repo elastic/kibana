@@ -295,7 +295,12 @@ export const getSummaryRows = ({
         }
 
         if (field.id === THRESHOLD_TERMS_FIELD) {
-          return acc;
+          const enrichedInfo = enrichThresholdTerms(item, data, description);
+          if (enrichedInfo) {
+            return [...acc, ...enrichedInfo];
+          } else {
+            return acc;
+          }
         }
 
         if (field.id === THRESHOLD_CARDINALITY_FIELD) {
@@ -317,6 +322,42 @@ export const getSummaryRows = ({
       }, [])
     : [];
 };
+
+/**
+ * Enriches the summary data for threshold terms.
+ * For any given threshold term, it generates a row with the term's name and the associated value.
+ */
+function enrichThresholdTerms(
+  { values: termsFieldArr }: TimelineEventsDetailsItem,
+  data: TimelineEventsDetailsItem[],
+  description: EnrichedFieldInfo
+) {
+  const termsValueItem = data.find((d) => d.field === THRESHOLD_TERMS_VALUE);
+  const termsValueArray = termsValueItem && termsValueItem.values;
+
+  // Make sure both `fields` and `values` are an array and that they have the same length
+  if (
+    Array.isArray(termsFieldArr) &&
+    termsFieldArr.length > 0 &&
+    Array.isArray(termsValueArray) &&
+    termsFieldArr.length === termsValueArray.length
+  ) {
+    return termsFieldArr
+      .map((field, index) => ({
+        title: field,
+        description: {
+          ...description,
+          values: [termsValueArray[index]],
+        },
+      }))
+      .filter(
+        (entry) =>
+          !alwaysDisplayedFields
+            .map((alwaysThereEntry) => alwaysThereEntry.id)
+            .includes(entry.title)
+      );
+  }
+}
 
 /**
  * Enriches the summary data for threshold cardinality.
