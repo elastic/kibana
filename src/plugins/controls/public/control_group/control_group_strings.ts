@@ -279,10 +279,5 @@ export const ControlGroupStrings = {
         defaultMessage: 'Move control {controlTitle}',
         values: { controlTitle: controlTitle ?? '' },
       }),
-    getAvailableOptionsPopoverAction: (controlTitle?: string) =>
-      i18n.translate('controls.controlGroup.ariaActions.availableOptionsPopoverAction', {
-        defaultMessage: 'Available options for {controlTitle}',
-        values: { controlTitle: controlTitle ?? '' },
-      }),
   },
 };
