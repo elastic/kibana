@@ -7,7 +7,7 @@
 
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { UXDashboardDatePicker } from '../page_objects/date_picker';
-import { loginToKibana, waitForLoadingToFinish } from './utils';
+import { byTestId, loginToKibana, waitForLoadingToFinish } from './utils';
 
 journey('Page Views Chart', async ({ page, params }) => {
   before(async () => {
@@ -44,6 +44,26 @@ journey('Page Views Chart', async ({ page, params }) => {
       'text=Total page viewsSelect an option: No breakdown, is selectedNo breakdown >> button'
     );
     await page.click('button[role="option"]:has-text("Browser")');
+    expect(await page.waitForSelector('text=Chrome'));
+    expect(await page.waitForSelector('text=Chrome Mobile iOS'));
+    expect(await page.waitForSelector('text=Edge'));
+    expect(await page.waitForSelector('text=Safari'));
+    expect(await page.waitForSelector('text=Firefox'));
+  });
+
+  step('can click through to exploratory view', async () => {
+    expect(await page.hover('text=Firefox'));
+    await page.click(
+      `.pageViewsChart  ${byTestId('embeddablePanelToggleMenuIcon')}`
+    );
+    await page.click(byTestId('embeddablePanelAction-expViewExplore'));
+    await page.waitForNavigation();
+  });
+
+  step('renders the chart in exploratory view', async () => {
+    await page.waitForLoadState('networkidle');
+    expect(await page.waitForSelector('text=User experience (RUM)'));
+    expect(await page.waitForSelector('text=Page views'));
     expect(await page.waitForSelector('text=Chrome'));
     expect(await page.waitForSelector('text=Chrome Mobile iOS'));
     expect(await page.waitForSelector('text=Edge'));
