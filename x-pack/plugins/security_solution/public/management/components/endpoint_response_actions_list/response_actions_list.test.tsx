@@ -9,13 +9,13 @@ import uuid from 'uuid';
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ResponseActionsList } from './response_actions_list';
-import { ActionDetails, ActionListApiResponse } from '../../../../../common/endpoint/types';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
-import { DEFAULT_TIMEPICKER_QUICK_RANGES, MANAGEMENT_PATH } from '../../../../../common/constants';
-import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
+import { createUseUiSetting$Mock } from '../../../common/lib/kibana/kibana_react.mock';
+import { DEFAULT_TIMEPICKER_QUICK_RANGES, MANAGEMENT_PATH } from '../../../../common/constants';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -24,8 +24,8 @@ let mockUseGetEndpointActionList: {
   data?: ActionListApiResponse;
   refetch: () => unknown;
 };
-jest.mock('../../../hooks/endpoint/use_get_endpoint_action_list', () => {
-  const original = jest.requireActual('../../../hooks/endpoint/use_get_endpoint_action_list');
+jest.mock('../../hooks/endpoint/use_get_endpoint_action_list', () => {
+  const original = jest.requireActual('../../hooks/endpoint/use_get_endpoint_action_list');
   return {
     ...original,
     useGetEndpointActionList: () => mockUseGetEndpointActionList,
@@ -85,7 +85,7 @@ const timepickerRanges = [
     display: 'Last 1 year',
   },
 ];
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 
 describe('Response Actions List', () => {
   const testPrefix = 'response-actions-list';
@@ -227,7 +227,7 @@ describe('Response Actions List', () => {
       userEvent.click(toggle);
       reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
 
-      await new Promise((r) => setTimeout(r, 3000));
+      await new Promise((r) => setTimeout(r, 3500));
       expect(refetchFunction).toHaveBeenCalledTimes(3);
     });
   });

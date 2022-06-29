@@ -35,16 +35,15 @@ import type {
 import type { HorizontalAlignment } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getEmptyValue } from '../../../../common/components/empty_value';
-import { FormattedDate } from '../../../../common/components/formatted_date';
-import { ActionDetails } from '../../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
-import { AdministrationListPage } from '../../../components/administration_list_page';
-import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
-import { useGetEndpointActionList } from '../../../hooks';
-import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { getEmptyValue } from '../../../common/components/empty_value';
+import { FormattedDate } from '../../../common/components/formatted_date';
+import { ActionDetails } from '../../../../common/endpoint/types';
+import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
+import { useGetEndpointActionList } from '../../hooks';
+import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from './translations';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionListDateRangePicker } from './components/action_list_date_range_picker';
 import type { DateRangePickerValues } from './components/action_list_date_range_picker';
 
@@ -115,10 +114,8 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
 `;
 
 export const ResponseActionsList = memo<
-  Pick<EndpointActionListRequestQuery, 'agentIds' | 'commands' | 'userIds'> & {
-    hideHeader?: boolean;
-  }
->(({ agentIds, commands, userIds, hideHeader = false }) => {
+  Pick<EndpointActionListRequestQuery, 'agentIds' | 'commands' | 'userIds'>
+>(({ agentIds, commands, userIds }) => {
   const getTestId = useTestIdGenerator('response-actions-list');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
     [k: ActionDetails['id']]: React.ReactNode;
@@ -170,7 +167,7 @@ export const ResponseActionsList = memo<
     [setDateRangePickerState]
   );
 
-  // update refresh timer
+  // handle refresh timer update
   const onRefreshChange = useCallback(
     (evt: OnRefreshChangeProps) => {
       setDateRangePickerState((prevState) => ({
@@ -181,13 +178,14 @@ export const ResponseActionsList = memo<
     [setDateRangePickerState]
   );
 
-  // auto refresh data
+  // handle auto refresh data
   const onRefresh = useCallback(() => {
     if (dateRangePickerState.autoRefreshOptions.enabled) {
       reFetchEndpointActionList();
     }
   }, [dateRangePickerState.autoRefreshOptions.enabled, reFetchEndpointActionList]);
 
+  // handle manual time change on date picker
   const onTimeChange = useCallback(
     ({ start: newStart, end: newEnd }: DurationRange) => {
       const newRecentlyUsedDateRanges = [
@@ -569,10 +567,7 @@ export const ResponseActionsList = memo<
   );
 
   return (
-    <AdministrationListPage
-      data-test-subj="responseActionsPage"
-      title={hideHeader ? undefined : UX_MESSAGES.pageTitle}
-    >
+    <>
       <ActionListDateRangePicker
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
@@ -624,7 +619,7 @@ export const ResponseActionsList = memo<
           />
         </>
       )}
-    </AdministrationListPage>
+    </>
   );
 });
 
