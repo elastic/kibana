@@ -24,12 +24,16 @@ import {
   CaseStatuses,
   CommentAttributes,
   CommentRequest,
+  CommentRequestActionsType,
   CommentRequestAlertType,
+  CommentRequestExternalReferenceSOType,
+  CommentRequestExternalReferenceType,
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
   CommentType,
   ConnectorTypes,
+  ExternalReferenceStorageType,
   User,
 } from '../../common/api';
 import { UpdateAlertRequest } from '../client/alerts/types';
@@ -219,7 +223,7 @@ export const isCommentRequestTypeUser = (
  */
 export const isCommentRequestTypeActions = (
   context: CommentRequest
-): context is CommentRequestUserType => {
+): context is CommentRequestActionsType => {
   return context.type === CommentType.actions;
 };
 
@@ -230,6 +234,27 @@ export const isCommentRequestTypeAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;
+};
+
+/**
+ * A type narrowing function for external reference attachments. Exporting so integration tests can use it.
+ */
+export const isCommentRequestTypeExternalReference = (
+  context: CommentRequest
+): context is CommentRequestExternalReferenceType => {
+  return context.type === CommentType.externalReference;
+};
+
+/**
+ * A type narrowing function for external reference so attachments. Exporting so integration tests can use it.
+ */
+export const isCommentRequestTypeExternalReferenceSO = (
+  context: Partial<CommentRequest>
+): context is CommentRequestExternalReferenceSOType => {
+  return (
+    context.type === CommentType.externalReference &&
+    context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
+  );
 };
 
 /**
@@ -370,4 +395,8 @@ export const asArray = <T>(field?: T | T[] | null): T[] => {
   }
 
   return Array.isArray(field) ? field : [field];
+};
+
+export const assertUnreachable = (x: never): never => {
+  throw new Error('You should not reach this part of code');
 };

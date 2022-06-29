@@ -16,6 +16,7 @@ import type { FindingsGroupByNoneQuery } from './use_latest_findings';
 import type { FindingsBaseURLQuery } from '../types';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import {
+  addFilter,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -114,6 +115,18 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                   pageSize: page.size,
                 })
               }
+              onAddFilter={(field, value, negate) =>
+                setUrlQuery({
+                  pageIndex: 0,
+                  filters: addFilter({
+                    filters: urlQuery.filters,
+                    dataView,
+                    field,
+                    value,
+                    negate,
+                  }),
+                })
+              }
             />
           </>
         )}
@@ -125,7 +138,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 const LatestFindingsPageTitle = () => (
   <PageTitle>
     <PageTitleText
-      title={<FormattedMessage id="xpack.csp.findings.findingsTitle" defaultMessage="Findings" />}
+      title={
+        <FormattedMessage
+          id="xpack.csp.findings.latestFindings.latestFindingsPageTitle"
+          defaultMessage="Findings"
+        />
+      }
     />
   </PageTitle>
 );
