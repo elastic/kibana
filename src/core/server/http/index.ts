@@ -54,6 +54,7 @@ export type {
   RouteValidationResultFactory,
   DestructiveRouteMethod,
   SafeRouteMethod,
+  IKibanaRequest,
 } from './router';
 export type { OnPreRoutingHandler, OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 export type {

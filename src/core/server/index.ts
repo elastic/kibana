@@ -233,7 +233,9 @@ export type {
   SafeRouteMethod,
 } from './http';
 
-export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
+export { kibanaResponseFactory, validBodyOutput } from './http';
+// using named export for backward compatibility
+export type { IKibanaRequest as KibanaRequest, IKibanaRequest } from './http';
 
 export type {
   HttpResourcesRenderOptions,

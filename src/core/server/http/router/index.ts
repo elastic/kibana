@@ -23,6 +23,7 @@ export type {
   KibanaRequestRouteOptions,
   KibanaRouteOptions,
   KibanaRequestState,
+  IKibanaRequest,
 } from './request';
 export { isSafeMethod, validBodyOutput } from './route';
 export type {

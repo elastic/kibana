@@ -15,7 +15,7 @@ import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
 } from '../../elasticsearch/client/errors';
-import { KibanaRequest } from './request';
+import { KibanaRequest, IKibanaRequest } from './request';
 import {
   KibanaResponseFactory,
   kibanaResponseFactory,
@@ -355,7 +355,7 @@ export type RequestHandler<
   ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 > = (
   context: Context,
-  request: KibanaRequest<P, Q, B, Method>,
+  request: IKibanaRequest<P, Q, B, Method>,
   response: ResponseFactory
 ) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
