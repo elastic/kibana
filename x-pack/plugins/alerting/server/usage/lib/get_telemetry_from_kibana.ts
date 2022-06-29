@@ -189,14 +189,14 @@ export async function getTotalCountAggregations({
       count_total: totalRulesCount ?? 0,
       count_by_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
       throttle_time: {
-        min: `${aggregations.min_throttle_time.value}s`,
-        avg: `${aggregations.avg_throttle_time.value}s`,
-        max: `${aggregations.max_throttle_time.value}s`,
+        min: `${aggregations.min_throttle_time.value ?? 0}s`,
+        avg: `${aggregations.avg_throttle_time.value ?? 0}s`,
+        max: `${aggregations.max_throttle_time.value ?? 0}s`,
       },
       schedule_time: {
-        min: `${aggregations.min_interval_time.value}s`,
-        avg: `${aggregations.avg_interval_time.value}s`,
-        max: `${aggregations.max_interval_time.value}s`,
+        min: `${aggregations.min_interval_time.value ?? 0}s`,
+        avg: `${aggregations.avg_interval_time.value ?? 0}s`,
+        max: `${aggregations.max_interval_time.value ?? 0}s`,
       },
       throttle_time_number_s: {
         min: aggregations.min_throttle_time.value ?? 0,
