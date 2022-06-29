@@ -6,6 +6,7 @@
  */
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
+import { importMonitors } from './tasks/import_monitors';
 import { SyntheticsRunner } from './synthetics_start';
 
 import { argv } from './parse_args_params';
@@ -23,10 +24,20 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
         pauseOnError,
       });
 
+      await importMonitors({
+        kibanaUrl: syntheticsRunner.kibanaUrl,
+        username: 'elastic',
+        password: 'changeme',
+      });
+
       await syntheticsRunner.setup();
       const fixturesDir = path.join(__dirname, '../e2e/fixtures/es_archiver/');
 
-      await syntheticsRunner.loadTestData(fixturesDir, ['full_heartbeat', 'browser']);
+      await syntheticsRunner.loadTestData(fixturesDir, [
+        'full_heartbeat',
+        'browser',
+        'synthetics_data',
+      ]);
 
       await syntheticsRunner.loadTestFiles(async () => {
         require('./journeys');
