@@ -9,6 +9,7 @@ import { buildEsQuery, type Filter, buildFilter, FILTERS, FilterStateStore } fro
 import { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Serializable } from '@kbn/utility-types';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from './types';
 import { useKibana } from '../../common/hooks/use_kibana';
@@ -104,6 +105,29 @@ export const useBaseEsQuery = ({
   useEffect(handleMalformedQueryError, [baseEsQuery.error, toasts]);
 
   return baseEsQuery;
+};
+
+export const getFindingsPageSizeInfo = ({
+  currentPageSize,
+  pageIndex,
+  pageSize,
+}: Record<'pageIndex' | 'pageSize' | 'currentPageSize', number>) => ({
+  pageStart: pageIndex * pageSize + 1,
+  pageEnd: pageIndex * pageSize + currentPageSize,
+});
+
+export const getFindingsCountAggQuery = () => ({
+  count: { terms: { field: 'result.evaluation.keyword' } },
+});
+
+export const getAggregationCount = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]) => {
+  const passed = buckets.find((bucket) => bucket.key === 'passed');
+  const failed = buckets.find((bucket) => bucket.key === 'failed');
+
+  return {
+    passed: passed?.doc_count || 0,
+    failed: failed?.doc_count || 0,
+  };
 };
 
 export const addFilter = ({

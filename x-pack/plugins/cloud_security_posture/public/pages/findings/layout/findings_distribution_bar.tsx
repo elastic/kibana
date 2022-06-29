@@ -25,6 +25,7 @@ interface Props {
   failed: number;
   pageStart: number;
   pageEnd: number;
+  type: string;
 }
 
 const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
@@ -43,6 +44,7 @@ const Counters = (props: Props) => (
       <CurrentPageOfTotal {...props} />
     </EuiFlexItem>
     <EuiFlexItem
+      grow={1}
       css={css`
         align-items: flex-end;
       `}
@@ -64,14 +66,14 @@ const PassedFailedCounters = ({ passed, failed }: Pick<Props, 'passed' | 'failed
     >
       <Counter
         label={i18n.translate('xpack.csp.findings.distributionBar.totalPassedLabel', {
-          defaultMessage: 'Passed',
+          defaultMessage: 'Passed Findings',
         })}
         color={euiTheme.colors.success}
         value={passed}
       />
       <Counter
         label={i18n.translate('xpack.csp.findings.distributionBar.totalFailedLabel', {
-          defaultMessage: 'Failed',
+          defaultMessage: 'Failed Findings',
         })}
         color={euiTheme.colors.danger}
         value={failed}
@@ -84,15 +86,17 @@ const CurrentPageOfTotal = ({
   pageEnd,
   pageStart,
   total,
-}: Pick<Props, 'pageEnd' | 'pageStart' | 'total'>) => (
+  type,
+}: Pick<Props, 'pageEnd' | 'pageStart' | 'total' | 'type'>) => (
   <EuiTextColor color="subdued">
     <FormattedMessage
       id="xpack.csp.findings.distributionBar.showingPageOfTotalLabel"
-      defaultMessage="Showing {pageStart}-{pageEnd} of {total} Findings"
+      defaultMessage="Showing {pageStart}-{pageEnd} of {total} {type}"
       values={{
         pageStart: <b>{pageStart}</b>,
         pageEnd: <b>{pageEnd}</b>,
         total: <b>{formatNumber(total)}</b>,
+        type,
       }}
     />
   </EuiTextColor>
@@ -127,10 +131,10 @@ const DistributionBarPart = ({ value, color }: { value: number; color: string })
 
 const Counter = ({ label, value, color }: { label: string; value: number; color: string }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
-    <EuiFlexItem>
+    <EuiFlexItem grow={1}>
       <EuiHealth color={color}>{label}</EuiHealth>
     </EuiFlexItem>
-    <EuiFlexItem>
+    <EuiFlexItem grow={false}>
       <EuiBadge>{formatNumber(value)}</EuiBadge>
     </EuiFlexItem>
   </EuiFlexGroup>
