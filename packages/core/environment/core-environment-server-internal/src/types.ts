@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { EnvironmentService } from './environment_service';
-export type {
-  InternalEnvironmentServicePreboot,
-  InternalEnvironmentServiceSetup,
-} from './environment_service';
-export { config } from './pid_config';
-export type { PidConfigType } from './pid_config';
+/**
+ * Subset of the `HttpConfig` type that is used by the environment service
+ */
+export interface HttpConfigType {
+  uuid: string;
+}

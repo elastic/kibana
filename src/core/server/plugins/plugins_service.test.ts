@@ -17,9 +17,9 @@ import { ConfigPath, ConfigService, Env } from '@kbn/config';
 
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { coreMock } from '../mocks';
-import { environmentServiceMock } from '../environment/environment_service.mock';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';

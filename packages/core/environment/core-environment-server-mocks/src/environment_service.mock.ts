@@ -11,7 +11,7 @@ import type {
   EnvironmentService,
   InternalEnvironmentServicePreboot,
   InternalEnvironmentServiceSetup,
-} from './environment_service';
+} from '@kbn/core-environment-server-internal';
 
 const createPrebootContractMock = () => {
   const prebootContract: jest.Mocked<InternalEnvironmentServicePreboot> = {

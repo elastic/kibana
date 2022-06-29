@@ -9,6 +9,8 @@
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { uuidRegexp } from '@kbn/core-base-server-internal';
+
 import { hostname } from 'os';
 import url from 'url';
 
@@ -21,8 +23,7 @@ import {
 } from './security_response_headers_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
-export const uuidRegexp =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;

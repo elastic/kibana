@@ -23,12 +23,12 @@ import { Logger, LogMeta } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { InternalHttpServiceSetup } from '../http';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { InternalMetricsServiceSetup } from '../metrics';
 import { registerStatusRoute } from './routes';
-import { InternalEnvironmentServiceSetup } from '../environment';
 import type { InternalCoreUsageDataSetup } from '../core_usage_data';
 
 import { config, StatusConfigType } from './status_config';

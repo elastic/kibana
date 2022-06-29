@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { CoreContext } from './core_context';
-export type { CoreService, ServiceConfigDescriptor } from './services';
-export { CriticalError } from './errors';
-export { uuidRegexp } from './regexp';
-export { coreConfigPaths } from './config';
+export { environmentServiceMock } from './environment_service.mock';

@@ -3127,6 +3127,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-environment-server-internal@link:bazel-bin/packages/core/environment/core-environment-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-environment-server-mocks@link:bazel-bin/packages/core/environment/core-environment-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-i18n-browser-internal@link:bazel-bin/packages/core/i18n/core-i18n-browser-internal":
   version "0.0.0"
   uid ""
@@ -6575,6 +6583,14 @@
   uid ""
 
 "@types/kbn__core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-environment-server-internal@link:bazel-bin/packages/core/environment/core-environment-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-environment-server-mocks@link:bazel-bin/packages/core/environment/core-environment-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
