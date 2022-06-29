@@ -19,10 +19,10 @@ describe('createApiKey lib function', () => {
   const keyName = `{indexName}-key`;
 
   const createResponse = {
-    id: 'VuaCfGcBCdbkQm-e5aOx',
-    name: keyName,
     api_key: 'ui2lp2axTNmsyakw9tvNnw',
     encoded: 'VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw==',
+    id: 'VuaCfGcBCdbkQm-e5aOx',
+    name: keyName,
   };
 
   security.authc.apiKeys.create = jest.fn().mockReturnValue(createResponse);

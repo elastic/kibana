@@ -17,11 +17,11 @@ export function registerCreateAPIKeyRoute({ router }: RouteDependencies, securit
     {
       path: '/internal/enterprise_search/{indexName}/api_keys',
       validate: {
-        params: schema.object({
-          indexName: schema.string(),
-        }),
         body: schema.object({
           keyName: schema.string(),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
         }),
     } },
     async (context, request, response) => {
@@ -30,7 +30,7 @@ export function registerCreateAPIKeyRoute({ router }: RouteDependencies, securit
       try {
         const createResponse = await createApiKey(request, security, indexName, keyName);
         if (!createResponse) {
-          throw 'Unable to create API Key';
+          throw new Error('Unable to create API Key');
         }
         return response.ok({
           body: { apiKey: createResponse },
@@ -38,8 +38,8 @@ export function registerCreateAPIKeyRoute({ router }: RouteDependencies, securit
         });
       } catch (error) {
         return response.customError({
-          statusCode: 502,
           body: 'Error creating API Key',
+          statusCode: 502,
         });
       }
     }
