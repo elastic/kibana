@@ -28,6 +28,7 @@ import {
   ExternalReferenceSORt,
   CommentRequestExternalReferenceType,
   ExternalReferenceWithoutSORefsRt,
+  PersistableStateAttachmentRt,
 } from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
@@ -37,6 +38,7 @@ import {
   isCommentRequestTypeActions,
   isCommentRequestTypeExternalReference,
   assertUnreachable,
+  isCommentRequestTypePersistableState,
 } from '../common/utils';
 import { SavedObjectFindOptionsKueryNode } from '../common/types';
 
@@ -91,6 +93,11 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
     }
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment);
+  } else if (isCommentRequestTypePersistableState(comment)) {
+    pipe(
+      excess(PersistableStateAttachmentRt).decode(comment),
+      fold(throwErrors(badRequest), identity)
+    );
   } else {
     /**
      * This assertion ensures that TS will show an error

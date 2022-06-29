@@ -28,6 +28,7 @@ import {
   CommentRequestAlertType,
   CommentRequestExternalReferenceSOType,
   CommentRequestExternalReferenceType,
+  CommentRequestPersistableStateType,
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
@@ -210,7 +211,7 @@ export const transformNewComment = ({
 };
 
 /**
- * A type narrowing function for user comments. Exporting so integration tests can use it.
+ * A type narrowing function for user comments.
  */
 export const isCommentRequestTypeUser = (
   context: CommentRequest
@@ -219,7 +220,7 @@ export const isCommentRequestTypeUser = (
 };
 
 /**
- * A type narrowing function for actions comments. Exporting so integration tests can use it.
+ * A type narrowing function for actions comments.
  */
 export const isCommentRequestTypeActions = (
   context: CommentRequest
@@ -228,7 +229,7 @@ export const isCommentRequestTypeActions = (
 };
 
 /**
- * A type narrowing function for alert comments. Exporting so integration tests can use it.
+ * A type narrowing function for alert comments.
  */
 export const isCommentRequestTypeAlert = (
   context: CommentRequest
@@ -237,7 +238,7 @@ export const isCommentRequestTypeAlert = (
 };
 
 /**
- * A type narrowing function for external reference attachments. Exporting so integration tests can use it.
+ * A type narrowing function for external reference attachments.
  */
 export const isCommentRequestTypeExternalReference = (
   context: CommentRequest
@@ -246,7 +247,7 @@ export const isCommentRequestTypeExternalReference = (
 };
 
 /**
- * A type narrowing function for external reference so attachments. Exporting so integration tests can use it.
+ * A type narrowing function for external reference so attachments.
  */
 export const isCommentRequestTypeExternalReferenceSO = (
   context: Partial<CommentRequest>
@@ -255,6 +256,15 @@ export const isCommentRequestTypeExternalReferenceSO = (
     context.type === CommentType.externalReference &&
     context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
   );
+};
+
+/**
+ * A type narrowing function for persistable state attachments.
+ */
+export const isCommentRequestTypePersistableState = (
+  context: CommentRequest
+): context is CommentRequestPersistableStateType => {
+  return context.type === CommentType.persistableState;
 };
 
 /**

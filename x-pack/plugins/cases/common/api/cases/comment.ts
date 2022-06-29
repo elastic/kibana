@@ -26,6 +26,7 @@ export enum CommentType {
   alert = 'alert',
   actions = 'actions',
   externalReference = 'externalReference',
+  persistableState = 'persistableState',
 }
 
 export enum IsolateHostActionType {
@@ -101,6 +102,13 @@ export const ExternalReferenceSORt = rt.type({
 export const ExternalReferenceRt = rt.union([ExternalReferenceNoSORt, ExternalReferenceSORt]);
 export const ExternalReferenceWithoutSORefsRt = ExternalReferenceNoSORt;
 
+export const PersistableStateAttachmentRt = rt.type({
+  type: rt.literal(CommentType.persistableState),
+  owner: rt.string,
+  persistableStateAttachmentTypeId: rt.string,
+  persistableStateAttachmentState: rt.record(rt.string, jsonValueRt),
+});
+
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
 const AttributesTypeAlertsRt = rt.intersection([AlertCommentRequestRt, CommentAttributesBasicRt]);
 const AttributesTypeActionsRt = rt.intersection([
@@ -118,11 +126,17 @@ const AttributesTypeExternalReferenceWithoutSORefsRt = rt.intersection([
   CommentAttributesBasicRt,
 ]);
 
+const AttributesTypePersistableStateRt = rt.intersection([
+  PersistableStateAttachmentRt,
+  CommentAttributesBasicRt,
+]);
+
 const CommentAttributesRt = rt.union([
   AttributesTypeUserRt,
   AttributesTypeAlertsRt,
   AttributesTypeActionsRt,
   AttributesTypeExternalReferenceRt,
+  AttributesTypePersistableStateRt,
 ]);
 
 const CommentAttributesWithoutSORefsRt = rt.union([
@@ -130,6 +144,7 @@ const CommentAttributesWithoutSORefsRt = rt.union([
   AttributesTypeAlertsRt,
   AttributesTypeActionsRt,
   AttributesTypeExternalReferenceWithoutSORefsRt,
+  AttributesTypePersistableStateRt,
 ]);
 
 export const CommentRequestRt = rt.union([
@@ -138,6 +153,7 @@ export const CommentRequestRt = rt.union([
   ActionsCommentRequestRt,
   ExternalReferenceNoSORt,
   ExternalReferenceSORt,
+  PersistableStateAttachmentRt,
 ]);
 
 export const CommentResponseRt = rt.intersection([
@@ -180,6 +196,14 @@ export const CommentResponseTypeExternalReferenceRt = rt.intersection([
   }),
 ]);
 
+export const CommentResponseTypePersistableStateRt = rt.intersection([
+  AttributesTypePersistableStateRt,
+  rt.type({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
 export const AllCommentsResponseRT = rt.array(CommentResponseRt);
 
 export const CommentPatchRequestRt = rt.intersection([
@@ -204,6 +228,7 @@ export const CommentPatchAttributesRt = rt.intersection([
     rt.partial(ActionsCommentRequestRt.props),
     rt.partial(ExternalReferenceNoSORt.props),
     rt.partial(ExternalReferenceSORt.props),
+    rt.partial(PersistableStateAttachmentRt.props),
   ]),
   rt.partial(CommentAttributesBasicRt.props),
 ]);
@@ -234,10 +259,13 @@ export type BulkCreateCommentRequest = rt.TypeOf<typeof BulkCreateCommentRequest
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
 export type CommentResponseUserType = rt.TypeOf<typeof CommentResponseTypeUserRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
-export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
+export type CommentResponseTypePersistableState = rt.TypeOf<
+  typeof CommentResponseTypePersistableStateRt
+>;
 export type CommentResponseExternalReferenceType = rt.TypeOf<
   typeof CommentResponseTypeExternalReferenceRt
 >;
+export type CommentResponseActionsType = rt.TypeOf<typeof CommentResponseTypeActionsRt>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
 export type CommentsResponse = rt.TypeOf<typeof CommentsResponseRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
@@ -248,3 +276,4 @@ export type CommentRequestActionsType = rt.TypeOf<typeof ActionsCommentRequestRt
 export type CommentRequestExternalReferenceType = rt.TypeOf<typeof ExternalReferenceRt>;
 export type CommentRequestExternalReferenceSOType = rt.TypeOf<typeof ExternalReferenceSORt>;
 export type CommentRequestExternalReferenceNoSOType = rt.TypeOf<typeof ExternalReferenceNoSORt>;
+export type CommentRequestPersistableStateType = rt.TypeOf<typeof PersistableStateAttachmentRt>;

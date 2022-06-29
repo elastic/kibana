@@ -83,6 +83,14 @@ export const createCaseCommentSavedObjectType = ({
         type: 'object',
         enabled: false,
       },
+      persistableStateAttachmentTypeId: {
+        type: 'keyword',
+      },
+      persistableStateAttachmentState: {
+        dynamic: false,
+        type: 'object',
+        enabled: false,
+      },
       pushed_at: {
         type: 'date',
       },
