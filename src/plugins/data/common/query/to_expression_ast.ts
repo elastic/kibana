@@ -46,9 +46,11 @@ export async function queryStateToExpressionAst({ filters, query, time, dataView
     const mode = getAggregateQueryMode(query);
     if (mode === 'sql') {
       const idxPattern = getIndexPatternFromSQLQuery(query.sql);
-      const dataView = await dataViewsService.find(idxPattern);
-      if (dataView && dataView.length) {
-        const timeFieldName = dataView[0].timeFieldName;
+      const idsTitles = await dataViewsService.getIdsWithTitle();
+      const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
+      if (dataViewIdTitle) {
+        const dataView = await dataViewsService.get(dataViewIdTitle.id);
+        const timeFieldName = dataView.timeFieldName;
         const essql = aggregateQueryToAst(query, timeFieldName);
 
         if (essql) {

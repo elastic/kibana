@@ -8,6 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -26,6 +27,15 @@ import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
 
+function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
+  const sql = sqlQuery?.replaceAll('"', '');
+  const matches = sql?.match(/FROM\s+([\w*]+)/);
+  if (matches) {
+    return matches[1];
+  }
+  return '';
+}
+
 export function useDiscoverState({
   services,
   history,
@@ -42,6 +52,7 @@ export function useDiscoverState({
   const { timefilter } = data.query.timefilter;
 
   const indexPattern = savedSearch.searchSource.getField('index')!;
+  // console.log(indexPattern);
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -225,6 +236,21 @@ export function useDiscoverState({
       refetch$.next(undefined);
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
+
+  useEffect(() => {
+    async function fetchDataview() {
+      if (state.query && isOfAggregateQueryType(state.query)) {
+        const indexPatternFROMQuery = getIndexPatternFromSQLQuery(state.query.sql);
+        const idsTitles = await indexPatterns.getIdsWithTitle();
+        const dataView = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
+        if (dataView) {
+          stateContainer.setAppState({ index: dataView.id });
+        }
+      }
+    }
+
+    fetchDataview();
+  }, [config, indexPatterns, savedSearch.searchSource, state.query, stateContainer]);
 
   return {
     data$,
