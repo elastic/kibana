@@ -151,6 +151,9 @@ npm_install_global() {
 
   npmRoot=$(npm root -g)
   packageRoot="${npmRoot:?}/$package"
+
+  # The success flag file exists just to try to make sure we know that the full install was done
+  # For example, if a job terminates in the middle of npm install, a directory could be left behind that we don't know the state of
   successFlag="${packageRoot:?}/.install-success"
 
   toInstall="$package"
