@@ -32,6 +32,7 @@ import {
   APP_USERS_PATH,
   APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
+  APP_RESPONSE_ACTIONS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -165,6 +166,13 @@ export const navTabs: SecurityNav = {
     id: SecurityPageName.blocklist,
     name: i18n.BLOCKLIST,
     href: APP_BLOCKLIST_PATH,
+    disabled: false,
+    urlKey: 'administration',
+  },
+  [SecurityPageName.responseActions]: {
+    id: SecurityPageName.responseActions,
+    name: i18n.RESPONSE_ACTIONS,
+    href: APP_RESPONSE_ACTIONS_PATH,
     disabled: false,
     urlKey: 'administration',
   },
