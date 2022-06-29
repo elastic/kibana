@@ -89,7 +89,8 @@ export class IndexedFieldsTable extends Component<
       indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
-    return Object.entries(indexPattern.getAllRuntimeFields()).map(([name, fld]) => {
+    // return Object.entries(indexPattern.getAllRuntimeFields()).map(([name, fld]) => {
+    return Object.entries(this.props.compositeRuntimeFields).map(([name, fld]) => {
       return {
         spec: {
           searchable: false,

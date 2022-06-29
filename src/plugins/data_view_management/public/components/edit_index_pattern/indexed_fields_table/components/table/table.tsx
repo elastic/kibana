@@ -34,7 +34,8 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexedFieldItem } from '../../types';
 
 export const showDelete = (field: IndexedFieldItem) =>
-  !field.isMapped && field.isUserEditable && field.runtimeField?.type !== 'composite';
+  (!field.isMapped && field.isUserEditable && field.runtimeField?.type !== 'composite') ||
+  (field.runtimeField?.type === 'composite' && !field.type);
 
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(

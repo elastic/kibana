@@ -47,9 +47,11 @@ export interface FieldEditorFormState {
   submit: FormHook<Field>['submit'];
 }
 
+type TypeSelection = Array<EuiComboBoxOptionOption<RuntimeType>>;
+
 export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
-  fields?: Array<{ name: string; type: string }>;
-  type: Array<EuiComboBoxOptionOption<RuntimeType>>;
+  fields?: Array<{ name: string; type: TypeSelection }>;
+  type: TypeSelection;
   __meta__: {
     isCustomLabelVisible: boolean;
     isValueVisible: boolean;
@@ -72,14 +74,16 @@ const changeWarning = i18n.translate('indexPatternFieldEditor.editor.form.change
     'Changing name or type can break searches and visualizations that rely on this field.',
 });
 
-const formDeserializer = (field: Field): FieldFormInternal => {
-  let fieldType: Array<EuiComboBoxOptionOption<RuntimeType>>;
-  if (!field.type) {
-    fieldType = [RUNTIME_FIELD_OPTIONS[0]];
-  } else {
-    const label = RUNTIME_FIELD_OPTIONS.find(({ value }) => value === field.type)?.label;
-    fieldType = [{ label: label ?? field.type, value: field.type as RuntimeType }];
+const fieldTypeToComboBoxOption = (type: Field['type']): TypeSelection => {
+  if (type) {
+    const label = RUNTIME_FIELD_OPTIONS.find(({ value }) => value === type)?.label;
+    return [{ label: label ?? type, value: type as RuntimeType }];
   }
+  return [RUNTIME_FIELD_OPTIONS[0]];
+};
+
+const formDeserializer = (field: Field): FieldFormInternal => {
+  const fieldType = fieldTypeToComboBoxOption(field.type);
 
   const format = field.format === null ? undefined : field.format;
   // console.log('DESERIALIZER', field.fields);
@@ -90,7 +94,7 @@ const formDeserializer = (field: Field): FieldFormInternal => {
     fields: field.fields
       ? Object.entries(field.fields).reduce<Array<{ name: string; type: RuntimePrimitiveTypes }>>(
           (col, [key, val]) => {
-            col.push({ name: key, type: val.type });
+            col.push({ name: key, type: fieldTypeToComboBoxOption(val.type) });
             return col;
           },
           []
@@ -107,7 +111,7 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 
 const formSerializer = (field: FieldFormInternal): Field => {
   const { __meta__, type, format, fields, ...rest } = field;
-  console.log('serializer', fields);
+
   return {
     type: type && type[0].value!,
     // By passing "null" we are explicitly telling DataView to remove the
@@ -115,7 +119,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
     format: format === undefined ? null : format,
     fields: fields
       ? fields.reduce<Record<string, RuntimeFieldSubField>>((acc, { name, type: subfieldType }) => {
-          acc[name] = { type: subfieldType as RuntimePrimitiveTypes };
+          acc[name] = { type: subfieldType[0].value as RuntimePrimitiveTypes };
           return acc;
         }, {})
       : undefined,
@@ -124,10 +128,11 @@ const formSerializer = (field: FieldFormInternal): Field => {
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
+  // todo
+  console.log('FieldEditorComponent - this is rerendering too much');
   const { namesNotAllowed, fieldTypeToProcess } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
-    fields$,
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -148,16 +153,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       '__meta__.isFormatVisible',
       '__meta__.isPopularityVisible',
     ],
-  });
-
-  fields$.subscribe({
-    next: (flds) => {
-      flds.forEach((f, idx) => {
-        console.log('setting field', f);
-        form.setFieldValue(`fields.[${idx}].name`, f.name);
-        form.setFieldValue(`fields.[${idx}].type`, f.type);
-      });
-    },
   });
 
   const {
@@ -225,7 +220,11 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
         {/* Type */}
         <EuiFlexItem>
-          <TypeField isDisabled={fieldTypeToProcess === 'concrete'} />
+          <TypeField
+            isDisabled={fieldTypeToProcess === 'concrete'}
+            includeComposite={true}
+            path="type"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

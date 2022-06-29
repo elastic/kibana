@@ -183,17 +183,9 @@ export function Tabs({
   const closeEditorHandler = useRef<() => void | undefined>();
   const { DeleteRuntimeFieldProvider } = dataViewFieldEditor;
 
-  /*
   const compositeRuntimeFields = useMemo(
     () => pickBy(indexPattern.getAllRuntimeFields(), (fld) => fld.type === 'composite'),
     [indexPattern]
-  );
-  */
-
-  console.log('recalculating composite fields', indexPattern.getAllRuntimeFields());
-  const compositeRuntimeFields = pickBy(
-    indexPattern.getAllRuntimeFields(),
-    (fld) => fld.type === 'composite'
   );
 
   const updateFilterItem = (
