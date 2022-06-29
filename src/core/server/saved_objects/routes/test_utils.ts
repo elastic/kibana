@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ContextService } from '../../context';
 import { createHttpServer, createCoreContext } from '../../http/test_utils';
 import { contextServiceMock, coreMock } from '../../mocks';
-import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { SavedObjectsType } from '../types';
 
 const defaultCoreId = Symbol('core');
