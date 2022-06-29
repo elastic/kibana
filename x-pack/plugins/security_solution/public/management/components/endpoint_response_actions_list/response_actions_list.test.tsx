@@ -227,8 +227,9 @@ describe('Response Actions List', () => {
       userEvent.click(toggle);
       reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
 
-      await new Promise((r) => setTimeout(r, 3500));
-      expect(refetchFunction).toHaveBeenCalledTimes(3);
+      await reactTestingLibrary.waitFor(() => {
+        expect(refetchFunction).toHaveBeenCalledTimes(3);
+      });
     });
   });
 
