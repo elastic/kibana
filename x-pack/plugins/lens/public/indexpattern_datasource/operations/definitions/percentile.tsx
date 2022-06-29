@@ -326,6 +326,7 @@ export const percentileOperation: OperationDefinition<
         }
       >
         <EuiRange
+          fullWidth
           data-test-subj="lns-indexPattern-percentile-input"
           compressed
           value={inputValue ?? ''}

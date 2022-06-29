@@ -159,7 +159,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       );
 
     return (
-      <EuiFormRow>
+      <EuiFormRow fullWidth>
         <FilterList
           filters={filters}
           setFilters={setFilters}

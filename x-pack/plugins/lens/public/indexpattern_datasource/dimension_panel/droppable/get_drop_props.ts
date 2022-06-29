@@ -36,6 +36,8 @@ interface GetDropPropsArgs {
 
 type DropProps = { dropTypes: DropType[]; nextLabel?: string } | undefined;
 
+const operationDisplay = getOperationDisplay();
+
 export function getNewOperation(
   field: IndexPatternField | undefined | false,
   filterOperations: (meta: OperationMetadata) => boolean,
@@ -131,7 +133,7 @@ function getDropPropsForField({
   const newOperation = getNewOperation(source.field, target.filterOperations, targetColumn);
 
   if (isTheSameIndexPattern && newOperation) {
-    const nextLabel = getOperationDisplay()[newOperation].displayName;
+    const nextLabel = operationDisplay[newOperation].displayName;
 
     if (!targetColumn) {
       return { dropTypes: ['field_add'], nextLabel };
@@ -225,7 +227,7 @@ function getDropPropsFromIncompatibleGroup(
 
     return {
       dropTypes,
-      nextLabel: getOperationDisplay()[newOperationForSource].displayName,
+      nextLabel: operationDisplay[newOperationForSource].displayName,
     };
   }
 }

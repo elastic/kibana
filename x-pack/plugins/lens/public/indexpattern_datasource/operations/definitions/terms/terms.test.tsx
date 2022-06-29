@@ -2128,9 +2128,9 @@ describe('terms', () => {
 
       expect(select.prop('options')!.map(({ value }) => value)).toEqual([
         'column$$$col2',
-        'custom',
         'alphabetical',
         'rare',
+        'custom',
       ]);
     });
 
@@ -2154,8 +2154,8 @@ describe('terms', () => {
 
       expect(select.prop('options')!.map(({ value }) => value)).toEqual([
         'column$$$col2',
-        'custom',
         'alphabetical',
+        'custom',
       ]);
     });
 

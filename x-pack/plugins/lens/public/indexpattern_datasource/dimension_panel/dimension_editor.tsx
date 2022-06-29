@@ -71,6 +71,8 @@ export interface DimensionEditorProps extends IndexPatternDimensionEditorProps {
   currentIndexPattern: IndexPattern;
 }
 
+const operationDisplay = getOperationDisplay();
+
 export function DimensionEditor(props: DimensionEditorProps) {
   const {
     selectedColumn,
@@ -314,8 +316,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     () => fieldIsInvalid(selectedColumn, currentIndexPattern),
     [selectedColumn, currentIndexPattern]
   );
-
-  const operationDisplay = getOperationDisplay();
 
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField, disabledStatus }) => {

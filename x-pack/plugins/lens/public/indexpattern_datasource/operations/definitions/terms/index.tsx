@@ -581,12 +581,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         };
       });
     orderOptions.push({
-      value: toValue({ type: 'custom' }),
-      text: i18n.translate('xpack.lens.indexPattern.terms.orderCustomMetric', {
-        defaultMessage: 'Custom metric',
-      }),
-    });
-    orderOptions.push({
       value: toValue({ type: 'alphabetical' }),
       text: i18n.translate('xpack.lens.indexPattern.terms.orderAlphabetical', {
         defaultMessage: 'Alphabetical',
@@ -603,6 +597,12 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         }),
       });
     }
+    orderOptions.push({
+      value: toValue({ type: 'custom' }),
+      text: i18n.translate('xpack.lens.indexPattern.terms.orderCustomMetric', {
+        defaultMessage: 'Custom',
+      }),
+    });
 
     const secondaryFieldsCount = currentColumn.params.secondaryFields
       ? currentColumn.params.secondaryFields.length
@@ -681,6 +681,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         >
           <EuiSelect
             compressed
+            fullWidth
             data-test-subj="indexPattern-terms-orderBy"
             options={orderOptions}
             value={toValue(currentColumn.params.orderBy)}
@@ -738,6 +739,12 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         {currentColumn.params.orderAgg && (
           <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s" style={{ margin: `8px 0` }}>
             <ReferenceEditor
+              functionLabel={i18n.translate('xpack.lens.indexPattern.terms.orderAgg.rankFunction', {
+                defaultMessage: 'Rank function',
+              })}
+              fieldLabel={i18n.translate('xpack.lens.indexPattern.terms.orderAgg.rankField', {
+                defaultMessage: 'Rank field',
+              })}
               layer={layer}
               selectionStyle="full"
               columnId={`${columnId}-orderAgg`}

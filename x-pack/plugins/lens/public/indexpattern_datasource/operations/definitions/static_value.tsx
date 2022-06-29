@@ -219,6 +219,7 @@ export const staticValueOperation: OperationDefinition<
         <EuiFormLabel>{paramEditorCustomProps?.label || defaultLabel}</EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiFieldNumber
+          fullWidth
           data-test-subj="lns-indexPattern-static_value-input"
           compressed
           value={inputValue ?? ''}

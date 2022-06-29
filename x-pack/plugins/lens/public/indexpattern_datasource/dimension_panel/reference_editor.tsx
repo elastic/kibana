@@ -81,6 +81,8 @@ export interface ReferenceEditorProps {
   column?: GenericIndexPatternColumn;
   incompleteColumn?: IncompleteColumn;
   currentIndexPattern: IndexPattern;
+  functionLabel?: string;
+  fieldLabel?: string;
 
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
@@ -118,9 +120,11 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     labelAppend,
     column,
     incompleteColumn,
+    functionLabel,
     onChooseField,
     onDeleteColumn,
     onChooseFunction,
+    fieldLabel,
   } = props;
 
   const selectedOperationDefinition = column && operationDefinitionMap[column.operationType];
@@ -228,9 +232,12 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
         <>
           <EuiFormRow
             data-test-subj="indexPattern-subFunction-selection-row"
-            label={i18n.translate('xpack.lens.indexPattern.chooseSubFunction', {
-              defaultMessage: 'Choose a sub-function',
-            })}
+            label={
+              functionLabel ||
+              i18n.translate('xpack.lens.indexPattern.chooseSubFunction', {
+                defaultMessage: 'Choose a sub-function',
+              })
+            }
             fullWidth
             isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
           >
@@ -239,9 +246,12 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
               compressed
               isClearable={false}
               data-test-subj="indexPattern-reference-function"
-              placeholder={i18n.translate('xpack.lens.indexPattern.referenceFunctionPlaceholder', {
-                defaultMessage: 'Sub-function',
-              })}
+              placeholder={
+                functionLabel ||
+                i18n.translate('xpack.lens.indexPattern.referenceFunctionPlaceholder', {
+                  defaultMessage: 'Sub-function',
+                })
+              }
               options={functionOptions}
               isInvalid={showOperationInvalid || showSelectionFunctionInvalid}
               selectedOptions={selectedOption}
@@ -277,9 +287,12 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
       {!column || selectedOperationDefinition?.input === 'field' ? (
         <EuiFormRow
           data-test-subj="indexPattern-reference-field-selection-row"
-          label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-            defaultMessage: 'Field',
-          })}
+          label={
+            fieldLabel ||
+            i18n.translate('xpack.lens.indexPattern.chooseField', {
+              defaultMessage: 'Field',
+            })
+          }
           fullWidth
           isInvalid={showFieldInvalid || showFieldMissingInvalid}
           labelAppend={labelAppend}

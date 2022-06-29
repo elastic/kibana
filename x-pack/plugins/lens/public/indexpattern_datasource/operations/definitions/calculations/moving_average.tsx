@@ -208,6 +208,7 @@ function MovingAverageParamEditor({
       isInvalid={!isValidNumber(inputValue)}
     >
       <EuiFieldNumber
+        fullWidth
         compressed
         value={inputValue}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}

@@ -203,6 +203,7 @@ export const percentileRanksOperation: OperationDefinition<
         }
       >
         <EuiFieldNumber
+          fullWidth
           data-test-subj="lns-indexPattern-percentile_ranks-input"
           compressed
           value={inputValue ?? ''}

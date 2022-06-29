@@ -296,6 +296,7 @@ export const lastValueOperation: OperationDefinition<
             placeholder={i18n.translate('xpack.lens.indexPattern.lastValue.sortFieldPlaceholder', {
               defaultMessage: 'Sort field',
             })}
+            fullWidth
             compressed
             isClearable={false}
             data-test-subj="lns-indexPattern-lastValue-sortField"
