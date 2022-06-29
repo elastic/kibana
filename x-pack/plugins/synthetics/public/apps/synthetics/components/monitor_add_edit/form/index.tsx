@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
-import { useFormWrapped } from './use_form_wrapped';
+import { useFormWrapped } from '../hooks/use_form_wrapped';
 import { FormMonitorType, SyntheticsMonitor } from '../types';
 import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
