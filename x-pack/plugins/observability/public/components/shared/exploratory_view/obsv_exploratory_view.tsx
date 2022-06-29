@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { getSyntheticsSingleMetricConfig } from './configurations/synthetics/single_metric_config';
 import { ExploratoryViewPage } from '.';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 import { AppDataType, ReportViewType } from './types';
@@ -17,6 +18,7 @@ import {
   DEVICE_DISTRIBUTION_LABEL,
   KPI_OVER_TIME_LABEL,
   PERF_DIST_LABEL,
+  SINGLE_METRIC_LABEL,
 } from './configurations/constants/labels';
 import { SELECT_REPORT_TYPE } from './series_editor/series_editor';
 import { DataTypes } from './configurations/constants';
@@ -86,6 +88,7 @@ export const reportTypesList: Array<{
   { reportType: 'data-distribution', label: PERF_DIST_LABEL },
   { reportType: 'core-web-vitals', label: CORE_WEB_VITALS_LABEL },
   { reportType: 'device-data-distribution', label: DEVICE_DISTRIBUTION_LABEL },
+  { reportType: 'single-metric', label: SINGLE_METRIC_LABEL },
 ];
 
 export const obsvReportConfigMap = {
@@ -95,7 +98,11 @@ export const obsvReportConfigMap = {
     getCoreWebVitalsConfig,
     getSingleMetricConfig,
   ],
-  [DataTypes.SYNTHETICS]: [getSyntheticsKPIConfig, getSyntheticsDistributionConfig],
+  [DataTypes.SYNTHETICS]: [
+    getSyntheticsKPIConfig,
+    getSyntheticsDistributionConfig,
+    getSyntheticsSingleMetricConfig,
+  ],
   [DataTypes.MOBILE]: [
     getMobileKPIConfig,
     getMobileKPIDistributionConfig,
