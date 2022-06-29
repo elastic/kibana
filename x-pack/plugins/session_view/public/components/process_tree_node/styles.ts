@@ -109,15 +109,13 @@ export const useStyles = ({
         backgroundColor: bgColor,
         width: `calc(100% + ${depth} * ${TREE_INDENT} + ${PROCESS_TREE_LEFT_PADDING})`,
       },
+      '.euiToolTipAnchor': {
+        verticalAlign: 'middle',
+      },
     };
 
     const textSection: CSSObject = {
       marginLeft: size.s,
-      span: {
-        fontSize: FONT_SIZE,
-        lineHeight: LINE_HEIGHT,
-        verticalAlign: 'middle',
-      },
     };
 
     const sessionLeader: CSSObject = {

@@ -10,15 +10,9 @@ import { CSSObject } from '@emotion/react';
 
 type Props = {
   children: string;
+  highlightIndices?: number[];
+  highlightStyle?: CSSObject;
   role?: string;
-};
-
-const css: CSSObject = {
-  '&&': {
-    display: 'inline',
-    fontSize: 0,
-    lineHeight: 0,
-  },
 };
 
 // Split a text into multiple spans, each of which a single character. This is
@@ -26,14 +20,30 @@ const css: CSSObject = {
 // exclusive features, such height or line-height.
 // It adds a `aria-label` attribute to a parent span, which is used by screen readers to
 // read the text as a single block.
-export const SplitText = ({ children, role = 'document', ...props }: Props) => (
-  <span css={css} aria-label={children} role={role}>
-    {children.split('').map(function (char, index) {
-      return (
-        <span aria-hidden="true" key={index} {...props}>
-          {char === ' ' ? <>&nbsp;</> : char}
-        </span>
-      );
-    })}
-  </span>
-);
+
+const css: CSSObject = {};
+
+export const SplitText = ({
+  children,
+  role = 'document',
+  highlightIndices,
+  highlightStyle,
+  ...props
+}: Props) => {
+  return (
+    <>
+      {children.split('').map(function (char, index) {
+        return (
+          <span
+            aria-hidden="true"
+            css={highlightIndices?.includes(index) ? highlightStyle : css}
+            key={index}
+            {...props}
+          >
+            {char === ' ' ? <>&nbsp;</> : char}
+          </span>
+        );
+      })}
+    </>
+  );
+};
