@@ -41,17 +41,12 @@ export const EmptyPlaceholder = ({
   }, [renderComplete]);
 
   return (
-    <EuiText
-      data-test-subj={dataTestSubj}
-      css={style}
-      className={className}
-      textAlign="center"
-      color="subdued"
-      size="xs"
-    >
-      <EuiIcon type={icon} color={iconColor} size="l" />
-      <EuiSpacer size="s" />
-      <p>{message}</p>
-    </EuiText>
+    <div className={className} css={style}>
+      <EuiText data-test-subj={dataTestSubj} textAlign="center" color="subdued" size="xs">
+        <EuiIcon type={icon} color={iconColor} size="l" />
+        <EuiSpacer size="s" />
+        <p>{message}</p>
+      </EuiText>
+    </div>
   );
 };
