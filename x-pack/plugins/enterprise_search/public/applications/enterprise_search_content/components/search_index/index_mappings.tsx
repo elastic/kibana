@@ -7,6 +7,6 @@
 
 import React from 'react';
 
-export const SearchIndexDocuments: React.FC = () => {
-  return <>Documents</>;
+export const SearchIndexIndexMappings: React.FC = () => {
+  return <>Index Mappings</>;
 };
