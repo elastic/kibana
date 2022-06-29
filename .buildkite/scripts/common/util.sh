@@ -167,6 +167,4 @@ npm_install_global() {
     echo "Trying again to install $toInstall..."
     npm install -g "$toInstall" && touch "$successFlag"
   fi
-
-  ls -alh "$packageRoot"
 }
