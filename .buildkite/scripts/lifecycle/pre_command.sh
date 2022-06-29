@@ -12,7 +12,7 @@ BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/k
 export BUILDKITE_TOKEN
 
 echo '--- Install/build buildkite dependencies'
-npm install -g ts-node
+npm_install_global ts-node
 cd '.buildkite'
 retry 5 15 npm ci
 cd ..

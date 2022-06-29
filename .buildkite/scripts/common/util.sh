@@ -141,3 +141,22 @@ set_git_merge_base() {
 
   export GITHUB_PR_MERGE_BASE
 }
+
+# If this command is terminated early, e.g. because the build was cancelled in buildkite,
+# a package directory is left behind in a bad state that can cause all subsequent installs to fail
+npm_install_global() {
+  package="$1"
+  version="${2:-}"
+
+  toInstall="$package"
+  if [[ "$version" ]]; then
+    toInstall="$package@$version"
+  fi
+
+  if [[ ! $(npm install -g "$toInstall") ]]; then
+    npmRoot=$(npm root -g)
+    rm -rf "${npmRoot:?}/$package"
+    echo "Trying again to install $toInstall..."
+    npm install -g "$toInstall"
+  fi
+}
