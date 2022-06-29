@@ -233,7 +233,7 @@ export type {
   SafeRouteMethod,
 } from './http';
 
-export { kibanaResponseFactory, validBodyOutput } from './http';
+export { kibanaResponseFactory, validBodyOutput, CoreKibanaRequest } from './http';
 export type { KibanaRequest } from './http';
 
 export type {
