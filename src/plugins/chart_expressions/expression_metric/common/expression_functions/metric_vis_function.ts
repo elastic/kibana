@@ -22,50 +22,50 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
   type: 'render',
   inputTypes: ['datatable'],
-  help: i18n.translate('expressionNewMetricVis.function.help', {
+  help: i18n.translate('expressionMetricVis.function.help', {
     defaultMessage: 'Metric visualization',
   }),
   args: {
     metric: {
       types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionNewMetricVis.function.metric.help', {
+      help: i18n.translate('expressionMetricVis.function.metric.help', {
         defaultMessage: 'The primary metric.',
       }),
     },
     secondaryMetric: {
       types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionNewMetricVis.function.secondaryMetric.help', {
+      help: i18n.translate('expressionMetricVis.function.secondaryMetric.help', {
         defaultMessage: 'The secondary metric (shown above the primary).',
       }),
     },
     breakdownBy: {
       types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionNewMetricVis.function.breakdownBy.help', {
+      help: i18n.translate('expressionMetricVis.function.breakdownBy.help', {
         defaultMessage: 'The dimension containing the labels for sub-categories.',
       }),
     },
     subtitle: {
       types: ['string'],
-      help: i18n.translate('expressionNewMetricVis.function.subtitle.help', {
+      help: i18n.translate('expressionMetricVis.function.subtitle.help', {
         defaultMessage: 'The subtitle for a single metric. Overridden if breakdownBy is supplied.',
       }),
     },
     extraText: {
       types: ['string'],
-      help: i18n.translate('expressionNewMetricVis.function.extra.help', {
+      help: i18n.translate('expressionMetricVis.function.extra.help', {
         defaultMessage: 'Text to be shown above metric value. Overridden by secondaryMetric.',
       }),
     },
     progressMin: {
       types: ['number'],
-      help: i18n.translate('expressionNewMetricVis.function.progressMin.help', {
+      help: i18n.translate('expressionMetricVis.function.progressMin.help', {
         defaultMessage: 'The number at which the progress bar should be empty.',
       }),
     },
     progressMax: {
       types: ['number'],
       // TODO: revisit default
-      help: i18n.translate('expressionNewMetricVis.function.progressMax.help.', {
+      help: i18n.translate('expressionMetricVis.function.progressMax.help.', {
         defaultMessage: 'The number at which the progress bar should be full.',
       }),
     },
@@ -73,27 +73,27 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string'],
       options: [LayoutDirection.Vertical, LayoutDirection.Horizontal],
       default: LayoutDirection.Vertical,
-      help: i18n.translate('expressionNewMetricVis.function.progressDirection.help', {
+      help: i18n.translate('expressionMetricVis.function.progressDirection.help', {
         defaultMessage: 'The direction the progress bar should grow.',
       }),
       strict: true,
     },
     palette: {
       types: ['palette'],
-      help: i18n.translate('expressionNewMetricVis.function.palette.help', {
+      help: i18n.translate('expressionMetricVis.function.palette.help', {
         defaultMessage: 'Provides colors for the values, based on the bounds.',
       }),
     },
     maxCols: {
       types: ['number'],
-      help: i18n.translate('expressionNewMetricVis.function.numCols.help', {
+      help: i18n.translate('expressionMetricVis.function.numCols.help', {
         defaultMessage: 'Specifies the max number of columns in the metric grid.',
       }),
       default: 5,
     },
     minTiles: {
       types: ['number'],
-      help: i18n.translate('expressionNewMetricVis.function.minTiles.help', {
+      help: i18n.translate('expressionMetricVis.function.minTiles.help', {
         defaultMessage:
           'Specifies the minimum number of tiles in the metric grid regardless of the input data.',
       }),
@@ -111,7 +111,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       const argsTable: Dimension[] = [
         [
           [args.metric],
-          i18n.translate('expressionNewMetricVis.function.dimension.metric', {
+          i18n.translate('expressionMetricVis.function.dimension.metric', {
             defaultMessage: 'Metric',
           }),
         ],
@@ -120,7 +120,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       if (args.secondaryMetric) {
         argsTable.push([
           [args.secondaryMetric],
-          i18n.translate('expressionNewMetricVis.function.dimension.secondaryMetric', {
+          i18n.translate('expressionMetricVis.function.dimension.secondaryMetric', {
             defaultMessage: 'Secondary Metric',
           }),
         ]);
@@ -129,7 +129,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       if (args.breakdownBy) {
         argsTable.push([
           [args.breakdownBy],
-          i18n.translate('expressionNewMetricVis.function.dimension.splitGroup', {
+          i18n.translate('expressionMetricVis.function.dimension.splitGroup', {
             defaultMessage: 'Split group',
           }),
         ]);

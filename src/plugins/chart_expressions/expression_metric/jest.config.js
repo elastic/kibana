@@ -9,11 +9,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../',
-  roots: ['<rootDir>/src/plugins/chart_expressions/expression_metric_new'],
+  roots: ['<rootDir>/src/plugins/chart_expressions/expression_metric'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/plugins/chart_expressions/expression_metric_new',
+    '<rootDir>/target/kibana-coverage/jest/src/plugins/chart_expressions/expression_metric',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/chart_expressions/expression_metric_new/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/plugins/chart_expressions/expression_metric/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
