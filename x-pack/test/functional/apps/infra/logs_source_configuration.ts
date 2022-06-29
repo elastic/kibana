@@ -31,13 +31,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Allows indices configuration', () => {
-      const localStart = new Date(new Date(DATES.metricsAndLogs.stream.startWithData).getTime());
-      const localEnd = new Date(new Date(DATES.metricsAndLogs.stream.endWithData).getTime());
       const logPosition = {
-        start: localStart.toISOString(),
-        end: localEnd.toISOString(),
+        start: DATES.metricsAndLogs.stream.startWithData,
+        end: DATES.metricsAndLogs.stream.endWithData,
       };
-      const formattedLocalStart = localStart.toLocaleDateString('en-US', {
+      const formattedLocalStart = new Date(logPosition.start).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
