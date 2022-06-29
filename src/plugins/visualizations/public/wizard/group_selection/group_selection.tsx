@@ -112,7 +112,6 @@ function GroupSelection(props: GroupSelectionProps) {
                     }
                   )}
                   icon={<EuiIcon type="heatmap" size="xl" color="success" />}
-                  className="visNewVisDialog__groupsCard"
                 >
                   <EuiLink
                     data-test-subj="visGroupAggBasedExploreLink"
@@ -205,7 +204,6 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         }
         layout="horizontal"
         icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="success" />}
-        className="visNewVisDialog__groupsCard"
       />
     </EuiFlexItem>
   );
