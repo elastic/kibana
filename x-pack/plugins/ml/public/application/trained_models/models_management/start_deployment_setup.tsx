@@ -254,7 +254,7 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
           title={
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.startDeployment.maxNumOfProcessorsWarning"
-              defaultMessage="The sum of the number of allocations and threads per allocation must be less that the total number of processors on your ML nodes."
+              defaultMessage="The product of the number of allocations and threads per allocation should be less that the total number of processors on your ML nodes."
             />
           }
           iconType="iInCircle"
