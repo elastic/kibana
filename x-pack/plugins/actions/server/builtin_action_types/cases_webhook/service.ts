@@ -101,7 +101,10 @@ export const createExternalService = (
   };
 
   const makeCaseStringy = (properties: Record<string, string | string[]>) => ({
-    case: Object.entries(properties).map(([key, value]) => ({ [key]: JSON.stringify(value) })),
+    case: Object.entries(properties).reduce(
+      (acc, [key, value]) => ({ ...acc, [key]: JSON.stringify(value) }),
+      {}
+    ),
   });
 
   const createIncident = async ({
@@ -164,7 +167,7 @@ export const createExternalService = (
           updateIncidentJson,
           makeCaseStringy({
             ...(summary ? { title: summary } : {}),
-            ...(description ? { title: description } : {}),
+            ...(description ? { description } : {}),
             ...(labels ? { tags: labels } : {}),
           })
         ),
