@@ -83,7 +83,7 @@ export const waitForElasticRulesBulkEditModal = (rulesCount: number) => {
 
 export const checkElasticRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
-    `${rulesCount} prebuild Elastic rules (editing prebuilt rules is not supported)`
+    `${rulesCount} prebuilt Elastic rules (editing prebuilt rules is not supported)`
   );
 };
 

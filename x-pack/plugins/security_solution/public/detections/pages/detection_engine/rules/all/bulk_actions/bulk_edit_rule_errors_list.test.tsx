@@ -48,7 +48,7 @@ describe('Component BulkEditRuleErrorsList', () => {
   test.each([
     [
       BULK_ACTIONS_DRY_RUN_ERR_CODE.IMMUTABLE,
-      '2 prebuild Elastic rules (editing prebuilt rules is not supported)',
+      '2 prebuilt Elastic rules (editing prebuilt rules is not supported)',
     ],
     [
       BULK_ACTIONS_DRY_RUN_ERR_CODE.MACHINE_LEARNING_INDEX_PATTERN,

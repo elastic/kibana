@@ -37,7 +37,7 @@ const BulkEditRuleErrorsListComponent = ({ ruleErrors = [] }: BulkEditRuleErrors
                 <li key={message}>
                   <FormattedMessage
                     id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.elasticRulesEditDescription"
-                    defaultMessage="{rulesCount, plural, =1 {# prebuild Elastic rule} other {# prebuild Elastic rules}} (editing prebuilt rules is not supported)"
+                    defaultMessage="{rulesCount, plural, =1 {# prebuilt Elastic rule} other {# prebuilt Elastic rules}} (editing prebuilt rules is not supported)"
                     values={{ rulesCount }}
                   />
                 </li>
