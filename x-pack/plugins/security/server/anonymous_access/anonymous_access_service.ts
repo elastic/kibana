@@ -12,9 +12,10 @@ import type {
   CapabilitiesStart,
   IBasePath,
   IClusterClient,
+  KibanaRequest,
   Logger,
 } from '@kbn/core/server';
-import { KibanaRequest, CoreKibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 

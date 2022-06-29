@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IBasePath, IClusterClient, LoggerFactory } from '@kbn/core/server';
-import { KibanaRequest, CoreKibanaRequest } from '@kbn/core/server';
+import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
