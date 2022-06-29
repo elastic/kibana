@@ -59,7 +59,7 @@ const fields = {
   },
 };
 
-<UseMultiField fields={fields}>
+<UseMultiFields fields={fields}>
   {({ min, max }) => {
     return (
       <EuiDualRange
@@ -73,7 +73,7 @@ const fields = {
       />
     );
   }}
-</UseMultiField>
+</UseMultiFields>
 ```
  */
 export function UseMultiFields<T = { [key: string]: unknown }>({ fields, children }: Props<T>) {
