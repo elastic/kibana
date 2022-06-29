@@ -16,6 +16,9 @@ import {
   EuiTourStep,
   EuiTourStepProps,
   EuiOverlayMask,
+  EuiImage,
+  EuiSpacer,
+  EuiText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
@@ -40,10 +43,12 @@ const getSteps = ({
   activeStep,
   incrementStep,
   endTour,
+  prependBasePath,
 }: {
   activeStep: number;
   incrementStep: () => void;
   endTour: () => void;
+  prependBasePath?: (imageName: string) => string;
 }) => {
   const footerAction = (
     <EuiFlexGroup gutterSize="s" alignItems="baseline">
@@ -92,7 +97,7 @@ const getSteps = ({
 
   return tourStepsConfig.map((stepConfig, index) => {
     const step = index + 1;
-    const { dataTestSubj, showOverlay, ...tourStepProps } = stepConfig;
+    const { dataTestSubj, showOverlay, content, imageConfig, ...tourStepProps } = stepConfig;
     return (
       <EuiTourStep
         {...tourStepProps}
@@ -109,6 +114,23 @@ const getSteps = ({
         panelProps={{
           'data-test-subj': dataTestSubj,
         }}
+        content={
+          <>
+            <EuiText size="s">
+              <p>{content}</p>
+            </EuiText>
+            {imageConfig && prependBasePath && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiImage
+                  alt={imageConfig.altText}
+                  src={prependBasePath(`/plugins/observability/assets/${imageConfig.name}`)}
+                  size="fullWidth"
+                />
+              </>
+            )}
+          </>
+        }
       />
     );
   });
@@ -148,11 +170,13 @@ export function ObservabilityTour({
   navigateToApp,
   isPageDataLoaded,
   showTour,
+  prependBasePath,
 }: {
   children: ({ isTourVisible }: { isTourVisible: boolean }) => ReactNode;
   navigateToApp: ApplicationStart['navigateToApp'];
   isPageDataLoaded: boolean;
   showTour: boolean;
+  prependBasePath?: (imageName: string) => string;
 }) {
   const prevIsTourActive = localStorage.getItem(observTourActiveStorageKey);
   const prevActiveStep = localStorage.getItem(observTourStepStorageKey);
@@ -209,7 +233,7 @@ export function ObservabilityTour({
       {children({ isTourVisible })}
       {isTourVisible && (
         <>
-          {getSteps({ activeStep, incrementStep, endTour })}
+          {getSteps({ activeStep, incrementStep, endTour, prependBasePath })}
           {showOverlay && (
             <EuiOverlayMask
               className="observabilityTour__overlayMask"

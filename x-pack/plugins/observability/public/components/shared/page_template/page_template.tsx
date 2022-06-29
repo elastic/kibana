@@ -135,6 +135,7 @@ export function ObservabilityPageTemplate({
     <SharedUxServicesProvider {...sharedUXServices}>
       <ObservabilityTour
         navigateToApp={navigateToApp}
+        prependBasePath={services?.http?.basePath.prepend}
         isPageDataLoaded={isPageDataLoaded}
         // The tour is dependent on the solution nav, and should not render if it is not visible
         // It should also not render if Kibana announcements are disabled in settings
