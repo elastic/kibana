@@ -16,6 +16,7 @@ import { FlyoutHeader } from '.';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockBrowserFields, mockDocValueFields } from '../../../../common/containers/source/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
+import { allCasesPermissions, noCasesPermissions } from '../../../../cases_test_utils';
 
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../../../common/containers/sourcerer');
@@ -79,10 +80,7 @@ describe('header', () => {
     });
 
     it('renders the button when the user has write permissions', () => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-        crud: true,
-        read: false,
-      });
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
 
       render(
         <TestProviders>
@@ -94,10 +92,7 @@ describe('header', () => {
     });
 
     it('does not render the button when the user does not have write permissions', () => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-        crud: false,
-        read: false,
-      });
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(noCasesPermissions());
 
       render(
         <TestProviders>

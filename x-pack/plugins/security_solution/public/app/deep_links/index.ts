@@ -10,6 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import {
+  CREATE_CASES_CAPABILITY,
+  DELETE_CASES_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '@kbn/cases-plugin/common';
 import { AppDeepLink, AppNavLinkStatus, AppUpdater, Capabilities } from '@kbn/core/public';
 import { Subject, Subscription } from 'rxjs';
 import { SecurityPageName } from '../types';
@@ -69,8 +76,11 @@ import { AppLinkItems } from '../../common/links/types';
 
 const FEATURE = {
   general: `${SERVER_APP_ID}.show`,
-  casesRead: `${CASES_FEATURE_ID}.read_cases`,
-  casesCrud: `${CASES_FEATURE_ID}.crud_cases`,
+  casesCreate: `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
+  casesRead: `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
+  casesUpdate: `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
+  casesDelete: `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
+  casesPush: `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
 } as const;
 
 type Feature = typeof FEATURE[keyof typeof FEATURE];
@@ -416,11 +426,24 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             features: [FEATURE.casesRead],
           },
           [SecurityPageName.caseConfigure]: {
-            features: [FEATURE.casesCrud],
+            features: [
+              FEATURE.casesCreate,
+              FEATURE.casesRead,
+              FEATURE.casesUpdate,
+              FEATURE.casesDelete,
+              FEATURE.casesPush,
+            ],
             isPremium: true,
           },
+          // TODO: can we just use create here?
           [SecurityPageName.caseCreate]: {
-            features: [FEATURE.casesCrud],
+            features: [
+              FEATURE.casesCreate,
+              FEATURE.casesRead,
+              FEATURE.casesUpdate,
+              FEATURE.casesDelete,
+              FEATURE.casesPush,
+            ],
           },
         },
       }),

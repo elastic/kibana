@@ -57,7 +57,6 @@ const StartAppComponent: FC<StartAppComponent> = ({
   } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   const userPermissions = useGetUserCasesPermissions();
-  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
   const CasesContext = cases.ui.getCasesContext();
   return (
     <EuiErrorBoundary>
@@ -70,7 +69,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
                       <ReactQueryClientProvider>
-                        <CasesContext owner={[APP_ID]} permissions={casesPermissions}>
+                        <CasesContext owner={[APP_ID]} permissions={userPermissions}>
                           <PageRouter
                             history={history}
                             onAppLeave={onAppLeave}

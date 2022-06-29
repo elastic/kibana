@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import {
+  CREATE_CASES_CAPABILITY,
+  DELETE_CASES_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '@kbn/cases-plugin/common';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { CASES_FEATURE_ID, CASES_PATH, SecurityPageName } from '../../common/constants';
 import { LinkItem } from '../common/links/types';
@@ -16,16 +23,29 @@ export const getCasesLinkItems = (): LinkItem => {
       [SecurityPageName.case]: {
         globalNavEnabled: true,
         globalNavOrder: 4,
-        capabilities: [`${CASES_FEATURE_ID}.read_cases`],
+        capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
       },
       [SecurityPageName.caseConfigure]: {
-        capabilities: [`${CASES_FEATURE_ID}.crud_cases`],
+        capabilities: [
+          `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
+          `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
+          `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
+          `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
+          `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
+        ],
         licenseType: 'gold',
         sideNavDisabled: true,
         hideTimeline: true,
       },
+      // TODO: can we just use create here?
       [SecurityPageName.caseCreate]: {
-        capabilities: [`${CASES_FEATURE_ID}.crud_cases`],
+        capabilities: [
+          `${CASES_FEATURE_ID}.${CREATE_CASES_CAPABILITY}`,
+          `${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`,
+          `${CASES_FEATURE_ID}.${UPDATE_CASES_CAPABILITY}`,
+          `${CASES_FEATURE_ID}.${DELETE_CASES_CAPABILITY}`,
+          `${CASES_FEATURE_ID}.${PUSH_CASES_CAPABILITY}`,
+        ],
         sideNavDisabled: true,
         hideTimeline: true,
       },

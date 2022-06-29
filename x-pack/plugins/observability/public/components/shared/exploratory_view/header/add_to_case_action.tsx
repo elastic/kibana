@@ -40,7 +40,6 @@ export function AddToCaseAction({
 }: AddToCaseProps) {
   const kServices = useKibana<ObservabilityAppServices>().services;
   const userPermissions = useGetUserCasesPermissions();
-  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
 
   const {
     cases,
@@ -77,7 +76,7 @@ export function AddToCaseAction({
   });
 
   const getAllCasesSelectorModalProps: GetAllCasesSelectorModalProps = {
-    permissions: casesPermissions,
+    permissions: userPermissions,
     onRowClick: onCaseClicked,
     owner: [owner],
     onClose: () => {

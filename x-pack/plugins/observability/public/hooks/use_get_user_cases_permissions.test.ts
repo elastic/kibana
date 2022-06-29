@@ -28,14 +28,24 @@ describe('useGetUserCasesPermissions', function () {
           ...mockUseKibanaReturnValue.services.application,
           capabilities: {
             ...applicationServiceMock.createStartContract().capabilities,
-            [casesFeatureId]: { crud_cases: false, read_cases: true },
+            [casesFeatureId]: {
+              create_cases: false,
+              update_cases: true,
+              delete_cases: false,
+              read_cases: true,
+              push_cases: false,
+            },
           },
         },
       },
     };
     const { result } = renderHook(() => useGetUserCasesPermissions(), {});
     expect(result.current?.read).toBe(true);
-    expect(result.current?.crud).toBe(false);
+    expect(result.current?.all).toBe(false);
+    expect(result.current?.create).toBe(false);
+    expect(result.current?.update).toBe(true);
+    expect(result.current?.delete).toBe(false);
+    expect(result.current?.push).toBe(false);
   });
 
   it('returns false when capabilities entry permissions are missing', () => {
@@ -56,7 +66,11 @@ describe('useGetUserCasesPermissions', function () {
     };
     const { result } = renderHook(() => useGetUserCasesPermissions(), {});
     expect(result.current?.read).toBe(false);
-    expect(result.current?.crud).toBe(false);
+    expect(result.current?.all).toBe(false);
+    expect(result.current?.create).toBe(false);
+    expect(result.current?.update).toBe(false);
+    expect(result.current?.delete).toBe(false);
+    expect(result.current?.push).toBe(false);
   });
 
   it('returns false when capabilities entry is missing entirely', () => {
@@ -74,6 +88,10 @@ describe('useGetUserCasesPermissions', function () {
     };
     const { result } = renderHook(() => useGetUserCasesPermissions(), {});
     expect(result.current?.read).toBe(false);
-    expect(result.current?.crud).toBe(false);
+    expect(result.current?.all).toBe(false);
+    expect(result.current?.create).toBe(false);
+    expect(result.current?.update).toBe(false);
+    expect(result.current?.delete).toBe(false);
+    expect(result.current?.push).toBe(false);
   });
 });

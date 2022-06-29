@@ -286,7 +286,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     ];
 
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
-    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+    plugins.features.registerKibanaFeature(
+      getCasesKibanaFeature(plugins.cases.createUICapabilities())
+    );
 
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationAlertType({ logger });

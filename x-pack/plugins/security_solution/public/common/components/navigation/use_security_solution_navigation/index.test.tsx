@@ -20,6 +20,11 @@ import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental
 import { TestProviders } from '../../../mock';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
+import {
+  noCasesPermissions,
+  readCasesCapabilities,
+  readCasesPermissions,
+} from '../../../../cases_test_utils';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
@@ -98,7 +103,7 @@ describe('useSecuritySolutionNavigation', () => {
               show: true,
               crud: true,
             },
-            [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+            [CASES_FEATURE_ID]: readCasesCapabilities(),
           },
         },
         chrome: {
@@ -156,10 +161,7 @@ describe('useSecuritySolutionNavigation', () => {
   describe('Permission gated routes', () => {
     describe('cases', () => {
       it('should display the cases navigation item when the user has read permissions', () => {
-        (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-          crud: true,
-          read: true,
-        });
+        (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
 
         const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
           () => useSecuritySolutionNavigation(),
@@ -184,10 +186,7 @@ describe('useSecuritySolutionNavigation', () => {
       });
 
       it('should not display the cases navigation item when the user does not have read permissions', () => {
-        (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-          crud: false,
-          read: false,
-        });
+        (useGetUserCasesPermissions as jest.Mock).mockReturnValue(noCasesPermissions());
 
         const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
           () => useSecuritySolutionNavigation(),

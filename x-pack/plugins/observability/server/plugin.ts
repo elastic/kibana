@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { PluginSetupContract as CasesPluginSetup } from '@kbn/cases-plugin/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -30,6 +31,7 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  cases: CasesPluginSetup;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -39,6 +41,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
   public setup(core: CoreSetup, plugins: PluginSetup) {
     const config = this.initContext.config.get<ObservabilityConfig>();
+
+    const casesCapabilities = plugins.cases.createUICapabilities();
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -62,7 +66,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             all: [],
             read: [],
           },
-          ui: ['crud_cases', 'read_cases'], // uiCapabilities[casesFeatureId].crud_cases or read_cases
+          ui: casesCapabilities.all,
         },
         read: {
           app: [casesFeatureId, 'kibana'],
@@ -75,9 +79,39 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             all: [],
             read: [],
           },
-          ui: ['read_cases'], // uiCapabilities[uiCapabilities[casesFeatureId]].read_cases
+          ui: casesCapabilities.read,
         },
       },
+      subFeatures: [
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.deleteSubFeatureName', {
+            defaultMessage: 'Delete',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  api: [],
+                  id: 'cases_delete',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.deleteSubFeatureDetails',
+                    {
+                      defaultMessage: 'Delete entities',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: casesCapabilities.delete,
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;

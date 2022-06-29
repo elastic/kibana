@@ -5,19 +5,39 @@
  * 2.0.
  */
 
+import {
+  CREATE_CASES_CAPABILITY,
+  DELETE_CASES_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from '../../../common/constants';
+
 export interface CasesPermissions {
   all: boolean;
+  create: boolean;
   read: boolean;
+  update: boolean;
+  delete: boolean;
+  push: boolean;
 }
 
 export const getUICapabilities = (
-  featureCapabilities: Partial<Record<string, boolean | Record<string, boolean>>>
+  featureCapabilities: Partial<Record<string, boolean | Record<string, boolean>>> | undefined
 ): CasesPermissions => {
-  const read = !!featureCapabilities?.read_cases;
-  const all = !!featureCapabilities?.crud_cases;
+  const create = !!featureCapabilities?.[CREATE_CASES_CAPABILITY];
+  const read = !!featureCapabilities?.[READ_CASES_CAPABILITY];
+  const update = !!featureCapabilities?.[UPDATE_CASES_CAPABILITY];
+  const deletePriv = !!featureCapabilities?.[DELETE_CASES_CAPABILITY];
+  const push = !!featureCapabilities?.[PUSH_CASES_CAPABILITY];
+  const all = create && read && update && deletePriv && push;
 
   return {
     all,
+    create,
     read,
+    update,
+    delete: deletePriv,
+    push,
   };
 };

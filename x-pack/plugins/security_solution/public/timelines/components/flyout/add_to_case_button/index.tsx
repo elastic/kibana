@@ -68,7 +68,6 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
   );
 
   const userPermissions = useGetUserCasesPermissions();
-  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);
@@ -165,7 +164,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
         cases.ui.getAllCasesSelectorModal({
           onRowClick,
           owner: [APP_ID],
-          permissions: casesPermissions,
+          permissions: userPermissions,
         })}
     </>
   );

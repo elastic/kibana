@@ -15,7 +15,10 @@ import {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
-import { PluginStartContract as CasesPluginStart } from '@kbn/cases-plugin/server';
+import {
+  PluginStartContract as CasesPluginStart,
+  PluginSetupContract as CasesPluginSetup,
+} from '@kbn/cases-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -50,6 +53,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   telemetry?: TelemetryPluginSetup;
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
+  cases: CasesPluginSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {

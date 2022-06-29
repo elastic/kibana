@@ -414,7 +414,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     filterQuery: combinedQueries?.filterQuery ?? '',
   });
 
-  const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
+  const hasWritePermissions = useGetUserCasesPermissions().all;
 
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="s">

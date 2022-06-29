@@ -53,6 +53,6 @@ export const useAddToExistingCase = ({
 
   return {
     onAddToExistingCaseClicked,
-    disabled: lensAttributes == null || timeRange == null || !userPermissions.crud,
+    disabled: lensAttributes == null || timeRange == null || !userPermissions.all,
   };
 };

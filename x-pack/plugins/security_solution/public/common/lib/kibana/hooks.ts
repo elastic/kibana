@@ -146,24 +146,47 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   return user;
 };
 
+// TODO: should I just rely on the definition in the cases plugin?
 export interface UseGetUserCasesPermissions {
-  crud: boolean;
+  all: boolean;
+  create: boolean;
   read: boolean;
+  update: boolean;
+  delete: boolean;
+  push: boolean;
 }
 
 export const useGetUserCasesPermissions = () => {
   const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions>({
-    crud: false,
+    all: false,
+    create: false,
     read: false,
+    update: false,
+    delete: false,
+    push: false,
   });
   const uiCapabilities = useKibana().services.application.capabilities;
+  const casesCapabilities = useKibana().services.cases.helpers.getUICapabilities(
+    uiCapabilities[CASES_FEATURE_ID]
+  );
 
   useEffect(() => {
     setCasesPermissions({
-      crud: !!uiCapabilities[CASES_FEATURE_ID]?.crud_cases,
-      read: !!uiCapabilities[CASES_FEATURE_ID]?.read_cases,
+      all: casesCapabilities.all,
+      create: casesCapabilities.create,
+      read: casesCapabilities.read,
+      update: casesCapabilities.update,
+      delete: casesCapabilities.delete,
+      push: casesCapabilities.push,
     });
-  }, [uiCapabilities]);
+  }, [
+    casesCapabilities.all,
+    casesCapabilities.create,
+    casesCapabilities.read,
+    casesCapabilities.update,
+    casesCapabilities.delete,
+    casesCapabilities.push,
+  ]);
 
   return casesPermissions;
 };

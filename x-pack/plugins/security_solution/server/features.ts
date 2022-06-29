@@ -7,13 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { PluginSetupContract as CasesPluginSetup } from '@kbn/cases-plugin/server';
 import { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
 
-export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
+export const getCasesKibanaFeature = (
+  casesCapabilities: ReturnType<CasesPluginSetup['createUICapabilities']>
+): KibanaFeatureConfig => ({
   id: CASES_FEATURE_ID,
   name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle', {
     defaultMessage: 'Cases',
@@ -35,7 +38,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
         all: [],
         read: [],
       },
-      ui: ['crud_cases', 'read_cases'], // uiCapabilities[CASES_FEATURE_ID].crud_cases or read_cases
+      ui: casesCapabilities.all,
     },
     read: {
       app: [CASES_FEATURE_ID, 'kibana'],
@@ -48,9 +51,39 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
         all: [],
         read: [],
       },
-      ui: ['read_cases'], // uiCapabilities[CASES_FEATURE_ID].read_cases
+      ui: casesCapabilities.read,
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.securitySolution.featureRegistry.deleteSubFeatureName', {
+        defaultMessage: 'Delete',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              api: [],
+              id: 'cases_delete',
+              name: i18n.translate(
+                'xpack.securitySolution.featureRegistry.deleteSubFeatureDetails',
+                {
+                  defaultMessage: 'Delete entities',
+                }
+              ),
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: casesCapabilities.delete,
+            },
+          ],
+        },
+      ],
+    },
+  ],
 });
 
 export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({

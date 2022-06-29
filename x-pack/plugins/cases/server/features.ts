@@ -11,6 +11,7 @@ import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { APP_ID, FEATURE_ID } from '../common/constants';
+import { createUICapabilities } from './capabilities';
 
 /**
  * The order of appearance in the feature privilege page
@@ -20,44 +21,75 @@ import { APP_ID, FEATURE_ID } from '../common/constants';
 
 const FEATURE_ORDER = 3100;
 
-export const getCasesKibanaFeature = (): KibanaFeatureConfig => ({
-  id: FEATURE_ID,
-  name: i18n.translate('xpack.cases.features.casesFeatureName', {
-    defaultMessage: 'Cases',
-  }),
-  category: DEFAULT_APP_CATEGORIES.management,
-  app: [],
-  order: FEATURE_ORDER,
-  management: {
-    insightsAndAlerting: [APP_ID],
-  },
-  cases: [APP_ID],
-  privileges: {
-    all: {
-      cases: {
-        all: [APP_ID],
-      },
-      management: {
-        insightsAndAlerting: [APP_ID],
-      },
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: ['crud_cases', 'read_cases'],
+export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
+  const capabilities = createUICapabilities();
+
+  return {
+    id: FEATURE_ID,
+    name: i18n.translate('xpack.cases.features.casesFeatureName', {
+      defaultMessage: 'Cases',
+    }),
+    category: DEFAULT_APP_CATEGORIES.management,
+    app: [],
+    order: FEATURE_ORDER,
+    management: {
+      insightsAndAlerting: [APP_ID],
     },
-    read: {
-      cases: {
-        read: [APP_ID],
+    cases: [APP_ID],
+    privileges: {
+      all: {
+        cases: {
+          all: [APP_ID],
+        },
+        management: {
+          insightsAndAlerting: [APP_ID],
+        },
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: capabilities.all,
       },
-      management: {
-        insightsAndAlerting: [APP_ID],
+      read: {
+        cases: {
+          read: [APP_ID],
+        },
+        management: {
+          insightsAndAlerting: [APP_ID],
+        },
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: capabilities.read,
       },
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: ['read_cases'],
     },
-  },
-});
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.cases.features.deleteSubFeatureName', {
+          defaultMessage: 'Delete',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                api: [],
+                id: 'cases_delete',
+                name: i18n.translate('xpack.cases.features.deleteSubFeatureDetails', {
+                  defaultMessage: 'Delete entities',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: capabilities.delete,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+};

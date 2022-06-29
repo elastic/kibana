@@ -68,7 +68,7 @@ describe('deepLinks', () => {
 
   it('should return case links for basic license with only read_cases capabilities', () => {
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+      [CASES_FEATURE_ID]: { read_cases: true },
       [SERVER_APP_ID]: { show: true },
     } as unknown as Capabilities);
     expect(findDeepLink(SecurityPageName.case, basicLinks)).toBeTruthy();
@@ -76,15 +76,21 @@ describe('deepLinks', () => {
 
   it('should return case links with NO deepLinks for basic license with only read_cases capabilities', () => {
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+      [CASES_FEATURE_ID]: { read_cases: true },
       [SERVER_APP_ID]: { show: true },
     } as unknown as Capabilities);
     expect(findDeepLink(SecurityPageName.case, basicLinks)?.deepLinks?.length === 0).toBeTruthy();
   });
 
-  it('should return case links with deepLinks for basic license with crud_cases capabilities', () => {
+  it('should return case links with deepLinks for basic license with permissive capabilities', () => {
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+      [CASES_FEATURE_ID]: {
+        create_cases: true,
+        read_cases: true,
+        update_cases: true,
+        delete_cases: true,
+        push_cases: true,
+      },
       [SERVER_APP_ID]: { show: true },
     } as unknown as Capabilities);
 
@@ -93,17 +99,29 @@ describe('deepLinks', () => {
     ).toBeTruthy();
   });
 
-  it('should return case links with deepLinks for basic license with crud_cases capabilities and security disabled', () => {
+  it('should return case links with deepLinks for basic license with permissive capabilities and security disabled', () => {
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, platinumLicense, {
-      [CASES_FEATURE_ID]: { read_cases: true, crud_cases: true },
+      [CASES_FEATURE_ID]: {
+        create_cases: true,
+        read_cases: true,
+        update_cases: true,
+        delete_cases: true,
+        push_cases: true,
+      },
       [SERVER_APP_ID]: { show: false },
     } as unknown as Capabilities);
     expect(findDeepLink(SecurityPageName.case, basicLinks)).toBeTruthy();
   });
 
-  it('should return NO case links for basic license with NO read_cases capabilities', () => {
+  it('should return NO case links for basic license with NO cases capabilities', () => {
     const basicLinks = getDeepLinks(mockGlobalState.app.enableExperimental, basicLicense, {
-      [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+      [CASES_FEATURE_ID]: {
+        create_cases: false,
+        read_cases: false,
+        update_cases: false,
+        delete_cases: false,
+        push_cases: false,
+      },
       [SERVER_APP_ID]: { show: true },
     } as unknown as Capabilities);
     expect(findDeepLink(SecurityPageName.case, basicLinks)).toBeFalsy();

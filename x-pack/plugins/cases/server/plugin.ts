@@ -49,6 +49,7 @@ import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
+import { createUICapabilities } from './capabilities';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -65,6 +66,10 @@ export interface PluginsStart {
   taskManager?: TaskManagerStartContract;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+}
+
+export interface PluginSetupContract {
+  createUICapabilities: typeof createUICapabilities;
 }
 
 /**
@@ -145,6 +150,10 @@ export class CasePlugin {
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,
     });
+
+    return {
+      createUICapabilities,
+    };
   }
 
   public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {

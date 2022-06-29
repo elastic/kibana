@@ -52,6 +52,6 @@ export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddTo
 
   return {
     onAddToNewCaseClicked,
-    disabled: lensAttributes == null || timeRange == null || !userPermissions.crud,
+    disabled: lensAttributes == null || timeRange == null || !userPermissions.all,
   };
 };

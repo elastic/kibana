@@ -26,7 +26,6 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
   const { cases: casesUi } = useKibana<ObservabilityAppServices>().services;
 
   const casePermissions = useGetUserCasesPermissions();
-  const hasWritePermissions = casePermissions?.crud ?? false;
 
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     onClose,
@@ -38,7 +37,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
   });
 
   return useMemo(() => {
-    return hasWritePermissions
+    return casePermissions.create
       ? [
           {
             label: ADD_TO_NEW_CASE,
@@ -68,5 +67,5 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
           },
         ]
       : [];
-  }, [casesUi.helpers, createCaseFlyout, hasWritePermissions, selectCaseModal]);
+  }, [casesUi.helpers, createCaseFlyout, casePermissions.create, selectCaseModal]);
 };

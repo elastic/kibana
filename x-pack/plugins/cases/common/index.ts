@@ -15,7 +15,15 @@
 // For example, constants below could eventually be in a "kbn-cases-constants" instead.
 // See: https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro#public-plugin-api
 
-export { CASES_URL, SECURITY_SOLUTION_OWNER } from './constants';
+export {
+  CASES_URL,
+  SECURITY_SOLUTION_OWNER,
+  CREATE_CASES_CAPABILITY,
+  DELETE_CASES_CAPABILITY,
+  PUSH_CASES_CAPABILITY,
+  READ_CASES_CAPABILITY,
+  UPDATE_CASES_CAPABILITY,
+} from './constants';
 
 export { CommentType, CaseStatuses, getCasesFromAlertsUrl, throwErrors } from './api';
 

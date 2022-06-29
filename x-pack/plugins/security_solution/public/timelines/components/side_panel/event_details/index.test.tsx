@@ -25,6 +25,7 @@ import {
 } from '../../../../common/containers/source/mock';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { allCasesPermissions } from '../../../../cases_test_utils';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -143,10 +144,7 @@ describe('event details footer component', () => {
         },
       },
     });
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: true,
-      read: true,
-    });
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
   });
   afterEach(() => {
     jest.clearAllMocks();
