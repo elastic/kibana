@@ -6,25 +6,24 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { FileJSON } from '../../../common/types';
+import type { Ensure } from '@kbn/utility-types';
+import type { GetByIdHttpEndpoint } from '../../../common/api_routes';
 import { getById } from './helpers';
 import type { FileKindsRequestHandler } from './types';
 
-interface Response {
-  file: FileJSON;
-}
+type Response = GetByIdHttpEndpoint['output'];
 
 export const method = 'get' as const;
 
 export const paramsSchema = schema.object({
-  fileId: schema.string(),
+  id: schema.string(),
 });
-type Params = TypeOf<typeof paramsSchema>;
+type Params = Ensure<GetByIdHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
 
 export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind }, req, res) => {
   const { fileService } = await files;
   const {
-    params: { fileId: id },
+    params: { id },
   } = req;
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;

@@ -6,6 +6,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { Ensure } from '@kbn/utility-types';
+import type { DeleteHttpEndpoint } from '../../../common/api_routes';
 import type { FileKindsRequestHandler } from './types';
 
 import { getById } from './helpers';
@@ -13,17 +15,16 @@ import { getById } from './helpers';
 export const method = 'delete' as const;
 
 export const paramsSchema = schema.object({
-  fileId: schema.string(),
+  id: schema.string(),
 });
-type Params = TypeOf<typeof paramsSchema>;
 
-interface Response {
-  ok: true;
-}
+type Params = Ensure<DeleteHttpEndpoint['inputs']['params'], TypeOf<typeof paramsSchema>>;
+
+type Response = DeleteHttpEndpoint['output'];
 
 export const handler: FileKindsRequestHandler<Params> = async ({ files, fileKind }, req, res) => {
   const {
-    params: { fileId: id },
+    params: { id },
   } = req;
   const { fileService } = await files;
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);

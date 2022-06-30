@@ -50,7 +50,7 @@ describe('FileService', () => {
     fileKindsRegistry.register({
       id: fileKindNonDefault,
       http: {},
-      blobStoreSettings: { esSingleIndex: { index: nonDefaultIndex } },
+      blobStoreSettings: { esFixedSizeIndex: { index: nonDefaultIndex } },
     });
     fileKindsRegistry.register({
       id: fileKindTinyFiles,

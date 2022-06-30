@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'files' as const;
-export const PLUGIN_NAME = 'files' as const;
-
-/**
- * Unique type name of the file saved object
- */
-export const FILE_SO_TYPE = 'file';
-
-export const ES_FIXED_SIZE_INDEX_BLOB_STORE = 'esFixedSizeIndex' as const;
+export { createFilesClient } from './files_client';
