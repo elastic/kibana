@@ -142,7 +142,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       return i18n.translate(
         'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip',
         {
-          defaultMessage: 'Notifications snoozed for {snoozeTime}',
+          defaultMessage: 'Notifications snoozing for {snoozeTime}',
           values: {
             snoozeTime: moment(isSnoozedUntil).fromNow(true),
           },
