@@ -7,6 +7,8 @@
 
 import React, { useEffect } from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import {
@@ -21,19 +23,21 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector_package/generate_connector_api_key_api_logic';
+import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ApiKey } from '../api_key/api_key';
 
-export const ConfigurationConnector: React.FC<{ indexId: string; indexName: string }> = ({
-  indexId,
-  indexName,
-}) => {
+export const ConfigurationConnector: React.FC = () => {
+  const { data: indexData } = useValues(FetchIndexApiLogic);
   const { makeRequest, apiReset } = useActions(GenerateConnectorApiKeyApiLogic);
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
+  const { indexSlug: indexName } = useParams<{ indexSlug: string }>();
+  const indexId = indexData?.connector?.id ?? '';
 
   useEffect(() => {
-    apiReset();
     return apiReset;
   }, [indexName]);
+
+  // TODO If index && !index.connector then do something
 
   return (
     <EuiFlexGroup direction="column">
