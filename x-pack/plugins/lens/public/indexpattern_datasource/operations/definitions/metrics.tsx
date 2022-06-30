@@ -108,9 +108,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
+    onOtherColumnChanged: (layer, thisColumnId) =>
       optionalTimeScaling
-        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId) as T)
+        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId) as T)
         : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),

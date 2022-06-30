@@ -6,47 +6,53 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Environment } from '../../../common/environment_rt';
 
 import { ProcessorEvent } from '../../../common/processor_event';
+import { Setup } from '../../lib/helpers/setup_request';
 
 import { withApmSpan } from '../../utils/with_apm_span';
 
-import {
-  getHistogramIntervalRequest,
-  getHistogramRangeSteps,
-} from '../correlations/queries/query_histogram_range_steps';
-import { getTransactionDurationRangesRequest } from '../correlations/queries/query_ranges';
+import { fetchDurationRanges } from '../correlations/queries/fetch_duration_ranges';
+import { fetchDurationHistogramRangeSteps } from '../correlations/queries/fetch_duration_histogram_range_steps';
 
 import { getPercentileThresholdValue } from './get_percentile_threshold_value';
-import type {
-  OverallLatencyDistributionOptions,
-  OverallLatencyDistributionResponse,
-} from './types';
+import type { OverallLatencyDistributionResponse } from './types';
 
-interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
-  buckets: Array<{
-    from: number;
-    doc_count: number;
-  }>;
-}
-export async function getOverallLatencyDistribution(
-  options: OverallLatencyDistributionOptions
-) {
+export async function getOverallLatencyDistribution({
+  eventType,
+  setup,
+  start,
+  end,
+  environment,
+  kuery,
+  query,
+  percentileThreshold,
+}: {
+  eventType: ProcessorEvent;
+  setup: Setup;
+  start: number;
+  end: number;
+  environment: Environment;
+  kuery: string;
+  query: estypes.QueryDslQueryContainer;
+  percentileThreshold: number;
+}) {
   return withApmSpan('get_overall_latency_distribution', async () => {
     const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
 
-    const { setup, termFilters, ...rawParams } = options;
-    const { apmEventClient } = setup;
-    const params = {
-      // pass on an empty index because we're using only the body attribute
-      // of the request body getters we're reusing from search strategies.
-      index: '',
-      ...rawParams,
-    };
-
     // #1: get 95th percentile to be displayed as a marker in the log log chart
     overallLatencyDistribution.percentileThresholdValue =
-      await getPercentileThresholdValue(options);
+      await getPercentileThresholdValue({
+        eventType,
+        setup,
+        start,
+        end,
+        environment,
+        kuery,
+        query,
+        percentileThreshold,
+      });
 
     // finish early if we weren't able to identify the percentileThresholdValue.
     if (!overallLatencyDistribution.percentileThresholdValue) {
@@ -54,72 +60,34 @@ export async function getOverallLatencyDistribution(
     }
 
     // #2: get histogram range steps
-    const steps = 100;
+    const rangeSteps = await fetchDurationHistogramRangeSteps({
+      eventType,
+      setup,
+      start,
+      end,
+      environment,
+      kuery,
+      query,
+    });
 
-    const { body: histogramIntervalRequestBody } =
-      getHistogramIntervalRequest(params);
-
-    const histogramIntervalResponse = (await apmEventClient.search(
-      'get_histogram_interval',
-      {
-        // TODO: add support for metrics
-        apm: { events: [ProcessorEvent.transaction] },
-        body: { size: 0, ...histogramIntervalRequestBody },
-      }
-    )) as {
-      aggregations?: {
-        transaction_duration_min: estypes.AggregationsRateAggregate;
-        transaction_duration_max: estypes.AggregationsRateAggregate;
-      };
-      hits: { total: estypes.SearchTotalHits };
-    };
-
-    if (
-      !histogramIntervalResponse.aggregations ||
-      histogramIntervalResponse.hits.total.value === 0
-    ) {
+    if (!rangeSteps) {
       return overallLatencyDistribution;
     }
-
-    const min =
-      histogramIntervalResponse.aggregations.transaction_duration_min.value;
-    const max =
-      histogramIntervalResponse.aggregations.transaction_duration_max.value * 2;
-
-    const histogramRangeSteps = getHistogramRangeSteps(min, max, steps);
 
     // #3: get histogram chart data
-    const { body: transactionDurationRangesRequestBody } =
-      getTransactionDurationRangesRequest(
-        params,
-        histogramRangeSteps,
-        termFilters
-      );
 
-    const transactionDurationRangesResponse = (await apmEventClient.search(
-      'get_transaction_duration_ranges',
-      {
-        // TODO: add support for metrics
-        apm: { events: [ProcessorEvent.transaction] },
-        body: { size: 0, ...transactionDurationRangesRequestBody },
-      }
-    )) as {
-      aggregations?: {
-        logspace_ranges: Aggs;
-      };
-    };
+    const durationRanges = await fetchDurationRanges({
+      eventType,
+      setup,
+      start,
+      end,
+      environment,
+      kuery,
+      query,
+      rangeSteps,
+    });
 
-    if (!transactionDurationRangesResponse.aggregations) {
-      return overallLatencyDistribution;
-    }
-
-    overallLatencyDistribution.overallHistogram =
-      transactionDurationRangesResponse.aggregations.logspace_ranges.buckets
-        .map((d) => ({
-          key: d.from,
-          doc_count: d.doc_count,
-        }))
-        .filter((d) => d.key !== undefined);
+    overallLatencyDistribution.overallHistogram = durationRanges;
 
     return overallLatencyDistribution;
   });
