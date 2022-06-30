@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { createApiIndex } from '../../lib/indices/create_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
@@ -114,6 +115,34 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
         const apiKey = await generateApiKey(client, indexName);
         return response.ok({
           body: apiKey,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        return response.customError({
+          body: 'Error fetching data from Enterprise Search',
+          statusCode: 502,
+        });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices',
+      validate: {
+        body: schema.object({
+          indexName: schema.string(),
+          language: schema.string(),
+        }),
+      },
+    },
+    async(context, request, response) => {
+      const { indexName, language } = request.body;
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const createIndexResponse = await createApiIndex(client, indexName, language);
+        return response.ok({
+          body: createIndexResponse,
           headers: { 'content-type': 'application/json' },
         });
       } catch (error) {
