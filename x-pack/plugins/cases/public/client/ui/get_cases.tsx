@@ -10,11 +10,13 @@ import React, { lazy, Suspense } from 'react';
 import type { CasesProps } from '../../components/app';
 import { CasesProvider, CasesContextProps } from '../../components/cases_context';
 
-export type GetCasesProps = CasesProps & CasesContextProps;
+type GetCasesPropsInternal = CasesProps & CasesContextProps;
+export type GetCasesProps = Omit<GetCasesPropsInternal, 'externalReferenceAttachmentTypeRegistry'>;
 
 const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes'));
 
 export const getCasesLazy = ({
+  externalReferenceAttachmentTypeRegistry,
   owner,
   permissions,
   basePath,
@@ -27,8 +29,17 @@ export const getCasesLazy = ({
   timelineIntegration,
   features,
   releasePhase,
-}: GetCasesProps) => (
-  <CasesProvider value={{ owner, permissions, basePath, features, releasePhase }}>
+}: GetCasesPropsInternal) => (
+  <CasesProvider
+    value={{
+      externalReferenceAttachmentTypeRegistry,
+      owner,
+      permissions,
+      basePath,
+      features,
+      releasePhase,
+    }}
+  >
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesRoutesLazy
         onComponentInitialized={onComponentInitialized}
