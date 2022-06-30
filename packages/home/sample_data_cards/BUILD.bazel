@@ -44,7 +44,6 @@ RUNTIME_DEPS = [
   "@npm//enzyme",
   "@npm//lodash",
   "@npm//react",
-  "//packages/kbn-i18n-react",
   "//packages/kbn-i18n",
 ]
 
@@ -67,7 +66,6 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/react",
   "//packages/kbn-ambient-ui-types",
-  "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
 ]
 

@@ -9,45 +9,42 @@
 import React from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
 import { SampleDataSet } from '../types';
 
 export type Props = Pick<SampleDataSet, 'id' | 'name' | 'statusMsg'>;
 
+const addDataLabel = i18n.translate('homePackages.sampleDataCard.default.addButtonLabel', {
+  defaultMessage: 'Add data',
+});
+
 export const DefaultFooter = ({ id, name, statusMsg }: Props) => {
+  const errorMessage = i18n.translate(
+    'homePackages.sampleDataCard.default.unableToVerifyErrorMessage',
+    { defaultMessage: 'Unable to verify dataset status, error: {statusMsg}', values: { statusMsg } }
+  );
+
+  const addButtonAriaLabel = i18n.translate(
+    'homePackages.sampleDataCard.default.addButtonAriaLabel',
+    {
+      defaultMessage: 'Add {datasetName}',
+      values: {
+        datasetName: name,
+      },
+    }
+  );
+
   return (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={
-            <p>
-              <FormattedMessage
-                id="homePackages.sampleDataSetCard.default.unableToVerifyErrorMessage"
-                defaultMessage="Unable to verify dataset status, error: {statusMsg}"
-                values={{ statusMsg }}
-              />
-            </p>
-          }
-        >
+        <EuiToolTip position="top" content={<p>{errorMessage}</p>}>
           <EuiButton
             isDisabled
             data-test-subj={`addSampleDataSet${id}`}
-            aria-label={i18n.translate(
-              'homePackages.sampleDataSetCard.default.addButtonAriaLabel',
-              {
-                defaultMessage: 'Add {datasetName}',
-                values: {
-                  datasetName: name,
-                },
-              }
-            )}
+            aria-label={addButtonAriaLabel}
           >
-            <FormattedMessage
-              id="homePackages.sampleDataSetCard.default.addButtonLabel"
-              defaultMessage="Add data"
-            />
+            {addDataLabel}
           </EuiButton>
         </EuiToolTip>
       </EuiFlexItem>

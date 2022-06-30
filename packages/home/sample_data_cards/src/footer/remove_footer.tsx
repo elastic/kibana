@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useRemove } from '../hooks';
 import type { SampleDataSet } from '../types';
@@ -18,10 +17,31 @@ import type { Props as ViewButtonProps } from './view_button';
 
 export type Props = Pick<SampleDataSet, 'id' | 'name'> & UseRemoveParams & ViewButtonProps;
 
+const removeLabel = i18n.translate('homePackages.sampleDataCard.removeButtonLabel', {
+  defaultMessage: 'Remove',
+});
+
+const removingLabel = i18n.translate('homePackages.sampleDataCard.removingButtonLabel', {
+  defaultMessage: 'Removing',
+});
+
 export const RemoveFooter = (props: Props) => {
   const [remove, isRemoving] = useRemove(props);
   const { id, name } = props;
 
+  const removeAriaLabel = i18n.translate('homePackages.sampleDataCard.removeButtonAriaLabel', {
+    defaultMessage: 'Remove {datasetName}',
+    values: {
+      datasetName: name,
+    },
+  });
+
+  const removingAriaLabel = i18n.translate('homePackages.sampleDataCard.removingButtonAriaLabel', {
+    defaultMessage: 'Removing {datasetName}',
+    values: {
+      datasetName: name,
+    },
+  });
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -31,33 +51,9 @@ export const RemoveFooter = (props: Props) => {
           color="danger"
           data-test-subj={`removeSampleDataSet${id}`}
           flush="left"
-          aria-label={
-            isRemoving
-              ? i18n.translate('homePackages.sampleDataCard.removingButtonAriaLabel', {
-                  defaultMessage: 'Removing {datasetName}',
-                  values: {
-                    datasetName: name,
-                  },
-                })
-              : i18n.translate('homePackages.sampleDataCard.removeButtonAriaLabel', {
-                  defaultMessage: 'Remove {datasetName}',
-                  values: {
-                    datasetName: name,
-                  },
-                })
-          }
+          aria-label={isRemoving ? removingAriaLabel : removeAriaLabel}
         >
-          {isRemoving ? (
-            <FormattedMessage
-              id="homePackages.sampleDataCard.removingButtonLabel"
-              defaultMessage="Removing"
-            />
-          ) : (
-            <FormattedMessage
-              id="homePackages.sampleDataCard.removeButtonLabel"
-              defaultMessage="Remove"
-            />
-          )}
+          {isRemoving ? removingLabel : removeLabel}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
