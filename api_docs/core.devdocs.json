@@ -10526,45 +10526,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.ContextSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "ContextSetup",
-        "description": [
-          "\n{@inheritdoc IContextContainer}\n"
-        ],
-        "path": "src/core/server/context/context_service.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ContextSetup.createContextContainer",
-            "type": "Function",
-            "tags": [],
-            "label": "createContextContainer",
-            "description": [
-              "\nCreates a new {@link IContextContainer} for a service owner."
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IContextContainer",
-                "text": "IContextContainer"
-              }
-            ],
-            "path": "src/core/server/context/context_service.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.CorePreboot",
         "type": "Interface",
         "tags": [],
@@ -10903,27 +10864,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.CoreSetup.context",
-            "type": "Object",
-            "tags": [],
-            "label": "context",
-            "description": [
-              "{@link ContextSetup}"
-            ],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ContextSetup",
-                "text": "ContextSetup"
-              }
-            ],
-            "path": "src/core/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-server.CoreSetup.docLinks",
             "type": "Object",
             "tags": [],
@@ -10968,13 +10908,7 @@
               "{@link ExecutionContextSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -11278,13 +11212,7 @@
               "{@link ExecutionContextStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -12648,7 +12576,7 @@
         "tags": [],
         "label": "ExecutionContextSetup",
         "description": [],
-        "path": "src/core/server/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -12658,14 +12586,14 @@
             "tags": [],
             "label": "withContext",
             "description": [
-              "\nKeeps track of execution context while the passed function is executed.\nData are carried over all async operations spawned by the passed function.\nThe nested calls stack the registered context on top of each other."
+              "\r\nKeeps track of execution context while the passed function is executed.\r\nData are carried over all async operations spawned by the passed function.\r\nThe nested calls stack the registered context on top of each other."
             ],
             "signature": [
               "<R>(context: ",
               "KibanaExecutionContext",
               " | undefined, fn: (...args: any[]) => R) => R"
             ],
-            "path": "src/core/server/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -12679,7 +12607,7 @@
                   "KibanaExecutionContext",
                   " | undefined"
                 ],
-                "path": "src/core/server/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               },
@@ -12693,7 +12621,7 @@
                 "signature": [
                   "(...args: any[]) => R"
                 ],
-                "path": "src/core/server/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -12711,7 +12639,7 @@
               "() => ",
               "Labels"
             ],
-            "path": "src/core/server/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -15857,7 +15785,7 @@
         "tags": [],
         "label": "IExecutionContextContainer",
         "description": [],
-        "path": "src/core/server/execution_context/execution_context_container.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -15870,7 +15798,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/core/server/execution_context/execution_context_container.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -15887,7 +15815,7 @@
               "KibanaExecutionContext",
               ">"
             ],
-            "path": "src/core/server/execution_context/execution_context_container.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -25952,15 +25880,9 @@
         "label": "ExecutionContextStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          }
+          "ExecutionContextSetup"
         ],
-        "path": "src/core/server/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

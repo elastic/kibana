@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
 import {
   CriteriaWithPagination,
   EuiAvatar,
@@ -28,36 +27,22 @@ import {
 } from '@elastic/eui';
 import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 
-import type {
-  DurationRange,
-  OnRefreshChangeProps,
-} from '@elastic/eui/src/components/date_picker/types';
 import type { HorizontalAlignment } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getEmptyValue } from '../../../../common/components/empty_value';
-import { FormattedDate } from '../../../../common/components/formatted_date';
-import { ActionDetails } from '../../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
-import { AdministrationListPage } from '../../../components/administration_list_page';
-import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
-import { useGetEndpointActionList } from '../../../hooks';
-import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
-import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { getEmptyValue } from '../../../common/components/empty_value';
+import { FormattedDate } from '../../../common/components/formatted_date';
+import { ActionDetails } from '../../../../common/endpoint/types';
+import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
+import { useGetEndpointActionList } from '../../hooks';
+import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from './translations';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionListDateRangePicker } from './components/action_list_date_range_picker';
-import type { DateRangePickerValues } from './components/action_list_date_range_picker';
+import { useDateRangePicker } from './components/hooks';
 
 const emptyValue = getEmptyValue();
-const defaultDateRangeOptions = Object.freeze({
-  autoRefreshOptions: {
-    enabled: false,
-    duration: 10000,
-  },
-  startDate: 'now-1d',
-  endDate: 'now',
-  recentlyUsedDateRanges: [],
-});
 
 const getCommand = (
   command: ActionDetails['command']
@@ -115,11 +100,8 @@ const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
 `;
 
 export const ResponseActionsList = memo<
-  Pick<EndpointActionListRequestQuery, 'agentIds' | 'commands' | 'userIds'> & {
-    hideHeader?: boolean;
-    hideHostNameColumn?: boolean;
-  }
->(({ agentIds, commands, userIds, hideHeader = false }) => {
+  Pick<EndpointActionListRequestQuery, 'agentIds' | 'commands' | 'userIds'>
+>(({ agentIds, commands, userIds }) => {
   const getTestId = useTestIdGenerator('response-actions-list');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
     [k: ActionDetails['id']]: React.ReactNode;
@@ -133,9 +115,8 @@ export const ResponseActionsList = memo<
     userIds,
   });
 
-  // date range picker settings
-  const [dateRangePickerState, setDateRangePickerState] =
-    useState<DateRangePickerValues>(defaultDateRangeOptions);
+  // date range picker state and handlers
+  const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
 
   // initial fetch of list data
   const {
@@ -150,68 +131,12 @@ export const ResponseActionsList = memo<
     endDate: dateRangePickerState.endDate,
   });
 
-  const updateActionListDateRanges = useCallback(
-    ({ start, end }) => {
-      setDateRangePickerState((prevState) => ({
-        ...prevState,
-        startDate: dateMath.parse(start)?.toISOString(),
-        endDate: dateMath.parse(end)?.toISOString(),
-      }));
-    },
-    [setDateRangePickerState]
-  );
-
-  const updateActionListRecentlyUsedDateRanges = useCallback(
-    (recentlyUsedDateRanges) => {
-      setDateRangePickerState((prevState) => ({
-        ...prevState,
-        recentlyUsedDateRanges,
-      }));
-    },
-    [setDateRangePickerState]
-  );
-
-  // update refresh timer
-  const onRefreshChange = useCallback(
-    (evt: OnRefreshChangeProps) => {
-      setDateRangePickerState((prevState) => ({
-        ...prevState,
-        autoRefreshOptions: { enabled: !evt.isPaused, duration: evt.refreshInterval },
-      }));
-    },
-    [setDateRangePickerState]
-  );
-
-  // auto refresh data
+  // handle auto refresh data
   const onRefresh = useCallback(() => {
     if (dateRangePickerState.autoRefreshOptions.enabled) {
       reFetchEndpointActionList();
     }
   }, [dateRangePickerState.autoRefreshOptions.enabled, reFetchEndpointActionList]);
-
-  const onTimeChange = useCallback(
-    ({ start: newStart, end: newEnd }: DurationRange) => {
-      const newRecentlyUsedDateRanges = [
-        { start: newStart, end: newEnd },
-        ...dateRangePickerState.recentlyUsedDateRanges
-          .filter(
-            (recentlyUsedRange: DurationRange) =>
-              !(recentlyUsedRange.start === newStart && recentlyUsedRange.end === newEnd)
-          )
-          .slice(0, 9),
-      ];
-
-      // update date ranges
-      updateActionListDateRanges({ start: newStart, end: newEnd });
-      // update recently used date ranges
-      updateActionListRecentlyUsedDateRanges(newRecentlyUsedDateRanges);
-    },
-    [
-      dateRangePickerState.recentlyUsedDateRanges,
-      updateActionListDateRanges,
-      updateActionListRecentlyUsedDateRanges,
-    ]
-  );
 
   // total actions
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
@@ -274,7 +199,7 @@ export const ResponseActionsList = memo<
             title: OUTPUT_MESSAGES.expandSection.output,
             description: (
               // codeblock for output
-              <StyledEuiCodeBlock>
+              <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
                 {isExpired
                   ? OUTPUT_MESSAGES.hasExpired(command)
                   : isCompleted
@@ -290,7 +215,7 @@ export const ResponseActionsList = memo<
         itemIdToExpandedRowMapValues[item.id] = (
           <>
             <EuiFlexGroup
-              data-test-subj={getTestId('output-section')}
+              data-test-subj={getTestId('details-tray')}
               direction="column"
               style={{ maxHeight: 270, overflowY: 'auto' }}
               className="eui-yScrollWithShadows"
@@ -340,11 +265,13 @@ export const ResponseActionsList = memo<
 
   // table column
   const responseActionListColumns = useMemo(() => {
+    const hideHostColumn = typeof agentIds === 'string';
+
     const columns = [
       {
         field: 'startedAt',
         name: TABLE_COLUMN_NAMES.time,
-        width: '15%',
+        width: hideHostColumn ? '21%' : '15%',
         truncateText: true,
         render: (startedAt: ActionDetails['startedAt']) => {
           return (
@@ -359,7 +286,7 @@ export const ResponseActionsList = memo<
       {
         field: 'command',
         name: TABLE_COLUMN_NAMES.command,
-        width: '10%',
+        width: hideHostColumn ? '21%' : '10%',
         truncateText: true,
         render: (_command: ActionDetails['command']) => {
           const command = getCommand(_command);
@@ -377,7 +304,7 @@ export const ResponseActionsList = memo<
       {
         field: 'createdBy',
         name: TABLE_COLUMN_NAMES.user,
-        width: '14%',
+        width: hideHostColumn ? '21%' : '14%',
         truncateText: true,
         render: (userId: ActionDetails['createdBy']) => {
           return (
@@ -428,7 +355,7 @@ export const ResponseActionsList = memo<
       {
         field: 'comment',
         name: TABLE_COLUMN_NAMES.comments,
-        width: '30%',
+        width: hideHostColumn ? '21%' : '30%',
         truncateText: true,
         render: (comment: ActionDetails['comment']) => {
           return (
@@ -447,7 +374,7 @@ export const ResponseActionsList = memo<
       {
         field: 'isCompleted',
         name: TABLE_COLUMN_NAMES.status,
-        width: '10%',
+        width: hideHostColumn ? '15%' : '10%',
         render: (isCompleted: ActionDetails['isCompleted'], data: ActionDetails) => {
           const status = data.isExpired
             ? UX_MESSAGES.badge.failed
@@ -504,7 +431,7 @@ export const ResponseActionsList = memo<
       },
     ];
     // filter out the host column
-    if (typeof agentIds === 'string') {
+    if (hideHostColumn) {
       return columns.filter((column) => column.field !== 'agents');
     }
     return columns;
@@ -576,10 +503,7 @@ export const ResponseActionsList = memo<
   );
 
   return (
-    <AdministrationListPage
-      data-test-subj="responseActionsPage"
-      title={hideHeader ? undefined : UX_MESSAGES.pageTitle}
-    >
+    <>
       <ActionListDateRangePicker
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
@@ -631,7 +555,7 @@ export const ResponseActionsList = memo<
           />
         </>
       )}
-    </AdministrationListPage>
+    </>
   );
 });
 
