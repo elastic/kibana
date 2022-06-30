@@ -66,8 +66,8 @@ export interface BucketSpanEstimatorResponse {
 
 export interface GetTimeFieldRangeResponse {
   success: boolean;
-  start: { epoch: number; string: string };
-  end: { epoch: number; string: string };
+  start: number;
+  end: number;
 }
 
 export interface SuccessCardinality {
@@ -644,14 +644,23 @@ export function mlApiServicesProvider(httpService: HttpService) {
       query,
       runtimeMappings,
       indicesOptions,
+      allowFutureTime,
     }: {
       index: string;
       timeFieldName?: string;
       query: any;
       runtimeMappings?: RuntimeMappings;
       indicesOptions?: IndicesOptions;
+      allowFutureTime?: boolean;
     }) {
-      const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings, indicesOptions });
+      const body = JSON.stringify({
+        index,
+        timeFieldName,
+        query,
+        runtimeMappings,
+        indicesOptions,
+        allowFutureTime,
+      });
 
       return httpService.http<GetTimeFieldRangeResponse>({
         path: `${basePath()}/fields_service/time_field_range`,

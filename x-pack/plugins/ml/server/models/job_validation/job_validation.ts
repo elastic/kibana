@@ -76,8 +76,8 @@ export async function validateJob(
         );
 
         duration = {
-          start: timeRange.start.epoch,
-          end: timeRange.end.epoch,
+          start: timeRange.start,
+          end: timeRange.end,
         };
       }
 

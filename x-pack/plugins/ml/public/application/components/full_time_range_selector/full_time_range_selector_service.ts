@@ -25,8 +25,7 @@ export interface TimeRange {
 export async function setFullTimeRange(
   indexPattern: DataView,
   query: QueryDslQueryContainer,
-  excludeFrozenData: boolean,
-  maxToValue?: number
+  excludeFrozenData: boolean
 ): Promise<GetTimeFieldRangeResponse> {
   try {
     const timefilter = getTimefilter();
@@ -39,16 +38,9 @@ export async function setFullTimeRange(
       ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
     });
 
-    if (maxToValue !== undefined && resp.end.epoch > maxToValue) {
-      resp.end = {
-        epoch: maxToValue,
-        string: moment(maxToValue).toISOString(),
-      };
-    }
-
     timefilter.setTime({
-      from: moment(resp.start.epoch).toISOString(),
-      to: moment(resp.end.epoch).toISOString(),
+      from: moment(resp.start).toISOString(),
+      to: moment(resp.end).toISOString(),
     });
     return resp;
   } catch (resp) {
