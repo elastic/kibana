@@ -124,10 +124,14 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    startModelAllocation(modelId: string) {
+    startModelAllocation(
+      modelId: string,
+      queryParams?: { number_of_allocations: number; threads_per_allocation: number }
+    ) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
+        query: queryParams,
       });
     },
 
