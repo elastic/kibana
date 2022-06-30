@@ -170,6 +170,7 @@ export const sampleMetricFormulaAttribute = {
         type: 'palette',
       },
       size: 's',
+      titlePosition: 'bottom',
     },
   },
   title: 'Prefilled from exploratory view app',

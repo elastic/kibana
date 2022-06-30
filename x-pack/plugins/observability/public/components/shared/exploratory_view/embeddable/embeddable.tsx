@@ -54,7 +54,7 @@ export interface ExploratoryEmbeddableProps {
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
   indexPatterns: DataViewState;
-  lensFormulaHelper: FormulaPublicApi;
+  lensFormulaHelper?: FormulaPublicApi;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -103,7 +103,7 @@ export default function Embeddable({
   let lensAttributes;
   try {
     if (reportType === ReportTypes.SINGLE_METRIC) {
-      lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportType, lensFormulaHelper);
+      lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportType, lensFormulaHelper!);
     } else {
       lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
     }
