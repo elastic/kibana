@@ -59,6 +59,7 @@ jest.mock('../archive', () => {
     ),
     unpackBufferToCache: jest.fn(),
     setPackageInfo: jest.fn(),
+    deleteVerificationResult: jest.fn(),
   };
 });
 
@@ -213,13 +214,15 @@ describe('install', () => {
         },
       ]);
 
-      await installPackage({
+      const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
         pkgkey: 'test_package-1.0.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
       });
+
+      expect(response.error).toBeUndefined();
 
       expect(install._installPackage).toHaveBeenCalledWith(
         expect.objectContaining({ installSource: 'upload' })
