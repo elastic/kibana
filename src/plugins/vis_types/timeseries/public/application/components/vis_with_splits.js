@@ -115,6 +115,7 @@ export function visWithSplits(WrappedComponent) {
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}
             fieldFormatMap={props.fieldFormatMap}
+            initialRender={props.initialRender}
           />
         </div>
       );
