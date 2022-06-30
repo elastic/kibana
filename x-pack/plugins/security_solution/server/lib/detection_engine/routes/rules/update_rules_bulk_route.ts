@@ -52,7 +52,6 @@ export const updateRulesBulkRoute = (
       const rulesClient = ctx.alerting.getRulesClient();
       const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
       const savedObjectsClient = ctx.core.savedObjects.client;
-      const siemClient = ctx.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
         license: ctx.licensing.license,
