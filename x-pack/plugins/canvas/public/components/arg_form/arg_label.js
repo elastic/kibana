@@ -40,7 +40,6 @@ export const ArgLabel = (props) => {
             </EuiToolTip>
           }
           id={argId}
-          style={{ alignItems: 'center' }}
         >
           {simpleArg || children}
         </EuiFormRow>

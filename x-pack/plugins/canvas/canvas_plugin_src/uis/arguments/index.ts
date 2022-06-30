@@ -29,7 +29,8 @@ import { shape } from './shape';
 import { string } from './string';
 // @ts-expect-error untyped local
 import { textarea } from './textarea';
-import { toggle, inlineToggle } from './toggle';
+// @ts-expect-error untyped local
+import { toggle } from './toggle';
 import { visdimension } from './vis_dimension';
 import { colorPicker } from './color_picker';
 import { editor } from './editor';
@@ -52,7 +53,6 @@ export const args = [
   string,
   textarea,
   toggle,
-  inlineToggle,
   visdimension,
   colorPicker,
   editor,
