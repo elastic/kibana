@@ -32,6 +32,7 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
   isSaving,
   onSave,
   onChange,
+  onStepChange,
   children,
   rightContentNav,
 }: Props<T, S>) {
@@ -41,6 +42,7 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
       isEditing={isEditing}
       onSave={onSave}
       onChange={onChange}
+      onStepChange={onStepChange}
       defaultActiveStep={defaultActiveStep}
     >
       <FormWizardConsumer>
