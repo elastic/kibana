@@ -147,6 +147,14 @@ describe('agent_list_page', () => {
     });
 
     utils.getByText('All agents selected');
+
+    expect(
+      utils
+        .getByText('agent6')
+        .closest('tr')!
+        .getAttribute('class')!
+        .includes('euiTableRow-isSelected')
+    ).toBeTruthy();
   });
 
   it('should set selection mode when agent selection changed manually', async () => {
