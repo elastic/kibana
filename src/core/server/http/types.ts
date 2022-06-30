@@ -117,7 +117,9 @@ export interface HttpAuth {
  * ```
  * @public
  */
-export interface HttpServicePreboot {
+export interface HttpServicePreboot<
+  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+> {
   /**
    * Provides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler
    * functions for any number of nested routes.
@@ -135,7 +137,10 @@ export interface HttpServicePreboot {
    * ```
    * @public
    */
-  registerRoutes(path: string, callback: (router: IRouter) => void): void;
+  registerRoutes<ContextType extends DefaultRequestHandlerType = DefaultRequestHandlerType>(
+    path: string,
+    callback: (router: IRouter<ContextType>) => void
+  ): void;
 
   /**
    * Access or manipulate the Kibana base path

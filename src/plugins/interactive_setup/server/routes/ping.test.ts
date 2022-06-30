@@ -32,7 +32,7 @@ describe('Configure routes', () => {
   });
 
   describe('#ping', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, any>;
     let routeConfig: RouteConfig<any, any, any, any>;
 
     beforeEach(() => {

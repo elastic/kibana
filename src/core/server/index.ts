@@ -538,7 +538,7 @@ export interface CorePreboot {
   /** {@link ElasticsearchServicePreboot} */
   elasticsearch: ElasticsearchServicePreboot;
   /** {@link HttpServicePreboot} */
-  http: HttpServicePreboot;
+  http: HttpServicePreboot<RequestHandlerContext>;
   /** {@link PrebootServicePreboot} */
   preboot: PrebootServicePreboot;
 }

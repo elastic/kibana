@@ -39,7 +39,7 @@ describe('Enroll routes', () => {
   });
 
   describe('#enroll', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, any>;
     let routeConfig: RouteConfig<any, any, any, any>;
 
     beforeEach(() => {
