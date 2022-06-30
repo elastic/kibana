@@ -42,10 +42,19 @@ describe('CreateApiLogic', () => {
         logic.actions.makeRequest({});
         expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
+          apiStatus: { status: Status.LOADING },
           status: Status.LOADING,
-          apiStatus: {
-            status: Status.LOADING,
-          },
+        });
+      });
+
+      it('should set persist data in between new requests', () => {
+        logic.actions.apiSuccess(123);
+        logic.actions.makeRequest({});
+        expect(logic.values).toEqual({
+          ...DEFAULT_VALUES,
+          apiStatus: { data: 123, status: Status.LOADING },
+          data: 123,
+          status: Status.LOADING,
         });
       });
     });
@@ -54,12 +63,12 @@ describe('CreateApiLogic', () => {
         logic.actions.apiSuccess({ success: 'data' });
         expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
-          status: Status.SUCCESS,
-          data: { success: 'data' },
           apiStatus: {
-            status: Status.SUCCESS,
             data: { success: 'data' },
+            status: Status.SUCCESS,
           },
+          data: { success: 'data' },
+          status: Status.SUCCESS,
         });
       });
     });
@@ -68,14 +77,14 @@ describe('CreateApiLogic', () => {
         logic.actions.apiError('error' as any as HttpError);
         expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
-          status: Status.ERROR,
-          data: undefined,
-          error: 'error',
           apiStatus: {
-            status: Status.ERROR,
             data: undefined,
             error: 'error',
+            status: Status.ERROR,
           },
+          data: undefined,
+          error: 'error',
+          status: Status.ERROR,
         });
       });
     });
@@ -84,14 +93,14 @@ describe('CreateApiLogic', () => {
         logic.actions.apiError('error' as any as HttpError);
         expect(logic.values).toEqual({
           ...DEFAULT_VALUES,
-          status: Status.ERROR,
-          data: undefined,
-          error: 'error',
           apiStatus: {
-            status: Status.ERROR,
             data: undefined,
             error: 'error',
+            status: Status.ERROR,
           },
+          data: undefined,
+          error: 'error',
+          status: Status.ERROR,
         });
         logic.actions.apiReset();
         expect(logic.values).toEqual(DEFAULT_VALUES);
@@ -115,14 +124,19 @@ describe('CreateApiLogic', () => {
         const apiSuccessMock = jest.spyOn(logic.actions, 'apiSuccess');
         const apiErrorMock = jest.spyOn(logic.actions, 'apiError');
         apiCallMock.mockReturnValue(
-          Promise.reject({ body: { statusCode: 404, message: 'message' } })
+          Promise.reject({
+            body: {
+              message: 'message',
+              statusCode: 404,
+            },
+          })
         );
         logic.actions.makeRequest({ arg: 'argument1' });
         expect(apiCallMock).toHaveBeenCalledWith({ arg: 'argument1' });
         await nextTick();
         expect(apiSuccessMock).not.toHaveBeenCalled();
         expect(apiErrorMock).toHaveBeenCalledWith({
-          body: { statusCode: 404, message: 'message' },
+          body: { message: 'message', statusCode: 404 },
         });
       });
     });

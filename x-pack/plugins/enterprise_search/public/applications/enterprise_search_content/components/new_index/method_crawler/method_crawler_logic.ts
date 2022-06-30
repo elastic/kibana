@@ -25,7 +25,6 @@ type MethodCrawlerActions = Pick<
 >;
 
 export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
-  path: ['enterprise_search', 'method_crawler'],
   connect: {
     actions: [CreateCrawlerIndexApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
   },
@@ -34,8 +33,9 @@ export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
       flashAPIErrors(error);
     },
     apiSuccess: ({ created }) => {
-      KibanaLogic.values.navigateToUrl(SEARCH_INDEX_PATH.replace(':indexSlug', encodeURI(created)));
+      KibanaLogic.values.navigateToUrl(SEARCH_INDEX_PATH.replace(':indexName', created));
     },
     makeRequest: () => clearFlashMessages(),
   },
+  path: ['enterprise_search', 'method_crawler'],
 });
