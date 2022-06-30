@@ -362,7 +362,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                         defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
                       />
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem>
                       <div>
                         <UninstallButton
                           {...packageInfo}
@@ -372,6 +372,20 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                         />
                       </div>
                     </EuiFlexItem>
+                    {packageHasUsages && (
+                      <EuiFlexItem>
+                        <EuiText color="subdued" size="s">
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
+                            defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
+                            values={{
+                              title,
+                              strongNote: <NoteLabel />,
+                            }}
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                   <EuiSpacer size="l" />
                   <EuiFlexGroup direction="column" gutterSize="m">
@@ -398,20 +412,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
-              )}
-              {packageHasUsages && (
-                <p>
-                  <EuiText color="subdued">
-                    <FormattedMessage
-                      id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
-                      defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
-                      values={{
-                        title,
-                        strongNote: <NoteLabel />,
-                      }}
-                    />
-                  </EuiText>
-                </p>
               )}
             </div>
           )}
