@@ -29,7 +29,7 @@ export const BarChart: React.FC<BarChartProps> = ({ id, name, height, data, x, y
   return (
     <Chart size={{ height }}>
       <Settings showLegend={false} />
-      <BarSeries id={id} name={name} data={data} xScaleType="time" xAccessor={0} yAccessors={[1]} />
+      <BarSeries id={id} name={name} data={data} xScaleType="time" xAccessor={x} yAccessors={[y]} />
       <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter('YYYY-MM-DD HH:mm:ss')} />
       <Axis id="left-axis" position="left" showGridLines tickFormat={(d) => Number(d).toFixed(0)} />
     </Chart>
