@@ -62,7 +62,7 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
     return 415; // Unsupported Media Type
   }
   if (error instanceof PackageFailedVerificationError) {
-    return 422; // Unprocessable Entity
+    return 400; // Bad Request
   }
   if (error instanceof ConcurrentInstallOperationError) {
     return 409; // Conflict
