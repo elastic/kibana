@@ -40,8 +40,8 @@ Review the following information about the {kib} 8.3.1 release.
 === Known issues
 
 Alerting users who are running 8.2 should not upgrade to either 8.3.0 or 8.3.1. Both 8.3.0 and 8.3.1 have a bug where alerting rules that were created or edited in 8.2 will stop running on upgrade. If you have upgraded to 8.3.0 or 8.3.1 and your alerting rules have stopped running
-and are erroring out with an error similar to the following, you will need to use the "Update API key" operation to restore the 
-alerting rule to a functional state. It should be noted that the "Update API Key" operation will cause the alerting rule to run as the user
+and are erroring out with an error similar to the following, you will need to use the *Update API key* operation in <<create-and-manage-rules,*Rules and Connectors Management*>> to restore the 
+alerting rule to a functional state. It should be noted that the *Update API Key* operation will cause the alerting rule to run as the user
 that performed the operation.
 
 Example error message::
@@ -108,8 +108,8 @@ Review the following information about the {kib} 8.3.0 release.
 === Known issues
 
 Alerting users who are running 8.2 should not upgrade to either 8.3.0 or 8.3.1. Both 8.3.0 and 8.3.1 have a bug where alerting rules that were created or edited in 8.2 will stop running on upgrade. If you have upgraded to 8.3.0 or 8.3.1 and your alerting rules have stopped running
-and are erroring out with an error similar to the following, you will need to use the "Update API key" operation to restore the 
-alerting rule to a functional state. It should be noted that the "Update API Key" operation will cause the alerting rule to run as the user
+and are erroring out with an error similar to the following, you will need to use the *Update API key* operation in <<create-and-manage-rules,*Rules and Connectors Management*>> to restore the 
+alerting rule to a functional state. It should be noted that the *Update API Key* operation will cause the alerting rule to run as the user
 that performed the operation.
 
 Example error message::
