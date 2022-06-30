@@ -52,9 +52,7 @@ describe('Discover flyout', function () {
       hit,
       hits:
         hits ||
-        esHits.map((entry: EsHitRecord) =>
-          buildDataTableRecord(entry, dataView || dataViewMock)
-        ),
+        esHits.map((entry: EsHitRecord) => buildDataTableRecord(entry, dataView || dataViewMock)),
       onAddColumn: jest.fn(),
       onClose,
       onFilter: jest.fn(),

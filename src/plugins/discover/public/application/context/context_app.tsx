@@ -37,7 +37,7 @@ export interface ContextAppProps {
 }
 
 export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
-  debugger
+  debugger;
   const services = useDiscoverServices();
   const { uiSettings, capabilities, dataViews, navigation, filterManager, core } = services;
 

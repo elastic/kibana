@@ -59,9 +59,7 @@ export async function fetchSurroundingDocs(
   const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
   const anchorRaw = anchor.raw!;
 
-  const nanos = dataView.isTimeNanosBased()
-    ? extractNanos(anchorRaw.fields?.[timeField][0])
-    : '';
+  const nanos = dataView.isTimeNanosBased() ? extractNanos(anchorRaw.fields?.[timeField][0]) : '';
   const timeValueMillis =
     nanos !== '' ? convertIsoToMillis(anchorRaw.fields?.[timeField][0]) : anchorRaw.sort?.[0];
 

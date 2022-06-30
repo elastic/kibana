@@ -239,7 +239,7 @@ export const DiscoverGrid = ({
       return convertValueToString({
         rowIndex,
         rows: displayedRows,
-        dataView: dataView,
+        dataView,
         columnId,
         services,
         options,

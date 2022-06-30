@@ -27,7 +27,7 @@ const buildGridContext = (dataView: DataView, rows: EsHitRecord[]): GridContext 
     setExpanded: jest.fn(),
     rows: usedRows,
     onFilter: jest.fn(),
-    dataView: dataView,
+    dataView,
     isDarkMode: false,
     selectedDocs: [],
     setSelectedDocs: jest.fn(),
