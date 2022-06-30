@@ -72,6 +72,7 @@ import {
 } from './core_usage_data';
 import { PrebootServicePreboot } from './preboot';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
+import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -496,6 +497,13 @@ export interface RequestHandlerContextBase {
  */
 export interface RequestHandlerContext extends RequestHandlerContextBase {
   core: Promise<CoreRequestHandlerContext>;
+}
+
+/**
+ * @internal
+ */
+export interface PrebootRequestHandlerContext extends RequestHandlerContextBase {
+  core: Promise<PrebootCoreRequestHandlerContext>;
 }
 
 /**

@@ -59,7 +59,7 @@ import { config as externalUrlConfig } from './external_url';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
-import type { RequestHandlerContext } from '.';
+import type { RequestHandlerContext, PrebootRequestHandlerContext } from '.';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -211,9 +211,13 @@ export class Server {
 
     await this.plugins.preboot(corePreboot);
 
-    httpPreboot.registerRouteHandlerContext(coreId, 'core', (() => {
-      return new PrebootCoreRouteHandlerContext(corePreboot);
-    }) as any);
+    httpPreboot.registerRouteHandlerContext<PrebootRequestHandlerContext, 'core'>(
+      coreId,
+      'core',
+      () => {
+        return new PrebootCoreRouteHandlerContext(corePreboot);
+      }
+    );
 
     this.coreApp.preboot(corePreboot, uiPlugins);
 

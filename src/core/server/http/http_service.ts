@@ -39,6 +39,7 @@ import {
   config as externalUrlConfig,
   ExternalUrlConfig,
 } from '../external_url';
+import { IRouter } from '..';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
@@ -118,8 +119,13 @@ export class HttpService
       server: prebootSetup.server,
       registerRouteHandlerContext: (pluginOpaqueId, contextName, provider) =>
         prebootServerRequestHandlerContext.registerContext(pluginOpaqueId, contextName, provider),
-      registerRoutes: (path, registerCallback) => {
-        const router = new Router(
+      registerRoutes: <
+        DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+      >(
+        path: string,
+        registerCallback: (router: IRouter<DefaultRequestHandlerType>) => void
+      ) => {
+        const router = new Router<DefaultRequestHandlerType>(
           path,
           this.log,
           prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId)

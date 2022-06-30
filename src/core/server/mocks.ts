@@ -158,10 +158,10 @@ function createCoreSetupMock({
   pluginStartDeps?: object;
   pluginStartContract?: any;
 } = {}) {
-  const httpMock: jest.Mocked<CoreSetup['http']> = {
+  const httpMock = {
     ...httpServiceMock.createSetupContract(),
     resources: httpResourcesMock.createRegistrar(),
-  };
+  } as jest.Mocked<CoreSetup['http']>;
 
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
