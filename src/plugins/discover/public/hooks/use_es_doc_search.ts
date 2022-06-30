@@ -88,7 +88,7 @@ export function buildSearchBody(
     body: {
       query: {
         bool: {
-          must: [{ ids: { values: [id] } }, { term: { _index: index } }],
+          filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
         },
       },
       stored_fields: computedFields.storedFields,
