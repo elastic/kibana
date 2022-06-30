@@ -158,7 +158,7 @@
         "label": "EUI_STYLES_GLOBAL",
         "description": [],
         "signature": [
-          "\"eui-styles-global\""
+          "\"eui-global\""
         ],
         "path": "packages/core/base/core-base-common/src/eui.ts",
         "deprecated": false,
