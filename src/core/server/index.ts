@@ -175,7 +175,6 @@ export type {
   HttpResponsePayload,
   HttpServerInfo,
   HttpServicePreboot,
-  HttpServiceSetup,
   HttpServiceStart,
   ErrorHttpResponseOptions,
   IKibanaSocket,
@@ -507,6 +506,11 @@ type PluginRouter<ContextType extends RequestHandlerContext = RequestHandlerCont
   IRouter<ContextType>;
 
 export type { PluginRouter as IRouter };
+
+type PublicHttpServiceSetup<ContextType extends RequestHandlerContext = RequestHandlerContext> =
+  HttpServiceSetup<ContextType>;
+
+export type { PublicHttpServiceSetup as HttpServiceSetup };
 
 /**
  * @internal
