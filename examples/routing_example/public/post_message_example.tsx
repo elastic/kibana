@@ -17,8 +17,7 @@ import {
   EuiFormRow,
   EuiTextArea,
 } from '@elastic/eui';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { isHttpFetchError } from '@kbn/core-http-browser';
+import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import { Services } from './services';
 
 interface Props {

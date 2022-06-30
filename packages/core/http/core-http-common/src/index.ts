@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { IExternalUrlPolicy } from './external_url_policy';
+export type { IExternalUrlPolicy } from './external_url_policy';
