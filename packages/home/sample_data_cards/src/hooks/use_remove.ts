@@ -12,18 +12,27 @@ import { i18n } from '@kbn/i18n';
 import { useServices } from '../services';
 import type { SampleDataSet } from '../types';
 
+/**
+ * Parameters for the `useRemove` React hook.
+ */
 export type Params = Pick<SampleDataSet, 'id' | 'defaultIndex' | 'name'> & {
+  /** Handler to invoke when the Sample Data Set is successfully removed. */
   onRemove: (id: string) => void;
 };
 
+/**
+ * A React hook that allows a component to remove a sample data set, handling success and
+ * failure in the Kibana UI.  It also provides a boolean that indicates if the data set is
+ * in the process of being removed.
+ */
 export const useRemove = ({ id, defaultIndex, name, onRemove }: Params): [() => void, boolean] => {
-  const { uninstallSampleDataSet, notifyError, notifySuccess } = useServices();
+  const { removeSampleDataSet, notifyError, notifySuccess } = useServices();
   const [isRemoving, setIsRemoving] = React.useState(false);
 
   const remove = useCallback(async () => {
     try {
       setIsRemoving(true);
-      await uninstallSampleDataSet(id, defaultIndex);
+      await removeSampleDataSet(id, defaultIndex);
       setIsRemoving(false);
 
       notifySuccess({
@@ -33,9 +42,11 @@ export const useRemove = ({ id, defaultIndex, name, onRemove }: Params): [() => 
         }),
         ['data-test-subj']: 'sampleDataSetUninstallToast',
       });
+
       onRemove(id);
     } catch (e) {
       setIsRemoving(false);
+
       notifyError({
         title: i18n.translate('homePackages.sampleDataSet.unableToUninstallErrorMessage', {
           defaultMessage: 'Unable to uninstall sample data set: {name}',
@@ -44,7 +55,7 @@ export const useRemove = ({ id, defaultIndex, name, onRemove }: Params): [() => 
         text: `${e.message}`,
       });
     }
-  }, [uninstallSampleDataSet, notifyError, notifySuccess, id, defaultIndex, name, onRemove]);
+  }, [removeSampleDataSet, notifyError, notifySuccess, id, defaultIndex, name, onRemove]);
 
   return [remove, isRemoving];
 };

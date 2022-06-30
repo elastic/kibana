@@ -14,6 +14,9 @@ import { useInstall } from '../hooks';
 import type { SampleDataSet } from '../types';
 import type { UseInstallParams } from '../hooks';
 
+/**
+ * Props for the `InstallFooter` component.
+ */
 export type Props = Pick<SampleDataSet, 'id' | 'name'> & UseInstallParams;
 
 const addingLabel = i18n.translate('homePackages.sampleDataCard.addingButtonLabel', {
@@ -24,6 +27,9 @@ const addLabel = i18n.translate('homePackages.sampleDataCard.addButtonLabel', {
   defaultMessage: 'Add data',
 });
 
+/**
+ * A footer displayed when a Sample Data Set is not installed, allowing a person to install it.
+ */
 export const InstallFooter = (params: Props) => {
   const [install, isInstalling] = useInstall(params);
   const { id, name } = params;

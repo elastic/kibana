@@ -15,8 +15,14 @@ import iconPath from './icon.svg';
 import { Services } from '../services';
 import { SampleDataSet } from '../types';
 
+/**
+ * A set of e-commerce images for use in Storybook stories.
+ */
 export const ecommerceImages = { previewImagePath, darkPreviewImagePath, iconPath };
 
+/**
+ * A mocked sample data set for use in Storybook stories.
+ */
 export const mockDataSet: SampleDataSet = {
   darkPreviewImagePath,
   defaultIndex: 'default-index',
@@ -37,6 +43,9 @@ export const mockDataSet: SampleDataSet = {
   statusMsg: 'optional status message',
 };
 
+/**
+ * Customize the Sample Data Set mock.
+ */
 export const getMockDataSet = (params: Partial<SampleDataSet> = {}) => ({
   ...mockDataSet,
   ...params,
@@ -70,11 +79,11 @@ export const getStoryServices = (params: Params) => {
     },
     notifyError: action('notifyError'),
     notifySuccess: action('notifySuccess'),
-    uninstallSampleDataSet: async (id) => {
+    removeSampleDataSet: async (id) => {
       if (simulateErrors) {
         throw new Error('Error on uninstall');
       }
-      action('uninstallSampleDataSet')(id);
+      action('removeSampleDataSet')(id);
     },
   };
 
@@ -124,7 +133,7 @@ export const getMockServices = (params: Partial<Services> = {}) => {
     installSampleDataSet: jest.fn(),
     notifyError: jest.fn(),
     notifySuccess: jest.fn(),
-    uninstallSampleDataSet: jest.fn(),
+    removeSampleDataSet: jest.fn(),
     ...params,
   };
 

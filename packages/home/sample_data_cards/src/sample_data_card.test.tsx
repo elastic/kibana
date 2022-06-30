@@ -14,6 +14,7 @@ import { SampleDataCard } from './sample_data_card';
 import { SampleDataCardsProvider } from './services';
 import { getMockServices, getMockDataSet } from './mocks';
 import { Services } from './services';
+import { INSTALLED_STATUS, UNINSTALLED_STATUS } from './constants';
 
 describe('SampleDataCard', () => {
   const onStatusChange = jest.fn();
@@ -44,7 +45,7 @@ describe('SampleDataCard', () => {
           .find(`button[data-test-subj="addSampleDataSet${sampleDataSet.id}"]`)
           .simulate('click');
       });
-      expect(onStatusChange).toHaveBeenCalledWith(sampleDataSet.id);
+      expect(onStatusChange).toHaveBeenCalledWith(sampleDataSet.id, INSTALLED_STATUS);
     });
   });
 
@@ -81,7 +82,7 @@ describe('SampleDataCard', () => {
           .find(`button[data-test-subj="removeSampleDataSet${sampleDataSet.id}"]`)
           .simulate('click');
       });
-      expect(onStatusChange).toHaveBeenCalledWith(sampleDataSet.id);
+      expect(onStatusChange).toHaveBeenCalledWith(sampleDataSet.id, UNINSTALLED_STATUS);
     });
   });
 });

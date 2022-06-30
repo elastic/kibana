@@ -13,9 +13,17 @@ import { FlexGridColumns } from '@elastic/eui/src/components/flex/flex_grid';
 import { useList } from './hooks';
 import { SampleDataCard } from './sample_data_card';
 
+/**
+ * Props for the `SampleDataCards` component.
+ */
 export interface Props {
+  /** Number of columns, defaults to 3. */
   columns?: FlexGridColumns;
 }
+
+/**
+ * Fetches and displays a collection of Sample Data Sets in a grid.
+ */
 export const SampleDataCards = ({ columns = 3 }: Props) => {
   const [sampleDataSets, refresh] = useList();
 

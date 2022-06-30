@@ -9,24 +9,32 @@
 import React from 'react';
 import { INSTALLED_STATUS, UNINSTALLED_STATUS } from '../constants';
 
-import { SampleDataSet } from '../types';
-import { DefaultFooter } from './default_footer';
+import { SampleDataSet, InstalledStatus } from '../types';
+import { DisabledFooter } from './disabled_footer';
 import { InstallFooter } from './install_footer';
 import { RemoveFooter } from './remove_footer';
 
+/**
+ * Props for the `Footer` component.
+ */
 export interface Props {
+  /** The Sample Data Set and its status. */
   sampleDataSet: SampleDataSet;
-  onAction: (id: string) => void;
+  /** The handler to invoke when an action is performed upon the Sample Data Set. */
+  onAction: (id: string, status: InstalledStatus) => void;
 }
 
+/**
+ * Displays the appropriate Footer component based on the status of the Sample Data Set.
+ */
 export const Footer = ({ sampleDataSet, onAction }: Props) => {
   if (sampleDataSet.status === INSTALLED_STATUS) {
-    return <RemoveFooter onRemove={onAction} {...sampleDataSet} />;
+    return <RemoveFooter onRemove={(id) => onAction(id, UNINSTALLED_STATUS)} {...sampleDataSet} />;
   }
 
   if (sampleDataSet.status === UNINSTALLED_STATUS) {
-    return <InstallFooter onInstall={onAction} {...sampleDataSet} />;
+    return <InstallFooter onInstall={(id) => onAction(id, INSTALLED_STATUS)} {...sampleDataSet} />;
   }
 
-  return <DefaultFooter {...sampleDataSet} />;
+  return <DisabledFooter {...sampleDataSet} />;
 };

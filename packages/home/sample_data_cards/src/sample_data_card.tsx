@@ -10,15 +10,23 @@ import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { useServices } from './services';
-import { SampleDataCard as Component } from './sample_data_card.component';
+import { SampleDataCard as Component, Props as ComponentProps } from './sample_data_card.component';
 
 import type { SampleDataSet } from './types';
 
-export interface Props {
+/**
+ * Props for the `SampleDataCard` component.
+ */
+export interface Props extends Pick<ComponentProps, 'onStatusChange'> {
+  /** A Sample Data Set to display. */
   sampleDataSet: SampleDataSet;
-  onStatusChange: (id: string) => void;
 }
 
+/**
+ * A card representing a Sample Data Set that can be installed.  Uses Kibana services to
+ * display and install the data set.  Requires a `SampleDataCardsProvider` to render and
+ * function.
+ */
 export const SampleDataCard = ({ sampleDataSet, onStatusChange }: Props) => {
   const { addBasePath } = useServices();
   const { colorMode } = useEuiTheme();

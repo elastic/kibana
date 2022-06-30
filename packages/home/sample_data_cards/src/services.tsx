@@ -35,7 +35,7 @@ export interface Services {
   installSampleDataSet: (id: string, defaultIndex: string) => Promise<void>;
   notifyError: NotifyFn;
   notifySuccess: NotifyFn;
-  uninstallSampleDataSet: (id: string, defaultIndex: string) => Promise<void>;
+  removeSampleDataSet: (id: string, defaultIndex: string) => Promise<void>;
 }
 
 const Context = React.createContext<Services | null>(null);
@@ -51,7 +51,7 @@ export const SampleDataCardsProvider: FC<Services> = ({ children, ...services })
     installSampleDataSet,
     notifyError,
     notifySuccess,
-    uninstallSampleDataSet,
+    removeSampleDataSet,
   } = services;
 
   return (
@@ -63,7 +63,7 @@ export const SampleDataCardsProvider: FC<Services> = ({ children, ...services })
         installSampleDataSet,
         notifyError,
         notifySuccess,
-        uninstallSampleDataSet,
+        removeSampleDataSet,
       }}
     >
       {children}
@@ -130,7 +130,7 @@ export const SampleDataCardsKibanaProvider: FC<KibanaDependencies> = ({
 
       clearDataViewsCache();
     },
-    uninstallSampleDataSet: async (id, defaultIndex) => {
+    removeSampleDataSet: async (id, defaultIndex) => {
       await http.delete(`${SAMPLE_DATA_API}/${id}`);
 
       if (

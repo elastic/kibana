@@ -11,15 +11,23 @@ import { EuiCard } from '@elastic/eui';
 
 import { INSTALLED_STATUS } from './constants';
 
-import type { SampleDataSet } from './types';
+import type { SampleDataSet, InstalledStatus } from './types';
 import { Footer } from './footer';
 
 export interface Props {
+  /** A Sample Data Set to display. */
   sampleDataSet: SampleDataSet;
+  /** A resolved, themed image to display in the card. */
   imagePath: string;
-  onStatusChange: (id: string) => void;
+  /** A handler to invoke when the status of a Sample Data Set is changed. */
+  onStatusChange: (id: string, status: InstalledStatus) => void;
 }
 
+/**
+ * A pure implementation of the `SampleDataCard` component that itself
+ * does not depend on any Kibana services.  Still requires a
+ * `SampleDataCardsProvider` for its dependencies to render and function.
+ */
 export const SampleDataCard = ({
   sampleDataSet,
   imagePath: image,

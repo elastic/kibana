@@ -20,12 +20,23 @@ import { i18n } from '@kbn/i18n';
 import { useServices } from '../services';
 import type { SampleDataSet } from '../types';
 
+/**
+ * Props for the `ViewButton` component.
+ */
 export type Props = Pick<SampleDataSet, 'id' | 'name' | 'overviewDashboard' | 'appLinks'>;
 
 const viewDataButtonLabel = i18n.translate('homePackages.sampleDataCard.viewDataButtonLabel', {
   defaultMessage: 'View data',
 });
 
+const dashboardLabel = i18n.translate('homePackages.sampleDataCard.dashboardLinkLabel', {
+  defaultMessage: 'Dashboard',
+});
+
+/**
+ * A button displayed when a Sample Data Set is installed, allowing a person to view the overview dashboard,
+ * and, if included, a number of actions to navigate to other solutions.
+ */
 export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => {
   const { addBasePath, getAppNavigationHandler } = useServices();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
@@ -60,9 +71,7 @@ export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => 
 
   const dashboardAppLink = {
     path: dashboardPath,
-    label: i18n.translate('homePackages.sampleDataCard.dashboardLinkLabel', {
-      defaultMessage: 'Dashboard',
-    }),
+    label: dashboardLabel,
     icon: 'dashboardApp',
     order: 0,
     'data-test-subj': `viewSampleDataSet${id}-dashboard`,

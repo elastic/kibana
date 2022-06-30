@@ -15,6 +15,9 @@ import { ViewButton } from './view_button';
 import type { UseRemoveParams } from '../hooks';
 import type { Props as ViewButtonProps } from './view_button';
 
+/**
+ * Props for the `RemoveFooter` component.
+ */
 export type Props = Pick<SampleDataSet, 'id' | 'name'> & UseRemoveParams & ViewButtonProps;
 
 const removeLabel = i18n.translate('homePackages.sampleDataCard.removeButtonLabel', {
@@ -25,6 +28,10 @@ const removingLabel = i18n.translate('homePackages.sampleDataCard.removingButton
   defaultMessage: 'Removing',
 });
 
+/**
+ * A footer displayed when a Sample Data Set is installed, allowing a person to remove it or view
+ * saved objects associated with it in their related solutions.
+ */
 export const RemoveFooter = (props: Props) => {
   const [remove, isRemoving] = useRemove(props);
   const { id, name } = props;
@@ -42,6 +49,7 @@ export const RemoveFooter = (props: Props) => {
       datasetName: name,
     },
   });
+
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={false}>

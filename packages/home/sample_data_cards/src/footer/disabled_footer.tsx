@@ -13,13 +13,20 @@ import { i18n } from '@kbn/i18n';
 
 import { SampleDataSet } from '../types';
 
+/**
+ * Props for the `DisabledFooter` component.
+ */
 export type Props = Pick<SampleDataSet, 'id' | 'name' | 'statusMsg'>;
 
 const addDataLabel = i18n.translate('homePackages.sampleDataCard.default.addButtonLabel', {
   defaultMessage: 'Add data',
 });
 
-export const DefaultFooter = ({ id, name, statusMsg }: Props) => {
+/**
+ * A footer for the `SampleDataCard` displayed when an unknown error or status prevents a person
+ * from installing the Sample Data Set.
+ */
+export const DisabledFooter = ({ id, name, statusMsg }: Props) => {
   const errorMessage = i18n.translate(
     'homePackages.sampleDataCard.default.unableToVerifyErrorMessage',
     { defaultMessage: 'Unable to verify dataset status, error: {statusMsg}', values: { statusMsg } }
