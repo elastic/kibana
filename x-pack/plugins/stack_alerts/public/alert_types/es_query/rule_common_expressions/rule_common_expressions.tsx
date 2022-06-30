@@ -90,7 +90,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
             <h5>
               <FormattedMessage
                 id="xpack.stackAlerts.esQuery.ui.selectSizePrompt"
-                defaultMessage="Select a size"
+                defaultMessage="Set the number of documents to send"
               />
             </h5>
           </EuiTitle>
