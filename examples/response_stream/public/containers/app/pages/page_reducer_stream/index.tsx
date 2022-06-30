@@ -65,11 +65,19 @@ export const PageReducerStream: FC = () => {
     }
   };
 
+  // This is for low level errors on the stream/HTTP level.
   useEffect(() => {
     if (error) {
       notifications.toasts.addDanger(error);
     }
   }, [error, notifications.toasts]);
+
+  // This is for errors on the application level
+  useEffect(() => {
+    if (data.errors.length > 0) {
+      notifications.toasts.addDanger(data.errors[data.errors.length - 1]);
+    }
+  }, [data.errors, notifications.toasts]);
 
   const buttonLabel = isRunning ? 'Stop development' : 'Start development';
 
