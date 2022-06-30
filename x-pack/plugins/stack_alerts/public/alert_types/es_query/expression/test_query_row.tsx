@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import {
   copyToClipboard,
   EuiButton,
@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestQuery } from './use_test_query';
@@ -27,45 +28,7 @@ export function TestQueryRow({
   hasValidationErrors: boolean;
 }) {
   const { onTestQuery, testQueryResult, testQueryError, testQueryLoading } = useTestQuery(fetch);
-  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-
-  let message: React.ReactElement | undefined;
-
-  if (showCopiedMessage) {
-    message = (
-      <EuiText data-test-subj="queryCopiedMessage" color="subdued" size="s">
-        <p>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.queryCopiedToClipboard"
-            defaultMessage="Query copied to clipboard."
-          />
-        </p>
-      </EuiText>
-    );
-  } else if (testQueryLoading) {
-    message = (
-      <EuiText color="subdued" size="s">
-        <p>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.testQueryIsExecuted"
-            defaultMessage="Query is executed."
-          />
-        </p>
-      </EuiText>
-    );
-  } else if (testQueryResult) {
-    message = (
-      <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">
-        <p>{testQueryResult}</p>
-      </EuiText>
-    );
-  } else if (testQueryError) {
-    message = (
-      <EuiText data-test-subj="testQueryError" color="danger" size="s">
-        <p>{testQueryError}</p>
-      </EuiText>
-    );
-  }
+  const [copiedMessage, setCopiedMessage] = useState<ReactNode | null>(null);
 
   return (
     <>
@@ -78,7 +41,6 @@ export function TestQueryRow({
               iconSide="left"
               iconType="playFilled"
               onClick={() => {
-                setShowCopiedMessage(false);
                 onTestQuery();
               }}
               disabled={hasValidationErrors}
@@ -93,29 +55,68 @@ export function TestQueryRow({
           </EuiFlexItem>
           {copyQuery && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="copyQuery"
-                color="primary"
-                iconSide="left"
-                iconType="copyClipboard"
-                onClick={() => {
-                  const copied = copyToClipboard(copyQuery());
-                  setShowCopiedMessage(copied);
+              <EuiToolTip
+                content={copiedMessage}
+                onMouseOut={() => {
+                  setCopiedMessage(null);
                 }}
-                disabled={hasValidationErrors}
-                isLoading={testQueryLoading}
-                size="s"
               >
-                <FormattedMessage
-                  id="xpack.stackAlerts.esQuery.ui.copyQuery"
-                  defaultMessage="Copy query"
-                />
-              </EuiButtonEmpty>
+                <EuiButtonEmpty
+                  data-test-subj="copyQuery"
+                  color="primary"
+                  iconSide="left"
+                  iconType="copyClipboard"
+                  onClick={() => {
+                    const copied = copyToClipboard(copyQuery());
+                    if (copied) {
+                      setCopiedMessage(
+                        <FormattedMessage
+                          id="xpack.stackAlerts.esQuery.ui.queryCopiedToClipboard"
+                          defaultMessage="Copied"
+                        />
+                      );
+                    }
+                  }}
+                  disabled={hasValidationErrors}
+                  isLoading={testQueryLoading}
+                  size="s"
+                >
+                  <FormattedMessage
+                    id="xpack.stackAlerts.esQuery.ui.copyQuery"
+                    defaultMessage="Copy query"
+                  />
+                </EuiButtonEmpty>
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFormRow>
-      {message && <EuiFormRow>{message}</EuiFormRow>}
+      {testQueryLoading && (
+        <EuiFormRow>
+          <EuiText color="subdued" size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.testQueryIsExecuted"
+                defaultMessage="Query is executed."
+              />
+            </p>
+          </EuiText>
+        </EuiFormRow>
+      )}
+      {testQueryResult && (
+        <EuiFormRow>
+          <EuiText data-test-subj="testQuerySuccess" color="subdued" size="s">
+            <p>{testQueryResult}</p>
+          </EuiText>
+        </EuiFormRow>
+      )}
+      {testQueryError && (
+        <EuiFormRow>
+          <EuiText data-test-subj="testQueryError" color="danger" size="s">
+            <p>{testQueryError}</p>
+          </EuiText>
+        </EuiFormRow>
+      )}
     </>
   );
 }

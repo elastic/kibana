@@ -247,13 +247,12 @@ describe('SearchSourceAlertTypeExpression', () => {
 
     expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="queryCopiedMessage"]').exists()).toBeFalsy();
     expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
       `Query matched 1234 documents in the last 15s.`
     );
   });
 
-  it('should call copyToClipboard with the serialized query and show the copied message when the copy query button is clicked', async () => {
+  it('should call copyToClipboard with the serialized query when the copy query button is clicked', async () => {
     let wrapper = null as unknown as ReactWrapper;
     await act(async () => {
       wrapper = setup(defaultSearchSourceExpressionParams);
@@ -328,9 +327,6 @@ describe('SearchSourceAlertTypeExpression', () => {
     }
   }
 }`);
-    expect(wrapper.find('[data-test-subj="queryCopiedMessage"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
   });
 
   test('should render error prompt', async () => {
