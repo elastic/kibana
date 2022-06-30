@@ -3287,8 +3287,6 @@
     "embeddableApi.panel.enhancedDashboardPanelAriaLabel": "Panneau du tableau de bord : {title}",
     "embeddableApi.panel.inspectPanel.displayName": "Inspecter",
     "embeddableApi.panel.inspectPanel.untitledEmbeddableFilename": "sans titre",
-    "embeddableApi.panel.labelAborted": "Annulé",
-    "embeddableApi.panel.labelError": "Erreur",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel": "Options de panneau",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabelWithIndex": "Options pour le panneau {index}",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel": "Options de panneau pour {title}",
