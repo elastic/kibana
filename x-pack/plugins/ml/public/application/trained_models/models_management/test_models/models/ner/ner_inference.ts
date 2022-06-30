@@ -6,30 +6,61 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { i18n } from '@kbn/i18n';
+import { InferenceBase, InferResponse } from '../inference_base';
+import { getGeneralInputComponent } from '../text_input';
+import { getNerOutputComponent } from './ner_output';
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/trained_models';
 
-import { InferenceBase } from '../inference_base';
-
-export type FormattedNerResp = Array<{
+export type FormattedNerResponse = Array<{
   value: string;
   entity: estypes.MlTrainedModelEntities | null;
 }>;
 
-interface InferResponse {
-  response: FormattedNerResp;
-  rawResponse: estypes.MlInferTrainedModelDeploymentResponse;
-}
+export type NerResponse = InferResponse<FormattedNerResponse, estypes.MlInferTrainedModelResponse>;
 
-export class NerInference extends InferenceBase<InferResponse> {
-  public async infer(inputText: string) {
-    const payload = { docs: { [this.inputField]: inputText } };
-    const resp = await this.trainedModelsApi.inferTrainedModel(this.model.model_id, payload, '30s');
+export class NerInference extends InferenceBase<NerResponse> {
+  protected inferenceType = SUPPORTED_PYTORCH_TASKS.NER;
 
-    return { response: parseResponse(resp), rawResponse: resp };
+  public async infer() {
+    try {
+      this.setRunning();
+      const inputText = this.inputText$.getValue();
+      const payload = { docs: [{ [this.inputField]: inputText }] };
+      const resp = await this.trainedModelsApi.inferTrainedModel(
+        this.model.model_id,
+        payload,
+        '30s'
+      );
+
+      const processedResponse: NerResponse = {
+        response: parseResponse(resp),
+        rawResponse: resp,
+        inputText,
+      };
+      this.inferenceResult$.next(processedResponse);
+      this.setFinished();
+      return processedResponse;
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
+  }
+
+  public getInputComponent(): JSX.Element {
+    const placeholder = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.inputText', {
+      defaultMessage: 'Enter a phrase to test',
+    });
+    return getGeneralInputComponent(this, placeholder);
+  }
+
+  public getOutputComponent(): JSX.Element {
+    return getNerOutputComponent(this);
   }
 }
 
-function parseResponse(resp: estypes.MlInferTrainedModelDeploymentResponse): FormattedNerResp {
-  const { predicted_value: predictedValue, entities } = resp;
+function parseResponse(resp: estypes.MlInferTrainedModelResponse): FormattedNerResponse {
+  const [{ predicted_value: predictedValue, entities }] = resp.inference_results;
   const splitWordsAndEntitiesRegex = /(\[.*?\]\(.*?&.*?\))/;
   const matchEntityRegex = /(\[.*?\])\((.*?)&(.*?)\)/;
   if (predictedValue === undefined || entities === undefined) {

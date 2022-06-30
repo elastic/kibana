@@ -16,7 +16,7 @@ import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { GetStateReturn } from '../../services/discover_state';
-import { DataCharts$, DataTotalHits$ } from '../../utils/use_saved_search';
+import { DataCharts$, DataTotalHits$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { Chart } from './point_series';
@@ -103,7 +103,13 @@ async function mountComponent(isTimeBased: boolean = false) {
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: {
+      appStateContainer: {
+        getState: () => ({
+          interval: 'auto',
+        }),
+      },
+    } as unknown as GetStateReturn,
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     setDiscoverViewMode: jest.fn(),
   };

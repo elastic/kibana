@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { render, waitFor } from '@testing-library/react';
+import { render as _render, waitFor } from '@testing-library/react';
 
 import { useFirstLastSeenHost } from '../../containers/hosts/first_last_seen';
 import { TestProviders } from '../../../common/mock';
@@ -26,58 +26,64 @@ describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
   const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
 
+  let render: (ui: React.ReactElement) => ReturnType<typeof _render>;
+
+  beforeEach(() => {
+    render = (ui: React.ReactElement): ReturnType<typeof _render> => {
+      return _render(
+        <TestProviders>
+          <div data-test-subj="test-render-output">{ui}</div>
+        </TestProviders>
+      );
+    };
+  });
+
   test('Loading', async () => {
     useFirstLastSeenHostMock.mockReturnValue([true, MOCKED_RESPONSE]);
-    const { container } = render(
-      <TestProviders>
-        <FirstLastSeenHost
-          docValueFields={[]}
-          indexNames={[]}
-          hostName="kibana-siem"
-          type={FirstLastSeenHostType.FIRST_SEEN}
-        />
-      </TestProviders>
+    const { getByTestId } = render(
+      <FirstLastSeenHost
+        docValueFields={[]}
+        indexNames={[]}
+        hostName="kibana-siem"
+        type={FirstLastSeenHostType.FIRST_SEEN}
+      />
     );
-    expect(container.innerHTML).toBe(
-      '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
-    );
+
+    // Removed strict equality as the EuiLoader has been converted to Emotion and will no longer have the euiLoadingSpinner--medium class
+    expect(getByTestId('test-render-output').innerHTML).toContain('<span class="euiLoadingSpinner');
   });
 
   test('First Seen', async () => {
     useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
-    const { container } = render(
-      <TestProviders>
-        <FirstLastSeenHost
-          docValueFields={[]}
-          indexNames={[]}
-          hostName="kibana-siem"
-          type={FirstLastSeenHostType.FIRST_SEEN}
-        />
-      </TestProviders>
+    const { getByTestId } = render(
+      <FirstLastSeenHost
+        docValueFields={[]}
+        indexNames={[]}
+        hostName="kibana-siem"
+        type={FirstLastSeenHostType.FIRST_SEEN}
+      />
     );
 
     await waitFor(() => {
-      expect(container.innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+      expect(getByTestId('test-render-output').innerHTML).toBe(
+        `<div class="euiText css-1vkrgyt-euiText-s"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
       );
     });
   });
 
   test('Last Seen', async () => {
     useFirstLastSeenHostMock.mockReturnValue([false, MOCKED_RESPONSE]);
-    const { container } = render(
-      <TestProviders>
-        <FirstLastSeenHost
-          docValueFields={[]}
-          indexNames={[]}
-          hostName="kibana-siem"
-          type={FirstLastSeenHostType.LAST_SEEN}
-        />
-      </TestProviders>
+    const { getByTestId } = render(
+      <FirstLastSeenHost
+        docValueFields={[]}
+        indexNames={[]}
+        hostName="kibana-siem"
+        type={FirstLastSeenHostType.LAST_SEEN}
+      />
     );
     await waitFor(() => {
-      expect(container.innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+      expect(getByTestId('test-render-output').innerHTML).toBe(
+        `<div class="euiText css-1vkrgyt-euiText-s"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
       );
     });
   });
@@ -90,20 +96,18 @@ describe('FirstLastSeen Component', () => {
         firstSeen: null,
       },
     ]);
-    const { container } = render(
-      <TestProviders>
-        <FirstLastSeenHost
-          docValueFields={[]}
-          indexNames={[]}
-          hostName="kibana-siem"
-          type={FirstLastSeenHostType.LAST_SEEN}
-        />
-      </TestProviders>
+    const { getByTestId } = render(
+      <FirstLastSeenHost
+        docValueFields={[]}
+        indexNames={[]}
+        hostName="kibana-siem"
+        type={FirstLastSeenHostType.LAST_SEEN}
+      />
     );
 
     await waitFor(() => {
-      expect(container.innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
+      expect(getByTestId('test-render-output').innerHTML).toBe(
+        `<div class="euiText css-1vkrgyt-euiText-s"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
       );
     });
   });
@@ -116,20 +120,18 @@ describe('FirstLastSeen Component', () => {
         lastSeen: null,
       },
     ]);
-    const { container } = render(
-      <TestProviders>
-        <FirstLastSeenHost
-          docValueFields={[]}
-          indexNames={[]}
-          hostName="kibana-siem"
-          type={FirstLastSeenHostType.FIRST_SEEN}
-        />
-      </TestProviders>
+    const { getByTestId } = render(
+      <FirstLastSeenHost
+        docValueFields={[]}
+        indexNames={[]}
+        hostName="kibana-siem"
+        type={FirstLastSeenHostType.FIRST_SEEN}
+      />
     );
 
     await waitFor(() => {
-      expect(container.innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
+      expect(getByTestId('test-render-output').innerHTML).toBe(
+        `<div class="euiText css-1vkrgyt-euiText-s"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
       );
     });
   });

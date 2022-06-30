@@ -16,7 +16,7 @@ export const useStyles = () => {
     const { size, colors, border } = euiTheme;
 
     const container: CSSObject = {
-      margin: `${size.xs} ${size.base} 0 ${size.xs}`,
+      margin: `${size.xs} ${size.base} ${size.base} ${size.xs}`,
       color: colors.text,
       padding: `${size.s} 0`,
       borderStyle: 'solid',

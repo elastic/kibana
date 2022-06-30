@@ -15,9 +15,14 @@ export interface FilterEventsAgainstListOptions<T> {
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
-  eventSearchResult: estypes.SearchResponse<T>;
+  events: Array<estypes.SearchHit<T>>;
   buildRuleMessage: BuildRuleMessage;
 }
+
+export type FilterEventsAgainstListReturn<T> = [
+  Array<estypes.SearchHit<T>>,
+  Array<estypes.SearchHit<T>>
+];
 
 export interface CreateSetToFilterAgainstOptions<T> {
   events: Array<estypes.SearchHit<T>>;

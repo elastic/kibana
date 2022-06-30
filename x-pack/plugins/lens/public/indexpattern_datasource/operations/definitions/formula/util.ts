@@ -13,7 +13,7 @@ import type {
   TinymathNamedArgument,
   TinymathVariable,
 } from '@kbn/tinymath';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type {
   OperationDefinition,
   GenericIndexPatternColumn,
@@ -118,6 +118,7 @@ export const tinymathFunctions: Record<
       optional?: boolean;
       defaultValue?: string | number;
       type?: string;
+      alternativeWhenMissing?: string;
     }>;
     // Help is in Markdown format
     help: string;
@@ -137,7 +138,7 @@ export const tinymathFunctions: Record<
     help: i18n.translate('xpack.lens.formula.addFunction.markdown', {
       defaultMessage: `
 Adds up two numbers.
-Also works with + symbol
+Also works with \`+\` symbol.
 
 Example: Calculate the sum of two fields
 
@@ -163,7 +164,7 @@ Example: Offset count by a static value
     help: i18n.translate('xpack.lens.formula.subtractFunction.markdown', {
       defaultMessage: `
 Subtracts the first number from the second number.
-Also works with \`-\` symbol
+Also works with \`-\` symbol.
 
 Example: Calculate the range of a field
 \`subtract(max(bytes), min(bytes))\`
@@ -273,10 +274,12 @@ Example: Round up price to the next dollar
       {
         name: i18n.translate('xpack.lens.formula.min', { defaultMessage: 'min' }),
         type: getTypeI18n('number'),
+        alternativeWhenMissing: 'pick_max',
       },
       {
         name: i18n.translate('xpack.lens.formula.max', { defaultMessage: 'max' }),
         type: getTypeI18n('number'),
+        alternativeWhenMissing: 'pick_min',
       },
     ],
     help: i18n.translate('xpack.lens.formula.clampFunction.markdown', {
@@ -478,6 +481,46 @@ Raise the value to the 2nd power
 
 Example: Calculate area based on side length
 \`square(last_value(length))\`
+    `,
+    }),
+  },
+  pick_max: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    help: i18n.translate('xpack.lens.formula.maxFunction.markdown', {
+      defaultMessage: `
+Finds the maximum value between two numbers.
+
+Example: Find the maximum between two fields averages
+\`pick_max(average(bytes), average(memory))\`
+        `,
+    }),
+  },
+  pick_min: {
+    positionalArguments: [
+      {
+        name: i18n.translate('xpack.lens.formula.left', { defaultMessage: 'left' }),
+        type: getTypeI18n('number'),
+      },
+      {
+        name: i18n.translate('xpack.lens.formula.right', { defaultMessage: 'right' }),
+        type: getTypeI18n('number'),
+      },
+    ],
+    help: i18n.translate('xpack.lens.formula.minFunction.markdown', {
+      defaultMessage: `
+Finds the minimum value between two numbers.
+
+Example: Find the minimum between two fields averages
+\`pick_min(average(bytes), average(memory))\`
     `,
     }),
   },

@@ -7,9 +7,10 @@
  */
 
 import { History } from 'history';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
 import {
@@ -22,6 +23,7 @@ import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { DashboardAppNoDataPage } from './dashboard_app_no_data';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -35,8 +37,18 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, chrome, embeddable, onAppLeave, uiSettings, data, spacesService } =
-    useKibana<DashboardAppServices>().services;
+  const {
+    core,
+    chrome,
+    embeddable,
+    onAppLeave,
+    uiSettings,
+    data,
+    spacesService,
+    screenshotModeService,
+  } = useKibana<DashboardAppServices>().services;
+
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
 
   const kbnUrlStateStorage = useMemo(
     () =>
@@ -57,6 +69,8 @@ export function DashboardApp({
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
   const dashboardAppState = useDashboardAppState({
     history,
+    showNoDataPage,
+    setShowNoDataPage,
     savedDashboardId,
     kbnUrlStateStorage,
     isEmbeddedExternally: Boolean(embedSettings),
@@ -117,15 +131,17 @@ export function DashboardApp({
 
   return (
     <>
-      {isCompleteDashboardAppState(dashboardAppState) && (
+      {showNoDataPage && (
+        <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
+      )}
+      {!showNoDataPage && isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          {!printMode && (
-            <DashboardTopNav
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardAppState={dashboardAppState}
-            />
-          )}
+          <DashboardTopNav
+            printMode={printMode}
+            redirectTo={redirectTo}
+            embedSettings={embedSettings}
+            dashboardAppState={dashboardAppState}
+          />
 
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&
@@ -138,7 +154,13 @@ export function DashboardApp({
                 )}${history.location.search}`,
               })
             : null}
-          <div className="dashboardViewport">
+          <div
+            className={`dashboardViewport ${
+              screenshotModeService && screenshotModeService.isScreenshotMode()
+                ? 'dashboardViewport--screenshotMode'
+                : ''
+            }`}
+          >
             <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
           </div>
         </>

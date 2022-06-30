@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 
 import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { NavigateToAppOptions } from '@kbn/core/public';
+import { convertToCamelCase } from '../../../api/utils';
 import {
   FEATURE_ID,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
-import { convertToCamelCase } from '../../../containers/utils';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 

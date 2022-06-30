@@ -60,6 +60,7 @@ import {
   ALERT_ORIGINAL_EVENT,
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_RULE_ACTIONS,
+  ALERT_RULE_INDICES,
   ALERT_RULE_THROTTLE,
   ALERT_RULE_TIMELINE_ID,
   ALERT_RULE_TIMELINE_TITLE,
@@ -78,7 +79,6 @@ import {
   commonParamsCamelToSnake,
   typeSpecificCamelToSnake,
 } from '../../../schemas/rule_converters';
-import { transformTags } from '../../../routes/rules/utils';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import {
   AncestorLatest,
@@ -131,12 +131,14 @@ export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
  * @param rule The rule that is generating the new alert.
  * @param spaceId The space ID in which the rule was executed.
  * @param reason Human readable string summarizing alert.
+ * @param indicesToQuery Array of index patterns searched by the rule.
  */
 export const buildAlert = (
   docs: SimpleHit[],
   completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
   reason: string,
+  indicesToQuery: string[],
   overrides?: {
     nameOverride: string;
     severityOverride: string;
@@ -205,6 +207,7 @@ export const buildAlert = (
     [ALERT_RULE_FROM]: params.from,
     [ALERT_RULE_IMMUTABLE]: params.immutable,
     [ALERT_RULE_INTERVAL]: schedule.interval,
+    [ALERT_RULE_INDICES]: indicesToQuery,
     [ALERT_RULE_LICENSE]: params.license,
     [ALERT_RULE_MAX_SIGNALS]: params.maxSignals,
     [ALERT_RULE_NAME]: overrides?.nameOverride ?? name,
@@ -215,7 +218,7 @@ export const buildAlert = (
     [ALERT_RULE_RULE_ID]: params.ruleId,
     [ALERT_RULE_RULE_NAME_OVERRIDE]: params.ruleNameOverride,
     [ALERT_RULE_SEVERITY_MAPPING]: params.severityMapping,
-    [ALERT_RULE_TAGS]: transformTags(tags),
+    [ALERT_RULE_TAGS]: tags,
     [ALERT_RULE_THREAT]: params.threat,
     [ALERT_RULE_THROTTLE]: throttle ?? undefined,
     [ALERT_RULE_TIMELINE_ID]: params.timelineId,

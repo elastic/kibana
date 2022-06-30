@@ -98,3 +98,9 @@ export const getExportedWorkpad = () => {
 export const getDefaultSidebar = () => ({
   groupFiltersByOption: DEFAULT_GROUP_BY_FIELD,
 });
+
+export const getDefaultFlyouts = () => ({
+  keyboardShortcutsDoc: {
+    isVisible: false,
+  },
+});

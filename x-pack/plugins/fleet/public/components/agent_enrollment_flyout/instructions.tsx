@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -13,17 +13,19 @@ import { useFleetStatus, useGetAgents } from '../../hooks';
 
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
-
-import { FLEET_SERVER_PACKAGE } from '../../constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
 
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
 import { Loading } from '..';
 
+import { policyHasFleetServer } from '../../services';
+
+import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
+
 import type { InstructionProps } from './types';
 
-import { ManagedSteps, StandaloneSteps, FleetServerSteps } from './steps';
+import { ManagedSteps, StandaloneSteps } from './steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
 
 export const Instructions = (props: InstructionProps) => {
@@ -35,29 +37,40 @@ export const Instructions = (props: InstructionProps) => {
     selectionType,
     setSelectionType,
     mode,
+    setMode,
     isIntegrationFlow,
+    refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
 
+  useEffect(() => {
+    refreshAgentPolicies();
+  }, [refreshAgentPolicies]);
+
+  const fleetServerAgentPolicies: string[] = useMemo(
+    () => agentPolicies.filter((pol) => policyHasFleetServer(pol)).map((pol) => pol.id),
+    [agentPolicies]
+  );
+
   const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
-    page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     showInactive: false,
+    kuery:
+      fleetServerAgentPolicies.length === 0
+        ? ''
+        : `${AGENTS_PREFIX}.policy_id:${fleetServerAgentPolicies
+            .map((id) => `"${id}"`)
+            .join(' or ')}`,
   });
 
-  const fleetServers = useMemo(() => {
-    const fleetServerAgentPolicies: string[] = agentPolicies
-      .filter((pol) => policyHasFleetServer(pol))
-      .map((pol) => pol.id);
-    return (agents?.items ?? []).filter((agent) =>
-      fleetServerAgentPolicies.includes(agent.policy_id ?? '')
-    );
-  }, [agents, agentPolicies]);
+  const fleetServers = agents?.items || [];
 
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
+
+  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
 
   const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
 
@@ -78,15 +91,13 @@ export const Instructions = (props: InstructionProps) => {
     setSelectionType('tabs');
   }
 
-  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
-
   if (hasNoFleetServerHost) {
     return null;
   }
 
   if (mode === 'managed') {
     if (showFleetServerEnrollment) {
-      return <FleetServerRequirementPage />;
+      return <FleetServerRequirementPage showStandaloneTab={() => setMode('standalone')} />;
     } else if (showAgentEnrollment) {
       return (
         <>
@@ -102,7 +113,7 @@ export const Instructions = (props: InstructionProps) => {
             </>
           )}
           {isFleetServerPolicySelected ? (
-            <FleetServerSteps {...props} />
+            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} />
           ) : (
             <ManagedSteps {...props} />
           )}

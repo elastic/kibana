@@ -26,6 +26,9 @@ const fullStoryConfigSchema = schema.object({
     schema.string({ minLength: 1 }),
     schema.maybe(schema.string())
   ),
+  eventTypesAllowlist: schema.arrayOf(schema.string(), {
+    defaultValue: ['Loaded Kibana'],
+  }),
 });
 
 const chatConfigSchema = schema.object({

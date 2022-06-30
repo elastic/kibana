@@ -6,7 +6,7 @@
  */
 
 import './dimension_editor.scss';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiListGroup,
@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
+import ReactDOM from 'react-dom';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import type { GenericIndexPatternColumn } from '../indexpattern';
@@ -58,6 +59,7 @@ import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
 import { NameInput } from '../../shared_components';
 import { ParamEditorProps } from '../operations/definitions';
+import { WrappingHelpPopover } from '../help_popover';
 
 const operationPanels = getOperationDisplay();
 
@@ -94,6 +96,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     http: props.http,
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
+    dataViews: props.dataViews,
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
@@ -228,6 +231,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
   const [timeShiftedFocused, setTimeShiftFocused] = useState(false);
+  const helpPopoverContainer = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    return () => {
+      if (helpPopoverContainer.current) {
+        ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+        document.body.removeChild(helpPopoverContainer.current);
+      }
+    };
+  }, []);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
@@ -309,6 +321,45 @@ export function DimensionEditor(props: DimensionEditorProps) {
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
         [`aria-pressed`]: isActive,
+        extraAction: operationDefinitionMap[operationType].helpComponent
+          ? {
+              color: 'primary',
+              onClick: (e) => {
+                if (!helpPopoverContainer.current) {
+                  const container = document.createElement('div');
+                  helpPopoverContainer.current = container;
+                  document.body.appendChild(container);
+                  const HelpComponent = operationDefinitionMap[operationType].helpComponent!;
+                  const element = (
+                    <WrappingHelpPopover
+                      button={e.target as HTMLElement}
+                      isOpen={true}
+                      title={operationDefinitionMap[operationType].helpComponentTitle}
+                      closePopover={() => {
+                        if (helpPopoverContainer.current) {
+                          ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+                          document.body.removeChild(helpPopoverContainer.current);
+                          helpPopoverContainer.current = null;
+                        }
+                      }}
+                    >
+                      <HelpComponent />
+                    </WrappingHelpPopover>
+                  );
+                  ReactDOM.render(element, helpPopoverContainer.current);
+                } else {
+                  ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+                  document.body.removeChild(helpPopoverContainer.current);
+                  helpPopoverContainer.current = null;
+                }
+              },
+              iconType: 'documentation',
+              iconSize: 's',
+              'aria-label': i18n.translate('xpack.lens.indexPattern.helpLabel', {
+                defaultMessage: 'Function help',
+              }),
+            }
+          : undefined,
         onClick() {
           if (
             ['none', 'fullReference', 'managedReference'].includes(
@@ -758,6 +809,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   selectedOperationDefinition.shiftable &&
                   selectedColumn.timeShift !== undefined ? (
                     <TimeShift
+                      datatableUtilities={services.data.datatableUtilities}
                       indexPattern={currentIndexPattern}
                       selectedColumn={selectedColumn}
                       columnId={columnId}

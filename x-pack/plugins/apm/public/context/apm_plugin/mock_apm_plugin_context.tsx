@@ -86,9 +86,6 @@ const mockPlugin = {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
   },
-  observability: {
-    isAlertingExperienceEnabled: () => false,
-  },
 };
 
 const mockCorePlugins = {

@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.addIdToItem",
+        "id": "def-common.addIdToItem",
         "type": "Function",
         "tags": [],
         "label": "addIdToItem",
@@ -26,7 +34,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-server.addIdToItem.$1",
+            "id": "def-common.addIdToItem.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "item",
@@ -44,7 +52,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.hasSimpleExecutableName",
+        "id": "def-common.hasSimpleExecutableName",
         "type": "Function",
         "tags": [],
         "label": "hasSimpleExecutableName",
@@ -53,17 +61,17 @@
           "({ os, type, value, }: { os: ",
           {
             "pluginId": "@kbn/securitysolution-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.OperatingSystem",
+            "section": "def-common.OperatingSystem",
             "text": "OperatingSystem"
           },
           "; type: ",
           {
             "pluginId": "@kbn/securitysolution-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.EntryTypes",
+            "section": "def-common.EntryTypes",
             "text": "EntryTypes"
           },
           "; value: string; }) => boolean | undefined"
@@ -73,7 +81,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-server.hasSimpleExecutableName.$1",
+            "id": "def-common.hasSimpleExecutableName.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  os,\n  type,\n  value,\n}",
@@ -83,7 +91,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-server.hasSimpleExecutableName.$1.os",
+                "id": "def-common.hasSimpleExecutableName.$1.os",
                 "type": "Enum",
                 "tags": [],
                 "label": "os",
@@ -91,9 +99,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/securitysolution-utils",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-                    "section": "def-server.OperatingSystem",
+                    "section": "def-common.OperatingSystem",
                     "text": "OperatingSystem"
                   }
                 ],
@@ -102,7 +110,7 @@
               },
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-server.hasSimpleExecutableName.$1.type",
+                "id": "def-common.hasSimpleExecutableName.$1.type",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "type",
@@ -115,7 +123,7 @@
               },
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-server.hasSimpleExecutableName.$1.value",
+                "id": "def-common.hasSimpleExecutableName.$1.value",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -131,7 +139,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.isPathValid",
+        "id": "def-common.isPathValid",
         "type": "Function",
         "tags": [],
         "label": "isPathValid",
@@ -140,25 +148,25 @@
           "({ os, field, type, value, }: { os: ",
           {
             "pluginId": "@kbn/securitysolution-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.OperatingSystem",
+            "section": "def-common.OperatingSystem",
             "text": "OperatingSystem"
           },
           "; field: ",
           {
             "pluginId": "@kbn/securitysolution-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.AllConditionEntryFields",
+            "section": "def-common.AllConditionEntryFields",
             "text": "AllConditionEntryFields"
           },
           "; type: ",
           {
             "pluginId": "@kbn/securitysolution-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.EntryTypes",
+            "section": "def-common.EntryTypes",
             "text": "EntryTypes"
           },
           "; value: string; }) => boolean"
@@ -168,7 +176,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-server.isPathValid.$1",
+            "id": "def-common.isPathValid.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  os,\n  field,\n  type,\n  value,\n}",
@@ -178,7 +186,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-server.isPathValid.$1.os",
+                "id": "def-common.isPathValid.$1.os",
                 "type": "Enum",
                 "tags": [],
                 "label": "os",
@@ -186,9 +194,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/securitysolution-utils",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-                    "section": "def-server.OperatingSystem",
+                    "section": "def-common.OperatingSystem",
                     "text": "OperatingSystem"
                   }
                 ],
@@ -197,35 +205,35 @@
               },
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-server.isPathValid.$1.field",
+                "id": "def-common.isPathValid.$1.field",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "field",
                 "description": [],
                 "signature": [
-                  "\"file.path.text\" | ",
                   {
                     "pluginId": "@kbn/securitysolution-utils",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-                    "section": "def-server.TrustedAppConditionEntryField",
+                    "section": "def-common.TrustedAppConditionEntryField",
                     "text": "TrustedAppConditionEntryField"
                   },
                   " | ",
                   {
                     "pluginId": "@kbn/securitysolution-utils",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-                    "section": "def-server.BlocklistConditionEntryField",
+                    "section": "def-common.BlocklistConditionEntryField",
                     "text": "BlocklistConditionEntryField"
-                  }
+                  },
+                  " | \"file.path.text\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false
               },
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-server.isPathValid.$1.type",
+                "id": "def-common.isPathValid.$1.type",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "type",
@@ -238,7 +246,7 @@
               },
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-server.isPathValid.$1.value",
+                "id": "def-common.isPathValid.$1.value",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -254,7 +262,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.removeIdFromItem",
+        "id": "def-common.removeIdFromItem",
         "type": "Function",
         "tags": [],
         "label": "removeIdFromItem",
@@ -269,7 +277,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-server.removeIdFromItem.$1",
+            "id": "def-common.removeIdFromItem.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "item",
@@ -289,7 +297,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.transformDataToNdjson",
+        "id": "def-common.transformDataToNdjson",
         "type": "Function",
         "tags": [],
         "label": "transformDataToNdjson",
@@ -302,7 +310,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-server.transformDataToNdjson.$1",
+            "id": "def-common.transformDataToNdjson.$1",
             "type": "Array",
             "tags": [],
             "label": "data",
@@ -320,7 +328,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.validateFilePathInput",
+        "id": "def-common.validateFilePathInput",
         "type": "Function",
         "tags": [],
         "label": "validateFilePathInput",
@@ -329,9 +337,9 @@
           "({ os, value, }: { os: ",
           {
             "pluginId": "@kbn/securitysolution-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.OperatingSystem",
+            "section": "def-common.OperatingSystem",
             "text": "OperatingSystem"
           },
           "; value?: string | undefined; }) => string | undefined"
@@ -341,7 +349,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-server.validateFilePathInput.$1",
+            "id": "def-common.validateFilePathInput.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  os,\n  value = '',\n}",
@@ -351,7 +359,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-server.validateFilePathInput.$1.os",
+                "id": "def-common.validateFilePathInput.$1.os",
                 "type": "Enum",
                 "tags": [],
                 "label": "os",
@@ -359,9 +367,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/securitysolution-utils",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-                    "section": "def-server.OperatingSystem",
+                    "section": "def-common.OperatingSystem",
                     "text": "OperatingSystem"
                   }
                 ],
@@ -370,7 +378,7 @@
               },
               {
                 "parentPluginId": "@kbn/securitysolution-utils",
-                "id": "def-server.validateFilePathInput.$1.value",
+                "id": "def-common.validateFilePathInput.$1.value",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -392,7 +400,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.ConditionEntryField",
+        "id": "def-common.ConditionEntryField",
         "type": "Enum",
         "tags": [],
         "label": "ConditionEntryField",
@@ -403,7 +411,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.EntryFieldType",
+        "id": "def-common.EntryFieldType",
         "type": "Enum",
         "tags": [],
         "label": "EntryFieldType",
@@ -414,7 +422,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.OperatingSystem",
+        "id": "def-common.OperatingSystem",
         "type": "Enum",
         "tags": [],
         "label": "OperatingSystem",
@@ -427,28 +435,28 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.AllConditionEntryFields",
+        "id": "def-common.AllConditionEntryFields",
         "type": "Type",
         "tags": [],
         "label": "AllConditionEntryFields",
         "description": [],
         "signature": [
-          "\"file.path.text\" | ",
           {
             "pluginId": "@kbn/securitysolution-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.TrustedAppConditionEntryField",
+            "section": "def-common.TrustedAppConditionEntryField",
             "text": "TrustedAppConditionEntryField"
           },
           " | ",
           {
             "pluginId": "@kbn/securitysolution-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionUtilsPluginApi",
-            "section": "def-server.BlocklistConditionEntryField",
+            "section": "def-common.BlocklistConditionEntryField",
             "text": "BlocklistConditionEntryField"
-          }
+          },
+          " | \"file.path.text\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -456,7 +464,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.BlocklistConditionEntryField",
+        "id": "def-common.BlocklistConditionEntryField",
         "type": "Type",
         "tags": [],
         "label": "BlocklistConditionEntryField",
@@ -470,7 +478,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.EntryTypes",
+        "id": "def-common.EntryTypes",
         "type": "Type",
         "tags": [],
         "label": "EntryTypes",
@@ -484,7 +492,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.FILENAME_WILDCARD_WARNING",
+        "id": "def-common.FILENAME_WILDCARD_WARNING",
         "type": "string",
         "tags": [],
         "label": "FILENAME_WILDCARD_WARNING",
@@ -495,7 +503,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.FILEPATH_WARNING",
+        "id": "def-common.FILEPATH_WARNING",
         "type": "string",
         "tags": [],
         "label": "FILEPATH_WARNING",
@@ -506,7 +514,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.TrustedAppConditionEntryField",
+        "id": "def-common.TrustedAppConditionEntryField",
         "type": "Type",
         "tags": [],
         "label": "TrustedAppConditionEntryField",
@@ -520,7 +528,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
-        "id": "def-server.TrustedAppEntryTypes",
+        "id": "def-common.TrustedAppEntryTypes",
         "type": "Type",
         "tags": [],
         "label": "TrustedAppEntryTypes",
@@ -533,14 +541,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

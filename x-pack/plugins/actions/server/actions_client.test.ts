@@ -18,11 +18,14 @@ import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { actionExecutorMock } from './lib/action_executor.mock';
 import uuid from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
@@ -37,6 +40,9 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { Logger } from '@kbn/core/server';
 import { connectorTokenClientMock } from './builtin_action_types/lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
+import { getOAuthJwtAccessToken } from './builtin_action_types/lib/get_oauth_jwt_access_token';
+import { getOAuthClientCredentialsAccessToken } from './builtin_action_types/lib/get_oauth_client_credentials_access_token';
+import { OAuthParams } from './routes/get_oauth_access_token';
 
 jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -60,6 +66,13 @@ jest.mock('./authorization/get_authorization_mode_by_source', () => {
   };
 });
 
+jest.mock('./builtin_action_types/lib/get_oauth_jwt_access_token', () => ({
+  getOAuthJwtAccessToken: jest.fn(),
+}));
+jest.mock('./builtin_action_types/lib/get_oauth_client_credentials_access_token', () => ({
+  getOAuthClientCredentialsAccessToken: jest.fn(),
+}));
+
 const defaultKibanaIndex = '.kibana';
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -73,6 +86,7 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const mockTaskManager = taskManagerMock.createSetup();
+const configurationUtilities = actionsConfigMock.create();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -101,6 +115,7 @@ beforeEach(() => {
   };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
   actionsClient = new ActionsClient({
+    logger,
     actionTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
@@ -115,6 +130,10 @@ beforeEach(() => {
     usageCounter: mockUsageCounter,
     connectorTokenClient,
   });
+  (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
+  (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
+    `Bearer clienttokentokentoken`
+  );
 });
 
 describe('create()', () => {
@@ -311,6 +330,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -443,6 +463,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -512,6 +533,7 @@ describe('create()', () => {
 
     actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -615,6 +637,7 @@ describe('get()', () => {
 
     test('ensures user is authorised to get preconfigured type of action', async () => {
       actionsClient = new ActionsClient({
+        logger,
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -632,6 +655,7 @@ describe('get()', () => {
               test: 'test1',
             },
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -672,6 +696,7 @@ describe('get()', () => {
 
     test('throws when user is not authorised to get preconfigured of action', async () => {
       actionsClient = new ActionsClient({
+        logger,
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -689,6 +714,7 @@ describe('get()', () => {
               test: 'test1',
             },
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -778,6 +804,7 @@ describe('get()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -790,6 +817,7 @@ describe('get()', () => {
 
   test('return predefined action with id', async () => {
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -807,6 +835,7 @@ describe('get()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -821,6 +850,7 @@ describe('get()', () => {
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
+      isDeprecated: false,
       name: 'test',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -861,6 +891,7 @@ describe('getAll()', () => {
       );
 
       actionsClient = new ActionsClient({
+        logger,
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -876,6 +907,7 @@ describe('getAll()', () => {
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1000,6 +1032,7 @@ describe('getAll()', () => {
     );
 
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -1015,6 +1048,7 @@ describe('getAll()', () => {
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -1028,6 +1062,7 @@ describe('getAll()', () => {
       {
         id: '1',
         isPreconfigured: false,
+        isDeprecated: false,
         name: 'test',
         config: {
           foo: 'bar',
@@ -1039,6 +1074,7 @@ describe('getAll()', () => {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         isPreconfigured: true,
+        isDeprecated: false,
         name: 'test',
         referencedByCount: 2,
       },
@@ -1077,6 +1113,7 @@ describe('getBulk()', () => {
       );
 
       actionsClient = new ActionsClient({
+        logger,
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
@@ -1092,6 +1129,7 @@ describe('getBulk()', () => {
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1210,6 +1248,7 @@ describe('getBulk()', () => {
     );
 
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -1225,6 +1264,7 @@ describe('getBulk()', () => {
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -1242,6 +1282,7 @@ describe('getBulk()', () => {
         },
         id: 'testPreconfigured',
         isPreconfigured: true,
+        isDeprecated: false,
         name: 'test',
         secrets: {},
       },
@@ -1253,9 +1294,297 @@ describe('getBulk()', () => {
         id: '1',
         isMissingSecrets: false,
         isPreconfigured: false,
+        isDeprecated: false,
         name: 'test',
       },
     ]);
+  });
+});
+
+describe('getOAuthAccessToken()', () => {
+  function getOAuthAccessToken(
+    requestBody: OAuthParams
+  ): ReturnType<ActionsClient['getOAuthAccessToken']> {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      defaultKibanaIndex,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      preconfiguredActions: [
+        {
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          name: 'test',
+          config: {
+            foo: 'bar',
+          },
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+    });
+    return actionsClient.getOAuthAccessToken(requestBody, configurationUtilities);
+  }
+
+  describe('authorization', () => {
+    test('ensures user is authorised to get the type of action', async () => {
+      await getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      });
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    });
+
+    test('throws when user is not authorised to create the type of action', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to update actions`));
+
+      await expect(
+        getOAuthAccessToken({
+          type: 'jwt',
+          options: {
+            tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+            config: {
+              clientId: 'abc',
+              jwtKeyId: 'def',
+              userIdentifierValue: 'userA',
+            },
+            secrets: {
+              clientSecret: 'iamasecret',
+              privateKey: 'xyz',
+            },
+          },
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to update actions]`);
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    });
+  });
+
+  test('throws when tokenUrl is not using http or https', async () => {
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: 'ftp://testurl.service-now.com/oauth_token.do',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Token URL must use http or https]`);
+
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+  });
+
+  test('throws when tokenUrl does not contain hostname', async () => {
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: '/path/to/myfile',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Token URL must contain hostname]`);
+
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+  });
+
+  test('throws when tokenUrl is not in allowed hosts', async () => {
+    configurationUtilities.ensureUriAllowed.mockImplementationOnce(() => {
+      throw new Error('URI not allowed');
+    });
+
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: URI not allowed]`);
+
+    expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
+    expect(configurationUtilities.ensureUriAllowed).toHaveBeenCalledWith(
+      `https://testurl.service-now.com/oauth_token.do`
+    );
+  });
+
+  test('calls getOAuthJwtAccessToken when type="jwt"', async () => {
+    const result = await getOAuthAccessToken({
+      type: 'jwt',
+      options: {
+        tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+        config: {
+          clientId: 'abc',
+          jwtKeyId: 'def',
+          userIdentifierValue: 'userA',
+        },
+        secrets: {
+          clientSecret: 'iamasecret',
+          privateKey: 'xyz',
+        },
+      },
+    });
+    expect(result).toEqual({
+      accessToken: 'Bearer jwttokentokentoken',
+    });
+    expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({
+      logger,
+      configurationUtilities,
+      credentials: {
+        config: {
+          clientId: 'abc',
+          jwtKeyId: 'def',
+          userIdentifierValue: 'userA',
+        },
+        secrets: {
+          clientSecret: 'iamasecret',
+          privateKey: 'xyz',
+        },
+      },
+      tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+    });
+    expect(getOAuthClientCredentialsAccessToken).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Successfully retrieved access token using JWT OAuth with tokenUrl https://testurl.service-now.com/oauth_token.do and config {\"clientId\":\"abc\",\"jwtKeyId\":\"def\",\"userIdentifierValue\":\"userA\"}`
+    );
+  });
+
+  test('calls getOAuthClientCredentialsAccessToken when type="client"', async () => {
+    const result = await getOAuthAccessToken({
+      type: 'client',
+      options: {
+        tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+        scope: 'https://graph.microsoft.com/.default',
+        config: {
+          clientId: 'abc',
+          tenantId: 'def',
+        },
+        secrets: {
+          clientSecret: 'iamasecret',
+        },
+      },
+    });
+    expect(result).toEqual({
+      accessToken: 'Bearer clienttokentokentoken',
+    });
+    expect(getOAuthClientCredentialsAccessToken as jest.Mock).toHaveBeenCalledWith({
+      logger,
+      configurationUtilities,
+      credentials: {
+        config: {
+          clientId: 'abc',
+          tenantId: 'def',
+        },
+        secrets: {
+          clientSecret: 'iamasecret',
+        },
+      },
+      tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+      oAuthScope: 'https://graph.microsoft.com/.default',
+    });
+    expect(getOAuthJwtAccessToken).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Successfully retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\"clientId\":\"abc\",\"tenantId\":\"def\"}`
+    );
+  });
+
+  test('throws when getOAuthJwtAccessToken throws error', async () => {
+    (getOAuthJwtAccessToken as jest.Mock).mockRejectedValue(new Error(`Something went wrong!`));
+
+    await expect(
+      getOAuthAccessToken({
+        type: 'jwt',
+        options: {
+          tokenUrl: 'https://testurl.service-now.com/oauth_token.do',
+          config: {
+            clientId: 'abc',
+            jwtKeyId: 'def',
+            userIdentifierValue: 'userA',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+            privateKey: 'xyz',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Failed to retrieve access token]`);
+
+    expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Failed to retrieve access token using JWT OAuth with tokenUrl https://testurl.service-now.com/oauth_token.do and config {\"clientId\":\"abc\",\"jwtKeyId\":\"def\",\"userIdentifierValue\":\"userA\"} - Something went wrong!`
+    );
+  });
+
+  test('throws when getOAuthClientCredentialsAccessToken throws error', async () => {
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValue(
+      new Error(`Something went wrong!`)
+    );
+
+    await expect(
+      getOAuthAccessToken({
+        type: 'client',
+        options: {
+          tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+          scope: 'https://graph.microsoft.com/.default',
+          config: {
+            clientId: 'abc',
+            tenantId: 'def',
+          },
+          secrets: {
+            clientSecret: 'iamasecret',
+          },
+        },
+      })
+    ).rejects.toMatchInlineSnapshot(`[Error: Failed to retrieve access token]`);
+
+    expect(getOAuthClientCredentialsAccessToken as jest.Mock).toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Failed to retrieved access token using Client Credentials OAuth with tokenUrl https://login.microsoftonline.com/98765/oauth2/v2.0/token, scope https://graph.microsoft.com/.default and config {\"clientId\":\"abc\",\"tenantId\":\"def\"} - Something went wrong!`
+    );
   });
 });
 
@@ -1264,7 +1593,6 @@ describe('delete()', () => {
     test('ensures user is authorised to delete actions', async () => {
       await actionsClient.delete({ id: '1' });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
-      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
@@ -1277,6 +1605,19 @@ describe('delete()', () => {
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('delete');
+    });
+
+    test(`deletes any existing authorization tokens`, async () => {
+      await actionsClient.delete({ id: '1' });
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
+    });
+
+    test(`failing to delete tokens logs error instead of throw`, async () => {
+      connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
+      await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
+      expect(logger.error).toHaveBeenCalledWith(
+        `Failed to delete auth tokens for connector "1" after delete: Fail`
+      );
     });
   });
 
@@ -1384,6 +1725,19 @@ describe('update()', () => {
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('update');
     });
+
+    test(`deletes any existing authorization tokens`, async () => {
+      await updateOperation();
+      expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
+    });
+
+    test(`failing to delete tokens logs error instead of throw`, async () => {
+      connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
+      await expect(updateOperation()).resolves.toBeTruthy();
+      expect(logger.error).toHaveBeenCalledWith(
+        `Failed to delete auth tokens for connector "my-action" after update: Fail`
+      );
+    });
   });
 
   describe('auditLogger', () => {
@@ -1458,6 +1812,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
       name: 'my name',
@@ -1529,6 +1884,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
       name: 'my name',
@@ -1668,6 +2024,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
       name: 'my name',
@@ -1983,6 +2340,7 @@ describe('isActionTypeEnabled()', () => {
 describe('isPreconfigured()', () => {
   test('should return true if connector id is in list of preconfigured connectors', () => {
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -2000,6 +2358,7 @@ describe('isPreconfigured()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -2018,6 +2377,7 @@ describe('isPreconfigured()', () => {
 
   test('should return false if connector id is not in list of preconfigured connectors', () => {
     actionsClient = new ActionsClient({
+      logger,
       actionTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
@@ -2035,6 +2395,7 @@ describe('isPreconfigured()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',

@@ -52,6 +52,17 @@ jsts_transpiler(
   build_pkg_name = package_name(),
 )
 
+jsts_transpiler(
+  name = "target_web",
+  srcs = [
+    "src/web_index.ts",
+    "src/format_request.ts",
+    "src/parse_endpoint.ts",
+  ],
+  build_pkg_name = package_name(),
+  web = True,
+)
+
 ts_config(
   name = "tsconfig",
   src = "tsconfig.json",
@@ -76,7 +87,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

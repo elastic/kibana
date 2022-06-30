@@ -6,11 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useReducer, Reducer } from 'react';
 import { Observable, Subscription } from 'rxjs';
 
 import { useIsMounted } from '../use_is_mounted';
 import { Task } from '../types';
+
+interface State<T> {
+  loading: boolean;
+  error?: unknown;
+  result?: T;
+}
+
+export type Action<T> =
+  | { type: 'setResult'; result: T }
+  | { type: 'setError'; error: unknown }
+  | { type: 'load' };
+
+function reducer<T>(state: State<T>, action: Action<T>) {
+  switch (action.type) {
+    case 'setResult':
+      return { ...state, result: action.result, loading: false };
+    case 'setError':
+      return { ...state, error: action.error, loading: false };
+    case 'load':
+      return { loading: true, result: undefined, error: undefined };
+  }
+}
 
 /**
  *
@@ -22,31 +44,29 @@ export const useObservable = <Args extends unknown[], Result>(
   fn: (...args: Args) => Observable<Result>
 ): Task<Args, Result> => {
   const isMounted = useIsMounted();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<unknown | undefined>();
-  const [result, setResult] = useState<Result | undefined>();
   const subRef = useRef<Subscription | undefined>();
+  const [state, dispatch] = useReducer<Reducer<State<Result>, Action<Result>>>(reducer, {
+    loading: false,
+    error: undefined,
+    result: undefined,
+  });
 
   const start = useCallback(
     (...args: Args) => {
       if (subRef.current) {
         subRef.current.unsubscribe();
       }
-      setLoading(true);
-      setResult(undefined);
-      setError(undefined);
+      dispatch({ type: 'load' });
 
       subRef.current = fn(...args).subscribe(
         (r) => {
           if (isMounted()) {
-            setResult(r);
-            setLoading(false);
+            dispatch({ type: 'setResult', result: r });
           }
         },
         (e) => {
           if (isMounted()) {
-            setError(e);
-            setLoading(false);
+            dispatch({ type: 'setError', error: e });
           }
         }
       );
@@ -64,9 +84,9 @@ export const useObservable = <Args extends unknown[], Result>(
   );
 
   return {
-    error,
-    loading,
-    result,
+    result: state.result,
+    error: state.error,
+    loading: state.loading,
     start,
   };
 };

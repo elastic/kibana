@@ -25,11 +25,7 @@ import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
-import {
-  EXCLUDE_ELASTIC_CLOUD_INDEX,
-  getScopeFromPath,
-  useSourcererDataView,
-} from '../../containers/sourcerer';
+import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
 import { InputsModelId } from '../../store/inputs/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
@@ -135,11 +131,6 @@ export const ModalInspectQuery = ({
     [inspectRequests, selectedPatterns]
   );
 
-  const isLogsExclude = useMemo(
-    () => (inspectRequests[0]?.index ?? []).includes(EXCLUDE_ELASTIC_CLOUD_INDEX),
-    [inspectRequests]
-  );
-
   const statistics: Array<{
     title: NonNullable<ReactNode | string>;
     description: NonNullable<ReactNode | string>;
@@ -159,13 +150,6 @@ export const ModalInspectQuery = ({
             <p>
               <small>
                 <i data-test-subj="not-sourcerer-msg">{i18n.INSPECT_PATTERN_DIFFERENT}</i>
-              </small>
-            </p>
-          )}
-          {isLogsExclude && (
-            <p>
-              <small>
-                <i data-test-subj="exclude-logs-msg">{i18n.LOGS_EXCLUDE_MESSAGE}</i>
               </small>
             </p>
           )}

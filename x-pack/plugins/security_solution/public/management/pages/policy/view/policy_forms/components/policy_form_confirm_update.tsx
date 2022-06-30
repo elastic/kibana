@@ -11,10 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 export const ConfirmUpdate = React.memo<{
-  hostCount: number;
+  endpointCount: number;
   onConfirm: () => void;
   onCancel: () => void;
-}>(({ hostCount, onCancel, onConfirm }) => {
+}>(({ endpointCount, onCancel, onConfirm }) => {
   return (
     <EuiConfirmModal
       data-test-subj="policyDetailsConfirmModal"
@@ -36,7 +36,7 @@ export const ConfirmUpdate = React.memo<{
         }
       )}
     >
-      {hostCount > 0 && (
+      {endpointCount > 0 && (
         <>
           <EuiCallOut
             data-test-subj="policyDetailsWarningCallout"
@@ -44,8 +44,8 @@ export const ConfirmUpdate = React.memo<{
               'xpack.securitySolution.endpoint.policy.details.updateConfirm.warningTitle',
               {
                 defaultMessage:
-                  'This action will update {hostCount, plural, one {# host} other {# hosts}}',
-                values: { hostCount },
+                  'This action will update {endpointCount, plural, one {# endpoint} other {# endpoints}}',
+                values: { endpointCount },
               }
             )}
           >

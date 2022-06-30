@@ -12,6 +12,7 @@
  * 2.0.
  */
 
+import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 
 import {
@@ -20,6 +21,8 @@ import {
   formatSortForTermsSort,
   getExecutionEventAggregation,
   getProviderAndActionFilter,
+  mapPlatformStatusToRuleExecutionStatus,
+  mapRuleExecutionStatusToPlatformStatus,
 } from '.';
 
 describe('getExecutionEventAggregation', () => {
@@ -69,7 +72,7 @@ describe('getExecutionEventAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_ms,schedule_delay_ms,num_triggered_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_s,schedule_delay_ms,num_triggered_actions]"`
     );
   });
 
@@ -82,7 +85,7 @@ describe('getExecutionEventAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_ms,schedule_delay_ms,num_triggered_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,duration_ms,indexing_duration_ms,search_duration_ms,gap_duration_s,schedule_delay_ms,num_triggered_actions]"`
     );
   });
 
@@ -206,7 +209,7 @@ describe('getExecutionEventAggregation', () => {
                 top_hits: {
                   size: 1,
                   _source: {
-                    includes: ['event.outcome', 'message'],
+                    includes: ['error.message', 'event.outcome', 'message'],
                   },
                 },
               },
@@ -647,7 +650,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: false,
           indexing_duration_ms: 7,
           search_duration_ms: 480,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -670,7 +673,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: false,
           indexing_duration_ms: 0,
           search_duration_ms: 9,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -965,7 +968,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: true,
           indexing_duration_ms: 7,
           search_duration_ms: 480,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -988,7 +991,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: false,
           indexing_duration_ms: 0,
           search_duration_ms: 9,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -1288,7 +1291,7 @@ describe('formatExecutionEventResponse', () => {
           timed_out: true,
           indexing_duration_ms: 7,
           search_duration_ms: 480,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
@@ -1311,11 +1314,61 @@ describe('formatExecutionEventResponse', () => {
           timed_out: false,
           indexing_duration_ms: 0,
           search_duration_ms: 9,
-          gap_duration_ms: 0,
+          gap_duration_s: 0,
           security_status: 'succeeded',
           security_message: 'succeeded',
         },
       ],
     });
+  });
+});
+
+describe('mapRuleStatusToPlatformStatus', () => {
+  test('should correctly translate empty array to empty array', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([])).toEqual([]);
+  });
+
+  test('should correctly translate RuleExecutionStatus.failed to `failure` platform status', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatus.failed])).toEqual([
+      'failure',
+    ]);
+  });
+
+  test('should correctly translate RuleExecutionStatus.succeeded to `success` platform status', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatus.succeeded])).toEqual([
+      'success',
+    ]);
+  });
+
+  test('should correctly translate RuleExecutionStatus.["going to run"] to empty array platform status', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatus['going to run']])).toEqual(
+      []
+    );
+  });
+
+  test("should correctly translate multiple RuleExecutionStatus's to platform statuses", () => {
+    expect(
+      mapRuleExecutionStatusToPlatformStatus([
+        RuleExecutionStatus.succeeded,
+        RuleExecutionStatus.failed,
+        RuleExecutionStatus['going to run'],
+      ]).sort()
+    ).toEqual(['failure', 'success']);
+  });
+});
+
+describe('mapPlatformStatusToRuleExecutionStatus', () => {
+  test('should correctly translate `invalid` platform status to `undefined`', () => {
+    expect(mapPlatformStatusToRuleExecutionStatus('')).toEqual(undefined);
+  });
+
+  test('should correctly translate `failure` platform status to `RuleExecutionStatus.failed`', () => {
+    expect(mapPlatformStatusToRuleExecutionStatus('failure')).toEqual(RuleExecutionStatus.failed);
+  });
+
+  test('should correctly translate `success` platform status to `RuleExecutionStatus.succeeded`', () => {
+    expect(mapPlatformStatusToRuleExecutionStatus('success')).toEqual(
+      RuleExecutionStatus.succeeded
+    );
   });
 });

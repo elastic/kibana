@@ -50,18 +50,6 @@
         "children": [
           {
             "parentPluginId": "telemetry",
-            "id": "def-public.TelemetryPluginConfig.enabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "enabled",
-            "description": [
-              "Is the plugin enabled?"
-            ],
-            "path": "src/plugins/telemetry/public/plugin.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "telemetry",
             "id": "def-public.TelemetryPluginConfig.banner",
             "type": "boolean",
             "tags": [],
@@ -152,6 +140,21 @@
             "label": "userCanChangeSettings",
             "description": [
               "Does the user have enough privileges to change the settings?"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/telemetry/public/plugin.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetry",
+            "id": "def-public.TelemetryPluginConfig.hidePrivacyStatement",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidePrivacyStatement",
+            "description": [
+              "Should we hide the privacy statement notice? Useful on some environments, e.g. Cloud"
             ],
             "signature": [
               "boolean | undefined"

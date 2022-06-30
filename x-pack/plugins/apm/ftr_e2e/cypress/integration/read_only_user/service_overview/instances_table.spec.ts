@@ -38,7 +38,7 @@ const apisToIntercept = [
 
 describe('Instances table', () => {
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   // describe('when data is not loaded', () => {

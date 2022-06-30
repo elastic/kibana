@@ -74,12 +74,14 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     cy.contains('View in Lens').should('not.exist');
     cy.react('EuiDataGridHeaderCellWrapper', {
       props: { id: 'osquery.days.number', index: 1 },
-    });
+    }).should('exist');
     cy.react('EuiDataGridHeaderCellWrapper', {
       props: { id: 'osquery.hours.number', index: 2 },
-    });
+    }).should('exist');
 
-    cy.react('EuiAccordion', { props: { buttonContent: 'Advanced' } }).click();
+    cy.react('EuiAccordionClass', { props: { buttonContent: 'Advanced' } })
+      .last()
+      .click();
     typeInECSFieldInput('message{downArrow}{enter}');
     typeInOsqueryFieldInput('days{downArrow}{enter}');
     submitQuery();
@@ -87,10 +89,14 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     checkResults();
     cy.react('EuiDataGridHeaderCellWrapper', {
       props: { id: 'message', index: 1 },
-    });
+    }).should('exist');
     cy.react('EuiDataGridHeaderCellWrapper', {
       props: { id: 'osquery.days.number', index: 2 },
-    }).react('EuiIconIndexMapping');
+    }).within(() => {
+      cy.get('.euiToolTipAnchor').within(() => {
+        cy.get('svg').should('exist');
+      });
+    });
   });
   it('to click the edit button and edit pack', () => {
     navigateTo('/app/osquery/saved_queries');
@@ -100,7 +106,10 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.react('EuiButtonIcon', { props: { id: 'labels-trash' } }).click();
+    cy.react('ECSComboboxFieldComponent', { props: { field: { value: 'labels' } } })
+      .parents('[data-test-subj="ECSMappingEditorForm"]')
+      .react('EuiButtonIcon', { props: { iconType: 'trash' } })
+      .click();
     cy.react('EuiButton').contains('Update query').click();
     cy.wait(5000);
 

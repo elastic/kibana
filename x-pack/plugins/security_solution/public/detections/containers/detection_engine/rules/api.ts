@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { camelCase } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { HttpStart } from '@kbn/core/public';
@@ -17,8 +18,13 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
   detectionEngineRuleExecutionEventsUrl,
+  DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
 } from '../../../../../common/constants';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
+import {
+  AggregateRuleExecutionEvent,
+  BulkAction,
+  RuleExecutionStatus,
+} from '../../../../../common/detection_engine/schemas/common';
 import {
   FullResponseSchema,
   PreviewResponse,
@@ -27,6 +33,7 @@ import {
   RulesSchema,
   GetAggregateRuleExecutionEventsResponse,
 } from '../../../../../common/detection_engine/schemas/response';
+import { GetInstalledIntegrationsResponse } from '../../../../../common/detection_engine/schemas/response/get_installed_integrations_response_schema';
 
 import {
   UpdateRulesProps,
@@ -320,11 +327,11 @@ export const exportRules = async ({
  * @param start Start daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now-30`)
  * @param end End daterange either in UTC ISO8601 or as datemath string (e.g. `2021-12-29T02:44:41.653Z` or `now/w`)
  * @param queryText search string in querystring format (e.g. `event.duration > 1000 OR kibana.alert.rule.execution.metrics.execution_gap_duration_s > 100`)
- * @param statusFilters comma separated string of `statusFilters` (e.g. `succeeded,failed,partial failure`)
+ * @param statusFilters RuleExecutionStatus[] array of `statusFilters` (e.g. `succeeded,failed,partial failure`)
  * @param page current page to fetch
  * @param perPage number of results to fetch per page
- * @param sortField field to sort by
- * @param sortOrder what order to sort by (e.g. `asc` or `desc`)
+ * @param sortField keyof AggregateRuleExecutionEvent field to sort by
+ * @param sortOrder SortOrder what order to sort by (e.g. `asc` or `desc`)
  * @param signal AbortSignal Optional signal for cancelling the request
  *
  * @throws An error if response is not OK
@@ -345,11 +352,11 @@ export const fetchRuleExecutionEvents = async ({
   start: string;
   end: string;
   queryText?: string;
-  statusFilters?: string;
+  statusFilters?: RuleExecutionStatus[];
   page?: number;
   perPage?: number;
-  sortField?: string;
-  sortOrder?: string;
+  sortField?: keyof AggregateRuleExecutionEvent;
+  sortOrder?: SortOrder;
   signal?: AbortSignal;
 }): Promise<GetAggregateRuleExecutionEventsResponse> => {
   const url = detectionEngineRuleExecutionEventsUrl(ruleId);
@@ -361,7 +368,7 @@ export const fetchRuleExecutionEvents = async ({
       start: startDate?.utc().toISOString(),
       end: endDate?.utc().toISOString(),
       query_text: queryText,
-      status_filters: statusFilters,
+      status_filters: statusFilters?.sort()?.join(','),
       page,
       per_page: perPage,
       sort_field: sortField,
@@ -400,6 +407,32 @@ export const getPrePackagedRulesStatus = async ({
     DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
     {
       method: 'GET',
+      signal,
+    }
+  );
+
+/**
+ * Fetch all installed integrations
+ *
+ * @param packages array of packages to filter for
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchInstalledIntegrations = async ({
+  packages,
+  signal,
+}: {
+  packages?: string[];
+  signal?: AbortSignal;
+}): Promise<GetInstalledIntegrationsResponse> =>
+  KibanaServices.get().http.fetch<GetInstalledIntegrationsResponse>(
+    DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
+    {
+      method: 'GET',
+      query: {
+        packages: packages?.sort()?.join(','),
+      },
       signal,
     }
   );

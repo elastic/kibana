@@ -96,7 +96,7 @@ describe('Alert events', () => {
         </TestProviders>
       );
 
-      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().simulate('click');
+      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).last().simulate('click');
       expect(onRuleDetailsClick).toHaveBeenCalled();
     });
 

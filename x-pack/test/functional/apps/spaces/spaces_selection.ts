@@ -11,7 +11,6 @@ export default function spaceSelectorFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
   const PageObjects = getPageObjects([
     'common',
@@ -21,18 +20,23 @@ export default function spaceSelectorFunctionalTests({
     'security',
     'spaceSelector',
   ]);
+  const spacesService = getService('spaces');
 
   describe('Spaces', function () {
+    const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/spaces/selector');
+      for (const testSpaceId of testSpacesIds) {
+        await spacesService.create({ id: testSpaceId, name: `${testSpaceId} name` });
+      }
     });
-    after(
-      async () => await esArchiver.unload('x-pack/test/functional/es_archives/spaces/selector')
-    );
+    after(async () => {
+      for (const testSpaceId of testSpacesIds) {
+        await spacesService.delete(testSpaceId);
+      }
+    });
 
     this.tags('includeFirefox');
-    // FLAKY: https://github.com/elastic/kibana/issues/99581
-    describe.skip('Space Selector', () => {
+    describe('Space Selector', () => {
       before(async () => {
         await PageObjects.security.forceLogout();
       });
@@ -63,9 +67,7 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/118356
-    // FLAKY: https://github.com/elastic/kibana/issues/118474
-    describe.skip('Search spaces in popover', () => {
+    describe('Search spaces in popover', () => {
       const spaceId = 'default';
       before(async () => {
         await PageObjects.security.forceLogout();
@@ -85,8 +87,8 @@ export default function spaceSelectorFunctionalTests({
         await PageObjects.spaceSelector.expectSearchBoxInSpacesSelector();
       });
 
-      it('search for "ce 1" and find one space', async () => {
-        await PageObjects.spaceSelector.setSearchBoxInSpacesSelector('ce 1');
+      it('search for "ce-1 name" and find one space', async () => {
+        await PageObjects.spaceSelector.setSearchBoxInSpacesSelector('ce-1 name');
         await PageObjects.spaceSelector.expectToFindThatManySpace(1);
       });
 

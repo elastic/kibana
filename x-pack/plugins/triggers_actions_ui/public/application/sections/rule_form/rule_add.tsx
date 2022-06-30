@@ -71,7 +71,7 @@ const RuleAdd = ({
   const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
     rule: initialRule,
   });
-  const [config, setConfig] = useState<TriggersActionsUiConfig>({});
+  const [config, setConfig] = useState<TriggersActionsUiConfig>({ isUsingSecurity: false });
   const [initialRuleParams, setInitialRuleParams] = useState<RuleTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmRuleSaveModalOpen, setIsConfirmRuleSaveModalOpen] = useState<boolean>(false);
@@ -232,7 +232,7 @@ const RuleAdd = ({
         aria-labelledby="flyoutRuleAddTitle"
         size="m"
         maxWidth={620}
-        ownFocus={false}
+        ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="addRuleFlyoutTitle">
@@ -245,7 +245,7 @@ const RuleAdd = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck inFlyout={true} waitForCheck={false}>
+          <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               <RuleForm
                 rule={rule}

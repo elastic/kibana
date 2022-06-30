@@ -175,7 +175,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['enterprise_search', 'file_storage'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive',
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive/custom',
   },
   {
     id: 'onedrive',
@@ -190,20 +190,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     ),
     categories: ['file_storage'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/one_drive',
-  },
-  {
-    id: 'outlook',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.outlookName', {
-      defaultMessage: 'Outlook',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.outlookDescription',
-      {
-        defaultMessage: 'Search over your email and calendars with Enterprise Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'microsoft_365', 'communications', 'productivity'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/outlook',
   },
   {
     id: 'salesforce',
@@ -280,7 +266,7 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['enterprise_search', 'file_storage', 'microsoft_365'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/sharepoint_server',
+    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point_server/custom',
   },
   {
     id: 'slack',
@@ -296,21 +282,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['communications'],
   },
   {
-    id: 'teams',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.teamsName', {
-      defaultMessage: 'Teams',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.teamsDescription',
-      {
-        defaultMessage:
-          'Search over meeting recordings, chats and other communications with Enterprise Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'microsoft_365', 'communications', 'productivity'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/teams',
-  },
-  {
     id: 'zendesk',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.zendeskName', {
       defaultMessage: 'Zendesk',
@@ -322,39 +293,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
       }
     ),
     categories: ['communications'],
-  },
-  {
-    id: 'zoom',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.zoomName', {
-      defaultMessage: 'Zoom',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.zoomDescription',
-      {
-        defaultMessage:
-          'Search over meeting recordings, chats and other communications with Enterprise Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'communications', 'productivity'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/zoom',
-  },
-  {
-    id: 'custom_api_source',
-    title: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceName',
-      {
-        defaultMessage: 'Custom API Source',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceDescription',
-      {
-        defaultMessage:
-          'Search over anything by building your own integration with Workplace Search.',
-      }
-    ),
-    categories: ['custom'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/custom',
   },
 ];
 

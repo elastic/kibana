@@ -31,7 +31,7 @@ export type AllowedSchemaTypes =
 /**
  * Helper to ensure the declared types match the schema types
  */
-export type PossibleSchemaTypes<Value> = Value extends string
+export type PossibleSchemaTypes<Value> = Value extends string | Date
   ? AllowedSchemaStringTypes
   : Value extends number
   ? AllowedSchemaNumberTypes
@@ -40,9 +40,15 @@ export type PossibleSchemaTypes<Value> = Value extends string
   : // allow any schema type from the union if typescript is unable to resolve the exact U type
     AllowedSchemaTypes;
 
+/**
+ * Schema to define a primitive value
+ */
 export interface SchemaChildValue<Value> {
+  /** The type of the value */
   type: PossibleSchemaTypes<NonNullable<Value>>;
+  /** Meta properties of the value: description and is optional */
   _meta: {
+    /** A description of the value */
     description: string; // Intentionally enforcing the descriptions here
   } & SchemaMetaOptional<Value>;
 }
@@ -55,8 +61,11 @@ export interface SchemaChildValue<Value> {
 export type SchemaValue<Value> =
   // Always allow the pass_through no matter what the value is
   | {
+      /** Type specification of a pass through object */
       type: 'pass_through';
+      /** Meta properties of the pass through: description and is optional */
       _meta: {
+        /** A description of the value */
         description: string; // Intentionally enforcing the descriptions here
       } & SchemaMetaOptional<Value>;
     }
@@ -64,8 +73,10 @@ export type SchemaValue<Value> =
       ? // If the Value is unknown (TS can't infer the type), allow any type of schema
         SchemaArray<unknown, Value> | SchemaObject<Value> | SchemaChildValue<Value>
       : // Otherwise, try to infer the type and enforce the schema
-      NonNullable<Value> extends Array<infer U>
+      NonNullable<Value> extends Array<infer U> | ReadonlyArray<infer U>
       ? SchemaArray<U, Value>
+      : NonNullable<Value> extends Date
+      ? SchemaChildValue<Value>
       : NonNullable<Value> extends object
       ? SchemaObject<Value>
       : SchemaChildValue<Value>);
@@ -83,7 +94,9 @@ export type SchemaMetaOptional<Value> = unknown extends Value
  * Schema meta with optional description
  */
 export interface SchemaMeta<Value> {
+  /** Meta properties of the pass through: description and is optional */
   _meta?: {
+    /** A description of the value */
     description?: string;
   } & SchemaMetaOptional<Value>;
 }
@@ -92,7 +105,9 @@ export interface SchemaMeta<Value> {
  * Schema to represent an array
  */
 export interface SchemaArray<Value, Base> extends SchemaMeta<Base> {
+  /** The type must be an array */
   type: 'array';
+  /** The schema of the items in the array is defined in the `items` property */
   items: SchemaValue<Value>;
 }
 
@@ -100,6 +115,9 @@ export interface SchemaArray<Value, Base> extends SchemaMeta<Base> {
  * Schema to represent an object
  */
 export interface SchemaObject<Value> extends SchemaMeta<Value> {
+  /**
+   * The schemas of the keys of the object are defined in the `properties` object.
+   */
   properties: {
     [Key in keyof Required<Value>]: SchemaValue<Value[Key]>;
   };

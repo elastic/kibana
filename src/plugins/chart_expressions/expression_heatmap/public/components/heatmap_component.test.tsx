@@ -10,6 +10,7 @@ import React from 'react';
 import { Settings, TooltipType, Heatmap } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -17,6 +18,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -47,6 +49,7 @@ const args: HeatmapArguments = {
     isVisible: true,
     position: 'top',
     type: 'heatmap_legend',
+    legendSize: LegendSize.SMALL,
   },
   gridConfig: {
     isCellLabelVisible: true,
@@ -108,15 +111,44 @@ describe('HeatmapComponent', function () {
       uiState,
       onClickValue: jest.fn(),
       onSelectRange: jest.fn(),
+      datatableUtilities: createDatatableUtilitiesMock(),
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
       interactive: true,
+      renderComplete: jest.fn(),
     };
   });
 
   it('renders the legend on the correct position', () => {
     const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
     expect(component.find(Settings).prop('legendPosition')).toEqual('top');
+  });
+
+  it('sets correct legend sizes', () => {
+    const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
+    expect(component.find(Settings).prop('legendSize')).toEqual(80);
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: {
+          ...args.legend,
+          legendSize: LegendSize.AUTO,
+        },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toBeUndefined();
+
+    component.setProps({
+      args: {
+        ...args,
+        legend: {
+          ...args.legend,
+          legendSize: undefined,
+        },
+      },
+    });
+    expect(component.find(Settings).prop('legendSize')).toEqual(130);
   });
 
   it('renders the legend toggle component if uiState is set', async () => {

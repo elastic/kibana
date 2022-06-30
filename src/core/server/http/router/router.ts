@@ -10,12 +10,12 @@ import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
 } from '../../elasticsearch/client/errors';
-import { KibanaRequest } from './request';
+import { KibanaRequest, CoreKibanaRequest } from './request';
 import {
   KibanaResponseFactory,
   kibanaResponseFactory,
@@ -266,7 +266,7 @@ export class Router<Context extends RequestHandlerContext = RequestHandlerContex
     let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      kibanaRequest = KibanaRequest.from(request, routeSchemas);
+      kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
     } catch (e) {
       return hapiResponseAdapter.toBadRequest(e.message);
     }

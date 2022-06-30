@@ -16,7 +16,7 @@ With Osquery in {kib}, you can:
  * View a history of past queries and their results
  * Save queries and build a library of queries for specific use cases
 
-Osquery is powered by the *Osquery Manager* integration.
+Osquery in {kib} is powered by the *Osquery Manager* integration.
 For information on how to set up *Osquery Manager*, refer to <<manage-osquery-integration>>.
 
 [float]
@@ -62,9 +62,10 @@ description, and other <<osquery-manage-query,details>>.
 [[osquery-view-history]]
 == View or rerun previous live queries
 
-From the *Live queries history* section on the *Live queries* tab:
+The *Live queries history* section on the *Live queries* tab shows a log of queries run over the last 30 days.
+Each query has the following options:
 
-* Click image:images/play-icon.png[Right-pointing triangle] to replay a query.
+* Click image:images/play-icon.png[Right-pointing triangle] to rerun a query.
 
 * Click image:images/table-icon.png[Table icon] to view the query <<osquery-results,results>> and <<osquery-status,status>>.
 +
@@ -126,11 +127,9 @@ image::images/scheduled-pack.png[Shows queries in the pack and details about eac
 You can save queries in two ways:
 
 * After running a live query, click the *Save for later* link.
-* From the *Saved queries* tab, click the **Add saved query** button.
+* From the *Saved queries* tab, click **Add saved query**.
 
-Once you save a query, you can only edit it from the *Saved queries* tab.
-
-To add or edit saved queries from the *Saved queries* tab:
+Once you save a query, you can only edit it from the *Saved queries* tab:
 
 . Go to *Saved queries*, and then click **Add saved query** or the edit icon.
 . Provide the following fields:
@@ -157,10 +156,179 @@ To add or edit saved queries from the *Saved queries* tab:
 
 . Click *Save* or *Update*.
 
---
+[float]
+[[osquery-prebuilt-packs-queries]]
+== Prebuilt Elastic packs and queries
+Osquery Manager includes a set of prebuilt Osquery packs and saved queries
+that can help you get started using the integration.
 
-include::advanced-osquery.asciidoc[]
+[float]
+[[osquery-prebuilt-queries]]
+=== Prebuilt queries
+A set of saved queries are included with the integration and available to run as a live query. 
+Note the following about the prebuilt queries:
+
+* The queries are not editable. 
+
+* Several of the queries include default ECS mappings to standardize the results.
+
+* The prebuilt Elastic queries all follow the same naming convention and identify  
+what type of information is being queried, what operating system it supports if it's limited to one or more,
+and that these are Elastic queries. For example, `firewall_rules_windows_elastic`. 
+
+[float]
+[[osquery-prebuilt-packs]]
+=== Prebuilt packs
+The prebuilt Osquery packs are included with the integration and can be optionally loaded. 
+Once added, you can then activate and schedule the packs. 
+
+You can modify the scheduled agent policies for a prebuilt pack, but you cannot edit queries in the pack. To edit the queries, you must first create a copy of the pack.
+
+For information about the prebuilt packs that are available, refer to <<prebuilt-packs>>.
+
+[float]
+[[load-prebuilt-packs]]
+==== Load and activate prebuilt Elastic packs
+
+. Go to *Packs*, and then click *Load Elastic prebuilt packs*.
++
+NOTE: This option is only available if new or updated prebuilt packs are available.
+
+. For each pack that you want to schedule: 
+
+* Enable the option to make the pack *Active*.
+
+* Click the pack name, then *Edit*.
+
+* Update the *Scheduled agent policies* to specify the policies where this pack should run.
+
+. Click *Update pack*.
+
+[float]
+[[copy-prebuilt-packs]]
+==== Copy prebuilt Elastic packs
+
+To modify queries in prebuilt packs, you must first make a copy of the pack.
+
+. Go to *Stack Management* -> *Saved Objects*.
+
+. Search for the Osquery packs you want to modify by name.
+
+. Select the checkboxes of the packs to export.
+
+. Click *Export x objects*.
+
+. Click *Import*.
+
+. Select the import option *Create new objects with random IDs*, then click *Import* to import the pack. This creates a copy of the pack that you can edit.
+
+[float]
+[[osquery-map-fields]]
+== Map result fields to ECS
+
+When you save queries or add queries to a pack, you can optionally map Osquery results or static values to fields in
+the {ecs-ref}/ecs-reference.html[Elastic Common Schema] (ECS).
+This standardizes your Osquery data for use across detections, machine learning,
+and any other areas that rely on ECS-compliant data.
+When the query is run, the results include the original `osquery.<fields>`
+and the mapped ECS fields. For example, if you update a query to map `osquery.name` to `user.name`, the query results include both fields.
+
+. Edit saved queries or queries in a pack to map fields:
+
+* For *Saved queries*: Open the *Saved queries* tab, and then click the edit icon for the query that you want to map.
+
+* For *packs*: Open the *Packs* tab, edit a pack, and then click the edit icon for the query that you want to map.
+
+. In the **ECS mapping** section, select an **ECS field** to map.
+
+. In the **Value** column, use the dropdown on the left to choose what type of value to map to the ECS field:
+
+** **Osquery value**: Select an Osquery field. The fields available are based on the SQL query entered, and only include fields that the query returns. When the query runs, the ECS field is set dynamically to the value of the Osquery field selected.
+
+** **Static value**: Enter a static value. When the query runs, the ECS field is set to the value entered. For example, static fields can be used to apply `tags` or your preferred `event.category` to the query results.
+
+. Map more fields, as needed. To remove any mapped rows, click the delete icon.
+
+. Save your changes.
+
+[NOTE]
+=========================
+
+* Some ECS fields are restricted and cannot be mapped. These are not available in the ECS dropdown.
+
+* Some ECS fields are restricted to a set of allowed values, like {ecs-ref}/ecs-event.html#field-event-category[event.category]. Use the {ecs-ref}/ecs-field-reference.html[ECS Field Reference] for help when mapping fields.
+
+* Osquery date fields have a variety of data types (including integer, text, or bigint). When mapping an Osquery date field to an ECS date field, you might need to use SQL operators in the query to get an {es}-compatible
+{ref}/date.html[date] type.
+=========================
+
+
+[float]
+[[osquery-extended-tables]]
+== Extended tables for Kubernetes queries
+In addition to the Osquery schema, the Elastic-provided version of Osquery also includes the following tables to support Kubernetes containers. These can be queried with live or scheduled queries.
+
+* `host_users`
+
+* `host_groups`
+
+* `host_processes`
+
+When querying these tables, the expectation is that the `/etc/passwd`, `/etc/group`, and `/proc` are available in the container under `/hostfs` as:
+`/hostfs/etc/passwd`, `/hostfs/etc/group`, and `/hostfs/proc`. For information about the fields available in these tables, see the
+https://docs.elastic.co/en/integrations/osquery_manager#exported-fields[exported fields] reference.
+
+[float]
+[[osquery-status]]
+== Osquery status
+
+A query can have the following status:
+
+[cols="2*<"]
+|===
+| Successful | The query successfully completed.
+| Failed | The query encountered a problem, such as an issue with the query or the agent was disconnected, and might have failed.
+| Not yet responded | The query has not been sent to the agent.
+| Expired | The action request timed out. The agent may be offline.
+|===
+
+NOTE: If an agent is offline, the request status remains **pending** as {kib} retries the request.
+By default, a query request times out after one minute. An action timeout error is returned when
+the query does not complete within that interval.
+
+
+[float]
+[[osquery-results]]
+== Osquery results
+When you run live or scheduled queries, the results are automatically
+stored in an {es} index, so that you can search, analyze, and visualize this data in {kib}.
+For a list of the Osquery fields that can be returned in query results,
+refer to https://docs.elastic.co/en/integrations/osquery_manager#exported-fields[exported fields].
+Query results can also include ECS fields, if the query has a defined ECS mapping.
+
+Osquery responses include the following information:
+
+* Everything prefaced with `osquery.` is part of the query response. These fields are not mapped to ECS by default.
+
+* Results include some ECS fields by default, such as `host.*` and `agent.*`, which provide information about the host that was queried.
+
+* For live queries, the `action_data.query` is the query that was sent.
+
+* For scheduled queries in a pack, the `action_id` has the format `pack_<pack-name>_<query-ID>`. You can use this information to look up the query that was run.
+
+* By default, all query results are https://osquery.readthedocs.io/en/stable/deployment/logging/#snapshot-logs[snapshot logs]
+that represent a point in time with a set of results, with no
+https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs[differentials].
+
+* Osquery data is stored in the `logs-osquery_manager.result-<namespace>` datastream, and the result row data is under the `osquery` property in the document.
+
+
+--
 
 include::manage-integration.asciidoc[]
 
 include::exported-fields-reference.asciidoc[]
+
+include::prebuilt-packs.asciidoc[]
+
+include::osquery-faq.asciidoc[]

@@ -4,7 +4,8 @@
   "execTimeout": 120000,
   "pageLoadTimeout": 12000,
   "retries": {
-    "runMode": 0
+    "runMode": 1,
+    "openMode": 0
   },
   "screenshotsFolder": "../../../target/kibana-osquery/cypress/screenshots",
   "trashAssetsBeforeRuns": false,

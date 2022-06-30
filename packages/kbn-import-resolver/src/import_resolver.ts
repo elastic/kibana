@@ -25,9 +25,18 @@ const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 export class ImportResolver {
   static create(repoRoot: string) {
     const pkgMap = new Map();
-    for (const dir of discoverBazelPackageLocations(repoRoot)) {
-      const pkg = JSON.parse(Fs.readFileSync(Path.resolve(dir, 'package.json'), 'utf8'));
-      pkgMap.set(pkg.name, normalizePath(Path.relative(repoRoot, dir)));
+    for (const dir of discoverBazelPackageLocations(REPO_ROOT)) {
+      const relativeBazelPackageDir = Path.relative(REPO_ROOT, dir);
+      const repoRootBazelPackageDir = Path.resolve(repoRoot, relativeBazelPackageDir);
+
+      if (!Fs.existsSync(Path.resolve(repoRootBazelPackageDir, 'package.json'))) {
+        continue;
+      }
+
+      const pkg = JSON.parse(
+        Fs.readFileSync(Path.resolve(repoRootBazelPackageDir, 'package.json'), 'utf8')
+      );
+      pkgMap.set(pkg.name, normalizePath(relativeBazelPackageDir));
     }
 
     return new ImportResolver(repoRoot, pkgMap, readPackageMap());

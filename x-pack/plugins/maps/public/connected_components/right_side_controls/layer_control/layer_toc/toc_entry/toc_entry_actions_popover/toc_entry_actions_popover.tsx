@@ -36,7 +36,6 @@ export interface Props {
   showThisLayerOnly: (layerId: string) => void;
   supportsFitToBounds: boolean;
   toggleVisible: (layerId: string) => void;
-  editModeActiveForLayer: boolean;
   numLayers: number;
 }
 
@@ -90,9 +89,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     }
 
     if (
-      (source as ESSearchSource).getApplyGlobalQuery() ||
       (source as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
-      (await vectorLayer.isFilteredByGlobalTime()) ||
       vectorLayer.isPreviewLayer() ||
       !vectorLayer.isVisible() ||
       vectorLayer.hasJoins()
@@ -194,9 +191,9 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
             ? null
             : i18n.translate('xpack.maps.layerTocActions.editFeaturesTooltip.disabledMessage', {
                 defaultMessage:
-                  'Edit features only supported for document layers without clustering, term joins, time filtering, or global search.',
+                  'Edit features is only supported for layers without clustering and term joins',
               }),
-          disabled: !this.state.isFeatureEditingEnabled || this.props.editModeActiveForLayer,
+          disabled: !this.state.isFeatureEditingEnabled,
           onClick: async () => {
             this._closePopover();
             const supportedShapeTypes = await (

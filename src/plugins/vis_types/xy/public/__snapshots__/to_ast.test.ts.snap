@@ -32,6 +32,9 @@ Object {
     "legendPosition": Array [
       "top",
     ],
+    "legendSize": Array [
+      "small",
+    ],
     "maxLegendLines": Array [
       1,
     ],

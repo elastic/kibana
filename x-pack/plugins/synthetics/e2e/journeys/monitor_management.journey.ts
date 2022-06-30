@@ -7,9 +7,9 @@
 
 import uuid from 'uuid';
 import { journey, step, expect, before, after, Page } from '@elastic/synthetics';
+import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { monitorManagementPageProvider } from '../page_objects/monitor_management';
 import { DataStream } from '../../common/runtime_types/monitor_management';
-import { byTestId } from './utils';
 
 const customLocation = process.env.SYNTHETICS_TEST_LOCATION;
 
@@ -68,6 +68,7 @@ const configuration = {
   [DataStream.BROWSER]: {
     monitorConfig: {
       ...basicMonitorDetails,
+      schedule: '10',
       name: browserName,
       inlineScript: 'step("test step", () => {})',
       locations: [basicMonitorDetails.location],
@@ -75,6 +76,7 @@ const configuration = {
     },
     monitorDetails: {
       ...basicMonitorDetails,
+      schedule: '10',
       name: browserName,
     },
   },

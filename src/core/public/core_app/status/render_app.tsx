@@ -9,10 +9,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { AppMountParameters } from '../../application';
 import type { HttpSetup } from '../../http';
 import type { NotificationsSetup } from '../../notifications';
-import { CoreThemeProvider } from '../../theme';
 import { StatusApp } from './status_app';
 
 interface Deps {

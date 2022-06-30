@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { Observable, firstValueFrom } from 'rxjs';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CoreSetup, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -27,7 +26,7 @@ import {
 import { APMUsage } from './types';
 import { apmSchema } from './schema';
 
-const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
+export const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
 export async function createApmTelemetry({
   core,
@@ -93,6 +92,7 @@ export async function createApmTelemetry({
       logger,
       indicesStats,
       transportRequest,
+      savedObjectsClient,
     });
 
     await savedObjectsClient.create(
@@ -159,7 +159,7 @@ export async function createApmTelemetry({
         logger.debug(
           `Stored telemetry is out of date. Task will run immediately. Stored: ${currentData.kibanaVersion}, expected: ${kibanaVersion}`
         );
-        await taskManagerStart.runNow(APM_TELEMETRY_TASK_NAME);
+        await taskManagerStart.runSoon(APM_TELEMETRY_TASK_NAME);
       }
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

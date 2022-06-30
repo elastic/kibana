@@ -12,19 +12,20 @@ exports[`Authentication Host Table Component rendering it renders the host authe
 }
 
 .c1 {
-  margin-bottom: 24px;
+  margin-bottom: 0;
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
   user-select: text;
 }
 
-.c1.toggle-expand .header-section-content {
-  height: 48px;
+.c1.toggle-expand {
+  margin-bottom: 24px;
 }
 
-.c1.toggle-expand .header-section-titles {
-  margin-top: 16px;
+.c1 .no-margin {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .c0 {
@@ -56,7 +57,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
 }
 
 <div
-  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder c0"
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-m-m-plain-hasBorder"
   data-test-subj="authentications-host-table-loading-false"
 >
   <header
@@ -64,83 +65,95 @@ exports[`Authentication Host Table Component rendering it renders the host authe
     data-test-subj="header-section"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionColumn"
     >
       <div
         class="euiFlexItem"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow header-section-content"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
             class="euiFlexItem"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive header-section-titles"
+              class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
             >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--directionRow header-section-titles"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <button
+                      aria-label="Open"
+                      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small"
+                      data-test-subj="query-toggle-header"
+                      title="Open"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                      />
+                    </button>
+                  </div>
+                  <div
+                    class="euiFlexItem"
+                  >
+                    <h4
+                      class="euiTitle emotion-euiTitle-m"
+                      data-test-subj="header-section-title"
+                    >
+                      <span
+                        class="eui-textBreakNormal"
+                      >
+                        Authentications
+                      </span>
+                    </h4>
+                  </div>
+                </div>
+              </div>
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  aria-label="Open"
-                  class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small"
-                  data-test-subj="query-toggle-header"
-                  title="Open"
+                  aria-label="Inspect"
+                  class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall inspectButtonComponent"
+                  data-test-subj="inspect-icon-button"
+                  disabled=""
+                  title="Inspect"
                   type="button"
                 >
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
                     color="inherit"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="inspect"
                   />
                 </button>
               </div>
-              <div
-                class="euiFlexItem"
-              >
-                <h4
-                  class="euiTitle euiTitle--medium"
-                  data-test-subj="header-section-title"
-                >
-                  <span
-                    class="eui-textBreakNormal"
-                  >
-                    Authentications
-                  </span>
-                </h4>
-              </div>
-            </div>
-            <div
-              class="c2 siemSubtitle"
-            >
-              <p
-                class="siemSubtitle__item siemSubtitle__item--text"
-                data-test-subj="header-panel-subtitle"
-              >
-                Showing: 0 users
-              </p>
             </div>
           </div>
-          <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+        </div>
+      </div>
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="c2 siemSubtitle"
+        >
+          <p
+            class="siemSubtitle__item siemSubtitle__item--text"
+            data-test-subj="header-panel-subtitle"
           >
-            <button
-              aria-label="Inspect"
-              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall inspectButtonComponent"
-              data-test-subj="inspect-icon-button"
-              disabled=""
-              title="Inspect"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="inspect"
-              />
-            </button>
-          </div>
+            Showing: 0 users
+          </p>
         </div>
       </div>
     </div>
@@ -193,7 +206,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
             </th>
             <th
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Successes_1"
+              data-test-subj="tableHeaderCell_node.successes_1"
               role="columnheader"
               scope="col"
               style="width: 8%;"
@@ -211,7 +224,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
             </th>
             <th
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_Failures_2"
+              data-test-subj="tableHeaderCell_node.failures_2"
               role="columnheader"
               scope="col"
               style="width: 8%;"

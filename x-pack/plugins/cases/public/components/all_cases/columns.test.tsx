@@ -77,6 +77,7 @@ describe('ExternalServiceColumn ', () => {
                 name: 'None',
                 config: {},
                 isPreconfigured: false,
+                isDeprecated: false,
               },
             ]}
           />

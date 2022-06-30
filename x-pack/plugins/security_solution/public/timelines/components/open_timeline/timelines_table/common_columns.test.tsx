@@ -378,7 +378,7 @@ describe('#getCommonColumns', () => {
 
       wrapper
         .find(`[data-test-subj="title-${mockResults[0].savedObjectId}"]`)
-        .first()
+        .last()
         .simulate('click');
 
       expect(onOpenTimeline).toHaveBeenCalledWith({

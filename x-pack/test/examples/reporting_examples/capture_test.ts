@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Captures', () => {
-    it('PNG that matches the baseline', async () => {
+    it('PNG file matches the baseline image', async () => {
       await PageObjects.common.navigateToApp(appId);
 
       await (await testSubjects.find('shareButton')).click();

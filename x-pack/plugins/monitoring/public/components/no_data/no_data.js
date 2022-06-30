@@ -183,6 +183,13 @@ export function NoData(props) {
                 the upper right includes monitoring data."
               />
             </p>
+            <p>
+              <FormattedMessage
+                id="xpack.monitoring.noData.remoteCollectionNotice"
+                defaultMessage="If you have configured monitoring data to be sent to a dedicated monitoring 
+                cluster you should access that data with the Kibana instance attached to the monitoring cluster."
+              />
+            </p>
           </EuiText>
           <EuiSpacer />
           <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="s">

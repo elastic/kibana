@@ -86,6 +86,7 @@ export async function registerMetricInventoryThresholdRuleType(
       ),
     },
     defaultActionGroupId: FIRED_ACTIONS_ID,
+    doesSetRecoveryContext: true,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
     producer: 'infrastructure',
     minimumLicenseRequired: 'basic',

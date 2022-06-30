@@ -32,7 +32,7 @@ import {
   CONDITION_OPERATOR_TYPE_NOT_MATCH,
 } from './translations';
 import { ArtifactInfo, ArtifactInfoEntry } from '../types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const OS_LABELS = Object.freeze({
   linux: OS_LINUX,
@@ -56,7 +56,7 @@ const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
 });
 
 const EuiFlexGroupNested = styled(EuiFlexGroup)`
-  margin-left: ${({ theme }) => theme.eui.spacerSizes.xl};
+  margin-left: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
 const EuiFlexItemNested = styled(EuiFlexItem)`

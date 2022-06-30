@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../common/constants';
-import { SEARCH_INDICES_PATH } from '../../enterprise_search_content/routes';
+import { NEW_INDEX_PATH } from '../../enterprise_search_content/routes';
 import { EuiLinkTo } from '../react_router_helpers';
 
 import searchIndicesIllustration from './search_indices.svg';
@@ -58,7 +58,7 @@ export const AddContentEmptyPrompt: React.FC = () => {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiLinkTo
-                    to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH)}
+                    to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
                     shouldNotCreateHref
                   >
                     <EuiButton color="primary" fill>

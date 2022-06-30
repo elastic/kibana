@@ -11,13 +11,11 @@ import { Filter } from '@kbn/es-query';
 import { hostsModel } from '../store';
 import { GlobalTimeArgs } from '../../common/containers/use_global_time';
 import { InputsModelId } from '../../common/store/inputs/constants';
-import { DocValueFields } from '../../common/containers/source';
 import { HOSTS_PATH } from '../../../common/constants';
 
 export const hostDetailsPagePath = `${HOSTS_PATH}/:detailName`;
 
 export type HostsTabsProps = GlobalTimeArgs & {
-  docValueFields: DocValueFields[];
   filterQuery: string;
   pageFilters?: Filter[];
   indexNames: string[];

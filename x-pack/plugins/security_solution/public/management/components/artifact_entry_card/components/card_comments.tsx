@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { CardActionsFlexItemProps } from './card_actions_flex_item';
 import { ArtifactInfo } from '../types';
 import { getFormattedComments } from '../utils/get_formatted_comments';

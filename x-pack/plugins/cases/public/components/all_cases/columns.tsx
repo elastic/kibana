@@ -18,12 +18,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
-import { Case, DeleteCase } from '../../../common/ui/types';
-import { CaseStatuses, ActionConnector } from '../../../common/api';
+import { Case, DeleteCase, UpdateByKey } from '../../../common/ui/types';
+import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -31,7 +33,6 @@ import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { ALERTS } from '../../common/translations';
 import { getActions } from './actions';
-import { UpdateCase } from '../../containers/use_get_cases';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
@@ -40,6 +41,8 @@ import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { severities } from '../severity/config';
+import { useUpdateCase } from '../../containers/use_update_case';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -50,22 +53,12 @@ const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
-const Spacer = styled.span`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
-`;
-
-const TagWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
-`;
-
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
-  isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
   userCanCrud: boolean;
@@ -75,10 +68,8 @@ export interface GetCasesColumn {
   showSolutionColumn?: boolean;
 }
 export const useCasesColumns = ({
-  dispatchUpdateCaseProperty,
   filterStatus,
   handleIsLoading,
-  isLoadingCases,
   refreshCases,
   isSelectorView,
   userCanCrud,
@@ -103,6 +94,8 @@ export const useCasesColumns = ({
     title: '',
   });
 
+  const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
+
   const toggleDeleteModal = useCallback(
     (deleteCase: Case) => {
       handleToggleModal();
@@ -112,15 +105,17 @@ export const useCasesColumns = ({
   );
 
   const handleDispatchUpdate = useCallback(
-    (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
-      dispatchUpdateCaseProperty({
-        ...args,
-        refetchCasesStatus: () => {
+    ({ updateKey, updateValue, caseData }: UpdateByKey) => {
+      updateCaseProperty({
+        updateKey,
+        updateValue,
+        caseData,
+        onSuccess: () => {
           if (refreshCases != null) refreshCases();
         },
       });
     },
-    [dispatchUpdateCaseProperty, refreshCases]
+    [refreshCases, updateCaseProperty]
   );
 
   const actions = useMemo(
@@ -141,8 +136,8 @@ export const useCasesColumns = ({
   );
 
   useEffect(() => {
-    handleIsLoading(isDeleting || isLoadingCases.indexOf('caseUpdate') > -1);
-  }, [handleIsLoading, isDeleting, isLoadingCases]);
+    handleIsLoading(isDeleting || isLoadingUpdateCase);
+  }, [handleIsLoading, isDeleting, isLoadingUpdateCase]);
 
   useEffect(() => {
     if (isDeleted) {
@@ -183,16 +178,18 @@ export const useCasesColumns = ({
       render: (createdBy: Case['createdBy']) => {
         if (createdBy != null) {
           return (
-            <>
+            <EuiToolTip
+              position="top"
+              content={createdBy.username ?? i18n.UNKNOWN}
+              data-test-subj="case-table-column-createdBy-tooltip"
+            >
               <EuiAvatar
                 className="userAction__circle"
                 name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
                 size="s"
+                data-test-subj="case-table-column-createdBy"
               />
-              <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.username ?? i18n.UNKNOWN}
-              </Spacer>
-            </>
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
@@ -203,8 +200,8 @@ export const useCasesColumns = ({
       name: i18n.TAGS,
       render: (tags: Case['tags']) => {
         if (tags != null && tags.length > 0) {
-          return (
-            <TagWrapper>
+          const badges = (
+            <EuiBadgeGroup data-test-subj="case-table-column-tags">
               {tags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
@@ -214,7 +211,17 @@ export const useCasesColumns = ({
                   {tag}
                 </EuiBadge>
               ))}
-            </TagWrapper>
+            </EuiBadgeGroup>
+          );
+
+          return (
+            <EuiToolTip
+              data-test-subj="case-table-column-tags-tooltip"
+              position="left"
+              content={badges}
+            >
+              {badges}
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
@@ -300,6 +307,47 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
+    ...(!isSelectorView
+      ? [
+          {
+            name: i18n.STATUS,
+            render: (theCase: Case) => {
+              if (theCase.status === null || theCase.status === undefined) {
+                return getEmptyTagValue();
+              }
+
+              return (
+                <StatusContextMenu
+                  currentStatus={theCase.status}
+                  disabled={!userCanCrud || isLoadingUpdateCase}
+                  onStatusChanged={(status) =>
+                    handleDispatchUpdate({
+                      updateKey: 'status',
+                      updateValue: status,
+                      caseData: theCase,
+                    })
+                  }
+                />
+              );
+            },
+          },
+        ]
+      : []),
+    {
+      name: i18n.SEVERITY,
+      render: (theCase: Case) => {
+        if (theCase.severity != null) {
+          const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
+          return (
+            <EuiHealth data-test-subj="case-table-column-severity" color={severityData.color}>
+              {severityData.label}
+            </EuiHealth>
+          );
+        }
+        return getEmptyTagValue();
+      },
+    },
+
     ...(isSelectorView
       ? [
           {
@@ -320,33 +368,6 @@ export const useCasesColumns = ({
                 );
               }
               return getEmptyTagValue();
-            },
-          },
-        ]
-      : []),
-    ...(!isSelectorView
-      ? [
-          {
-            name: i18n.STATUS,
-            render: (theCase: Case) => {
-              if (theCase.status === null || theCase.status === undefined) {
-                return getEmptyTagValue();
-              }
-
-              return (
-                <StatusContextMenu
-                  currentStatus={theCase.status}
-                  disabled={!userCanCrud || isLoadingCases.length > 0}
-                  onStatusChanged={(status) =>
-                    handleDispatchUpdate({
-                      updateKey: 'status',
-                      updateValue: status,
-                      caseId: theCase.id,
-                      version: theCase.version,
-                    })
-                  }
-                />
-              );
             },
           },
         ]

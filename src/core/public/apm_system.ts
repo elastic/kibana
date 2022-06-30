@@ -8,9 +8,9 @@
 
 import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum';
 import { modifyUrl } from '@kbn/std';
+import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import { CachedResourceObserver } from './apm_resource_counter';
 import type { InternalApplicationStart } from './application';
-import { ExecutionContextStart } from './execution_context';
 
 /** "GET protocol://hostname:port/pathname" */
 const HTTP_REQUEST_TRANSACTION_NAME_REGEX =
@@ -36,6 +36,7 @@ export class ApmSystem {
   private pageLoadTransaction?: Transaction;
   private resourceObserver: CachedResourceObserver;
   private apm?: ApmBase;
+  private executionContext?: ExecutionContextStart;
 
   /**
    * `apmConfig` would be populated with relevant APM RUM agent
@@ -56,6 +57,7 @@ export class ApmSystem {
     }
 
     this.addHttpRequestNormalization(apm);
+    this.addRouteChangeNormalization(apm);
 
     init(apmConfig);
     // hold page load transaction blocks a transaction implicitly created by init.
@@ -65,6 +67,7 @@ export class ApmSystem {
   async start(start?: StartDeps) {
     if (!this.enabled || !start) return;
 
+    this.executionContext = start.executionContext;
     this.markPageLoadStart();
 
     start.executionContext.context$.subscribe((c) => {
@@ -126,7 +129,7 @@ export class ApmSystem {
 
   /**
    * Adds an observer to the APM configuration for normalizing transactions of the 'http-request' type to remove the
-   * hostname, protocol, port, and base path. Allows for coorelating data cross different deployments.
+   * hostname, protocol, port, and base path. Allows for correlating data cross different deployments.
    */
   private addHttpRequestNormalization(apm: ApmBase) {
     apm.observe('transaction:end', (t) => {
@@ -154,7 +157,7 @@ export class ApmSystem {
           return;
         }
 
-        // Strip the protocol, hostnname, port, and protocol slashes to normalize
+        // Strip the protocol, hostname, port, and protocol slashes to normalize
         parts.protocol = null;
         parts.hostname = null;
         parts.port = null;
@@ -169,6 +172,22 @@ export class ApmSystem {
       });
 
       t.name = `${method} ${normalizedUrl}`;
+    });
+  }
+
+  /**
+   * Set route-change transaction name to the destination page name taken from
+   * the execution context. Otherwise, all route change transactions would have
+   * default names, like 'Click - span' or 'Click - a' instead of more
+   * descriptive '/security/rules/:id/edit'.
+   */
+  private addRouteChangeNormalization(apm: ApmBase) {
+    apm.observe('transaction:end', (t) => {
+      const executionContext = this.executionContext?.get();
+      if (executionContext && t.type === 'route-change') {
+        const { name, page } = executionContext;
+        t.name = `${name} ${page || 'unknown'}`;
+      }
     });
   }
 }

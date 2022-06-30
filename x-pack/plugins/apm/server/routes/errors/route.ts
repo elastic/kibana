@@ -14,7 +14,7 @@ import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
-import { offsetRt } from '../../../common/offset_rt';
+import { offsetRt } from '../../../common/comparison_rt';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -70,7 +70,7 @@ const errorsMainStatisticsRoute = createApmServerRoute({
 
 const errorsDetailedStatisticsRoute = createApmServerRoute({
   endpoint:
-    'GET /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
+    'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -82,9 +82,9 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
       offsetRt,
       t.type({
         numBuckets: toNumberRt,
-        groupIds: jsonRt.pipe(t.array(t.string)),
       }),
     ]),
+    body: t.type({ groupIds: jsonRt.pipe(t.array(t.string)) }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -107,7 +107,8 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { environment, kuery, numBuckets, groupIds, start, end, offset },
+      query: { environment, kuery, numBuckets, start, end, offset },
+      body: { groupIds },
     } = params;
 
     return getErrorGroupPeriods({

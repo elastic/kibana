@@ -169,7 +169,7 @@ export function DevToolsSettingsModal(props: Props) {
 
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
-    fields || indices || templates ? (
+    fields || indices || templates || dataStreams ? (
       <Fragment>
         <EuiFormRow
           label={

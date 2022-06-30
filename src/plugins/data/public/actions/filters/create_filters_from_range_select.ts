@@ -9,9 +9,10 @@
 import { last } from 'lodash';
 import moment from 'moment';
 import { Datatable } from '@kbn/expressions-plugin';
-import { esFilters, IFieldType, RangeFilterParams } from '../..';
+import { buildRangeFilter, DataViewFieldBase, RangeFilterParams } from '@kbn/es-query';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
+import { mapAndFlattenFilters } from '../../query';
 
 interface RangeSelectDataContext {
   table: Datatable;
@@ -33,7 +34,7 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
     aggConfigs as AggConfigSerialized,
   ]);
   const aggConfig = aggConfigsInstance.aggs[0];
-  const field: IFieldType = aggConfig.params.field;
+  const field: DataViewFieldBase = aggConfig.params.field;
 
   if (!field || event.range.length <= 1) {
     return [];
@@ -57,5 +58,5 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
     range.format = 'strict_date_optional_time';
   }
 
-  return esFilters.mapAndFlattenFilters([esFilters.buildRangeFilter(field, range, indexPattern)]);
+  return mapAndFlattenFilters([buildRangeFilter(field, range, indexPattern)]);
 }

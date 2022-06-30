@@ -40,6 +40,7 @@ const getDashboardState = (state?: Partial<DashboardState>): DashboardState => {
       hidePanelTitles: false,
       useMargins: true,
       syncColors: false,
+      syncTooltips: false,
     },
     panels: {
       panel_1: {
@@ -97,6 +98,7 @@ describe('Dashboard state diff function', () => {
           hidePanelTitles: false,
           useMargins: false,
           syncColors: false,
+          syncTooltips: false,
         },
       })
     ).toEqual(['options']);
@@ -108,6 +110,7 @@ describe('Dashboard state diff function', () => {
         options: {
           useMargins: true,
           syncColors: undefined,
+          syncTooltips: undefined,
         } as unknown as DashboardOptions,
       })
     ).toEqual([]);

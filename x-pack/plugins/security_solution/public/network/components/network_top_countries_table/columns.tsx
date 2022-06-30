@@ -70,6 +70,8 @@ export const getNetworkTopCountriesColumns = (
               kqlQuery: '',
               queryMatch: { field: geoAttr, value: geo, operator: IS_OPERATOR },
             }}
+            isAggregatable={true}
+            fieldType={'keyword'}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>

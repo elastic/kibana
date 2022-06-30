@@ -28,7 +28,7 @@ import {
   ENTRY_PROPERTY_TITLES,
   OPERATOR_TITLES,
 } from '../../translations';
-import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/path_placeholder';
 
 const ConditionEntryCell = memo<{

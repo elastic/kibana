@@ -24,7 +24,6 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/vis_types/timeseries/tsconfig.json" },
-    { "path": "../data_enhanced/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../license_management/tsconfig.json" },

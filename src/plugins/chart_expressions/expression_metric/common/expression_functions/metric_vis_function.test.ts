@@ -68,6 +68,7 @@ describe('interpreter/functions#metric', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
     };

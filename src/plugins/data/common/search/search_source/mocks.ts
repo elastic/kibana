@@ -7,10 +7,10 @@
  */
 
 import { of } from 'rxjs';
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
-import { SearchSource } from './search_source';
+import { SearchSource, SearchSourceDependencies } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
 
 export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
@@ -35,6 +35,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   history: [],
   getSerializedFields: jest.fn(),
   serialize: jest.fn(),
+  toExpressionAst: jest.fn(),
 };
 
 export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
@@ -48,6 +49,9 @@ export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
 
 export const createSearchSourceMock = (fields?: SearchSourceFields, response?: any) =>
   new SearchSource(fields, {
+    aggs: {
+      createAggConfigs: jest.fn(),
+    } as unknown as SearchSourceDependencies['aggs'],
     getConfig: uiSettingsServiceMock.createStartContract().get,
     search: jest.fn().mockReturnValue(
       of(

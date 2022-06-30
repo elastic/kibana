@@ -38,7 +38,7 @@ describe.skip('Home page', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   it('Redirects to service page with comparisonEnabled, environment, rangeFrom, rangeTo and offset added to the URL', () => {

@@ -34,7 +34,7 @@ describe('SessionViewSearchBar component', () => {
       />
     );
 
-    const searchInput = renderResult.getByTestId('sessionView:searchInput').querySelector('input');
+    const searchInput = renderResult.getByTestId('sessionView:searchBar').querySelector('input');
 
     expect(searchInput?.value).toEqual('ls');
 
@@ -73,7 +73,7 @@ describe('SessionViewSearchBar component', () => {
     userEvent.click(renderResult.getByTestId('pagination-button-next'));
     expect(searchPagination.querySelector(paginationTextClass)?.textContent).toEqual('2 of 3');
 
-    const searchInput = renderResult.getByTestId('sessionView:searchInput').querySelector('input');
+    const searchInput = renderResult.getByTestId('sessionView:searchBar').querySelector('input');
 
     if (searchInput) {
       userEvent.type(searchInput, ' -la');

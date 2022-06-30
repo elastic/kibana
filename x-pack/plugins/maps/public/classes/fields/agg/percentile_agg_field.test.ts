@@ -7,7 +7,7 @@
 
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { IESAggSource } from '../../sources/es_agg_source';
-import { IndexPattern } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { PercentileAggField } from './percentile_agg_field';
 import { ESDocField } from '../es_doc_field';
 
@@ -68,7 +68,7 @@ describe('percentile agg field', () => {
       percentile: 80,
     });
 
-    expect(field.getValueAggDsl(mockIndexPattern as IndexPattern)).toEqual({
+    expect(field.getValueAggDsl(mockIndexPattern as DataView)).toEqual({
       percentiles: { field: 'foobar', percents: [80] },
     });
   });

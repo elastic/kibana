@@ -6,16 +6,17 @@
  */
 
 import { NEVER, of } from 'rxjs';
-import type { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from './chromium';
 import {
-  CONTEXT_SKIPTELEMETRY,
-  CONTEXT_GETNUMBEROFITEMS,
-  CONTEXT_INJECTCSS,
-  CONTEXT_WAITFORRENDER,
-  CONTEXT_GETTIMERANGE,
+  CONTEXT_DEBUG,
   CONTEXT_ELEMENTATTRIBUTES,
+  CONTEXT_GETNUMBEROFITEMS,
   CONTEXT_GETRENDERERRORS,
+  CONTEXT_GETTIMERANGE,
+  CONTEXT_INJECTCSS,
+  CONTEXT_SKIPTELEMETRY,
+  CONTEXT_WAITFORRENDER,
 } from '../screenshots/constants';
+import type { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from './chromium';
 
 const selectors = {
   renderComplete: 'renderedSelector',
@@ -40,6 +41,7 @@ function getElementsPositionAndAttributes(title: string, description: string) {
 export function createMockBrowserDriver(): jest.Mocked<HeadlessChromiumDriver> {
   const evaluate = jest.fn(async (_, { context }) => {
     switch (context) {
+      case CONTEXT_DEBUG:
       case CONTEXT_SKIPTELEMETRY:
       case CONTEXT_INJECTCSS:
       case CONTEXT_WAITFORRENDER:
@@ -90,7 +92,7 @@ export function createMockBrowserDriverFactory(
     createPage: jest.fn(() =>
       of({
         driver: driver ?? createMockBrowserDriver(),
-        unexpectedExit$: NEVER,
+        error$: NEVER,
         close: () => of({}),
       })
     ),

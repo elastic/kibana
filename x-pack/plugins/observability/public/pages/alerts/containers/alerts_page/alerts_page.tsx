@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
-
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
@@ -22,7 +20,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
-import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
@@ -37,7 +34,8 @@ import {
   useAlertsPageStateContainer,
 } from '../state_container';
 import './styles.scss';
-import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
+import { AlertsStatusFilter, AlertsSearchBar } from '../../components';
+import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
 
 interface RuleStatsState {
@@ -51,15 +49,11 @@ interface RuleStatsState {
 export interface TopAlert {
   fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
+  lastUpdated: number;
   reason: string;
   link?: string;
   active: boolean;
 }
-
-const Divider = euiStyled.div`
-  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  height: 100%;
-`;
 
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 const NO_INDEX_PATTERNS: DataViewBase[] = [];
@@ -74,7 +68,7 @@ const ALERT_STATUS_REGEX = new RegExp(
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
 function AlertsPage() {
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
@@ -115,6 +109,7 @@ function AlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
+        typesFilter: observabilityRuleTypeRegistry.list(),
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;
@@ -149,9 +144,7 @@ function AlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = config.unsafe.rules.enabled
-    ? http.basePath.prepend('/app/observability/alerts/rules')
-    : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules');
+  const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
@@ -241,68 +234,16 @@ function AlertsPage() {
   return (
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
+      isPageDataLoaded={Boolean(hasAnyData || isAllRequestsComplete)}
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       pageHeader={{
         pageTitle: (
-          <>
-            {i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}{' '}
-            <ExperimentalBadge />
-          </>
+          <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
         ),
-        rightSideItems: [
-          <EuiStat
-            title={ruleStats.total}
-            description={i18n.translate('xpack.observability.alerts.ruleStats.ruleCount', {
-              defaultMessage: 'Rule count',
-            })}
-            color="primary"
-            titleSize="xs"
-            isLoading={ruleStatsLoading}
-            data-test-subj="statRuleCount"
-          />,
-          <EuiStat
-            title={ruleStats.disabled}
-            description={i18n.translate('xpack.observability.alerts.ruleStats.disabled', {
-              defaultMessage: 'Disabled',
-            })}
-            color="primary"
-            titleSize="xs"
-            isLoading={ruleStatsLoading}
-            data-test-subj="statDisabled"
-          />,
-          <EuiStat
-            title={ruleStats.muted + ruleStats.snoozed}
-            description={i18n.translate('xpack.observability.alerts.ruleStats.muted', {
-              defaultMessage: 'Snoozed',
-            })}
-            color="primary"
-            titleSize="xs"
-            isLoading={ruleStatsLoading}
-            data-test-subj="statMuted"
-          />,
-          <EuiStat
-            title={ruleStats.error}
-            description={i18n.translate('xpack.observability.alerts.ruleStats.errors', {
-              defaultMessage: 'Errors',
-            })}
-            color="primary"
-            titleSize="xs"
-            isLoading={ruleStatsLoading}
-            data-test-subj="statErrors"
-          />,
-          <Divider />,
-          <EuiButtonEmpty href={manageRulesHref}>
-            {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
-              defaultMessage: 'Manage Rules',
-            })}
-          </EuiButtonEmpty>,
-        ].reverse(),
+        rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
       }}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <AlertsDisclaimer />
-        </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
             dynamicIndexPatterns={dynamicIndexPatternsAsyncState.value ?? NO_INDEX_PATTERNS}
@@ -335,6 +276,7 @@ function AlertsPage() {
               setRefetch={setRefetch}
               stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
               storage={new Storage(window.localStorage)}
+              itemsPerPage={50}
             />
           </CasesContext>
         </EuiFlexItem>

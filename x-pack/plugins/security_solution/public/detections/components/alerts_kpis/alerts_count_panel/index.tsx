@@ -113,7 +113,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       <InspectButtonContainer show={toggleStatus}>
         <KpiPanel $toggleStatus={toggleStatus} hasBorder data-test-subj="alertsCountPanel">
           <HeaderSection
-            height={!toggleStatus ? 30 : undefined}
             id={uniqueQueryId}
             title={i18n.COUNT_TABLE_TITLE}
             titleSize="s"

@@ -14,7 +14,7 @@ import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../common/endpoint/service/artifacts';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../../pages/mocks';
+import { trustedAppsAllHttpMocks } from '../../../mocks';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { entriesToConditionEntries } from '../../../../common/utils/exception_list_items/mappers';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';

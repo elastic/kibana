@@ -11,7 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const transform = getService('transform');
 
-  describe('transform', () => {
+  describe('transform Accessibility', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {

@@ -217,6 +217,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     return AuthenticationResult.succeeded(
       this.authenticationInfoToAuthenticatedUser(tokens.authentication),
       {
+        userProfileGrant: { type: 'accessToken', accessToken: tokens.access_token },
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
         },

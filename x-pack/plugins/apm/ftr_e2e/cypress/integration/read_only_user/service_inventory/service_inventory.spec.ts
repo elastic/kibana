@@ -9,6 +9,7 @@ import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 import { checkA11y } from '../../../support/commands';
+import { generateMultipleServicesData } from './generate_data';
 
 const timeRange = {
   rangeFrom: '2021-10-10T00:00:00.000Z',
@@ -20,7 +21,7 @@ const serviceInventoryHref = url.format({
   query: timeRange,
 });
 
-const apiRequestsToIntercept = [
+const mainApiRequestsToIntercept = [
   {
     endpoint: '/internal/apm/services?*',
     aliasName: 'servicesRequest',
@@ -31,13 +32,20 @@ const apiRequestsToIntercept = [
   },
 ];
 
-const aliasNames = apiRequestsToIntercept.map(
+const secondaryApiRequestsToIntercept = [
+  {
+    endpoint: 'internal/apm/suggestions?*',
+    aliasName: 'suggestionsRequest',
+  },
+];
+
+const mainAliasNames = mainApiRequestsToIntercept.map(
   ({ aliasName }) => `@${aliasName}`
 );
 
 describe('When navigating to the service inventory', () => {
   before(async () => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
     cy.visit(serviceInventoryHref);
 
     const { rangeFrom, rangeTo } = timeRange;
@@ -77,43 +85,116 @@ describe('When navigating to the service inventory', () => {
 
   describe.skip('Calls APIs', () => {
     beforeEach(() => {
-      apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
-        cy.intercept('GET', endpoint).as(aliasName);
-      });
+      [...mainApiRequestsToIntercept, ...secondaryApiRequestsToIntercept].map(
+        ({ endpoint, aliasName }) => {
+          cy.intercept('GET', endpoint).as(aliasName);
+        }
+      );
 
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(serviceInventoryHref);
     });
 
     it('with the correct environment when changing the environment', () => {
-      cy.wait(aliasNames);
-
-      cy.get('[data-test-subj="environmentFilter"]').select('production');
+      cy.wait(mainAliasNames);
+      cy.get('[data-test-subj="environmentFilter"]').type('pro');
 
       cy.expectAPIsToHaveBeenCalledWith({
-        apisIntercepted: aliasNames,
+        apisIntercepted: ['@suggestionsRequest'],
+        value: 'fieldValue=pro',
+      });
+
+      cy.contains('button', 'production').click();
+
+      cy.expectAPIsToHaveBeenCalledWith({
+        apisIntercepted: mainAliasNames,
         value: 'environment=production',
       });
     });
 
     it('when clicking the refresh button', () => {
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
       cy.contains('Refresh').click();
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
     });
 
     it('when selecting a different time range and clicking the update button', () => {
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
       );
       cy.contains('Update').click();
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
 
       cy.contains('Refresh').click();
-      cy.wait(aliasNames);
+      cy.wait(mainAliasNames);
+    });
+  });
+});
+
+describe('Check detailed statistics API with multiple services', () => {
+  before(async () => {
+    cy.loginAsViewerUser();
+    const { rangeFrom, rangeTo } = timeRange;
+
+    await synthtrace.index(
+      generateMultipleServicesData({
+        from: new Date(rangeFrom).getTime(),
+        to: new Date(rangeTo).getTime(),
+      })
+    );
+  });
+
+  after(async () => {
+    await synthtrace.clean();
+  });
+
+  it('calls detailed API with visible items only', () => {
+    cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
+      'detailedStatisticsRequest'
+    );
+    cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
+
+    cy.visit(
+      `${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`
+    );
+    cy.wait('@mainStatisticsRequest');
+    cy.contains('Services');
+    cy.get('.euiPagination__list').children().should('have.length', 5);
+    cy.wait('@detailedStatisticsRequest').then((payload) => {
+      expect(payload.request.body.serviceNames).eql(
+        JSON.stringify([
+          '0',
+          '1',
+          '10',
+          '11',
+          '12',
+          '13',
+          '14',
+          '15',
+          '16',
+          '17',
+        ])
+      );
+    });
+    cy.get('[data-test-subj="pagination-button-1"]').click();
+    cy.wait('@detailedStatisticsRequest').then((payload) => {
+      expect(payload.request.body.serviceNames).eql(
+        JSON.stringify([
+          '18',
+          '19',
+          '2',
+          '20',
+          '21',
+          '22',
+          '23',
+          '24',
+          '25',
+          '26',
+        ])
+      );
     });
   });
 });

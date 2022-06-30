@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { pick } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -48,7 +49,6 @@ import {
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import { RulesClient } from './rules_client';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -62,6 +62,7 @@ import {
   RuleType,
   RuleTypeParams,
   RuleTypeState,
+  RulesClientApi,
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
@@ -121,7 +122,7 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: RuleTypeRegistry['list'];
 
-  getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
+  getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
   getAlertingAuthorizationWithRequest(
     request: KibanaRequest
@@ -140,6 +141,7 @@ export interface AlertingPluginsSetup {
   eventLog: IEventLogService;
   statusService: StatusServiceSetup;
   monitoringCollection: MonitoringCollectionSetup;
+  data: DataPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -149,7 +151,7 @@ export interface AlertingPluginsStart {
   features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
   licensing: LicensingPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   security?: SecurityPluginStart;
   data: DataPluginStart;
 }
@@ -247,12 +249,16 @@ export class AlertingPlugin {
     // Usage counter for telemetry
     this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
 
+    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
+      plugins.data.search.searchSource
+    );
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.ruleTypeRegistry,
       this.logger,
-      plugins.actions.isPreconfiguredConnector
+      plugins.actions.isPreconfiguredConnector,
+      getSearchSourceMigrations
     );
 
     initializeApiKeyInvalidator(
@@ -340,7 +346,10 @@ export class AlertingPlugin {
         );
       },
       getConfig: () => {
-        return pick(this.config.rules, 'minimumScheduleInterval');
+        return {
+          ...pick(this.config.rules, 'minimumScheduleInterval'),
+          isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
+        };
       },
     };
   }
@@ -374,10 +383,10 @@ export class AlertingPlugin {
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
       async getSpace(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getActiveSpace(request);
+        return plugins.spaces.spacesService.getActiveSpace(request);
       },
       getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request);
+        return plugins.spaces.spacesService.getSpaceId(request);
       },
       features: plugins.features,
     });

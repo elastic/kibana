@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
@@ -22,7 +21,7 @@ import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
-import { getData } from '../../kibana_services';
+import { getData, isScreenshotMode } from '../../kibana_services';
 import { RawValue } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../reducers/map';
@@ -232,7 +231,7 @@ export class MapContainer extends Component<Props, State> {
             onSingleValueTrigger={onSingleValueTrigger}
             renderTooltipContent={renderTooltipContent}
           />
-          {!this.props.settings.hideToolbarOverlay && (
+          {!this.props.settings.hideToolbarOverlay && !isScreenshotMode() && (
             <ToolbarOverlay
               addFilters={addFilters}
               getFilterActions={getFilterActions}

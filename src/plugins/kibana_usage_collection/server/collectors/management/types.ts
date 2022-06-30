@@ -36,6 +36,7 @@ export interface UsageStats {
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
+  'observability:enableNewSyntheticsView': boolean;
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableInfrastructureView': boolean;
@@ -48,7 +49,6 @@ export interface UsageStats {
   'visualization:tileMap:maxPrecision': number;
   'csv:separator': string;
   'visualization:tileMap:WMSdefaults': string;
-  'timelion:legacyChartsLibrary': boolean;
   'timelion:target_buckets': number;
   'timelion:max_buckets': number;
   'timelion:es.timefield': string;

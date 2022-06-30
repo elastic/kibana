@@ -7,14 +7,15 @@
  */
 
 import * as Option from 'fp-ts/lib/Option';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ControlState } from './state_action_machine';
-import { AliasAction } from './actions';
-import { IndexMapping } from '../mappings';
-import { SavedObjectsRawDoc } from '..';
-import { TransformErrorObjects } from './core';
-import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
-import { MigrationLog, Progress } from './types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { DocLinks } from '@kbn/doc-links';
+import type { ControlState } from './state_action_machine';
+import type { AliasAction } from './actions';
+import type { IndexMapping } from '../mappings';
+import type { SavedObjectsRawDoc } from '..';
+import type { TransformErrorObjects } from './core';
+import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
+import type { MigrationLog, Progress } from './types';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
@@ -38,7 +39,7 @@ export interface BaseState extends ControlState {
   readonly tempIndexMappings: IndexMapping;
   /** Script to apply to a legacy index before it can be used as a migration source */
   readonly preMigrationScript: Option.Option<string>;
-  readonly outdatedDocumentsQuery: estypes.QueryDslQueryContainer;
+  readonly outdatedDocumentsQuery: QueryDslQueryContainer;
   readonly retryCount: number;
   readonly retryDelay: number;
   /**
@@ -87,6 +88,21 @@ export interface BaseState extends ControlState {
   readonly maxBatchSizeBytes: number;
   readonly logs: MigrationLog[];
   /**
+   * If saved objects exist which have an unknown type they will cause
+   * the migration to fail. If this flag is set to `true`, kibana will
+   * discard the unknown objects and proceed with the migration.
+   * This can happen, for instance, if a plugin that had registered some
+   * saved objects is disabled.
+   */
+  readonly discardUnknownObjects: boolean;
+  /**
+   * If saved objects exist which are corrupt or they can't be migrated due to
+   * transform errors, they will cause the migration to fail. If this flag is set
+   * to `true`, kibana will discard the objects that cause these errors
+   * and proceed with the migration.
+   */
+  readonly discardCorruptObjects: boolean;
+  /**
    * The current alias e.g. `.kibana` which always points to the latest
    * version index
    */
@@ -106,11 +122,16 @@ export interface BaseState extends ControlState {
    */
   readonly tempIndex: string;
   /**
-   * When reindexing we use a source query to exclude saved objects types which
-   * are no longer used. These saved objects will still be kept in the outdated
+   * When upgrading to a more recent kibana version, some saved object types
+   * might be conflicting or no longer used.
+   * When reindexing, we use a source query to exclude types which are:
+   * - no longer used
+   * - unknown (e.g. belonging to plugins that have been disabled)
+   * - explicitly excluded from upgrades by plugin developers
+   * These saved objects will still be kept in the outdated
    * index for backup purposes, but won't be available in the upgraded index.
    */
-  readonly unusedTypesQuery: estypes.QueryDslQueryContainer;
+  readonly excludeOnUpgradeQuery: QueryDslQueryContainer;
   /**
    * The list of known SO types that are registered.
    */
@@ -125,7 +146,7 @@ export interface BaseState extends ControlState {
   /**
    * DocLinks for savedObjects. to reference online documentation
    */
-  readonly migrationDocLinks: Record<string, string>;
+  readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
 }
 
 export interface InitState extends BaseState {
@@ -145,7 +166,7 @@ export interface PostInitState extends BaseState {
   /** The target index is the index to which the migration writes */
   readonly targetIndex: string;
   readonly versionIndexReadyActions: Option.Option<AliasAction[]>;
-  readonly outdatedDocumentsQuery: estypes.QueryDslQueryContainer;
+  readonly outdatedDocumentsQuery: QueryDslQueryContainer;
 }
 
 export interface DoneState extends PostInitState {
@@ -207,13 +228,16 @@ export interface ReindexSourceToTempOpenPit extends PostInitState {
   readonly sourceIndex: Option.Some<string>;
 }
 
-export interface ReindexSourceToTempRead extends PostInitState {
-  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
+interface ReindexSourceToTempBatch extends PostInitState {
   readonly sourceIndexPitId: string;
   readonly lastHitSortValue: number[] | undefined;
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
   readonly progress: Progress;
+}
+
+export interface ReindexSourceToTempRead extends ReindexSourceToTempBatch {
+  readonly controlState: 'REINDEX_SOURCE_TO_TEMP_READ';
 }
 
 export interface ReindexSourceToTempClosePit extends PostInitState {
@@ -221,23 +245,15 @@ export interface ReindexSourceToTempClosePit extends PostInitState {
   readonly sourceIndexPitId: string;
 }
 
-export interface ReindexSourceToTempTransform extends PostInitState {
+export interface ReindexSourceToTempTransform extends ReindexSourceToTempBatch {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_TRANSFORM';
   readonly outdatedDocuments: SavedObjectsRawDoc[];
-  readonly sourceIndexPitId: string;
-  readonly lastHitSortValue: number[] | undefined;
-  readonly corruptDocumentIds: string[];
-  readonly transformErrors: TransformErrorObjects[];
-  readonly progress: Progress;
 }
 
-export interface ReindexSourceToTempIndexBulk extends PostInitState {
+export interface ReindexSourceToTempIndexBulk extends ReindexSourceToTempBatch {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK';
   readonly transformedDocBatches: [SavedObjectsRawDoc[]];
   readonly currentBatch: number;
-  readonly sourceIndexPitId: string;
-  readonly lastHitSortValue: number[] | undefined;
-  readonly progress: Progress;
 }
 
 export type SetTempWriteBlock = PostInitState & {

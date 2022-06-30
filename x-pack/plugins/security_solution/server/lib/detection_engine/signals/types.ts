@@ -31,7 +31,13 @@ import {
 } from '../../../../common/detection_engine/types';
 import { BuildRuleMessage } from './rule_messages';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
-import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
+import {
+  CompleteRule,
+  QueryRuleParams,
+  ThreatRuleParams,
+  RuleParams,
+  SavedQueryRuleParams,
+} from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from '../rule_types/factories';
 import { BuildReasonMessage } from './reason_formatters';
 import {
@@ -277,7 +283,7 @@ export interface AlertAttributes<T extends RuleParams = RuleParams> {
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
 
-export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
+export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
 
 export type BulkCreate = <T extends BaseFieldsLatest>(
   docs: Array<WrappedFieldsLatest<T>>
@@ -301,7 +307,10 @@ export interface SearchAfterAndBulkCreateParams {
     from: moment.Moment;
     maxSignals: number;
   };
-  completeRule: CompleteRule<RuleParams>;
+  completeRule:
+    | CompleteRule<QueryRuleParams>
+    | CompleteRule<SavedQueryRuleParams>
+    | CompleteRule<ThreatRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
@@ -318,6 +327,7 @@ export interface SearchAfterAndBulkCreateParams {
   wrapHits: WrapHits;
   trackTotalHits?: boolean;
   sortOrder?: estypes.SortOrder;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

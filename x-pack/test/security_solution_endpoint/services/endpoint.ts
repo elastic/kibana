@@ -11,6 +11,7 @@ import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
   METADATA_UNITED_INDEX,
+  METADATA_UNITED_TRANSFORM,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
@@ -77,6 +78,27 @@ export class EndpointTestResources extends FtrService {
     await this.transform.api.updateTransform(transform.id, { frequency }).catch(catchAndWrapError);
   }
 
+  private async stopTransform(transformId: string) {
+    const stopRequest = {
+      transform_id: `${transformId}*`,
+      force: true,
+      wait_for_completion: true,
+      allow_no_match: true,
+    };
+    return this.esClient.transform.stopTransform(stopRequest);
+  }
+
+  private async startTransform(transformId: string) {
+    const transformsResponse = await this.esClient.transform.getTransform({
+      transform_id: `${transformId}*`,
+    });
+    return Promise.all(
+      transformsResponse.transforms.map((transform) => {
+        return this.esClient.transform.startTransform({ transform_id: transform.id });
+      })
+    );
+  }
+
   /**
    * Loads endpoint host/alert/event data into elasticsearch
    * @param [options]
@@ -86,6 +108,8 @@ export class EndpointTestResources extends FtrService {
    * @param [options.enableFleetIntegration=true] When set to `true`, Fleet data will also be loaded (ex. Integration Policies, Agent Policies, "fake" Agents)
    * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
    * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processed by the transform
+   * @param [options.waitTimeout=60000] If waitUntilTransformed=true, number of ms to wait until timeout
+   * @param [options.customIndexFn] If provided, will use this function to generate and index data instead
    */
   async loadEndpointData(
     options: Partial<{
@@ -95,6 +119,8 @@ export class EndpointTestResources extends FtrService {
       enableFleetIntegration: boolean;
       generatorSeed: string;
       waitUntilTransformed: boolean;
+      waitTimeout: number;
+      customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
     }> = {}
   ): Promise<IndexedHostsAndAlertsResponse> {
     const {
@@ -104,25 +130,39 @@ export class EndpointTestResources extends FtrService {
       enableFleetIntegration = true,
       generatorSeed = 'seed',
       waitUntilTransformed = true,
+      waitTimeout = 60000,
+      customIndexFn,
     } = options;
 
+    if (waitUntilTransformed) {
+      // need this before indexing docs so that the united transform doesn't
+      // create a checkpoint with a timestamp after the doc timestamps
+      await this.stopTransform(METADATA_UNITED_TRANSFORM);
+    }
+
     // load data into the system
-    const indexedData = await indexHostsAndAlerts(
-      this.esClient as Client,
-      this.kbnClient,
-      generatorSeed,
-      numHosts,
-      numHostDocs,
-      'metrics-endpoint.metadata-default',
-      'metrics-endpoint.policy-default',
-      'logs-endpoint.events.process-default',
-      'logs-endpoint.alerts-default',
-      alertsPerHost,
-      enableFleetIntegration
-    );
+    const indexedData = customIndexFn
+      ? await customIndexFn()
+      : await indexHostsAndAlerts(
+          this.esClient as Client,
+          this.kbnClient,
+          generatorSeed,
+          numHosts,
+          numHostDocs,
+          'metrics-endpoint.metadata-default',
+          'metrics-endpoint.policy-default',
+          'logs-endpoint.events.process-default',
+          'logs-endpoint.alerts-default',
+          alertsPerHost,
+          enableFleetIntegration
+        );
 
     if (waitUntilTransformed) {
-      await this.waitForEndpoints(indexedData.hosts.map((host) => host.agent.id));
+      const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
+      await this.waitForEndpoints(metadataIds, waitTimeout);
+      await this.startTransform(METADATA_UNITED_TRANSFORM);
+      const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
+      await this.waitForUnitedEndpoints(agentIds, waitTimeout);
     }
 
     return indexedData;

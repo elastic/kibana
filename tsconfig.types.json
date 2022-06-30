@@ -7,17 +7,11 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "declarationMap": true,
+    "rootDir": "./src"
   },
   "include": [
     "src/core/server/index.ts",
     "src/core/public/index.ts",
-    "src/plugins/data/server/index.ts",
-    "src/plugins/data/public/index.ts",
-    "src/plugins/embeddable/server/index.ts",
-    "src/plugins/embeddable/public/index.ts",
-    "src/plugins/expressions/server/index.ts",
-    "src/plugins/expressions/public/index.ts",
-    "src/plugins/ui_actions/public/index.ts",
     "typings"
   ]
 }

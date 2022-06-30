@@ -7,14 +7,15 @@
 
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '..';
-import { ActionTypeModel, UserConfiguredActionConnector } from '../../../../types';
+import { ActionTypeModel } from '../../../../types';
+import { registrationServicesMock } from '../../../../mocks';
 
 const ACTION_TYPE_ID = '.server-log';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
@@ -25,28 +26,6 @@ describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.iconClass).toEqual('logsApp');
-  });
-});
-
-describe('server-log connector validation', () => {
-  test('connector validation succeeds when connector config is valid', async () => {
-    const actionConnector: UserConfiguredActionConnector<{}, {}> = {
-      secrets: {},
-      id: 'test',
-      actionTypeId: '.server-log',
-      name: 'server-log',
-      config: {},
-      isPreconfigured: false,
-    };
-
-    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
-      config: {
-        errors: {},
-      },
-      secrets: {
-        errors: {},
-      },
-    });
   });
 });
 

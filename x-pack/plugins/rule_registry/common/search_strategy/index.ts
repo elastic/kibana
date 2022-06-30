@@ -7,13 +7,18 @@
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Ecs } from '@kbn/core/server';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
+  QueryDslFieldAndFormat,
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
   featureIds: ValidFeatureId[];
-  query?: { bool: estypes.QueryDslBoolQuery };
-  sort?: estypes.SortCombinations[];
+  fields?: QueryDslFieldAndFormat[];
+  query?: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  sort?: SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
 };
 
@@ -52,15 +57,21 @@ type Join<K, P> = K extends string | number
   ? P extends string | number
     ? `${K}${'' extends P ? '' : '.'}${P}`
     : never
-  : never;
+  : string;
 
 type DotNestedKeys<T, D extends number = 10> = [D] extends [never]
   ? never
   : T extends object
   ? { [K in keyof T]-?: Join<K, DotNestedKeys<T[K], Prev[D]>> }[keyof T]
-  : '';
+  : never;
 
-type EcsFieldsResponse = {
-  [Property in DotNestedKeys<Ecs>]: string[];
-};
+export type EcsFields = DotNestedKeys<Omit<Ecs, 'ecs'>>;
+
+export interface BasicFields {
+  _id: string;
+  _index: string;
+}
+export type EcsFieldsResponse = {
+  [Property in EcsFields]: string[];
+} & BasicFields;
 export type RuleRegistrySearchResponse = IEsSearchResponse<EcsFieldsResponse>;

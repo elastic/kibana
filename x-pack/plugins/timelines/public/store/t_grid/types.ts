@@ -46,7 +46,7 @@ export enum TimelineId {
   usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
-  hostsPageSessions = 'hosts-page-sessions',
+  hostsPageSessions = 'hosts-page-sessions-v2',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
@@ -54,6 +54,7 @@ export enum TimelineId {
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+  kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
 export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {

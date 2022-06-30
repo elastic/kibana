@@ -59,9 +59,9 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
-          const needsValidation = !isMlRule(formData.ruleType);
+          const skipValidation = isMlRule(formData.ruleType) || formData.dataViewId != null;
 
-          if (!needsValidation) {
+          if (skipValidation) {
             return;
           }
 
@@ -77,6 +77,49 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
+  dataViewTitle: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
+      {
+        defaultMessage: 'Data View',
+      }
+    ),
+    validations: [],
+  },
+  dataViewId: {
+    fieldsToValidateOnChange: ['dataViewId'],
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ path, formData }] = args;
+          // the dropdown defaults the dataViewId to an empty string somehow on render..
+          // need to figure this out.
+          const notEmptyDataViewId = formData.dataViewId != null && formData.dataViewId !== '';
+          const skipValidation =
+            isMlRule(formData.ruleType) ||
+            ((formData.index != null || notEmptyDataViewId) &&
+              !(formData.index != null && notEmptyDataViewId));
+
+          if (skipValidation) {
+            return;
+          }
+
+          return {
+            path,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired',
+              {
+                defaultMessage: 'Please select an available Data View or Index Pattern.',
+              }
+            ),
+          };
+        },
+      },
+    ],
+  },
+  eqlOptions: {},
   queryBar: {
     validations: [
       {
@@ -174,6 +217,34 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       },
     ],
+  },
+  relatedIntegrations: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
+      {
+        defaultMessage: 'Related integrations',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsHelpText',
+      {
+        defaultMessage: 'Integration related to this Rule.',
+      }
+    ),
+  },
+  requiredFields: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsLabel',
+      {
+        defaultMessage: 'Required fields',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsHelpText',
+      {
+        defaultMessage: 'Fields required for this Rule to function.',
+      }
+    ),
   },
   timeline: {
     label: i18n.translate(

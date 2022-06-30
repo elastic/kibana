@@ -66,7 +66,7 @@ describe('getClustersFromAggs', () => {
           totalPassed: 6,
           postureScore: 50.0,
         },
-        resourcesTypes: [
+        groupedFindingsEvaluation: [
           {
             name: 'foo_type',
             totalFindings: 6,

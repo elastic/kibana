@@ -350,6 +350,7 @@ Object {
       testMigrateMatchAllQuery(migrationFn);
     });
   });
+
   it('should apply search source migrations within saved search', () => {
     const savedSearch = {
       attributes: {
@@ -375,6 +376,29 @@ Object {
             some: 'prop',
             migrated: true,
           }),
+        },
+      },
+    });
+  });
+
+  it('should not apply search source migrations within saved search when searchSourceJSON is not an object', () => {
+    const savedSearch = {
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
+        },
+      },
+    } as SavedObjectUnsanitizedDoc;
+
+    const versionToTest = '9.1.2';
+    const migrations = getAllMigrations({
+      [versionToTest]: (state) => ({ ...state, migrated: true }),
+    });
+
+    expect(migrations[versionToTest](savedSearch, {} as SavedObjectMigrationContext)).toEqual({
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
         },
       },
     });

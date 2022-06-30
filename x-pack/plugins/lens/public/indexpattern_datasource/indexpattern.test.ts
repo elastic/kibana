@@ -33,6 +33,7 @@ import {
   FormulaIndexPatternColumn,
   RangeIndexPatternColumn,
   FiltersIndexPatternColumn,
+  PercentileIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
@@ -384,6 +385,11 @@ describe('IndexPattern Data Source', () => {
         Object {
           "chain": Array [
             Object {
+              "arguments": Object {},
+              "function": "kibana",
+              "type": "function",
+            },
+            Object {
               "arguments": Object {
                 "aggs": Array [
                   Object {
@@ -486,10 +492,10 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-0\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-1\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
+                  "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
                 ],
               },
-              "function": "lens_rename_columns",
+              "function": "lens_map_to_columns",
               "type": "function",
             },
           ],
@@ -552,7 +558,7 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
+      expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
     it('should pass time shift parameter to metric agg functions', async () => {
@@ -589,7 +595,7 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect((ast.chain[0].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
+      expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
     });
 
     it('should wrap filtered metrics in filtered metric aggregation', async () => {
@@ -638,7 +644,7 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.aggs[0]).toMatchInlineSnapshot(`
+      expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -898,11 +904,11 @@ describe('IndexPattern Data Source', () => {
 
       const state = enrichBaseState(queryBaseState);
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.metricsAtAllLevels).toEqual([false]);
-      expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
-        'col-0-0': expect.objectContaining({ id: 'bucket1' }),
-        'col-1-1': expect.objectContaining({ id: 'bucket2' }),
-        'col-2-2': expect.objectContaining({ id: 'metric' }),
+      expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
+      expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
+        'col-0-0': [expect.objectContaining({ id: 'bucket1' })],
+        'col-1-1': [expect.objectContaining({ id: 'bucket2' })],
+        'col-2-2': [expect.objectContaining({ id: 'metric' })],
       });
     });
 
@@ -939,8 +945,142 @@ describe('IndexPattern Data Source', () => {
       const state = enrichBaseState(queryBaseState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp']);
-      expect(ast.chain[0].arguments.timeFields).not.toContain('timefield');
+      expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
+      expect(ast.chain[1].arguments.timeFields).not.toContain('timefield');
+    });
+
+    it('should call optimizeEsAggs once per operation for which it is available', () => {
+      const queryBaseState: DataViewBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columns: {
+              col1: {
+                label: 'timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                isBucketed: true,
+                scale: 'interval',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                },
+              } as DateHistogramIndexPatternColumn,
+              col2: {
+                label: '95th percentile of bytes',
+                dataType: 'number',
+                operationType: 'percentile',
+                sourceField: 'bytes',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  percentile: 95,
+                },
+              } as PercentileIndexPatternColumn,
+              col3: {
+                label: '95th percentile of bytes',
+                dataType: 'number',
+                operationType: 'percentile',
+                sourceField: 'bytes',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  percentile: 95,
+                },
+              } as PercentileIndexPatternColumn,
+            },
+            columnOrder: ['col1', 'col2', 'col3'],
+            incompleteColumns: {},
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
+
+      indexPatternDatasource.toExpression(state, 'first');
+
+      expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
+
+      optimizeMock.mockRestore();
+    });
+
+    it('should update anticipated esAggs column IDs based on the order of the optimized agg expression builders', () => {
+      const queryBaseState: DataViewBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columns: {
+              col1: {
+                label: 'timestamp',
+                dataType: 'date',
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                isBucketed: true,
+                scale: 'interval',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: true,
+                  dropPartials: false,
+                },
+              } as DateHistogramIndexPatternColumn,
+              col2: {
+                label: '95th percentile of bytes',
+                dataType: 'number',
+                operationType: 'percentile',
+                sourceField: 'bytes',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  percentile: 95,
+                },
+              } as PercentileIndexPatternColumn,
+              col3: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+                timeScale: 'h',
+              },
+              col4: {
+                label: 'Count of records2',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+                timeScale: 'h',
+              },
+            },
+            columnOrder: ['col1', 'col2', 'col3', 'col4'],
+            incompleteColumns: {},
+          },
+        },
+      };
+
+      const state = enrichBaseState(queryBaseState);
+
+      const optimizeMock = jest
+        .spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs')
+        .mockImplementation((aggs, esAggsIdMap) => {
+          // change the order of the aggregations
+          return { aggs: aggs.reverse(), esAggsIdMap };
+        });
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+
+      expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
+
+      const idMap = JSON.parse(ast.chain[2].arguments.idMap as unknown as string);
+
+      expect(Object.keys(idMap)).toEqual(['col-0-3', 'col-1-2', 'col-2-1', 'col-3-0']);
+
+      optimizeMock.mockRestore();
     });
 
     describe('references', () => {
@@ -988,7 +1128,7 @@ describe('IndexPattern Data Source', () => {
         const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
-        expect(ast.chain[2]).toEqual('mock');
+        expect(ast.chain[3]).toEqual('mock');
       });
 
       it('should keep correct column mapping keys with reference columns present', async () => {
@@ -1021,10 +1161,13 @@ describe('IndexPattern Data Source', () => {
         const state = enrichBaseState(queryBaseState);
 
         const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-        expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
-          'col-0-0': expect.objectContaining({
-            id: 'col1',
-          }),
+
+        expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
+          'col-0-0': [
+            expect.objectContaining({
+              id: 'col1',
+            }),
+          ],
         });
       });
 

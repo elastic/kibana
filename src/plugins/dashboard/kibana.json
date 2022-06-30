@@ -9,6 +9,7 @@
   "requiredPlugins": [
     "data",
     "dataViews",
+    "dataViewEditor",
     "embeddable",
     "controls",
     "inspector",
@@ -26,7 +27,8 @@
     "spaces",
     "savedObjectsTaggingOss",
     "screenshotMode",
-    "usageCollection"
+    "usageCollection",
+    "taskManager"
   ],
   "server": true,
   "ui": true,

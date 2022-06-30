@@ -7,9 +7,10 @@
  */
 
 import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 import {
   HapiResponseAdapter,
+  CoreKibanaRequest,
   KibanaRequest,
   KibanaResponse,
   lifecycleResponseFactory,
@@ -71,7 +72,7 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
       if (result instanceof KibanaResponse) {
         return hapiResponseAdapter.handle(result);
       }

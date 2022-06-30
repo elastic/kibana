@@ -29,7 +29,15 @@
           "\nA factory function for creating a Jest-based implementation of `SharedUxServices`."
         ],
         "signature": [
-          "() => { application: ",
+          "(params?: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.MockServicesFactoryParams",
+            "text": "MockServicesFactoryParams"
+          },
+          " | undefined) => { application: ",
           {
             "pluginId": "@kbn/shared-ux-services",
             "scope": "common",
@@ -77,11 +85,41 @@
             "section": "def-common.SharedUxPlatformService",
             "text": "SharedUxPlatformService"
           },
+          "; data: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxDataService",
+            "text": "SharedUxDataService"
+          },
           "; }"
         ],
         "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
         "deprecated": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.mockServicesFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.MockServicesFactoryParams",
+                "text": "MockServicesFactoryParams"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -192,6 +230,14 @@
             "section": "def-common.SharedUxPlatformService",
             "text": "SharedUxPlatformService"
           },
+          "; data: ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxDataService",
+            "text": "SharedUxDataService"
+          },
           "; }"
         ],
         "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
@@ -215,6 +261,31 @@
             "docId": "kibKbnSharedUxServicesPluginApi",
             "section": "def-common.SharedUxApplicationService",
             "text": "SharedUxApplicationService"
+          }
+        ],
+        "path": "packages/kbn-shared-ux-services/src/context.tsx",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.useData",
+        "type": "Function",
+        "tags": [],
+        "label": "useData",
+        "description": [
+          "\nReact hook for accessing the pre-wired `SharedUxDataService`."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/shared-ux-services",
+            "scope": "common",
+            "docId": "kibKbnSharedUxServicesPluginApi",
+            "section": "def-common.SharedUxDataService",
+            "text": "SharedUxDataService"
           }
         ],
         "path": "packages/kbn-shared-ux-services/src/context.tsx",
@@ -375,6 +446,32 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.MockServicesFactoryParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "MockServicesFactoryParams",
+        "description": [],
+        "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.MockServicesFactoryParams.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "MockDataServiceFactoryConfig"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
         "id": "def-common.SharedUxApplicationService",
         "type": "Interface",
         "tags": [],
@@ -426,6 +523,72 @@
             ],
             "path": "packages/kbn-shared-ux-services/src/services/application.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-services",
+        "id": "def-common.SharedUxDataService",
+        "type": "Interface",
+        "tags": [],
+        "label": "SharedUxDataService",
+        "description": [
+          "\nA service providing data information. Typically used for handling of empty state.."
+        ],
+        "path": "packages/kbn-shared-ux-services/src/services/data.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxDataService.hasESData",
+            "type": "Function",
+            "tags": [],
+            "label": "hasESData",
+            "description": [
+              "True if the cluster contains data, false otherwise."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/data.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxDataService.hasUserDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "hasUserDataView",
+            "description": [
+              "True if Kibana instance contains user-created data view, false otherwise."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/data.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxDataService.hasDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "hasDataView",
+            "description": [
+              "True if Kibana instance contains any data view, including system-created ones."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/data.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -717,6 +880,25 @@
                 "docId": "kibKbnSharedUxServicesPluginApi",
                 "section": "def-common.SharedUxPlatformService",
                 "text": "SharedUxPlatformService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.SharedUxServices.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxDataService",
+                "text": "SharedUxDataService"
               }
             ],
             "path": "packages/kbn-shared-ux-services/src/types.ts",
@@ -1071,6 +1253,45 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.mockServiceFactories.dataServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "dataServiceFactory",
+            "description": [],
+            "signature": [
+              "(config?: ",
+              "MockDataServiceFactoryConfig",
+              " | undefined) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxDataService",
+                "text": "SharedUxDataService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/mock/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.mockServiceFactories.dataServiceFactory.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "MockDataServiceFactoryConfig",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/services/mock/data.mock.ts",
+                "deprecated": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1291,6 +1512,42 @@
               {
                 "parentPluginId": "@kbn/shared-ux-services",
                 "id": "def-common.stubServiceFactories.userPermissionsServiceFactory.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "Parameters"
+                ],
+                "path": "packages/kbn-shared-ux-services/src/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-services",
+            "id": "def-common.stubServiceFactories.dataServiceFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "dataServiceFactory",
+            "description": [],
+            "signature": [
+              "(params: void) => ",
+              {
+                "pluginId": "@kbn/shared-ux-services",
+                "scope": "common",
+                "docId": "kibKbnSharedUxServicesPluginApi",
+                "section": "def-common.SharedUxDataService",
+                "text": "SharedUxDataService"
+              }
+            ],
+            "path": "packages/kbn-shared-ux-services/src/services/stub/index.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-services",
+                "id": "def-common.stubServiceFactories.dataServiceFactory.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "params",

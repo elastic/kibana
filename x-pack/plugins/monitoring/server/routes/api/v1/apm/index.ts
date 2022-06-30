@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export { apmInstanceRoute } from './instance';
-export { apmInstancesRoute } from './instances';
-export { apmOverviewRoute } from './overview';
+import { MonitoringCore } from '../../../../types';
+import { apmInstanceRoute } from './instance';
+import { apmInstancesRoute } from './instances';
+import { apmOverviewRoute } from './overview';
+
+export function registerV1ApmRoutes(server: MonitoringCore) {
+  apmInstanceRoute(server);
+  apmInstancesRoute(server);
+  apmOverviewRoute(server);
+}

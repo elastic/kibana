@@ -21,13 +21,13 @@ import styled from 'styled-components';
 import { CriteriaConditions, CriteriaConditionsProps } from './components/criteria_conditions';
 import { AnyArtifact } from './types';
 import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { DESCRIPTION_LABEL } from './components/translations';
 import { DescriptionField } from './components/description_field';
 
 const CardContainerPanel = styled(EuiSplitPanel.Outer)`
   &.artifactEntryCardMinified + &.artifactEntryCardMinified {
-    margin-top: ${({ theme }) => theme.eui.spacerSizes.l};
+    margin-top: ${({ theme }) => theme.eui.euiSizeL};
   }
 `;
 

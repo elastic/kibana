@@ -17,8 +17,12 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessDeps, ProcessTreeNode } from '.';
 import { Cancelable } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
+import { useDateFormat } from '../../hooks';
 
 jest.useFakeTimers('modern');
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 describe('ProcessTreeNode component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -45,6 +49,7 @@ describe('ProcessTreeNode component', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 
   describe('When ProcessTreeNode is mounted', () => {
@@ -57,7 +62,9 @@ describe('ProcessTreeNode component', () => {
     it('should have an alternate rendering for a session leader', async () => {
       renderResult = mockedContext.render(<ProcessTreeNode {...props} isSessionLeader />);
 
-      expect(renderResult.container.textContent).toEqual(' bash started by  vagrant');
+      expect(renderResult.container.textContent?.replace(/\s+/g, ' ')).toEqual(
+        ' bash started by vagrant'
+      );
     });
 
     // commented out until we get new UX for orphans treatment aka disjointed tree
@@ -216,7 +223,7 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
-          `Alerts(${sessionViewAlertProcessMock.getAlerts().length})`
+          `Alerts (${sessionViewAlertProcessMock.getAlerts().length})`
         );
       });
       it('renders Alerts button with 99+ when process has more than 99 alerts', async () => {
@@ -234,7 +241,7 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
-          'Alerts(99+)'
+          'Alerts (99+)'
         );
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {
@@ -288,13 +295,19 @@ describe('ProcessTreeNode component', () => {
     describe('Search', () => {
       it('highlights text within the process node line item if it matches the searchQuery', () => {
         // set a mock search matched indicator for the process (typically done by ProcessTree/helpers.ts)
-        processMock.searchMatched = '/vagrant';
+        processMock.searchMatched = '/vagr';
 
         renderResult = mockedContext.render(<ProcessTreeNode {...props} />);
 
         expect(
           renderResult.getByTestId('sessionView:processNodeSearchHighlight').textContent
-        ).toEqual('/vagrant');
+        ).toEqual('/vagr');
+
+        // ensures we are showing the rest of the info, and not replacing it with just the match.
+        const { process } = props.process.getDetails();
+        expect(renderResult.container.textContent).toContain(
+          process?.working_directory + '\xA0' + (process?.args && process.args.join(' '))
+        );
       });
     });
   });

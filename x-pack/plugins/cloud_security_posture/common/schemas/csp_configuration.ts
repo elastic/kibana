@@ -6,9 +6,12 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 
+// cspRulesConfigSchema has to match the 'DataYaml' struct in https://github.com/elastic/cloudbeat/blob/main/config/config.go#L45-L51
 export const cspRulesConfigSchema = rt.object({
-  activated_rules: rt.object({
-    cis_k8s: rt.arrayOf(rt.string()),
+  data_yaml: rt.object({
+    activated_rules: rt.object({
+      cis_k8s: rt.arrayOf(rt.string()),
+    }),
   }),
 });
 

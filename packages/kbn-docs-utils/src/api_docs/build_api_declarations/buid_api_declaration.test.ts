@@ -53,6 +53,24 @@ it('Test number primitive doc def', () => {
   expect(def.type).toBe(TypeKind.NumberKind);
 });
 
+it('Test a constructor type declaration inside an interface', () => {
+  const node = nodes.find((n) => getNodeName(n) === 'ClassConstructorWithStaticProperties');
+  expect(node).toBeDefined();
+  const def = buildApiDeclarationTopNode(node!, {
+    plugins,
+    log,
+    currentPluginId: plugins[0].manifest.id,
+    scope: ApiScope.CLIENT,
+    captureReferences: false,
+  });
+
+  expect(def.type).toBe(TypeKind.InterfaceKind);
+  expect(def.children).toHaveLength(2);
+  expect(def.children![1].type).toBe(TypeKind.FunctionKind);
+  expect(def.children![1].label).toBe('new');
+  expect(def.children![1].id).toBe('def-public.ClassConstructorWithStaticProperties.new');
+});
+
 it('Function type is exported as type with signature', () => {
   const node = nodes.find((n) => getNodeName(n) === 'FnWithGeneric');
   expect(node).toBeDefined();

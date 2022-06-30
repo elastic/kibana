@@ -193,6 +193,7 @@ export const validateAdvancedEditor = (state: State): State => {
     dependentVariableEmpty = dependentVariableName === '';
     if (
       !dependentVariableEmpty &&
+      Array.isArray(analyzedFields) &&
       analyzedFields.length > 0 &&
       !analyzedFields.includes(dependentVariableName)
     ) {

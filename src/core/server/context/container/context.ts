@@ -8,7 +8,9 @@
 
 import { flatten } from 'lodash';
 import { ShallowPromise, MaybePromise } from '@kbn/utility-types';
-import type { CoreId, PluginOpaqueId, RequestHandler, RequestHandlerContext } from '../..';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreId } from '@kbn/core-base-common-internal';
+import type { RequestHandler, RequestHandlerContext } from '../..';
 
 /**
  * A function that returns a context value for a specific key of given context type.

@@ -44,7 +44,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'errors'
     | 'metrics'
     | 'nodes'
-    | 'infra'
+    | 'infrastructure'
     | 'service-map'
     | 'logs'
     | 'profiling';
@@ -53,7 +53,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
 
 interface Props {
   title: string;
-  children: React.ReactNode;
+  children: React.ReactChild;
   selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }
@@ -61,9 +61,7 @@ interface Props {
 export function ApmServiceTemplate(props: Props) {
   return (
     <ApmServiceContextProvider>
-      <ServiceAnomalyTimeseriesContextProvider>
-        <TemplateWithContext {...props} />
-      </ServiceAnomalyTimeseriesContextProvider>
+      <TemplateWithContext {...props} />
     </ApmServiceContextProvider>
   );
 }
@@ -127,8 +125,9 @@ function TemplateWithContext({
       }}
     >
       <SearchBar {...searchBarOptions} />
-
-      {children}
+      <ServiceAnomalyTimeseriesContextProvider>
+        {children}
+      </ServiceAnomalyTimeseriesContextProvider>
     </ApmMainTemplate>
   );
 }
@@ -249,8 +248,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       hidden: isJVMsTabHidden({ agentName, runtimeName }),
     },
     {
-      key: 'infra',
-      href: router.link('/services/{serviceName}/infra', {
+      key: 'infrastructure',
+      href: router.link('/services/{serviceName}/infrastructure', {
         path: { serviceName },
         query,
       }),

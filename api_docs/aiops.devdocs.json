@@ -1,0 +1,227 @@
+{
+  "id": "aiops",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.ExplainLogRateSpikes",
+        "type": "Function",
+        "tags": [],
+        "label": "ExplainLogRateSpikes",
+        "description": [
+          "\nLazy-wrapped ExplainLogRateSpikes React component"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          {
+            "pluginId": "aiops",
+            "scope": "public",
+            "docId": "kibAiopsPluginApi",
+            "section": "def-public.ExplainLogRateSpikesProps",
+            "text": "ExplainLogRateSpikesProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ExplainLogRateSpikes.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.ExplainLogRateSpikesProps",
+                "text": "ExplainLogRateSpikesProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "aiops",
+        "id": "def-public.ExplainLogRateSpikesProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExplainLogRateSpikesProps",
+        "description": [
+          "\nExplainLogRateSpikes props require a data view."
+        ],
+        "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ExplainLogRateSpikesProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "The data view to analyze."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ExplainLogRateSpikesProps.windowParameters",
+            "type": "Object",
+            "tags": [],
+            "label": "windowParameters",
+            "description": [
+              "Window parameters for the analysis"
+            ],
+            "signature": [
+              "WindowParameters"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "start": {
+      "parentPluginId": "aiops",
+      "id": "def-public.AiopsPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "AiopsPluginStart",
+      "description": [
+        "\naiops plugin public start contract"
+      ],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/plugins/aiops/public/types.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "aiops",
+      "id": "def-server.AiopsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AiopsPluginSetup",
+      "description": [
+        "\naiops plugin server setup contract"
+      ],
+      "path": "x-pack/plugins/aiops/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "aiops",
+      "id": "def-server.AiopsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AiopsPluginStart",
+      "description": [
+        "\naiops plugin server start contract"
+      ],
+      "path": "x-pack/plugins/aiops/server/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "aiops",
+        "id": "def-common.AIOPS_ENABLED",
+        "type": "boolean",
+        "tags": [],
+        "label": "AIOPS_ENABLED",
+        "description": [
+          "\nThis is an internal hard coded feature flag so we can easily turn on/off the\n\"Explain log rate spikes UI\" during development until the first release."
+        ],
+        "signature": [
+          "true"
+        ],
+        "path": "x-pack/plugins/aiops/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [
+          "\nPLUGIN_ID is used as a unique identifier for the aiops plugin"
+        ],
+        "signature": [
+          "\"aiops\""
+        ],
+        "path": "x-pack/plugins/aiops/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [
+          "\nPLUGIN_NAME is used as the display name for the aiops plugin"
+        ],
+        "signature": [
+          "\"AIOps\""
+        ],
+        "path": "x-pack/plugins/aiops/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

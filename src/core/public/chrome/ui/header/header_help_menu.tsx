@@ -331,7 +331,9 @@ export class HeaderHelpMenu extends Component<Props, State> {
         {content && (
           <>
             {customLinks && <EuiSpacer size="xs" />}
-            <HeaderExtension extension={content} />
+            <HeaderExtension
+              extension={(domNode) => content(domNode, { hideHelpMenu: this.closeMenu })}
+            />
           </>
         )}
       </>

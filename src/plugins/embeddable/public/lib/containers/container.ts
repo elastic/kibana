@@ -132,6 +132,37 @@ export abstract class Container<
     return this.createAndSaveEmbeddable(type, panelState);
   }
 
+  public async replaceEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+  >(id: string, newExplicitInput: Partial<EEI>, newType?: string) {
+    if (!this.input.panels[id]) {
+      throw new PanelNotFoundError();
+    }
+
+    if (newType && newType !== this.input.panels[id].type) {
+      const factory = this.getFactory(newType) as EmbeddableFactory<EEI, EEO, E> | undefined;
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(newType);
+      }
+      this.updateInput({
+        panels: {
+          ...this.input.panels,
+          [id]: {
+            ...this.input.panels[id],
+            explicitInput: { ...newExplicitInput, id },
+            type: newType,
+          },
+        },
+      } as Partial<TContainerInput>);
+    } else {
+      this.updateInputForChild(id, newExplicitInput);
+    }
+
+    await this.untilEmbeddableLoaded<E>(id);
+  }
+
   public removeEmbeddable(embeddableId: string) {
     // Just a shortcut for removing the panel from input state, all internal state will get cleaned up naturally
     // by the listener.

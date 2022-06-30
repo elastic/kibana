@@ -21,8 +21,17 @@ import { BulkError } from '../utils';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { legacyMigrate } from '../../rules/utils';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe('update_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -40,6 +49,8 @@ describe('update_rules_bulk', () => {
 
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
     updateRulesBulkRoute(server.router, ml, logger);
   });
 
@@ -54,6 +65,8 @@ describe('update_rules_bulk', () => {
 
     test('returns 200 as a response when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
+
       const expected: BulkError[] = [
         {
           error: { message: 'rule_id: "rule-1" not found', status_code: 404 },
@@ -116,6 +129,8 @@ describe('update_rules_bulk', () => {
 
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
+
       const noIdRequest = requestMock.create({
         method: 'put',
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,

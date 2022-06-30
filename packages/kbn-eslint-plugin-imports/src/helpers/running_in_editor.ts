@@ -7,7 +7,8 @@
  */
 
 export const RUNNING_IN_EDITOR =
+  !process.env.IS_KIBANA_PRECOMIT_HOOK &&
   // vscode sets this in the env for all workers
-  !!process.env.VSCODE_CWD ||
-  // MacOS sets this for intellij processes, not sure if it works in webstorm but we could expand this check later
-  !!process.env.__CFBundleIdentifier?.startsWith('com.jetbrains.intellij');
+  (!!process.env.VSCODE_CWD ||
+    // MacOS sets this for intellij processes, not sure if it works in webstorm but we could expand this check later
+    !!process.env.__CFBundleIdentifier?.startsWith('com.jetbrains.intellij'));

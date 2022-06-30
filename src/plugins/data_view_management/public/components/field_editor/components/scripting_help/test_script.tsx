@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './test_script.scss';
-
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -223,8 +221,11 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
           />
         </EuiFormRow>
 
+        <EuiSpacer size="s" />
+
         <div className="testScript__searchBar">
           <this.context.services.unifiedSearch.ui.SearchBar
+            displayStyle="inPage"
             appName={'indexPatternManagement'}
             showFilterBar={false}
             showDatePicker={false}

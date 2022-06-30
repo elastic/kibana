@@ -19,7 +19,7 @@ import {
 
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { useThrottledResizeObserver } from '../utils';
 import { ChartPlaceHolder } from './chart_place_holder';
 import { useTimeZone } from '../../lib/kibana';
@@ -32,6 +32,7 @@ import {
   WrappedByAutoSizer,
   useTheme,
   Wrapper,
+  ChartWrapper,
 } from './common';
 import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
 import { VisualizationActionsProps } from '../visualization_actions/types';
@@ -165,7 +166,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
     <Wrapper>
       <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
         {isValidSeriesExist && areaChart && (
-          <EuiFlexGroup gutterSize="none">
+          <ChartWrapper gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
                 <AreaChartBase
@@ -176,7 +177,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
                 />
               </WrappedByAutoSizer>
             </EuiFlexItem>
-          </EuiFlexGroup>
+          </ChartWrapper>
         )}
         {!isValidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={areaChart} />

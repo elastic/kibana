@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
@@ -33,7 +34,6 @@ import { TimelineId } from '../../../../common/types';
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     detailName,
-    docValueFields,
     filterQuery,
     indexNames,
     indexPattern,
@@ -87,7 +87,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />

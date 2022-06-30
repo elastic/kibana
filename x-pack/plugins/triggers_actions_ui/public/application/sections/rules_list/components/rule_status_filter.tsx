@@ -4,104 +4,120 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiFilterGroup,
-  EuiPopover,
   EuiFilterButton,
-  EuiFilterSelectItem,
-  EuiHealth,
+  EuiPopover,
+  EuiFilterGroup,
+  EuiSelectableListItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { RuleExecutionStatuses, RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
-import { rulesStatusesTranslationsMapping } from '../translations';
+import { RuleStatus } from '../../../../types';
 
-interface RuleStatusFilterProps {
-  selectedStatuses: string[];
-  onChange?: (selectedRuleStatusesIds: string[]) => void;
+const statuses: RuleStatus[] = ['enabled', 'disabled', 'snoozed'];
+
+const optionStyles = {
+  textTransform: 'capitalize' as const,
+};
+
+const getOptionDataTestSubj = (status: RuleStatus) => `ruleStatusFilterOption-${status}`;
+
+export interface RuleStatusFilterProps {
+  selectedStatuses: RuleStatus[];
+  dataTestSubj?: string;
+  selectDataTestSubj?: string;
+  buttonDataTestSubj?: string;
+  optionDataTestSubj?: (status: RuleStatus) => string;
+  onChange: (selectedStatuses: RuleStatus[]) => void;
 }
 
-export const RuleStatusFilter: React.FunctionComponent<RuleStatusFilterProps> = ({
-  selectedStatuses,
-  onChange,
-}: RuleStatusFilterProps) => {
-  const [selectedValues, setSelectedValues] = useState<string[]>(selectedStatuses);
+export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
+  const {
+    selectedStatuses = [],
+    dataTestSubj = 'ruleStatusFilter',
+    selectDataTestSubj = 'ruleStatusFilterSelect',
+    buttonDataTestSubj = 'ruleStatusFilterButton',
+    optionDataTestSubj = getOptionDataTestSubj,
+    onChange = () => {},
+  } = props;
+
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (onChange) {
-      onChange(selectedValues);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedValues]);
+  const onFilterItemClick = useCallback(
+    (newOption: RuleStatus) => () => {
+      if (selectedStatuses.includes(newOption)) {
+        onChange(selectedStatuses.filter((option) => option !== newOption));
+        return;
+      }
+      onChange([...selectedStatuses, newOption]);
+    },
+    [selectedStatuses, onChange]
+  );
 
-  useEffect(() => {
-    setSelectedValues(selectedStatuses);
-  }, [selectedStatuses]);
+  const onClick = useCallback(() => {
+    setIsPopoverOpen((prevIsOpen) => !prevIsOpen);
+  }, [setIsPopoverOpen]);
+
+  const renderClearAll = () => {
+    return (
+      <div>
+        <EuiButtonEmpty
+          style={{
+            width: '100%',
+          }}
+          size="xs"
+          iconType="crossInACircleFilled"
+          color="danger"
+          onClick={() => onChange([])}
+        >
+          Clear all
+        </EuiButtonEmpty>
+      </div>
+    );
+  };
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         button={
           <EuiFilterButton
+            data-test-subj={buttonDataTestSubj}
             iconType="arrowDown"
-            hasActiveFilters={selectedValues.length > 0}
-            numActiveFilters={selectedValues.length}
-            numFilters={selectedValues.length}
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            data-test-subj="ruleStatusFilterButton"
+            hasActiveFilters={selectedStatuses.length > 0}
+            numActiveFilters={selectedStatuses.length}
+            numFilters={selectedStatuses.length}
+            onClick={onClick}
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.ruleStatusFilterLabel"
-              defaultMessage="Last response"
+              id="xpack.triggersActionsUI.sections.ruleDetails.ruleStatusFilterButton"
+              defaultMessage="View"
             />
           </EuiFilterButton>
         }
       >
-        <div className="euiFilterSelect__items">
-          {[...RuleExecutionStatusValues].sort().map((item: RuleExecutionStatuses) => {
-            const healthColor = getHealthColor(item);
+        <div data-test-subj={selectDataTestSubj}>
+          {statuses.map((status) => {
             return (
-              <EuiFilterSelectItem
-                key={item}
-                style={{ textTransform: 'capitalize' }}
-                onClick={() => {
-                  const isPreviouslyChecked = selectedValues.includes(item);
-                  if (isPreviouslyChecked) {
-                    setSelectedValues(selectedValues.filter((val) => val !== item));
-                  } else {
-                    setSelectedValues(selectedValues.concat(item));
-                  }
-                }}
-                checked={selectedValues.includes(item) ? 'on' : undefined}
-                data-test-subj={`ruleStatus${item}FilerOption`}
+              <EuiSelectableListItem
+                key={status}
+                style={optionStyles}
+                data-test-subj={optionDataTestSubj(status)}
+                onClick={onFilterItemClick(status)}
+                checked={selectedStatuses.includes(status) ? 'on' : undefined}
               >
-                <EuiHealth color={healthColor}>{rulesStatusesTranslationsMapping[item]}</EuiHealth>
-              </EuiFilterSelectItem>
+                {status}
+              </EuiSelectableListItem>
             );
           })}
+          {renderClearAll()}
         </div>
       </EuiPopover>
     </EuiFilterGroup>
   );
 };
 
-export function getHealthColor(status: RuleExecutionStatuses) {
-  switch (status) {
-    case 'active':
-      return 'success';
-    case 'error':
-      return 'danger';
-    case 'ok':
-      return 'primary';
-    case 'pending':
-      return 'accent';
-    case 'warning':
-      return 'warning';
-    default:
-      return 'subdued';
-  }
-}
+// eslint-disable-next-line import/no-default-export
+export { RuleStatusFilter as default };

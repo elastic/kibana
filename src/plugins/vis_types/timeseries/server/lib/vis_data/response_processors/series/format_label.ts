@@ -26,7 +26,8 @@ export function formatLabel(
   meta: BaseMeta,
   extractFields: ReturnType<typeof createFieldsFetcher>,
   fieldFormatService: FieldFormatsRegistry,
-  cachedIndexPatternFetcher: CachedIndexPatternFetcher
+  cachedIndexPatternFetcher: CachedIndexPatternFetcher,
+  timezone: string
 ) {
   return (next: (results: PanelData[]) => unknown) => async (results: PanelData[]) => {
     const { terms_field: termsField, split_mode: splitMode } = series;
@@ -54,7 +55,8 @@ export function formatLabel(
       const formatField = createCachedFieldValueFormatter(
         fetchedIndex?.indexPattern,
         fields,
-        fieldFormatService
+        fieldFormatService,
+        { timezone }
       );
 
       results
@@ -66,7 +68,6 @@ export function formatLabel(
 
           if (formatted) {
             item.label = formatted;
-            item.labelFormatted = formatted;
           }
         });
     }

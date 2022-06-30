@@ -9,7 +9,7 @@
 import { applyExportTransformsMock } from './collect_exported_objects.test.mocks';
 import { savedObjectsClientMock } from '../../mocks';
 import { httpServerMock } from '../../http/http_server.mocks';
-import { loggerMock } from '../../logging/logger.mock';
+import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObject, SavedObjectError } from '../../../types';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';

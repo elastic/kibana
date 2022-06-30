@@ -7,15 +7,12 @@
  */
 
 import { Observable } from 'rxjs';
+import { ErrorLike } from '@kbn/expressions-plugin';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
 
-export interface EmbeddableError {
-  name: string;
-  message: string;
-}
-
+export type EmbeddableError = ErrorLike;
 export type { EmbeddableInput };
 
 export interface EmbeddableOutput {
@@ -161,6 +158,13 @@ export interface IEmbeddable<
    * @param domNode
    */
   render(domNode: HTMLElement | Element): void;
+
+  /**
+   * Renders a custom embeddable error at the given node.
+   * @param domNode
+   * @returns A callback that will be called on error destroy.
+   */
+  renderError?(domNode: HTMLElement | Element, error: ErrorLike): () => void;
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant

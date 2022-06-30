@@ -13,9 +13,11 @@ import { EventsTdContent } from '../../styles';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import { Pin } from '../../pin';
 import { TimelineType } from '../../../../../../common/types/timeline';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 interface PinEventActionProps {
   ariaLabel?: string;
+  isAlert: boolean;
   noteIds: string[];
   onPinClicked: () => void;
   eventIsPinned: boolean;
@@ -24,19 +26,22 @@ interface PinEventActionProps {
 
 const PinEventActionComponent: React.FC<PinEventActionProps> = ({
   ariaLabel,
+  isAlert,
   noteIds,
   onPinClicked,
   eventIsPinned,
   timelineType,
 }) => {
+  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
   const tooltipContent = useMemo(
     () =>
       getPinTooltip({
         isPinned: eventIsPinned,
+        isAlert,
         eventHasNotes: eventHasNotes(noteIds),
         timelineType,
       }),
-    [eventIsPinned, noteIds, timelineType]
+    [eventIsPinned, isAlert, noteIds, timelineType]
   );
 
   return (
@@ -47,6 +52,8 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
             ariaLabel={ariaLabel}
             allowUnpinning={!eventHasNotes(noteIds)}
             data-test-subj="pin-event"
+            isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
+            isAlert={isAlert}
             onClick={onPinClicked}
             pinned={eventIsPinned}
             timelineType={timelineType}

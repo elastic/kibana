@@ -14,6 +14,8 @@ import {
   getCreateThreatMatchRulesSchemaMock,
   getCreateRulesSchemaMock,
   getCreateThresholdRulesSchemaMock,
+  getCreateRulesSchemaMockWithDataView,
+  getCreateMachineLearningRulesSchemaMock,
 } from './rule_schemas.mock';
 import { getListArrayMock } from '../types/lists.mock';
 
@@ -1197,6 +1199,91 @@ describe('create rules schema', () => {
         'Invalid value "[]" supplied to "threat_mapping"',
       ]);
       expect(message.schema).toEqual({});
+    });
+  });
+
+  describe('data_view_id', () => {
+    test('validates when "data_view_id" and index are defined', () => {
+      const payload = { ...getCreateRulesSchemaMockWithDataView(), index: ['auditbeat-*'] };
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('"data_view_id" cannot be a number', () => {
+      const payload: Omit<CreateRulesSchema, 'data_view_id'> & { data_view_id: number } = {
+        ...getCreateRulesSchemaMockWithDataView(),
+        data_view_id: 5,
+      };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "5" supplied to "data_view_id"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('it should validate a type of "query" with "data_view_id" defined', () => {
+      const payload = getCreateRulesSchemaMockWithDataView();
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getCreateRulesSchemaMockWithDataView();
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate a type of "saved_query" with "data_view_id" defined', () => {
+      const payload = { ...getCreateSavedQueryRulesSchemaMock(), data_view_id: 'logs-*' };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getCreateSavedQueryRulesSchemaMock(), data_view_id: 'logs-*' };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate a type of "threat_match" with "data_view_id" defined', () => {
+      const payload = { ...getCreateThreatMatchRulesSchemaMock(), data_view_id: 'logs-*' };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getCreateThreatMatchRulesSchemaMock(), data_view_id: 'logs-*' };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate a type of "threshold" with "data_view_id" defined', () => {
+      const payload = { ...getCreateThresholdRulesSchemaMock(), data_view_id: 'logs-*' };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = { ...getCreateThresholdRulesSchemaMock(), data_view_id: 'logs-*' };
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should NOT validate a type of "machine_learning" with "data_view_id" defined', () => {
+      const payload = { ...getCreateMachineLearningRulesSchemaMock(), data_view_id: 'logs-*' };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+
+      expect(message.schema).toEqual({});
+      expect(getPaths(left(message.errors))).toEqual(['invalid keys "data_view_id"']);
     });
   });
 });

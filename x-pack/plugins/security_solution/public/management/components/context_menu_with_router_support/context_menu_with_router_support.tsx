@@ -20,7 +20,7 @@ import {
   ContextMenuItemNavByRouter,
   ContextMenuItemNavByRouterProps,
 } from './context_menu_item_nav_by_router';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ContextMenuWithRouterSupportProps
   extends CommonProps,
@@ -153,11 +153,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         closePopover={handleCloseMenu}
       >
         {title ? <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle> : null}
-        <EuiContextMenuPanel
-          hasFocus={false}
-          {...additionalContextMenuPanelProps}
-          items={menuItems}
-        />
+        <EuiContextMenuPanel {...additionalContextMenuPanelProps} items={menuItems} />
       </EuiPopover>
     );
   }

@@ -25,7 +25,7 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
+import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import {
   useGetAgentCountForPolicy,
   useGetEndpointSecurityPackage,
@@ -189,7 +189,9 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'created-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{name}</EuiText>
+                <EuiText size="s" data-test-subj="created-by-name">
+                  {name}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -222,7 +224,9 @@ export const PolicyList = memo(() => {
                 <EuiAvatar name={name} data-test-subj={'updated-by-avatar'} size="s" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">{name}</EuiText>
+                <EuiText size="s" data-test-subj="updated-by-name">
+                  {name}
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

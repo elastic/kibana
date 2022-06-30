@@ -42,7 +42,7 @@ export interface UseActionCellDataProvider {
   values: string[] | null | undefined;
 }
 
-const getDataProvider = (field: string, id: string, value: string): DataProvider => ({
+export const getDataProvider = (field: string, id: string, value: string): DataProvider => ({
   and: [],
   enabled: true,
   id: escapeDataProviderId(id),

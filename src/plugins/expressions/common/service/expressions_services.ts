@@ -7,6 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from '@kbn/core/server';
@@ -152,6 +153,8 @@ export interface ExpressionExecutionParams {
 
   syncColors?: boolean;
 
+  syncTooltips?: boolean;
+
   inspectorAdapters?: Adapters;
 
   executionContext?: KibanaExecutionContext;
@@ -268,6 +271,7 @@ export interface ExpressionsServiceStart {
 
 export interface ExpressionServiceParams {
   executor?: Executor;
+  logger?: Logger;
   renderers?: ExpressionRendererRegistry;
 }
 
@@ -304,7 +308,8 @@ export class ExpressionsService
   public readonly renderers: ExpressionRendererRegistry;
 
   constructor({
-    executor = Executor.createWithDefaults(),
+    logger,
+    executor = Executor.createWithDefaults(logger),
     renderers = new ExpressionRendererRegistry(),
   }: ExpressionServiceParams = {}) {
     this.executor = executor;

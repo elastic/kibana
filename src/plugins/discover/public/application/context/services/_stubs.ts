@@ -8,8 +8,10 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
-
-import { EsHitRecordList } from '../../types';
+import { of } from 'rxjs';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { EsHitRecord } from '../../../types';
 
 type SortHit = {
   [key in string]: number; // timeField name
@@ -20,7 +22,24 @@ type SortHit = {
 /**
  * A stubbed search source with a `fetch` method that returns all of `_stubHits`.
  */
-export function createSearchSourceStub(hits: EsHitRecordList, timeField?: string) {
+export function createSearchSourceStub(hits: EsHitRecord[], timeField?: string) {
+  const requestResult = {
+    id: 'Fjk5bndxTHJWU2FldVRVQ0tYR0VqOFEcRWtWNDhOdG5SUzJYcFhONVVZVTBJQToxMDMwOQ==',
+    rawResponse: {
+      took: 2,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: {
+        hits,
+        total: hits.length,
+      },
+    },
+    isPartial: false,
+    isRunning: false,
+    total: 1,
+    loaded: 1,
+    isRestored: false,
+  } as unknown as IKibanaSearchResponse<estypes.SearchResponse<unknown>>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const searchSourceStub: any = {
     _stubHits: hits,
@@ -36,14 +55,7 @@ export function createSearchSourceStub(hits: EsHitRecordList, timeField?: string
       const previousSetCall = searchSourceStub.setField.withArgs(key).lastCall;
       return previousSetCall ? previousSetCall.args[1] : null;
     }),
-    fetch: sinon.spy(() =>
-      Promise.resolve({
-        hits: {
-          hits: searchSourceStub._stubHits,
-          total: searchSourceStub._stubHits.length,
-        },
-      })
-    ),
+    fetch$: sinon.spy(() => of(requestResult)),
   };
   return searchSourceStub;
 }
@@ -54,7 +66,7 @@ export function createSearchSourceStub(hits: EsHitRecordList, timeField?: string
 export function createContextSearchSourceStub(timeFieldName: string) {
   const searchSourceStub = createSearchSourceStub([], timeFieldName);
 
-  searchSourceStub.fetch = sinon.spy(() => {
+  searchSourceStub.fetch$ = sinon.spy(() => {
     const timeField: keyof SortHit = searchSourceStub._stubTimeField;
     const lastQuery = searchSourceStub.setField.withArgs('query').lastCall.args[1];
     const timeRange = lastQuery.query.bool.must.constant_score.filter.range[timeField];
@@ -72,10 +84,12 @@ export function createContextSearchSourceStub(timeFieldName: string) {
       )
       .sort(sortFunction);
 
-    return Promise.resolve({
-      hits: {
-        hits: filteredHits,
-        total: filteredHits.length,
+    return of({
+      rawResponse: {
+        hits: {
+          hits: filteredHits,
+          total: filteredHits.length,
+        },
       },
     });
   });

@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import {
   CaseResponse,
+  CaseSeverity,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
@@ -104,6 +105,30 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusUserAction.type).to.eql('status');
       expect(statusUserAction.action).to.eql('update');
       expect(statusUserAction.payload).to.eql({ status: 'closed' });
+    });
+
+    it('creates a severity update user action when changing the severity', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: theCase.id,
+              version: theCase.version,
+              severity: CaseSeverity.HIGH,
+            },
+          ],
+        },
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const statusUserAction = userActions[1];
+
+      expect(userActions.length).to.eql(2);
+      expect(statusUserAction.type).to.eql('severity');
+      expect(statusUserAction.action).to.eql('update');
+      expect(statusUserAction.payload).to.eql({ severity: 'high' });
     });
 
     it('creates a connector update user action', async () => {

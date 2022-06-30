@@ -156,6 +156,7 @@ export interface JobSummary {
   status: JobStatus;
   jobtype: ReportSource['jobtype'];
   title: ReportSource['payload']['title'];
+  errorCode?: ReportOutput['error_code'];
   maxSizeReached: TaskRunResult['max_size_reached'];
   csvContainsFormulas: TaskRunResult['csv_contains_formulas'];
 }

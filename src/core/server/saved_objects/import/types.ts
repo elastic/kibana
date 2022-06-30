@@ -155,6 +155,8 @@ export interface SavedObjectsImportOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /** Refresh setting, defaults to `wait_for` */
+  refresh?: boolean | 'wait_for';
 }
 
 /**

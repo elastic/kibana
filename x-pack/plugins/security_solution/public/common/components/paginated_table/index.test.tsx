@@ -31,9 +31,7 @@ const mockTheme = getMockTheme({
     euiBreakpoints: {
       s: '450px',
     },
-    paddingSizes: {
-      m: '10px',
-    },
+    euiSizeM: '10px',
   },
 });
 

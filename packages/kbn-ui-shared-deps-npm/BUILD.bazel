@@ -24,7 +24,6 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md"
 ]
 
 RUNTIME_DEPS = [
@@ -32,6 +31,7 @@ RUNTIME_DEPS = [
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
+  "@npm//@emotion/cache",
   "@npm//@emotion/react",
   "@npm//babel-loader",
   "@npm//core-js",
@@ -69,6 +69,7 @@ TYPES_DEPS = [
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
+  "@npm//@emotion/cache",
   "@npm//@emotion/react",
   "@npm//babel-loader",
   "@npm//core-js",

@@ -20,7 +20,7 @@ import {
   ContextMenuItemNavByRouter,
   ContextMenuItemNavByRouterProps,
 } from '../context_menu_with_router_support';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ActionsContextMenuProps {
   items: ContextMenuItemNavByRouterProps[];

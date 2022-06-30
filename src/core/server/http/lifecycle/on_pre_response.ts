@@ -13,9 +13,9 @@ import {
   ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
 import Boom from '@hapi/boom';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 
-import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';
+import { HapiResponseAdapter, CoreKibanaRequest, KibanaRequest, ResponseHeaders } from '../router';
 
 enum ResultType {
   render = 'render',
@@ -126,7 +126,7 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
           ? response.output.statusCode
           : response.statusCode;
 
-        const result = await fn(KibanaRequest.from(request), { statusCode }, toolkit);
+        const result = await fn(CoreKibanaRequest.from(request), { statusCode }, toolkit);
 
         if (preResponseResult.isNext(result)) {
           if (result.headers) {

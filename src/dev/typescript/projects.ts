@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import glob from 'glob';
+import globby from 'globby';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
@@ -23,17 +23,15 @@ const createProject = (rootRelativePath: string, options: ProjectOptions = {}) =
     cache: PROJECT_CACHE,
   });
 
-const findProjects = (pattern: string) =>
-  // NOTE: using glob.sync rather than glob-all or globby
-  // because it takes less than 10 ms, while the other modules
-  // both took closer to 1000ms.
-  glob.sync(pattern, { cwd: REPO_ROOT }).map((path) => createProject(path));
+const findProjects = (patterns: string[]) =>
+  globby.sync(patterns, { cwd: REPO_ROOT }).map((path) => createProject(path));
 
 export const PROJECTS = [
   createProject('tsconfig.json'),
   createProject('test/tsconfig.json', { name: 'kibana/test' }),
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
   createProject('src/core/tsconfig.json'),
+  createProject('.buildkite/tsconfig.json'),
 
   createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
     name: 'security_solution/cypress',
@@ -73,16 +71,29 @@ export const PROJECTS = [
     disableTypeCheck: true,
   }),
 
-  ...findProjects('src/plugins/*/tsconfig.json'),
-  ...findProjects('src/plugins/chart_expressions/*/tsconfig.json'),
-  ...findProjects('src/plugins/vis_types/*/tsconfig.json'),
-  ...findProjects('x-pack/plugins/*/tsconfig.json'),
-  ...findProjects('examples/*/tsconfig.json'),
-  ...findProjects('x-pack/examples/*/tsconfig.json'),
-  ...findProjects('test/plugin_functional/plugins/*/tsconfig.json'),
-  ...findProjects('test/interpreter_functional/plugins/*/tsconfig.json'),
-  ...findProjects('test/server_integration/__fixtures__/plugins/*/tsconfig.json'),
-  ...findProjects('packages/kbn-type-summarizer/tests/tsconfig.json'),
+  createProject('x-pack/plugins/ux/e2e/tsconfig.json', {
+    name: 'ux/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
 
-  ...BAZEL_PACKAGE_DIRS.flatMap((dir) => findProjects(`${dir}/*/tsconfig.json`)),
+  createProject('x-pack/plugins/observability/e2e/tsconfig.json', {
+    name: 'observability/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+
+  // Glob patterns to be all search at once
+  ...findProjects([
+    'src/plugins/*/tsconfig.json',
+    'src/plugins/chart_expressions/*/tsconfig.json',
+    'src/plugins/vis_types/*/tsconfig.json',
+    'x-pack/plugins/*/tsconfig.json',
+    'examples/*/tsconfig.json',
+    'x-pack/examples/*/tsconfig.json',
+    'test/analytics/fixtures/plugins/*/tsconfig.json',
+    'test/plugin_functional/plugins/*/tsconfig.json',
+    'test/interpreter_functional/plugins/*/tsconfig.json',
+    'test/server_integration/__fixtures__/plugins/*/tsconfig.json',
+    'packages/kbn-type-summarizer/tests/tsconfig.json',
+    ...BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/tsconfig.json`),
+  ]),
 ];

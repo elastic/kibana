@@ -13,6 +13,10 @@ export const WhitePageWrapper = styled.div`
   flex: 1 1 auto;
 `;
 
+export const WhitePageWrapperNoBorder = styled.div`
+  background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  flex: 1 1 auto;
+`;
 export const SectionWrapper = styled.div`
   box-sizing: content-box;
   margin: 0 auto;
@@ -24,7 +28,7 @@ const gutterTimeline = '70px'; // seems to be a timeline reference from the orig
 export const ContentWrapper = styled.div`
   ${({ theme }) =>
     `
-      padding: ${theme.eui.paddingSizes.l} 0 ${gutterTimeline} 0;
+      padding: ${theme.eui.euiSizeL} 0 ${gutterTimeline} 0;
     `};
 `;
 

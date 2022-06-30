@@ -1,224 +1,80 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ScriptingWarningCallOut should render normally 1`] = `
-<ScriptingWarningCallOut
-  isVisible={true}
->
-  <EuiText
-    size="s"
+Array [
+  <div
+    class="euiText emotion-euiText-s"
   >
-    <div
-      className="euiText euiText--small"
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="Familiarize yourself with {scripFields} and {scriptsInAggregation} before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable."
-          id="indexPatternManagement.warningCallOutLabel.callOutDetail"
-          values={
-            Object {
-              "scripFields": <EuiLink
-                target="_blank"
-              >
-                <FormattedMessage
-                  defaultMessage="scripted fields"
-                  id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
-                  values={Object {}}
-                />
-              </EuiLink>,
-              "scriptsInAggregation": <EuiLink
-                target="_blank"
-              >
-                <FormattedMessage
-                  defaultMessage="scripts in aggregations"
-                  id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
-                  values={Object {}}
-                />
-              </EuiLink>,
-            }
-          }
+    <p>
+      <span>
+        Familiarize yourself with 
+        <button
+          class="euiLink emotion-euiLink-primary"
+          type="button"
         >
           <span>
-            Familiarize yourself with 
-            <EuiLink
-              target="_blank"
-            >
-              <button
-                className="euiLink euiLink--primary"
-                disabled={false}
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="scripted fields"
-                  id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
-                  values={Object {}}
-                >
-                  <span>
-                    scripted fields
-                  </span>
-                </FormattedMessage>
-              </button>
-            </EuiLink>
-             and 
-            <EuiLink
-              target="_blank"
-            >
-              <button
-                className="euiLink euiLink--primary"
-                disabled={false}
-                type="button"
-              >
-                <FormattedMessage
-                  defaultMessage="scripts in aggregations"
-                  id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
-                  values={Object {}}
-                >
-                  <span>
-                    scripts in aggregations
-                  </span>
-                </FormattedMessage>
-              </button>
-            </EuiLink>
-             before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable.
+            scripted fields
           </span>
-        </FormattedMessage>
-      </p>
-    </div>
-  </EuiText>
-  <EuiSpacer
-    size="m"
+        </button>
+         and 
+        <button
+          class="euiLink emotion-euiLink-primary"
+          type="button"
+        >
+          <span>
+            scripts in aggregations
+          </span>
+        </button>
+         before using this feature. Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow and, if done incorrectly, can cause Kibana to become unusable.
+      </span>
+    </p>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />,
+  <div
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
   >
-    <div
-      className="euiSpacer euiSpacer--m"
-    />
-  </EuiSpacer>
-  <EuiCallOut
-    color="warning"
-    iconType="alert"
-    title={
-      <FormattedMessage
-        defaultMessage="Scripted fields are deprecated"
-        description="Deprecation warning title within scripted field editor"
-        id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
-        values={Object {}}
+    <p
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+    >
+      <span
+        aria-hidden="true"
+        class="emotion-euiCallOut__icon"
+        color="inherit"
+        data-euiicon-type="alert"
       />
-    }
-  >
+      <span>
+        Scripted fields are deprecated
+      </span>
+    </p>
     <div
-      className="euiCallOut euiCallOut--warning"
+      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
     >
       <div
-        className="euiCallOutHeader"
+        class="euiText emotion-euiText-s"
       >
-        <EuiIcon
-          aria-hidden="true"
-          className="euiCallOutHeader__icon"
-          color="inherit"
-          size="m"
-          type="alert"
-        >
-          <span
-            aria-hidden="true"
-            className="euiCallOutHeader__icon"
-            color="inherit"
-            data-euiicon-type="alert"
-            size="m"
-          />
-        </EuiIcon>
-        <span
-          className="euiCallOutHeader__title"
-        >
-          <FormattedMessage
-            defaultMessage="Scripted fields are deprecated"
-            description="Deprecation warning title within scripted field editor"
-            id="indexPatternManagement.scriptedFieldsDeprecatedTitle"
-            values={Object {}}
-          >
-            <span>
-              Scripted fields are deprecated
-            </span>
-          </FormattedMessage>
-        </span>
-      </div>
-      <EuiText
-        color="default"
-        size="s"
-      >
-        <div
-          className="euiText euiText--small"
-        >
-          <EuiTextColor
-            color="default"
-            component="div"
-          >
-            <div
-              className="euiTextColor euiTextColor--default"
-              style={Object {}}
+        <p>
+          <span>
+            For greater flexibility and Painless script support, use 
+            <button
+              class="euiLink emotion-euiLink-primary"
+              type="button"
             >
-              <EuiText
-                size="s"
-              >
-                <div
-                  className="euiText euiText--small"
-                >
-                  <p>
-                    <FormattedMessage
-                      defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
-                      id="indexPatternManagement.scriptedFieldsDeprecatedBody"
-                      values={
-                        Object {
-                          "runtimeDocs": <EuiLink
-                            target="_blank"
-                          >
-                            <FormattedMessage
-                              defaultMessage="runtime fields"
-                              id="indexPatternManagement.warningCallOutLabel.runtimeLink"
-                              values={Object {}}
-                            />
-                          </EuiLink>,
-                        }
-                      }
-                    >
-                      <span>
-                        For greater flexibility and Painless script support, use 
-                        <EuiLink
-                          target="_blank"
-                        >
-                          <button
-                            className="euiLink euiLink--primary"
-                            disabled={false}
-                            type="button"
-                          >
-                            <FormattedMessage
-                              defaultMessage="runtime fields"
-                              id="indexPatternManagement.warningCallOutLabel.runtimeLink"
-                              values={Object {}}
-                            >
-                              <span>
-                                runtime fields
-                              </span>
-                            </FormattedMessage>
-                          </button>
-                        </EuiLink>
-                        .
-                      </span>
-                    </FormattedMessage>
-                  </p>
-                </div>
-              </EuiText>
-            </div>
-          </EuiTextColor>
-        </div>
-      </EuiText>
+              <span>
+                runtime fields
+              </span>
+            </button>
+            .
+          </span>
+        </p>
+      </div>
     </div>
-  </EuiCallOut>
-  <EuiSpacer
-    size="m"
-  >
-    <div
-      className="euiSpacer euiSpacer--m"
-    />
-  </EuiSpacer>
-</ScriptingWarningCallOut>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />,
+]
 `;
 
 exports[`ScriptingWarningCallOut should render nothing if not visible 1`] = `

@@ -185,6 +185,14 @@ export const ACTION_ADD_EVENT_FILTER = i18n.translate(
   }
 );
 
+export const ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter.disabled.tooltip',
+  {
+    defaultMessage:
+      'Endpoint event filters can be created from the Events section of the Hosts page.',
+  }
+);
+
 export const ACTION_ADD_ENDPOINT_EXCEPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addEndpointException',
   {
@@ -297,5 +305,12 @@ export const ADD_TO_NEW_CASE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase',
   {
     defaultMessage: 'Add to new case',
+  }
+);
+
+export const ADD_TO_CASE_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCaseDisabled',
+  {
+    defaultMessage: 'Add to case is not supported for this selection',
   }
 );

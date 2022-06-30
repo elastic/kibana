@@ -17,25 +17,26 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export async function getServicesFromErrorAndMetricDocuments({
   environment,
   setup,
-  probability,
   maxNumServices,
   kuery,
   start,
   end,
   serviceGroup,
+  randomSampler,
 }: {
   setup: Setup;
   environment: string;
-  probability: number;
   maxNumServices: number;
   kuery: string;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  randomSampler: RandomSampler;
 }) {
   const { apmEventClient } = setup;
 
@@ -59,9 +60,7 @@ export async function getServicesFromErrorAndMetricDocuments({
         },
         aggs: {
           sample: {
-            random_sampler: {
-              probability,
-            },
+            random_sampler: randomSampler,
             aggs: {
               services: {
                 terms: {

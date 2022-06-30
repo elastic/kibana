@@ -8,27 +8,22 @@
 import { isArray, isEmpty, map } from 'lodash';
 import uuid from 'uuid';
 import { produce } from 'immer';
-import { RefObject, useMemo } from 'react';
+import { useMemo } from 'react';
 
+import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
 import { useForm } from '../../shared_imports';
 import { createFormSchema } from '../../packs/queries/schema';
 import { PackFormData } from '../../packs/queries/use_pack_query_form';
 import { useSavedQueries } from '../use_saved_queries';
-import { SavedQueryFormRefObject } from '.';
 
 const SAVED_QUERY_FORM_ID = 'savedQueryForm';
 
 interface UseSavedQueryFormProps {
   defaultValue?: unknown;
   handleSubmit: (payload: unknown) => Promise<void>;
-  savedQueryFormRef: RefObject<SavedQueryFormRefObject>;
 }
 
-export const useSavedQueryForm = ({
-  defaultValue,
-  handleSubmit,
-  savedQueryFormRef,
-}: UseSavedQueryFormProps) => {
+export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) => {
   const { data } = useSavedQueries({});
   const ids: string[] = useMemo<string[]>(
     () => map(data?.saved_objects, 'attributes.id') ?? [],
@@ -50,14 +45,9 @@ export const useSavedQueryForm = ({
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
-      const ecsFieldValue = await savedQueryFormRef?.current?.validateEcsMapping();
-
-      if (isValid && !!ecsFieldValue) {
+      if (isValid) {
         try {
-          await handleSubmit({
-            ...formData,
-            ecs_mapping: ecsFieldValue,
-          });
+          await handleSubmit(formData);
           // eslint-disable-next-line no-empty
         } catch (e) {}
       }
@@ -66,13 +56,6 @@ export const useSavedQueryForm = ({
     defaultValue,
     serializer: (payload) =>
       produce(payload, (draft) => {
-        // @ts-expect-error update types
-        if (draft.platform?.split(',').length === 3) {
-          // if all platforms are checked then use undefined
-          // @ts-expect-error update types
-          delete draft.platform;
-        }
-
         if (isArray(draft.version)) {
           if (!draft.version.length) {
             // @ts-expect-error update types
@@ -82,9 +65,12 @@ export const useSavedQueryForm = ({
           }
         }
 
-        if (isEmpty(draft.ecs_mapping)) {
+        if (isEmpty(payload.ecs_mapping)) {
           // @ts-expect-error update types
           delete draft.ecs_mapping;
+        } else {
+          // @ts-expect-error update types
+          draft.ecs_mapping = convertECSMappingToObject(payload.ecs_mapping);
         }
 
         // @ts-expect-error update types
@@ -103,7 +89,16 @@ export const useSavedQueryForm = ({
         interval: payload.interval ?? 3600,
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
-        ecs_mapping: payload.ecs_mapping ?? {},
+        ecs_mapping:
+          (!isEmpty(payload.ecs_mapping) &&
+            map(payload.ecs_mapping, (value, key) => ({
+              key,
+              result: {
+                type: Object.keys(value)[0],
+                value: Object.values(value)[0],
+              },
+            }))) ??
+          [],
       };
     },
   });

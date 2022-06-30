@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { TestProviders } from '../../../../common/mock';
+
 import {
   from,
   mockSeverityRuleAlertsResponse,
@@ -50,16 +50,12 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 
 // helper function to render the hook
 const renderUseRuleAlertsItems = (props: Partial<UseRuleAlertsItemsProps> = {}) =>
-  renderHook<UseRuleAlertsItemsProps, ReturnType<UseRuleAlertsItems>>(
-    () =>
-      useRuleAlertsItems({
-        queryId: 'test',
-        signalIndexName: 'signal-alerts',
-        ...props,
-      }),
-    {
-      wrapper: TestProviders,
-    }
+  renderHook<UseRuleAlertsItemsProps, ReturnType<UseRuleAlertsItems>>(() =>
+    useRuleAlertsItems({
+      queryId: 'test',
+      signalIndexName: 'signal-alerts',
+      ...props,
+    })
   );
 
 describe('useRuleAlertsItems', () => {
@@ -103,7 +99,6 @@ describe('useRuleAlertsItems', () => {
     const newDateNow = new Date('2022-04-08T14:00:00.000Z').valueOf();
     mockDateNow.mockReturnValue(newDateNow); // setUpdatedAt call
     mockDateNow.mockReturnValueOnce(dateNow); // initialization call
-
     mockUseQueryAlerts.mockReturnValue({
       ...defaultUseQueryAlertsReturn,
       data: mockSeverityRuleAlertsResponse,

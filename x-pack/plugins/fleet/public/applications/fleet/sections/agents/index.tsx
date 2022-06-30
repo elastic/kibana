@@ -8,11 +8,18 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Router, Route, Switch, useHistory } from 'react-router-dom';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
-import { Loading, Error, AgentEnrollmentFlyout } from '../../components';
-import { useConfig, useFleetStatus, useBreadcrumbs, useAuthz, useGetSettings } from '../../hooks';
+import { Loading, Error } from '../../components';
+import {
+  useConfig,
+  useFleetStatus,
+  useBreadcrumbs,
+  useAuthz,
+  useGetSettings,
+  useFlyoutContext,
+} from '../../hooks';
 import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
 
 import { AgentListPage } from './agent_list_page';
@@ -27,10 +34,10 @@ export const AgentsApp: React.FunctionComponent = () => {
   const { agents } = useConfig();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
   const fleetStatus = useFleetStatus();
+  const flyoutContext = useFlyoutContext();
 
   const settings = useGetSettings();
 
-  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const [fleetServerModalVisible, setFleetServerModalVisible] = useState(false);
   const onCloseFleetServerModal = useCallback(() => {
     setFleetServerModalVisible(false);
@@ -81,21 +88,12 @@ export const AgentsApp: React.FunctionComponent = () => {
 
   const rightColumn = hasOnlyFleetServerMissingRequirement ? (
     <>
-      {isEnrollmentFlyoutOpen && (
-        <EuiPortal>
-          <AgentEnrollmentFlyout
-            defaultMode="standalone"
-            isIntegrationFlow={true}
-            onClose={() => setIsEnrollmentFlyoutOpen(false)}
-          />
-        </EuiPortal>
-      )}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
             iconType="plusInCircle"
-            onClick={() => setIsEnrollmentFlyoutOpen(true)}
+            onClick={() => flyoutContext.openEnrollmentFlyout()}
             data-test-subj="addAgentBtnTop"
           >
             <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
@@ -117,7 +115,7 @@ export const AgentsApp: React.FunctionComponent = () => {
               <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
             )}
             {hasOnlyFleetServerMissingRequirement ? (
-              <FleetServerRequirementPage />
+              <FleetServerRequirementPage showEnrollmentRecommendation={false} />
             ) : (
               <AgentListPage />
             )}

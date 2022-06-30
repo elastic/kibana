@@ -18,7 +18,7 @@ function generator({
   dockerCrossCompile,
   version,
   dockerTargetFilename,
-  baseOSImage,
+  baseImageName,
   architecture,
 }: TemplateContext) {
   const dockerTargetName = `${imageTag}${imageFlavor}:${version}${
@@ -61,7 +61,7 @@ function generator({
     done
   }
 
-  retry_docker_pull ${baseOSImage}
+  retry_docker_pull ${baseImageName}
 
   echo "Building: kibana${imageFlavor}-docker"; \\
   ${dockerBuild}

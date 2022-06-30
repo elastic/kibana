@@ -36,6 +36,9 @@ import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
 interface Node {
   name: string;
   uuid: string;
+}
+
+interface NodeWithStatus extends Node {
   isOnline: boolean;
   shardCount: number;
 }
@@ -52,7 +55,7 @@ export async function getPaginatedNodes(
     nodesShardCount,
   }: {
     clusterStats: {
-      cluster_state?: { nodes: Record<string, Node> };
+      cluster_state?: { nodes?: Record<string, unknown> };
       elasticsearch?: ElasticsearchModifiedSource['elasticsearch'];
     };
     nodesShardCount: { nodes: Record<string, { shardCount: number }> };
@@ -67,10 +70,11 @@ export async function getPaginatedNodes(
     clusterStats?.cluster_state?.nodes ??
     clusterStats?.elasticsearch?.cluster?.stats?.state?.nodes ??
     {};
-  for (const node of nodes) {
-    node.isOnline = !isUndefined(clusterStateNodes && clusterStateNodes[node.uuid]);
-    node.shardCount = nodesShardCount?.nodes[node.uuid]?.shardCount ?? 0;
-  }
+  const nodesWithStatus: NodeWithStatus[] = nodes.map((node) => ({
+    ...node,
+    isOnline: !isUndefined(clusterStateNodes && clusterStateNodes[node.uuid]),
+    shardCount: nodesShardCount?.nodes[node.uuid]?.shardCount ?? 0,
+  }));
 
   // `metricSet` defines a list of metrics that are sortable in the UI
   // but we don't need to fetch all the data for these metrics to perform
@@ -80,13 +84,13 @@ export async function getPaginatedNodes(
   const filters = [
     {
       terms: {
-        'source_node.name': nodes.map((node) => node.name),
+        'source_node.name': nodesWithStatus.map((node) => node.name),
       },
     },
   ];
   const groupBy = {
     field: `source_node.uuid`,
-    include: nodes.map((node) => node.uuid),
+    include: nodesWithStatus.map((node) => node.uuid),
     size,
   };
   const metricSeriesData = await getMetrics(
@@ -94,7 +98,7 @@ export async function getPaginatedNodes(
     'elasticsearch',
     metricSet,
     filters,
-    { nodes },
+    { nodes: nodesWithStatus },
     4,
     groupBy
   );
@@ -106,7 +110,7 @@ export async function getPaginatedNodes(
 
     const metricList = metricSeriesData[metricName];
     for (const metricItem of metricList[0]) {
-      const node = nodes.find((n) => n.uuid === metricItem.groupedBy);
+      const node = nodesWithStatus.find((n) => n.uuid === metricItem.groupedBy);
       if (!node) {
         continue;
       }
@@ -124,7 +128,7 @@ export async function getPaginatedNodes(
   // Manually apply pagination/sorting/filtering concerns
 
   // Filtering
-  const filteredNodes = filter(nodes, queryText, ['name']); // We only support filtering by name right now
+  const filteredNodes = filter(nodesWithStatus, queryText, ['name']); // We only support filtering by name right now
 
   // Sorting
   const sortedNodes = sortNodes(filteredNodes, sort);

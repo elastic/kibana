@@ -10,6 +10,7 @@ import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
+  CaseSeverity,
   CasesResponse,
   CaseStatuses,
   CommentType,
@@ -34,6 +35,8 @@ import {
   removeServerGeneratedPropertiesFromUserAction,
   findCases,
   superUserSpace1Auth,
+  delay,
+  calculateDuration,
 } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
@@ -111,9 +114,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        const { duration, ...dataWithoutDuration } = data;
+        const { duration: resDuration, ...resWithoutDuration } = postCaseResp();
 
-        expect(data).to.eql({
-          ...postCaseResp(),
+        expect(dataWithoutDuration).to.eql({
+          ...resWithoutDuration,
           status: CaseStatuses.closed,
           closed_by: defaultUser,
           updated_by: defaultUser,
@@ -166,6 +171,34 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('should patch the severity of a case correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        // the default severity
+        expect(postedCase.severity).equal(CaseSeverity.LOW);
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                severity: CaseSeverity.MEDIUM,
+              },
+            ],
+          },
+        });
+
+        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+
+        expect(data).to.eql({
+          ...postCaseResp(),
+          severity: CaseSeverity.MEDIUM,
+          updated_by: defaultUser,
+        });
+      });
+
       it('should patch a case with new connector', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCases = await updateCase({
@@ -197,6 +230,65 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           updated_by: defaultUser,
         });
+      });
+
+      describe('duration', () => {
+        it('updates the duration correctly when the case closes', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await delay(1000);
+
+          const patchedCases = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  status: CaseStatuses.closed,
+                },
+              ],
+            },
+          });
+
+          const duration = calculateDuration(patchedCases[0].closed_at, postedCase.created_at);
+          expect(duration).to.be(patchedCases[0].duration);
+        });
+
+        for (const status of [CaseStatuses.open, CaseStatuses['in-progress']]) {
+          it(`sets the duration to null when the case status changes to ${status}`, async () => {
+            const postedCase = await createCase(supertest, postCaseReq);
+
+            const closedCases = await updateCase({
+              supertest,
+              params: {
+                cases: [
+                  {
+                    id: postedCase.id,
+                    version: postedCase.version,
+                    status: CaseStatuses.closed,
+                  },
+                ],
+              },
+            });
+
+            expect(closedCases[0].duration).to.not.be(null);
+
+            const openCases = await updateCase({
+              supertest,
+              params: {
+                cases: [
+                  {
+                    id: postedCase.id,
+                    version: closedCases[0].version,
+                    status,
+                  },
+                ],
+              },
+            });
+
+            expect(openCases[0].duration).to.be(null);
+          });
+        }
       });
     });
 
@@ -231,6 +323,22 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           },
           expectedHttpCode: 404,
+        });
+      });
+
+      it('400s when a wrong severity value is passed', async () => {
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                version: 'version',
+                // @ts-expect-error
+                severity: 'wont-do',
+              },
+            ],
+          },
+          expectedHttpCode: 400,
         });
       });
 

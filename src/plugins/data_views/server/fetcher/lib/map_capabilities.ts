@@ -8,6 +8,12 @@
 
 import { mergeJobConfigurations } from './jobs_compatibility';
 
+/**
+ * Get rollup job capabilities
+ * @public
+ * @param indices rollup job index capabilites
+ */
+
 export function getCapabilitiesForRollupIndices(indices: Record<string, { rollup_jobs: any }>) {
   const indexNames = Object.keys(indices);
   const capabilities = {} as { [key: string]: any };

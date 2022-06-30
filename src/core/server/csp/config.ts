@@ -7,7 +7,7 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
-import { ServiceConfigDescriptor } from '../internal_types';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 interface DirectiveValidationOptions {
   allowNone: boolean;
@@ -39,6 +39,13 @@ const getDirectiveValueValidator = ({ allowNone, allowNonce }: DirectiveValidati
 
 const configSchema = schema.object(
   {
+    disableUnsafeEval: schema.conditional(
+      // Default disableUnsafeEval to false if it's not a distributable release
+      schema.contextRef('dist'),
+      true,
+      schema.boolean({ defaultValue: false }),
+      schema.boolean({ defaultValue: true })
+    ),
     script_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),

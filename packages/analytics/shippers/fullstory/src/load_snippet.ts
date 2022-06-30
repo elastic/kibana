@@ -8,6 +8,9 @@
 
 import type { FullStoryApi } from './types';
 
+/**
+ * FullStory basic configuration.
+ */
 export interface FullStorySnippetConfig {
   /**
    * The FullStory account id.

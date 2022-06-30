@@ -39,6 +39,7 @@ import {
   getMultiTermsScriptedFieldErrorMessage,
   getFieldsByValidationState,
   isSortableByColumn,
+  isPercentileRankSortable,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -235,6 +236,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
+    let orderBy = '_key';
+
+    if (column.params?.orderBy.type === 'column') {
+      const orderColumn = layer.columns[column.params.orderBy.columnId];
+      orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
+      // percentile rank with non integer value should default to alphabetical order
+      if (!isPercentileRankSortable(orderColumn)) {
+        orderBy = '_key';
+      }
+    }
 
     // To get more accurate results, we set shard_size to a minimum of 1000
     // The other calculation matches the current Elasticsearch shard_size default,
@@ -249,10 +260,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         enabled: true,
         schema: 'segment',
         fields: [column.sourceField, ...column.params.secondaryFields],
-        orderBy:
-          column.params.orderBy.type === 'alphabetical'
-            ? '_key'
-            : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
+        orderBy,
         order: column.params.orderDirection,
         size: column.params.size,
         shardSize,
@@ -267,10 +275,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       enabled: true,
       schema: 'segment',
       field: column.sourceField,
-      orderBy:
-        column.params.orderBy.type === 'alphabetical'
-          ? '_key'
-          : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
+      orderBy,
       order: column.params.orderDirection,
       size: column.params.size,
       shardSize,
@@ -320,7 +325,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       params: newParams,
     };
   },
-  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) => {
+  onOtherColumnChanged: (layer, thisColumnId) => {
     const columns = layer.columns;
     const currentColumn = columns[thisColumnId] as TermsIndexPatternColumn;
     if (

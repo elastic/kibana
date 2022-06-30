@@ -8,6 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { sortBy } from 'lodash';
 import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -47,7 +48,6 @@ export class SampleDataViewDataButton extends React.Component {
       }
     );
     const dashboardPath = `/app/dashboards#/view/${this.props.overviewDashboard}`;
-    const prefixedDashboardPath = this.addBasePath(dashboardPath);
 
     if (this.props.appLinks.length === 0) {
       return (
@@ -61,12 +61,24 @@ export class SampleDataViewDataButton extends React.Component {
       );
     }
 
-    const additionalItems = this.props.appLinks.map(({ path, label, icon }) => {
+    const dashboardAppLink = {
+      path: dashboardPath,
+      label: i18n.translate('home.sampleDataSetCard.dashboardLinkLabel', {
+        defaultMessage: 'Dashboard',
+      }),
+      icon: 'dashboardApp',
+      order: 0,
+      'data-test-subj': `viewSampleDataSet${this.props.id}-dashboard`,
+    };
+
+    const sortedItems = sortBy([dashboardAppLink, ...this.props.appLinks], 'order');
+    const items = sortedItems.map(({ path, label, icon, ...rest }) => {
       return {
         name: label,
         icon: <EuiIcon type={icon} size="m" />,
         href: this.addBasePath(path),
         onClick: createAppNavigationHandler(path),
+        ...(rest['data-test-subj'] ? { 'data-test-subj': rest['data-test-subj'] } : {}),
       };
     });
 
@@ -75,18 +87,7 @@ export class SampleDataViewDataButton extends React.Component {
     const panels = [
       {
         id: 0,
-        items: [
-          {
-            name: i18n.translate('home.sampleDataSetCard.dashboardLinkLabel', {
-              defaultMessage: 'Dashboard',
-            }),
-            icon: <EuiIcon type="dashboardApp" size="m" />,
-            href: prefixedDashboardPath,
-            onClick: createAppNavigationHandler(dashboardPath),
-            'data-test-subj': `viewSampleDataSet${this.props.id}-dashboard`,
-          },
-          ...additionalItems,
-        ],
+        items,
       },
     ];
     const popoverButton = (
@@ -124,6 +125,7 @@ SampleDataViewDataButton.propTypes = {
       path: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
       icon: PropTypes.string.isRequired,
+      order: PropTypes.number,
     })
   ).isRequired,
 };

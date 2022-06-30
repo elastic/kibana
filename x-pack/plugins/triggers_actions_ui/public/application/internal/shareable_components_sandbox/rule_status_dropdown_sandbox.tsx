@@ -6,37 +6,38 @@
  */
 
 import React, { useState } from 'react';
+import moment from 'moment';
 import { getRuleStatusDropdownLazy } from '../../../common/get_rule_status_dropdown';
 
 export const RuleStatusDropdownSandbox: React.FC<{}> = () => {
   const [enabled, setEnabled] = useState(true);
-  const [snoozeEndTime, setSnoozeEndTime] = useState<Date | null>(null);
+  const [isSnoozedUntil, setIsSnoozedUntil] = useState<Date | null>(null);
   const [muteAll, setMuteAll] = useState(false);
 
   return getRuleStatusDropdownLazy({
     rule: {
       enabled,
-      snoozeEndTime,
+      isSnoozedUntil,
       muteAll,
     },
     enableRule: async () => {
       setEnabled(true);
       setMuteAll(false);
-      setSnoozeEndTime(null);
+      setIsSnoozedUntil(null);
     },
     disableRule: async () => setEnabled(false),
-    snoozeRule: async (time) => {
-      if (time === -1) {
-        setSnoozeEndTime(null);
+    snoozeRule: async (schedule) => {
+      if (schedule.duration === -1) {
+        setIsSnoozedUntil(null);
         setMuteAll(true);
       } else {
-        setSnoozeEndTime(new Date(time));
+        setIsSnoozedUntil(moment(schedule.rRule.dtstart).add(schedule.duration, 'ms').toDate());
         setMuteAll(false);
       }
     },
     unsnoozeRule: async () => {
       setMuteAll(false);
-      setSnoozeEndTime(null);
+      setIsSnoozedUntil(null);
     },
     onRuleChanged: () => {},
     isEditable: true,

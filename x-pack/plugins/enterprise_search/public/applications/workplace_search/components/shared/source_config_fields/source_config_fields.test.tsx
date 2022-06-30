@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { sourceConfigData } from '../../../__mocks__/content_sources.mock';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -15,25 +17,9 @@ import { CredentialItem } from '../credential_item';
 import { SourceConfigFields } from './source_config_fields';
 
 describe('SourceConfigFields', () => {
-  it('renders empty with no items', () => {
-    const wrapper = shallow(<SourceConfigFields />);
-
-    expect(wrapper.find(ApiKey)).toHaveLength(0);
-    expect(wrapper.find(CredentialItem)).toHaveLength(0);
-  });
-
-  it('renders with all items, hiding API Keys', () => {
+  it('renders with all items, hiding API Keys when auth is false', () => {
     const wrapper = shallow(
-      <SourceConfigFields
-        isOauth1={false}
-        clientId="123"
-        clientSecret="456"
-        publicKey="abc"
-        consumerKey="def"
-        baseUrl="ghi"
-        externalConnectorUrl="https://url.com"
-        externalConnectorApiKey="apiKey"
-      />
+      <SourceConfigFields isOauth1={false} sourceConfigData={sourceConfigData} />
     );
 
     expect(wrapper.find(ApiKey)).toHaveLength(0);
@@ -41,22 +27,32 @@ describe('SourceConfigFields', () => {
     expect(wrapper.find('[data-test-subj="external-connector-url-input"]')).toHaveLength(1);
   });
 
-  it('shows API keys', () => {
-    const wrapper = shallow(
-      <SourceConfigFields
-        isOauth1
-        clientSecret="456"
-        publicKey="abc"
-        consumerKey="def"
-        baseUrl="ghi"
-      />
-    );
+  it('shows API keys when connector uses oauth', () => {
+    const wrapper = shallow(<SourceConfigFields isOauth1 sourceConfigData={sourceConfigData} />);
 
     expect(wrapper.find(ApiKey)).toHaveLength(2);
   });
 
+  it('shows configurable fields for external connectors', () => {
+    const wrapper = shallow(
+      <SourceConfigFields
+        isOauth1={false}
+        sourceConfigData={{
+          ...sourceConfigData,
+          serviceType: 'external',
+          configurableFields: [{ key: 'third_party_url', label: 'Third Party URL' }],
+          configuredFields: { third_party_url: 'https://www.elastic.co' },
+        }}
+      />
+    );
+
+    expect(wrapper.find(CredentialItem)).toHaveLength(1);
+    expect(wrapper.find(CredentialItem).prop('label')).toEqual('Third Party URL');
+    expect(wrapper.find(CredentialItem).prop('value')).toEqual('https://www.elastic.co');
+  });
+
   it('handles select all button click', () => {
-    const wrapper = shallow(<SourceConfigFields externalConnectorUrl="url" />);
+    const wrapper = shallow(<SourceConfigFields sourceConfigData={sourceConfigData} />);
     const simulatedEvent = {
       button: 0,
       target: { getAttribute: () => '_self' },

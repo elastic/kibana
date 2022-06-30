@@ -116,7 +116,7 @@ async function update(success: boolean) {
     expect(logger.warn).lastCalledWith(`rulesClient.update('alert-id') conflict, exceeded retries`);
     return expectConflict(success, err, 'create');
   }
-  expectSuccess(success, 3, 'create');
+  expectSuccess(success, 2, 'create');
 
   // only checking the debug messages in this test
   expect(logger.debug).nthCalledWith(1, `rulesClient.update('alert-id') conflict, retrying ...`);
@@ -310,7 +310,7 @@ beforeEach(() => {
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
 
-  taskManager.runNow.mockResolvedValue({ id: '' });
+  taskManager.runSoon.mockResolvedValue({ id: '' });
   taskManager.schedule.mockResolvedValue({
     id: 'scheduled-task-id',
     scheduledAt: new Date(),

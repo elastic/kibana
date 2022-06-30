@@ -33,8 +33,7 @@ export const useSecuritySolutionNavigation = () => {
   const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
 
   const disabledNavTabs = [
-    ...(!useIsExperimentalFeatureEnabled('usersEnabled') ? ['users'] : []),
-    ...(!useIsExperimentalFeatureEnabled('detectionResponseEnabled') ? ['detection_response'] : []),
+    ...(!useIsExperimentalFeatureEnabled('kubernetesEnabled') ? ['kubernetes'] : []),
   ];
   const enabledNavTabs: GenericNavRecord = omit(disabledNavTabs, navTabs);
 
@@ -45,22 +44,15 @@ export const useSecuritySolutionNavigation = () => {
       setBreadcrumbs(
         {
           detailName,
-          filters: urlState.filters,
           flowTarget,
           navTabs: enabledNavTabs,
           pageName,
           pathName,
-          query: urlState.query,
-          savedQuery: urlState.savedQuery,
           search,
-          sourcerer: urlState.sourcerer,
           state,
           tabName,
-          timeline: urlState.timeline,
-          timerange: urlState.timerange,
         },
         chrome,
-        getUrlForApp,
         navigateToUrl
       );
     }
@@ -69,7 +61,6 @@ export const useSecuritySolutionNavigation = () => {
     pageName,
     pathName,
     search,
-    urlState,
     state,
     detailName,
     flowTarget,
@@ -85,7 +76,6 @@ export const useSecuritySolutionNavigation = () => {
     filters: urlState.filters,
     navTabs: enabledNavTabs,
     pageName,
-    sourcerer: urlState.sourcerer,
     savedQuery: urlState.savedQuery,
     tabName,
     timeline: urlState.timeline,

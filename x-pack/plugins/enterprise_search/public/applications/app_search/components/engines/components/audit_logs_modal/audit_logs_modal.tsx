@@ -92,7 +92,7 @@ export const AuditLogsModal: React.FC = () => {
             },
             {
               type: 'field',
-              field: 'outcome',
+              field: 'event.outcome',
               header: i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engines.auditLogsModal.headers.outcome',
                 {
@@ -101,7 +101,8 @@ export const AuditLogsModal: React.FC = () => {
               ),
             },
             {
-              type: 'message',
+              type: 'field',
+              field: 'message',
               width: '50%',
             },
           ]}

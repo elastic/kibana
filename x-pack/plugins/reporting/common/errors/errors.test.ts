@@ -7,7 +7,9 @@
 
 import * as errors from '.';
 
-describe('ReportingError', () => {
+const { ReportingError: _, ...nonAbstractErrors } = errors;
+
+describe('Reporting error', () => {
   it('provides error code when stringified', () => {
     expect(new errors.AuthenticationExpiredError() + '').toBe(
       `ReportingError(code: authentication_expired_error)`
@@ -18,10 +20,14 @@ describe('ReportingError', () => {
       `ReportingError(code: authentication_expired_error) "some details"`
     );
   });
-  it('has the expected code structure', () => {
-    const { ReportingError: _, ...nonAbstractErrors } = errors;
+  it('has the expected error code structure', () => {
     Object.values(nonAbstractErrors).forEach((Ctor) => {
-      expect(new Ctor().code).toMatch(/^[a-z_]+_error$/);
+      expect(Ctor.code).toMatch(/^[a-z_]+_error$/);
+    });
+  });
+  it('has the same error code values on static "code" and instance "code" properties', () => {
+    Object.values(nonAbstractErrors).forEach((Ctor) => {
+      expect(Ctor.code).toBe(new Ctor().code);
     });
   });
 });

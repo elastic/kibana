@@ -6,8 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { Logger, LogMeta } from '@kbn/core/server';
-import sinon from 'sinon';
 import { Comparator, InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   InventoryItemType,
@@ -17,25 +15,13 @@ import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/invento
 import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
+import { createFakeLogger } from './create_fake_logger';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const log = getService('log');
-
-  const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
-    meta ? log.debug(msg, meta) : log.debug(msg);
-
-  const logger = {
-    trace: fakeLogger,
-    debug: fakeLogger,
-    info: fakeLogger,
-    warn: fakeLogger,
-    error: fakeLogger,
-    fatal: fakeLogger,
-    log: sinon.stub(),
-    get: sinon.stub(),
-  } as Logger;
+  const logger = createFakeLogger(log);
 
   const baseCondition: InventoryMetricConditions = {
     metric: 'cpu',
@@ -178,6 +164,46 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 2000,
+          },
+        });
+      });
+      it('should work with a long threshold', async () => {
+        const results = await evaluateCondition({
+          ...baseOptions,
+          condition: {
+            ...baseCondition,
+            metric: 'rx',
+            threshold: [107374182400],
+            comparator: Comparator.LT,
+          },
+          esClient,
+        });
+        expect(results).to.eql({
+          'host-0': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 1666.6666666666667,
+          },
+          'host-1': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,

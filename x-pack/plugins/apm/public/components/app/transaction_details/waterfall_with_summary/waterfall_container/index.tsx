@@ -7,23 +7,24 @@
 
 import React from 'react';
 import { keyBy } from 'lodash';
-import type { ApmUrlParams } from '../../../../../context/url_params_context/types';
 import {
   IWaterfall,
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
 import { Waterfall } from './waterfall';
 import { WaterfallLegends } from './waterfall_legends';
-import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 
 interface Props {
-  urlParams: ApmUrlParams;
+  waterfallItemId?: string;
+  serviceName?: string;
   waterfall: IWaterfall;
 }
 
-export function WaterfallContainer({ urlParams, waterfall }: Props) {
-  const { serviceName } = useApmServiceContext();
-
+export function WaterfallContainer({
+  serviceName,
+  waterfallItemId,
+  waterfall,
+}: Props) {
   if (!waterfall) {
     return null;
   }
@@ -75,10 +76,7 @@ export function WaterfallContainer({ urlParams, waterfall }: Props) {
   return (
     <div>
       <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
-      <Waterfall
-        waterfallItemId={urlParams.waterfallItemId}
-        waterfall={waterfall}
-      />
+      <Waterfall waterfallItemId={waterfallItemId} waterfall={waterfall} />
     </div>
   );
 }

@@ -22,7 +22,7 @@ import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../
 import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({

@@ -6,21 +6,27 @@
  */
 
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n-react';
+
 import * as i18n from './translations';
 
 export const SEVERITY_COLOR = {
-  critical: '#EF6550',
-  high: '#EE9266',
-  medium: '#F3B689',
-  low: '#F8D9B2',
+  critical: '#E7664C',
+  high: '#DA8B45',
+  medium: '#D6BF57',
+  low: '#54B399',
 } as const;
+
+export const ITEMS_PER_PAGE = 4;
+const MAX_ALLOWED_RESULTS = 100;
 
 export interface LastUpdatedAtProps {
   updatedAt: number;
   isUpdating: boolean;
 }
+
 export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, updatedAt }) => (
   <EuiFlexGroup>
     {isUpdating ? (
@@ -37,3 +43,10 @@ export const LastUpdatedAt: React.FC<LastUpdatedAtProps> = ({ isUpdating, update
     )}
   </EuiFlexGroup>
 );
+
+/**
+ * While there could be more than 100 hosts or users we only want to show 25 pages of results,
+ * and the host count cardinality result will always be the total count
+ * */
+export const getPageCount = (count: number = 0) =>
+  Math.ceil(Math.min(count || 0, MAX_ALLOWED_RESULTS) / ITEMS_PER_PAGE);

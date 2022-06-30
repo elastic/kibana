@@ -18,7 +18,7 @@ import { RowRendererContainer } from '../row_renderer';
 import { ThreatMatchRow } from './threat_match_row';
 
 const SpacedContainer = styled.div`
-  margin: ${({ theme }) => theme.eui.paddingSizes.s} 0;
+  margin: ${({ theme }) => theme.eui.euiSizeS} 0;
 `;
 
 export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, timelineId }) => {

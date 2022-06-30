@@ -41,9 +41,8 @@ describe('Last Event Time Stat', () => {
         <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.html()).toBe(
-      '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
-    );
+    // Removed strict equality as the EuiLoader has been converted to Emotion and will no longer have the euiLoadingSpinner--medium class
+    expect(wrapper.find(LastEventTime).html()).toContain('<span class="euiLoadingSpinner ');
   });
   test('Last seen', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
@@ -58,7 +57,9 @@ describe('Last Event Time Stat', () => {
         <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">20 hours ago</span>');
+    expect(wrapper.find(LastEventTime).html()).toBe(
+      'Last event: <span class="euiToolTipAnchor">20 hours ago</span>'
+    );
   });
   test('Bad date time string', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
@@ -74,7 +75,7 @@ describe('Last Event Time Stat', () => {
       </TestProviders>
     );
 
-    expect(wrapper.html()).toBe('something-invalid');
+    expect(wrapper.find(LastEventTime).html()).toBe('something-invalid');
   });
   test('Null time string', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
@@ -89,6 +90,6 @@ describe('Last Event Time Stat', () => {
         <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.html()).toContain(getEmptyValue());
+    expect(wrapper.find(LastEventTime).html()).toContain(getEmptyValue());
   });
 });

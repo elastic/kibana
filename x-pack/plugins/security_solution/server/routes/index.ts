@@ -69,6 +69,7 @@ import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/rou
 import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
+import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -117,6 +118,8 @@ export const initRoutes = (
   performBulkActionRoute(router, ml, logger);
 
   getRuleExecutionEventsRoute(router);
+
+  getInstalledIntegrationsRoute(router, logger);
 
   createTimelinesRoute(router, config, security);
   patchTimelinesRoute(router, config, security);

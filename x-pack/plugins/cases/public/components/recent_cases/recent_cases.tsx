@@ -6,19 +6,18 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useEffect, useMemo, useRef } from 'react';
-import { isEqual } from 'lodash/fp';
+import React from 'react';
 import styled from 'styled-components';
 
 import { IconWithCount } from './icon_with_count';
 import * as i18n from './translations';
-import { useGetCases } from '../../containers/use_get_cases';
 import { CaseDetailsLink } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
 import { MarkdownRenderer } from '../markdown_editor';
 import { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
+import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
 
 const MarkdownContainer = styled.div`
   max-height: 150px;
@@ -31,30 +30,11 @@ export interface RecentCasesProps {
   maxCasesToShow: number;
 }
 
-const usePrevious = (value: Partial<FilterOptions>) => {
-  const ref = useRef();
-  useEffect(() => {
-    (ref.current as unknown) = value;
-  });
-  return ref.current;
-};
-
 export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesProps) => {
-  const previousFilterOptions = usePrevious(filterOptions);
-  const { data, loading, setFilters } = useGetCases({
-    initialQueryParams: { perPage: maxCasesToShow },
+  const { data = initialGetCasesData, isLoading: isLoadingCases } = useGetCases({
+    queryParams: { perPage: maxCasesToShow },
+    filterOptions,
   });
-
-  useEffect(() => {
-    if (previousFilterOptions !== undefined && !isEqual(previousFilterOptions, filterOptions)) {
-      setFilters(filterOptions);
-    }
-  }, [previousFilterOptions, filterOptions, setFilters]);
-
-  const isLoadingCases = useMemo(
-    () => loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1,
-    [loading]
-  );
 
   return isLoadingCases ? (
     <LoadingPlaceholders lines={2} placeholders={3} />

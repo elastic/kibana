@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isEmpty } from 'lodash/fp';
+import { get } from 'lodash/fp';
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { decodeIpv6 } from '../../../common/lib/helpers';
@@ -14,9 +14,8 @@ import { networkModel } from '../../store';
 import * as i18n from '../translations';
 import { NetworkRouteType } from '../navigation/types';
 import { NetworkRouteSpyState } from '../../../common/utils/route/types';
-import { GetUrlForApp } from '../../../common/components/navigation/types';
-import { APP_UI_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
+import { GetSecuritySolutionUrl } from '../../../common/components/link_to';
 
 export const type = networkModel.NetworkType.details;
 const TabNameMappedToI18nKey: Record<NetworkRouteType, string> = {
@@ -28,32 +27,19 @@ const TabNameMappedToI18nKey: Record<NetworkRouteType, string> = {
   [NetworkRouteType.tls]: i18n.NAVIGATION_TLS_TITLE,
 };
 
-export const getBreadcrumbs = (
+export const getTrailingBreadcrumbs = (
   params: NetworkRouteSpyState,
-  search: string[],
-  getUrlForApp: GetUrlForApp
+  getSecuritySolutionUrl: GetSecuritySolutionUrl
 ): ChromeBreadcrumb[] => {
-  let breadcrumb = [
-    {
-      text: i18n.PAGE_TITLE,
-      href: getUrlForApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.network,
-        path: !isEmpty(search[0]) ? search[0] : '',
-      }),
-    },
-  ];
+  let breadcrumb: ChromeBreadcrumb[] = [];
+
   if (params.detailName != null) {
     breadcrumb = [
-      ...breadcrumb,
       {
         text: decodeIpv6(params.detailName),
-        href: getUrlForApp(APP_UI_ID, {
+        href: getSecuritySolutionUrl({
           deepLinkId: SecurityPageName.network,
-          path: getNetworkDetailsUrl(
-            params.detailName,
-            params.flowTarget,
-            !isEmpty(search[0]) ? search[0] : ''
-          ),
+          path: getNetworkDetailsUrl(params.detailName, params.flowTarget, ''),
         }),
       },
     ];

@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -30,6 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
         title: caseTitle,
         description: 'test description',
         tag: 'tagme',
+        severity: CaseSeverity.HIGH,
       });
 
       // validate title

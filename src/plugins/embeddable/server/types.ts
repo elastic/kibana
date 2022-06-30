@@ -23,12 +23,6 @@ export interface EnhancementRegistryItem<P extends SerializableRecord = Serializ
   id: string;
 }
 
-export interface EmbeddableRegistryDefinition<
-  P extends EmbeddableStateWithType = EmbeddableStateWithType
-> extends PersistableStateDefinition<P> {
-  id: string;
-}
-
 export interface EmbeddableRegistryItem<P extends EmbeddableStateWithType = EmbeddableStateWithType>
   extends PersistableState<P> {
   id: string;

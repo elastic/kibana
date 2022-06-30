@@ -71,7 +71,7 @@ describe('Service overview - header filters', () => {
 
   describe('Filtering by transaction type', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
     });
     it('changes url when selecting different value', () => {
       cy.visit(serviceOverviewHref);
@@ -119,7 +119,7 @@ describe('Service overview - header filters', () => {
 
   describe('Filtering by kuerybar', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
     });
     it('filters by transaction.name', () => {
       cy.visit(

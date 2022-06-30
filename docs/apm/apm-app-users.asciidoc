@@ -125,9 +125,9 @@ Here are two examples:
 <titleabbrev>Create an annotation user</titleabbrev>
 ++++
 
-NOTE: By default, the `apm_user` built-in role provides access to Observability annotations.
-You only need to create an annotation user if the default annotation index
-defined in <<apm-settings-kb,`xpack.observability.annotations.index`>> has been customized.
+NOTE: By default, the `viewer` and `editor` built-in roles provide read access to Observability annotations.
+You only need to create an annotation user to write to the annotations index
+(<<apm-settings-kb,`xpack.observability.annotations.index`>>).
 
 [[apm-app-annotation-user]]
 ==== Annotation user

@@ -42,20 +42,20 @@ describe('bulk_action_edit', () => {
   });
 
   describe('applyBulkActionEditToRule', () => {
-    const ruleMock = {
+    const getRuleMock = (params = {}) => ({
       tags: ['tag1', 'tag2'],
-      params: { index: ['initial-index-*'] },
-    };
+      params: { type: 'query', index: ['initial-index-*'], ...params },
+    });
     describe('tags', () => {
       test('should add new tags to rule', () => {
-        const editedRule = applyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = applyBulkActionEditToRule(getRuleMock() as RuleAlertType, {
           type: BulkActionEditType.add_tags,
           value: ['new_tag'],
         });
         expect(editedRule.tags).toEqual(['tag1', 'tag2', 'new_tag']);
       });
       test('should remove tag from rule', () => {
-        const editedRule = applyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = applyBulkActionEditToRule(getRuleMock() as RuleAlertType, {
           type: BulkActionEditType.delete_tags,
           value: ['tag1'],
         });
@@ -63,7 +63,7 @@ describe('bulk_action_edit', () => {
       });
 
       test('should rewrite tags in rule', () => {
-        const editedRule = applyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = applyBulkActionEditToRule(getRuleMock() as RuleAlertType, {
           type: BulkActionEditType.set_tags,
           value: ['tag_r_1', 'tag_r_2'],
         });
@@ -73,7 +73,7 @@ describe('bulk_action_edit', () => {
 
     describe('index_patterns', () => {
       test('should add new index pattern to rule', () => {
-        const editedRule = applyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = applyBulkActionEditToRule(getRuleMock() as RuleAlertType, {
           type: BulkActionEditType.add_index_patterns,
           value: ['my-index-*'],
         });
@@ -91,7 +91,7 @@ describe('bulk_action_edit', () => {
       });
 
       test('should rewrite index  pattern in rule', () => {
-        const editedRule = applyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = applyBulkActionEditToRule(getRuleMock() as RuleAlertType, {
           type: BulkActionEditType.set_index_patterns,
           value: ['index'],
         });
@@ -148,11 +148,92 @@ describe('bulk_action_edit', () => {
           })
         ).toThrow("Index patterns can't be overwritten with empty list");
       });
+
+      describe('overwriteDataViews', () => {
+        describe('overwriteDataViews is true', () => {
+          test('should add new index pattern to rule', () => {
+            const editedRule = applyBulkActionEditToRule(
+              getRuleMock({ dataViewId: 'logs-*', index: [] }) as RuleAlertType,
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['my-index-*'],
+                overwriteDataViews: true,
+              }
+            );
+            expect(editedRule.params).toHaveProperty('index', ['my-index-*']);
+            expect(editedRule.params).toHaveProperty('dataViewId', undefined);
+          });
+
+          test('should remove index pattern from rule', () => {
+            const editedRule = applyBulkActionEditToRule(
+              getRuleMock({ dataViewId: 'logs-*', index: ['index', 'index-2-*'] }) as RuleAlertType,
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['index-2-*'],
+                overwriteDataViews: true,
+              }
+            );
+            expect(editedRule.params).toHaveProperty('index', ['index']);
+            expect(editedRule.params).toHaveProperty('dataViewId', undefined);
+          });
+
+          test('should rewrite index  pattern in rule', () => {
+            const editedRule = applyBulkActionEditToRule(
+              getRuleMock({ dataViewId: 'logs-*', index: ['index', 'index-1'] }) as RuleAlertType,
+              {
+                type: BulkActionEditType.set_index_patterns,
+                value: ['index'],
+                overwriteDataViews: true,
+              }
+            );
+            expect(editedRule.params).toHaveProperty('index', ['index']);
+            expect(editedRule.params).toHaveProperty('dataViewId', undefined);
+          });
+        });
+
+        describe('overwriteDataViews is false', () => {
+          test('should NOT remove dataViewId from rule if adding index pattern', () => {
+            const editedRule = applyBulkActionEditToRule(
+              getRuleMock({ dataViewId: 'logs-*', index: [] }) as RuleAlertType,
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: ['my-index-*'],
+                overwriteDataViews: false,
+              }
+            );
+            expect(editedRule.params).toHaveProperty('dataViewId', 'logs-*');
+          });
+
+          test('should NOT remove dataViewId from rule if deleting index pattern', () => {
+            const editedRule = applyBulkActionEditToRule(
+              getRuleMock({ dataViewId: 'logs-*', index: ['index', 'index-2-*'] }) as RuleAlertType,
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['index-2-*'],
+                overwriteDataViews: false,
+              }
+            );
+            expect(editedRule.params).toHaveProperty('dataViewId', 'logs-*');
+          });
+
+          test('should NOT remove dataViewId from rule if setting index pattern', () => {
+            const editedRule = applyBulkActionEditToRule(
+              getRuleMock({ dataViewId: 'logs-*', index: [] }) as RuleAlertType,
+              {
+                type: BulkActionEditType.set_index_patterns,
+                value: ['index'],
+                overwriteDataViews: false,
+              }
+            );
+            expect(editedRule.params).toHaveProperty('dataViewId', 'logs-*');
+          });
+        });
+      });
     });
 
     describe('timeline', () => {
       test('should set timeline', () => {
-        const editedRule = applyBulkActionEditToRule(ruleMock as RuleAlertType, {
+        const editedRule = applyBulkActionEditToRule(getRuleMock() as RuleAlertType, {
           type: BulkActionEditType.set_timeline,
           value: {
             timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',

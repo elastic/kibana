@@ -54,6 +54,7 @@ TYPES_DEPS = [
   "@npm//tslib",
   "@npm//@types/node",
   "@npm//@types/jest",
+  "//packages/kbn-jest-serializers:npm_module_types" # needed for windows development, only used in tests
 ]
 
 jsts_transpiler(

@@ -30,12 +30,13 @@ export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
 
 export const JSON_TEXT = '[data-test-subj="jsonView"]';
 
-export const OVERVIEW_HOST_NAME =
-  '[data-test-subj="eventDetails"] [data-test-subj="host-details-button"]';
+export const OVERVIEW_HOST_NAME = '[data-test-subj="event-field-host.name"]';
 
 export const OVERVIEW_RISK_SCORE = '[data-test-subj="eventDetails"] [data-test-subj="riskScore"]';
 
 export const OVERVIEW_RULE = '[data-test-subj="eventDetails"] [data-test-subj="ruleName"]';
+
+export const OVERVIEW_RULE_TYPE = '[data-test-subj="event-field-kibana.alert.rule.type"]';
 
 export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-subj="severity"]';
 
@@ -72,3 +73,9 @@ export const THREAT_INTEL_TAB = '[data-test-subj="threatIntelTab"]';
 export const TITLE = '.euiTitle';
 
 export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-button"]';
+
+export const OVERVIEW_TAB = '[data-test-subj="overviewTab"]';
+
+export const SUMMARY_VIEW_PREVALENCE_CELL = `${SUMMARY_VIEW} [data-test-subj='alert-prevalence']`;
+
+export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [aria-label='Investigate in timeline']`;

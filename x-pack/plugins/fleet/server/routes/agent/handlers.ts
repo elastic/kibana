@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -87,10 +88,16 @@ export const updateAgentHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
+  const partialAgent: any = {};
+  if (request.body.user_provided_metadata) {
+    partialAgent.user_provided_metadata = request.body.user_provided_metadata;
+  }
+  if (request.body.tags) {
+    partialAgent.tags = uniq(request.body.tags);
+  }
+
   try {
-    await AgentService.updateAgent(esClient, request.params.agentId, {
-      user_provided_metadata: request.body.user_provided_metadata,
-    });
+    await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
       item: await AgentService.getAgentById(esClient, request.params.agentId),
     };
@@ -121,6 +128,8 @@ export const getAgentsHandler: RequestHandler<
       showInactive: request.query.showInactive,
       showUpgradeable: request.query.showUpgradeable,
       kuery: request.query.kuery,
+      sortField: request.query.sortField,
+      sortOrder: request.query.sortOrder,
     });
     const totalInactive = request.query.showInactive
       ? await AgentService.countInactiveAgents(esClient, {
@@ -188,7 +197,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     const results = await AgentService.reassignAgents(
       soClient,
       esClient,
-      agentOptions,
+      { ...agentOptions, batchSize: request.body.batchSize },
       request.body.policy_id
     );
 
@@ -234,15 +243,18 @@ export const getAgentDataHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
   try {
-    let items;
+    const returnDataPreview = request.query.previewData;
+    const agentIds = isStringArray(request.query.agentsIds)
+      ? request.query.agentsIds
+      : [request.query.agentsIds];
 
-    if (isStringArray(request.query.agentsIds)) {
-      items = await AgentService.getIncomingDataByAgentsId(esClient, request.query.agentsIds);
-    } else {
-      items = await AgentService.getIncomingDataByAgentsId(esClient, [request.query.agentsIds]);
-    }
+    const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId(
+      esClient,
+      agentIds,
+      returnDataPreview
+    );
 
-    const body = { items };
+    const body = { items, dataPreview };
 
     return response.ok({ body });
   } catch (error) {

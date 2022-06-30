@@ -11,8 +11,38 @@ cat <<EOF > $KIBANA_DIR/.bazelrc
   build --build_metadata=ROLE=CI
 EOF
 
-if [[ "${BAZEL_CACHE_MODE:-none}" == read* ]]; then
-  echo "[bazel] enabling caching"
+BAZEL_CACHE_MODE=${BAZEL_CACHE_MODE:-gcs}
+
+if [[ "$BAZEL_CACHE_MODE" == "gcs" ]]; then
+  echo "[bazel] enabling caching with GCS buckets"
+
+  BAZEL_REGION="us-central1"
+  if [[ "$(curl -is metadata.google.internal || true)" ]]; then
+    # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
+    BAZEL_REGION=$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone | rev | cut -d'/' -f1 | cut -c3- | rev)
+  fi
+
+  BAZEL_BUCKET="kibana-ci-bazel_$BAZEL_REGION"
+
+  echo "[bazel] using GCS bucket: $BAZEL_BUCKET"
+
+cat <<EOF >> $KIBANA_DIR/.bazelrc
+  build --remote_cache=https://storage.googleapis.com/$BAZEL_BUCKET
+  build --google_default_credentials
+EOF
+fi
+
+if [[ "$BAZEL_CACHE_MODE" == "populate-local-gcs" ]]; then
+  echo "[bazel] enabling caching with GCS buckets for local dev"
+
+cat <<EOF >> $KIBANA_DIR/.bazelrc
+  build --remote_cache=https://storage.googleapis.com/kibana-local-bazel-remote-cache
+  build --google_credentials=$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
+EOF
+fi
+
+if [[ "$BAZEL_CACHE_MODE" == "buildbuddy" ]]; then
+  echo "[bazel] enabling caching with Buildbuddy"
 cat <<EOF >> $KIBANA_DIR/.bazelrc
   build --bes_results_url=https://app.buildbuddy.io/invocation/
   build --bes_backend=grpcs://remote.buildbuddy.io
@@ -22,14 +52,7 @@ cat <<EOF >> $KIBANA_DIR/.bazelrc
 EOF
 fi
 
-if [[ "${BAZEL_CACHE_MODE:-none}" == "read" ]]; then
-  echo "[bazel] cache set to read-only"
-cat <<EOF >> $KIBANA_DIR/.bazelrc
-  build --noremote_upload_local_results
-EOF
-fi
-
-if [[ "${BAZEL_CACHE_MODE:-none}" != @(read|read-write|none|) ]]; then
-  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [read,read-write,none]"
+if [[ "$BAZEL_CACHE_MODE" != @(gcs|populate-local-gcs|buildbuddy|none|) ]]; then
+  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [gcs,populate-local-gcs|buildbuddy,none]"
   exit 1
 fi

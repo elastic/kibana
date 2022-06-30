@@ -62,7 +62,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly metricsEntitiesEnabled: boolean; readonly ruleRegistryEnabled: boolean; readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly usersEnabled: boolean; readonly detectionResponseEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly securityRulesCancelEnabled: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly groupedNavigation: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false
@@ -254,6 +254,68 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.registerAppLinks",
+            "type": "Function",
+            "tags": [],
+            "label": "registerAppLinks",
+            "description": [
+              "\nRegister deepLinks and appUpdater for all app links, to change deepLinks as needed when licensing changes."
+            ],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: ",
+              "StartPlugins",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerAppLinks.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerAppLinks.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "StartPlugins"
+                ],
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -302,7 +364,9 @@
           "PinnedEvent",
           ">; resolveTimelineConfig?: ",
           "ResolveTimelineConfig",
-          " | undefined; showSaveModal?: boolean | undefined; savedQueryId?: string | null | undefined; sessionViewId: string | null; show: boolean; status: ",
+          " | undefined; showSaveModal?: boolean | undefined; savedQueryId?: string | null | undefined; sessionViewConfig: ",
+          "SessionViewConfig",
+          " | null; show: boolean; status: ",
           "TimelineStatus",
           "; updated?: number | undefined; updatedBy?: string | null | undefined; isSaving: boolean; version: string | null; initialized?: boolean | undefined; }"
         ],
@@ -704,26 +768,28 @@
         "tags": [],
         "label": "SecuritySolutionApiRequestHandlerContext",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "securitySolution",
-            "scope": "server",
-            "docId": "kibSecuritySolutionPluginApi",
-            "section": "def-server.SecuritySolutionApiRequestHandlerContext",
-            "text": "SecuritySolutionApiRequestHandlerContext"
-          },
-          " extends ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          }
-        ],
         "path": "x-pack/plugins/security_solution/server/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreRequestHandlerContext",
+                "text": "CoreRequestHandlerContext"
+              }
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.endpointAuthz",
@@ -872,6 +938,68 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getInternalFleetServices",
+            "type": "Function",
+            "tags": [],
+            "label": "getInternalFleetServices",
+            "description": [],
+            "signature": [
+              "() => ",
+              "EndpointInternalFleetServicesInterface"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getScopedFleetServices",
+            "type": "Function",
+            "tags": [],
+            "label": "getScopedFleetServices",
+            "description": [],
+            "signature": [
+              "(req: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) => ",
+              "EndpointScopedFleetServicesInterface"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.SecuritySolutionApiRequestHandlerContext.getScopedFleetServices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "req",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-server.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/plugins/security_solution/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -887,7 +1015,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ metricsEntitiesEnabled: boolean; ruleRegistryEnabled: boolean; tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; usersEnabled: boolean; detectionResponseEnabled: boolean; disableIsolationUIPendingStatuses: boolean; riskyHostsEnabled: boolean; riskyUsersEnabled: boolean; securityRulesCancelEnabled: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; previewTelemetryUrlEnabled: boolean; responseActionsConsoleEnabled: boolean; }>; }"
+          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; kubernetesEnabled: boolean; disableIsolationUIPendingStatuses: boolean; riskyHostsEnabled: boolean; riskyUsersEnabled: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; policyResponseInFleetEnabled: boolean; groupedNavigation: boolean; previewTelemetryUrlEnabled: boolean; responseActionsConsoleEnabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,

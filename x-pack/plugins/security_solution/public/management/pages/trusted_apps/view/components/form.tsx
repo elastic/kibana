@@ -56,7 +56,7 @@ import {
 } from '../translations';
 import { OS_TITLES } from '../../../../common/translations';
 import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
-import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import {
   EffectedPolicySelect,

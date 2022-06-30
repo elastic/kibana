@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { DASH } from '../constants';
 import { dataOrDash } from './data_or_dash';
 
 const TEST_STRING = '123';
 const TEST_NUMBER = 123;
-const DASH = '-';
 
 describe('dataOrDash(data)', () => {
   it('works for a valid string', () => {

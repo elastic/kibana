@@ -19,7 +19,6 @@ import {
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
-import { addTags } from './add_tags';
 import { PartialFilter } from '../types';
 import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
@@ -30,7 +29,9 @@ export const createRules = async ({
   buildingBlockType,
   description,
   enabled,
+  timestampField,
   eventCategoryOverride,
+  tiebreakerField,
   falsePositives,
   from,
   query,
@@ -45,13 +46,17 @@ export const createRules = async ({
   ruleId,
   immutable,
   index,
+  dataViewId,
   interval,
   maxSignals,
+  relatedIntegrations,
+  requiredFields,
   riskScore,
   riskScoreMapping,
   ruleNameOverride,
   outputIndex,
   name,
+  setup,
   severity,
   severityMapping,
   tags,
@@ -83,7 +88,7 @@ export const createRules = async ({
     },
     data: {
       name,
-      tags: addTags(tags, ruleId, immutable),
+      tags,
       alertTypeId: ruleTypeMappings[type],
       consumer: SERVER_APP_ID,
       params: {
@@ -93,7 +98,10 @@ export const createRules = async ({
         description,
         ruleId,
         index,
+        dataViewId,
+        timestampField,
         eventCategoryOverride,
+        tiebreakerField,
         falsePositives,
         from,
         immutable,
@@ -110,9 +118,12 @@ export const createRules = async ({
           : undefined,
         filters,
         maxSignals,
+        relatedIntegrations,
+        requiredFields,
         riskScore,
         riskScoreMapping,
         ruleNameOverride,
+        setup,
         severity,
         severityMapping,
         threat,

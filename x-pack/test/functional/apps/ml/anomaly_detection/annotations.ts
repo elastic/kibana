@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('annotations', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     const jobId = `fq_single_1_smv_${Date.now()}`;
 
     const annotation = {
