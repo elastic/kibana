@@ -242,7 +242,7 @@ export async function getRegistryPackage(
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
   let paths = getArchiveFilelist({ name, version });
-  let verificationResult = getVerificationResult({ name, version });
+  let verificationResult = verifyPackage ? getVerificationResult({ name, version }) : undefined;
   if (!paths || paths.length === 0) {
     const {
       archiveBuffer,
