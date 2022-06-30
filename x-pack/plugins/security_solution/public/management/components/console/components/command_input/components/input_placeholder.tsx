@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useWithInputPlaceholder } from '../../../hooks/state_selectors/use_with_input_placeholder';
@@ -19,10 +19,11 @@ const InputPlaceholderContainer = styled(EuiText)`
   padding-left: 0.5em;
   transform: translateY(-50%);
   width: 96%;
+  color: ${({ theme: { eui } }) => eui.euiFormControlPlaceholderText};
 `;
 
 export const InputPlaceholder = memo(() => {
-  const textEntered = useWithInputTextEntered();
+  const { fullTextEntered } = useWithInputTextEntered();
   const placeholder = useWithInputPlaceholder();
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
@@ -32,9 +33,7 @@ export const InputPlaceholder = memo(() => {
       className="eui-textTruncate"
       data-test-subj={getTestId('inputPlaceholder')}
     >
-      <EuiTextColor color="subdued" className="eui-textTruncate">
-        {textEntered ? '' : placeholder}
-      </EuiTextColor>
+      <div className="eui-textTruncate">{fullTextEntered ? '' : placeholder}</div>
     </InputPlaceholderContainer>
   );
 });
