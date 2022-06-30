@@ -23,6 +23,6 @@ export class PersistableStateAttachmentTypeRegistry extends CaseRegistry<Persist
       migrations: attachmentType.migrations || {},
     };
 
-    this.register(item);
+    super.register(item);
   }
 }

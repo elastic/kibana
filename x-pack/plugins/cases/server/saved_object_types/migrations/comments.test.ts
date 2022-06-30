@@ -30,12 +30,11 @@ import {
 import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { PersistableStateAttachmentTypeSetup } from '../../attachment_framework/types';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 describe('comments migrations', () => {
-  const migrations = createCommentsMigrations({
-    lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({}), {}),
-  });
-
   const contextMock = savedObjectsServiceMock.createMigrationContext();
 
   const lensVisualizationToMigrate = {
@@ -236,6 +235,11 @@ describe('comments migrations', () => {
       };
 
       it('should remove time zone param from date histogram', () => {
+        const migrations = createCommentsMigrations({
+          persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
+          lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({}), {}),
+        });
+
         expect(migrations['7.14.0']).toBeDefined();
         const result = migrations['7.14.0'](caseComment, contextMock);
 
@@ -309,7 +313,7 @@ describe('comments migrations', () => {
       `);
     });
 
-    describe('mergeMigrationFunctionMaps', () => {
+    describe('mergeSavedObjectMigrationMaps', () => {
       it('logs an error when the passed migration functions fails', () => {
         const migrationObj1 = {
           '1.0.0': migrateByValueLensVisualizations(migrationFunction),
@@ -527,6 +531,55 @@ describe('comments migrations', () => {
             name: 'action-name',
           },
         ],
+      });
+    });
+  });
+
+  describe('Attachment framework', () => {
+    const attachment: PersistableStateAttachmentTypeSetup = {
+      id: 'test',
+      migrations: {
+        '8.4.0': (state) => {
+          return { ...state, persistableStateAttachmentState: { bar: 'bar' } };
+        },
+      },
+    };
+
+    const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+    persistableStateAttachmentTypeRegistry.register(attachment);
+
+    const migrations = createCommentsMigrations({
+      persistableStateAttachmentTypeRegistry,
+      lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({}), {}),
+    });
+
+    it('migrates a persistable state attachment correctly', () => {
+      const migrationFn = migrations['8.4.0'];
+      const res = migrationFn(
+        {
+          id: '123',
+          type: 'abc',
+          attributes: {
+            type: CommentType.persistableState,
+            persistableStateAttachmentTypeId: 'test',
+            persistableStateAttachmentState: { foo: 'foo' },
+            owner: SECURITY_SOLUTION_OWNER,
+          },
+        },
+        contextMock
+      );
+
+      expect(res).toEqual({
+        attributes: {
+          owner: 'securitySolution',
+          persistableStateAttachmentState: {
+            bar: 'bar',
+          },
+          persistableStateAttachmentTypeId: 'test',
+          type: 'persistableState',
+        },
+        id: '123',
+        type: 'abc',
       });
     });
   });
