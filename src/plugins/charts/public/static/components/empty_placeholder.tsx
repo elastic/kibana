@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -17,6 +17,7 @@ export interface EmptyPlaceholderProps {
   message?: JSX.Element;
   dataTestSubj?: string;
   className?: string;
+  renderComplete?: () => void;
 }
 
 const style = css`
@@ -33,12 +34,19 @@ export const EmptyPlaceholder = ({
   message = <FormattedMessage id="charts.noDataLabel" defaultMessage="No results found" />,
   dataTestSubj = 'emptyPlaceholder',
   className,
-}: EmptyPlaceholderProps) => (
-  <div className={className} css={style}>
-    <EuiText data-test-subj={dataTestSubj} textAlign="center" color="subdued" size="xs">
-      <EuiIcon type={icon} color={iconColor} size="l" />
-      <EuiSpacer size="s" />
-      <p>{message}</p>
-    </EuiText>
-  </div>
-);
+  renderComplete,
+}: EmptyPlaceholderProps) => {
+  useEffect(() => {
+    renderComplete?.();
+  }, [renderComplete]);
+
+  return (
+    <div className={className} css={style}>
+      <EuiText data-test-subj={dataTestSubj} textAlign="center" color="subdued" size="xs">
+        <EuiIcon type={icon} color={iconColor} size="l" />
+        <EuiSpacer size="s" />
+        <p>{message}</p>
+      </EuiText>
+    </div>
+  );
+};
