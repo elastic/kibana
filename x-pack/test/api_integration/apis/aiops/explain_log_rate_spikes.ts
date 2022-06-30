@@ -129,6 +129,9 @@ export default ({ getService }: FtrProviderContext) => {
         body: JSON.stringify(requestBody),
       });
 
+      expect(response.ok).to.be(true);
+      expect(response.status).to.be(200);
+
       const stream = response.body;
 
       expect(stream).not.to.be(null);
