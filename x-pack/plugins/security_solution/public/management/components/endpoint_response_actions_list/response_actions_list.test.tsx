@@ -189,6 +189,41 @@ describe('Response Actions List', () => {
       );
     });
 
+    it('should update per page rows on the table', async () => {
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data: await getActionListMock({ actionCount: 33 }),
+      };
+
+      render();
+
+      expect(renderResult.getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(renderResult.getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-10 of 33 response actions'
+      );
+
+      // should have 4 pages each of size 10.
+      expect(renderResult.getByTestId('pagination-button-0')).toHaveAttribute(
+        'aria-label',
+        'Page 1 of 4'
+      );
+
+      // toggle page size popover
+      userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
+      // click size 20
+      userEvent.click(renderResult.getByTestId('tablePagination-20-rows'));
+
+      expect(renderResult.getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-20 of 33 response actions'
+      );
+
+      // should have only 2 pages each of size 20
+      expect(renderResult.getByTestId('pagination-button-0')).toHaveAttribute(
+        'aria-label',
+        'Page 1 of 2'
+      );
+    });
+
     it('should show 1-1 record label when only 1 record', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
