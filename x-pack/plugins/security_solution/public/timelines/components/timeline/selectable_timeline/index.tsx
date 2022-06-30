@@ -48,6 +48,15 @@ export const ORIGINAL_PAGE_SIZE = 50;
 const POPOVER_HEIGHT = 260;
 const TIMELINE_ITEM_HEIGHT = 50;
 
+/**
+ * Modifies options by setting value of `title` to `timelineTitle`, and `title` to undefined.
+ * Prevents appearing default browser tooltip on option hover
+ * @param {EuiSelectableOption[]} options
+ * @returns {EuiSelectableOption[]} modified options
+ */
+const replaceTitleInOptions = (options: EuiSelectableOption[]): EuiSelectableOption[] =>
+  options.map(({ title, ...props }) => ({ ...props, title: undefined, timelineTitle: title }));
+
 export interface GetSelectableOptions {
   timelines: OpenTimelineResult[];
   onlyFavorites: boolean;
@@ -124,14 +133,15 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   );
 
   const renderTimelineOption = useCallback((option, searchValue) => {
-    const title = isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title;
+    const title = isUntitled({ ...option, title: option.timelineTitle })
+      ? i18nTimeline.UNTITLED_TIMELINE
+      : option.timelineTitle;
     const isDescriptionNonEmpty =
       option.description != null && option.description.trim().length > 0;
     const description = isDescriptionNonEmpty ? option.description : getEmptyTagValue();
 
     return (
       <EuiFlexGroup
-        title=""
         gutterSize="s"
         justifyContent="spaceBetween"
         alignItems="center"
@@ -177,9 +187,9 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       );
       if (selectedTimeline != null && selectedTimeline.length > 0) {
         onTimelineChange(
-          isEmpty(selectedTimeline[0].title)
+          isEmpty(selectedTimeline[0].timelineTitle)
             ? i18nTimeline.UNTITLED_TIMELINE
-            : selectedTimeline[0].title,
+            : selectedTimeline[0].timelineTitle,
           selectedTimeline[0].id === '-1' ? null : selectedTimeline[0].id,
           selectedTimeline[0].graphEventId ?? ''
         );
@@ -264,12 +274,14 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       searchable
       searchProps={searchProps}
       singleSelection={true}
-      options={getSelectableOptions({
-        timelines: timelines ?? [],
-        onlyFavorites,
-        searchTimelineValue,
-        timelineType,
-      })}
+      options={replaceTitleInOptions(
+        getSelectableOptions({
+          timelines: timelines ?? [],
+          onlyFavorites,
+          searchTimelineValue,
+          timelineType,
+        })
+      )}
     >
       {EuiSelectableContent}
     </EuiSelectable>
