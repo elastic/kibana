@@ -7,6 +7,8 @@
 
 import * as zlib from 'zlib';
 
+import type { Logger } from '@kbn/logging';
+
 import { streamFactory } from './stream_factory';
 
 interface MockItem {
@@ -24,8 +26,14 @@ const mockItem2: MockItem = {
 };
 
 describe('streamFactory', () => {
+  let mockLogger: Logger;
+
+  beforeEach(() => {
+    mockLogger = { error: jest.fn() } as unknown as Logger;
+  });
+
   it('should encode and receive an uncompressed string based stream', async () => {
-    const { end, push, responseWithHeaders } = streamFactory({});
+    const { end, push, responseWithHeaders } = streamFactory({}, mockLogger);
 
     push('push1');
     push('push2');
@@ -41,7 +49,7 @@ describe('streamFactory', () => {
   });
 
   it('should encode and receive an uncompressed NDJSON based stream', async () => {
-    const { DELIMITER, end, push, responseWithHeaders } = streamFactory<MockItem>({});
+    const { DELIMITER, end, push, responseWithHeaders } = streamFactory<MockItem>({}, mockLogger);
 
     push(mockItem1);
     push(mockItem2);
@@ -74,9 +82,12 @@ describe('streamFactory', () => {
   // without the need for additional custom code.
   it('should encode and receive a compressed string based stream', (done) => {
     (async () => {
-      const { end, push, responseWithHeaders } = streamFactory({
-        'accept-encoding': 'gzip',
-      });
+      const { end, push, responseWithHeaders } = streamFactory(
+        {
+          'accept-encoding': 'gzip',
+        },
+        mockLogger
+      );
 
       push('push1');
       push('push2');
@@ -104,9 +115,12 @@ describe('streamFactory', () => {
 
   it('should encode and receive a compressed NDJSON based stream', (done) => {
     (async () => {
-      const { DELIMITER, end, push, responseWithHeaders } = streamFactory<MockItem>({
-        'accept-encoding': 'gzip',
-      });
+      const { DELIMITER, end, push, responseWithHeaders } = streamFactory<MockItem>(
+        {
+          'accept-encoding': 'gzip',
+        },
+        mockLogger
+      );
 
       push(mockItem1);
       push(mockItem2);
@@ -140,49 +154,49 @@ describe('streamFactory', () => {
     })();
   });
 
-  it('should throw when a string based stream receives a non-string chunk', async () => {
-    const { push } = streamFactory({});
+  it('should log an error when a string based stream receives a non-string chunk', async () => {
+    const { push } = streamFactory({}, mockLogger);
 
     // First push initializes the stream as string based.
-    expect(() => {
-      push('push1');
-    }).not.toThrow();
+    push('push1');
+    expect(mockLogger.error).toHaveBeenCalledTimes(0);
 
     // Second push is again a string and should not throw.
-    expect(() => {
-      push('push2');
-    }).not.toThrow();
+    push('push2');
+    expect(mockLogger.error).toHaveBeenCalledTimes(0);
 
     // Third push is not a string and should trigger an error.
-    expect(() => {
-      push({ myObject: 'push3' } as unknown as string);
-    }).toThrow('Must not push non-string chunks to a string based stream.');
+    push({ myObject: 'push3' } as unknown as string);
+    expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Must not push non-string chunks to a string based stream.'
+    );
   });
 
-  it('should throw when an NDJSON based stream receives a string chunk', async () => {
-    const { push } = streamFactory<MockItem>({});
+  it('should log an error when an NDJSON based stream receives a string chunk', async () => {
+    const { push } = streamFactory<MockItem>({}, mockLogger);
 
     // First push initializes the stream as NDJSON based.
-    expect(() => {
-      push(mockItem1);
-    }).not.toThrow();
+    push(mockItem1);
+    expect(mockLogger.error).toHaveBeenCalledTimes(0);
 
     // Second push is again a valid object and should not throw.
-    expect(() => {
-      push(mockItem1);
-    }).not.toThrow();
+    push(mockItem1);
+    expect(mockLogger.error).toHaveBeenCalledTimes(0);
 
     // Third push is a string and should trigger an error.
-    expect(() => {
-      push('push3' as unknown as MockItem);
-    }).toThrow('Must not push raw string chunks to an NDJSON based stream.');
+    push('push3' as unknown as MockItem);
+    expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Must not push raw string chunks to an NDJSON based stream.'
+    );
   });
 
-  it('should throw for undefined as push value', async () => {
-    const { push } = streamFactory({});
+  it('should log an error for undefined as push value', async () => {
+    const { push } = streamFactory({}, mockLogger);
 
-    expect(() => {
-      push(undefined as unknown as string);
-    }).toThrow('Stream chunk must not be undefined.');
+    push(undefined as unknown as string);
+    expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).toHaveBeenCalledWith('Stream chunk must not be undefined.');
   });
 });

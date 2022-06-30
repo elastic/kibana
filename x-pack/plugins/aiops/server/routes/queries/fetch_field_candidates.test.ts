@@ -95,9 +95,7 @@ describe('query_field_candidates', () => {
 
       const resp = await fetchFieldCandidates(esClientMock, params);
 
-      expect(resp).toEqual({
-        fieldCandidates: ['myIpFieldName', 'myKeywordFieldName'],
-      });
+      expect(resp).toEqual(['myIpFieldName', 'myKeywordFieldName']);
       expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });

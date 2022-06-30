@@ -8,6 +8,8 @@
 import { Stream } from 'stream';
 import * as zlib from 'zlib';
 
+import type { Logger } from '@kbn/logging';
+
 import { acceptCompression } from './accept_compression';
 
 /**
@@ -30,7 +32,6 @@ type StreamType = 'string' | 'ndjson';
 interface StreamFactoryReturnType<T = unknown> {
   DELIMITER: string;
   end: () => void;
-  error: (errorText: string) => void;
   push: (d: T) => void;
   responseWithHeaders: {
     body: zlib.Gzip | ResponseStream;
@@ -47,7 +48,10 @@ interface StreamFactoryReturnType<T = unknown> {
  * @param headers - Request headers.
  * @returns An object with stream attributes and methods.
  */
-export function streamFactory<T = string>(headers: Headers): StreamFactoryReturnType<T>;
+export function streamFactory<T = string>(
+  headers: Headers,
+  logger: Logger
+): StreamFactoryReturnType<T>;
 /**
  * Sets up a response stream with support for gzip compression depending on provided
  * request headers. Any non-string data pushed to the stream will be stream as NDJSON.
@@ -55,15 +59,14 @@ export function streamFactory<T = string>(headers: Headers): StreamFactoryReturn
  * @param headers - Request headers.
  * @returns An object with stream attributes and methods.
  */
-export function streamFactory<T = unknown>(headers: Headers): StreamFactoryReturnType<T> {
+export function streamFactory<T = unknown>(
+  headers: Headers,
+  logger: Logger
+): StreamFactoryReturnType<T> {
   let streamType: StreamType;
   const isCompressed = acceptCompression(headers);
 
   const stream = isCompressed ? zlib.createGzip() : new ResponseStream();
-
-  function error(errorText: string) {
-    stream.emit('error', errorText);
-  }
 
   function end() {
     stream.end();
@@ -71,7 +74,7 @@ export function streamFactory<T = unknown>(headers: Headers): StreamFactoryRetur
 
   function push(d: T) {
     if (d === undefined) {
-      error('Stream chunk must not be undefined.');
+      logger.error('Stream chunk must not be undefined.');
       return;
     }
     // Initialize the stream type with the first push to the stream,
@@ -79,10 +82,10 @@ export function streamFactory<T = unknown>(headers: Headers): StreamFactoryRetur
     if (streamType === undefined) {
       streamType = typeof d === 'string' ? 'string' : 'ndjson';
     } else if (streamType === 'string' && typeof d !== 'string') {
-      error('Must not push non-string chunks to a string based stream.');
+      logger.error('Must not push non-string chunks to a string based stream.');
       return;
     } else if (streamType === 'ndjson' && typeof d === 'string') {
-      error('Must not push raw string chunks to an NDJSON based stream.');
+      logger.error('Must not push raw string chunks to an NDJSON based stream.');
       return;
     }
 
@@ -90,7 +93,8 @@ export function streamFactory<T = unknown>(headers: Headers): StreamFactoryRetur
       const line = typeof d !== 'string' ? `${JSON.stringify(d)}${DELIMITER}` : d;
       stream.write(line);
     } catch (e) {
-      error(`Could not serialize or stream data chunk: ${e.toString()}`);
+      logger.error(`Could not serialize or stream data chunk: ${e.toString()}`);
+      return;
     }
 
     // Calling .flush() on a compression stream will
@@ -111,5 +115,5 @@ export function streamFactory<T = unknown>(headers: Headers): StreamFactoryRetur
       : {}),
   };
 
-  return { DELIMITER, end, error, push, responseWithHeaders };
+  return { DELIMITER, end, push, responseWithHeaders };
 }

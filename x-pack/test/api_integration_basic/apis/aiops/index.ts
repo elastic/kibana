@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('AIOps', function () {
+  describe('aiops basic license', function () {
     this.tags(['aiops']);
 
-    if (AIOPS_ENABLED) {
-      loadTestFile(require.resolve('./explain_log_rate_spikes'));
-    }
+    // The aiops API should return forbidden when called without a trial/platinum license.
+    loadTestFile(require.resolve('./permissions'));
   });
 }

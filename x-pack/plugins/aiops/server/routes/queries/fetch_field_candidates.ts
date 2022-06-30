@@ -45,7 +45,7 @@ export const getRandomDocsRequest = (
 export const fetchFieldCandidates = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema
-): Promise<{ fieldCandidates: string[] }> => {
+): Promise<string[]> => {
   const { index } = params;
   // Get all supported fields
   const respMapping = await esClient.fieldCaps({
@@ -78,7 +78,5 @@ export const fetchFieldCandidates = async (
     }
   });
 
-  return {
-    fieldCandidates: [...finalFieldCandidates],
-  };
+  return [...finalFieldCandidates];
 };

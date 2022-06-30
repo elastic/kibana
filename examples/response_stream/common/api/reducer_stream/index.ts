@@ -14,6 +14,7 @@ export const API_ACTION_NAME = {
   UPDATE_PROGRESS: 'update_progress',
   ADD_TO_ENTITY: 'add_to_entity',
   DELETE_ENTITY: 'delete_entity',
+  ERROR: 'error',
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
 
@@ -59,7 +60,20 @@ export function deleteEntityAction(payload: string): ApiActionDeleteEntity {
   };
 }
 
+interface ApiActionError {
+  type: typeof API_ACTION_NAME.ERROR;
+  payload: string;
+}
+
+export function errorAction(payload: string): ApiActionError {
+  return {
+    type: API_ACTION_NAME.ERROR,
+    payload,
+  };
+}
+
 export type ReducerStreamApiAction =
   | ApiActionUpdateProgress
   | ApiActionAddToEntity
-  | ApiActionDeleteEntity;
+  | ApiActionDeleteEntity
+  | ApiActionError;
