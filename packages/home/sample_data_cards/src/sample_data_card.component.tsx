@@ -36,6 +36,7 @@ export const SampleDataCard = ({
   return (
     <EuiCard
       textAlign="left"
+      paddingSize="m"
       data-test-subj={`sampleDataSetCard${id}`}
       {...{ image, title, description, betaBadgeProps, footer }}
     />
