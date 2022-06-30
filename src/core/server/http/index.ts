@@ -14,7 +14,7 @@ export type { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_sto
 export {
   isKibanaRequest,
   isRealRequest,
-  KibanaRequest,
+  CoreKibanaRequest,
   kibanaResponseFactory,
   validBodyOutput,
 } from './router';
@@ -25,6 +25,7 @@ export type {
   HttpResponseOptions,
   HttpResponsePayload,
   ErrorHttpResponseOptions,
+  KibanaRequest,
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
