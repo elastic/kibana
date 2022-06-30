@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { ObjectRemover } from './object_remover';
 import { getTestAlertData, getTestActionData } from './get_test_data';
-
-const FUTURE_SNOOZE_TIME = '9999-12-31T06:00:00.000Z';
 
 export async function createAlertManualCleanup({
   supertest,
@@ -94,7 +93,14 @@ export async function snoozeAlert({ supertest, alertId }: { supertest: any; aler
     .set('kbn-xsrf', 'foo')
     .set('content-type', 'application/json')
     .send({
-      snooze_end_time: FUTURE_SNOOZE_TIME,
+      snooze_schedule: {
+        duration: 100000000,
+        rRule: {
+          count: 1,
+          dtstart: moment().format(),
+          tzid: 'UTC',
+        },
+      },
     });
   return alert;
 }
