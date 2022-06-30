@@ -82,11 +82,6 @@ export type FileShareSavedObjectAttributes = {
   created_at: string;
 
   /**
-   * ID of the file being shared publicly
-   */
-  file: string;
-
-  /**
    * Human friendly name for this share token.
    */
   name?: string;
@@ -105,7 +100,7 @@ export type FileShareSavedObjectAttributes = {
 /**
  * Attributes of a file that represent a serialised version of the file.
  */
-export type FileShareJSON = FileShareSavedObjectAttributes & { id: string };
+export type FileShareJSON = FileShareSavedObjectAttributes & { id: string; fileId: string };
 
 export type UpdatableFileShareAttributes = Pick<FileSavedObjectAttributes, 'name'>;
 

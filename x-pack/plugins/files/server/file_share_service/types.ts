@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FileShareJSON } from '../../common/types';
+import type { FileShareJSON, FileShareSavedObjectAttributes } from '../../common/types';
 import type { GetArgs, UpdateArgs } from './internal_file_share_service';
 
 /**
@@ -21,5 +21,5 @@ export interface FileShareServiceStart {
   /**
    * Update a share instance.
    */
-  update(args: UpdateArgs): Promise<FileShareJSON>;
+  update(args: UpdateArgs): Promise<FileShareSavedObjectAttributes & { id: string }>;
 }

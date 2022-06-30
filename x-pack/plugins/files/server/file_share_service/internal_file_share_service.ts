@@ -10,11 +10,13 @@ import type {
   SavedObject,
   ISavedObjectsRepository,
 } from '@kbn/core/server';
-import {
+import type {
+  FileSavedObjectAttributes,
   FileShareJSON,
   FileShareSavedObjectAttributes,
   UpdatableFileShareAttributes,
 } from '../../common/types';
+import { FILE_SO_TYPE } from '../../common/constants';
 import type { File } from '../file';
 import { fileShareObjectType } from '../saved_objects';
 import { generateShareToken } from './generate_share_token';
@@ -60,10 +62,16 @@ export interface UpdateArgs {
 function toFileShareJSON(so: SavedObject<FileShareSavedObjectAttributes>): FileShareJSON {
   return {
     id: so.id,
+    fileId: so.references[0]?.id, // Assuming a single file reference
     ...so.attributes,
   };
 }
 
+/**
+ * Service for managing file shares and associated Saved Objects.
+ *
+ * @internal
+ */
 export class InternalFileShareService implements FileShareServiceStart {
   private readonly savedObjectsType = fileShareObjectType.name;
 
@@ -75,14 +83,16 @@ export class InternalFileShareService implements FileShareServiceStart {
     const so = await this.savedObjects.create<FileShareSavedObjectAttributes>(
       this.savedObjectsType,
       {
-        file: file.id,
         created_at: new Date().toISOString(),
         name,
         valid_until: validUntil
           ? moment(validUntil).toISOString()
           : moment().add(30, 'days').toISOString(),
       },
-      { id: generateShareToken() }
+      {
+        id: generateShareToken(),
+        references: [{ name: file.name, id: file.id, type: FILE_SO_TYPE }],
+      }
     );
 
     return toFileShareJSON(so);
@@ -105,21 +115,27 @@ export class InternalFileShareService implements FileShareServiceStart {
     return toFileShareJSON(result);
   }
 
-  public async update(args: UpdateArgs): Promise<FileShareJSON> {
-    const update = await this.savedObjects.update<FileShareSavedObjectAttributes>(
+  public async update({
+    id,
+    attributes,
+  }: UpdateArgs): Promise<FileSavedObjectAttributes & { id: string }> {
+    const result = await this.savedObjects.update<FileShareSavedObjectAttributes>(
       this.savedObjectsType,
-      args.id,
-      args.attributes
+      id,
+      attributes
     );
-    return toFileShareJSON(update as SavedObject<FileShareSavedObjectAttributes>);
+    return { id, ...(result.attributes as FileSavedObjectAttributes) };
   }
 
   public async list({ file, page, perPage }: ListArgs): Promise<FileShareJSON[]> {
     const results = await this.savedObjects.find<FileShareSavedObjectAttributes>({
       type: this.savedObjectsType,
+      hasReference: {
+        type: FILE_SO_TYPE,
+        id: file.id,
+      },
       perPage,
       page,
-      filter: `${this.savedObjectsType}.attributes.file:${file.id}`,
     });
 
     return results.saved_objects.map(toFileShareJSON);

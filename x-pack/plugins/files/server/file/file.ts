@@ -130,42 +130,6 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  /**
-   * Static method for creating files so that we can keep all of the audit logging for files
-   * in the same place.
-   */
-  public static async create(
-    {
-      name,
-      fileKind,
-      alt,
-      meta,
-      mime,
-    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
-    internalFileService: InternalFileService
-  ) {
-    const fileSO = await internalFileService.createSO({
-      ...createDefaultFileAttributes(),
-      file_kind: fileKind.id,
-      name,
-      alt,
-      meta,
-      mime,
-      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
-    });
-
-    const file = internalFileService.toFile(fileSO, fileKind);
-
-    internalFileService.createAuditLog(
-      createAuditEvent({
-        action: 'create',
-        message: `Created file "${file.name}" of kind "${file.fileKind}" and id "${file.id}"`,
-      })
-    );
-
-    return file;
-  }
-
   public async share({
     name,
     validUntil,
@@ -238,5 +202,41 @@ export class File<M = unknown> implements IFile {
 
   public get extension(): undefined | string {
     return this.attributes.extension;
+  }
+
+  /**
+   * Static method for creating files so that we can keep all of the audit logging for files
+   * in the same place.
+   */
+  public static async create(
+    {
+      name,
+      fileKind,
+      alt,
+      meta,
+      mime,
+    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
+    internalFileService: InternalFileService
+  ) {
+    const fileSO = await internalFileService.createSO({
+      ...createDefaultFileAttributes(),
+      file_kind: fileKind.id,
+      name,
+      alt,
+      meta,
+      mime,
+      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
+    });
+
+    const file = internalFileService.toFile(fileSO, fileKind);
+
+    internalFileService.createAuditLog(
+      createAuditEvent({
+        action: 'create',
+        message: `Created file "${file.name}" of kind "${file.fileKind}" and id "${file.id}"`,
+      })
+    );
+
+    return file;
   }
 }

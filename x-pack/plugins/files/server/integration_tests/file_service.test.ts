@@ -234,7 +234,7 @@ describe('FileService', () => {
         createDisposableFile({ fileKind, name: 'anothertest' }),
       ]);
 
-      await Promise.all([
+      const [share1] = await Promise.all([
         file.share({ name: 'my file share 1' }),
         file.share({ name: 'my file share 2' }),
         file.share({ name: 'my file share 3' }),
@@ -244,12 +244,16 @@ describe('FileService', () => {
         file2.share({ name: 'my file share 3' }),
       ]);
 
+      // Check whether updating file attributes interferes with SO references.
+      const shareService = fileService.getFileShareService();
+      await shareService.update({ id: share1.id, attributes: { name: 'my file share X' } });
+
       const shares1 = await file.listShares();
       expect(shares1).toHaveLength(3);
       expect(shares1[0]).toEqual(
         expect.objectContaining({
           id: expect.any(String),
-          file: file.id,
+          fileId: file.id,
         })
       );
       const shares2 = await file2.listShares();
@@ -257,7 +261,7 @@ describe('FileService', () => {
       expect(shares2[0]).toEqual(
         expect.objectContaining({
           id: expect.any(String),
-          file: file2.id,
+          fileId: file2.id,
         })
       );
     });

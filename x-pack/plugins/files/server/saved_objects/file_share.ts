@@ -25,9 +25,6 @@ const properties: Properties = {
   valid_until: {
     type: 'date',
   },
-  file: {
-    type: 'keyword',
-  },
   name: {
     type: 'keyword',
   },
