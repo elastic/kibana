@@ -28966,7 +28966,6 @@
     "xpack.stackAlerts.esQuery.missingEsQueryErrorMessage": "[esQuery]：必须包含“query”",
     "xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage": "表达式包含错误。",
     "xpack.stackAlerts.esQuery.ui.alertType.defaultActionMessage": "Elasticsearch 查询告警“\\{\\{alertName\\}\\}”处于活动状态：\n\n- 值：\\{\\{context.value\\}\\}\n- 满足的条件：\\{\\{context.conditions\\}\\} 超过 \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}\n- 时间戳：\\{\\{context.date\\}\\}\n- 链接：\\{\\{context.link\\}\\}",
-    "xpack.stackAlerts.esQuery.ui.alertType.descriptionText": "在运行最新查询期间找到匹配项时告警。",
     "xpack.stackAlerts.esQuery.ui.conditionPrompt": "当匹配数目",
     "xpack.stackAlerts.esQuery.ui.conditionPrompt.toolTip": "下面定义的时间窗口仅适用于第一次规则检查。",
     "xpack.stackAlerts.esQuery.ui.numQueryMatchesText": "查询在过去 {window} 匹配 {count} 个文档。",

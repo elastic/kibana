@@ -144,8 +144,8 @@ export const EsQueryExpression: React.FC<
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.searchThreshold.ui.conditionPrompt"
-            defaultMessage="When the number of documents match"
+            id="xpack.stackAlerts.esQuery.ui.selectIndexLabel"
+            defaultMessage="Select an index"
           />
         </h5>
       </EuiTitle>
@@ -183,15 +183,18 @@ export const EsQueryExpression: React.FC<
 
       <EuiSpacer size="s" />
 
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.defineQueryLabel"
+            defaultMessage="Define your query"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiFormRow
         id="queryEditor"
         fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.queryPrompt.label"
-            defaultMessage="Elasticsearch query"
-          />
-        }
         isInvalid={errors.esQuery.length > 0}
         error={errors.esQuery}
         helpText={
@@ -220,7 +223,7 @@ export const EsQueryExpression: React.FC<
         />
       </EuiFormRow>
 
-      <EuiSpacer />
+      <EuiSpacer size="s" />
 
       <RuleCommonExpressions
         threshold={threshold ?? DEFAULT_VALUES.THRESHOLD}

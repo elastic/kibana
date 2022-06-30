@@ -54,28 +54,14 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
 }) => {
   return (
     <>
-      <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
-                defaultMessage="When number of matches"
-              />
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            position="right"
-            color="subdued"
-            type="questionInCircle"
-            content={i18n.translate('xpack.stackAlerts.esQuery.ui.conditionPrompt.toolTip', {
-              defaultMessage: 'The time window defined below applies only to the first rule check.',
-            })}
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.conditionsPromptLabel"
+            defaultMessage="Set the threshold and duration"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </h5>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <ThresholdExpression
         data-test-subj="thresholdExpression"
@@ -116,7 +102,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
             type="questionInCircle"
             content={i18n.translate('xpack.stackAlerts.esQuery.ui.selectSizePrompt.toolTip', {
               defaultMessage:
-                'Specifies the number of documents to pass to the configured actions when the threshold condition is met.',
+                'Specify the number of documents to pass to the configured actions when the threshold condition is met.',
             })}
           />
         </EuiFlexItem>

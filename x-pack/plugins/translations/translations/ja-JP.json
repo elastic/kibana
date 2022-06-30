@@ -28940,7 +28940,6 @@
     "xpack.stackAlerts.esQuery.missingEsQueryErrorMessage": "[esQuery]：「query」を含む必要があります",
     "xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage": "下の表現のエラーを修正してください。",
     "xpack.stackAlerts.esQuery.ui.alertType.defaultActionMessage": "Elasticsearchクエリアラート'\\{\\{alertName\\}\\}'が有効です。\n\n- 値：\\{\\{context.value\\}\\}\n- 満たされた条件：\\{\\{context.conditions\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}\n- タイムスタンプ：\\{\\{context.date\\}\\}\n- リンク：\\{\\{context.link\\}\\}",
-    "xpack.stackAlerts.esQuery.ui.alertType.descriptionText": "前回のクエリ実行中に一致が見つかったときにアラートを発行します。",
     "xpack.stackAlerts.esQuery.ui.conditionPrompt": "一致数",
     "xpack.stackAlerts.esQuery.ui.conditionPrompt.toolTip": "以下で定義された時間枠は最初のルールチェックにのみ適用されます。",
     "xpack.stackAlerts.esQuery.ui.numQueryMatchesText": "前回の{window}でクエリが{count}個のドキュメントと一致しました。",

@@ -32,8 +32,7 @@ const FORM_TYPE_ITEMS: Array<{ formType: SearchType; label: string; description:
     description: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeDescription',
       {
-        defaultMessage:
-          'Make use of a data view, write the query using KQL or Lucene and add filters.',
+        defaultMessage: 'Use KQL or Lucene to define a text-based query.',
       }
     ),
   },
@@ -48,7 +47,7 @@ const FORM_TYPE_ITEMS: Array<{ formType: SearchType; label: string; description:
     description: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeDescription',
       {
-        defaultMessage: 'Make use of the powerful Query DSL of Elasticsearch.',
+        defaultMessage: 'Use the Elasticsearch Query DSL to define a query.',
       }
     ),
   },

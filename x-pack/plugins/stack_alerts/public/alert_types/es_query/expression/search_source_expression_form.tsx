@@ -11,7 +11,6 @@ import { lastValueFrom } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DataView, Query, ISearchSource, getTime } from '@kbn/data-plugin/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
@@ -194,8 +193,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.searchThreshold.ui.conditionPrompt"
-            defaultMessage="When the number of documents match"
+            id="xpack.stackAlerts.searchThreshold.ui.selectDataViewLabel"
+            defaultMessage="Select a data view"
           />
         </h5>
       </EuiTitle>
@@ -211,15 +210,20 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       {Boolean(dataView?.id) && (
         <>
           <EuiSpacer size="s" />
-
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.defineQueryLabel"
+                defaultMessage="Define your query"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
           <SearchBar
             onQuerySubmit={onQueryBarSubmit}
             onQueryChange={onChangeQuery}
             suggestionsSize="s"
             displayStyle="inPage"
-            placeholder={i18n.translate('xpack.stackAlerts.searchSource.ui.searchQuery', {
-              defaultMessage: 'Search query',
-            })}
             query={query}
             indexPatterns={dataViews}
             savedQuery={savedQuery}
@@ -243,7 +247,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         </>
       )}
 
-      <EuiSpacer />
+      <EuiSpacer size="m" />
 
       <RuleCommonExpressions
         threshold={ruleConfiguration.threshold}
