@@ -99,3 +99,4 @@ export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './va
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 export type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
+export { CoreSavedObjectsRouteHandlerContext } from './saved_objects_route_handler_context';
