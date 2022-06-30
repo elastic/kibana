@@ -6,10 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type {
-  AlertsClient,
-  RuleRegistryPluginStartContract,
-} from '@kbn/rule-registry-plugin/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';

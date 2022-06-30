@@ -116,7 +116,7 @@ export class StatsQuery {
           ],
         },
       },
-      //search_after: undefined,
+      // search_after: undefined,
       index,
       aggs: {
         ids: {
