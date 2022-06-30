@@ -12,7 +12,6 @@ import {
   StartServicesAccessor,
   RequestHandler,
   RouteValidatorFullConfig,
-  RequestHandlerContext,
 } from '@kbn/core/server';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
 import { IndexPatternsFetcher } from '../fetcher';
@@ -52,11 +51,7 @@ const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
   // not available to get request
   body: schema.maybe(schema.object({ index_filter: schema.any() })),
 };
-const handler: RequestHandler<{}, IQuery, IBody, RequestHandlerContext> = async (
-  context,
-  request,
-  response
-) => {
+const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, response) => {
   const { asCurrentUser } = (await context.core).elasticsearch.client;
   const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
   const {
