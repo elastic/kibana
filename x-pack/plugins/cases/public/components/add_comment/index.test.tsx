@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { waitFor, act } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
-import { TestProviders } from '../../common/mock';
+import { noCasesPermissions, TestProviders } from '../../common/mock';
 
 import { CommentRequest, CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -119,7 +119,7 @@ describe('AddComment ', () => {
       isLoading: true,
     }));
     const wrapper = mount(
-      <TestProviders permissions={{ all: false, read: false }}>
+      <TestProviders permissions={noCasesPermissions()}>
         <AddComment {...{ ...addCommentProps }} />
       </TestProviders>
     );

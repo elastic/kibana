@@ -187,7 +187,11 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
       generalCases: {
         all: permissions.all,
+        create: permissions.create,
         read: permissions.read,
+        update: permissions.update,
+        delete: permissions.delete,
+        push: permissions.push,
       },
       visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
       dashboard: {
@@ -203,7 +207,11 @@ export const useApplicationCapabilities = (): UseApplicationCapabilities => {
       capabilities.visualize?.save,
       capabilities.visualize?.show,
       permissions.all,
+      permissions.create,
       permissions.read,
+      permissions.update,
+      permissions.delete,
+      permissions.push,
     ]
   );
 };

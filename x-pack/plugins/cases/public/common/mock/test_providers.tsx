@@ -83,19 +83,29 @@ export const testQueryClient = new QueryClient({
   },
 });
 
-export const buildCasesPermissions = (overrides: Partial<CasesPermissions> = {}) => {
+export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 'all'>> = {}) => {
+  const create = overrides.create ?? true;
   const read = overrides.read ?? true;
-  const all = overrides.all ?? true;
+  const update = overrides.update ?? true;
+  const deletePermissions = overrides.delete ?? true;
+  const push = overrides.push ?? true;
+  const all = create && read && update && deletePermissions && push;
 
   return {
     all,
+    create,
     read,
+    update,
+    delete: deletePermissions,
+    push,
   };
 };
 
 export const allCasesPermissions = () => buildCasesPermissions();
-export const noCasesPermissions = () => buildCasesPermissions({ read: false, all: false });
-export const readCasesPermissions = () => buildCasesPermissions({ all: false });
+export const noCasesPermissions = () =>
+  buildCasesPermissions({ read: false, create: false, update: false, delete: false, push: false });
+export const readCasesPermissions = () =>
+  buildCasesPermissions({ read: true, create: false, update: false, delete: false, push: false });
 
 export const createAppMockRenderer = ({
   features,

@@ -19,6 +19,7 @@ import {
 import { CasesFeaturesAllRequired, CasesFeatures } from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
 import { ReleasePhase } from '../types';
+import { CasesPermissions } from '../../client/helpers/capabilities';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
@@ -26,10 +27,7 @@ export interface CasesContextValue {
   owner: string[];
   appId: string;
   appTitle: string;
-  permissions: {
-    all: boolean;
-    read: boolean;
-  };
+  permissions: CasesPermissions;
   basePath: string;
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
