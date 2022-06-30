@@ -23,10 +23,10 @@ import {
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
 } from './translations';
 
-import { getActionButtonCount, getActionsColumnWidth } from './actions_column';
 import './alerts_table.scss';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
+const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const GridStyles: EuiDataGridStyle = {
   border: 'none',
@@ -59,6 +59,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pageIndex: activePage,
     pageSize: props.pageSize,
   });
+  const { useActionsColumn = () => ({ getActionButtonIconsProps: undefined, width: undefined }) } =
+    props.alertsTableConfiguration;
 
   const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
 
@@ -73,18 +75,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [onColumnsChange, props.columns]
   );
 
-  const { useActionsColumn = () => ({ actionButtonIcons: undefined }) } =
-    props.alertsTableConfiguration;
-  const { actionButtonIcons } = useActionsColumn();
+  const { getActionButtonIconsProps, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
+    useActionsColumn();
 
   const leadingControlColumns = useMemo(() => {
-    const actionButtonCount = getActionButtonCount(actionButtonIcons, props.showExpandToDetails);
-    if (!actionButtonCount) return props.leadingControlColumns;
+    if (!props.showExpandToDetails && !getActionButtonIconsProps)
+      return props.leadingControlColumns;
 
     return [
       {
         id: 'expandColumn',
-        width: getActionsColumnWidth(actionButtonCount),
+        width: actionsColumnWidth,
         headerCellRender: () => {
           return (
             <span data-test-subj="expandColumnHeaderLabel">
@@ -96,6 +97,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
             visibleRowIndex: number;
           };
+          const actionButtonIconsProps =
+            getActionButtonIconsProps && getActionButtonIconsProps(alerts[visibleRowIndex]);
+
           return (
             <EuiFlexGroup gutterSize="none" responsive={false}>
               {props.showExpandToDetails && (
@@ -114,7 +118,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              {actionButtonIcons?.map((euiButtonIconProps: ActionButtonIcon) => {
+              {actionButtonIconsProps?.map((euiButtonIconProps: ActionButtonIcon) => {
                 return (
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon {...euiButtonIconProps} />
@@ -128,10 +132,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       ...props.leadingControlColumns,
     ];
   }, [
+    actionsColumnWidth,
+    alerts,
+    getActionButtonIconsProps,
     props.leadingControlColumns,
     props.showExpandToDetails,
     setFlyoutAlertIndex,
-    actionButtonIcons,
   ]);
 
   useEffect(() => {

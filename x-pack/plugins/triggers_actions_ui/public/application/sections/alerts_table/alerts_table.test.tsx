@@ -144,7 +144,7 @@ describe('AlertsTable', () => {
             ...alertsTableConfiguration,
             useActionsColumn: () => {
               return {
-                actionButtonIcons: [
+                getActionButtonIconsProps: () => [
                   {
                     iconType: 'analyzeEvent',
                     color: 'primary',
@@ -177,7 +177,7 @@ describe('AlertsTable', () => {
             ...alertsTableConfiguration,
             useActionsColumn: () => {
               return {
-                actionButtonIcons: [
+                getActionButtonIconsProps: () => [
                   {
                     iconType: 'analyzeEvent',
                     color: 'primary',
