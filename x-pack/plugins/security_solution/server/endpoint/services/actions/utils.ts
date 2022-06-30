@@ -12,6 +12,7 @@ import {
   failedFleetActionErrorCode,
 } from '../../../../common/endpoint/constants';
 import type {
+  ActionResponseOutput,
   ActivityLogAction,
   ActivityLogActionResponse,
   ActivityLogEntry,
@@ -102,6 +103,7 @@ interface ActionCompletionInfo {
   completedAt: undefined | string;
   wasSuccessful: boolean;
   errors: undefined | string[];
+  outputs: Record<string, ActionResponseOutput>;
 }
 
 export const getActionCompletionInfo = (
@@ -113,6 +115,7 @@ export const getActionCompletionInfo = (
   const completedInfo: ActionCompletionInfo = {
     completedAt: undefined,
     errors: undefined,
+    outputs: {},
     isCompleted: Boolean(agentIds.length),
     wasSuccessful: Boolean(agentIds.length),
   };
@@ -130,13 +133,20 @@ export const getActionCompletionInfo = (
   // If completed, then get the completed at date and determine if action was successful or not
   if (completedInfo.isCompleted) {
     const responseErrors: ActionCompletionInfo['errors'] = [];
-
-    for (const normalizedAgentResponse of Object.values(responsesByAgentId)) {
+    completedInfo.outputs = {};
+    for (const [agentId, normalizedAgentResponse] of Object.entries(responsesByAgentId)) {
       if (
         !completedInfo.completedAt ||
         completedInfo.completedAt < (normalizedAgentResponse.completedAt ?? '')
       ) {
         completedInfo.completedAt = normalizedAgentResponse.completedAt;
+        if (
+          normalizedAgentResponse.endpointResponse &&
+          normalizedAgentResponse.endpointResponse.item.data.EndpointActions.output
+        ) {
+          completedInfo.outputs[agentId] =
+            normalizedAgentResponse.endpointResponse.item.data.EndpointActions.output;
+        }
       }
 
       if (!normalizedAgentResponse.wasSuccessful) {
