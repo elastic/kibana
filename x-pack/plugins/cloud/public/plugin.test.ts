@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+import { Sha256 } from '@kbn/crypto';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
-import { CloudPlugin, CloudConfigType } from './plugin';
-import { firstValueFrom } from 'rxjs';
-import { Sha256 } from '@kbn/core/public/utils';
+import { CloudPlugin, type CloudConfigType } from './plugin';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {

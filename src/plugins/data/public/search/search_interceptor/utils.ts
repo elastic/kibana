@@ -7,7 +7,7 @@
  */
 
 import stringify from 'json-stable-stringify';
-import { Sha256 } from '@kbn/core/public/utils';
+import { Sha256 } from '@kbn/crypto';
 
 export async function createRequestHash(keys: Record<string, any>) {
   return new Sha256().update(stringify(keys), 'utf8').digest('hex');

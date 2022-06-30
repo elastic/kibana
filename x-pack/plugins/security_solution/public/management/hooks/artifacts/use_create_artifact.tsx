@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
@@ -18,19 +18,19 @@ export function useCreateArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
   customOptions: UseMutationOptions<
     ExceptionListItemSchema,
-    HttpFetchError,
+    IHttpFetchError,
     CreateExceptionListItemSchema,
     () => void
   > = DEFAULT_OPTIONS
 ): UseMutationResult<
   ExceptionListItemSchema,
-  HttpFetchError,
+  IHttpFetchError,
   CreateExceptionListItemSchema,
   () => void
 > {
   return useMutation<
     ExceptionListItemSchema,
-    HttpFetchError,
+    IHttpFetchError,
     CreateExceptionListItemSchema,
     () => void
   >((exception: CreateExceptionListItemSchema) => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock } from '../../http/http_service.mock';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { RecentlyAccessedService } from './recently_accessed_service';
 import { Subject } from 'rxjs';
 import { takeUntil, bufferCount } from 'rxjs/operators';

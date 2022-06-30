@@ -6,11 +6,24 @@
  */
 
 import { call, put } from 'redux-saga/effects';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { fetchEffectFactory } from './fetch_effect';
 import { indexStatusAction } from '../actions';
-import { HttpFetchError } from '@kbn/core/public';
-import { StatesIndexStatus } from '../../../../common/runtime_types';
+import type { StatesIndexStatus } from '../../../../common/runtime_types';
 import { fetchIndexStatus } from '../api';
+
+class HttpFetchError extends Error implements IHttpFetchError {
+  name: string;
+  request: Request;
+  req: Request;
+
+  constructor(message: string, name = 'error', req = {} as any) {
+    super(message);
+    this.name = name;
+    this.req = req;
+    this.request = req;
+  }
+}
 
 describe('fetch saga effect factory', () => {
   const asyncAction = indexStatusAction;
@@ -44,11 +57,7 @@ describe('fetch saga effect factory', () => {
   });
 
   it('works with error workflow', () => {
-    const indexStatusResultError = new HttpFetchError(
-      'No heartbeat index found.',
-      'error',
-      {} as any
-    );
+    const indexStatusResultError = new HttpFetchError('No heartbeat index found.');
 
     fetchEffect = fetchEffectFactory(
       fetchIndexStatus,
@@ -68,11 +77,7 @@ describe('fetch saga effect factory', () => {
   });
 
   it('works with throw error workflow', () => {
-    const unExpectedError = new HttpFetchError(
-      'No url found for the call, so throw error.',
-      'error',
-      {} as any
-    );
+    const unExpectedError = new HttpFetchError('No url found for the call, so throw error.');
 
     fetchEffect = fetchEffectFactory(
       fetchIndexStatus,

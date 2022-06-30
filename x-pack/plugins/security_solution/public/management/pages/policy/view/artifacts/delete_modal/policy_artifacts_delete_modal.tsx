@@ -7,8 +7,8 @@
 
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
 import { useQueryClient } from 'react-query';
-import { HttpFetchError } from '@kbn/core/public';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback } from 'react';
 import { useBulkUpdateArtifact } from '../../../../../hooks/artifacts';
 import { useToasts } from '../../../../../../common/lib/kibana';
@@ -41,7 +41,7 @@ export const PolicyArtifactsDeleteModal = React.memo<PolicyArtifactsDeleteModalP
           queryClient.invalidateQueries(['list', apiClient]);
           onClose();
         },
-        onError: (error?: HttpFetchError) => {
+        onError: (error?: IHttpFetchError) => {
           toasts.addError(error as unknown as Error, {
             title: labels.deleteModalErrorMessage,
           });

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { ReactElement, ReactNode } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';

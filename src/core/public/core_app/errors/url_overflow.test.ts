@@ -7,13 +7,13 @@
  */
 
 import { createMemoryHistory, History } from 'history';
+import type { IBasePath } from '@kbn/core-http-browser';
 
-import { BasePath } from '../../http/base_path';
+import { BasePath } from '@kbn/core-http-browser-internal';
 import { notificationServiceMock } from '../../notifications/notifications_service.mock';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
-import { IBasePath } from '../../http';
-import { IToasts } from '../../notifications';
-import { IUiSettingsClient } from '../../ui_settings';
+import type { IToasts } from '../../notifications';
+import type { IUiSettingsClient } from '../../ui_settings';
 
 import { setupUrlOverflowDetection, URL_MAX_LENGTH, URL_WARNING_LENGTH } from './url_overflow';
 
@@ -74,11 +74,11 @@ describe('url overflow detection', () => {
     const unmount = mountToast(element);
     expect(element).toMatchInlineSnapshot(`
       <div>
-        Either enable the 
+        Either enable the
         <code>
           state:storeInSessionStorage
         </code>
-         option in 
+         option in
         <a
           href="/test-123/app/management/kibana/settings"
         >

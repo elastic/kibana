@@ -6,8 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-import { HttpFetchError } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
@@ -266,11 +264,3 @@ export const getCreateTransformRequestBody = (
   // conditionally add additional settings
   ...getCreateTransformSettingsRequestBody(transformDetailsState),
 });
-
-export function isHttpFetchError(error: any): error is HttpFetchError {
-  return (
-    error instanceof HttpFetchError &&
-    typeof error.name === 'string' &&
-    typeof error.message !== 'undefined'
-  );
-}

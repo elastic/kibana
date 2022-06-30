@@ -6,7 +6,7 @@
  */
 
 import type { UseQueryOptions, UseQueryResult } from 'react-query';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from 'react-query';
 import { useHttp } from '../../../common/lib/kibana';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
@@ -18,11 +18,11 @@ import type {
 
 export const useGetActionDetails = <TOutputType extends object = object>(
   actionId: string,
-  options: UseQueryOptions<ActionDetailsApiResponse<RunningProcessesEntry>, HttpFetchError> = {}
-): UseQueryResult<ActionDetailsApiResponse<RunningProcessesEntry>, HttpFetchError> => {
+  options: UseQueryOptions<ActionDetailsApiResponse<RunningProcessesEntry>, IHttpFetchError> = {}
+): UseQueryResult<ActionDetailsApiResponse<RunningProcessesEntry>, IHttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<ActionDetailsApiResponse<RunningProcessesEntry>, HttpFetchError>({
+  return useQuery<ActionDetailsApiResponse<RunningProcessesEntry>, IHttpFetchError>({
     queryKey: ['get-action-details', actionId],
     ...options,
     queryFn: () => {

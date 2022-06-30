@@ -13,7 +13,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 
 import { createRenderer } from './utils';
 import { ApplicationService } from '../application_service';
-import { httpServiceMock } from '../../http/http_service.mock';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';

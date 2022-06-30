@@ -34,6 +34,7 @@ import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceSetup, ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { ExecutionContextSetup, ExecutionContextStart } from '@kbn/core-execution-context-browser';
+import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 
 import type {
@@ -63,7 +64,6 @@ import {
   NavType,
   ChromeHelpMenuActions,
 } from './chrome';
-import { HttpSetup, HttpStart } from './http';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
@@ -163,8 +163,6 @@ export type {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './saved_objects';
 
-export { HttpFetchError } from './http';
-
 export type {
   HttpHeadersInit,
   HttpRequestInit,
@@ -181,9 +179,10 @@ export type {
   IExternalUrl,
   IHttpInterceptController,
   ResponseErrorBody,
-  IHttpFetchError,
   IHttpResponseInterceptorOverrides,
-} from './http';
+} from '@kbn/core-http-browser';
+
+export type { IHttpFetchError } from '@kbn/core-http-browser';
 
 export type {
   OverlayStart,

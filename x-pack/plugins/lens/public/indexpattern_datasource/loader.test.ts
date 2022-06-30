@@ -17,7 +17,6 @@ import {
   injectReferences,
 } from './loader';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { HttpFetchError } from '@kbn/core/public';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -1158,14 +1157,7 @@ describe('loader', () => {
       const setState = jest.fn();
       const fetchJson = jest.fn((path: string) => {
         return new Promise((resolve, reject) => {
-          reject(
-            new HttpFetchError(
-              'timeout',
-              'name',
-              {} as unknown as Request,
-              { status: 408 } as unknown as Response
-            )
-          );
+          reject(new Error('timeout'));
         });
       }) as unknown as HttpHandler;
 

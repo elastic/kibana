@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
-import { HttpFetchError } from '@kbn/core/public';
-import { HostIsolationRequestBody, HostIsolationResponse } from '../../../../common/endpoint/types';
+import { useMutation, type UseMutationOptions, type UseMutationResult } from 'react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type {
+  HostIsolationRequestBody,
+  HostIsolationResponse,
+} from '../../../../common/endpoint/types';
 import { unIsolateHost } from '../../../common/lib/endpoint_isolation';
 
 /**
@@ -17,11 +20,11 @@ import { unIsolateHost } from '../../../common/lib/endpoint_isolation';
 export const useSendReleaseEndpointRequest = (
   customOptions?: UseMutationOptions<
     HostIsolationResponse,
-    HttpFetchError,
+    IHttpFetchError,
     HostIsolationRequestBody
   >
-): UseMutationResult<HostIsolationResponse, HttpFetchError, HostIsolationRequestBody> => {
-  return useMutation<HostIsolationResponse, HttpFetchError, HostIsolationRequestBody>(
+): UseMutationResult<HostIsolationResponse, IHttpFetchError, HostIsolationRequestBody> => {
+  return useMutation<HostIsolationResponse, IHttpFetchError, HostIsolationRequestBody>(
     (releaseData: HostIsolationRequestBody) => {
       return unIsolateHost(releaseData);
     },

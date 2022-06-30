@@ -7,7 +7,8 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { HttpStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { HttpStart } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { Legacy } from '../legacy_shims';
 import { SetupModeFeature } from '../../common/enums';
 import { ISetupModeContext } from '../components/setup_mode/setup_mode_context';

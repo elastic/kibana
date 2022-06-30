@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpFetchError } from '@kbn/core/public';
-import { UseQueryResult, useQuery, UseQueryOptions } from 'react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { type UseQueryResult, useQuery, type UseQueryOptions } from 'react-query';
 import { useHttp } from '../../../common/lib/kibana';
 import { BASE_POLICY_RESPONSE_ROUTE } from '../../../../common/endpoint/constants';
-import { GetHostPolicyResponse } from '../../../../common/endpoint/types';
+import type { GetHostPolicyResponse } from '../../../../common/endpoint/types';
 
 export function useGetEndpointPolicyResponse(
   selectedEndpoint: string,
-  customQueryOptions?: UseQueryOptions<GetHostPolicyResponse, HttpFetchError>
-): UseQueryResult<GetHostPolicyResponse, HttpFetchError> {
+  customQueryOptions?: UseQueryOptions<GetHostPolicyResponse, IHttpFetchError>
+): UseQueryResult<GetHostPolicyResponse, IHttpFetchError> {
   const http = useHttp();
-  return useQuery<GetHostPolicyResponse, HttpFetchError>(
+  return useQuery<GetHostPolicyResponse, IHttpFetchError>(
     ['getEndpointPolicyResponse', selectedEndpoint],
     () => {
       return http.get<GetHostPolicyResponse>(BASE_POLICY_RESPONSE_ROUTE, {

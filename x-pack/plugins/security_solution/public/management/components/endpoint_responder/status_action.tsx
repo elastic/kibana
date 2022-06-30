@@ -9,7 +9,7 @@ import React, { memo, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { HttpFetchError } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { v4 as uuidV4 } from 'uuid';
 import type { HostInfo, PendingActionsResponse } from '../../../../common/endpoint/types';
 import type { EndpointCommandDefinitionMeta } from './types';
@@ -28,7 +28,7 @@ export const EndpointStatusActionResult = memo<
     {
       apiCalled?: boolean;
       endpointDetails?: HostInfo;
-      detailsFetchError?: HttpFetchError;
+      detailsFetchError?: IHttpFetchError;
       endpointPendingActions?: PendingActionsResponse;
     },
     EndpointCommandDefinitionMeta

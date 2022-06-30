@@ -16,7 +16,8 @@ import {
   injectedMetadataServiceMock,
   docLinksServiceMock,
 } from '@kbn/core/public/mocks';
-import { HttpService } from '@kbn/core/public/http';
+// FIXME plugins should not use core's internal service implementations
+import { HttpService } from '@kbn/core-http-browser-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
