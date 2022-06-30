@@ -65,3 +65,69 @@ export const ChangeListeners = () => {
 };
 
 ChangeListeners.storyName = 'ChangeListeners';
+
+ChangeListeners.parameters = {
+  docs: {
+    source: {
+      code: `
+const MyFormComponent = () => {
+  const { form } = useForm({ defaultValue });
+
+  const onUseFormDataChange = ({ title }: { title: string }) => {
+    action('1. useFormData() -> onChange() handler')(title);
+  };
+  const [{ title }] = useFormData({ watch: 'title', onChange: onUseFormDataChange });
+
+  const onFieldChangeProp = (value: string) => {
+    action('2. onChange() prop handler')(value);
+  };
+
+  useEffect(() => {
+    action('4. useEffect() "title" changed')(title);
+    action('')('----------------------------------');
+  }, [title]);
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      // ... do something with the data
+    }
+  };
+
+  return (
+    <Form form={form}>
+      <EuiText>
+        <p>
+          <EuiTextColor color="subdued">
+            Info: start writing in the field and see the order of change listeners appear in the
+            &quot;Actions&quot; panel below.
+          </EuiTextColor>
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <UseField<string>
+        path="title"
+        component={TextField}
+        config={{
+          label: 'Title',
+          helpText: 'This is a help text for the field.',
+          validations: [
+            {
+              validator: ({ value }) => {
+                action('3. Validating "title" field')(value);
+              },
+            },
+          ],
+        }}
+        onChange={onFieldChangeProp}
+      />
+      <EuiSpacer />
+      <EuiButton onClick={submitForm}>Send</EuiButton>
+    </Form>
+  );
+};
+      `,
+      language: 'tsx',
+    },
+  },
+};

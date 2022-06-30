@@ -246,3 +246,47 @@ FieldTypes.argTypes = {
 };
 
 FieldTypes.storyName = 'FieldTypes';
+
+FieldTypes.parameters = {
+  docs: {
+    source: {
+      code: `
+const MyFormComponent = () => {
+  const { form } = useForm({ defaultValue });
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      // ... do something with the data
+    }
+  };
+
+  return (
+    <Form form={form}>
+      <EuiText>
+        <p>
+          <EuiTextColor color="subdued">
+            Info: change the field type in the &quot;Controls&quot; panel below.
+          </EuiTextColor>
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <UseField<any>
+        // We add a key to force a reset of the state whenever
+        // the field type changes
+        key={fieldType}
+        path="myField"
+        config={{ ...fieldConfigBase }}
+        onChange={action('onChange')}
+        {...getPropsForType(fieldType)}
+      />
+      <EuiSpacer />
+      <EuiButton onClick={submitForm}>Send</EuiButton>
+    </Form>
+  );
+};
+      `,
+      language: 'tsx',
+    },
+  },
+};
