@@ -133,12 +133,13 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   );
 
   const renderTimelineOption = useCallback((option, searchValue) => {
-    const title = isUntitled({ ...option, title: option.timelineTitle })
+    const title: string = isUntitled({ ...option, title: option.timelineTitle })
       ? i18nTimeline.UNTITLED_TIMELINE
       : option.timelineTitle;
-    const isDescriptionNonEmpty =
-      option.description != null && option.description.trim().length > 0;
-    const description = isDescriptionNonEmpty ? option.description : getEmptyTagValue();
+    const description: string | null =
+      option.description != null && option.description.trim().length > 0
+        ? option.description
+        : null;
 
     return (
       <EuiFlexGroup
@@ -158,12 +159,9 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiToolTip
-                content={isDescriptionNonEmpty ? description : null}
-                anchorClassName="eui-textTruncate eui-alignMiddle"
-              >
+              <EuiToolTip content={description} anchorClassName="eui-textTruncate eui-alignMiddle">
                 <EuiTextColor color="subdued" component="span">
-                  <small>{description}</small>
+                  <small>{description ?? getEmptyTagValue()}</small>
                 </EuiTextColor>
               </EuiToolTip>
             </EuiFlexItem>
