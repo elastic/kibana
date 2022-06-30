@@ -78,15 +78,114 @@ export interface KibanaRequestEvents {
 }
 
 /**
+ * Auth status for this request.
+ * @public
+ */
+export interface KibanaRequestAuth {
+  /** true if the request has been successfully authenticated, false otherwise. */
+  isAuthenticated: boolean;
+}
+
+/**
  * Kibana specific abstraction for an incoming request.
  * @public
  */
-export class KibanaRequest<
+export interface KibanaRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
   Method extends RouteMethod = any
 > {
+  /**
+   * A identifier to identify this request.
+   *
+   * @remarks
+   * Depending on the user's configuration, this value may be sourced from the
+   * incoming request's `X-Opaque-Id` header which is not guaranteed to be unique
+   * per request.
+   */
+  readonly id: string;
+
+  /**
+   * A UUID to identify this request.
+   *
+   * @remarks
+   * This value is NOT sourced from the incoming request's `X-Opaque-Id` header. it
+   * is always a UUID uniquely identifying the request.
+   */
+  readonly uuid: string;
+
+  /** a WHATWG URL standard object. */
+  readonly url: URL;
+
+  /** matched route details */
+  readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
+
+  /**
+   * Readonly copy of incoming request headers.
+   * @remarks
+   * This property will contain a `filtered` copy of request headers.
+   */
+  readonly headers: Headers;
+
+  /**
+   * Whether or not the request is a "system request" rather than an application-level request.
+   * Can be set on the client using the `HttpFetchOptions#asSystemRequest` option.
+   */
+  readonly isSystemRequest: boolean;
+
+  /**
+   * The socket associated with this request.
+   * See {@link IKibanaSocket}.
+   */
+  readonly socket: IKibanaSocket;
+
+  /**
+   * Allow to listen to events bound to this request.
+   * See {@link KibanaRequestEvents}.
+   */
+  readonly events: KibanaRequestEvents;
+
+  /**
+   * The auth status of this request.
+   * See {@link KibanaRequestAuth}.
+   */
+  readonly auth: KibanaRequestAuth;
+
+  /**
+   * URL rewritten in onPreRouting request interceptor.
+   */
+  readonly rewrittenUrl?: URL;
+
+  /**
+   * The path parameter of this request.
+   */
+  readonly params: Params;
+
+  /**
+   * The query parameter of this request.
+   */
+  readonly query: Query;
+
+  /**
+   * The body payload of this request.
+   */
+  readonly body: Body;
+}
+
+/**
+ * Core internal implementation of {@link KibanaRequest}
+ * @internal
+ * @remarks Only publicly exposed for consumers that need to forge requests using {@link CoreKibanaRequest.from}.
+ *          All other usages should import and use the {@link KibanaRequest} interface instead.
+ */
+export class CoreKibanaRequest<
+  Params = unknown,
+  Query = unknown,
+  Body = unknown,
+  Method extends RouteMethod = any
+> implements KibanaRequest<Params, Query, Body, Method>
+{
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
@@ -98,8 +197,8 @@ export class KibanaRequest<
     withoutSecretHeaders: boolean = true
   ) {
     const routeValidator = RouteValidator.from<P, Q, B>(routeSchemas);
-    const requestParts = KibanaRequest.validate(req, routeValidator);
-    return new KibanaRequest(
+    const requestParts = CoreKibanaRequest.validate(req, routeValidator);
+    return new CoreKibanaRequest(
       req,
       requestParts.params,
       requestParts.query,
@@ -128,51 +227,25 @@ export class KibanaRequest<
     return { query, params, body };
   }
 
-  /**
-   * A identifier to identify this request.
-   *
-   * @remarks
-   * Depending on the user's configuration, this value may be sourced from the
-   * incoming request's `X-Opaque-Id` header which is not guaranteed to be unique
-   * per request.
-   */
+  /** {@inheritDoc IKibanaRequest.id} */
   public readonly id: string;
-  /**
-   * A UUID to identify this request.
-   *
-   * @remarks
-   * This value is NOT sourced from the incoming request's `X-Opaque-Id` header. it
-   * is always a UUID uniquely identifying the request.
-   */
+  /** {@inheritDoc IKibanaRequest.uuid} */
   public readonly uuid: string;
-  /** a WHATWG URL standard object. */
+  /** {@inheritDoc IKibanaRequest.url} */
   public readonly url: URL;
-  /** matched route details */
+  /** {@inheritDoc IKibanaRequest.route} */
   public readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
-  /**
-   * Readonly copy of incoming request headers.
-   * @remarks
-   * This property will contain a `filtered` copy of request headers.
-   */
+  /** {@inheritDoc IKibanaRequest.headers} */
   public readonly headers: Headers;
-  /**
-   * Whether or not the request is a "system request" rather than an application-level request.
-   * Can be set on the client using the `HttpFetchOptions#asSystemRequest` option.
-   */
+  /** {@inheritDoc IKibanaRequest.isSystemRequest} */
   public readonly isSystemRequest: boolean;
-
-  /** {@link IKibanaSocket} */
+  /** {@inheritDoc IKibanaRequest.socket} */
   public readonly socket: IKibanaSocket;
-  /** Request events {@link KibanaRequestEvents} */
+  /** {@inheritDoc IKibanaRequest.events} */
   public readonly events: KibanaRequestEvents;
-  public readonly auth: {
-    /* true if the request has been successfully authenticated, otherwise false. */
-    isAuthenticated: boolean;
-  };
-
-  /**
-   * URL rewritten in onPreRouting request interceptor.
-   */
+  /** {@inheritDoc IKibanaRequest.auth} */
+  public readonly auth: KibanaRequestAuth;
+  /** {@inheritDoc IKibanaRequest.rewrittenUrl} */
   public readonly rewrittenUrl?: URL;
 
   /** @internal */
@@ -312,14 +385,14 @@ export class KibanaRequest<
  * @internal
  */
 export const ensureRawRequest = (request: KibanaRequest | Request) =>
-  isKibanaRequest(request) ? request[requestSymbol] : request;
+  isKibanaRequest(request) ? request[requestSymbol] : (request as Request);
 
 /**
  * Checks if an incoming request is a {@link KibanaRequest}
  * @internal
  */
-export function isKibanaRequest(request: unknown): request is KibanaRequest {
-  return request instanceof KibanaRequest;
+export function isKibanaRequest(request: unknown): request is CoreKibanaRequest {
+  return request instanceof CoreKibanaRequest;
 }
 
 function isRequest(request: any): request is Request {

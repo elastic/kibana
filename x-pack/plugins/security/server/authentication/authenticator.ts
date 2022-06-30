@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { IBasePath, IClusterClient, LoggerFactory } from '@kbn/core/server';
-import { KibanaRequest } from '@kbn/core/server';
+import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -131,7 +131,7 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
 
 function assertRequest(request: KibanaRequest) {
-  if (!(request instanceof KibanaRequest)) {
+  if (!(request instanceof CoreKibanaRequest)) {
     throw new Error(`Request should be a valid "KibanaRequest" instance, was [${typeof request}].`);
   }
 }
