@@ -61,31 +61,28 @@ export class KeydownScrollZoom extends Component<Props, State> {
 
   render() {
     return (
-      <div
+      <aside
         className={classNames('mapKeydownScrollZoom', {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          mapKeydownScrollZoom__show: this.state.show,
+          mapKeydownScrollZoom--show: this.state.show,
         })}
       >
-        <EuiText textAlign="center" size="s">
+        <EuiText textAlign="center" size="s" color="ghost">
           <h3>
-            <EuiTextColor color="ghost">
-              {i18n.translate('xpack.maps.keydownScrollZoom.keydownToZoomInstructions', {
-                defaultMessage: 'Use {key} + scroll to zoom the map',
-                values: { key: isMac ? '⌘' : 'ctrl' },
-              })}
-            </EuiTextColor>
+            {i18n.translate('xpack.maps.keydownScrollZoom.keydownToZoomInstructions', {
+              defaultMessage: 'Use {key} + scroll to zoom the map',
+              values: { key: isMac ? '⌘' : 'control' },
+            })}
           </h3>
-          <h3>
-            <EuiTextColor color="ghost">
-              {i18n.translate('xpack.maps.keydownScrollZoom.keydownClickAndDragZoomInstructions', {
-                defaultMessage:
-                  'Use shift + click and drag to zoom the map to fit within a bounding box',
-              })}
-            </EuiTextColor>
-          </h3>
+
+          <p>
+            {i18n.translate('xpack.maps.keydownScrollZoom.keydownClickAndDragZoomInstructions', {
+              defaultMessage:
+                'Use shift + click and drag to zoom the map to fit within a bounding box',
+            })}
+          </p>
         </EuiText>
-      </div>
+      </aside>
     );
   }
 }
