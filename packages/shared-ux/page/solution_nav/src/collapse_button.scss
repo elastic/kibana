@@ -14,14 +14,14 @@
     transition-delay: 0s !important;
   }
 
-  .kbnWithSolutionNav:hover &,
+  .kbnSolutionNav__sidebar:hover &,
   &:hover,
   &:focus {
     opacity: 1;
     left: 248px - $euiSizeL;
   }
 
-  .kbnWithSolutionNav:hover & {
+  .kbnSolutionNav__sidebar:hover & {
     transition-delay: $euiAnimSpeedSlow * 2;
   }
 
