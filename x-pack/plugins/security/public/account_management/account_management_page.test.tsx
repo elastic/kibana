@@ -16,8 +16,8 @@ import { UserAPIClient } from '../management';
 import { securityMock } from '../mocks';
 import { Providers } from './account_management_app';
 import { AccountManagementPage } from './account_management_page';
-import { UserProfileAPIClient } from './user_profile';
 import * as UserProfileImports from './user_profile/user_profile';
+import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
 
 const UserProfileMock = jest.spyOn(UserProfileImports, 'UserProfile');
 
