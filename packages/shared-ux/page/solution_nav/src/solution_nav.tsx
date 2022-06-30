@@ -7,7 +7,7 @@
  */
 import './solution_nav.scss';
 
-import React, { FunctionComponent, useState, useMemo } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 import classNames from 'classnames';
 import {
   EuiAvatarProps,
@@ -29,6 +29,9 @@ import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 
 import { SolutionNavCollapseButton } from './collapse_button';
 
+/**
+ * Props for the `SolutionNav` component.
+ */
 export type SolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items' | 'heading'> & {
   /**
    * Name of the solution, i.e. "Observability"
@@ -55,6 +58,9 @@ export type SolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items' | 
    * Control the collapsed state
    */
   isOpenOnDesktop?: boolean;
+  /**
+   * Handler for when the navigation flyout is collapsed.
+   */
   onCollapse?: () => void;
   /**
    * Allows hiding of the navigation by the user.
@@ -77,9 +83,9 @@ const setTabIndex = (items: Array<EuiSideNavItemType<{}>>, isHidden: boolean) =>
 const generateId = htmlIdGenerator('SolutionNav');
 
 /**
- * A wrapper around EuiSideNav but also creates the appropriate title with optional solution logo
+ * A wrapper around `EuiSideNav` that includes the appropriate title with optional solution logo.
  */
-export const SolutionNav: FunctionComponent<SolutionNavProps> = ({
+export const SolutionNav: FC<SolutionNavProps> = ({
   children,
   headingProps,
   icon,
@@ -96,7 +102,7 @@ export const SolutionNav: FunctionComponent<SolutionNavProps> = ({
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
 
-  // This is used for both the EuiSideNav and EuiFlyout toggling
+  // This is used for both the `EuiSideNav` and `EuiFlyout` toggling
   const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
   const toggleOpenOnMobile = () => {
     setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
@@ -109,11 +115,10 @@ export const SolutionNav: FunctionComponent<SolutionNavProps> = ({
     'kbnSolutionNav--hidden': isHidden,
   });
 
-  /**
-   * Create the avatar and titles
-   */
+  // Create the avatar and titles.
   const headingID = headingProps?.id || generateId('heading');
   const HeadingElement = headingProps?.element || 'h2';
+
   const titleText = (
     <EuiTitle size="xs" id={headingID}>
       <HeadingElement>
@@ -138,16 +143,16 @@ export const SolutionNav: FunctionComponent<SolutionNavProps> = ({
     </EuiTitle>
   );
 
-  /**
-   * Create the side nav content
-   */
+  // Create the side nav content
   const sideNavContent = useMemo(() => {
     if (isCustomSideNav) {
       return children;
     }
+
     if (!items) {
       return null;
     }
+
     return (
       <EuiSideNav
         aria-labelledby={headingID}

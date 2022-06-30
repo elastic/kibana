@@ -9,7 +9,4 @@
 export { SolutionNav } from './solution_nav';
 export type { SolutionNavProps } from './solution_nav';
 
-export { SolutionNavCollapseButton } from './collapse_button';
-export type { SolutionNavCollapseButtonProps } from './collapse_button';
-
 export { withSolutionNav } from './with_solution_nav';
