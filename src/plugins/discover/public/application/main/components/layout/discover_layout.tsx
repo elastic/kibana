@@ -257,12 +257,12 @@ export function DiscoverLayout({
             <SidebarMemoized
               columns={columns}
               documents$={savedSearchData$.documents$}
-              indexPatternList={dataViewList}
+              dataViewList={dataViewList}
               onAddField={onAddColumn}
               onAddFilter={onAddFilter}
               onRemoveField={onRemoveColumn}
               onChangeIndexPattern={onChangeDataView}
-              selectedIndexPattern={dataView}
+              selectedDataView={dataView}
               state={state}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}

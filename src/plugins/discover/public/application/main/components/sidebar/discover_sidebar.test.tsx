@@ -38,7 +38,7 @@ function getCompProps(): DiscoverSidebarProps {
   const dataView = stubLogstashDataView;
   const hits = getDataTableRecords(dataView);
 
-  const indexPatternList = [
+  const dataViewList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
     { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
     { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
@@ -60,12 +60,12 @@ function getCompProps(): DiscoverSidebarProps {
     columns: ['extension'],
     fieldCounts,
     documents: hits,
-    indexPatternList,
+    dataViewList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    selectedIndexPattern: dataView,
+    selectedDataView: dataView,
     state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),

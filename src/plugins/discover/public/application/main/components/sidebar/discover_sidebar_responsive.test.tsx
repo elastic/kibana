@@ -77,7 +77,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
 
   const hits = getDataTableRecords(dataView);
 
-  const indexPatternList = [
+  const dataViewList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
     { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
     { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
@@ -99,12 +99,12 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
     }) as AvailableFields$,
-    indexPatternList,
+    dataViewList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    selectedIndexPattern: dataView,
+    selectedDataView: dataView,
     state: {},
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
