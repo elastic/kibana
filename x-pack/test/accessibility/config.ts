@@ -16,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
 
     testFiles: [
+      require.resolve('./apps/cross_cluster_replication'),
       require.resolve('./apps/login_page'),
       require.resolve('./apps/kibana_overview'),
       require.resolve('./apps/home'),
