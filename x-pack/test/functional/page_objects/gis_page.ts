@@ -564,7 +564,7 @@ export class GisPageObject extends FtrService {
   }
 
   async openInspectorMapView() {
-    await this.inspector.openInspectorView('Map');
+    await this.inspector.openInspectorView('Map details');
   }
 
   // Method should only be used when multiple requests are expected

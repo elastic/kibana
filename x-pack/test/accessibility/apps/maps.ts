@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'maps']);
 
   describe('Maps app Accessibility', () => {
@@ -62,12 +63,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('map inspector panel - view requests', async function () {
-      await PageObjects.maps.openInspectorView('Requests');
+      await inspector.openInspectorView('Requests');
       await a11y.testAppSnapshot();
     });
 
     it('map inspector panel - view maps', async function () {
-      await PageObjects.maps.openInspectorView('Map');
+      await inspector.openInspectorView('Map details');
       await a11y.testAppSnapshot();
     });
 
