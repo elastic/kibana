@@ -18,7 +18,7 @@ export const LongRunningCommandHint = memo(() => {
     <ConsoleText data-test-subj={getTestId('longRunningCommandHint')}>
       <FormattedMessage
         id="xpack.securitySolution.console.longRunningCommandHintMessage"
-        defaultMessage="Hint: We are still working on this task. You may leave the console or place another command wile this command is processing."
+        defaultMessage="Hint: We are still working on this task. You may leave the console or place another command while this command is processing."
       />
     </ConsoleText>
   );
