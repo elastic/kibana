@@ -21,8 +21,8 @@ export function getAlertType(alerting: AlertingSetup): RuleTypeModel<EsQueryAler
 
   return {
     id: ES_QUERY_ALERT_TYPE,
-    description: i18n.translate('xpack.stackAlerts.esQuery.ui.alertType.descriptionLabel', {
-      defaultMessage: 'Alert when the following search thresholds are met.',
+    description: i18n.translate('xpack.stackAlerts.esQuery.ui.alertType.descriptionText', {
+      defaultMessage: 'Alert when matches are found during the latest query run.',
     }),
     iconClass: 'logoElastic',
     documentationUrl: (docLinks) => docLinks.links.alerting.esQuery,

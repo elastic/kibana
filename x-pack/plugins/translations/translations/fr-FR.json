@@ -28957,6 +28957,7 @@
     "xpack.stackAlerts.esQuery.missingEsQueryErrorMessage": "[esQuery] : doit contenir \"query\"",
     "xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage": "L'expression contient des erreurs.",
     "xpack.stackAlerts.esQuery.ui.alertType.defaultActionMessage": "L'alerte de recherche Elasticsearch \"\\{\\{alertName\\}\\}\" est active :\n\n- Valeur : \\{\\{context.value\\}\\}\n- Conditions remplies : \\{\\{context.conditions\\}\\} sur \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}\n- Horodatage : \\{\\{context.date\\}\\}\n- Lien : \\{\\{context.link\\}\\}",
+    "xpack.stackAlerts.esQuery.ui.alertType.descriptionText": "Alerte lorsque des correspondances sont trouvées au cours de la dernière exécution de la requête.",
     "xpack.stackAlerts.esQuery.ui.numQueryMatchesText": "La recherche correspond à {count} documents dans le/la/les dernier(s)/dernière(s) {window}.",
     "xpack.stackAlerts.esQuery.ui.queryEditor": "Éditeur de recherche Elasticsearch",
     "xpack.stackAlerts.esQuery.ui.queryError": "Erreur lors du test de la recherche : {message}",
