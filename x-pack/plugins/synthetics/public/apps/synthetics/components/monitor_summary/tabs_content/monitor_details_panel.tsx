@@ -19,6 +19,7 @@ import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { MonitorTags } from './monitor_tags';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { LocationsStatus } from './locations_status';
@@ -43,9 +44,9 @@ export const MonitorDetailsPanel = () => {
   }
 
   return (
-    <>
-      <EuiSpacer />
-      <EuiDescriptionList type="responsiveColumn" style={{ maxWidth: '400px' }}>
+    <Wrapper>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList type="responsiveColumn" compressed={true}>
         <EuiDescriptionListTitle>{ENABLED_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           {monitor && (
@@ -80,9 +81,16 @@ export const MonitorDetailsPanel = () => {
           {monitor && <MonitorTags tags={monitor[ConfigKey.TAGS]} />}
         </EuiDescriptionListDescription>
       </EuiDescriptionList>
-    </>
+    </Wrapper>
   );
 };
+
+const Wrapper = euiStyled.div`
+  .euiDescriptionList.euiDescriptionList--column > *,
+  .euiDescriptionList.euiDescriptionList--responsiveColumn > * {
+    margin-top: ${(props) => props.theme.eui.euiSizeS};
+  }
+`;
 
 const FREQUENCY_LABEL = i18n.translate('xpack.synthetics.management.monitorList.frequency', {
   defaultMessage: 'Frequency',
