@@ -1,0 +1,16 @@
+---
+id: kibDevDocsOpsTypeSummarizer
+slug: /kibana-dev-docs/ops/type-summarizer
+title: "@kbn/type-summarizer"
+description: A tool to summarize and produce a single .d.ts file from tsc output supporting sourcemaps
+date: 2022-05-17
+tags: ['kibana', 'dev', 'contributor', 'operations', 'type', 'summarizer', 'typescript', 'bundler', 'sourcemap']
+---
+
+Consumes the .d.ts files produced by `tsc` for a package and generates a single `.d.ts` file of the public types along with a source map that points back to the original source.
+
+## You mean like API Extractor?
+
+Yeah, except with source map support and without all the legacy features and other features we disable to generate our current type summaries.
+
+We first attempted to implement this in api-extractor but we hit a wall when dealing with the `Span` class. This class handles all the text output which ends up becoming source code, and I wasn't able to find a way to associate specific spans with source locations without getting 12 headaches. Instead I decided to try implementing this from scratch, reducing our reliance on the api-extractor project and putting us in control of how we generate type summaries.
