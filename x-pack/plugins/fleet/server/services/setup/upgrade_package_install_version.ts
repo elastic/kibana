@@ -13,8 +13,15 @@ import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../constants/fleet_es_assets';
 import type { Installation } from '../../types';
 
-import { reinstallPackageFromInstallation } from '../epm/packages';
+import { reinstallPackageForInstallation } from '../epm/packages';
 
+function findOutdatedInstallations(soClient: SavedObjectsClientContract) {
+  return soClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed and (${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_format_schema_version < ${FLEET_INSTALL_FORMAT_VERSION} or not ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_format_schema_version:*)`,
+  });
+}
 /**
  * Upgrade package install version for packages installed with an older version of Kibana
  */
@@ -27,11 +34,7 @@ export async function upgradePackageInstallVersion({
   esClient: ElasticsearchClient;
   logger: Logger;
 }) {
-  const res = await soClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-    perPage: SO_SEARCH_LIMIT,
-    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status:installed and (${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_format_schema_version < ${FLEET_INSTALL_FORMAT_VERSION} or not ${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_format_schema_version:*)`,
-  });
+  const res = await findOutdatedInstallations(soClient);
 
   if (res.total === 0) {
     return;
@@ -40,16 +43,17 @@ export async function upgradePackageInstallVersion({
   await pMap(
     res.saved_objects,
     ({ attributes: installation }) => {
+      // Uploaded package cannot be reinstalled
       if (installation.install_source === 'upload') {
         return;
       }
-      return reinstallPackageFromInstallation({
+      return reinstallPackageForInstallation({
         soClient,
         esClient,
         installation,
-      }).catch((err) => {
+      }).catch((err: Error) => {
         logger.error(
-          `Package needs to be manually reinstalled ${installation.name} updating install_version failed.`
+          `Package needs to be manually reinstalled ${installation.name} updating install_version failed. ${err.message}`
         );
       });
     },

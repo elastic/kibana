@@ -499,33 +499,6 @@ export type InstallPackageParams = {
   | ({ installSource: Extract<InstallSource, 'bundled'> } & InstallUploadedArchiveParams)
 );
 
-export async function reinstallPackageFromInstallation({
-  soClient,
-  esClient,
-  installation,
-}: {
-  soClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
-  installation: Installation;
-}) {
-  if (installation.install_source === 'upload') {
-    throw new Error('Cannot reinstall an uploaded package');
-  }
-  return installPackage({
-    // If the package is bundled reinstall from the registry will still use the bundled package.
-    installSource: 'registry',
-    savedObjectsClient: soClient,
-    pkgkey: Registry.pkgToPkgKey({
-      name: installation.name,
-      version: installation.version,
-    }),
-    esClient,
-    spaceId: installation.installed_kibana_space_id || DEFAULT_SPACE_ID,
-    // Force install the package will update the index template and the datastream write indices
-    force: true,
-  });
-}
-
 export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
