@@ -53,9 +53,9 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
     // Default navigation to allow collapsing
     const { canBeCollapsed = true } = solutionNav;
     const sideBarClasses = classNames(
-      'kbnWithSolutionNav',
+      'kbnSolutionNav__sidebar',
       {
-        'kbnWithSolutionNav--shrink':
+        'kbnSolutionNav__sidebar--shrink':
           isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop),
       },
       props.pageSideBarProps?.className
