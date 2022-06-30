@@ -391,6 +391,10 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
+    test('can optionally exclude fields', () => {
+      expect(indexPattern.toSpec(false)).toMatchSnapshot();
+    });
+
     test('can restore from spec', async () => {
       const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),

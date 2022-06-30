@@ -311,6 +311,11 @@ Controls whether to enable the newsfeed
 system for the {kib} UI notification center. Set to `false` to disable the
 newsfeed system. *Default: `true`*
 
+`node.roles`::
+Indicates which roles to configure the {kib} process with, which will effectively
+run {kib} in different modes. Valid options are `background_tasks` and `ui`,
+or `*` to select all roles. *Default: `*`*
+
 [[path-data]] `path.data`::
 The path where {kib} stores persistent data
 not saved in {es}. *Default: `data`*

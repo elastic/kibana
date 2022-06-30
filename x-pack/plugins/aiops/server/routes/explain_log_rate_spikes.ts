@@ -5,18 +5,27 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
+import { chunk } from 'lodash';
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { DataRequestHandlerContext, IEsSearchRequest } from '@kbn/data-plugin/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
 
 import {
+  addChangePoints,
   aiopsExplainLogRateSpikesSchema,
-  addFieldsAction,
+  updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
+import type { ChangePoint } from '../../common/types';
+
+import { fetchFieldCandidates } from './queries/fetch_field_candidates';
+import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
+
+// Overall progress is a float from 0 to 1.
+const LOADED_FIELD_CANDIDATES = 0.2;
+const PROGRESS_STEP_P_VALUES = 0.8;
 
 export const defineExplainLogRateSpikesRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -30,10 +39,11 @@ export const defineExplainLogRateSpikesRoute = (
       },
     },
     async (context, request, response) => {
-      const index = request.body.index;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
 
       const controller = new AbortController();
 
+      let loaded = 0;
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
         shouldStop = true;
@@ -44,47 +54,83 @@ export const defineExplainLogRateSpikesRoute = (
         controller.abort();
       });
 
-      const search = await context.search;
-      const res = await firstValueFrom(
-        search.search(
-          {
-            params: {
-              index,
-              body: { size: 1 },
-            },
-          } as IEsSearchRequest,
-          { abortSignal: controller.signal }
-        )
-      );
-
-      const doc = res.rawResponse.hits.hits.pop();
-      const fields = Object.keys(doc?._source ?? {});
-
       const { end, push, responseWithHeaders } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
         request.headers
       );
 
-      async function pushField() {
-        setTimeout(() => {
+      // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
+      (async () => {
+        push(
+          updateLoadingStateAction({
+            ccsWarning: false,
+            loaded,
+            loadingState: 'Loading field candidates.',
+          })
+        );
+
+        const { fieldCandidates } = await fetchFieldCandidates(client, request.body);
+
+        if (fieldCandidates.length > 0) {
+          loaded += LOADED_FIELD_CANDIDATES;
+        } else {
+          loaded = 1;
+        }
+
+        push(
+          updateLoadingStateAction({
+            ccsWarning: false,
+            loaded,
+            loadingState: `Identified ${fieldCandidates.length} field candidates.`,
+          })
+        );
+
+        if (shouldStop || fieldCandidates.length === 0) {
+          end();
+          return;
+        }
+
+        const changePoints: ChangePoint[] = [];
+        const fieldsToSample = new Set<string>();
+        const chunkSize = 10;
+
+        const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
+
+        for (const fieldCandidatesChunk of fieldCandidatesChunks) {
+          const { changePoints: pValues } = await fetchChangePointPValues(
+            client,
+            request.body,
+            fieldCandidatesChunk
+          );
+
+          if (pValues.length > 0) {
+            pValues.forEach((d) => {
+              fieldsToSample.add(d.fieldName);
+            });
+            changePoints.push(...pValues);
+          }
+
+          loaded += (1 / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES;
+          if (pValues.length > 0) {
+            push(addChangePoints(pValues));
+          }
+          push(
+            updateLoadingStateAction({
+              ccsWarning: false,
+              loaded,
+              loadingState: `Identified ${
+                changePoints?.length ?? 0
+              } significant field/value pairs.`,
+            })
+          );
+
           if (shouldStop) {
             end();
             return;
           }
+        }
 
-          const field = fields.pop();
-
-          if (field !== undefined) {
-            push(addFieldsAction([field]));
-            pushField();
-          } else {
-            end();
-          }
-          // This is just exemplary demo code so we're adding a random timout of 0-250ms to each
-          // stream push to simulate string chunks appearing on the client with some randomness.
-        }, Math.random() * 250);
-      }
-
-      pushField();
+        end();
+      })();
 
       return response.ok(responseWithHeaders);
     }
