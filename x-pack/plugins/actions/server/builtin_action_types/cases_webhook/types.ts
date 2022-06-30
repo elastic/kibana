@@ -69,7 +69,7 @@ export interface CreateIncidentParams {
   incident: Incident;
 }
 export interface UpdateIncidentParams {
-  incidentId: string;
+  externalId: string;
   incident: Partial<Incident>;
 }
 export interface SimpleComment {
@@ -78,7 +78,7 @@ export interface SimpleComment {
 }
 
 export interface CreateCommentParams {
-  incidentId: string;
+  externalId: string;
   comment: SimpleComment;
 }
 

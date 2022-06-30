@@ -25,6 +25,7 @@ import {
 import { Field, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { MustacheTextFieldWrapper } from '../../mustache_text_field_wrapper';
 import { JsonFieldWrapper } from '../../json_field_wrapper';
 import { PasswordField } from '../../password_field';
 import { ActionConnectorFieldsProps } from '../../../../types';
@@ -45,6 +46,10 @@ const casesVars: ActionVariable[] = [
 
 const commentVars: ActionVariable[] = [
   { name: 'case.comment', description: 'test comment', useWithTripleBracesInTemplates: true },
+];
+
+const urlVars: ActionVariable[] = [
+  { name: 'external.system.id', description: 'test id', useWithTripleBracesInTemplates: true },
 ];
 
 const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
@@ -173,11 +178,13 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               ],
               helpText: i18n.GET_INCIDENT_URL_HELP,
             }}
-            component={Field}
+            component={MustacheTextFieldWrapper}
             componentProps={{
               euiFieldProps: {
                 readOnly,
                 'data-test-subj': 'webhookGetUrlText',
+                messageVariables: urlVars,
+                paramsProperty: 'getIncidentUrl',
               },
             }}
           />
@@ -257,11 +264,20 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               ],
               helpText: i18n.EXTERNAL_INCIDENT_VIEW_URL_HELP,
             }}
-            component={Field}
+            component={MustacheTextFieldWrapper}
             componentProps={{
               euiFieldProps: {
                 readOnly,
                 'data-test-subj': 'incidentViewUrlText',
+                messageVariables: [
+                  ...urlVars,
+                  {
+                    name: 'external.system.title',
+                    description: 'test title',
+                    useWithTripleBracesInTemplates: true,
+                  },
+                ],
+                paramsProperty: 'incidentViewUrl',
               },
             }}
           />
@@ -305,11 +321,13 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               ],
               helpText: i18n.UPDATE_INCIDENT_URL_HELP,
             }}
-            component={Field}
+            component={MustacheTextFieldWrapper}
             componentProps={{
               euiFieldProps: {
                 readOnly,
                 'data-test-subj': 'webhookUpdateUrlText',
+                messageVariables: urlVars,
+                paramsProperty: 'updateIncidentUrl',
               },
             }}
           />
@@ -380,11 +398,13 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               ],
               helpText: i18n.CREATE_COMMENT_URL_HELP,
             }}
-            component={Field}
+            component={MustacheTextFieldWrapper}
             componentProps={{
               euiFieldProps: {
                 readOnly,
                 'data-test-subj': 'webhookCreateCommentUrlText',
+                messageVariables: urlVars,
+                paramsProperty: 'createCommentUrl',
               },
             }}
           />

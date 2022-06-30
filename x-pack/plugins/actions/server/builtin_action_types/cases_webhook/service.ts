@@ -9,12 +9,11 @@ import axios, { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
 import { isString } from 'lodash';
-import { renderMustacheStringInJson } from '../../lib/mustache_renderer';
+import { renderMustacheStringNoEscape } from '../../lib/mustache_renderer';
 import {
   createServiceError,
   getObjectValueByKey,
   getPushedDate,
-  makeIncidentUrl,
   removeSlash,
   throwIfResponseIsNotValidSpecial,
 } from './utils';
@@ -77,7 +76,13 @@ export const createExternalService = (
     try {
       const res = await request({
         axios: axiosInstance,
-        url: makeIncidentUrl(getIncidentUrl, id),
+        url: renderMustacheStringNoEscape(getIncidentUrl, {
+          external: {
+            system: {
+              id,
+            },
+          },
+        }),
         logger,
         configurationUtilities,
       });
@@ -118,7 +123,7 @@ export const createExternalService = (
         url: `${createIncidentUrl}`,
         logger,
         method: createIncidentMethod,
-        data: renderMustacheStringInJson(
+        data: renderMustacheStringNoEscape(
           createIncidentJson,
           makeCaseStringy({
             title: summary,
@@ -135,15 +140,22 @@ export const createExternalService = (
         res,
         requiredAttributesToBeInTheResponse: [createIncidentResponseKey],
       });
-      const incidentId = getObjectValueByKey(data, createIncidentResponseKey);
-      const insertedIncident = await getIncident(incidentId);
+      const externalId = getObjectValueByKey(data, createIncidentResponseKey);
+      const insertedIncident = await getIncident(externalId);
 
       logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
 
       return {
-        id: incidentId,
+        id: externalId,
         title: insertedIncident.title,
-        url: makeIncidentUrl(incidentViewUrl, incidentId, insertedIncident.title),
+        url: renderMustacheStringNoEscape(incidentViewUrl, {
+          external: {
+            system: {
+              id: externalId,
+              title: insertedIncident.title,
+            },
+          },
+        }),
         pushedDate: getPushedDate(insertedIncident.created),
       };
     } catch (error) {
@@ -152,18 +164,23 @@ export const createExternalService = (
   };
 
   const updateIncident = async ({
-    incidentId,
+    externalId,
     incident,
   }: UpdateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     try {
       const { labels, summary, description } = incident;
-
       const res = await request({
         axios: axiosInstance,
         method: updateIncidentMethod,
-        url: makeIncidentUrl(updateIncidentUrl, incidentId),
+        url: renderMustacheStringNoEscape(updateIncidentUrl, {
+          external: {
+            system: {
+              id: externalId,
+            },
+          },
+        }),
         logger,
-        data: renderMustacheStringInJson(
+        data: renderMustacheStringNoEscape(
           updateIncidentJson,
           makeCaseStringy({
             ...(summary ? { title: summary } : {}),
@@ -178,12 +195,19 @@ export const createExternalService = (
         res,
       });
 
-      const updatedIncident = await getIncident(incidentId as string);
+      const updatedIncident = await getIncident(externalId as string);
 
       return {
-        id: incidentId,
+        id: externalId,
         title: updatedIncident.title,
-        url: makeIncidentUrl(incidentViewUrl, incidentId, updatedIncident.title),
+        url: renderMustacheStringNoEscape(incidentViewUrl, {
+          external: {
+            system: {
+              id: externalId,
+              title: updatedIncident.title,
+            },
+          },
+        }),
         pushedDate: getPushedDate(updatedIncident.updated),
       };
     } catch (error) {
@@ -191,14 +215,20 @@ export const createExternalService = (
     }
   };
 
-  const createComment = async ({ incidentId, comment }: CreateCommentParams): Promise<unknown> => {
+  const createComment = async ({ externalId, comment }: CreateCommentParams): Promise<unknown> => {
     try {
       const res = await request({
         axios: axiosInstance,
         method: createCommentMethod,
-        url: makeIncidentUrl(createCommentUrl, incidentId),
+        url: renderMustacheStringNoEscape(createCommentUrl, {
+          external: {
+            system: {
+              id: externalId,
+            },
+          },
+        }),
         logger,
-        data: renderMustacheStringInJson(
+        data: renderMustacheStringNoEscape(
           createCommentJson,
           makeCaseStringy({ comment: comment.comment })
         ),

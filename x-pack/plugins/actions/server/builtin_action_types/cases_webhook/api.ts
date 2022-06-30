@@ -24,7 +24,7 @@ const pushToServiceHandler = async ({
 
   if (externalId != null) {
     res = await externalService.updateIncident({
-      incidentId: externalId,
+      externalId,
       incident,
     });
   } else {
@@ -40,7 +40,7 @@ const pushToServiceHandler = async ({
         continue;
       }
       await externalService.createComment({
-        incidentId: res.id,
+        externalId: res.id,
         comment: currentComment,
       });
       res.comments = [

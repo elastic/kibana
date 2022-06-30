@@ -11,9 +11,9 @@ import { isString, isPlainObject, cloneDeepWith } from 'lodash';
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';
 type Variables = Record<string, unknown>;
 
-// return a rendered mustache template in JSON given the specified variables and escape
+// return a rendered mustache template with no escape given the specified variables and escape
 // Individual variable values should be stringified already
-export function renderMustacheStringInJson(string: string, variables: Variables): string {
+export function renderMustacheStringNoEscape(string: string, variables: Variables): string {
   try {
     return Mustache.render(`${string}`, variables);
   } catch (err) {
