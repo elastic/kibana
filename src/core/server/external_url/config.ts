@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
-import { IExternalUrlPolicy } from '.';
+import { type TypeOf, schema } from '@kbn/config-schema';
+import type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
 /**
  * @internal

@@ -158,7 +158,7 @@ export type {
   UnauthorizedError,
 } from './elasticsearch';
 
-export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
+export type { IExternalUrlConfig } from './external_url';
 export type {
   AuthenticationHandler,
   AuthHeaders,

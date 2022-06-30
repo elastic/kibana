@@ -19,7 +19,7 @@ const setupService = ({
 }: {
   location: URL;
   serverBasePath: string;
-  policy: IExternalUrlPolicy;
+  policy: IExternalUrlPolicy[];
 }) => {
   const hashedPolicies = policy.map((entry) => {
     // If the host contains a `[`, then it's likely an IPv6 address. Otherwise, append a `.` if it doesn't already contain one
