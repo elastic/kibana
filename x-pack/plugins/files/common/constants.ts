@@ -15,6 +15,6 @@ export const FILE_SO_TYPE = 'file';
 /**
  * Unique type name of the public file saved object
  */
-export const PUBLIC_FILE_SO_TYPE = 'publicFile';
+export const FILE_SHARE_SO_TYPE = 'fileShare';
 
 export const ES_FIXED_SIZE_INDEX_BLOB_STORE = 'esFixedSizeIndex' as const;

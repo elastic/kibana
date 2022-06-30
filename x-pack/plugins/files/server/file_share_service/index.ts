@@ -6,3 +6,4 @@
  */
 
 export { FileShareService } from './file_share_service';
+export { FileShareServiceStart } from './types';

@@ -180,4 +180,18 @@ describe('FileService', () => {
       expect(await esClient.indices.exists({ index: nonDefaultIndex })).toBe(true);
     });
   });
+
+  describe('Sharing files', () => {
+    it('creates and deletes file share', async () => {
+      const file = await createDisposableFile({ fileKind, name: 'test' });
+      const shareObject = await file.share({ name: 'test name' });
+      expect(shareObject).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          name: 'test name',
+          valid_until: expect.any(String),
+        })
+      );
+    });
+  });
 });

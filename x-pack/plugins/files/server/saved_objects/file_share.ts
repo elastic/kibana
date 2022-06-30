@@ -6,8 +6,8 @@
  */
 
 import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
-import type { PublicFileSavedObjectAttributes } from '../../common/types';
-import { PUBLIC_FILE_SO_TYPE } from '../../common/constants';
+import type { FileShareSavedObjectAttributes } from '../../common/types';
+import { FILE_SHARE_SO_TYPE } from '../../common/constants';
 
 /**
  * This saved object represents an instance of a publicly shared file.
@@ -16,7 +16,7 @@ import { PUBLIC_FILE_SO_TYPE } from '../../common/constants';
  * Internet.
  */
 
-type Properties = Record<keyof PublicFileSavedObjectAttributes, SavedObjectsFieldMapping>;
+type Properties = Record<keyof FileShareSavedObjectAttributes, SavedObjectsFieldMapping>;
 
 const properties: Properties = {
   created_at: {
@@ -28,10 +28,13 @@ const properties: Properties = {
   file: {
     type: 'keyword',
   },
+  name: {
+    type: 'keyword',
+  },
 };
 
-export const publicFileObjectType: SavedObjectsType<PublicFileSavedObjectAttributes> = {
-  name: PUBLIC_FILE_SO_TYPE,
+export const fileShareObjectType: SavedObjectsType<FileShareSavedObjectAttributes> = {
+  name: FILE_SHARE_SO_TYPE,
   hidden: true,
   namespaceType: 'agnostic', // These saved objects should be visible everywhere
   mappings: {

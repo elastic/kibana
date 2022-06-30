@@ -14,8 +14,9 @@ import {
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { File, FileSavedObjectAttributes } from '../../common';
-import { fileObjectType } from '../saved_objects';
+import { fileObjectType, fileShareObjectType } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
+import { FileShareService } from '../file_share_service';
 import {
   CreateFileArgs,
   FindFileArgs,
@@ -35,23 +36,25 @@ export class FileServiceFactory {
     private readonly logger: Logger
   ) {}
 
-  private readonly savedObjectType = fileObjectType.name;
-
   private createFileService(req?: KibanaRequest): FileServiceStart {
+    const hiddenTypes = [fileObjectType.name, fileShareObjectType.name];
     const soClient = req
       ? this.savedObjectsService.getScopedClient(req, {
-          includedHiddenTypes: [this.savedObjectType],
+          includedHiddenTypes: hiddenTypes,
         })
-      : this.savedObjectsService.createInternalRepository([this.savedObjectType]);
+      : this.savedObjectsService.createInternalRepository(hiddenTypes);
 
     const auditLogger = req
       ? this.security?.audit.asScoped(req)
       : this.security?.audit.withoutRequest;
 
+    const fileShareService = new FileShareService(soClient);
+
     const internalFileService = new InternalFileService(
-      this.savedObjectType,
+      fileObjectType.name,
       soClient,
       this.blobStorageService,
+      fileShareService,
       auditLogger,
       this.fileKindRegistry,
       this.logger
@@ -72,6 +75,9 @@ export class FileServiceFactory {
       },
       async list<M>(args: ListFilesArgs) {
         return internalFileService.list(args) as Promise<Array<File<M>>>;
+      },
+      getFileShareService() {
+        return fileShareService;
       },
     };
   }
@@ -99,5 +105,6 @@ export class FileServiceFactory {
    */
   public static setup(savedObjectsSetup: SavedObjectsServiceSetup): void {
     savedObjectsSetup.registerType<FileSavedObjectAttributes<{}>>(fileObjectType);
+    savedObjectsSetup.registerType(fileShareObjectType);
   }
 }

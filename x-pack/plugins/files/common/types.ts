@@ -65,9 +65,31 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
   meta?: Meta;
 };
 
+/**
+ * Attributes of a file that represent a serialised version of the file.
+ */
+export type FileJSON = FileSavedObjectAttributes & { id: string };
+
+export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
+
+export type UpdatableFileAttributes<Meta = unknown> = Pick<
+  FileSavedObjectAttributes<Meta>,
+  'meta' | 'alt' | 'name'
+>;
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type PublicFileSavedObjectAttributes = {
+export type FileShareSavedObjectAttributes = {
   created_at: string;
+
+  /**
+   * ID of the file being shared publicly
+   */
+  file: string;
+
+  /**
+   * Human friendly name for this share token.
+   */
+  name?: string;
 
   /**
    * The date-time this file share will expire.
@@ -78,21 +100,14 @@ export type PublicFileSavedObjectAttributes = {
    * not be the default.
    */
   valid_until?: string;
-
-  /**
-   * ID of the file being shared publicly
-   */
-  file: string;
 };
 
-export type FileJSON = FileSavedObjectAttributes & { id: string };
+/**
+ * Attributes of a file that represent a serialised version of the file.
+ */
+export type FileShareJSON = FileShareSavedObjectAttributes & { id: string };
 
-export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
-
-export type UpdatableFileAttributes<Meta = unknown> = Pick<
-  FileSavedObjectAttributes<Meta>,
-  'meta' | 'alt' | 'name'
->;
+export type UpdatableFileShareAttributes = Pick<FileSavedObjectAttributes, 'name'>;
 
 /**
  * The set of properties and behaviors of the "smart" file object. This is built
@@ -133,6 +148,17 @@ export interface File<Meta = unknown> {
   downloadContent(): Promise<Readable>;
 
   delete(): Promise<void>;
+
+  share(opts?: { name?: string; validUntil?: string }): Promise<FileShareJSON>;
+
+  listShares(): Promise<FileShareJSON[]>;
+
+  unshare(opts: {
+    /**
+     * Specify the share instance to remove
+     */
+    shareId: string;
+  }): Promise<void>;
 
   toJSON(): FileJSON;
 }

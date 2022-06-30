@@ -8,6 +8,7 @@
 import { Logger } from '@kbn/core/server';
 import mimeType from 'mime';
 import { Readable } from 'stream';
+import { FileShareJSON } from '../../common/types';
 import {
   File as IFile,
   FileKind,
@@ -25,6 +26,7 @@ import {
 } from './file_attributes_reducer';
 import { createAuditEvent } from '../audit_events';
 import { InternalFileService } from '../file_service/internal_file_service';
+import { FileShareService } from '../file_share_service';
 import { BlobStorage } from '../blob_storage_service/types';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 
@@ -43,6 +45,7 @@ export class File<M = unknown> implements IFile {
     private readonly fileKindDescriptor: FileKind,
     private readonly internalFileService: InternalFileService,
     private readonly blobStorageService: BlobStorageService,
+    private readonly fileShareService: FileShareService,
     private readonly logger: Logger
   ) {
     this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
@@ -160,6 +163,24 @@ export class File<M = unknown> implements IFile {
     );
 
     return file;
+  }
+
+  public async share({
+    name,
+    validUntil,
+  }: {
+    name?: string;
+    validUntil?: string;
+  }): Promise<FileShareJSON> {
+    return await this.fileShareService.share({ file: this, name, validUntil });
+  }
+
+  async listShares(): Promise<FileShareJSON[]> {
+    return await this.fileShareService.list({ file: this });
+  }
+
+  async unshare(opts: { shareId: string }): Promise<void> {
+    await this.fileShareService.delete({ tokenId: opts.shareId });
   }
 
   public toJSON(): FileJSON {

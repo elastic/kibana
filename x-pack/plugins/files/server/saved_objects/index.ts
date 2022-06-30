@@ -6,3 +6,4 @@
  */
 
 export { fileObjectType } from './file';
+export { fileShareObjectType } from './file_share';
