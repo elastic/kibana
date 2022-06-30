@@ -33,6 +33,7 @@ export const initiateState = (
     footerContent: '',
     input: {
       textEntered: '',
+      rightOfCursor: { text: '' },
       commandEntered: '',
       placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
       showPopover: undefined,
