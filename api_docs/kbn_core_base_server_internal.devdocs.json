@@ -110,7 +110,22 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-base-server-internal",
+        "id": "def-server.uuidRegexp",
+        "type": "Object",
+        "tags": [],
+        "label": "uuidRegexp",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "packages/core/base/core-base-server-internal/src/regexp.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "common": {
     "classes": [],

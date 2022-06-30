@@ -19319,7 +19319,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ user_provided_metadata: Record<string, any>; }"
+              "{ user_provided_metadata?: Record<string, any> | undefined; tags?: string[] | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
             "deprecated": false
