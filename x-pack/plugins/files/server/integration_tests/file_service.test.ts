@@ -13,13 +13,13 @@ import {
 } from '@kbn/core/test_helpers/kbn_server';
 import { Readable } from 'stream';
 
-import type { FileStatus, File } from '../../../common';
+import type { FileStatus, File } from '../../common';
 
-import { fileKindsRegistry } from '../../file_kinds_registry';
-import { BlobStorageService } from '../../blob_storage_service';
-import { FileServiceFactory } from '..';
-import { FileServiceStart } from '../file_service';
-import { CreateFileArgs } from '../internal_file_service';
+import { fileKindsRegistry } from '../file_kinds_registry';
+import { BlobStorageService } from '../blob_storage_service';
+import { FileServiceFactory } from '../file_service';
+import { FileServiceStart } from '../file_service/file_service';
+import { CreateFileArgs } from '../file_service/internal_file_service';
 
 describe('FileService', () => {
   const fileKind: string = 'test';
