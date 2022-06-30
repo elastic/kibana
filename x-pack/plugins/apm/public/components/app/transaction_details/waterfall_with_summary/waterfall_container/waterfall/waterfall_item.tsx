@@ -202,13 +202,19 @@ export function WaterfallItem({
   const [widthFactor, setWidthFactor] = useState(1);
   const waterfallItemRef: React.RefObject<any> = useRef(null);
   useEffect(() => {
-    if(waterfallItemRef?.current && marginLeftLevel){
-        setWidthFactor(1 + marginLeftLevel/waterfallItemRef.current.offsetWidth);
+    if (waterfallItemRef?.current && marginLeftLevel) {
+      setWidthFactor(
+        1 + marginLeftLevel / waterfallItemRef.current.offsetWidth
+      );
     }
   }, [marginLeftLevel]);
 
   const width = (item.duration / totalDuration) * widthFactor * 100;
-  const left = ((((item.offset + item.skew) / totalDuration) * widthFactor) - widthFactor + 1) * 100;
+  const left =
+    (((item.offset + item.skew) / totalDuration) * widthFactor -
+      widthFactor +
+      1) *
+    100;
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
   const itemBarStyle = getItemBarStyle(item, color, width, left);
