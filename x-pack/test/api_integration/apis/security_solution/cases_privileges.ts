@@ -18,9 +18,72 @@ import { Role, User } from '../../../cases_api_integration/common/lib/authentica
 import {
   createCase,
   deleteAllCaseItems,
+  deleteCases,
   getCase,
 } from '../../../cases_api_integration/common/lib/utils';
 import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
+
+const secAllCasesOnlyDelete: Role = {
+  name: 'sec_all_cases_only_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCases: ['cases_delete'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+const secAllCasesOnlyDeleteUser: User = {
+  username: 'sec_all_cases_only_delete_user',
+  password: 'password',
+  roles: [secAllCasesOnlyDelete.name],
+};
+
+const secAllCasesNoDelete: Role = {
+  name: 'sec_all_cases_no_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCases: ['minimal_all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+const secAllCasesNoDeleteUser: User = {
+  username: 'sec_all_cases_no_delete_user',
+  password: 'password',
+  roles: [secAllCasesNoDelete.name],
+};
 
 const secAll: Role = {
   name: 'sec_all_role',
@@ -241,6 +304,8 @@ const roles = [
   secAll,
   secAllCasesRead,
   secAllCasesNone,
+  secAllCasesOnlyDelete,
+  secAllCasesNoDelete,
   secReadCasesAll,
   secReadCasesRead,
   secRead,
@@ -251,6 +316,8 @@ const users = [
   secAllUser,
   secAllCasesReadUser,
   secAllCasesNoneUser,
+  secAllCasesOnlyDeleteUser,
+  secAllCasesNoDeleteUser,
   secReadCasesAllUser,
   secReadCasesReadUser,
   secReadUser,
@@ -275,7 +342,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    for (const user of [secAllUser, secReadCasesAllUser]) {
+    for (const user of [secAllUser, secReadCasesAllUser, secAllCasesNoDeleteUser]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, async () => {
         await createCase(supertestWithoutAuth, getPostCaseRequest({ owner: APP_ID }), 200, {
           user,
@@ -289,6 +356,7 @@ export default ({ getService }: FtrProviderContext): void => {
       secReadCasesAllUser,
       secReadCasesReadUser,
       secReadUser,
+      secAllCasesNoDeleteUser,
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can get a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner: APP_ID }));
@@ -309,6 +377,7 @@ export default ({ getService }: FtrProviderContext): void => {
       secReadCasesReadUser,
       secReadUser,
       secReadCasesNoneUser,
+      secAllCasesOnlyDeleteUser,
     ]) {
       it(`User ${
         user.username
@@ -320,13 +389,39 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     }
 
-    for (const user of [secAllCasesNoneUser, secReadCasesNoneUser]) {
+    for (const user of [secAllCasesNoneUser, secReadCasesNoneUser, secAllCasesOnlyDeleteUser]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} cannot get a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner: APP_ID }));
 
         await getCase({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
+          expectedHttpCode: 403,
+          auth: { user, space: null },
+        });
+      });
+    }
+
+    for (const user of [secAllUser, secAllCasesOnlyDeleteUser]) {
+      it(`User ${user.username} with role(s) ${user.roles.join()} can delete a case`, async () => {
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner: APP_ID }));
+        await deleteCases({
+          caseIDs: [caseInfo.id],
+          supertest: supertestWithoutAuth,
+          expectedHttpCode: 204,
+          auth: { user, space: null },
+        });
+      });
+    }
+
+    for (const user of [secAllCasesReadUser, secAllCasesNoDeleteUser]) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} cannot delete a case`, async () => {
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner: APP_ID }));
+        await deleteCases({
+          caseIDs: [caseInfo.id],
+          supertest: supertestWithoutAuth,
           expectedHttpCode: 403,
           auth: { user, space: null },
         });

@@ -31,7 +31,10 @@ export const getCasesKibanaFeature = (
       app: [CASES_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       cases: {
-        all: [APP_ID],
+        create: [APP_ID],
+        read: [APP_ID],
+        update: [APP_ID],
+        push: [APP_ID],
       },
       api: [],
       savedObject: {
@@ -76,6 +79,9 @@ export const getCasesKibanaFeature = (
               savedObject: {
                 all: [],
                 read: [],
+              },
+              cases: {
+                delete: [APP_ID],
               },
               ui: casesCapabilities.delete,
             },

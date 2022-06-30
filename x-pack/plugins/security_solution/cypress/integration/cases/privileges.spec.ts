@@ -6,7 +6,7 @@
  */
 
 import { TestCaseWithoutTimeline } from '../../objects/case';
-import { ALL_CASES_NAME } from '../../screens/all_cases';
+import { ALL_CASES_CREATE_NEW_CASE_BTN, ALL_CASES_NAME } from '../../screens/all_cases';
 
 import { goToCreateNewCase } from '../../tasks/all_cases';
 import { cleanKibana, deleteCases } from '../../tasks/common';
@@ -31,12 +31,21 @@ import {
   secAllUser,
   secReadCasesAllUser,
   secReadCasesAll,
+  secAllCasesNoDelete,
+  secAllCasesNoDeleteUser,
+  secAllCasesOnlyReadDeleteUser,
+  secAllCasesOnlyReadDelete,
 } from '../../tasks/privileges';
 
 import { CASES_URL } from '../../urls/navigation';
 import { openSourcerer } from '../../tasks/sourcerer';
-const usersToCreate = [secAllUser, secReadCasesAllUser];
-const rolesToCreate = [secAll, secReadCasesAll];
+const usersToCreate = [
+  secAllUser,
+  secReadCasesAllUser,
+  secAllCasesNoDeleteUser,
+  secAllCasesOnlyReadDeleteUser,
+];
+const rolesToCreate = [secAll, secReadCasesAll, secAllCasesNoDelete, secAllCasesOnlyReadDelete];
 // needed to generate index pattern
 const visitSecuritySolution = () => {
   visitHostDetailsPage();
@@ -51,6 +60,7 @@ const testCase: TestCaseWithoutTimeline = {
   reporter: 'elastic',
   owner: 'securitySolution',
 };
+
 describe('Cases privileges', () => {
   before(() => {
     cleanKibana();
@@ -67,7 +77,7 @@ describe('Cases privileges', () => {
     deleteCases();
   });
 
-  for (const user of [secAllUser, secReadCasesAllUser]) {
+  for (const user of [secAllUser, secReadCasesAllUser, secAllCasesNoDeleteUser]) {
     it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, () => {
       loginWithUser(user);
       visitWithUser(CASES_URL, user);
@@ -78,6 +88,14 @@ describe('Cases privileges', () => {
       filterStatusOpen();
 
       cy.get(ALL_CASES_NAME).should('have.text', testCase.name);
+    });
+  }
+
+  for (const user of [secAllCasesOnlyReadDeleteUser]) {
+    it(`User ${user.username} with role(s) ${user.roles.join()} cannot create a case`, () => {
+      loginWithUser(user);
+      visitWithUser(CASES_URL, user);
+      cy.get(ALL_CASES_CREATE_NEW_CASE_BTN).should('not.exist');
     });
   }
 });

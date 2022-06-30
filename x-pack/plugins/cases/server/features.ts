@@ -39,7 +39,10 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
     privileges: {
       all: {
         cases: {
-          all: [APP_ID],
+          create: [APP_ID],
+          read: [APP_ID],
+          update: [APP_ID],
+          push: [APP_ID],
         },
         management: {
           insightsAndAlerting: [APP_ID],
@@ -83,6 +86,9 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                 savedObject: {
                   all: [],
                   read: [],
+                },
+                cases: {
+                  delete: [APP_ID],
                 },
                 ui: capabilities.delete,
               },

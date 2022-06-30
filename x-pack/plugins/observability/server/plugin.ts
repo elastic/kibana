@@ -59,7 +59,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
-            all: [observabilityFeatureId],
+            create: [observabilityFeatureId],
+            read: [observabilityFeatureId],
+            update: [observabilityFeatureId],
+            push: [observabilityFeatureId],
           },
           api: [],
           savedObject: {
@@ -104,6 +107,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                   savedObject: {
                     all: [],
                     read: [],
+                  },
+                  cases: {
+                    delete: [observabilityFeatureId],
                   },
                   ui: casesCapabilities.delete,
                 },

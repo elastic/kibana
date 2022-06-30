@@ -59,47 +59,56 @@ const UserActionPropertyActionsComponent = ({
     setShowDeleteConfirm(false);
   }, []);
 
-  const propertyActions = useMemo(
-    () =>
-      [
-        permissions.all
-          ? [
-              {
-                iconType: 'pencil',
-                label: editLabel,
-                onClick: onEditClick,
-              },
-              ...(deleteLabel && onDelete
-                ? [
-                    {
-                      iconType: 'trash',
-                      label: deleteLabel,
-                      onClick: onDeleteClick,
-                    },
-                  ]
-                : []),
-              {
-                iconType: 'quote',
-                label: quoteLabel,
-                onClick: onQuoteClick,
-              },
-            ]
-          : [],
-        canUseEditor && actionConfig ? [actionConfig] : [],
-      ].flat(),
-    [
-      permissions.all,
-      editLabel,
-      onEditClick,
-      deleteLabel,
-      onDelete,
-      onDeleteClick,
-      quoteLabel,
-      onQuoteClick,
-      canUseEditor,
-      actionConfig,
-    ]
-  );
+  const propertyActions = useMemo(() => {
+    const showEditPencilIcon = permissions.update;
+    const showTrashIcon = permissions.delete && deleteLabel && onDelete;
+    const showQuoteIcon = permissions.create;
+    const showLensEditor = permissions.update && canUseEditor && actionConfig;
+
+    return [
+      ...(showEditPencilIcon
+        ? [
+            {
+              iconType: 'pencil',
+              label: editLabel,
+              onClick: onEditClick,
+            },
+          ]
+        : []),
+      ...(showTrashIcon
+        ? [
+            {
+              iconType: 'trash',
+              label: deleteLabel,
+              onClick: onDeleteClick,
+            },
+          ]
+        : []),
+      ...(showQuoteIcon
+        ? [
+            {
+              iconType: 'quote',
+              label: quoteLabel,
+              onClick: onQuoteClick,
+            },
+          ]
+        : []),
+      ...(showLensEditor ? [actionConfig] : []),
+    ];
+  }, [
+    permissions.update,
+    permissions.delete,
+    permissions.create,
+    deleteLabel,
+    onDelete,
+    canUseEditor,
+    actionConfig,
+    editLabel,
+    onEditClick,
+    onDeleteClick,
+    quoteLabel,
+    onQuoteClick,
+  ]);
 
   if (!propertyActions.length) {
     return null;
