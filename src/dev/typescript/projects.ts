@@ -31,6 +31,7 @@ export const PROJECTS = [
   createProject('test/tsconfig.json', { name: 'kibana/test' }),
   createProject('x-pack/test/tsconfig.json', { name: 'x-pack/test' }),
   createProject('src/core/tsconfig.json'),
+  createProject('.buildkite/tsconfig.json'),
 
   createProject('x-pack/plugins/drilldowns/url_drilldown/tsconfig.json', {
     name: 'security_solution/cypress',
@@ -75,6 +76,11 @@ export const PROJECTS = [
     disableTypeCheck: true,
   }),
 
+  createProject('x-pack/plugins/observability/e2e/tsconfig.json', {
+    name: 'observability/synthetics-e2e-tests',
+    disableTypeCheck: true,
+  }),
+
   // Glob patterns to be all search at once
   ...findProjects([
     'src/plugins/*/tsconfig.json',
@@ -83,6 +89,7 @@ export const PROJECTS = [
     'x-pack/plugins/*/tsconfig.json',
     'examples/*/tsconfig.json',
     'x-pack/examples/*/tsconfig.json',
+    'test/analytics/fixtures/plugins/*/tsconfig.json',
     'test/plugin_functional/plugins/*/tsconfig.json',
     'test/interpreter_functional/plugins/*/tsconfig.json',
     'test/server_integration/__fixtures__/plugins/*/tsconfig.json',
