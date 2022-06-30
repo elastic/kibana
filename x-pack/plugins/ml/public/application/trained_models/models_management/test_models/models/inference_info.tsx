@@ -25,7 +25,6 @@ export const InferenceInfo: FC<Props> = ({ inferenceType, info }) => {
   return (
     <>
       <EuiCallOut
-        size="s"
         title={i18n.translate('xpack.ml.editModelSnapshotFlyout.calloutTitle', {
           defaultMessage: 'Model type: {inferenceType}',
           values: { inferenceType },
