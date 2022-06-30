@@ -16,17 +16,13 @@ import {
   ActivityLogItemTypes,
   EndpointAction,
   EndpointActionResponse,
-  ISOLATION_ACTIONS,
+  RESPONSE_ACTION_COMMANDS,
 } from '../types';
-
-const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */
   generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
-    const timeStamp = overrides['@timestamp']
-      ? new Date(overrides['@timestamp'])
-      : new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -38,8 +34,9 @@ export class FleetActionGenerator extends BaseDataGenerator {
         agents: [this.seededUUIDv4()],
         user_id: 'elastic',
         data: {
-          command: this.randomIsolateCommand(),
+          command: this.randomResponseActionCommand(),
           comment: this.randomString(15),
+          parameter: undefined,
         },
       },
       overrides
@@ -66,17 +63,26 @@ export class FleetActionGenerator extends BaseDataGenerator {
   generateResponse(overrides: DeepPartial<EndpointActionResponse> = {}): EndpointActionResponse {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
+    const startedAtTimes: number[] = [];
+    [2, 3, 5, 8, 13, 21].forEach((n) => {
+      startedAtTimes.push(
+        timeStamp.setMinutes(-this.randomN(n)),
+        timeStamp.setSeconds(-this.randomN(n))
+      );
+    });
+
     return merge(
       {
         action_data: {
-          command: this.randomIsolateCommand(),
+          command: this.randomResponseActionCommand(),
           comment: '',
+          parameter: undefined,
         },
         action_id: this.seededUUIDv4(),
         agent_id: this.seededUUIDv4(),
-        started_at: this.randomPastDate(),
+        started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
         completed_at: timeStamp.toISOString(),
-        error: 'some error happened',
+        error: undefined,
         '@timestamp': timeStamp.toISOString(),
       },
       overrides
@@ -135,7 +141,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
-  protected randomIsolateCommand() {
-    return this.randomChoice(ISOLATION_COMMANDS);
+  protected randomResponseActionCommand() {
+    return this.randomChoice(RESPONSE_ACTION_COMMANDS);
   }
 }

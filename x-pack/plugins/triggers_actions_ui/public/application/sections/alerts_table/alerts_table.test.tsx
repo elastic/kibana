@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { AlertsTable } from './alerts_table';
-import { ActionButtonIcon, AlertsField, AlertsTableFlyoutState } from '../../../types';
+import { ActionButtonIcon, AlertsField } from '../../../types';
 
 jest.mock('@kbn/data-plugin/public');
 
@@ -60,16 +60,11 @@ describe('AlertsTable', () => {
     id: '',
     columns,
     sort: [],
-    externalFlyout: {
+    useInternalFlyout: jest.fn().mockImplementation(() => ({
       header: jest.fn(),
       body: jest.fn(),
       footer: jest.fn(),
-    },
-    internalFlyout: {
-      header: jest.fn(),
-      body: jest.fn(),
-      footer: jest.fn(),
-    },
+    })),
     getRenderCellValue: () =>
       jest.fn().mockImplementation((props) => {
         return `${props.colIndex}:${props.rowIndex}`;
@@ -89,7 +84,6 @@ describe('AlertsTable', () => {
     showExpandToDetails: true,
     trailingControlColumns: [],
     alerts,
-    flyoutState: AlertsTableFlyoutState.internal,
     useFetchAlertsData,
     visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',

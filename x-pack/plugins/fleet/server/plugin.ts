@@ -67,6 +67,7 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
   registerPreconfigurationRoutes,
+  registerDownloadSourcesRoutes,
   registerHealthCheckRoutes,
 } from './routes';
 
@@ -367,6 +368,7 @@ export class FleetPlugin
     registerSettingsRoutes(fleetAuthzRouter);
     registerDataStreamRoutes(fleetAuthzRouter);
     registerPreconfigurationRoutes(fleetAuthzRouter);
+    registerDownloadSourcesRoutes(fleetAuthzRouter);
     registerHealthCheckRoutes(fleetAuthzRouter);
 
     // Conditional config routes
