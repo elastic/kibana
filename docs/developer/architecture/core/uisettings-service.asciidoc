@@ -30,7 +30,7 @@ Use the top-level `uiSettings` key for this, for example:
 
 [source,yaml]
 ----
-# Fewer feature announcement messages
+# Display times in UTC
 uiSettings:
   overrides:
     "dateFormat:tz": "UTC"
