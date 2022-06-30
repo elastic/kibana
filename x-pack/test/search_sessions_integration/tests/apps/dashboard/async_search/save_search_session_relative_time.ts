@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   async function checkSampleDashboardLoaded(visualizationContainer?: string) {
     log.debug('Checking no error labels');
-    await testSubjects.missingOrFail('embeddableErrorLabel');
+    await testSubjects.missingOrFail('embeddableError');
     log.debug('Checking charts rendered');
     await elasticChart.waitForRenderComplete(visualizationContainer ?? 'lnsVisualizationContainer');
     log.debug('Checking saved searches rendered');
