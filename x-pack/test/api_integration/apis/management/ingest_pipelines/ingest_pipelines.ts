@@ -242,6 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(testPipeline).to.eql({
             ...PIPELINE,
+            isManaged: false,
             name: PIPELINE_ID,
           });
         });
@@ -255,6 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(body).to.eql({
             ...PIPELINE,
+            isManaged: false,
             name: PIPELINE_ID,
           });
         });
