@@ -12,9 +12,7 @@
  *   Kibana intgegrations page
  */
 
-import React, { useState, useEffect } from 'react';
-
-import { useActions } from 'kea';
+import React, { useState } from 'react';
 
 import {
   EuiBadge,
@@ -29,7 +27,6 @@ import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
-import { SearchIndicesLogic } from '../search_indices/search_indices_logic';
 
 import { ButtonGroup, ButtonGroupOption } from './button_group';
 import { SearchIndexEmptyState } from './empty_state';
@@ -97,11 +94,6 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
 
 export const NewIndex: React.FC = () => {
   const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>();
-
-  const { loadSearchEngines } = useActions(SearchIndicesLogic);
-  useEffect(() => {
-    loadSearchEngines();
-  }, []);
 
   return (
     <EnterpriseSearchContentPageTemplate
