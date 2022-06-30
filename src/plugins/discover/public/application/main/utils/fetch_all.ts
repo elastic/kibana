@@ -140,9 +140,9 @@ export function fetchAll(
             result: docs.length,
           });
         }
-        const dataView = searchSource.getField('index')!;
+        const currentDataView = searchSource.getField('index')!;
 
-        const resultDocs = docs.map((doc) => buildDataTableRecord(doc, dataView));
+        const resultDocs = docs.map((doc) => buildDataTableRecord(doc, currentDataView));
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,

@@ -26,7 +26,7 @@ export interface SingleDocRouteProps {
 }
 
 export interface DocUrlParams {
-  indexPatternId: string;
+  dataViewId: string;
   index: string;
 }
 
@@ -34,13 +34,13 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
   const services = useDiscoverServices();
   const { chrome, timefilter, core } = services;
 
-  const { indexPatternId, index } = useParams<DocUrlParams>();
+  const { dataViewId, index } = useParams<DocUrlParams>();
   const breadcrumb = useMainRouteBreadcrumb();
 
   useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'single-doc',
-    id: indexPatternId,
+    id: dataViewId,
   });
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
     timefilter.disableTimeRangeSelector();
   });
 
-  const { dataView, error } = useDataView(services.dataViews, indexPatternId);
+  const { dataView, error } = useDataView(services.dataViews, dataViewId);
 
   if (error) {
     return (
@@ -74,7 +74,7 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
           <FormattedMessage
             id="discover.singleDocRoute.errorMessage"
             defaultMessage="No matching data view for id {indexPatternId}"
-            values={{ indexPatternId }}
+            values={{ dataViewId }}
           />
         }
       />

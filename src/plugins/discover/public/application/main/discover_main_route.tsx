@@ -178,8 +178,8 @@ export function DiscoverMainRoute(props: Props) {
   ]);
 
   const onDataViewCreated = useCallback(
-    async (dataView: unknown) => {
-      if (dataView) {
+    async (nextDataView: unknown) => {
+      if (nextDataView) {
         setShowNoDataPage(false);
         setError(undefined);
         await loadSavedSearch();
