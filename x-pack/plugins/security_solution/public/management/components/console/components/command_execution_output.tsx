@@ -67,7 +67,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
 
     // keep track if this becomes a long running command
     useEffect(() => {
-      let timeoutId: number;
+      let timeoutId: ReturnType<typeof setTimeout>;
 
       if (isRunning && !isLongRunningCommand) {
         const elapsedSeconds = moment().diff(moment(enteredAt), 'seconds');
