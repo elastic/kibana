@@ -33,6 +33,10 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
   opacity: 1;
 }
 
+.c2 {
+  word-break: break-word;
+}
+
 .c2 dt {
   font-size: 12px !important;
 }
