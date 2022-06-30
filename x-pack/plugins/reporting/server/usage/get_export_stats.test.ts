@@ -117,6 +117,7 @@ test('Model of jobTypes', () => {
       "available": true,
       "deprecated": 0,
       "error_codes": Object {},
+      "execution_times": undefined,
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
@@ -145,6 +146,7 @@ test('Model of jobTypes', () => {
       "available": true,
       "deprecated": 0,
       "error_codes": Object {},
+      "execution_times": undefined,
       "layout": undefined,
       "metrics": Object {
         "csv_rows": Object {},
@@ -172,6 +174,7 @@ test('Model of jobTypes', () => {
       "available": true,
       "deprecated": 0,
       "error_codes": Object {},
+      "execution_times": undefined,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 3,
@@ -223,6 +226,7 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
       "available": true,
       "deprecated": 5,
       "error_codes": Object {},
+      "execution_times": undefined,
       "layout": undefined,
       "metrics": Object {
         "png_cpu": Object {},
@@ -238,6 +242,61 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
         "99.0": 11935594,
       },
       "total": 15,
+    }
+  `);
+});
+
+test('Incorporate queue times', () => {
+  const result = getExportStats(
+    {
+      queue_times: {
+        min: 45,
+        max: 105,
+        avg: 75.01,
+      },
+    },
+    featureMap,
+    exportTypesHandler
+  );
+
+  expect(result.queue_times).toMatchInlineSnapshot(`
+    Object {
+      "avg": 75.01,
+      "max": 105,
+      "min": 45,
+    }
+  `);
+});
+
+test('Incorporate execution times', () => {
+  const result = getExportStats(
+    {
+      PNGV2: {
+        available: true,
+        total: 3,
+        output_size: sizesAggResponse,
+        app: {},
+        metrics: {
+          png_cpu: { '50.0': 0.01, '75.0': 0.01, '95.0': 0.01, '99.0': 0.01 },
+          png_memory: { '50.0': 3485, '75.0': 3496, '95.0': 3678, '99.0': 3782 },
+        },
+        execution_times: {
+          avg: 75.01,
+          max: 105,
+          min: 45,
+        },
+        error_codes: {} as ErrorCodeStats,
+      },
+    },
+    featureMap,
+    exportTypesHandler
+  );
+
+  expect(result.PNGV2.execution_times).toMatchInlineSnapshot(`
+    Object {
+      "avg": 75.01,
+      "max": 105,
+      "min": 45,
     }
   `);
 });
