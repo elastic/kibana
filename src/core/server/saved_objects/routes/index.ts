@@ -11,6 +11,7 @@ import { InternalHttpServiceSetup } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
+import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';
 import { registerCreateRoute } from './create';
@@ -46,7 +47,8 @@ export function registerRoutes({
   kibanaVersion: string;
   kibanaIndex: string;
 }) {
-  const router = http.createRouter('/api/saved_objects/');
+  const router =
+    http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
 
   registerGetRoute(router, { coreUsageData });
   registerResolveRoute(router, { coreUsageData });

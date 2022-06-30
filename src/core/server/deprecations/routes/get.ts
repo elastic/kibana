@@ -5,10 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IRouter } from '../../http';
-import { DeprecationsGetResponse } from '../types';
 
-export const registerGetRoute = (router: IRouter) => {
+import type { IRouter } from '../../http';
+import type { DeprecationsGetResponse } from '../types';
+import type { InternalDeprecationRequestHandlerContext } from '../internal_types';
+
+export const registerGetRoute = (router: IRouter<InternalDeprecationRequestHandlerContext>) => {
   router.get(
     {
       path: '/',
