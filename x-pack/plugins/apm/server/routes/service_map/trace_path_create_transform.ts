@@ -9,7 +9,7 @@ import {
   TRACE_ID,
   PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { tracePathsAggs } from './trace_path_preview';
+import { tracePathsAggs } from './trace_path';
 
 // client.transform.putTransform(...)
 // client.transform.startTransform(...)

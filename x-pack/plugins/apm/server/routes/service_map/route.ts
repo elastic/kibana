@@ -23,7 +23,7 @@ import { getServiceMapTracePathsPreview } from './trace_path_preview';
 import { getServiceMapTracePathsPreviewOriginal } from './trace_path_preview_original';
 
 const serviceMapTracePathsOriginalRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/trace_path_preview_original',
+  endpoint: 'GET /internal/apm/service-map/trace_paths_original',
   params: t.type({
     query: rangeRt,
   }),
@@ -47,7 +47,7 @@ const serviceMapTracePathsOriginalRoute = createApmServerRoute({
 });
 
 const serviceMapTracePathsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/service-map/trace_path_preview',
+  endpoint: 'GET /internal/apm/service-map/trace_paths',
   params: t.type({
     query: rangeRt,
   }),
