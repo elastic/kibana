@@ -577,7 +577,7 @@ export class SavedObjectsRepository {
     const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
     for (const { value } of validObjects) {
       const { object, preflightCheckIndex: index } = value;
-      const preflightResult = index ? preflightCheckResponse[index] : undefined;
+      const preflightResult = index !== undefined ? preflightCheckResponse[index] : undefined;
 
       const spacesToEnforce = typesAndSpaces.get(object.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
       for (const space of object.initialNamespaces ?? []) {
@@ -2003,7 +2003,7 @@ export class SavedObjectsRepository {
     for (const { value } of validObjects) {
       const { type, objectNamespace, esRequestIndex: index } = value;
       const objectNamespaceString = getNamespaceString(objectNamespace);
-      const preflightResult = index ? bulkGetResponse?.body.docs[index] : undefined;
+      const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
 
       const spacesToEnforce = typesAndSpaces.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
       spacesToEnforce.add(objectNamespaceString);

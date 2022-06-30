@@ -228,7 +228,7 @@ export async function updateObjectsSpaces({
   const spacesToAuthorize = new Set<string>();
   for (const { value } of validObjects) {
     const { type, esRequestIndex: index } = value;
-    const preflightResult = index ? bulkGetResponse?.body.docs[index] : undefined;
+    const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
 
     const spacesToEnforce =
       typesAndSpaces.get(type) ?? new Set([...spacesToAdd, ...spacesToRemove, namespaceString]); // Always enforce authZ for the active space
