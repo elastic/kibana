@@ -174,8 +174,10 @@ export interface KibanaRequest<
 }
 
 /**
- * Core internal implementation of {@link IKibanaRequest}
+ * Core internal implementation of {@link KibanaRequest}
  * @internal
+ * @remarks Only publicly exposed for consumers that need to forge requests using {@link CoreKibanaRequest.from}.
+ *          All other usages should import and use the {@link KibanaRequest} interface instead.
  */
 export class CoreKibanaRequest<
   Params = unknown,
