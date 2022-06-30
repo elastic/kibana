@@ -16,16 +16,35 @@ describe('When entering data into the Console input', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let enterCommand: ConsoleTestSetup['enterCommand'];
-  let typeText: ConsoleTestSetup['typeText'];
 
-  const showInputHistoryPopover = () => {
-    typeText('{ArrowUp}');
+  const showInputHistoryPopover = async () => {
+    enterCommand('{ArrowUp}', { inputOnly: true, useKeyboard: true });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
+    });
+
+    const selectable = renderResult.getByTestId('test-inputHistorySelector');
+
+    userEvent.tab({ focusTrap: selectable });
+  };
+
+  const getInputPlaceholderText = () => {
+    return renderResult.getByTestId('test-inputPlaceholder').textContent;
+  };
+
+  const getUserInputText = () => {
+    return renderResult.getByTestId('test-cmdInput-userTextInput').textContent;
+  };
+
+  const getFooterText = () => {
+    return renderResult.getByTestId('test-footer').textContent;
   };
 
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
-    ({ enterCommand, typeText } = testSetup);
+    ({ enterCommand } = testSetup);
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
@@ -33,134 +52,238 @@ describe('When entering data into the Console input', () => {
     render();
 
     enterCommand('c', { inputOnly: true });
-    expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('c');
+    expect(getUserInputText()).toEqual('c');
 
     enterCommand('m', { inputOnly: true });
-    expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('cm');
-  });
-
-  it('should delete last character when BACKSPACE is pressed', () => {
-    render();
-
-    enterCommand('cm', { inputOnly: true });
-    expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('cm');
-
-    enterCommand('{backspace}', { inputOnly: true, useKeyboard: true });
-    expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('c');
+    expect(getUserInputText()).toEqual('cm');
   });
 
   it('should display placeholder text when input area is blank', () => {
     render();
 
-    expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
-      INPUT_DEFAULT_PLACEHOLDER_TEXT
-    );
+    expect(getInputPlaceholderText()).toEqual(INPUT_DEFAULT_PLACEHOLDER_TEXT);
   });
 
   it('should NOT display placeholder text if input area has text entered', () => {
     render();
     enterCommand('cm', { inputOnly: true });
 
-    expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual('');
+    expect(getInputPlaceholderText()).toEqual('');
   });
 
   it('should NOT display any hint test in footer if nothing is displayed', () => {
     render();
 
-    expect(renderResult.getByTestId('test-footer').textContent?.trim()).toEqual('');
+    expect(getFooterText()?.trim()).toEqual('');
   });
 
   it('should display hint when a known command is typed', () => {
     render();
     enterCommand('cmd2 ', { inputOnly: true });
 
-    expect(renderResult.getByTestId('test-footer').textContent).toEqual(
-      'cmd2 --file [--ext --bad]'
-    );
+    expect(getFooterText()).toEqual('Hint: cmd2 --file [--ext --bad]');
   });
 
   it('should display hint when an unknown command is typed', () => {
     render();
     enterCommand('abc ', { inputOnly: true });
 
-    expect(renderResult.getByTestId('test-footer').textContent).toEqual('Unknown command abc');
-  });
-
-  it('should display a custom hint when provided by a command', () => {
-    render();
-    enterCommand('cmd5 ', { inputOnly: true });
-
-    expect(renderResult.getByTestId('test-footer').textContent).toEqual(
-      'Enter --foo to execute Ex: [cmd5 --foo 123]'
-    );
+    expect(getFooterText()).toEqual('Hint: unknown command abc');
   });
 
   it('should display the input history popover when UP key is pressed', async () => {
     render();
-    showInputHistoryPopover();
+    await showInputHistoryPopover();
 
     expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
   });
 
   describe('and when the command input history popover is opened', () => {
-    const renderWithInputHistory = (inputText: string = '') => {
+    const renderWithInputHistory = async (inputText: string = '') => {
       render();
-      enterCommand('cmd1 --help');
       enterCommand('help');
       enterCommand('cmd2 --help');
-      enterCommand('cls');
+      enterCommand('cmd1 --help');
 
       if (inputText) {
         enterCommand(inputText, { inputOnly: true });
       }
 
-      showInputHistoryPopover();
+      await showInputHistoryPopover();
     };
 
     it('should clear the input area and show placeholder with first item that is focused', async () => {
-      renderWithInputHistory('one');
+      await renderWithInputHistory('one');
 
-      expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual('');
+      expect(getUserInputText()).toEqual('');
 
-      waitFor(() => {
-        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
-          'cmd1 --help'
-        );
+      await waitFor(() => {
+        expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
     });
 
     it('should return original value to input and clear placeholder if popup is closed with no selection', async () => {
-      renderWithInputHistory('one');
+      await renderWithInputHistory('one');
 
-      waitFor(() => {
-        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
-          'cmd1 --help'
-        );
+      await waitFor(() => {
+        expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
       userEvent.keyboard('{Escape}');
 
-      waitFor(() => {
-        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual('one');
+      await waitFor(() => {
+        expect(getUserInputText()).toEqual('one');
       });
     });
 
     it('should add history item to the input area when selected and clear placeholder', async () => {
-      renderWithInputHistory('one');
+      await renderWithInputHistory('one');
 
-      waitFor(() => {
-        expect(renderResult.getByTestId('test-inputPlaceholder').textContent).toEqual(
-          'cmd1 --help'
-        );
+      await waitFor(() => {
+        expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
       userEvent.keyboard('{Enter}');
 
-      waitFor(() => {
-        expect(renderResult.getByTestId('test-cmdInput-userTextInput').textContent).toEqual(
-          'cmd1 --help'
-        );
+      await waitFor(() => {
+        expect(getUserInputText()).toEqual('cmd1 --help');
       });
+    });
+  });
+
+  describe('and keyboard special keys are pressed', () => {
+    const getRightOfCursorText = () => {
+      return renderResult.getByTestId('test-cmdInput-rightOfCursor').textContent;
+    };
+
+    const typeKeyboardKey = (key: string) => {
+      enterCommand(key, { inputOnly: true, useKeyboard: true });
+    };
+
+    beforeEach(() => {
+      render();
+      enterCommand('isolate', { inputOnly: true });
+    });
+
+    it('should backspace and delete last character', () => {
+      typeKeyboardKey('{backspace}');
+      expect(getUserInputText()).toEqual('isolat');
+      expect(getRightOfCursorText()).toEqual('');
+    });
+
+    it('should move cursor to the left', () => {
+      typeKeyboardKey('{ArrowLeft}');
+      typeKeyboardKey('{ArrowLeft}');
+      expect(getUserInputText()).toEqual('isola');
+      expect(getRightOfCursorText()).toEqual('te');
+    });
+
+    it('should move cursor to the right', () => {
+      typeKeyboardKey('{ArrowLeft}');
+      typeKeyboardKey('{ArrowLeft}');
+      expect(getUserInputText()).toEqual('isola');
+      expect(getRightOfCursorText()).toEqual('te');
+
+      typeKeyboardKey('{ArrowRight}');
+      expect(getUserInputText()).toEqual('isolat');
+      expect(getRightOfCursorText()).toEqual('e');
+    });
+
+    it('should move cursor to the beginning', () => {
+      typeKeyboardKey('{Home}');
+      expect(getUserInputText()).toEqual('');
+      expect(getRightOfCursorText()).toEqual('isolate');
+    });
+
+    it('should should move cursor to the end', () => {
+      typeKeyboardKey('{Home}');
+      expect(getUserInputText()).toEqual('');
+      expect(getRightOfCursorText()).toEqual('isolate');
+
+      typeKeyboardKey('{End}');
+      expect(getUserInputText()).toEqual('isolate');
+      expect(getRightOfCursorText()).toEqual('');
+    });
+
+    it('should delete text', () => {
+      typeKeyboardKey('{Home}');
+      typeKeyboardKey('{Delete}');
+      expect(getUserInputText()).toEqual('');
+      expect(getRightOfCursorText()).toEqual('solate');
+    });
+
+    it('should execute the correct command if Enter is pressed when cursor is between input', () => {
+      typeKeyboardKey('{ArrowLeft}');
+      typeKeyboardKey('{ArrowLeft}');
+
+      expect(getUserInputText()).toEqual('isola');
+      expect(getRightOfCursorText()).toEqual('te');
+
+      typeKeyboardKey('{enter}');
+
+      expect(renderResult.getByTestId('test-userCommandText').textContent).toEqual('isolate');
+    });
+
+    it('should show correct hint when cursor is between input', () => {
+      typeKeyboardKey('{Enter}');
+      typeKeyboardKey('cmd1 '); // space after command trigger command look for hint
+      typeKeyboardKey('{Home}');
+      typeKeyboardKey('{ArrowRight}');
+
+      expect(getUserInputText()).toEqual('c');
+      expect(getRightOfCursorText()).toEqual('md1 ');
+
+      expect(getFooterText()).toEqual('Hint: cmd1 ');
+    });
+
+    it('should return original cursor position if input history is closed with no selection', async () => {
+      typeKeyboardKey('{Enter}'); // add `isolate` to the input history
+
+      typeKeyboardKey('release');
+      typeKeyboardKey('{Home}');
+      typeKeyboardKey('{ArrowRight}');
+
+      expect(getUserInputText()).toEqual('r');
+      expect(getRightOfCursorText()).toEqual('elease');
+
+      await showInputHistoryPopover();
+
+      expect(getUserInputText()).toEqual('');
+      expect(getRightOfCursorText()).toEqual('');
+
+      await waitFor(() => {
+        expect(getInputPlaceholderText()).toEqual('isolate');
+      });
+
+      userEvent.keyboard('{Escape}');
+
+      expect(getUserInputText()).toEqual('r');
+      expect(getRightOfCursorText()).toEqual('elease');
+    });
+
+    it('should reset cursor position to default (at end) if a selection is done from input history', async () => {
+      typeKeyboardKey('{Enter}'); // add `isolate` to the input history
+
+      typeKeyboardKey('release');
+      typeKeyboardKey('{Home}');
+      typeKeyboardKey('{ArrowRight}');
+
+      expect(getUserInputText()).toEqual('r');
+      expect(getRightOfCursorText()).toEqual('elease');
+
+      await showInputHistoryPopover();
+
+      expect(getUserInputText()).toEqual('');
+      expect(getRightOfCursorText()).toEqual('');
+
+      await waitFor(() => {
+        expect(getInputPlaceholderText()).toEqual('isolate');
+      });
+
+      userEvent.keyboard('{Enter}');
+
+      expect(getUserInputText()).toEqual('isolate');
+      expect(getRightOfCursorText()).toEqual('');
     });
   });
 });
