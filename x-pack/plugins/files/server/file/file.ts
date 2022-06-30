@@ -119,6 +119,7 @@ export class File<M = unknown> implements IFile {
     if (attributes.content_ref) {
       await this.blobStorage.delete(attributes.content_ref);
     }
+    await this.fileShareService.deleteForFile({ file: this });
     await this.internalFileService.deleteSO(id);
     this.logAuditEvent(
       createAuditEvent({
