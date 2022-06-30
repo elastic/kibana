@@ -35,7 +35,7 @@ export default {
 
 type Args = Pick<FormProps, 'children' | 'FormWrapper'>;
 
-const { DefaultValue, Validation, DeSerializer, IsModified } = formStories;
+const { DefaultValue, Validation, DeSerializer, IsModified, GlobalFields } = formStories;
 
 /**
  * Validate the form and return its data.
@@ -98,4 +98,4 @@ export const Schema = (args: Args) => {
   );
 };
 
-export { DefaultValue, Validation, DeSerializer, IsModified };
+export { DefaultValue, Validation, DeSerializer, IsModified, GlobalFields };

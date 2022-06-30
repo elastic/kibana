@@ -10,6 +10,7 @@ import { Validation } from './form_validation';
 import { DeSerializer } from './form_de_serializer';
 import { DefaultValue } from './form_default_value';
 import { IsModified } from './form_is_modified';
+import { GlobalFields } from './form_global_fields';
 
 import { submitForm, FormWrapper } from './form_utils';
 
@@ -28,6 +29,7 @@ export const formStories = {
   DeSerializer,
   DefaultValue,
   IsModified,
+  GlobalFields,
 };
 
 export const useFieldStories = {
