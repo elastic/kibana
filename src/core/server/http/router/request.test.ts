@@ -11,17 +11,17 @@ jest.mock('uuid', () => ({
 }));
 
 import { RouteOptions } from '@hapi/hapi';
-import { KibanaRequest } from './request';
+import { CoreKibanaRequest } from './request';
 import { httpServerMock } from '../http_server.mocks';
 import { schema } from '@kbn/config-schema';
 
-describe('KibanaRequest', () => {
+describe('CoreKibanaRequest', () => {
   describe('id property', () => {
     it('uses the request.app.requestId property if present', () => {
       const request = httpServerMock.createRawRequest({
         app: { requestId: 'fakeId' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.id).toEqual('fakeId');
     });
 
@@ -30,7 +30,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: undefined,
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
 
@@ -39,7 +39,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: {},
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.id).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
   });
@@ -49,7 +49,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: { requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.uuid).toEqual('123e4567-e89b-12d3-a456-426614174000');
     });
 
@@ -58,7 +58,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: undefined,
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
 
@@ -67,7 +67,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         app: {},
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.uuid).toEqual('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
     });
   });
@@ -77,7 +77,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.headers).toEqual({ custom: 'one', authorization: 'token' });
     });
   });
@@ -88,7 +88,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: rawRequestHeaders,
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.headers).toEqual({ custom: 'one' });
       expect(kibanaRequest.headers).not.toBe(rawRequestHeaders);
@@ -99,7 +99,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.headers).toEqual({
         custom: 'one',
       });
@@ -109,7 +109,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', authorization: 'token' },
       });
-      const kibanaRequest = KibanaRequest.from(request, undefined, false);
+      const kibanaRequest = CoreKibanaRequest.from(request, undefined, false);
       expect(kibanaRequest.headers).toEqual({
         custom: 'one',
         authorization: 'token',
@@ -122,7 +122,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.isSystemRequest).toBe(false);
     });
 
@@ -130,7 +130,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', 'kbn-system-request': 'true' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.isSystemRequest).toBe(true);
     });
 
@@ -138,7 +138,7 @@ describe('KibanaRequest', () => {
       const request = httpServerMock.createRawRequest({
         headers: { custom: 'one', 'kbn-system-request': 'false' },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
       expect(kibanaRequest.isSystemRequest).toBe(false);
     });
   });
@@ -153,7 +153,7 @@ describe('KibanaRequest', () => {
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe(true);
     });
@@ -167,7 +167,7 @@ describe('KibanaRequest', () => {
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe(false);
     });
@@ -179,7 +179,7 @@ describe('KibanaRequest', () => {
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe(true);
     });
@@ -192,7 +192,7 @@ describe('KibanaRequest', () => {
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe('optional');
     });
@@ -205,7 +205,7 @@ describe('KibanaRequest', () => {
           },
         },
       });
-      const kibanaRequest = KibanaRequest.from(request);
+      const kibanaRequest = CoreKibanaRequest.from(request);
 
       expect(kibanaRequest.route.options.authRequired).toBe('optional');
     });
@@ -219,7 +219,7 @@ describe('KibanaRequest', () => {
         },
       });
 
-      expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => CoreKibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
         `"unexpected authentication options: {\\"strategies\\":[\\"session\\"]} for route: /"`
       );
     });
@@ -233,7 +233,7 @@ describe('KibanaRequest', () => {
         },
       });
 
-      expect(() => KibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => CoreKibanaRequest.from(request)).toThrowErrorMatchingInlineSnapshot(
         `"unexpected authentication options: {} for route: /"`
       );
     });
@@ -249,7 +249,7 @@ describe('KibanaRequest', () => {
         }),
         payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
       } as any;
-      const kibanaRequest = KibanaRequest.from(request, {
+      const kibanaRequest = CoreKibanaRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
         body: schema.buffer(),
@@ -271,7 +271,7 @@ describe('KibanaRequest', () => {
         }),
         payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
       } as any;
-      const kibanaRequest = KibanaRequest.from(request, {
+      const kibanaRequest = CoreKibanaRequest.from(request, {
         params: schema.object({ id: schema.string() }),
         query: schema.object({ search: schema.string() }),
         body: (data, { ok, badRequest }) => {

@@ -96,6 +96,14 @@ export class CasesUiPlugin
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
 
+    /**
+     * getCasesContextLazy returns a new component each time is being called. To avoid re-renders
+     * we get the component on start and provide the same component to all consumers.
+     */
+    const getCasesContext = getCasesContextLazy({
+      externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+    });
+
     return {
       api: createClientAPI({ http: core.http }),
       ui: {
@@ -104,10 +112,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
           }),
-        getCasesContext: () =>
-          getCasesContextLazy({
-            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
-          }),
+        getCasesContext,
         getRecentCases: (props) =>
           getRecentCasesLazy({
             ...props,

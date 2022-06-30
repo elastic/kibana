@@ -3291,6 +3291,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards":
+  version "0.0.0"
+  uid ""
+
 "@kbn/i18n-react@link:bazel-bin/packages/kbn-i18n-react":
   version "0.0.0"
   uid ""
@@ -3816,6 +3820,11 @@
     "@types/proj4" "^2.5.0"
     proj4 "2.6.2"
 
+"@mattiasbuelens/web-streams-adapter@~0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@mattiasbuelens/web-streams-adapter/-/web-streams-adapter-0.1.0.tgz#607b5a25682f4ae2741da7ba6df39302505336b3"
+  integrity sha512-oV4PyZfwJNtmFWhvlJLqYIX1Nn22ML8FZpS16ZUKv0hg7414xV1fjsGqxQzLT2dyK92TKxsJSwMOd7VNHAtPmA==
+
 "@mdx-js/loader@^1.6.22":
   version "1.6.22"
   resolved "https://registry.yarnpkg.com/@mdx-js/loader/-/loader-1.6.22.tgz#d9e8fe7f8185ff13c9c8639c048b123e30d322c4"
@@ -4288,6 +4297,14 @@
   integrity sha512-s1zLBjWhdEI2zwaoSgyOFoKSl109CUcVBCc7biPJ3aAf6LGLU6szDvi31JPU7bxfla2lqfhjbbg/5DdFNxOwHw==
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
+
+"@openpgp/web-stream-tools@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@openpgp/web-stream-tools/-/web-stream-tools-0.0.10.tgz#4496390da9715c9bfc581ad144f9fb8a36a37775"
+  integrity sha512-1ONZADML0fb0RJR5UiGYPnRf9VaYBYUBc1gF9jyq57sHkr58cp5/BQHS+ivrqbRw21Sb70FKTssmJbRe71V+kw==
+  dependencies:
+    "@mattiasbuelens/web-streams-adapter" "~0.1.0"
+    web-streams-polyfill "~3.0.3"
 
 "@opentelemetry/api@^1.1.0":
   version "1.1.0"
@@ -6778,6 +6795,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__i18n-react@link:bazel-bin/packages/kbn-i18n-react/npm_module_types":
   version "0.0.0"
   uid ""
@@ -9130,6 +9151,16 @@ asn1.js@^4.0.0:
     bn.js "^4.0.0"
     inherits "^2.0.1"
     minimalistic-assert "^1.0.0"
+
+asn1.js@^5.0.0:
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/asn1.js/-/asn1.js-5.4.1.tgz#11a980b84ebb91781ce35b0fdc2ee294e3783f07"
+  integrity sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA==
+  dependencies:
+    bn.js "^4.0.0"
+    inherits "^2.0.1"
+    minimalistic-assert "^1.0.0"
+    safer-buffer "^2.1.0"
 
 asn1@~0.2.3:
   version "0.2.4"
@@ -22092,6 +22123,13 @@ opener@^1.5.2:
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
+openpgp@5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.3.0.tgz#e8fc97e538865b8c095dbd91c7be4203bd1dd1df"
+  integrity sha512-qjCj0vYpV3dmmkE+vURiJ5kVAJwrMk8BPukvpWJiHcTNWKwPVsRS810plIe4klIcHVf1ScgUQwqtBbv99ff+kQ==
+  dependencies:
+    asn1.js "^5.0.0"
+
 opentracing@^0.14.3:
   version "0.14.4"
   resolved "https://registry.yarnpkg.com/opentracing/-/opentracing-0.14.4.tgz#a113408ea740da3a90fde5b3b0011a375c2e4268"
@@ -30243,6 +30281,11 @@ web-streams-polyfill@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.2.0.tgz#a6b74026b38e4885869fb5c589e90b95ccfc7965"
   integrity sha512-EqPmREeOzttaLRm5HS7io98goBgZ7IVz79aDvqjD0kYXLtFZTc0T/U6wHTPKyIjb+MdN7DFIIX6hgdBEpWmfPA==
+
+web-streams-polyfill@~3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.0.3.tgz#f49e487eedeca47a207c1aee41ee5578f884b42f"
+  integrity sha512-d2H/t0eqRNM4w2WvmTdoeIvzAUSpK7JmATB8Nr2lb7nQ9BTIJVjbQ/TRFVEh2gUH1HwclPdoPtfMoFfetXaZnA==
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
