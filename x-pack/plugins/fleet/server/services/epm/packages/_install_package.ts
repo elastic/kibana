@@ -19,9 +19,16 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common';
-import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
-import type { AssetReference, Installation, InstallType } from '../../../types';
+import type {
+  AssetReference,
+  Installation,
+  InstallType,
+  InstallablePackage,
+  InstallSource,
+  PackageAssetReference,
+  PackageVerificationResult,
+} from '../../../types';
 import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import {
@@ -41,7 +48,6 @@ import { packagePolicyService } from '../..';
 
 import { createInstallation, updateEsAssetReferences, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
-import type { PackageVerificationResult } from './package_verification';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path

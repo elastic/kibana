@@ -23,6 +23,7 @@ import type {
   RegistryPackage,
   RegistrySearchResults,
   GetCategoriesRequest,
+  PackageVerificationResult,
 } from '../../../types';
 import {
   getArchiveFilelist,
@@ -45,7 +46,6 @@ import { getBundledPackageByName } from '../packages/bundled_packages';
 
 import { withPackageSpan } from '../packages/utils';
 
-import type { PackageVerificationResult } from '../packages/package_verification';
 import { verifyPackageArchiveSignature } from '../packages/package_verification';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ArchivePackage, RegistryPackage } from '../../../../common';
-import type { PackageVerificationResult } from '../packages/package_verification';
+import type { ArchivePackage, RegistryPackage, PackageVerificationResult } from '../../../types';
 import { appContextService } from '../..';
 
 import type { ArchiveEntry } from '.';

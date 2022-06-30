@@ -10,7 +10,7 @@ import { readFile } from 'fs/promises';
 import * as openpgp from 'openpgp';
 import type { Logger } from '@kbn/logging';
 
-import type { PackageVerificationStatus } from '../../../../common';
+import type { PackageVerificationResult } from '../../../types';
 
 import * as Registry from '../registry';
 
@@ -20,11 +20,6 @@ import type { Installation } from '../../../types';
 interface VerificationResult {
   isVerified: boolean;
   keyId: string;
-}
-
-export interface PackageVerificationResult {
-  verificationKeyId?: string;
-  verificationStatus: PackageVerificationStatus;
 }
 
 let cachedKey: openpgp.Key | undefined | null = null;
