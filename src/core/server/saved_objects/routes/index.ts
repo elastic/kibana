@@ -64,7 +64,7 @@ export function registerRoutes({
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
 
-  const legacyRouter = http.createRouter('');
+  const legacyRouter = http.createRouter<InternalSavedObjectsRequestHandlerContext>('');
   registerLegacyImportRoute(legacyRouter, {
     maxImportPayloadBytes: config.maxImportPayloadBytes,
     coreUsageData,
@@ -72,7 +72,9 @@ export function registerRoutes({
   });
   registerLegacyExportRoute(legacyRouter, { kibanaVersion, coreUsageData, logger });
 
-  const internalRouter = http.createRouter('/internal/saved_objects/');
+  const internalRouter = http.createRouter<InternalSavedObjectsRequestHandlerContext>(
+    '/internal/saved_objects/'
+  );
 
   registerMigrateRoute(internalRouter, migratorPromise);
   registerDeleteUnknownTypesRoute(internalRouter, { kibanaIndex, kibanaVersion });
