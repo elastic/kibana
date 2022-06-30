@@ -15,15 +15,10 @@ import { i18n } from '@kbn/i18n';
 
 import { generateNavLink } from '../../../shared/layout';
 
-import {
-  SEARCH_INDEX_PATH,
-  SEARCH_INDEX_OVERVIEW_PATH,
-  SEARCH_INDEX_DOCUMENTS_PATH,
-  SEARCH_INDEX_SCHEMA_PATH,
-  SEARCH_INDEX_LOGS_PATH,
-} from '../../routes';
+import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import './index_nav.scss';
+import { SearchIndexTabId } from './search_index';
 
 // TODO: replace once logic in place.
 const indexName = 'Index name goes here';
@@ -46,37 +41,39 @@ export const useSearchIndicesNav = () => {
       'data-test-subj': 'IndexLabel',
     },
     {
-      id: 'overview',
+      id: SearchIndexTabId.OVERVIEW,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.overviewTitle', {
         defaultMessage: 'Overview',
       }),
-      ...generateNavLink({ to: generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug }) }),
+      ...generateNavLink({
+        to: generatePath(SEARCH_INDEX_TAB_PATH, { indexSlug, tabId: SearchIndexTabId.OVERVIEW }),
+      }),
       'data-test-subj': 'IndexOverviewLink',
     },
     {
-      id: 'documents',
+      id: SearchIndexTabId.DOCUMENTS,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.documentsTitle', {
         defaultMessage: 'Documents',
       }),
-      ...generateNavLink({ to: generatePath(SEARCH_INDEX_DOCUMENTS_PATH, { indexSlug }) }),
+      ...generateNavLink({
+        to: generatePath(SEARCH_INDEX_TAB_PATH, { indexSlug, tabId: SearchIndexTabId.DOCUMENTS }),
+      }),
       'data-test-subj': 'IndexDocumentsLink',
     },
     {
-      id: 'schema',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.schemaTitle', {
-        defaultMessage: 'Schema',
+      id: SearchIndexTabId.INDEX_MAPPINGS,
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.indexMappingsTitle', {
+        defaultMessage: 'Index Mappings',
       }),
-      ...generateNavLink({ to: generatePath(SEARCH_INDEX_SCHEMA_PATH, { indexSlug }) }),
-      'data-test-subj': 'IndexSchemaLink',
-    },
-    {
-      id: 'logs',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.logsitle', {
-        defaultMessage: 'Logs',
+      ...generateNavLink({
+        to: generatePath(SEARCH_INDEX_TAB_PATH, {
+          indexSlug,
+          tabId: SearchIndexTabId.INDEX_MAPPINGS,
+        }),
       }),
-      ...generateNavLink({ to: generatePath(SEARCH_INDEX_LOGS_PATH, { indexSlug }) }),
-      'data-test-subj': 'IndexLogsLink',
+      'data-test-subj': 'IndexIndexMappingsLink',
     },
+    // TODO Conditionally display links for connector/crawler
   ];
 
   return navItems;
