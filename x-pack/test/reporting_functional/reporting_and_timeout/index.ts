@@ -50,8 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const captureData = await PageObjects.reporting.getRawPdfReportData(url);
       const pngSessionFilePath = await compareImages.writeToSessionFile(sessionPng, captureData);
 
+      // allow minor visual differences: https://github.com/elastic/kibana/issues/135309#issuecomment-1169095186
       expect(await compareImages.checkIfPngsMatch(pngSessionFilePath, baselineAPng)).to.be.lessThan(
-        0.01
+        0.011
       );
     });
   });
