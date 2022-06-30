@@ -7,7 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, IRouter, RouteMethod, RouteConfig, RequestHandler } from '@kbn/core/server';
+import {
+  CoreSetup,
+  IRouter,
+  RouteMethod,
+  RouteConfig,
+  RequestHandler,
+  RequestHandlerContext,
+} from '@kbn/core/server';
 
 import { ILicense } from '@kbn/licensing-plugin/server';
 
@@ -38,10 +45,10 @@ export class KibanaFramework {
 
   public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
     config: GrokDebuggerRouteConfig<Params, Query, Body, Method>,
-    handler: RequestHandler<Params, Query, Body>
+    handler: RequestHandler<Params, Query, Body, RequestHandlerContext>
   ) {
     // Automatically wrap all route registrations with license checking
-    const wrappedHandler: RequestHandler<Params, Query, Body> = async (
+    const wrappedHandler: RequestHandler<Params, Query, Body, RequestHandlerContext> = async (
       requestContext,
       request,
       response

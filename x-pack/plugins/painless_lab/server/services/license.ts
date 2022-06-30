@@ -55,7 +55,7 @@ export class License {
     });
   }
 
-  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B>) {
+  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B, RequestHandlerContext>) {
     const license = this;
 
     return function licenseCheck(
