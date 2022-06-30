@@ -17,6 +17,7 @@ import React, {
 import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { ConsoleDataState } from '../console_state/types';
 import { useInputHints } from './hooks/use_input_hints';
 import { InputPlaceholder } from './components/input_placeholder';
 import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
@@ -59,7 +60,9 @@ const CommandInputContainer = styled.div`
     }
 
     &.inactive {
-      background-color: transparent !important;
+      background-color: ${({ theme }) => theme.eui.euiTextSubduedColor} !important;
+      animation: none;
+      -webkit-animation: none;
     }
   }
 `;
@@ -73,13 +76,15 @@ export interface CommandInputProps extends CommonProps {
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
   useInputHints();
   const dispatch = useConsoleStateDispatch();
-  const textEntered = useWithInputTextEntered();
+  const { rightOfCursor, textEntered } = useWithInputTextEntered();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const [commandToExecute, setCommandToExecute] = useState('');
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
+
+  // TODO:PT what do I use this for? investigate
   const textDisplayRef = useRef<HTMLDivElement | null>(null);
 
   const dimensions = useResizeObserver(containerRef.current);
@@ -128,33 +133,99 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
-        payload: {
-          textEntered: (prevValue) => {
-            let updatedTextEnteredState = prevValue + value;
+        payload: ({ rightOfCursor: prevRightOfCursor, textEntered: prevTextEntered }) => {
+          let updatedTextEnteredState = prevTextEntered + value;
+          let updatedRightOfCursor: ConsoleDataState['input']['rightOfCursor'] | undefined =
+            prevRightOfCursor;
 
-            switch (keyCode) {
-              // BACKSPACE
-              // remove the last character from the text entered
-              case 8:
-                if (updatedTextEnteredState.length) {
-                  updatedTextEnteredState = updatedTextEnteredState.replace(/.$/, '');
-                }
-                break;
+          const lengthOfTextEntered = updatedTextEnteredState.length;
 
-              // ENTER
-              // Execute command and blank out the input area
-              case 13:
-                setCommandToExecute(updatedTextEnteredState);
-                updatedTextEnteredState = '';
-                break;
-            }
+          switch (keyCode) {
+            // BACKSPACE
+            // remove the last character from the text entered
+            case 8:
+              if (lengthOfTextEntered) {
+                updatedTextEnteredState = updatedTextEnteredState.substring(
+                  0,
+                  lengthOfTextEntered - 1
+                );
+              }
+              break;
 
-            return updatedTextEnteredState;
-          },
+            // ENTER
+            // Execute command and blank out the input area
+            case 13:
+              setCommandToExecute(updatedTextEnteredState + rightOfCursor.text);
+              updatedTextEnteredState = '';
+              updatedRightOfCursor = undefined;
+              break;
+
+            // ARROW LEFT
+            // Move cursor left (or more accurately - move text to the right of the cursor)
+            case 37:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text:
+                  updatedTextEnteredState.charAt(lengthOfTextEntered - 1) + prevRightOfCursor.text,
+              };
+              updatedTextEnteredState = updatedTextEnteredState.substring(
+                0,
+                lengthOfTextEntered - 1
+              );
+              break;
+
+            // ARROW RIGHT
+            // Move cursor right (or more accurately - move text to the left of the cursor)
+            case 39:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: prevRightOfCursor.text.substring(1),
+              };
+              updatedTextEnteredState = updatedTextEnteredState + prevRightOfCursor.text.charAt(0);
+              break;
+
+            // HOME
+            // Move cursor to the start of the input area
+            // (or more accurately - move all text to the right of the cursor)
+            case 36:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: updatedTextEnteredState + prevRightOfCursor.text,
+              };
+              updatedTextEnteredState = '';
+              break;
+
+            // END
+            // Move cursor to the end of the input area
+            // (or more accurately - move all text to the left of the cursor)
+            case 35:
+              updatedRightOfCursor = {
+                ...prevRightOfCursor,
+                text: '',
+              };
+              updatedTextEnteredState = updatedTextEnteredState + prevRightOfCursor.text;
+              break;
+
+            // DELETE
+            // Remove the first character from the Right side of cursor
+            case 46:
+              if (prevRightOfCursor.text) {
+                updatedRightOfCursor = {
+                  ...prevRightOfCursor,
+                  text: prevRightOfCursor.text.substring(1),
+                };
+              }
+              break;
+          }
+
+          return {
+            textEntered: updatedTextEnteredState,
+            rightOfCursor: updatedRightOfCursor,
+          };
         },
       });
     },
-    [dispatch]
+    [dispatch, rightOfCursor.text]
   );
 
   // Execute the command if one was ENTER'd.
@@ -181,14 +252,29 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               <span className="eui-displayInlineBlock prompt">{prompt}</span>
             </EuiFlexItem>
           )}
-          <EuiFlexItem className="textEntered" grow={false}>
-            <div data-test-subj={getTestId('cmdInput-userTextInput')}>{textEntered}</div>
+          <EuiFlexItem className="textEntered">
+            <EuiFlexGroup
+              responsive={false}
+              alignItems="flexStart"
+              gutterSize="none"
+              justifyContent="flexStart"
+            >
+              <EuiFlexItem grow={false}>
+                <div data-test-subj={getTestId('cmdInput-userTextInput')}>{textEntered}</div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span className={cursorClassName} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>{rightOfCursor.text}</div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
             <InputPlaceholder />
           </EuiFlexItem>
-          <EuiFlexItem grow>
-            <span className={cursorClassName} />
-          </EuiFlexItem>
+          <EuiFlexItem grow={false} />
         </EuiFlexGroup>
+
         <KeyCapture
           onCapture={handleKeyCapture}
           focusRef={keyCaptureFocusRef}
