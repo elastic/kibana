@@ -118,7 +118,7 @@ export class InternalFileShareService implements FileShareServiceStart {
       type: this.savedObjectsType,
       perPage,
       page,
-      filter: `file:${file.id}`,
+      filter: `${this.savedObjectsType}.attributes.file:${file.id}`,
     });
 
     return results.saved_objects.map(toFileShareJSON);

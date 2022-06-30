@@ -182,7 +182,7 @@ describe('FileService', () => {
   });
 
   describe('Sharing files', () => {
-    it('creates and deletes file share', async () => {
+    it('creates a file share object', async () => {
       const file = await createDisposableFile({ fileKind, name: 'test' });
       const shareObject = await file.share({ name: 'test name' });
       expect(shareObject).toEqual(
@@ -190,8 +190,84 @@ describe('FileService', () => {
           id: expect.any(String),
           name: 'test name',
           valid_until: expect.any(String),
+          created_at: expect.any(String),
         })
       );
+    });
+
+    it('retrieves a a file share object', async () => {
+      const file = await createDisposableFile({ fileKind, name: 'test' });
+      const { id } = await file.share({ name: 'my file share' });
+      const shareService = fileService.getFileShareService();
+      // Check if a file share exists without using an {@link File} object
+      const result = await shareService.get({ tokenId: id });
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          name: 'my file share',
+          valid_until: expect.any(String),
+          created_at: expect.any(String),
+        })
+      );
+    });
+
+    it('updates a file share object', async () => {
+      const file = await createDisposableFile({ fileKind, name: 'test' });
+      const { id } = await file.share({ name: 'my file share 1' });
+      const shareService = fileService.getFileShareService();
+      // Check if a file share exists without using an {@link File} object
+      await shareService.update({ id, attributes: { name: 'my file share 2' } });
+      const result = await shareService.get({ tokenId: id });
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          name: 'my file share 2',
+          valid_until: expect.any(String),
+          created_at: expect.any(String),
+        })
+      );
+    });
+
+    it('lists all file share objects for a file', async () => {
+      const [file, file2] = await Promise.all([
+        createDisposableFile({ fileKind, name: 'test' }),
+        createDisposableFile({ fileKind, name: 'anothertest' }),
+      ]);
+
+      await Promise.all([
+        file.share({ name: 'my file share 1' }),
+        file.share({ name: 'my file share 2' }),
+        file.share({ name: 'my file share 3' }),
+
+        file2.share({ name: 'my file share 1' }),
+        file2.share({ name: 'my file share 2' }),
+        file2.share({ name: 'my file share 3' }),
+      ]);
+
+      const shares1 = await file.listShares();
+      expect(shares1).toHaveLength(3);
+      expect(shares1[0]).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          file: file.id,
+        })
+      );
+      const shares2 = await file2.listShares();
+      expect(await file2.listShares()).toHaveLength(3);
+      expect(shares2[0]).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          file: file2.id,
+        })
+      );
+    });
+
+    it('deletes a file share object', async () => {
+      const file = await createDisposableFile({ fileKind, name: 'myfile' });
+      const { id } = await file.share({ name: 'my file share' });
+      expect(await file.listShares()).toHaveLength(1);
+      await file.unshare({ shareId: id });
+      expect(await file.listShares()).toEqual([]);
     });
   });
 });
