@@ -24,7 +24,7 @@ export const DefaultFooter = ({ id, name, statusMsg }: Props) => {
           content={
             <p>
               <FormattedMessage
-                id="home.sampleDataSetCard.default.unableToVerifyErrorMessage"
+                id="homePackages.sampleDataSetCard.default.unableToVerifyErrorMessage"
                 defaultMessage="Unable to verify dataset status, error: {statusMsg}"
                 values={{ statusMsg }}
               />
@@ -34,15 +34,18 @@ export const DefaultFooter = ({ id, name, statusMsg }: Props) => {
           <EuiButton
             isDisabled
             data-test-subj={`addSampleDataSet${id}`}
-            aria-label={i18n.translate('home.sampleDataSetCard.default.addButtonAriaLabel', {
-              defaultMessage: 'Add {datasetName}',
-              values: {
-                datasetName: name,
-              },
-            })}
+            aria-label={i18n.translate(
+              'homePackages.sampleDataSetCard.default.addButtonAriaLabel',
+              {
+                defaultMessage: 'Add {datasetName}',
+                values: {
+                  datasetName: name,
+                },
+              }
+            )}
           >
             <FormattedMessage
-              id="home.sampleDataSetCard.default.addButtonLabel"
+              id="homePackages.sampleDataSetCard.default.addButtonLabel"
               defaultMessage="Add data"
             />
           </EuiButton>

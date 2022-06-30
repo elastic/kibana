@@ -9,7 +9,6 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useInstall } from '../hooks';
 import type { SampleDataSet } from '../types';
@@ -17,9 +16,31 @@ import type { UseInstallParams } from '../hooks';
 
 export type Props = Pick<SampleDataSet, 'id' | 'name'> & UseInstallParams;
 
+const addingLabel = i18n.translate('homePackages.sampleDataCard.addingButtonLabel', {
+  defaultMessage: 'Adding',
+});
+
+const addLabel = i18n.translate('homePackages.sampleDataCard.addButtonLabel', {
+  defaultMessage: 'Add data',
+});
+
 export const InstallFooter = (params: Props) => {
   const [install, isInstalling] = useInstall(params);
   const { id, name } = params;
+
+  const addingAriaLabel = i18n.translate('homePackages.sampleDataCard.addingButtonAriaLabel', {
+    defaultMessage: 'Adding {datasetName}',
+    values: {
+      datasetName: name,
+    },
+  });
+
+  const addAriaLabel = i18n.translate('homePackages.sampleDataCard.addButtonAriaLabel', {
+    defaultMessage: 'Add {datasetName}',
+    values: {
+      datasetName: name,
+    },
+  });
 
   return (
     <EuiFlexGroup justifyContent="flexEnd">
@@ -28,33 +49,9 @@ export const InstallFooter = (params: Props) => {
           isLoading={isInstalling}
           onClick={install}
           data-test-subj={`addSampleDataSet${id}`}
-          aria-label={
-            isInstalling
-              ? i18n.translate('homePackages.sampleDataCard.addingButtonAriaLabel', {
-                  defaultMessage: 'Adding {datasetName}',
-                  values: {
-                    datasetName: name,
-                  },
-                })
-              : i18n.translate('homePackages.sampleDataCard.addButtonAriaLabel', {
-                  defaultMessage: 'Add {datasetName}',
-                  values: {
-                    datasetName: name,
-                  },
-                })
-          }
+          aria-label={isInstalling ? addingAriaLabel : addAriaLabel}
         >
-          {isInstalling ? (
-            <FormattedMessage
-              id="homePackages.sampleDataCard.addingButtonLabel"
-              defaultMessage="Adding"
-            />
-          ) : (
-            <FormattedMessage
-              id="homePackages.sampleDataCard.addButtonLabel"
-              defaultMessage="Add data"
-            />
-          )}
+          {isInstalling ? addingLabel : addLabel}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
