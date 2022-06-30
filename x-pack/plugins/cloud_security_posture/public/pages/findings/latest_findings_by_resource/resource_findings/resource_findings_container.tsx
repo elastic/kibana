@@ -10,6 +10,7 @@ import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiTheme } from '@elastic/eui';
 import { generatePath } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageWrapper, PageTitle, PageTitleText } from '../../layout/findings_layout';
 import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcrumbs';
@@ -18,6 +19,8 @@ import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findi
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
 import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
 import {
+  getFindingsPageSizeInfo,
+  addFilter,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -26,6 +29,7 @@ import {
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
+import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
 
 const getDefaultQuery = ({
   query,
@@ -107,18 +111,50 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         <EuiSpacer />
         {error && <ErrorCallout error={error} />}
         {!error && (
-          <ResourceFindingsTable
-            loading={resourceFindings.isFetching}
-            items={resourceFindings.data?.page || []}
-            pagination={getPaginationTableParams({
-              pageSize: urlQuery.pageSize,
-              pageIndex: urlQuery.pageIndex,
-              totalItemCount: resourceFindings.data?.total || 0,
-            })}
-            setTableOptions={({ page }) =>
-              setUrlQuery({ pageIndex: page.index, pageSize: page.size })
-            }
-          />
+          <>
+            {resourceFindings.isSuccess && !!resourceFindings.data.page.length && (
+              <FindingsDistributionBar
+                {...{
+                  type: i18n.translate('xpack.csp.findings.resourceFindings.tableRowTypeLabel', {
+                    defaultMessage: 'Findings',
+                  }),
+                  total: resourceFindings.data.total,
+                  passed: resourceFindings.data.count.passed,
+                  failed: resourceFindings.data.count.failed,
+                  ...getFindingsPageSizeInfo({
+                    pageIndex: urlQuery.pageIndex,
+                    pageSize: urlQuery.pageSize,
+                    currentPageSize: resourceFindings.data.page.length,
+                  }),
+                }}
+              />
+            )}
+            <EuiSpacer />
+            <ResourceFindingsTable
+              loading={resourceFindings.isFetching}
+              items={resourceFindings.data?.page || []}
+              pagination={getPaginationTableParams({
+                pageSize: urlQuery.pageSize,
+                pageIndex: urlQuery.pageIndex,
+                totalItemCount: resourceFindings.data?.total || 0,
+              })}
+              setTableOptions={({ page }) =>
+                setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+              }
+              onAddFilter={(field, value, negate) =>
+                setUrlQuery({
+                  pageIndex: 0,
+                  filters: addFilter({
+                    filters: urlQuery.filters,
+                    dataView,
+                    field,
+                    value,
+                    negate,
+                  }),
+                })
+              }
+            />
+          </>
         )}
       </PageWrapper>
     </div>
