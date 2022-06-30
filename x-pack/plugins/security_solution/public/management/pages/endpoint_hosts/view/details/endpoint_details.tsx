@@ -7,6 +7,7 @@
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { ResponseActionsList } from '../../../../components/endpoint_response_actions_list/response_actions_list';
 import { PolicyResponseWrapper } from '../../../../components/policy_response';
 import { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../common/lib/kibana';
@@ -14,7 +15,6 @@ import { getEndpointDetailsPath } from '../../../../common/routing';
 import {
   detailsData,
   detailsError,
-  getActivityLogData,
   hostStatusInfo,
   policyVersionInfo,
   showView,
@@ -29,14 +29,12 @@ import {
 } from './components/endpoint_details_tabs';
 import { EndpointIsolationFlyoutPanel } from './components/endpoint_isolate_flyout_panel';
 import { EndpointDetailsFlyoutHeader } from './components/flyout_header';
-import { EndpointActivityLog } from './endpoint_activity_log';
 import { EndpointDetailsContent } from './endpoint_details_content';
 
 export const EndpointDetails = memo(() => {
   const toasts = useToasts();
   const queryParams = useEndpointSelector(uiQueryParams);
 
-  const activityLog = useEndpointSelector(getActivityLogData);
   const hostDetails = useEndpointSelector(detailsData);
   const hostDetailsError = useEndpointSelector(detailsError);
 
@@ -84,10 +82,10 @@ export const EndpointDetails = memo(() => {
           name: 'endpointActivityLog',
           selected_endpoint: id,
         }),
-        content: <EndpointActivityLog activityLog={activityLog} />,
+        content: <ResponseActionsList agentIds={id} />,
       },
     ],
-    [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, activityLog, queryParams]
+    [ContentLoadingMarkup, hostDetails, policyInfo, hostStatus, queryParams]
   );
 
   const showFlyoutFooter =
