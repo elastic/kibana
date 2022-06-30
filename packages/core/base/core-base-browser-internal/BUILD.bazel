@@ -36,7 +36,6 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-config:npm_module_types",
-  "//packages/kbn-config-schema:npm_module_types",
   "//packages/core/base/core-base-common-internal:npm_module_types",
 ]
 
