@@ -86,11 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await focusAndPressButton('discoverAlertsButton');
         expect(await hasFocus('discoverAlertsButton')).to.be(false);
         await focusAndPressButton('discoverCreateAlertButton');
-        await retry.waitFor(
-          'Create Rule flyout is visible',
-          async () => await testSubjects.exists('addRuleFlyoutTitle')
-        );
-        expect(await hasFocus('ruleNameInput')).to.be(true);
+        expect(await testSubjects.exists('addRuleFlyoutTitle')).to.be(true);
         await retry.try(async () => {
           await browser.pressKeys(browser.keys.ESCAPE);
           // A bug exists with the create rule flyout where sometimes the confirm modal
