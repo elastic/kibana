@@ -34,6 +34,7 @@ const NO_EDITOR_ERROR_MESSAGE = i18n.translate(
 );
 
 interface Props {
+  buttonTitle?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   inputTargetValue?: string;
@@ -53,6 +54,7 @@ const { useXJsonMode } = XJson;
 const EDITOR_SOURCE = 'json-editor-with-message-variables';
 
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
+  buttonTitle,
   messageVariables,
   paramsProperty,
   inputTargetValue,
@@ -148,6 +150,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
       label={label}
       labelAppend={
         <AddMessageVariables
+          buttonTitle={buttonTitle}
           messageVariables={messageVariables}
           onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}

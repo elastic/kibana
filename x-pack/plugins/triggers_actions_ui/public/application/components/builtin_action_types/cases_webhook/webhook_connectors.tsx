@@ -24,33 +24,23 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import {
+  containsCommentsOrEmpty,
+  containsExternalId,
+  containsExternalIdOrTitle,
+  containsIdOrEmpty,
+  containsTitleAndDesc,
+  isUrlButCanBeEmpty,
+} from './validator';
 import { MustacheTextFieldWrapper } from '../../mustache_text_field_wrapper';
 import { JsonFieldWrapper } from '../../json_field_wrapper';
 import { PasswordField } from '../../password_field';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
+import { casesVars, commentVars, urlVars, urlVarsExt } from './action_variables';
 const { emptyField, urlField } = fieldValidators;
 
 const HTTP_VERBS = ['post', 'put', 'patch'];
-
-const casesVars: ActionVariable[] = [
-  { name: 'case.title', description: 'test title', useWithTripleBracesInTemplates: true },
-  {
-    name: 'case.description',
-    description: 'test description',
-    useWithTripleBracesInTemplates: true,
-  },
-  { name: 'case.tags', description: 'test tags', useWithTripleBracesInTemplates: true },
-];
-
-const commentVars: ActionVariable[] = [
-  { name: 'case.comment', description: 'test comment', useWithTripleBracesInTemplates: true },
-];
-
-const urlVars: ActionVariable[] = [
-  { name: 'external.system.id', description: 'test id', useWithTripleBracesInTemplates: true },
-];
 
 const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -124,8 +114,10 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                 {
                   validator: emptyField(i18n.CREATE_INCIDENT_REQUIRED),
                 },
+                {
+                  validator: containsTitleAndDesc(),
+                },
               ],
-              // type: FIELD_TYPES.JSON,
             }}
             component={JsonFieldWrapper}
             componentProps={{
@@ -136,6 +128,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               },
               messageVariables: casesVars,
               paramsProperty: 'createIncidentJson',
+              buttonTitle: i18n.ADD_CASES_VARIABLE,
             }}
           />
         </EuiFlexItem>
@@ -175,6 +168,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                 {
                   validator: urlField(i18n.GET_INCIDENT_URL_REQUIRED),
                 },
+                { validator: containsExternalId() },
               ],
               helpText: i18n.GET_INCIDENT_URL_HELP,
             }}
@@ -185,6 +179,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                 'data-test-subj': 'webhookGetUrlText',
                 messageVariables: urlVars,
                 paramsProperty: 'getIncidentUrl',
+                buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
               },
             }}
           />
@@ -261,6 +256,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                 {
                   validator: urlField(i18n.GET_INCIDENT_VIEW_URL_REQUIRED),
                 },
+                { validator: containsExternalIdOrTitle() },
               ],
               helpText: i18n.EXTERNAL_INCIDENT_VIEW_URL_HELP,
             }}
@@ -269,15 +265,9 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               euiFieldProps: {
                 readOnly,
                 'data-test-subj': 'incidentViewUrlText',
-                messageVariables: [
-                  ...urlVars,
-                  {
-                    name: 'external.system.title',
-                    description: 'test title',
-                    useWithTripleBracesInTemplates: true,
-                  },
-                ],
+                messageVariables: urlVarsExt,
                 paramsProperty: 'incidentViewUrl',
+                buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
               },
             }}
           />
@@ -318,6 +308,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                 {
                   validator: urlField(i18n.UPDATE_URL_REQUIRED),
                 },
+                { validator: containsExternalId() },
               ],
               helpText: i18n.UPDATE_INCIDENT_URL_HELP,
             }}
@@ -328,6 +319,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                 'data-test-subj': 'webhookUpdateUrlText',
                 messageVariables: urlVars,
                 paramsProperty: 'updateIncidentUrl',
+                buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
               },
             }}
           />
@@ -344,6 +336,9 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                 {
                   validator: emptyField(i18n.UPDATE_INCIDENT_REQUIRED),
                 },
+                {
+                  validator: containsTitleAndDesc(),
+                },
               ],
             }}
             component={JsonFieldWrapper}
@@ -356,6 +351,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               },
               messageVariables: casesVars,
               paramsProperty: 'updateIncidentJson',
+              buttonTitle: i18n.ADD_CASES_VARIABLE,
             }}
           />
         </EuiFlexItem>
@@ -393,8 +389,9 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               label: i18n.CREATE_COMMENT_URL,
               validations: [
                 {
-                  validator: urlField(i18n.CREATE_COMMENT_URL_REQUIRED),
+                  validator: isUrlButCanBeEmpty(i18n.CREATE_COMMENT_URL_REQUIRED),
                 },
+                { validator: containsIdOrEmpty(i18n.CREATE_COMMENT_URL_REQUIRED) },
               ],
               helpText: i18n.CREATE_COMMENT_URL_HELP,
             }}
@@ -405,6 +402,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
                 'data-test-subj': 'webhookCreateCommentUrlText',
                 messageVariables: urlVars,
                 paramsProperty: 'createCommentUrl',
+                buttonTitle: i18n.ADD_EXTERNAL_VARIABLE,
               },
             }}
           />
@@ -419,7 +417,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               label: i18n.CREATE_COMMENT_JSON,
               validations: [
                 {
-                  validator: emptyField(i18n.CREATE_COMMENT_REQUIRED),
+                  validator: containsCommentsOrEmpty(i18n.CREATE_COMMENT_MESSAGE),
                 },
               ],
             }}
@@ -433,6 +431,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
               },
               messageVariables: commentVars,
               paramsProperty: 'createCommentJson',
+              buttonTitle: i18n.ADD_CASES_VARIABLE,
             }}
           />
         </EuiFlexItem>

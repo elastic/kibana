@@ -13,6 +13,7 @@ import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
 
 interface Props {
+  buttonTitle?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   index: number;
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
+  buttonTitle,
   messageVariables,
   paramsProperty,
   index,
@@ -68,6 +70,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
       }}
       append={
         <AddMessageVariables
+          buttonTitle={buttonTitle}
           messageVariables={messageVariables}
           onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}

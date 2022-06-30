@@ -19,11 +19,11 @@ interface Props {
   field: FieldHook<any, string>;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  euiCodeEditorProps?: { [key: string]: any };
+  euiFieldProps: { [key: string]: any; paramsProperty: string };
   [key: string]: any;
 }
 
-export const MustacheTextFieldWrapper = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
+export const MustacheTextFieldWrapper = ({ field, euiFieldProps, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   const { value, onChange } = field;

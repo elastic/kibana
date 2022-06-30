@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const NAME = i18n.translate('xpack.actions.builtin.cases.casesWebhookTitle', {
-  defaultMessage: 'Webhook - Incident Management',
+  defaultMessage: 'Webhook - Case Management',
 });
 
 export const INVALID_URL = (err: string, url: string) =>

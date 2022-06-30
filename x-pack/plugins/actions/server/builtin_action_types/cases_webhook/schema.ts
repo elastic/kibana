@@ -38,18 +38,20 @@ export const ExternalIncidentServiceConfiguration = {
     }
   ),
   updateIncidentJson: schema.string(),
-  createCommentUrl: schema.string(),
-  createCommentMethod: schema.oneOf(
-    [
-      schema.literal(CasesWebhookMethods.POST),
-      schema.literal(CasesWebhookMethods.PUT),
-      schema.literal(CasesWebhookMethods.PATCH),
-    ],
-    {
-      defaultValue: CasesWebhookMethods.PUT,
-    }
+  createCommentUrl: schema.maybe(schema.string()),
+  createCommentMethod: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal(CasesWebhookMethods.POST),
+        schema.literal(CasesWebhookMethods.PUT),
+        schema.literal(CasesWebhookMethods.PATCH),
+      ],
+      {
+        defaultValue: CasesWebhookMethods.PUT,
+      }
+    )
   ),
-  createCommentJson: schema.string(),
+  createCommentJson: schema.maybe(schema.string()),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
 };

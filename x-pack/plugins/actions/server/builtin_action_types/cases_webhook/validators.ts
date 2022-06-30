@@ -36,17 +36,20 @@ const validateConfig = (
   } catch (allowListError) {
     return i18n.CONFIG_ERR(allowListError.message);
   }
-  try {
-    new URL(createCommentUrl);
-  } catch (err) {
-    return i18n.INVALID_URL(err, 'createCommentUrl');
+  if (createCommentUrl) {
+    try {
+      new URL(createCommentUrl);
+    } catch (err) {
+      return i18n.INVALID_URL(err, 'createCommentUrl');
+    }
+
+    try {
+      configurationUtilities.ensureUriAllowed(createCommentUrl);
+    } catch (allowListError) {
+      return i18n.CONFIG_ERR(allowListError.message);
+    }
   }
 
-  try {
-    configurationUtilities.ensureUriAllowed(createCommentUrl);
-  } catch (allowListError) {
-    return i18n.CONFIG_ERR(allowListError.message);
-  }
   try {
     new URL(incidentViewUrl);
   } catch (err) {

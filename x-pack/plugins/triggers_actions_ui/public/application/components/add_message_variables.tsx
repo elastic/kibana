@@ -19,12 +19,14 @@ import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { templateActionVariable } from '../lib';
 
 interface Props {
+  buttonTitle?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   onSelectEventHandler: (variable: ActionVariable) => void;
 }
 
 export const AddMessageVariables: React.FunctionComponent<Props> = ({
+  buttonTitle,
   messageVariables,
   paramsProperty,
   onSelectEventHandler,
@@ -54,12 +56,14 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       </EuiContextMenuItem>
     ));
 
-  const addVariableButtonTitle = i18n.translate(
-    'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
-    {
-      defaultMessage: 'Add rule variable',
-    }
-  );
+  const addVariableButtonTitle = buttonTitle
+    ? buttonTitle
+    : i18n.translate(
+        'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
+        {
+          defaultMessage: 'Add rule variable',
+        }
+      );
 
   if ((messageVariables?.length ?? 0) === 0) {
     return <></>;
