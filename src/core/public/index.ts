@@ -72,12 +72,7 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
 
-export type {
-  PackageInfo,
-  EnvironmentMode,
-  IExternalUrlPolicy,
-  DomainDeprecationDetails,
-} from '../server/types';
+export type { PackageInfo, EnvironmentMode, DomainDeprecationDetails } from '../server/types';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
 export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
