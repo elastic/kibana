@@ -1,7 +1,9 @@
 .mapKeydownScrollZoom {
-  background: rgba(0, 0, 0, .4);
-  width: 100%;
-  height: 100%;
+  background: transparentize($euiColorInk, .5);
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   position: absolute;
   z-index: $euiZLevel2;
   pointer-events: none;
@@ -10,7 +12,8 @@
   align-content: center;
   flex-direction: column;
   opacity: 0;
-  transition: opacity .2s ease .2s;
+  transition: opacity $euiAnimSpeedNormal ease $euiAnimSpeedNormal;
+  padding: $euiSize;
 }
 
 .mapKeydownScrollZoom__show {
