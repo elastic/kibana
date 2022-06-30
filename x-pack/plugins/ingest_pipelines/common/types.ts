@@ -23,6 +23,7 @@ export interface Pipeline {
   version?: number;
   processors: Processor[];
   on_failure?: Processor[];
+  isManaged?: boolean;
 }
 
 export interface PipelinesByName {

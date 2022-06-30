@@ -10,6 +10,7 @@ import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hap
 import type { Logger } from '@kbn/logging';
 import {
   HapiResponseAdapter,
+  CoreKibanaRequest,
   KibanaRequest,
   KibanaResponse,
   lifecycleResponseFactory,
@@ -88,7 +89,7 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
 
     try {
-      const result = await fn(KibanaRequest.from(request), lifecycleResponseFactory, toolkit);
+      const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
       if (result instanceof KibanaResponse) {
         return hapiResponseAdapter.handle(result);
       }

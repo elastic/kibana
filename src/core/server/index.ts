@@ -53,7 +53,6 @@ import { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
-import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
 import {
@@ -236,7 +235,8 @@ export type {
   SafeRouteMethod,
 } from './http';
 
-export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
+export { kibanaResponseFactory, validBodyOutput, CoreKibanaRequest } from './http';
+export type { KibanaRequest } from './http';
 
 export type {
   HttpResourcesRenderOptions,
@@ -569,8 +569,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   analytics: AnalyticsServiceSetup;
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
-  /** {@link ContextSetup} */
-  context: ContextSetup;
   /** {@link DocLinksServiceSetup} */
   docLinks: DocLinksServiceSetup;
   /** {@link ElasticsearchServiceSetup} */
@@ -646,7 +644,6 @@ export interface CoreStart {
 export type {
   CapabilitiesSetup,
   CapabilitiesStart,
-  ContextSetup,
   ExecutionContextSetup,
   ExecutionContextStart,
   HttpResources,
