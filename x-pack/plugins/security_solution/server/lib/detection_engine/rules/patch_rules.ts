@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { PartialRule } from '@kbn/alerting-plugin/server';
 import { RuleParams } from '../schemas/rule_schemas';
 import { PatchRulesOptions } from './types';
@@ -22,10 +21,6 @@ export const patchRules = async ({
   }
 
   const patchedRule = convertPatchAPIToInternalSchema(params, rule);
-  // TODO: consistently throw or return the error - probably throw all the way from convert up to route handler
-  if (patchedRule instanceof BadRequestError) {
-    throw patchedRule;
-  }
 
   const update = await rulesClient.update({
     id: rule.id,

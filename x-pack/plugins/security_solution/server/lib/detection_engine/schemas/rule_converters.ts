@@ -262,7 +262,7 @@ const patchMachineLearningParams = (
   };
 };
 
-export const parseValidationError = (error: string | null): BadRequestError => {
+const parseValidationError = (error: string | null): BadRequestError => {
   if (error != null) {
     return new BadRequestError(error);
   } else {
@@ -270,11 +270,10 @@ export const parseValidationError = (error: string | null): BadRequestError => {
   }
 };
 
-// TODO: unit test this function to make sure schemas pass validation as expected
 export const patchTypeSpecificSnakeToCamel = (
   params: PatchRulesSchema,
   existingRule: RuleParams
-): TypeSpecificRuleParams | BadRequestError => {
+): TypeSpecificRuleParams => {
   // Here we do the validation of patch params by rule type to ensure that the fields that are
   // passed in to patch are of the correct type, e.g. `query` is a string. Since the combined patch schema
   // is a union of types where everything is optional, it's hard to do the validation before we know the rule type -
@@ -284,42 +283,42 @@ export const patchTypeSpecificSnakeToCamel = (
     case 'eql': {
       const [validated, error] = validateNonExact(params, eqlPatchParams);
       if (validated == null) {
-        return parseValidationError(error);
+        throw parseValidationError(error);
       }
       return patchEqlParams(validated, existingRule);
     }
     case 'threat_match': {
       const [validated, error] = validateNonExact(params, threatMatchPatchParams);
       if (validated == null) {
-        return parseValidationError(error);
+        throw parseValidationError(error);
       }
       return patchThreatMatchParams(validated, existingRule);
     }
     case 'query': {
       const [validated, error] = validateNonExact(params, queryPatchParams);
       if (validated == null) {
-        return parseValidationError(error);
+        throw parseValidationError(error);
       }
       return patchQueryParams(validated, existingRule);
     }
     case 'saved_query': {
       const [validated, error] = validateNonExact(params, savedQueryPatchParams);
       if (validated == null) {
-        return parseValidationError(error);
+        throw parseValidationError(error);
       }
       return patchSavedQueryParams(validated, existingRule);
     }
     case 'threshold': {
       const [validated, error] = validateNonExact(params, thresholdPatchParams);
       if (validated == null) {
-        return parseValidationError(error);
+        throw parseValidationError(error);
       }
       return patchThresholdParams(validated, existingRule);
     }
     case 'machine_learning': {
       const [validated, error] = validateNonExact(params, machineLearningPatchParams);
       if (validated == null) {
-        return parseValidationError(error);
+        throw parseValidationError(error);
       }
       return patchMachineLearningParams(validated, existingRule);
     }
@@ -339,16 +338,12 @@ const shouldUpdateVersion = (params: PatchRulesSchema): boolean => {
   return false;
 };
 
-// TODO: tests to ensure version gets updated as expected
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
   params: PatchRulesSchema,
   existingRule: SanitizedRule<RuleParams>
-): InternalRuleUpdate | BadRequestError => {
+): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(params, existingRule.params);
-  if (typeSpecificParams instanceof BadRequestError) {
-    return typeSpecificParams;
-  }
   const existingParams = existingRule.params;
   return {
     name: params.name ?? existingRule.name,

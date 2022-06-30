@@ -17,7 +17,6 @@ import { baseCreateParams, createTypeSpecific } from './rule_schemas';
  *  - rule_id is required here
  *  - version is a required field that must exist
  */
-// TODO: test `version` overwriting `version` from baseParams
 export const addPrepackagedRulesSchema = t.intersection([
   baseCreateParams,
   createTypeSpecific,

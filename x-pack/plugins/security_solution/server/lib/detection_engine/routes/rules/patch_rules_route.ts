@@ -29,7 +29,7 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
       validate: {
         // Use non-exact validation because everything is optional in patch - since everything is optional,
         // io-ts can't find the right schema from the type specific union and the exact check breaks.
-        // We do type specific exact validation after fetching the existing rule so we know the rule type.
+        // We do type specific validation after fetching the existing rule so we know the rule type.
         body: buildRouteValidationNonExact<typeof patchRulesSchema>(patchRulesSchema),
       },
       options: {
