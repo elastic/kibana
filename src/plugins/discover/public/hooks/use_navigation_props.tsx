@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useMemo, useRef } from 'react';
+import { MouseEventHandler, useMemo, useRef } from 'react';
 import { useHistory, matchPath } from 'react-router-dom';
 import type { Location } from 'history';
 import { stringify } from 'query-string';
@@ -105,8 +105,8 @@ export const useNavigationProps = ({
       exact: true,
     });
 
-    const onOpenSingleDoc = (event?: Event) => {
-      event?.preventDefault();
+    const onOpenSingleDoc: MouseEventHandler<HTMLAnchorElement> = (event) => {
+      event?.preventDefault?.();
 
       history.push({
         pathname: `/doc/${indexPatternId}/${rowIndex}`,
@@ -117,8 +117,8 @@ export const useNavigationProps = ({
       });
     };
 
-    const onOpenSurrDocs = (event?: Event) => {
-      event?.preventDefault();
+    const onOpenSurrDocs: MouseEventHandler<HTMLAnchorElement> = (event) => {
+      event?.preventDefault?.();
 
       history.push({
         pathname: `/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
