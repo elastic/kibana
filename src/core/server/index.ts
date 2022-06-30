@@ -48,7 +48,13 @@ import {
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
 } from './elasticsearch';
-import type { HttpServicePreboot, HttpServiceSetup, HttpServiceStart, IRouter } from './http';
+import type {
+  HttpServicePreboot,
+  HttpServiceSetup,
+  HttpServiceStart,
+  IRouter,
+  RequestHandler,
+} from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -73,6 +79,7 @@ import {
 import { PrebootServicePreboot } from './preboot';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
 import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
+import { KibanaResponseFactory, RouteMethod } from './http';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -197,7 +204,6 @@ export type {
   OnPreResponseExtensions,
   OnPreResponseInfo,
   RedirectResponseOptions,
-  RequestHandler,
   RequestHandlerWrapper,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
@@ -498,21 +504,6 @@ export interface RequestHandlerContext extends RequestHandlerContextBase {
 }
 
 /**
- * Public version of IRouter, default-scoped to {@link RequestHandlerContext}
- * See [@link IRouter}
- * @public
- */
-type PluginRouter<ContextType extends RequestHandlerContext = RequestHandlerContext> =
-  IRouter<ContextType>;
-
-export type { PluginRouter as IRouter };
-
-type PublicHttpServiceSetup<ContextType extends RequestHandlerContext = RequestHandlerContext> =
-  HttpServiceSetup<ContextType>;
-
-export type { PublicHttpServiceSetup as HttpServiceSetup };
-
-/**
  * @internal
  */
 export interface PrebootRequestHandlerContext extends RequestHandlerContextBase {
@@ -653,3 +644,39 @@ export const config = {
     appenders: appendersSchema as Type<AppenderConfigType>,
   },
 };
+
+/**
+ * Public version of RequestHandler, default-scoped to {@link RequestHandlerContext}
+ * See [@link RequestHandler}
+ * @public
+ */
+type PublicRequestHandler<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Context extends RequestHandlerContext = RequestHandlerContext,
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+> = RequestHandler<P, Q, B, Context, Method, ResponseFactory>;
+
+export type { PublicRequestHandler as RequestHandler };
+
+/**
+ * Public version of IRouter, default-scoped to {@link RequestHandlerContext}
+ * See [@link IRouter}
+ * @public
+ */
+type PublicRouter<ContextType extends RequestHandlerContext = RequestHandlerContext> =
+  IRouter<ContextType>;
+
+export type { PublicRouter as IRouter };
+
+/**
+ * Public version of RequestHandlerContext, default-scoped to {@link RequestHandlerContext}
+ * See [@link RequestHandlerContext}
+ * @public
+ */
+type PublicHttpServiceSetup<ContextType extends RequestHandlerContext = RequestHandlerContext> =
+  HttpServiceSetup<ContextType>;
+
+export type { PublicHttpServiceSetup as HttpServiceSetup };
