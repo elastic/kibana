@@ -31,8 +31,7 @@ import type {
   CspServerPluginStartServices,
 } from './types';
 import { defineRoutes } from './routes';
-import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
-import { cspRuleAssetType } from './saved_objects/csp_rule_type';
+import { setupSavedObjects } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
@@ -82,8 +81,7 @@ export class CspPlugin
       security: plugins.security,
     };
 
-    core.savedObjects.registerType(cspRuleAssetType);
-    core.savedObjects.registerType(cspRuleTemplateAssetType);
+    setupSavedObjects(core.savedObjects);
 
     const router = core.http.createRouter<CspRequestHandlerContext>();
 

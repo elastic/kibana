@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiPanel, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { MonitorDurationTrend } from './duration_trend';
@@ -17,7 +17,7 @@ export const SummaryTabContent = () => {
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
         <EuiPanel>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3>{MONITOR_DETAILS_LABEL}</h3>
           </EuiTitle>
           <MonitorDetailsPanel />
