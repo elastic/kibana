@@ -51,7 +51,7 @@ const TIMELINE_ITEM_HEIGHT = 50;
 /**
  * Modifies options by creating new property `timelineTitle`(with value of `title`), and by setting `title` to undefined.
  * Thus prevents appearing default browser tooltip on option hover (attribute `title` that gets rendered on li element)
- * 
+ *
  * @param {EuiSelectableOption[]} options
  * @returns {EuiSelectableOption[]} modified options
  */
