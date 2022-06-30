@@ -443,5 +443,22 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.statusCode).to.equal(200);
       expect(response.body._source?.alert?.tags).to.eql(['test-tag-1', 'foo-tag']);
     });
+
+    it('8.3.0 removes snoozeEndTime in favor of snoozeSchedule', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:734def70-f8b1-11ec-b8e0-c99fab63aaae',
+        },
+        { meta: true }
+      );
+
+      expect(response.statusCode).to.equal(200);
+      expect(response.body._source?.alert?.snoozeEndTime).to.be(undefined);
+      expect(response.body._source?.alert?.snoozeSchedule).not.to.be(undefined);
+
+      const snoozeSchedule = response.body._source?.alert.snoozeSchedule!;
+      expect(snoozeSchedule.length).to.eql(1);
+    });
   });
 }

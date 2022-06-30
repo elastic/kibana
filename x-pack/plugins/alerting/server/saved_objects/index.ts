@@ -22,6 +22,9 @@ import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateAlert } from './partially_update_alert';
 
+// Use caution when removing items from this array! If the field
+// exists in the rule SO, it needs to be included in this array to
+// prevent decryption failures during migration.
 export const AlertAttributesExcludedFromAAD = [
   'scheduledTaskId',
   'muteAll',
@@ -30,6 +33,7 @@ export const AlertAttributesExcludedFromAAD = [
   'updatedAt',
   'executionStatus',
   'monitoring',
+  'snoozeEndTime',
   'snoozeSchedule',
   'isSnoozedUntil',
 ];
@@ -46,6 +50,7 @@ export type AlertAttributesExcludedFromAADType =
   | 'updatedAt'
   | 'executionStatus'
   | 'monitoring'
+  | 'snoozeEndTime'
   | 'snoozeSchedule'
   | 'isSnoozedUntil';
 

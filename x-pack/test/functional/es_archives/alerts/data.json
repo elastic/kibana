@@ -1041,3 +1041,63 @@
      }
   }
 }
+
+{
+  "type":"doc",
+  "value":{
+     "id":"alert:734def70-f8b1-11ec-b8e0-c99fab63aaae",
+     "index":".kibana_1",
+     "source":{
+        "alert":{
+           "name":"Test rule with snoozeEndTime",
+           "alertTypeId":".index-threshold",
+           "consumer":"alerts",
+           "params" : {
+             "aggType" : "count",
+             "termSize" : 5,
+             "thresholdComparator" : ">",
+             "timeWindowSize" : 5,
+             "timeWindowUnit" : "d",
+             "groupBy" : "all",
+             "threshold" : [
+               0
+             ],
+             "index" : [
+               ".test-test-test"
+             ],
+             "timeField" : "@timestamp"
+           },
+           "schedule":{
+              "interval":"1m"
+           },
+           "enabled":true,
+           "actions":[
+              
+           ],
+           "throttle":null,
+           "notifyWhen" : "onActiveAlert",
+           "apiKeyOwner" : "elastic",
+           "apiKey" : "y86eFOuG06GNd4p/90Zh4V4C+4wF8rFHiLcOeNqHQFFAbagYCXIuggq/N/AB0HBncCsWrh5PsCs4RiX53+LP2o+oLtoQkdTK9m+iv0BnzP6aavoypIudKtnElN3SotI3XpIRm7c3MEdM/C/zZXHgCmn4UMExhkulOO1S/Q//FwvIr2/SKw/mp8Vx5qP41hqDX4YFfSMoFkPSLw==",
+           "createdBy":"elastic",
+           "updatedBy":"elastic",
+           "createdAt":"2021-07-27T20:42:55.896Z",
+           "muteAll":false,
+           "mutedInstanceIds":[
+              
+           ],
+           "snoozeEndTime" : "2022-06-30T23:18:17.740Z",
+           "scheduledTaskId":"734def70-f8b1-11ec-b8e0-c99fab63aaae",
+           "tags":[
+           ]
+        },
+        "type":"alert",
+        "migrationVersion":{
+           "alert":"8.2.0"
+        },
+        "updated_at":"2021-08-13T23:00:11.985Z",
+        "references":[
+           
+        ]
+     }
+  }
+}

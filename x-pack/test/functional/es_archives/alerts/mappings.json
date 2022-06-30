@@ -150,6 +150,9 @@
               },
               "type": "text"
             },
+            "notifyWhen": {
+              "type": "keyword"
+            },
             "params": {
               "enabled": false,
               "type": "object"
@@ -162,6 +165,9 @@
               }
             },
             "scheduledTaskId": {
+              "type": "keyword"
+            },
+            "snoozeEndTime": {
               "type": "keyword"
             },
             "tags": {
