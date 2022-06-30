@@ -373,7 +373,7 @@ function peg$parse(input, options) {
   var peg$f16 = function(value) {
       if (value.type === 'cursor') return value;
 
-      if (!allowLeadingWildcards && value.type === 'wildcard' && nodeTypes.wildcard.hasLeadingWildcard(value)) {
+      if (!allowLeadingWildcards && nodeTypes.wildcard.isNode(value) && nodeTypes.wildcard.hasLeadingWildcard(value)) {
         error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
       }
 
@@ -401,10 +401,10 @@ function peg$parse(input, options) {
       if (sequence === 'null') return buildLiteralNode(null);
       if (sequence === 'true') return buildLiteralNode(true);
       if (sequence === 'false') return buildLiteralNode(false);
-      if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
+      if (chars.includes(KQL_WILDCARD_SYMBOL)) return buildWildcardNode(sequence);
       return buildLiteralNode(sequence);
     };
-  var peg$f22 = function() { return wildcardSymbol; };
+  var peg$f22 = function() { return KQL_WILDCARD_SYMBOL; };
   var peg$f23 = function() { return '\t'; };
   var peg$f24 = function() { return '\r'; };
   var peg$f25 = function() { return '\n'; };
@@ -2189,7 +2189,7 @@ function peg$parse(input, options) {
     const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
     const buildLiteralNode = nodeTypes.literal.buildNode;
     const buildWildcardNode = nodeTypes.wildcard.buildNode;
-    const { wildcardSymbol } = nodeTypes.wildcard;
+    const { KQL_WILDCARD_SYMBOL } = nodeTypes.wildcard;
 
 
   peg$result = peg$startRuleFunction();

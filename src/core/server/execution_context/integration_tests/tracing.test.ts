@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContextContainer } from '../../../public/execution_context/execution_context_container';
+import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

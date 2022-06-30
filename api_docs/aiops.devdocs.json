@@ -88,6 +88,21 @@
             ],
             "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ExplainLogRateSpikesProps.windowParameters",
+            "type": "Object",
+            "tags": [],
+            "label": "windowParameters",
+            "description": [
+              "Window parameters for the analysis"
+            ],
+            "signature": [
+              "WindowParameters"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -168,7 +183,7 @@
           "\nThis is an internal hard coded feature flag so we can easily turn on/off the\n\"Explain log rate spikes UI\" during development until the first release."
         ],
         "signature": [
-          "false"
+          "true"
         ],
         "path": "x-pack/plugins/aiops/common/index.ts",
         "deprecated": false,
