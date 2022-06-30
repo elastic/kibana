@@ -25,6 +25,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
     transformDescription,
     transformFrequency,
     transformSettingsMaxPageSearchSize,
+    transformSettingsNumFailureRetries,
     destinationIndex,
     destinationIngestPipeline,
     touched,
@@ -153,6 +154,16 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
         >
           <span>{transformSettingsMaxPageSearchSize}</span>
         </EuiFormRow>
+        {transformSettingsNumFailureRetries ? (
+          <EuiFormRow
+            data-test-subj={'transformWizardAdvancedSettingsNumFailureRetriesLabel'}
+            label={i18n.translate('xpack.transform.stepDetailsSummary.numFailureRetriesLabel', {
+              defaultMessage: 'Number of retries',
+            })}
+          >
+            <span>{transformSettingsNumFailureRetries}</span>
+          </EuiFormRow>
+        ) : null}
       </EuiAccordion>
     </div>
   );

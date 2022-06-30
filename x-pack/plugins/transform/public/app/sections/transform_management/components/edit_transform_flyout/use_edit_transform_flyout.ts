@@ -133,7 +133,7 @@ export const integerGreaterThanOrEqualToValidatorFactory =
   };
 
 export const integerAboveZeroValidator: Validator = integerGreaterThanOrEqualToValidatorFactory(
-  0,
+  1,
   numberAboveZeroNotValidErrorMessage
 );
 
