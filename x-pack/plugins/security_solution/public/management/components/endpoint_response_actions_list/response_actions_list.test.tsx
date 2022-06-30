@@ -12,9 +12,8 @@ import userEvent from '@testing-library/user-event';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ResponseActionsList } from './response_actions_list';
 import { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import { createUseUiSetting$Mock } from '../../../common/lib/kibana/kibana_react.mock';
-import { DEFAULT_TIMEPICKER_QUICK_RANGES, MANAGEMENT_PATH } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
+import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 let mockUseGetEndpointActionList: {
@@ -32,59 +31,6 @@ jest.mock('../../hooks/endpoint/use_get_endpoint_action_list', () => {
   };
 });
 
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
-const timepickerRanges = [
-  {
-    from: 'now/d',
-    to: 'now/d',
-    display: 'Today',
-  },
-  {
-    from: 'now/w',
-    to: 'now/w',
-    display: 'This week',
-  },
-  {
-    from: 'now-15m',
-    to: 'now',
-    display: 'Last 15 minutes',
-  },
-  {
-    from: 'now-30m',
-    to: 'now',
-    display: 'Last 30 minutes',
-  },
-  {
-    from: 'now-1h',
-    to: 'now',
-    display: 'Last 1 hour',
-  },
-  {
-    from: 'now-24h',
-    to: 'now',
-    display: 'Last 24 hours',
-  },
-  {
-    from: 'now-7d',
-    to: 'now',
-    display: 'Last 7 days',
-  },
-  {
-    from: 'now-30d',
-    to: 'now',
-    display: 'Last 30 days',
-  },
-  {
-    from: 'now-90d',
-    to: 'now',
-    display: 'Last 90 days',
-  },
-  {
-    from: 'now-1y',
-    to: 'now',
-    display: 'Last 1 year',
-  },
-];
 jest.mock('../../../common/lib/kibana');
 
 describe('Response Actions List', () => {
@@ -114,13 +60,6 @@ describe('Response Actions List', () => {
       history.push(`${MANAGEMENT_PATH}/response_actions`);
     });
     (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
-    mockUseUiSetting$.mockImplementation((key, defaultValue) => {
-      const useUiSetting$Mock = createUseUiSetting$Mock();
-
-      return key === DEFAULT_TIMEPICKER_QUICK_RANGES
-        ? [timepickerRanges, jest.fn()]
-        : useUiSetting$Mock(key, defaultValue);
-    });
 
     mockUseGetEndpointActionList = {
       ...baseMockedActionList,

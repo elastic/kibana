@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
-import dateMath from '@kbn/datemath';
+import React, { memo, useState } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DurationRange, OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
-import { useUiSetting$ } from '../../../../common/lib/kibana';
-import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../common/constants';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 export interface DateRangePickerValues {
   autoRefreshOptions: {
     enabled: boolean;
     duration: number;
   };
-  startDate?: string;
-  endDate?: string;
+  startDate: string;
+  endDate: string;
   recentlyUsedDateRanges: EuiSuperDatePickerRecentRange[];
-}
-interface Range {
-  from: string;
-  to: string;
-  display: string;
 }
 
 const DatePickerWrapper = euiStyled.div`
@@ -49,48 +43,38 @@ export const ActionListDateRangePicker = memo(
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
   }) => {
-    const { uiSettings } = useKibana().services;
-    const [quickRanges] = useUiSetting$<Range[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
-    const [dateFormat] = useState(() => uiSettings?.get('dateFormat'));
-    const commonlyUsedRanges = !quickRanges.length
-      ? []
-      : quickRanges.map(({ from, to, display }) => ({
-          start: from,
-          end: to,
-          label: display,
-        }));
-
-    const end = useMemo(
-      () =>
-        dateRangePickerState.endDate
-          ? dateMath.parse(dateRangePickerState.endDate)?.toISOString()
-          : undefined,
-      [dateRangePickerState]
-    );
-
-    const start = useMemo(
-      () =>
-        dateRangePickerState.startDate
-          ? dateMath.parse(dateRangePickerState.startDate)?.toISOString()
-          : undefined,
-      [dateRangePickerState]
-    );
+    const kibana = useKibana<IDataPluginServices>();
+    const { uiSettings } = kibana.services;
+    const [commonlyUsedRanges] = useState(() => {
+      return (
+        uiSettings
+          ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
+          ?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
+            return {
+              start: from,
+              end: to,
+              label: display,
+            };
+          }) ?? []
+      );
+    });
 
     return (
       <DatePickerWrapper data-test-subj="actionListSuperDatePicker">
         <EuiSuperDatePicker
-          updateButtonProps={{ iconOnly: true, fill: false }}
           isLoading={isDataLoading}
-          dateFormat={dateFormat}
+          dateFormat={uiSettings.get('dateFormat')}
           commonlyUsedRanges={commonlyUsedRanges}
-          end={end}
+          end={dateRangePickerState.endDate}
           isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
           onTimeChange={onTimeChange}
           onRefreshChange={onRefreshChange}
           refreshInterval={dateRangePickerState.autoRefreshOptions.duration}
           onRefresh={onRefresh}
           recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
-          start={start}
+          start={dateRangePickerState.startDate}
+          updateButtonProps={{ iconOnly: true, fill: false }}
+          width="auto"
         />
       </DatePickerWrapper>
     );
