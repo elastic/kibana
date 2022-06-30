@@ -19,7 +19,7 @@ import { HttpService, InternalHttpServiceSetup } from '../../../http';
 import { registerStatusRoute } from '../status';
 import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '../../types';
 import { statusServiceMock } from '../../status_service.mock';
-import { executionContextServiceMock } from '../../../execution_context/execution_context_service.mock';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '../../../context/context_service.mock';
 
 const coreId = Symbol('core');

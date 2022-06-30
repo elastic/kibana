@@ -9,6 +9,7 @@ import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { useEnablement } from '../../../../hooks';
 import { MONITOR_ADD_ROUTE } from '../../../../../../../common/constants';
 
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
@@ -17,6 +18,10 @@ import { BETA_TOOLTIP_MESSAGE } from '../labels';
 
 export const MonitorsPageHeader = () => {
   const { basePath } = useContext(SyntheticsSettingsContext);
+
+  const {
+    enablement: { isEnabled },
+  } = useEnablement();
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -38,6 +43,8 @@ export const MonitorsPageHeader = () => {
           iconSide="left"
           iconType="plusInCircleFilled"
           href={`${basePath}/app/uptime${MONITOR_ADD_ROUTE}`}
+          isDisabled={!isEnabled}
+          data-test-subj="syntheticsAddMonitorBtn"
         >
           <FormattedMessage
             id="xpack.synthetics.monitors.pageHeader.createButton.label"

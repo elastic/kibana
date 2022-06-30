@@ -37,7 +37,7 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
         header={
           <FormattedMessage
             id="xpack.securitySolution.console.badArgument.title"
-            defaultMessage="Unsupported argument!"
+            defaultMessage="Unsupported argument"
           />
         }
         data-test-subj={getTestId('badArgument')}

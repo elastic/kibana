@@ -48,6 +48,12 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
   };
 }
 
+export function hasComments(data: string) {
+  // matches single line and multiline comments
+  const re = /(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)|(\/\/.*)|(#.*)/;
+  return re.test(data);
+}
+
 export function extractWarningMessages(warnings: string) {
   // pattern for valid warning header
   const re =

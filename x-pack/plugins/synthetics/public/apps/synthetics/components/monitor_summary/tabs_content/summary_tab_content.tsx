@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { StepDurationPanel } from './step_duration_panel';
@@ -15,12 +15,19 @@ import { MonitorDetailsPanel } from './monitor_details_panel';
 export const SummaryTabContent = () => {
   return (
     <>
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h3>{MONITOR_DETAILS_LABEL}</h3>
-        </EuiTitle>
-        <MonitorDetailsPanel />
-      </EuiPanel>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiPanel>
+            <EuiTitle size="xs">
+              <h3>{MONITOR_DETAILS_LABEL}</h3>
+            </EuiTitle>
+            <MonitorDetailsPanel />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <EuiPanel />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
       <StepDurationPanel />
     </>
