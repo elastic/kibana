@@ -44,7 +44,7 @@ export abstract class InferenceBase<TInferResponse> {
   public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
   public inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
   public runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
-  protected info: string[] | null = null;
+  protected info: string[] = [];
 
   constructor(
     protected trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,

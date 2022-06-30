@@ -11,15 +11,15 @@ import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
 
 interface Props {
   inferenceType: string;
-  info: string[] | null;
+  info: string[];
 }
 
-export const getInferenceInfoComponent = (inferenceType: string, info: string[] | null) => (
+export const getInferenceInfoComponent = (inferenceType: string, info: string[]) => (
   <InferenceInfo inferenceType={inferenceType} info={info} />
 );
 
 export const InferenceInfo: FC<Props> = ({ inferenceType, info }) => {
-  if (info === null) {
+  if (info.length === 0) {
     return null;
   }
   return (
