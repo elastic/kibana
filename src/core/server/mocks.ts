@@ -139,7 +139,7 @@ function createCorePrebootMock() {
   const mock: CorePrebootMockType = {
     analytics: analyticsServiceMock.createAnalyticsServicePreboot(),
     elasticsearch: elasticsearchServiceMock.createPreboot(),
-    http: httpServiceMock.createPrebootContract(),
+    http: httpServiceMock.createPrebootContract() as CorePrebootMockType['http'],
     preboot: prebootServiceMock.createPrebootContract(),
   };
 
