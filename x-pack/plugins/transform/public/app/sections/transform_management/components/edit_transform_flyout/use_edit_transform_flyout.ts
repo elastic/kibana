@@ -114,7 +114,7 @@ const numberAboveZeroNotValidErrorMessage = i18n.translate(
   }
 );
 
-const numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage = i18n.translate(
+const numberRangeMinus1To100NotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberGreaterThanOrEqualToNegativeOneNotValidErrorMessage',
   {
     defaultMessage: 'Number of retries needs to be a number greater than or equal to -1.',
@@ -137,11 +137,14 @@ export const integerAboveZeroValidator: Validator = integerGreaterThanOrEqualToV
   numberAboveZeroNotValidErrorMessage
 );
 
-export const integerGreaterThanOrEqualToNegativeOne: Validator =
-  integerGreaterThanOrEqualToValidatorFactory(
-    -1,
-    numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage
-  );
+export const integerRangeMinus1To100Validator: Validator = (value) =>
+  !isNaN(value) &&
+  Number.isInteger(+value) &&
+  !(value + '').includes('.') &&
+  +value >= -1 &&
+  +value <= 100
+    ? []
+    : [numberRangeMinus1To100NotValidErrorMessage];
 
 const numberRange10To10000NotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberRange10To10000NotValidErrorMessage',
@@ -240,10 +243,7 @@ const validate = {
   string: stringValidator,
   frequency: frequencyValidator,
   integerAboveZero: integerAboveZeroValidator,
-  integerGreaterThanOrEqualToNegativeOne: integerGreaterThanOrEqualToValidatorFactory(
-    -1,
-    numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage
-  ),
+  integerRangeMinus1To100: integerRangeMinus1To100Validator,
   integerRange10To10000: integerRange10To10000Validator,
   retentionPolicyMaxAge: retentionPolicyMaxAgeValidator,
 } as const;
@@ -445,7 +445,7 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         defaultValue: undefined,
         isNullable: true,
         isOptional: true,
-        validator: 'integerGreaterThanOrEqualToNegativeOne',
+        validator: 'integerRangeMinus1To100',
         valueParser: (v) => +v,
       }
     ),
