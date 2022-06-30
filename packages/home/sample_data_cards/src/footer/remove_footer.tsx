@@ -23,7 +23,7 @@ export const RemoveFooter = (props: Props) => {
   const { id, name } = props;
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           isLoading={isRemoving}
