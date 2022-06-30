@@ -17,15 +17,15 @@ export default ({ getService }: FtrProviderContext) => {
   const spacesService = getService('spaces');
   const supertest = getService('supertestWithoutAuth');
 
-  const adJobIdSpace1 = 'fq_single_space1';
-  const adJobIdSpace2 = 'fq_single_space2';
-  const adJobIdSpace3 = 'fq_single_space3';
-  const dfaJobIdSpace1 = 'dfa_single_space1';
-  const dfaJobIdSpace2 = 'dfa_single_space2';
-  const dfaJobIdSpace3 = 'dfa_single_space3';
-  const trainedModelIdSpace1 = 'trained_model_space1';
-  const trainedModelIdSpace2 = 'trained_model_space2';
-  const trainedModelIdSpace3 = 'trained_model_space3';
+  const adJobIdSpace1s1 = 'fq_single_space1s1';
+  const adJobIdSpace2s1 = 'fq_single_space2s1';
+  const adJobIdSpace3s2 = 'fq_single_space3s2';
+  const dfaJobIdSpace1s1 = 'dfa_single_space1s1';
+  const dfaJobIdSpace2s1 = 'dfa_single_space2s1';
+  const dfaJobIdSpace3s2 = 'dfa_single_space3s2';
+  const trainedModelIdSpace1s1 = 'trained_model_space1s1';
+  const trainedModelIdSpace2s1 = 'trained_model_space2s1';
+  const trainedModelIdSpace3s2 = 'trained_model_space3s2';
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
 
@@ -51,37 +51,37 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.initSavedObjects();
 
       // Create AD jobs
-      const jobConfig1 = ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdSpace1);
+      const jobConfig1 = ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdSpace1s1);
       await ml.api.createAnomalyDetectionJob(jobConfig1, idSpace1);
-      const jobConfig2 = ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdSpace2);
+      const jobConfig2 = ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdSpace2s1);
       await ml.api.createAnomalyDetectionJob(jobConfig2, idSpace1);
-      const jobConfig3 = ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdSpace3);
+      const jobConfig3 = ml.commonConfig.getADFqSingleMetricJobConfig(adJobIdSpace3s2);
       await ml.api.createAnomalyDetectionJob(jobConfig3, idSpace2);
 
       // Create DFA jobs
-      const dfaConfig1 = ml.commonConfig.getDFABmClassificationJobConfig(dfaJobIdSpace1);
+      const dfaConfig1 = ml.commonConfig.getDFABmClassificationJobConfig(dfaJobIdSpace1s1);
       await ml.api.createDataFrameAnalyticsJob(dfaConfig1, idSpace1);
-      const dfaConfig2 = ml.commonConfig.getDFABmClassificationJobConfig(dfaJobIdSpace2);
+      const dfaConfig2 = ml.commonConfig.getDFABmClassificationJobConfig(dfaJobIdSpace2s1);
       await ml.api.createDataFrameAnalyticsJob(dfaConfig2, idSpace1);
-      const dfaConfig3 = ml.commonConfig.getDFABmClassificationJobConfig(dfaJobIdSpace3);
+      const dfaConfig3 = ml.commonConfig.getDFABmClassificationJobConfig(dfaJobIdSpace3s2);
       await ml.api.createDataFrameAnalyticsJob(dfaConfig3, idSpace2);
 
       // Create trained models
       const trainedModelConfig1 = await ml.api.createTestTrainedModelConfig(
-        trainedModelIdSpace1,
+        trainedModelIdSpace1s1,
         'regression'
       );
-      await ml.api.createTrainedModel(trainedModelIdSpace1, trainedModelConfig1.body, idSpace1);
+      await ml.api.createTrainedModel(trainedModelIdSpace1s1, trainedModelConfig1.body, idSpace1);
       const trainedModelConfig2 = await ml.api.createTestTrainedModelConfig(
-        trainedModelIdSpace2,
+        trainedModelIdSpace2s1,
         'regression'
       );
-      await ml.api.createTrainedModel(trainedModelIdSpace2, trainedModelConfig2.body, idSpace1);
+      await ml.api.createTrainedModel(trainedModelIdSpace2s1, trainedModelConfig2.body, idSpace1);
       const trainedModelConfig3 = await ml.api.createTestTrainedModelConfig(
-        trainedModelIdSpace3,
+        trainedModelIdSpace3s2,
         'regression'
       );
-      await ml.api.createTrainedModel(trainedModelIdSpace3, trainedModelConfig3.body, idSpace2);
+      await ml.api.createTrainedModel(trainedModelIdSpace3s2, trainedModelConfig3.body, idSpace2);
 
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
