@@ -57,8 +57,8 @@ To review the breaking changes in previous versions, refer to the following:
 [discrete]
 === Known issues
 
-* Elasticsearch API commands will fail if you add any URL arguments (e.g. `?v`, `?pretty`) to the call. 
-This only impacts the Kibana Dev Tools.  All other sources of API calls are not affected (e.g. curl, Elastic Cloud API console) {kibana-issue}133965[#133965]
+* API requests will fail if you add any URL arguments (e.g. `?v`, `?pretty`) to the request. 
+This only impacts the Kibana Dev Tools.  All other sources of API requests are not affected (e.g. curl, Elastic Cloud API console) {kibana-issue}133965[#133965]
 
 [float]
 [[enhancement-v8.3.1]]
