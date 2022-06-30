@@ -115,6 +115,10 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
     return result;
   }
 
+  public getTelemetryUsageCluster(): UsageCounter | undefined {
+    return this.composite.getTelemetryUsageCluster();
+  }
+
   public isTelemetryOptedIn(): Promise<boolean> {
     return this.composite.isTelemetryOptedIn();
   }
