@@ -46,7 +46,7 @@ export default function ({
       const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
         aggs={aggCount id="1" enabled=true schema="metric"}
         aggs={aggTerms id="2" enabled=true schema="segment" field="response.raw" size=4 order="desc" orderBy="1"}
-        | metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}
+        | legacyMetricVis metric={visdimension 1 format="number"} bucket={visdimension 0}
       `;
 
       // we can execute an expression and validate the result manually:
