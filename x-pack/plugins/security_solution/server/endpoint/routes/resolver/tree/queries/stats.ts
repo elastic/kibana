@@ -6,10 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import type {
-  AlertsClient,
-  RuleRegistryPluginStartContract,
-} from '@kbn/rule-registry-plugin/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { JsonObject } from '@kbn/utility-types';
 import { EventStats, ResolverSchema } from '../../../../../../common/endpoint/types';
 import { NodeID, TimeRange } from '../utils';
