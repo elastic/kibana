@@ -8,7 +8,7 @@
   },
   "description": "Bringing blob storage to Kibana",
   "server": true,
-  "ui": false,
+  "ui": true,
   "requiredPlugins": [],
   "optionalPlugins": ["security"]
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME, ES_SINGLE_INDEX_BLOB_STORE } from './constants';
+export { FILE_SO_TYPE, PLUGIN_ID, PLUGIN_NAME, ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
 export type {
   FileSavedObjectAttributes,

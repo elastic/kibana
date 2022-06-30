@@ -17,14 +17,12 @@ import { PLUGIN_ID } from '../common/constants';
 
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
-import type { FilesPluginSetupDependencies, FilesPluginSetup, FilesPluginStart } from './types';
+import type { FilesPluginSetupDependencies, FilesSetup, FilesStart } from './types';
 import { fileKindsRegistry } from './file_kinds_registry';
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes } from './routes';
 
-export class FilesPlugin
-  implements Plugin<FilesPluginSetup, FilesPluginStart, FilesPluginSetupDependencies>
-{
+export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private readonly logger: Logger;
   private fileServiceFactory: undefined | FileServiceFactory;
   private securitySetup: FilesPluginSetupDependencies['security'];
@@ -33,7 +31,7 @@ export class FilesPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, deps: FilesPluginSetupDependencies): FilesPluginSetup {
+  public setup(core: CoreSetup, deps: FilesPluginSetupDependencies): FilesSetup {
     FileServiceFactory.setup(core.savedObjects);
     this.securitySetup = deps.security;
 
@@ -70,7 +68,7 @@ export class FilesPlugin
     };
   }
 
-  public start(coreStart: CoreStart): FilesPluginStart {
+  public start(coreStart: CoreStart): FilesStart {
     const { savedObjects } = coreStart;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const blobStorageService = new BlobStorageService(

@@ -8,14 +8,14 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { FileKind } from '../common';
 import { FileServiceFactory } from './file_service';
 
-export interface FilesPluginSetup {
+export interface FilesSetup {
   registerFileKind(fileKind: FileKind): void;
-}
-
-export interface FilesPluginStart {
-  fileServiceFactory: FileServiceFactory;
 }
 
 export interface FilesPluginSetupDependencies {
   security?: SecurityPluginSetup;
+}
+
+export interface FilesStart {
+  fileServiceFactory: FileServiceFactory;
 }
