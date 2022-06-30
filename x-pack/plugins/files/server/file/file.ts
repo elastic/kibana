@@ -26,7 +26,7 @@ import {
 } from './file_attributes_reducer';
 import { createAuditEvent } from '../audit_events';
 import { InternalFileService } from '../file_service/internal_file_service';
-import { FileShareService } from '../file_share_service';
+import { InternalFileShareService } from '../file_share_service';
 import { BlobStorage } from '../blob_storage_service/types';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 
@@ -45,7 +45,7 @@ export class File<M = unknown> implements IFile {
     private readonly fileKindDescriptor: FileKind,
     private readonly internalFileService: InternalFileService,
     private readonly blobStorageService: BlobStorageService,
-    private readonly fileShareService: FileShareService,
+    private readonly fileShareService: InternalFileShareService,
     private readonly logger: Logger
   ) {
     this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
