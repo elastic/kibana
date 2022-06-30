@@ -39,7 +39,7 @@ const EndpointDetailsTab = memo(
         onClick={onClick}
         isSelected={isSelected}
         key={tab.id}
-        data-test-subj={tab.id}
+        data-test-subj={`endpoint-details-flyout-tab-${tab.id}`}
       >
         {tab.name}
       </EuiTab>
@@ -72,7 +72,11 @@ export const EndpointDetailsFlyoutTabs = memo(
             {renderTabs}
           </EuiTabs>
         </EndpointDetailsFlyoutHeader>
-        <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
+        <EuiFlyoutBody
+          data-test-subj={`endpoint${
+            selectedTab?.id === 'details' ? 'Details' : 'ActivityLog'
+          }FlyoutBody`}
+        >
           {selectedTab?.content}
         </EuiFlyoutBody>
       </>

@@ -19,22 +19,6 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     loading: false,
     error: undefined,
     endpointDetails: {
-      activityLog: {
-        paging: {
-          disabled: false,
-          page: 1,
-          pageSize: 50,
-          startDate: 'now-1d',
-          endDate: 'now',
-          isInvalidDateRange: false,
-          autoRefreshOptions: {
-            enabled: false,
-            duration: DEFAULT_POLL_INTERVAL,
-          },
-          recentlyUsedDateRanges: [],
-        },
-        logData: createUninitialisedResourceState(),
-      },
       hostDetails: {
         details: undefined,
         detailsLoading: false,

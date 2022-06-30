@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import {
-  ActivityLog,
   HostInfo,
   Immutable,
   HostMetadata,
@@ -38,22 +36,6 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
-    activityLog: {
-      paging: {
-        disabled?: boolean;
-        page: number;
-        pageSize: number;
-        startDate: string;
-        endDate: string;
-        isInvalidDateRange: boolean;
-        autoRefreshOptions: {
-          enabled: boolean;
-          duration: number;
-        };
-        recentlyUsedDateRanges: EuiSuperDatePickerRecentRange[];
-      };
-      logData: AsyncResourceState<ActivityLog>;
-    };
     hostDetails: {
       /** details data for a specific host */
       details?: Immutable<HostMetadata>;
