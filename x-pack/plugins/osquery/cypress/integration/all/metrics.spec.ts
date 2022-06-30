@@ -38,7 +38,7 @@ describe('ALL - Inventory', () => {
   });
   it('should be able to run the previously saved query', () => {
     cy.getBySel('toggleNavButton').click();
-    cy.getBySel('collapsibleNavAppLink').contains('Inventory').click();
+    cy.getBySel('collapsibleNavAppLink').contains('Infrastructure').click();
 
     cy.wait(500);
     cy.getBySel('nodeContainer').click();
