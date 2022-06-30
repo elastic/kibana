@@ -139,6 +139,10 @@ export interface RulesTableActions {
   setPerPage: React.Dispatch<React.SetStateAction<number>>;
   setSelectedRuleIds: React.Dispatch<React.SetStateAction<string[]>>;
   setSortingOptions: React.Dispatch<React.SetStateAction<SortingOptions>>;
+  /**
+   * clears rules selection on a page
+   */
+  clearRulesSelection: () => void;
 }
 
 export interface RulesTableContextType {
@@ -218,6 +222,11 @@ export const RulesTableContextProvider = ({
     }
   }, [selectedRuleIds, isRefreshOn]);
 
+  const clearRulesSelection = useCallback(() => {
+    setSelectedRuleIds([]);
+    setIsAllSelected(false);
+  }, []);
+
   const handleFilterOptionsChange = useCallback(
     (newFilter: Partial<FilterOptions>) => {
       setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
@@ -292,6 +301,7 @@ export const RulesTableContextProvider = ({
         setPerPage,
         setSelectedRuleIds,
         setSortingOptions,
+        clearRulesSelection,
       },
     }),
     [
@@ -318,6 +328,7 @@ export const RulesTableContextProvider = ({
       toggleInMemorySorting,
       setSelectedRuleIds,
       total,
+      clearRulesSelection,
     ]
   );
 
