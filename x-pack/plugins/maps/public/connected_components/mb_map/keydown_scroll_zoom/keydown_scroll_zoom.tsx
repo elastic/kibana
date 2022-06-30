@@ -63,8 +63,7 @@ export class KeydownScrollZoom extends Component<Props, State> {
     return (
       <aside
         className={classNames('mapKeydownScrollZoom', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          mapKeydownScrollZoom--show: this.state.show,
+          'mapKeydownScrollZoom--show': this.state.show,
         })}
       >
         <EuiText textAlign="center" size="s" color="ghost">
