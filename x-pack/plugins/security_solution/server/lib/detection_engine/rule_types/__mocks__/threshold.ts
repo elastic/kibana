@@ -33,6 +33,7 @@ import {
   ALERT_ANCESTORS,
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
+  ALERT_THRESHOLD_RESULT_COUNT,
 } from '../../../../../common/field_maps/field_names';
 
 export const mockThresholdResults = {
@@ -111,6 +112,7 @@ export const sampleThresholdAlert = {
     [ALERT_RULE_PRODUCER]: 'siem',
     [ALERT_RULE_TYPE_ID]: 'query-rule-id',
     [ALERT_RULE_UUID]: '151af49f-2e82-4b6f-831b-7f8cb341a5ff',
+    [ALERT_THRESHOLD_RESULT_COUNT]: 3,
     [ALERT_RULE_PARAMETERS]: {
       author: [],
       description: 'some description',
