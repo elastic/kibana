@@ -605,6 +605,7 @@ export async function restartInstallation(options: {
   if (verificationResult) {
     savedObjectUpdate = {
       ...savedObjectUpdate,
+      verification_key_id: null, // unset any previous verification key id
       ...formatVerificationResultForSO(verificationResult),
     };
   }

@@ -422,7 +422,7 @@ export interface Installation extends SavedObjectAttributes {
   keep_policies_up_to_date?: boolean;
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
-  verification_key_id?: string;
+  verification_key_id?: string | null;
 }
 
 export interface PackageUsageStats {

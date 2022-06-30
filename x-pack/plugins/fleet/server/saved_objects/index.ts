@@ -231,14 +231,8 @@ const getSavedObjectTypes = (
           enabled: false,
           type: 'object',
         },
-        verification: {
-          type: 'object',
-          properties: {
-            verification_attempted: { type: 'boolean' },
-            is_verified: { type: 'boolean' },
-            key_id: { type: 'keyword' },
-          },
-        },
+        verification_status: { type: 'keyword' },
+        verification_key_id: { type: 'keyword' },
         installed_es: {
           type: 'nested',
           properties: {
