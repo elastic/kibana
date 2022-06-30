@@ -1740,5 +1740,16 @@ module.exports = {
         quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
       },
     },
+
+    /**
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     */
+    {
+      files: '.buildkite/**/*.{js,ts}',
+      rules: {
+        'no-console': 'off',
+        '@kbn/imports/no_unresolvable_imports': 'off',
+      },
+    },
   ],
 };

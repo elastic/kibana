@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
@@ -43,11 +44,14 @@ const ConsoleWindow = styled.div`
       border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
     }
 
+    &-footer {
+      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
+    }
+
     &-rightPanel {
       width: 35%;
-      background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
-      border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
-        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+      background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
+      border-left: ${({ theme: { eui } }) => eui.euiBorderThin};
     }
 
     &-historyOutput {
@@ -70,6 +74,10 @@ const ConsoleWindow = styled.div`
 
   .font-family-code {
     font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
+  }
+
+  .font-style-italic {
+    font-style: italic;
   }
 
   .descriptionList-20_80 {
@@ -105,28 +113,29 @@ export const Console = memo<ConsoleProps>(
       // it is stored in State and currently not updated if it changes
     }, []);
 
-    const handleConsoleClick = useCallback(() => {
+    const setFocusOnInput = useCallback(() => {
       if (inputFocusRef.current) {
-        inputFocusRef.current();
+        inputFocusRef.current.focus();
       }
     }, []);
 
     // When the console is shown, set focus to it so that user can just start typing
     useEffect(() => {
       if (!managedConsole || managedConsole.isOpen) {
-        setTimeout(handleConsoleClick, 2);
+        setTimeout(setFocusOnInput, 2);
       }
-    }, [handleConsoleClick, managedConsole]);
+    }, [setFocusOnInput, managedConsole]);
 
     return (
       <ConsoleStateProvider
         commands={commands}
         scrollToBottom={scrollToBottom}
+        keyCapture={inputFocusRef}
         managedKey={managedKey}
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
       >
-        <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
+        <ConsoleWindow onClick={setFocusOnInput} {...commonProps}>
           <EuiFlexGroup
             direction="column"
             className="layout"
@@ -157,6 +166,9 @@ export const Console = memo<ConsoleProps>(
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} className="layout-container layout-commandInput">
                       <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} className="layout-container layout-footer">
+                      <ConsoleFooter />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
