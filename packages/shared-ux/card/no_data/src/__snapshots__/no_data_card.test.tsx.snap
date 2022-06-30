@@ -3,7 +3,7 @@
 exports[`NoDataCard props button 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
       class="euiCard__top"
@@ -27,7 +27,7 @@ exports[`NoDataCard props button 1`] = `
       class="euiCard__content"
     >
       <span
-        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        class="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
         <a
@@ -44,7 +44,7 @@ exports[`NoDataCard props button 1`] = `
         </a>
       </span>
       <div
-        class="euiText euiText--small euiCard__description"
+        class="euiText euiCard__description emotion-euiText-s"
         id="generated-idDescription"
       >
         <p>
@@ -77,7 +77,7 @@ exports[`NoDataCard props button 1`] = `
 exports[`NoDataCard props extends EuiCardProps 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable custom_class css-1hu4pg0-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
       class="euiCard__top"
@@ -101,7 +101,7 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
       class="euiCard__content"
     >
       <span
-        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        class="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
         <a
@@ -118,7 +118,7 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
         </a>
       </span>
       <div
-        class="euiText euiText--small euiCard__description"
+        class="euiText euiCard__description emotion-euiText-s"
         id="generated-idDescription"
       >
         <p>
@@ -151,7 +151,7 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
 exports[`NoDataCard props href 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
       class="euiCard__top"
@@ -175,7 +175,7 @@ exports[`NoDataCard props href 1`] = `
       class="euiCard__content"
     >
       <span
-        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        class="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
         <a
@@ -192,7 +192,7 @@ exports[`NoDataCard props href 1`] = `
         </a>
       </span>
       <div
-        class="euiText euiText--small euiCard__description"
+        class="euiText euiCard__description emotion-euiText-s"
         id="generated-idDescription"
       >
         <p>
@@ -225,7 +225,7 @@ exports[`NoDataCard props href 1`] = `
 exports[`NoDataCard props no access to Fleet 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiCard euiCard--centerAligned euiCard-isDisabled css-1hu4pg0-EuiCard"
+    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard-isDisabled emotion-euiPanel-grow-m-l-subdued-EuiCard"
   >
     <div
       class="euiCard__top"
@@ -249,7 +249,7 @@ exports[`NoDataCard props no access to Fleet 1`] = `
       class="euiCard__content"
     >
       <span
-        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        class="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
         <button
@@ -258,19 +258,19 @@ exports[`NoDataCard props no access to Fleet 1`] = `
           disabled=""
         >
           <span
-            class="euiTextColor euiTextColor--default"
+            class="emotion-euiTextColor-default"
           >
             Contact your administrator
           </span>
         </button>
       </span>
       <div
-        class="euiText euiText--small euiCard__description"
+        class="euiText euiCard__description emotion-euiText-s"
         id="generated-idDescription"
       >
         <p>
           <span
-            class="euiTextColor euiTextColor--default"
+            class="emotion-euiTextColor-default"
           >
             This integration is not yet enabled. Your administrator has the required permissions to turn it on.
           </span>
@@ -284,7 +284,7 @@ exports[`NoDataCard props no access to Fleet 1`] = `
 exports[`NoDataCard renders 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
       class="euiCard__top"
@@ -308,7 +308,7 @@ exports[`NoDataCard renders 1`] = `
       class="euiCard__content"
     >
       <span
-        class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
+        class="euiTitle euiCard__title emotion-euiTitle-s"
         id="generated-idTitle"
       >
         <a
@@ -325,7 +325,7 @@ exports[`NoDataCard renders 1`] = `
         </a>
       </span>
       <div
-        class="euiText euiText--small euiCard__description"
+        class="euiText euiCard__description emotion-euiText-s"
         id="generated-idDescription"
       >
         <p>

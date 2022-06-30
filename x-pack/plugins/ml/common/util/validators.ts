@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ALLOWED_DATA_UNITS } from '../constants/validation';
 import { parseInterval } from './parse_interval';
-import { isPopulatedObject } from './object_utils';
 
 /**
  * Provides a validator function for maximum allowed input length.
@@ -104,9 +104,14 @@ export function timeIntervalInputValidator() {
 export interface NumberValidationResult {
   min: boolean;
   max: boolean;
+  integerOnly: boolean;
 }
 
-export function numberValidator(conditions?: { min?: number; max?: number }) {
+export function numberValidator(conditions?: {
+  min?: number;
+  max?: number;
+  integerOnly?: boolean;
+}) {
   if (
     conditions?.min !== undefined &&
     conditions.max !== undefined &&
@@ -122,6 +127,9 @@ export function numberValidator(conditions?: { min?: number; max?: number }) {
     }
     if (conditions?.max !== undefined && value > conditions.max) {
       result.max = true;
+    }
+    if (!!conditions?.integerOnly && !Number.isInteger(value)) {
+      result.integerOnly = true;
     }
     if (isPopulatedObject(result)) {
       return result;

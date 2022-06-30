@@ -420,13 +420,7 @@
             ],
             "signature": [
               "{ calculateAutoTimeExpression: (range: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
@@ -12282,13 +12276,7 @@
         "description": [],
         "signature": [
           "(getConfig: (key: string) => any) => (range: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           ") => string | undefined"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/calculate_auto_time_expression.ts",
@@ -15721,13 +15709,7 @@
         "description": [],
         "signature": [
           "(timerange: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           ") => ",
           {
             "pluginId": "expressions",
@@ -15748,13 +15730,7 @@
             "label": "timerange",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              }
+              "TimeRange"
             ],
             "path": "src/plugins/data/common/search/expressions/timerange_to_ast.ts",
             "deprecated": false,
@@ -20909,13 +20885,7 @@
             "description": [],
             "signature": [
               "(range: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               ") => string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -25238,13 +25208,7 @@
             "description": [],
             "signature": [
               "{ calculateAutoTimeExpression: (range: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               ") => string | undefined; createAggConfigs: (indexPattern: ",
               {
                 "pluginId": "dataViews",
@@ -26683,13 +26647,7 @@
         ],
         "signature": [
           "{ calculateAutoTimeExpression: (range: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           ") => string | undefined; createAggConfigs: (indexPattern: ",
           {
             "pluginId": "dataViews",
@@ -27367,13 +27325,7 @@
           " | ",
           "Query",
           "[] | undefined; timeRange?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
@@ -27973,13 +27925,7 @@
             "text": "ExpressionFunctionDefinition"
           },
           "<\"timerange\", null, ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           ", ",
           {
             "pluginId": "data",
@@ -29485,13 +29431,7 @@
         "description": [],
         "signature": [
           "{ type: \"timerange\"; } & ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          }
+          "TimeRange"
         ],
         "path": "src/plugins/data/common/search/expressions/timerange.ts",
         "deprecated": false,
@@ -29672,7 +29612,15 @@
           },
           "[] | undefined; fieldsFromSource?: ",
           "Fields",
-          " | undefined; index?: string | undefined; searchAfter?: ",
+          " | undefined; index?: string | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          " | undefined; searchAfter?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -32857,13 +32805,7 @@
             "description": [],
             "signature": [
               "(input: null, args: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               ") => { type: \"timerange\"; from: string; to: string; mode: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/timerange.ts",
@@ -32891,13 +32833,7 @@
                 "label": "args",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataQueryPluginApi",
-                    "section": "def-common.TimeRange",
-                    "text": "TimeRange"
-                  }
+                  "TimeRange"
                 ],
                 "path": "src/plugins/data/common/search/expressions/timerange.ts",
                 "deprecated": false,
@@ -35000,13 +34936,7 @@
               " | ",
               "Query",
               "[] | undefined; timeRange?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               " | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
@@ -35303,13 +35233,7 @@
               " | ",
               "Query",
               "[] | undefined; timeRange?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               " | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",

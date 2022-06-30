@@ -22,6 +22,8 @@ import {
   BackendOperation,
   getTopBackendOperations,
 } from './get_top_backend_operations';
+import { getBackendLatencyDistribution } from './get_backend_latency_distribution';
+import { OverallLatencyDistributionResponse } from '../latency_distribution/types';
 import { BackendSpan, getTopBackendSpans } from './get_top_backend_spans';
 
 const topBackendsRoute = createApmServerRoute({
@@ -511,6 +513,54 @@ const backendOperationsRoute = createApmServerRoute({
   },
 });
 
+const backendLatencyDistributionChartsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/backends/charts/distribution',
+  params: t.type({
+    query: t.intersection([
+      t.type({
+        backendName: t.string,
+        spanName: t.string,
+        percentileThreshold: toNumberRt,
+      }),
+      rangeRt,
+      kueryRt,
+      environmentRt,
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    allSpansDistribution: OverallLatencyDistributionResponse;
+    failedSpansDistribution: OverallLatencyDistributionResponse;
+  }> => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const {
+      backendName,
+      spanName,
+      percentileThreshold,
+      kuery,
+      environment,
+      start,
+      end,
+    } = params.query;
+
+    return getBackendLatencyDistribution({
+      setup,
+      backendName,
+      spanName,
+      percentileThreshold,
+      kuery,
+      environment,
+      start,
+      end,
+    });
+  },
+});
+
 const topBackendSpansRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/operations/spans',
   options: {
@@ -522,13 +572,23 @@ const topBackendSpansRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       t.type({ backendName: t.string, spanName: t.string }),
+      t.partial({ sampleRangeFrom: toNumberRt, sampleRangeTo: toNumberRt }),
     ]),
   }),
   handler: async (resources): Promise<{ spans: BackendSpan[] }> => {
     const setup = await setupRequest(resources);
 
     const {
-      query: { backendName, spanName, start, end, environment, kuery },
+      query: {
+        backendName,
+        spanName,
+        start,
+        end,
+        environment,
+        kuery,
+        sampleRangeFrom,
+        sampleRangeTo,
+      },
     } = resources.params;
 
     const spans = await getTopBackendSpans({
@@ -539,6 +599,8 @@ const topBackendSpansRoute = createApmServerRoute({
       end,
       environment,
       kuery,
+      sampleRangeFrom,
+      sampleRangeTo,
     });
 
     return { spans };
@@ -553,5 +615,6 @@ export const backendsRouteRepository = {
   ...backendThroughputChartsRoute,
   ...backendFailedTransactionRateChartsRoute,
   ...backendOperationsRoute,
+  ...backendLatencyDistributionChartsRoute,
   ...topBackendSpansRoute,
 };

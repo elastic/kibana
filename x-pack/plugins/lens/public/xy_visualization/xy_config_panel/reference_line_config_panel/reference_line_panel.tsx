@@ -9,9 +9,9 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { FillStyle, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
+import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../../types';
-import { State, XYState, XYReferenceLineLayerConfig } from '../../types';
+import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import { FormatFactory } from '../../../../common';
 
 import { ColorPicker } from '../color_picker';
@@ -52,7 +52,7 @@ export const ReferenceLinePanel = (
   );
 
   const setConfig = useCallback(
-    (yConfig: Partial<ExtendedYConfig> | undefined) => {
+    (yConfig: Partial<YConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
@@ -108,7 +108,7 @@ export const ReferenceLinePanel = (
 
 interface LabelConfigurationOptions {
   isHorizontal: boolean;
-  axisMode: ExtendedYConfig['axisMode'];
+  axisMode: YConfig['axisMode'];
 }
 
 function getFillPositionOptions({ isHorizontal, axisMode }: LabelConfigurationOptions) {
@@ -154,8 +154,8 @@ export const FillSetting = ({
   setConfig,
   isHorizontal,
 }: {
-  currentConfig?: ExtendedYConfig;
-  setConfig: (yConfig: Partial<ExtendedYConfig> | undefined) => void;
+  currentConfig?: YConfig;
+  setConfig: (yConfig: Partial<YConfig> | undefined) => void;
   isHorizontal: boolean;
 }) => {
   return (

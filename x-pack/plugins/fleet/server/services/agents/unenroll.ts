@@ -13,12 +13,14 @@ import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
+import { errorsToResults } from './crud';
 import {
   getAgentById,
   getAgents,
   updateAgent,
   getAgentPolicyForAgent,
   bulkUpdateAgents,
+  processAgentsInBatches,
 } from './crud';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
@@ -69,11 +71,35 @@ export async function unenrollAgents(
   options: GetAgentsOptions & {
     force?: boolean;
     revoke?: boolean;
+    batchSize?: number;
   }
 ): Promise<{ items: BulkActionResult[] }> {
-  // start with all agents specified
-  const givenAgents = await getAgents(esClient, options);
+  if ('agentIds' in options) {
+    const givenAgents = await getAgents(esClient, options);
+    return await unenrollBatch(soClient, esClient, givenAgents, options);
+  }
+  return await processAgentsInBatches(
+    esClient,
+    {
+      kuery: options.kuery,
+      showInactive: options.showInactive ?? false,
+      batchSize: options.batchSize,
+    },
+    async (agents: Agent[], skipSuccess?: boolean) =>
+      await unenrollBatch(soClient, esClient, agents, options, skipSuccess)
+  );
+}
 
+async function unenrollBatch(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  givenAgents: Agent[],
+  options: {
+    force?: boolean;
+    revoke?: boolean;
+  },
+  skipSuccess?: boolean
+): Promise<{ items: BulkActionResult[] }> {
   // Filter to those not already unenrolled, or unenrolling
   const agentsEnrolled = givenAgents.filter((agent) => {
     if (options.revoke) {
@@ -124,20 +150,8 @@ export async function unenrollAgents(
     agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData }))
   );
 
-  const getResultForAgent = (agent: Agent) => {
-    const hasError = agent.id in outgoingErrors;
-    const result: BulkActionResult = {
-      id: agent.id,
-      success: !hasError,
-    };
-    if (hasError) {
-      result.error = outgoingErrors[agent.id];
-    }
-    return result;
-  };
-
   return {
-    items: givenAgents.map(getResultForAgent),
+    items: errorsToResults(givenAgents, outgoingErrors, undefined, skipSuccess),
   };
 }
 
