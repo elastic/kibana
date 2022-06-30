@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('AIOps', function () {
-    this.tags(['aiops']);
+    this.tags(['aiops', 'walterra']);
 
     if (AIOPS_ENABLED) {
       loadTestFile(require.resolve('./explain_log_rate_spikes'));

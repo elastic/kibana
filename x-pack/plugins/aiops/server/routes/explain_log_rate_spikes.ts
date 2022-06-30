@@ -7,13 +7,15 @@
 
 import { chunk } from 'lodash';
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
 
 import {
-  addChangePoints,
+  addChangePointsAction,
   aiopsExplainLogRateSpikesSchema,
+  errorAction,
   updateLoadingStateAction,
   AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
@@ -43,7 +45,7 @@ export const defineExplainLogRateSpikesRoute = (
     },
     async (context, request, response) => {
       if (!license.isActivePlatinumLicense) {
-        response.forbidden();
+        return response.forbidden();
       }
 
       const client = (await context.core).elasticsearch.client.asCurrentUser;
@@ -62,7 +64,8 @@ export const defineExplainLogRateSpikesRoute = (
       });
 
       const { end, push, responseWithHeaders } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
-        request.headers
+        request.headers,
+        logger
       );
 
       // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
@@ -75,7 +78,14 @@ export const defineExplainLogRateSpikesRoute = (
           })
         );
 
-        const { fieldCandidates } = await fetchFieldCandidates(client, request.body);
+        let fieldCandidates: Awaited<ReturnType<typeof fetchFieldCandidates>>;
+        try {
+          fieldCandidates = await fetchFieldCandidates(client, request.body);
+        } catch (e) {
+          push(errorAction(e.toString()));
+          end();
+          return;
+        }
 
         if (fieldCandidates.length > 0) {
           loaded += LOADED_FIELD_CANDIDATES;
@@ -103,11 +113,14 @@ export const defineExplainLogRateSpikesRoute = (
         const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
         for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-          const { changePoints: pValues } = await fetchChangePointPValues(
-            client,
-            request.body,
-            fieldCandidatesChunk
-          );
+          let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
+          try {
+            pValues = await fetchChangePointPValues(client, request.body, fieldCandidatesChunk);
+          } catch (e) {
+            push(errorAction(e.toString()));
+            end();
+            return;
+          }
 
           if (pValues.length > 0) {
             pValues.forEach((d) => {
@@ -118,7 +131,7 @@ export const defineExplainLogRateSpikesRoute = (
 
           loaded += (1 / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES;
           if (pValues.length > 0) {
-            push(addChangePoints(pValues));
+            push(addChangePointsAction(pValues));
           }
           push(
             updateLoadingStateAction({

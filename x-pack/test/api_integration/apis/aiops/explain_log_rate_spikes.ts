@@ -36,7 +36,10 @@ export default ({ getService }: FtrProviderContext) => {
   const expected = {
     chunksLength: 7,
     actionsLength: 6,
+    noIndexChunksLength: 3,
+    noIndexActionsLength: 2,
     actionFilter: 'add_change_points',
+    errorFilter: 'error',
     changePoints: [
       {
         fieldName: 'day_of_week',
@@ -166,6 +169,42 @@ export default ({ getService }: FtrProviderContext) => {
           expect(cp.bg_count).to.equal(ecp.bg_count);
         });
       }
+    });
+
+    it('should return an error for non existing index without streaming', async () => {
+      const resp = await supertest
+        .post(`/internal/aiops/explain_log_rate_spikes`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          ...requestBody,
+          index: 'does_not_exist',
+        })
+        .expect(200);
+
+      const chunks: string[] = resp.body.toString().split('\n');
+
+      expect(chunks.length).to.be(expected.noIndexChunksLength);
+
+      const lastChunk = chunks.pop();
+      expect(lastChunk).to.be('');
+
+      let data: any[] = [];
+
+      expect(() => {
+        data = chunks.map((c) => JSON.parse(c));
+      }).not.to.throwError();
+
+      expect(data.length).to.be(expected.noIndexActionsLength);
+      data.forEach((d) => {
+        expect(typeof d.type).to.be('string');
+      });
+
+      const errorActions = data.filter((d) => d.type === expected.errorFilter);
+      expect(errorActions.length).to.be(1);
+
+      expect(errorActions[0].payload).to.be(
+        'ResponseError: index_not_found_exception: [index_not_found_exception] Reason: no such index [does_not_exist]'
+      );
     });
   });
 };
