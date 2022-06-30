@@ -21,8 +21,14 @@ import {
   coreDeprecationProvider,
   ensureValidConfiguration,
 } from '@kbn/core-config-server-internal';
+import { NodeService, nodeConfig } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { EnvironmentService, pidConfig } from '@kbn/core-environment-server-internal';
+import {
+  ExecutionContextService,
+  executionContextConfig,
+} from '@kbn/core-execution-context-server-internal';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
@@ -34,10 +40,8 @@ import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
-import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
-import { ExecutionContextService } from './execution_context';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -52,7 +56,6 @@ import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
-import { config as executionContextConfig } from './execution_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
@@ -88,6 +91,7 @@ export class Server {
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly environment: EnvironmentService;
+  private readonly node: NodeService;
   private readonly metrics: MetricsService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
@@ -132,6 +136,7 @@ export class Server {
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
     this.environment = new EnvironmentService(core);
+    this.node = new NodeService(core);
     this.metrics = new MetricsService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreApp(core);
@@ -159,9 +164,13 @@ export class Server {
     const analyticsPreboot = this.analytics.preboot();
 
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
+    const nodePreboot = await this.node.preboot();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    this.discoveredPlugins = await this.plugins.discover({ environment: environmentPreboot });
+    this.discoveredPlugins = await this.plugins.discover({
+      environment: environmentPreboot,
+      node: nodePreboot,
+    });
 
     // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
     // silent deprecation warnings until `setup` stage where we'll validate config once again.
@@ -401,6 +410,7 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    this.node.stop();
     this.deprecations.stop();
   }
 
@@ -412,22 +422,23 @@ export class Server {
 
   public setupCoreConfig() {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
-      executionContextConfig,
-      pathConfig,
       cspConfig,
+      deprecationConfig,
       elasticsearchConfig,
+      executionContextConfig,
       externalUrlConfig,
-      loggingConfig,
       httpConfig,
+      i18nConfig,
+      loggingConfig,
+      nodeConfig,
+      opsConfig,
+      pathConfig,
+      pidConfig,
       pluginsConfig,
       savedObjectsConfig,
       savedObjectsMigrationConfig,
-      uiSettingsConfig,
-      opsConfig,
       statusConfig,
-      pidConfig,
-      i18nConfig,
-      deprecationConfig,
+      uiSettingsConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

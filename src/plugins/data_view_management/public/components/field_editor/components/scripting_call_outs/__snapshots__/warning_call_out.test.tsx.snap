@@ -3,13 +3,13 @@
 exports[`ScriptingWarningCallOut should render normally 1`] = `
 Array [
   <div
-    class="euiText css-1vkrgyt-euiText-s"
+    class="euiText emotion-euiText-s"
   >
     <p>
       <span>
         Familiarize yourself with 
         <button
-          class="euiLink css-102pf9n-euiLink-primary"
+          class="euiLink emotion-euiLink-primary"
           type="button"
         >
           <span>
@@ -18,7 +18,7 @@ Array [
         </button>
          and 
         <button
-          class="euiLink css-102pf9n-euiLink-primary"
+          class="euiLink emotion-euiLink-primary"
           type="button"
         >
           <span>
@@ -30,17 +30,17 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
-    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1yqbqzs-euiPanel-none-m-warning-euiCallOut"
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
   >
     <p
-      class="euiTitle euiCallOutHeader__title css-nznt5c-euiTitle-xs-euiCallOutHeader-warning"
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
     >
       <span
         aria-hidden="true"
-        class="css-15maws8-euiCallOut__icon"
+        class="emotion-euiCallOut__icon"
         color="inherit"
         data-euiicon-type="alert"
       />
@@ -49,16 +49,16 @@ Array [
       </span>
     </p>
     <div
-      class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"
+      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
     >
       <div
-        class="euiText css-1vkrgyt-euiText-s"
+        class="euiText emotion-euiText-s"
       >
         <p>
           <span>
             For greater flexibility and Painless script support, use 
             <button
-              class="euiLink css-102pf9n-euiLink-primary"
+              class="euiLink emotion-euiLink-primary"
               type="button"
             >
               <span>
@@ -72,7 +72,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
 ]
 `;

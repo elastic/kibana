@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { get } from 'lodash';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FlyoutProps } from './types';
 
@@ -16,7 +15,7 @@ export default function AlertsFlyoutHeader({ alert }: FlyoutProps) {
     <>
       <EuiSpacer size="s" />
       <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
-        <h2>{get(alert, ALERT_RULE_NAME)}</h2>
+        <h2>{alert.fields[ALERT_RULE_NAME]}</h2>
       </EuiTitle>
     </>
   );
