@@ -43,7 +43,7 @@ export class RenderingService {
     http,
     uiPlugins,
   }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
-    http.registerRoutes('', (router) => {
+    http.registerRoutes<InternalRenderingRequestHandlerContext>('', (router) => {
       registerBootstrapRoute({
         router,
         renderer: bootstrapRendererFactory({

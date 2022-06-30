@@ -162,7 +162,12 @@ export interface InternalHttpServicePreboot
     | 'server'
     | 'getServerInfo'
   > {
-  registerRoutes(path: string, callback: (router: IRouter) => void): void;
+  registerRoutes<
+    DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+  >(
+    path: string,
+    callback: (router: IRouter<DefaultRequestHandlerType>) => void
+  ): void;
 }
 
 /**
