@@ -92,7 +92,7 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
 export const UX_MESSAGES = Object.freeze({
   flyoutTitle: (hostname: string) =>
     i18n.translate('xpack.securitySolution.responseActionsList.flyout.title', {
-      defaultMessage: `Action log - {hostname} `,
+      defaultMessage: `Action log : {hostname}`,
       values: { hostname },
     }),
   pageTitle: i18n.translate('xpack.securitySolution.responseActionsList.list.title', {
