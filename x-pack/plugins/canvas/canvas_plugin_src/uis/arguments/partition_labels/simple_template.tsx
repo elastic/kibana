@@ -9,16 +9,19 @@ import React, { FunctionComponent, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { get, set } from 'lodash';
+import { set } from 'lodash';
 import { defaultExpression } from './default_expression';
+import { getFieldPath, getFieldValue } from './utils';
 
 export interface Props {
   onValueChange: (argValue: ExpressionAstExpression) => void;
   argValue: null | ExpressionAstExpression;
 }
 
+const SHOW_FIELD = 'show';
+
 export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argValue }) => {
-  const showValuePath = 'chain.0.arguments.show.0';
+  const showValuePath = getFieldPath(SHOW_FIELD);
 
   useEffect(() => {
     if (!argValue) {
@@ -33,10 +36,10 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argVal
 
       onValueChange(newArgValue);
     },
-    [argValue, onValueChange]
+    [argValue, onValueChange, showValuePath]
   );
 
-  const showLabels = get(argValue, showValuePath, false);
+  const showLabels = getFieldValue(argValue, SHOW_FIELD, false);
 
   return (
     <EuiSwitch compressed checked={showLabels} onChange={onToggle} showLabel={false} label="" />

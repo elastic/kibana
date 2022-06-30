@@ -8,11 +8,14 @@
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ExtendedTemplate } from './extended_template';
 import { SimpleTemplate } from './simple_template';
+import { ArgumentStrings } from '../../../../i18n';
+
+const { PartitionLabels: strings } = ArgumentStrings;
 
 export const partitionLabels = () => ({
   name: 'partitionLabels',
-  displayName: 'partition labels',
-  help: 'partition labels help',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(SimpleTemplate),
   template: templateFromReactComponent(ExtendedTemplate),
 });

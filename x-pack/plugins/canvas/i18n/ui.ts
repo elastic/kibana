@@ -244,6 +244,52 @@ export const ArgumentStrings = {
         defaultMessage: 'Custom',
       }),
   },
+  PartitionLabels: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.partitionLabelsTitle', {
+        defaultMessage: 'Partition labels',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.partitionLabelsLabel', {
+        defaultMessage: 'Labels configuration',
+      }),
+    getPositionDefaultLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.positionDefaultLabel', {
+        defaultMessage: 'Default',
+      }),
+    getPositionInsideLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.positionDefaultLabel', {
+        defaultMessage: 'Inside',
+      }),
+    getPositionLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.positionLabel', {
+        defaultMessage: 'Position',
+      }),
+    getValuesLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.valuesLabel', {
+        defaultMessage: 'Values',
+      }),
+    getValuesFormatLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.valuesLabel', {
+        defaultMessage: 'Values format',
+      }),
+    getValuesFormatValueLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.valuesFormatValueLabel', {
+        defaultMessage: 'Value',
+      }),
+    getValuesFormatPercentLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.valuesFormatPercentLabel', {
+        defaultMessage: 'Percent',
+      }),
+    getPercentDecimalsLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.percentDecimals', {
+        defaultMessage: 'Percent decimals',
+      }),
+    getSwitchedOffShowLabelsLabel: () =>
+      i18n.translate('xpack.canvas.uis.arguments.turnedOffShowLabelsLabel', {
+        defaultMessage: 'Switch on to view labels settings',
+      }),
+  },
   Color: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.colorTitle', {

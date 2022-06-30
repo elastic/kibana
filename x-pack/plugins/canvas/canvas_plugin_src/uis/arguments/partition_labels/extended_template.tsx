@@ -18,51 +18,39 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { get, set } from 'lodash';
+import { set } from 'lodash';
 import { defaultExpression } from './default_expression';
+import { Fields } from './types';
+import { getFieldPath, getFieldValue } from './utils';
+import { ArgumentStrings } from '../../../../i18n';
+
+const { PartitionLabels: strings } = ArgumentStrings;
 
 export interface Props {
   onValueChange: (argValue: ExpressionAstExpression) => void;
   argValue: null | ExpressionAstExpression;
 }
 
-interface PartitionLabelsArguments {
-  show: boolean;
-  position: 'inside' | 'default';
-  values: boolean;
-  valuesFormat: 'percent' | 'value';
-  percentDecimals: number;
-}
-
-type Fields = keyof PartitionLabelsArguments;
+const SHOW_FIELD = 'show';
+const POSITION_FIELD = 'position';
+const VALUES_FIELD = 'values';
+const VALUES_FORMAT_FIELD = 'valuesFormat';
+const PERCENT_DECIMALS_FIELD = 'percentDecimals';
 
 export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argValue }) => {
-  const getFieldPath = (field: keyof PartitionLabelsArguments) => `chain.0.arguments.${field}.0`;
-
-  const getFieldValue = (
-    ast: null | ExpressionAstExpression,
-    field: keyof PartitionLabelsArguments
-  ) => {
-    if (!ast) {
-      return null;
-    }
-
-    return get(ast, getFieldPath(field));
-  };
-
-  const showLabels = getFieldValue(argValue, 'show');
-  const showValues = getFieldValue(argValue, 'values');
-  const valueFormat = getFieldValue(argValue, 'valuesFormat');
-  const percentDecimals = getFieldValue(argValue, 'percentDecimals');
+  const showLabels = getFieldValue(argValue, SHOW_FIELD);
+  const showValues = getFieldValue(argValue, VALUES_FIELD);
+  const valueFormat = getFieldValue(argValue, VALUES_FORMAT_FIELD);
+  const percentDecimals = getFieldValue(argValue, PERCENT_DECIMALS_FIELD);
 
   const positions: EuiSelectOption[] = [
-    { text: 'Default', value: 'default' },
-    { text: 'Inside', value: 'inside' },
+    { text: strings.getPositionDefaultLabel(), value: 'default' },
+    { text: strings.getPositionInsideLabel(), value: 'inside' },
   ];
 
   const valuesFormats: EuiSelectOption[] = [
-    { text: 'Value', value: 'value' },
-    { text: 'Percent', value: 'percent' },
+    { text: strings.getValuesFormatValueLabel(), value: 'value' },
+    { text: strings.getValuesFormatPercentLabel(), value: 'percent' },
   ];
 
   useEffect(() => {
@@ -102,42 +90,42 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argV
   if (!showLabels) {
     return (
       <EuiText color="subdued" size="xs">
-        <p>Switch on to view labels settings</p>
+        <p>{strings.getSwitchedOffShowLabelsLabel()}</p>
       </EuiText>
     );
   }
 
   return (
     <>
-      <EuiFormRow label={'Position'} display="columnCompressed">
+      <EuiFormRow label={strings.getPositionLabel()} display="columnCompressed">
         <EuiSelect
           compressed
-          value={getFieldValue(argValue, 'position')}
+          value={getFieldValue(argValue, POSITION_FIELD)}
           options={positions}
-          onChange={onCommonFieldChange('position')}
+          onChange={onCommonFieldChange(POSITION_FIELD)}
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiFormRow label={'Values'} display="columnCompressedSwitch">
+      <EuiFormRow label={strings.getValuesLabel()} display="columnCompressedSwitch">
         <EuiSwitch
           compressed
           checked={showValues}
-          onChange={onToggleFieldChange('values')}
+          onChange={onToggleFieldChange(VALUES_FIELD)}
           label="Show"
         />
       </EuiFormRow>
       {showValues && (
-        <EuiFormRow label={'Values format'} display="columnCompressed">
+        <EuiFormRow label={strings.getValuesFormatLabel()} display="columnCompressed">
           <EuiSelect
             compressed
             value={valueFormat}
             options={valuesFormats}
-            onChange={onCommonFieldChange('valuesFormat')}
+            onChange={onCommonFieldChange(VALUES_FORMAT_FIELD)}
           />
         </EuiFormRow>
       )}
       {showValues && valueFormat === 'percent' && (
-        <EuiFormRow label={'Percent decimals'} display="columnCompressed">
+        <EuiFormRow label={strings.getPercentDecimalsLabel()} display="columnCompressed">
           <EuiRange
             compressed
             min={0}
@@ -148,7 +136,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argV
             value={percentDecimals}
             onChange={(e, isValid) => {
               if (isValid) {
-                onCommonFieldChange('percentDecimals')(e);
+                onCommonFieldChange(PERCENT_DECIMALS_FIELD)(e);
               }
             }}
           />
