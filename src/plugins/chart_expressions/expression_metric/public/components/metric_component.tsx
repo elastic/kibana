@@ -157,17 +157,10 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         autoScale={this.props.visParams.metric.autoScale}
         colorFullBackground={this.props.visParams.metric.colorFullBackground}
         labelConfig={this.props.visParams.metric.labels}
+        renderComplete={this.props.renderComplete}
       />
     );
   };
-
-  componentDidMount() {
-    this.props.renderComplete();
-  }
-
-  componentDidUpdate() {
-    this.props.renderComplete();
-  }
 
   render() {
     let metricsHtml;

@@ -65,7 +65,7 @@ export const tagcloudRenderer: (
                 <TagCloudChart
                   {...config}
                   palettesRegistry={palettesRegistry}
-                  renderComplete={handlers.done}
+                  renderComplete={() => handlers.done()}
                   fireEvent={handlers.event}
                   syncColors={config.syncColors}
                 />

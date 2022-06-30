@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   Chart,
   Settings,
@@ -122,6 +122,7 @@ export type XYChartRenderProps = XYChartProps & {
   syncColors: boolean;
   syncTooltips: boolean;
   eventAnnotationService: EventAnnotationServiceType;
+  renderComplete: () => void;
 };
 
 function getValueLabelsStyling(isHorizontal: boolean): {
@@ -174,6 +175,7 @@ export function XYChart({
   syncColors,
   syncTooltips,
   useLegacyTimeAxis,
+  renderComplete,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -203,6 +205,15 @@ export function XYChart({
     datatables: filteredLayers.map(({ table }) => table),
   });
 
+  const onRenderChange = useCallback(
+    (isRendered: boolean = true) => {
+      if (isRendered) {
+        renderComplete();
+      }
+    },
+    [renderComplete]
+  );
+
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
   const formattedDatatables = useMemo(
     () => getFormattedTablesByLayers(dataLayers, formatFactory),
@@ -216,7 +227,9 @@ export function XYChart({
 
   if (dataLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
-    return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
+    return (
+      <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
+    );
   }
 
   // use formatting hint of first x axis column to format ticks
@@ -614,6 +627,7 @@ export function XYChart({
   return (
     <Chart ref={chartRef}>
       <Settings
+        onRenderChange={onRenderChange}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{
           tooltip: { visible: syncTooltips, placement: Placement.Right },

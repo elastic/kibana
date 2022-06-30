@@ -18,5 +18,6 @@ export type GaugeRenderProps = GaugeExpressionProps & {
   formatFactory: FormatFactory;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
+  renderComplete: () => void;
   uiState: PersistedState;
 };

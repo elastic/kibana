@@ -137,6 +137,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     paletteService,
     uiState,
     interactive,
+    renderComplete,
   }) => {
     const chartTheme = chartsThemeService.useChartsTheme();
     const isDarkTheme = chartsThemeService.useDarkMode();
@@ -171,6 +172,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         uiState?.emit('colorChanged');
       },
       [uiState]
+    );
+
+    const onRenderChange = useCallback(
+      (isRendered: boolean = true) => {
+        if (isRendered) {
+          renderComplete();
+        }
+      },
+      [renderComplete]
     );
 
     const table = data;
@@ -299,7 +309,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );
     if (!chartData || !chartData.length) {
-      return <EmptyPlaceholder icon={HeatmapIcon} />;
+      return <EmptyPlaceholder icon={HeatmapIcon} renderComplete={onRenderChange} />;
     }
 
     if (!yAxisColumn) {
@@ -487,6 +497,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         >
           <Chart>
             <Settings
+              onRenderChange={onRenderChange}
               onElementClick={interactive ? (onElementClick as ElementClickListener) : undefined}
               showLegend={showLegend ?? args.legend.isVisible}
               legendPosition={args.legend.position}

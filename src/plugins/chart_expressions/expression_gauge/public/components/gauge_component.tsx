@@ -203,7 +203,7 @@ const getPreviousSectionValue = (value: number, bands: number[]) => {
 };
 
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
-  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService }) => {
+  ({ data, args, uiState, formatFactory, paletteService, chartsThemeService, renderComplete }) => {
     const {
       shape: gaugeType,
       palette,
@@ -278,6 +278,15 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       [uiState]
     );
 
+    const onRenderChange = useCallback(
+      (isRendered: boolean = true) => {
+        if (isRendered) {
+          renderComplete();
+        }
+      },
+      [renderComplete]
+    );
+
     const table = data;
     const accessors = getAccessorsFromArgs(args, table.columns);
 
@@ -300,7 +309,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const icon = getIcons(gaugeType);
 
     if (typeof metricValue !== 'number') {
-      return <EmptyPlaceholder icon={icon} />;
+      return <EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />;
     }
 
     const goal = accessors.goal ? getValueFromAccessor(accessors.goal, row) : undefined;
@@ -317,6 +326,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
               defaultMessage="Minimum and maximum values may not be equal"
             />
           }
+          renderComplete={onRenderChange}
         />
       );
     }
@@ -331,6 +341,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
               defaultMessage="Minimum value may not be greater than maximum value"
             />
           }
+          renderComplete={onRenderChange}
         />
       );
     }
@@ -388,6 +399,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             theme={[{ background: { color: 'transparent' } }, chartTheme]}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
+            onRenderChange={onRenderChange}
           />
           <Goal
             id="goal"

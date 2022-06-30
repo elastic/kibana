@@ -65,15 +65,13 @@ export const heatmapRenderer: (
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
+            renderComplete={() => handlers.done()}
             uiState={handlers.uiState as PersistedState}
             interactive={isInteractive()}
           />
         </div>
       </KibanaThemeProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });
