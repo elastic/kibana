@@ -27,16 +27,19 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 
-type ComponentOpts = Pick<
-  RuleApis,
-  'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule' | 'loadExecutionLogAggregations'
-> & {
+export interface RuleStatusPanelProps {
   rule: any;
   isEditable: boolean;
   requestRefresh: () => void;
   healthColor: string;
   statusMessage: string;
-};
+}
+
+type ComponentOpts = Pick<
+  RuleApis,
+  'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule' | 'loadExecutionLogAggregations'
+> &
+  RuleStatusPanelProps;
 
 export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   rule,
@@ -177,4 +180,7 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   );
 };
 
-export const RuleStatusPanelWithApi = withBulkRuleOperations(RuleStatusPanel);
+const RuleStatusPanelWithApi = withBulkRuleOperations(RuleStatusPanel);
+
+// eslint-disable-next-line import/no-default-export
+export { RuleStatusPanelWithApi as default };
