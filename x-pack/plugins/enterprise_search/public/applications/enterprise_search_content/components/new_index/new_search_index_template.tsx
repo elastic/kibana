@@ -22,11 +22,11 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSteps,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -35,18 +35,18 @@ import { i18n } from '@kbn/i18n';
 import { SUPPORTED_LANGUAGES } from './constants';
 import { NewSearchIndexLogic } from './new_search_index_logic';
 
-interface SearchIndex {
+export interface Props {
   title: React.ReactNode;
   description: React.ReactNode;
   docsUrl: string;
   type: string;
   onNameChange?(name: string): void;
-  onSubmit(name: string): void;
+  onSubmit(name: string, language: string): void;
   buttonLoading?: boolean;
   formDisabled?: boolean;
 }
 
-export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
+export const NewSearchIndexTemplate: React.FC<Props> = ({
   children,
   title,
   description,
@@ -74,7 +74,7 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
       <EuiForm
         onSubmit={(event) => {
           event.preventDefault();
-          onSubmit(name);
+          onSubmit(name, language);
         }}
         component="form"
         id="enterprise-search-add-connector"
@@ -98,7 +98,6 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
               </p>
             </EuiText>
           </EuiFlexItem>
-
           <EuiFlexItem grow>
             <EuiFlexGroup>
               <EuiFlexItem grow>
@@ -159,7 +158,6 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow>{children}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
@@ -190,82 +188,8 @@ export const NewSearchIndexTemplate: React.FC<SearchIndex> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>
-      <EuiSpacer />
-
-      <EuiSteps
-        steps={[
-          {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.createIndex.title',
-              {
-                defaultMessage: 'Create an Elasticsearch index',
-              }
-            ),
-
-            titleSize: 'xs',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.createIndex.content',
-                    {
-                      defaultMessage:
-                        'Provide a unique name for your index and select an optional language analyzer.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-          },
-          {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.configureIngestion.title',
-              {
-                defaultMessage: 'Configure ingestion settings',
-              }
-            ),
-            titleSize: 'xs',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.configureIngestion.content',
-                    {
-                      defaultMessage:
-                        'Generate an API key and view the documentation for posting documents to the Elasticsearch API endpoint. Language clients are available for streamlined integration.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-          },
-          {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.buildSearchExperience.title',
-              {
-                defaultMessage: 'Build a search experience',
-              }
-            ),
-            titleSize: 'xs',
-            children: (
-              <EuiText size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.steps.buildSearchExperience.content',
-                    {
-                      defaultMessage:
-                        'Connect your newly created Elasticsearch index to an App Search engine to build a cusomtizable search experience.',
-                    }
-                  )}
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-          },
-        ]}
-      />
+      <EuiHorizontalRule />
+      {children}
     </EuiPanel>
   );
 };

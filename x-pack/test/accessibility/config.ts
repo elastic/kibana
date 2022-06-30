@@ -28,6 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/spaces'),
       require.resolve('./apps/advanced_settings'),
       require.resolve('./apps/dashboard_edit_panel'),
+      require.resolve('./apps/dashboard_controls'),
       require.resolve('./apps/users'),
       require.resolve('./apps/roles'),
       require.resolve('./apps/ingest_node_pipelines'),
@@ -49,6 +50,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/tags'),
       require.resolve('./apps/search_sessions'),
       require.resolve('./apps/stack_monitoring'),
+      require.resolve('./apps/watcher'),
       require.resolve('./apps/rollup_jobs'),
     ],
 

@@ -1978,10 +1978,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressionXY",
-                "scope": "common",
-                "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.AxesSettingsConfig",
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.AxesSettingsConfig",
                 "text": "AxesSettingsConfig"
               },
               " | undefined"
@@ -3617,10 +3617,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressionXY",
-                "scope": "common",
-                "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.SeriesType",
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.SeriesType",
                 "text": "SeriesType"
               },
               "[]"
@@ -3764,11 +3764,11 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressionXY",
-                "scope": "common",
-                "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.ExtendedYConfig",
-                "text": "ExtendedYConfig"
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.YConfig",
+                "text": "YConfig"
               },
               "[] | undefined"
             ],
@@ -3860,10 +3860,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressionXY",
-                "scope": "common",
-                "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.SeriesType",
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.SeriesType",
                 "text": "SeriesType"
               },
               " | undefined"
@@ -4592,6 +4592,20 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.ENVIRONMENT_ALL",
+        "type": "string",
+        "tags": [],
+        "label": "ENVIRONMENT_ALL",
+        "description": [],
+        "signature": [
+          "\"ENVIRONMENT_ALL\""
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.FetchData",
         "type": "Type",
         "tags": [],
@@ -4711,7 +4725,7 @@
         "signature": [
           "Pick<",
           "KibanaPageTemplateProps",
-          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"restrictWidth\" | \"template\" | \"noDataConfig\" | \"pageHeader\" | \"pageBodyProps\" | \"pageContentProps\" | \"pageContentBodyProps\" | \"isEmptyState\"> & { showSolutionNav?: boolean | undefined; }"
+          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"restrictWidth\" | \"template\" | \"noDataConfig\" | \"pageHeader\" | \"pageBodyProps\" | \"pageContentProps\" | \"pageContentBodyProps\" | \"isEmptyState\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/page_template/lazy_page_template.tsx",
         "deprecated": false,

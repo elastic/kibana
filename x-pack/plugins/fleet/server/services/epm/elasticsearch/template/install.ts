@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
+import { getPipelineNameForDatastream } from '../../../../../common';
 import type {
   RegistryDataStream,
   IndexTemplateEntry,
@@ -22,9 +23,7 @@ import type {
   EsAssetReference,
   PackageInfo,
 } from '../../../../types';
-
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
-import { getPipelineNameForDatastream } from '../ingest_pipeline';
 import { getAsset, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,

@@ -130,7 +130,7 @@ const useSideNavItems = () => {
 const useSelectedId = (): SecurityPageName => {
   const [{ pageName }] = useRouteSpy();
   const selectedId = useMemo(() => {
-    const [rootLinkInfo] = getAncestorLinksInfo(pageName as SecurityPageName);
+    const [rootLinkInfo] = getAncestorLinksInfo(pageName);
     return rootLinkInfo?.id ?? '';
   }, [pageName]);
 

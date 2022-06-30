@@ -50,6 +50,9 @@ export default function ({ loadTestFile, getService }) {
     // Outputs
     loadTestFile(require.resolve('./outputs'));
 
+    // Download sources
+    loadTestFile(require.resolve('./download_sources'));
+
     // Telemetry
     loadTestFile(require.resolve('./fleet_telemetry'));
 
