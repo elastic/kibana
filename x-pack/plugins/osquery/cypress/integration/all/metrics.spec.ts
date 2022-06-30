@@ -25,7 +25,7 @@ describe('ALL - Inventory', () => {
 
   it('should be able to run the query', () => {
     cy.getBySel('toggleNavButton').click();
-    cy.contains('Inventory').click();
+    cy.contains('Infrastructure').click();
 
     cy.wait(1000);
 
