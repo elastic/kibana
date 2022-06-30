@@ -18,7 +18,7 @@ import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface ContextUrlParams {
-  indexPatternId: string;
+  dataViewId: string;
   id: string;
 }
 
@@ -26,9 +26,9 @@ export function ContextAppRoute() {
   const services = useDiscoverServices();
   const { chrome } = services;
 
-  const { indexPatternId, id } = useParams<ContextUrlParams>();
+  const { dataViewId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
-  const dataViewId = decodeURIComponent(indexPatternId);
+  const usedDataViewId = decodeURIComponent(dataViewId);
   const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function ContextAppRoute() {
     ]);
   }, [chrome, breadcrumb]);
 
-  const { dataView, error } = useDataView(services.dataViews, dataViewId);
+  const { dataView, error } = useDataView(services.dataViews, usedDataViewId);
 
   if (error) {
     return (
