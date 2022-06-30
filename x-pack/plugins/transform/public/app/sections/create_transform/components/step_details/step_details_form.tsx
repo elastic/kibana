@@ -27,7 +27,7 @@ import {
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { integerGreaterThanOrEqualToNegativeOne } from '../../../transform_management/components/edit_transform_flyout/use_edit_transform_flyout';
+import { integerRangeMinus1To100Validator } from '../../../transform_management/components/edit_transform_flyout/use_edit_transform_flyout';
 import {
   isEsIndices,
   isEsIngestPipelines,
@@ -312,7 +312,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const isTransformSettingsNumFailureRetriesValid =
       transformSettingsNumFailureRetries === undefined ||
       transformSettingsNumFailureRetries === '-' ||
-      integerGreaterThanOrEqualToNegativeOne(transformSettingsNumFailureRetries).length === 0;
+      integerRangeMinus1To100Validator(transformSettingsNumFailureRetries).length === 0;
 
     const valid =
       !transformIdEmpty &&
@@ -867,8 +867,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 !isTransformSettingsNumFailureRetriesValid && [
                   i18n.translate('xpack.transform.stepDetailsForm.NumFailureRetriesError', {
                     defaultMessage:
-                      'Number of retries needs to be a number greater than or equal to -1. The minimum value is `0` and the maximum is `100`.\n' +
-                      '`-1` can be used to denote infinity. In this case, the transform never gives up on retrying a recoverable failure.',
+                      'Number of retries needs to be between 0 and 100, or -1 for infinite retries.',
                   }),
                 ]
               }
@@ -876,7 +875,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 'xpack.transform.stepDetailsForm.transformNumRetriesHelpText',
                 {
                   defaultMessage:
-                    'Defines the number of retries on a recoverable failure before the transform task is marked as `failed`. If not set, the cluster setting `xpack.transform.num_transform_failure_retries` or a default of 10 will be used.',
+                    'Defines the number of retries on a recoverable failure before the transform task is marked as failed. If not set, the cluster setting `xpack.transform.num_transform_failure_retries` or a default of 10 will be used.',
                 }
               )}
             >

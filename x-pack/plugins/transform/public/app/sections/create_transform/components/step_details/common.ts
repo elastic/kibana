@@ -109,6 +109,9 @@ export function applyTransformConfigToDetailsState(
       } else {
         state.transformSettingsDocsPerSecond = null;
       }
+      if (typeof transformConfig.settings?.num_failure_retries === 'number') {
+        state.transformSettingsNumFailureRetries = transformConfig.settings.num_failure_retries;
+      }
     }
 
     if (transformConfig._meta) {
