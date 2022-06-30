@@ -49,7 +49,7 @@ describe('Test of <Doc /> helper / hook', () => {
           "fields": Array [],
           "query": Object {
             "bool": Object {
-              "must": Array [
+              "filter": Array [
                 Object {
                   "ids": Object {
                     "values": Array [
@@ -89,7 +89,7 @@ describe('Test of <Doc /> helper / hook', () => {
           ],
           "query": Object {
             "bool": Object {
-              "must": Array [
+              "filter": Array [
                 Object {
                   "ids": Object {
                     "values": Array [
@@ -131,7 +131,7 @@ describe('Test of <Doc /> helper / hook', () => {
           ],
           "query": Object {
             "bool": Object {
-              "must": Array [
+              "filter": Array [
                 Object {
                   "ids": Object {
                     "values": Array [
@@ -184,7 +184,7 @@ describe('Test of <Doc /> helper / hook', () => {
           ],
           "query": Object {
             "bool": Object {
-              "must": Array [
+              "filter": Array [
                 Object {
                   "ids": Object {
                     "values": Array [

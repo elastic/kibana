@@ -105,8 +105,8 @@ export const useNavigationProps = ({
       exact: true,
     });
 
-    const onOpenSingleDoc = (event: Event) => {
-      event.preventDefault();
+    const onOpenSingleDoc = (event?: Event) => {
+      event?.preventDefault();
 
       history.push({
         pathname: `/doc/${indexPatternId}/${rowIndex}`,
@@ -117,8 +117,8 @@ export const useNavigationProps = ({
       });
     };
 
-    const onOpenSurrDocs = (event: Event) => {
-      event.preventDefault();
+    const onOpenSurrDocs = (event?: Event) => {
+      event?.preventDefault();
 
       history.push({
         pathname: `/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
