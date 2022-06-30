@@ -122,7 +122,7 @@ export class TooltipControl extends Component<Props, {}> {
       });
 
     this.props.updateOpenTooltips(openTooltips);
-  }, 100);
+  }, 300);
 
   _onMouseout = () => {
     this._updateHoverTooltipState.cancel();
