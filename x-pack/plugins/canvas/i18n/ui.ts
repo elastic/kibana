@@ -258,7 +258,7 @@ export const ArgumentStrings = {
         defaultMessage: 'Default',
       }),
     getPositionInsideLabel: () =>
-      i18n.translate('xpack.canvas.uis.arguments.positionDefaultLabel', {
+      i18n.translate('xpack.canvas.uis.arguments.positionInsideLabel', {
         defaultMessage: 'Inside',
       }),
     getPositionLabel: () =>
@@ -270,7 +270,7 @@ export const ArgumentStrings = {
         defaultMessage: 'Values',
       }),
     getValuesFormatLabel: () =>
-      i18n.translate('xpack.canvas.uis.arguments.valuesLabel', {
+      i18n.translate('xpack.canvas.uis.arguments.valuesFormatLabel', {
         defaultMessage: 'Values format',
       }),
     getValuesFormatValueLabel: () =>
@@ -1847,10 +1847,6 @@ export const ViewStrings = {
         defaultMessage: 'Donut hole size',
       }),
     getEmptySizeRatioHelp: () =>
-      i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioHelp', {
-        defaultMessage: 'Size of donut hole',
-      }),
-    getEmptySizeRatioTooltip: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioHelp', {
         defaultMessage: 'Size of the donut hole',
       }),
