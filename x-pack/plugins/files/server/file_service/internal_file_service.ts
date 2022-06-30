@@ -14,7 +14,7 @@ import {
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 
 import { BlobStorageService } from '../blob_storage_service';
-import { FileShareService } from '../file_share_service';
+import { InternalFileShareService } from '../file_share_service';
 import {
   FileSavedObjectAttributes,
   File as IFile,
@@ -68,7 +68,7 @@ export class InternalFileService {
     private readonly savedObjectType: string,
     private readonly soClient: SavedObjectsClientContract | ISavedObjectsRepository,
     private readonly blobStorageService: BlobStorageService,
-    private readonly fileShareService: FileShareService,
+    private readonly fileShareService: InternalFileShareService,
     private readonly auditLogger: undefined | AuditLogger,
     private readonly fileKindRegistry: FileKindsRegistry,
     private readonly logger: Logger
