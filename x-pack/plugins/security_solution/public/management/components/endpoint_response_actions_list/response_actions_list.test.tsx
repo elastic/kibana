@@ -171,7 +171,7 @@ describe('Response Actions List', () => {
         )
           .slice(0, 6)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command/action', 'User', 'Host', 'Comments', 'Status']);
+      ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
     });
 
     it('should paginate table when there is data', async () => {
@@ -357,7 +357,7 @@ describe('Response Actions List', () => {
         )
           .slice(0, 5)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command/action', 'User', 'Comments', 'Status']);
+      ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status']);
     });
 
     it('should show a host column when multiple agentIds', async () => {
@@ -374,7 +374,7 @@ describe('Response Actions List', () => {
         )
           .slice(0, 6)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command/action', 'User', 'Host', 'Comments', 'Status']);
+      ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
     });
   });
 });
