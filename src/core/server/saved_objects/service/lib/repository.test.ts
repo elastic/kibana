@@ -1964,7 +1964,8 @@ describe('SavedObjectsRepository', () => {
 
       it(`returns error when ES is unable to find the index (mget)`, async () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE };
-        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, {} as estypes.MgetResponse, {
+        const mgetResponse = getMockMgetResponse([_obj]);
+        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, mgetResponse, {
           statusCode: 404,
         });
       });
