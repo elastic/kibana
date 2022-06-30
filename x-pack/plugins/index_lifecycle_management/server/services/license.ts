@@ -57,12 +57,12 @@ export class License {
     });
   }
 
-  guardApiRoute(handler: RequestHandler) {
+  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B, RequestHandlerContext>) {
     const license = this;
 
     return function licenseCheck(
       ctx: RequestHandlerContext,
-      request: KibanaRequest,
+      request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
     ) {
       const licenseStatus = license.getStatus();

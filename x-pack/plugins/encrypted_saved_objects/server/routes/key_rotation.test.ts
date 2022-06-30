@@ -31,7 +31,7 @@ describe('Key rotation routes', () => {
   });
 
   describe('rotate', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, any>;
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [rotateRouteConfig, rotateRouteHandler] = router.post.mock.calls.find(
