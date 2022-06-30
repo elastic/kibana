@@ -29,6 +29,8 @@ import {
   TypedLensByValueInput,
   XYCurveType,
   XYState,
+  FormulaPublicApi,
+  YAxisMode,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
@@ -44,7 +46,14 @@ import {
   PERCENTILE_RANKS,
   ReportTypes,
 } from './constants';
-import { ColumnFilter, ParamFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
+import {
+  ColumnFilter,
+  MetricOption,
+  ParamFilter,
+  SeriesConfig,
+  UrlFilter,
+  URLReportDefinition,
+} from '../types';
 import { parseRelativeDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
@@ -67,16 +76,10 @@ export function getPercentileParam(operationType: string) {
   };
 }
 
-export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricField?: string) => {
-  let columnType;
-  let columnFilters;
-  let columnFilter;
-  let paramFilters;
-  let timeScale;
-  let columnLabel;
-  let columnField;
-  let showPercentileAnnotations;
-
+export const parseCustomFieldName = (
+  seriesConfig: SeriesConfig,
+  selectedMetricField?: string
+): Partial<MetricOption> & { fieldName: string; columnLabel?: string; columnField?: string } => {
   const metricOptions = seriesConfig.metricOptions ?? [];
 
   if (selectedMetricField) {
@@ -84,27 +87,18 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
       const currField = metricOptions.find(
         ({ field, id }) => field === selectedMetricField || id === selectedMetricField
       );
-      columnType = currField?.columnType;
-      columnFilters = currField?.columnFilters;
-      columnFilter = currField?.columnFilter;
-      timeScale = currField?.timeScale;
-      columnLabel = currField?.label;
-      showPercentileAnnotations = currField?.showPercentileAnnotations;
-      paramFilters = currField?.paramFilters;
-      columnField = currField?.field;
+
+      return {
+        ...(currField ?? {}),
+        fieldName: selectedMetricField,
+        columnLabel: currField?.label,
+        columnField: currField?.field,
+      };
     }
   }
 
   return {
     fieldName: selectedMetricField!,
-    columnType,
-    columnFilters,
-    paramFilters,
-    timeScale,
-    columnLabel,
-    columnFilter,
-    columnField,
-    showPercentileAnnotations,
   };
 };
 
@@ -138,11 +132,17 @@ export class LensAttributes {
   >;
   globalFilter?: { query: string; language: string };
   reportType: string;
+  lensFormulaHelper?: FormulaPublicApi;
 
-  constructor(layerConfigs: LayerConfig[], reportType: string) {
+  constructor(
+    layerConfigs: LayerConfig[],
+    reportType: string,
+    lensFormulaHelper?: FormulaPublicApi
+  ) {
     this.layers = {};
     this.seriesReferenceLines = {};
     this.reportType = reportType;
+    this.lensFormulaHelper = lensFormulaHelper;
 
     layerConfigs.forEach(({ seriesConfig, operationType }) => {
       if (operationType && reportType !== ReportTypes.SINGLE_METRIC) {
@@ -617,7 +617,13 @@ export class LensAttributes {
       layerConfig.seriesConfig.yAxisColumns[0];
 
     if (sourceField === RECORDS_PERCENTAGE_FIELD) {
-      return getDistributionInPercentageColumn({ label, layerId, columnFilter }).main;
+      return getDistributionInPercentageColumn({
+        label,
+        layerId,
+        columnFilter,
+        dataView: layerConfig.indexPattern,
+        lensFormulaHelper: this.lensFormulaHelper!,
+      }).main;
     }
 
     if (sourceField === RECORDS_FIELD || !sourceField) {
@@ -646,8 +652,13 @@ export class LensAttributes {
     const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
 
     if (mainSourceField === RECORDS_PERCENTAGE_FIELD && layerId && !forAccessorsKeys) {
-      return getDistributionInPercentageColumn({ label: mainLabel, layerId, columnFilter })
-        .supportingColumns;
+      return getDistributionInPercentageColumn({
+        label: mainLabel,
+        layerId,
+        columnFilter,
+        dataView: layerConfig.indexPattern,
+        lensFormulaHelper: this.lensFormulaHelper!,
+      }).supportingColumns;
     }
 
     if (yAxisColumns.length === 1 && breakdown === PERCENTILE) {
@@ -865,12 +876,12 @@ export class LensAttributes {
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X' as XYCurveType,
       axisTitlesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: !this.isMultiSeries,
         yRight: !this.isMultiSeries,
       },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       preferredSeriesType: 'line',
       layers: this.getDataLayers(),
       ...(this.layerConfigs[0].seriesConfig.yTitle
@@ -900,8 +911,8 @@ export class LensAttributes {
             this.layerConfigs[0].indexPattern.fieldFormatMap[
               this.layerConfigs[0].selectedMetricField
             ]?.id
-              ? 'left'
-              : 'right',
+              ? ('left' as YAxisMode)
+              : ('right' as YAxisMode),
         },
       ],
       xAccessor: `x-axis-column-layer${index}`,

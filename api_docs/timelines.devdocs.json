@@ -249,6 +249,200 @@
       },
       {
         "parentPluginId": "timelines",
+        "id": "def-public.convertKueryToDslFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "convertKueryToDslFilter",
+        "description": [],
+        "signature": [
+          "(kueryExpression: string, indexPattern: ",
+          "DataViewBase",
+          ") => ",
+          "QueryDslQueryContainer"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertKueryToDslFilter.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kueryExpression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertKueryToDslFilter.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "DataViewBase"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.convertKueryToElasticSearchQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "convertKueryToElasticSearchQuery",
+        "description": [],
+        "signature": [
+          "(kueryExpression: string, indexPattern?: ",
+          "DataViewBase",
+          " | undefined) => string"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertKueryToElasticSearchQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kueryExpression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertKueryToElasticSearchQuery.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "DataViewBase",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.convertToBuildEsQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "convertToBuildEsQuery",
+        "description": [],
+        "signature": [
+          "({ config, indexPattern, queries, filters, }: { config: ",
+          "EsQueryConfig",
+          "; indexPattern: ",
+          "DataViewBase",
+          "; queries: ",
+          "Query",
+          "[]; filters: ",
+          "Filter",
+          "[]; }) => [string, undefined] | [undefined, Error]"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.convertToBuildEsQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  config,\n  indexPattern,\n  queries,\n  filters,\n}",
+            "description": [],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "timelines",
+                "id": "def-public.convertToBuildEsQuery.$1.config",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "KueryQueryOptions",
+                  " & ",
+                  "EsQueryFiltersConfig",
+                  " & { allowLeadingWildcards?: boolean | undefined; queryStringOptions?: ",
+                  "SerializableRecord",
+                  " | undefined; }"
+                ],
+                "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "timelines",
+                "id": "def-public.convertToBuildEsQuery.$1.indexPattern",
+                "type": "Object",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "{ fields: ",
+                  "DataViewFieldBase",
+                  "[]; id?: string | undefined; title: string; }"
+                ],
+                "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "timelines",
+                "id": "def-public.convertToBuildEsQuery.$1.queries",
+                "type": "Array",
+                "tags": [],
+                "label": "queries",
+                "description": [],
+                "signature": [
+                  "Query",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "timelines",
+                "id": "def-public.convertToBuildEsQuery.$1.filters",
+                "type": "Array",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  "Filter",
+                  "[]"
+                ],
+                "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-public.elementOrChildrenHasFocus",
         "type": "Function",
         "tags": [],
@@ -275,6 +469,67 @@
             "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.escapeKuery",
+        "type": "Function",
+        "tags": [],
+        "label": "escapeKuery",
+        "description": [],
+        "signature": [
+          "(val: string) => string"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.escapeKuery.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "A"
+            ],
+            "path": "node_modules/@types/lodash/ts3.1/fp.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.escapeQueryValue",
+        "type": "Function",
+        "tags": [],
+        "label": "escapeQueryValue",
+        "description": [],
+        "signature": [
+          "(val?: string | number) => string | number"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.escapeQueryValue.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/utils/keury/index.ts",
+            "deprecated": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
