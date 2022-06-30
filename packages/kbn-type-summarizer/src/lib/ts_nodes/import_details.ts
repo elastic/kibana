@@ -105,11 +105,4 @@ export function getImportDetails(node: ts.Node): ImportDetails | undefined {
       node,
     };
   }
-
-  // if (
-  //   !node.getSourceFile().fileName.includes('/typescript/') &&
-  //   !node.getSourceFile().fileName.includes('@types/node')
-  // ) {
-  //   debugger;
-  // }
 }
