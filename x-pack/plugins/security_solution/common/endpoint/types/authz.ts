@@ -26,6 +26,8 @@ export interface EndpointAuthz {
   canSuspendProcess: boolean;
   /** If user has permissions to get running processes on hosts */
   canGetRunningProcesses: boolean;
+  /** If user has permissions to use the Response Actions Console */
+  canAccessResponseConsole: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;
