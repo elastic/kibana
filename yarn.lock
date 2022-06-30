@@ -3291,6 +3291,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards":
+  version "0.0.0"
+  uid ""
+
 "@kbn/i18n-react@link:bazel-bin/packages/kbn-i18n-react":
   version "0.0.0"
   uid ""
@@ -6788,6 +6792,10 @@
   uid ""
 
 "@types/kbn__handlebars@link:bazel-bin/packages/kbn-handlebars/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards/npm_module_types":
   version "0.0.0"
   uid ""
 
