@@ -52,13 +52,13 @@ pageLoadAssetSize:
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 115240
+  security: 65433
   snapshotRestore: 79032
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
   transform: 41007
-  triggersActionsUi: 119000 #This is temporary. Check https://github.com/elastic/kibana/pull/130710#issuecomment-1119843458 & https://github.com/elastic/kibana/issues/130728
+  triggersActionsUi: 119000
   upgradeAssistant: 81241
   urlForwarding: 32579
   usageCollection: 39762
