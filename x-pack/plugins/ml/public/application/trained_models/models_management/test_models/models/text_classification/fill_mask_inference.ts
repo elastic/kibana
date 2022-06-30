@@ -17,6 +17,14 @@ const MASK = '[MASK]';
 
 export class FillMaskInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.FILL_MASK;
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.fillMask.info1', {
+      defaultMessage: 'This is some info.',
+    }),
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.fillMask.info2', {
+      defaultMessage: 'And this is the next bit of text.',
+    }),
+  ];
 
   public async infer() {
     try {
