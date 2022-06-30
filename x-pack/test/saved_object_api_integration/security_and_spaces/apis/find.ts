@@ -117,11 +117,8 @@ export default function ({ getService }: FtrProviderContext) {
       crossSpace: [
         explicitCrossSpaceDefinitions,
         wildcardCrossSpaceDefinitions,
-
-        // TODO: these requests are currently returning a 200 empty responses (instead of 400 bad request) for unauthorized users because
-        // the Spaces SOC wrapper is filtering them out; uncomment these tests when the Spaces SOC wrapper is refactored to an extension
-        // createTestDefinitions(explicitCrossSpace.badRequestTypes, false, { user }), // validation for filter returns 400 Bad Request before authZ check
-        // createTestDefinitions(wildcardCrossSpace.badRequestTypes, false, { user }), // validation for filter returns 400 Bad Request before authZ check
+        createTestDefinitions(explicitCrossSpace.badRequestTypes, false, { user }), // validation for filter returns 400 Bad Request before authZ check
+        createTestDefinitions(wildcardCrossSpace.badRequestTypes, false, { user }), // validation for filter returns 400 Bad Request before authZ check
       ].flat(),
     };
   };
