@@ -37,7 +37,6 @@ import {
   REMOVE_TRACKED_LAYER_STATE,
   UPDATE_SOURCE_DATA_REQUEST,
   SET_OPEN_TOOLTIPS,
-  SET_SCROLL_ZOOM,
   SET_MAP_INIT_ERROR,
   UPDATE_DRAW_STATE,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
@@ -70,7 +69,6 @@ export const DEFAULT_MAP_STATE: MapState = {
   mapState: {
     zoom: undefined, // setting this value does not adjust map zoom, read only value used to store current map zoom for persisting between sessions
     center: undefined, // setting this value does not adjust map view, read only value used to store current map center for persisting between sessions
-    scrollZoom: true,
     extent: undefined,
     mouseCoordinates: undefined,
     timeFilters: undefined,
@@ -302,14 +300,6 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         ...state.layerList[index].style,
         __styleMeta: styleMeta,
       });
-    case SET_SCROLL_ZOOM:
-      return {
-        ...state,
-        mapState: {
-          ...state.mapState,
-          scrollZoom: action.scrollZoom,
-        },
-      };
     case SET_MAP_INIT_ERROR:
       return {
         ...state,
