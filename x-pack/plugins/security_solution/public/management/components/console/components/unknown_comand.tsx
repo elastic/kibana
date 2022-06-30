@@ -39,7 +39,7 @@ export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, s
       header={
         <FormattedMessage
           id="xpack.securitySolution.console.unknownCommand.title"
-          defaultMessage="Unsupported text/command!"
+          defaultMessage="Unsupported text/command"
         />
       }
       data-test-subj={getTestId('unknownCommandError')}

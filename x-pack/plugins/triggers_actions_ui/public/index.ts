@@ -43,8 +43,6 @@ export type {
   FieldBrowserProps,
 } from './types';
 
-export { AlertsTableFlyoutState } from './types';
-
 export {
   ActionForm,
   CreateConnectorFlyout,
