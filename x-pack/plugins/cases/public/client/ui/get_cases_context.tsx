@@ -43,20 +43,28 @@ const CasesProviderLazyWrapper = ({
     </Suspense>
   );
 };
+
 CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 
 export const getCasesContextLazy = ({
   externalReferenceAttachmentTypeRegistry,
-}: Pick<GetCasesContextPropsInternal, 'externalReferenceAttachmentTypeRegistry'>) => {
-  // eslint-disable-next-line react/display-name
-  return (
-    props: GetCasesContextProps & {
-      children: ReactNode;
-    }
-  ) => (
+}: Pick<
+  GetCasesContextPropsInternal,
+  'externalReferenceAttachmentTypeRegistry'
+>): (() => React.FC<GetCasesContextProps>) => {
+  const CasesProviderLazyWrapperWithRegistry: React.FC<GetCasesContextProps> = ({
+    children,
+    ...props
+  }) => (
     <CasesProviderLazyWrapper
       {...props}
       externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
-    />
+    >
+      {children}
+    </CasesProviderLazyWrapper>
   );
+
+  CasesProviderLazyWrapperWithRegistry.displayName = 'CasesProviderLazyWrapperWithRegistry';
+
+  return () => CasesProviderLazyWrapperWithRegistry;
 };
