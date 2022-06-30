@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiText, EuiIcon, EuiSpacer, EuiPopover, EuiLink } from '@elastic/eui';
+import { EuiText, EuiIcon, EuiPopover, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaThemeProvider, Markdown } from '@kbn/kibana-react-plugin/public';
@@ -58,12 +58,13 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     const node = this.compact ? (
       <CompactEmbeddableError>{errorMarkdown}</CompactEmbeddableError>
     ) : (
-      <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
-        <EuiText color="subdued" size="xs">
-          <EuiIcon type="alert" color="danger" />
-          <EuiSpacer size="s" />
-          {errorMarkdown}
-        </EuiText>
+      <div className="embPanel__content" data-test-subj="embeddableStackError">
+        <EuiEmptyPrompt
+          className="embPanel__error"
+          iconType="alert"
+          iconColor="danger"
+          body={errorMarkdown}
+        />
       </div>
     );
     const content =

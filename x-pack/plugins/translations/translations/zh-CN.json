@@ -3289,8 +3289,6 @@
     "embeddableApi.panel.enhancedDashboardPanelAriaLabel": "仪表板面板：{title}",
     "embeddableApi.panel.inspectPanel.displayName": "检查",
     "embeddableApi.panel.inspectPanel.untitledEmbeddableFilename": "未命名",
-    "embeddableApi.panel.labelAborted": "已中止",
-    "embeddableApi.panel.labelError": "错误",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabel": "面板选项",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonAriaLabelWithIndex": "面板 {index} 的选项",
     "embeddableApi.panel.optionsMenu.panelOptionsButtonEnhancedAriaLabel": "{title} 的面板选项",
