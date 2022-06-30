@@ -632,7 +632,7 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
-  const savedObject: Installation = {
+  let savedObject: Installation = {
     installed_kibana: [],
     installed_kibana_space_id: options.spaceId,
     installed_es: [],
@@ -650,7 +650,7 @@ export async function createInstallation(options: {
   };
 
   if (verificationResult) {
-    savedObject.verification = formatVerificationResultForSO(verificationResult);
+    savedObject = { ...savedObject, ...formatVerificationResultForSO(verificationResult) };
   }
 
   const created = await savedObjectsClient.create<Installation>(
