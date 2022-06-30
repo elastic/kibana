@@ -18,8 +18,6 @@ type Props = {
 // Split a text into multiple spans, each of which a single character. This is
 // useful for creating inline "like" text but still having control over the blocks
 // exclusive features, such height or line-height.
-// It adds a `aria-label` attribute to a parent span, which is used by screen readers to
-// read the text as a single block.
 
 const css: CSSObject = {};
 

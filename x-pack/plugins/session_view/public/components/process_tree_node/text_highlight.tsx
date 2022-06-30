@@ -23,7 +23,11 @@ const css: CSSObject = {
     verticalAlign: 'middle',
   },
 };
-
+// Component that takes an array of matching indices in a text and pass down a highlight
+// css style prop across its children
+// Currently it works only for a single child level, designed to be in combination with SplitText
+// It adds a `aria-label` attribute to a parent span, which is used by screen readers to
+// read the text as a single block.
 export const TextHighlight = ({ children, match, text, highlightStyle }: Props): JSX.Element => {
   let startIdx = 0;
 
