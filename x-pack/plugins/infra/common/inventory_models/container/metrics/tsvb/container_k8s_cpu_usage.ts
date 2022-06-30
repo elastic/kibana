@@ -46,4 +46,3 @@ export const k8sContainerCpuUsage: TSVBMetricModelCreator = (
     },
   ],
 });
-
