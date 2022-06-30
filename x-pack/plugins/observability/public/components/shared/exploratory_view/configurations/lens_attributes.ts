@@ -896,7 +896,14 @@ export class LensAttributes {
     const dataLayers = this.layerConfigs.map((layerConfig, index) => {
       const { sourceField } = layerConfig.seriesConfig.yAxisColumns[0];
 
-      const { palette } = this.getFieldMeta(sourceField, layerConfig);
+      let palette = layerConfig.seriesConfig.palette;
+
+      if (sourceField) {
+        const fieldMeta = this.getFieldMeta(sourceField, layerConfig);
+        if (fieldMeta.palette) {
+          palette = fieldMeta.palette;
+        }
+      }
 
       return {
         accessors: [
