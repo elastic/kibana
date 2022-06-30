@@ -17,7 +17,6 @@ const InputPlaceholderContainer = styled(EuiText)`
   position: absolute;
   pointer-events: none;
   padding-left: 0.5em;
-  transform: translateY(-50%);
   width: 96%;
   color: ${({ theme: { eui } }) => eui.euiFormControlPlaceholderText};
 `;

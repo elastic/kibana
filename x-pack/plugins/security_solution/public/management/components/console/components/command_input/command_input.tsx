@@ -257,7 +257,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           <EuiFlexItem className="textEntered">
             <EuiFlexGroup
               responsive={false}
-              alignItems="flexStart"
+              alignItems="center"
               gutterSize="none"
               justifyContent="flexStart"
             >
@@ -271,11 +271,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                 <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>{rightOfCursor.text}</div>
               </EuiFlexItem>
             </EuiFlexGroup>
-
             <InputPlaceholder />
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <span className={cursorClassName} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiIcon type="playFilled" color="subdued" />
