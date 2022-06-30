@@ -27,6 +27,8 @@ export interface CreateShareArgs {
   name?: string;
   /**
    * Optionally set an expiration date for this file share instance
+   *
+   * @note If not specified the file share will expire after 30 days
    */
   validUntil?: string;
 
