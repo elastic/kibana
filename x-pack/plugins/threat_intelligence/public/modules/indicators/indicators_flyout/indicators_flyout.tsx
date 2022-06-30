@@ -16,15 +16,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { Indicator } from '../../../../common/types/Indicator';
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
 import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
-import { Indicator as CommonIndicator } from '../../../../common/types/Indicator';
-
-export interface Indicator extends CommonIndicator {
-  id: string;
-  name: string;
-  first_seen: string;
-}
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
@@ -84,7 +78,7 @@ export const IndicatorsFlyout: VFC<{ indicator: Indicator; closeFlyout: () => vo
     <EuiFlyout onClose={closeFlyout}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 data-test-subj={TITLE_TEST_ID}>Indicator: {indicator.id || 'N/A'}</h2>
+          <h2 data-test-subj={TITLE_TEST_ID}>Indicator: {indicator.value || 'N/A'}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size={'xs'}>

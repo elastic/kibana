@@ -7,21 +7,18 @@
 
 import React from 'react';
 import { Story } from '@storybook/react';
-import { Indicator, IndicatorsFlyout } from './indicators_flyout';
+import { generateMockIndicator, Indicator } from '../../../../common/types/Indicator';
+import { IndicatorsFlyout } from './indicators_flyout';
 
 export default {
   component: IndicatorsFlyout,
   title: 'IndicatorsFlyout',
 };
 
-const mockIndicator: Indicator = {
-  id: '12.68.554.87',
-  name: 'first indicator',
-  last_seen: '2022-06-03T11:41:06.000Z',
-  first_seen: '2022-06-03T11:41:06.000Z',
-};
+const mockIndicator: Indicator = generateMockIndicator();
 
 export const Default: Story<void> = () => {
+  // eslint-disable-next-line no-console
   return <IndicatorsFlyout indicator={mockIndicator} closeFlyout={() => console.log('closing')} />;
 };
 
@@ -29,6 +26,7 @@ export const EmtpyIndicator: Story<void> = () => {
   return (
     <IndicatorsFlyout
       indicator={{} as unknown as Indicator}
+      // eslint-disable-next-line no-console
       closeFlyout={() => console.log('closing')}
     />
   );

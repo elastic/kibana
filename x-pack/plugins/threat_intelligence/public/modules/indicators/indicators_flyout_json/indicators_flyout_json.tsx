@@ -7,7 +7,7 @@
 
 import React, { VFC } from 'react';
 import { EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
-import { Indicator } from '../indicators_flyout/indicators_flyout';
+import { Indicator } from '../../../../common/types/Indicator';
 
 export const EMPTY_PROMPT_TEST_ID = 'tiFlyoutJsonEmptyPrompt';
 export const CODE_BLOCK_TEST_ID = 'tiFlyoutJsonCodeBlock';

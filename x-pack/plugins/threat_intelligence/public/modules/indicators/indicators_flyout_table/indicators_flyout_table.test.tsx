@@ -6,40 +6,25 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { render } from '@testing-library/react';
-import { EuiInMemoryTable } from '@elastic/eui';
-import { Indicator } from '../indicators_flyout/indicators_flyout';
+import { generateMockIndicator, Indicator } from '../../../../common/types/Indicator';
 import {
   EMPTY_PROMPT_TEST_ID,
   IndicatorsFlyoutTable,
   TABLE_TEST_ID,
 } from './indicators_flyout_table';
 
-const mockIndicator: Indicator = {
-  id: '12.68.554.87',
-  value: 'value',
-  feed: 'feed',
-  type: 'type',
-  name: 'first indicator',
-  first_seen: '2022-06-03T11:41:06.000Z',
-};
+const mockIndicator: Indicator = generateMockIndicator();
 
 describe('IndicatorsFlyoutTable', () => {
-  it('should render EUI components', () => {
-    const wrapper = mountWithIntl(<IndicatorsFlyoutTable indicator={mockIndicator} />);
-
-    expect(wrapper.find(EuiInMemoryTable)).toHaveLength(1);
-  });
-
   it('should render fields and values in table', () => {
     const { getByTestId, getByText } = render(<IndicatorsFlyoutTable indicator={mockIndicator} />);
 
     expect(getByTestId(TABLE_TEST_ID)).toBeInTheDocument();
-    expect(getByText('id')).toBeInTheDocument();
-    expect(getByText('name')).toBeInTheDocument();
-    expect(getByText(mockIndicator.id)).toBeInTheDocument();
-    expect(getByText(mockIndicator.name)).toBeInTheDocument();
+    expect(getByText('value')).toBeInTheDocument();
+    expect(getByText('feed')).toBeInTheDocument();
+    expect(getByText(mockIndicator.value)).toBeInTheDocument();
+    expect(getByText(mockIndicator.feed)).toBeInTheDocument();
   });
 
   it('should render error message on invalid indicator', () => {

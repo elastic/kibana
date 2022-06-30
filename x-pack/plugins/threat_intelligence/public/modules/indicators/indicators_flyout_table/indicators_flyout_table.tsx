@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
 import React, { VFC } from 'react';
-import { Indicator } from '../indicators_flyout/indicators_flyout';
+import { Indicator } from '../../../../common/types/Indicator';
 
 export const EMPTY_PROMPT_TEST_ID = 'tiFlyoutTableEmptyPrompt';
 export const TABLE_TEST_ID = 'tiFlyoutTableMemoryTable';

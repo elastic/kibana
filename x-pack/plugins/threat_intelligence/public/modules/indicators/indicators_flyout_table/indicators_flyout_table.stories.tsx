@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Story } from '@storybook/react';
-import { Indicator } from '../indicators_flyout/indicators_flyout';
+import { generateMockIndicator, Indicator } from '../../../../common/types/Indicator';
 import { IndicatorsFlyoutTable } from './indicators_flyout_table';
 
 export default {
@@ -15,12 +15,7 @@ export default {
   title: 'IndicatorsFlyoutTable',
 };
 
-const mockIndicator: Indicator = {
-  id: '12.68.554.87',
-  name: 'first indicator',
-  last_seen: '2022-06-03T11:41:06.000Z',
-  first_seen: '2022-06-03T11:41:06.000Z',
-};
+const mockIndicator: Indicator = generateMockIndicator();
 
 export const Default: Story<void> = () => {
   return <IndicatorsFlyoutTable indicator={mockIndicator} />;

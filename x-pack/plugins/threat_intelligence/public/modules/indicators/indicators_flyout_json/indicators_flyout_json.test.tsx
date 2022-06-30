@@ -6,32 +6,17 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { render } from '@testing-library/react';
-import { EuiCodeBlock } from '@elastic/eui';
-import { Indicator } from '../indicators_flyout/indicators_flyout';
+import { generateMockIndicator, Indicator } from '../../../../common/types/Indicator';
 import {
   CODE_BLOCK_TEST_ID,
   EMPTY_PROMPT_TEST_ID,
   IndicatorsFlyoutJson,
 } from './indicators_flyout_json';
 
-const mockIndicator: Indicator = {
-  id: '12.68.554.87',
-  value: 'value',
-  feed: 'feed',
-  type: 'type',
-  name: 'first indicator',
-  first_seen: '2022-06-03T11:41:06.000Z',
-};
+const mockIndicator: Indicator = generateMockIndicator();
 
 describe('IndicatorsFlyoutJson', () => {
-  it('should render EUI components', () => {
-    const wrapper = mountWithIntl(<IndicatorsFlyoutJson indicator={mockIndicator} />);
-
-    expect(wrapper.find(EuiCodeBlock)).toHaveLength(1);
-  });
-
   it('should render code block component on valid indicator', () => {
     const { getByTestId } = render(<IndicatorsFlyoutJson indicator={mockIndicator} />);
 
