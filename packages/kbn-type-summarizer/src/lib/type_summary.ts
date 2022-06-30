@@ -234,7 +234,6 @@ export class TypeSummary {
             this.getName(local.rootSymbol, local.exported.name) === local.exported.name;
 
           for (const dec of local.decs) {
-            // TODO: We aren't getting all the comments that api-extractor is able to find, specifically in @kbn/shared-ux-link-redirect-app
             for (const s of this.indexer.toSnippets(dec)) {
               if (s.type === 'source') {
                 source.add(s.value);
