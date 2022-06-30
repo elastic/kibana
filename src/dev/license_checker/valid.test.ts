@@ -47,7 +47,7 @@ describe('tasks/lib/licenses', () => {
           packages: [PACKAGE],
           validLicenses: [`not ${PACKAGE.licenses[0]}`],
           perPackageOverrides: {
-            [`${PACKAGE.name}-${PACKAGE.version}`]: [`also not ${PACKAGE.licenses[0]}`],
+            [`${PACKAGE.name}@${PACKAGE.version}`]: [`also not ${PACKAGE.licenses[0]}`],
           },
         });
       }).toThrow(PACKAGE.name);
@@ -59,7 +59,7 @@ describe('tasks/lib/licenses', () => {
           packages: [PACKAGE],
           validLicenses: [`not ${PACKAGE.licenses[0]}`],
           perPackageOverrides: {
-            [`${PACKAGE.name}-${PACKAGE.version}`]: PACKAGE.licenses,
+            [`${PACKAGE.name}@${PACKAGE.version}`]: PACKAGE.licenses,
           },
         })
       ).toEqual(undefined);
