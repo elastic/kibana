@@ -16,7 +16,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
 
     testFiles: [
-      require.resolve('./apps/cross_cluster_replication'),
       require.resolve('./apps/login_page'),
       require.resolve('./apps/kibana_overview'),
       require.resolve('./apps/home'),
@@ -43,6 +42,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/security_solution'),
       require.resolve('./apps/ml_embeddables_in_dashboard'),
       require.resolve('./apps/remote_clusters'),
+      require.resolve('./apps/cross_cluster_replication'),
       require.resolve('./apps/snapshot_and_restore'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/enterprise_search'),
