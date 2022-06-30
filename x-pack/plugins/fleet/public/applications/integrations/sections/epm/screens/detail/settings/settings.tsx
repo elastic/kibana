@@ -45,6 +45,7 @@ import {
 import { KeepPoliciesUpToDateSwitch } from '../components';
 
 import { InstallButton } from './install_button';
+import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 
@@ -344,33 +345,56 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                 </div>
               ) : (
                 <>
-                  <div>
-                    <EuiTitle>
-                      <h4>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageUninstallTitle"
-                          defaultMessage="Uninstall"
-                        />
-                      </h4>
-                    </EuiTitle>
-                    <EuiSpacer size="s" />
-                    <p>
+                  <EuiFlexGroup direction="column" gutterSize="m">
+                    <EuiFlexItem>
+                      <EuiTitle>
+                        <h4>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageUninstallTitle"
+                            defaultMessage="Uninstall"
+                          />
+                        </h4>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
                       <FormattedMessage
                         id="xpack.fleet.integrations.settings.packageUninstallDescription"
                         defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
                       />
-                    </p>
-                  </div>
-                  <EuiFlexGroup>
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <p>
+                      <div>
                         <UninstallButton
                           {...packageInfo}
                           numOfAssets={numOfAssets}
                           latestVersion={latestVersion}
                           disabled={!packagePoliciesData || packageHasUsages}
                         />
-                      </p>
+                      </div>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="l" />
+                  <EuiFlexGroup direction="column" gutterSize="m">
+                    <EuiFlexItem>
+                      <EuiTitle>
+                        <h4>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageReinstallTitle"
+                            defaultMessage="Reinstall"
+                          />
+                        </h4>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <FormattedMessage
+                        id="xpack.fleet.integrations.settings.packageReinstallDescription"
+                        defaultMessage="Reinstall Kibana and Elasticsearch assets for this integration."
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <div>
+                        <ReinstallButton {...packageInfo} />
+                      </div>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
