@@ -22,7 +22,7 @@ const InputPlaceholderContainer = styled(EuiText)`
 `;
 
 export const InputPlaceholder = memo(() => {
-  const textEntered = useWithInputTextEntered();
+  const { fullTextEntered } = useWithInputTextEntered();
   const placeholder = useWithInputPlaceholder();
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
@@ -32,7 +32,7 @@ export const InputPlaceholder = memo(() => {
       className="eui-textTruncate"
       data-test-subj={getTestId('inputPlaceholder')}
     >
-      <div className="eui-textTruncate">{textEntered ? '' : placeholder}</div>
+      <div className="eui-textTruncate">{fullTextEntered ? '' : placeholder}</div>
     </InputPlaceholderContainer>
   );
 });
