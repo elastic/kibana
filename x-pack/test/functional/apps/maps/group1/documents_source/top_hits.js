@@ -31,7 +31,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should not fetch any search hits', async () => {
         await inspector.open();
-        await inspector.openInspectorView('Requests');
+        await inspector.openInspectorRequestsView();
         const requestStats = await inspector.getTableData();
         const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
         expect(hits).to.equal('0'); // aggregation requests do not return any documents

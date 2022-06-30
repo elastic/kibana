@@ -608,7 +608,7 @@ export class GisPageObject extends FtrService {
   }
 
   async _getResponse(requestName: string) {
-    await this.inspector.openInspectorView('Requests');
+    await this.inspector.openInspectorRequestsView();
     if (requestName) {
       await this.testSubjects.click('inspectorRequestChooser');
       await this.testSubjects.click(`inspectorRequestChooser${requestName}`);

@@ -190,10 +190,8 @@ export class InspectorService extends FtrService {
   }
 
   /**
-   * Opens inspector view
+   * Opens inspector viewId for example 'Requests
    * @param viewId
-   *  This method was flaky. So we changed viewId to the substring of the dts which is visible
-   *  so we can verify if the selection worked
    */
 
   public async openInspectorView(viewId: string): Promise<void> {

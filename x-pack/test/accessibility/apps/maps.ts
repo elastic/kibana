@@ -63,12 +63,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('map inspector panel - view requests', async function () {
-      await inspector.openInspectorView('Requests');
+      await inspector.openInspectorRequestsView();
       await a11y.testAppSnapshot();
     });
 
     it('map inspector panel - view maps', async function () {
-      await inspector.openInspectorView('Map details');
+      await PageObjects.maps.openInspectorMapView();
       await a11y.testAppSnapshot();
     });
 
