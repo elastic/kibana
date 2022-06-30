@@ -73,7 +73,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should bulk update tags of multiple agents by kuery in batches', async () => {
-        const { body: unenrolledBody } = await supertest
+        const { body: updatedBody } = await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -84,7 +84,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(unenrolledBody).to.eql({
+        expect(updatedBody).to.eql({
           agent1: { success: true },
           agent2: { success: true },
           agent3: { success: true },
