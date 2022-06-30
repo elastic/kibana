@@ -6,31 +6,9 @@
  */
 
 import type { FileShareJSON } from '../../common/types';
-import type {
-  CreateShareArgs,
-  DeleteArgs,
-  DeleteForFileArgs,
-  GetArgs,
-  ListArgs,
-  UpdateArgs,
-} from './file_share_service';
+import type { GetArgs, ListArgs, UpdateArgs } from './internal_file_share_service';
 
 export interface FileShareServiceStart {
-  /**
-   * Create a new share instance for a file.
-   */
-  share(arg: CreateShareArgs): Promise<FileShareJSON>;
-
-  /**
-   * Delete a share instance.
-   */
-  delete(arg: DeleteArgs): Promise<void>;
-
-  /**
-   * Delete all share instances for a file
-   */
-  deleteForFile(arg: DeleteForFileArgs): Promise<void>;
-
   /**
    * Get a share instance
    */

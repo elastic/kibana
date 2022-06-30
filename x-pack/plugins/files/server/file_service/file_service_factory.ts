@@ -16,7 +16,7 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { File, FileSavedObjectAttributes } from '../../common';
 import { fileObjectType, fileShareObjectType } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
-import { FileShareService } from '../file_share_service';
+import { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
 import {
   CreateFileArgs,
   FindFileArgs,
@@ -48,13 +48,13 @@ export class FileServiceFactory {
       ? this.security?.audit.asScoped(req)
       : this.security?.audit.withoutRequest;
 
-    const fileShareService = new FileShareService(soClient);
+    const internalFileShareService = new InternalFileShareService(soClient);
 
     const internalFileService = new InternalFileService(
       fileObjectType.name,
       soClient,
       this.blobStorageService,
-      fileShareService,
+      internalFileShareService,
       auditLogger,
       this.fileKindRegistry,
       this.logger
@@ -76,8 +76,8 @@ export class FileServiceFactory {
       async list<M>(args: ListFilesArgs) {
         return internalFileService.list(args) as Promise<Array<File<M>>>;
       },
-      getFileShareService() {
-        return fileShareService;
+      getFileShareService(): FileShareServiceStart {
+        return internalFileShareService;
       },
     };
   }

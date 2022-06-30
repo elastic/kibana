@@ -173,7 +173,14 @@ export class File<M = unknown> implements IFile {
     name?: string;
     validUntil?: string;
   }): Promise<FileShareJSON> {
-    return await this.fileShareService.share({ file: this, name, validUntil });
+    const shareObject = await this.fileShareService.share({ file: this, name, validUntil });
+    this.internalFileService.createAuditLog(
+      createAuditEvent({
+        action: 'create',
+        message: `Shared file "${this.name}" with id "${this.id}"`,
+      })
+    );
+    return shareObject;
   }
 
   async listShares(): Promise<FileShareJSON[]> {
@@ -182,6 +189,12 @@ export class File<M = unknown> implements IFile {
 
   async unshare(opts: { shareId: string }): Promise<void> {
     await this.fileShareService.delete({ tokenId: opts.shareId });
+    this.internalFileService.createAuditLog(
+      createAuditEvent({
+        action: 'delete',
+        message: `Removed share for "${this.name}" with id "${this.id}"`,
+      })
+    );
   }
 
   public toJSON(): FileJSON {

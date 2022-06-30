@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { FileShareService } from './file_share_service';
+export { InternalFileShareService } from './internal_file_share_service';
 export { FileShareServiceStart } from './types';

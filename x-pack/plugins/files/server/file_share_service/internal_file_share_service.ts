@@ -62,7 +62,7 @@ function toFileShareJSON(so: SavedObject<FileShareSavedObjectAttributes>): FileS
   };
 }
 
-export class FileShareService implements FileShareServiceStart {
+export class InternalFileShareService implements FileShareServiceStart {
   private readonly savedObjectsType = fileShareObjectType.name;
 
   constructor(
