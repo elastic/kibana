@@ -70,53 +70,57 @@ export default function TextBasedLanguagesTransitionModal({
           justify-content: space-between;
         `}
       >
-        <EuiFlexItem grow={false}>
-          <EuiCheckbox
-            id="dismiss-text-based-languages-transition-modal"
-            label={i18n.translate(
-              'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalDismissButton',
-              {
-                defaultMessage: "Don't show this warning again",
-              }
-            )}
-            checked={dismissModalChecked}
-            onChange={onTransitionModalDismiss}
-          />
-        </EuiFlexItem>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => closeModal(dismissModalChecked)}
-              color="warning"
-              iconType="merge"
-              css={css`
-                color: ${euiTheme.colors.warning};
-                border: 1px solid ${euiTheme.colors.warning};
-                background-color: ${euiTheme.colors.emptyShade};
-              `}
-            >
-              {i18n.translate(
-                'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalCloseButton',
+            <EuiCheckbox
+              id="dismiss-text-based-languages-transition-modal"
+              label={i18n.translate(
+                'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalDismissButton',
                 {
-                  defaultMessage: 'Switch without saving',
+                  defaultMessage: "Don't show this warning again",
                 }
               )}
-            </EuiButton>
+              checked={dismissModalChecked}
+              onChange={onTransitionModalDismiss}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => closeModal(dismissModalChecked, true)}
-              fill
-              color="success"
-              iconType="save"
-            >
-              {i18n.translate(
-                'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalSaveButton',
-                {
-                  defaultMessage: 'Save and switch',
-                }
-              )}
-            </EuiButton>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => closeModal(dismissModalChecked)}
+                  color="warning"
+                  iconType="merge"
+                  css={css`
+                    color: ${euiTheme.colors.warning};
+                    border: 1px solid ${euiTheme.colors.warning};
+                    background-color: ${euiTheme.colors.emptyShade};
+                  `}
+                >
+                  {i18n.translate(
+                    'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalCloseButton',
+                    {
+                      defaultMessage: 'Switch without saving',
+                    }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => closeModal(dismissModalChecked, true)}
+                  fill
+                  color="success"
+                  iconType="save"
+                >
+                  {i18n.translate(
+                    'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalSaveButton',
+                    {
+                      defaultMessage: 'Save and switch',
+                    }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalFooter>
