@@ -584,6 +584,7 @@ export class LensAttributes {
   getFieldMeta(sourceField: string, layerConfig: LayerConfig) {
     if (sourceField === REPORT_METRIC_FIELD) {
       const {
+        palette,
         fieldName,
         columnType,
         columnLabel,
@@ -594,6 +595,7 @@ export class LensAttributes {
       } = parseCustomFieldName(layerConfig.seriesConfig, layerConfig.selectedMetricField);
       const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName!);
       return {
+        palette,
         fieldMeta,
         fieldName,
         columnType,
@@ -891,40 +893,46 @@ export class LensAttributes {
   }
 
   getDataLayers(): XYState['layers'] {
-    const dataLayers = this.layerConfigs.map((layerConfig, index) => ({
-      accessors: [
-        `y-axis-column-layer${index}`,
-        ...Object.keys(this.getChildYAxises(layerConfig, `layer${index}`, undefined, true)),
-      ],
-      layerId: `layer${index}`,
-      layerType: 'data' as any,
-      seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
-      palette: layerConfig.seriesConfig.palette,
-      yConfig: layerConfig.seriesConfig.yConfig || [
-        {
-          forAccessor: `y-axis-column-layer${index}`,
-          color: layerConfig.color,
-          /* if the fields format matches the field format of the first layer, use the default y axis (right)
-           * if not, use the secondary y axis (left) */
-          axisMode:
-            layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
-            this.layerConfigs[0].indexPattern.fieldFormatMap[
-              this.layerConfigs[0].selectedMetricField
-            ]?.id
-              ? ('left' as YAxisMode)
-              : ('right' as YAxisMode),
-        },
-      ],
-      xAccessor: `x-axis-column-layer${index}`,
-      ...(layerConfig.breakdown &&
-      layerConfig.breakdown !== PERCENTILE &&
-      layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
-        ? { splitAccessor: `breakdown-column-layer${index}` }
-        : {}),
-      ...(this.layerConfigs[0].seriesConfig.yTitle
-        ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
-        : {}),
-    }));
+    const dataLayers = this.layerConfigs.map((layerConfig, index) => {
+      const { sourceField } = layerConfig.seriesConfig.yAxisColumns[0];
+
+      const { palette } = this.getFieldMeta(sourceField, layerConfig);
+
+      return {
+        accessors: [
+          `y-axis-column-layer${index}`,
+          ...Object.keys(this.getChildYAxises(layerConfig, `layer${index}`, undefined, true)),
+        ],
+        layerId: `layer${index}`,
+        layerType: 'data' as any,
+        seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
+        palette: palette ?? layerConfig.seriesConfig.palette,
+        yConfig: layerConfig.seriesConfig.yConfig || [
+          {
+            forAccessor: `y-axis-column-layer${index}`,
+            color: layerConfig.color,
+            /* if the fields format matches the field format of the first layer, use the default y axis (right)
+             * if not, use the secondary y axis (left) */
+            axisMode:
+              layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
+              this.layerConfigs[0].indexPattern.fieldFormatMap[
+                this.layerConfigs[0].selectedMetricField
+              ]?.id
+                ? ('left' as YAxisMode)
+                : ('right' as YAxisMode),
+          },
+        ],
+        xAccessor: `x-axis-column-layer${index}`,
+        ...(layerConfig.breakdown &&
+        layerConfig.breakdown !== PERCENTILE &&
+        layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
+          ? { splitAccessor: `breakdown-column-layer${index}` }
+          : {}),
+        ...(this.layerConfigs[0].seriesConfig.yTitle
+          ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
+          : {}),
+      };
+    });
 
     const referenceLineLayers: XYState['layers'] = [];
 
