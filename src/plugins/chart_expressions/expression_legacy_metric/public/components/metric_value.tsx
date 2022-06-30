@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
@@ -18,21 +18,20 @@ interface MetricVisValueProps {
   labelConfig: MetricVisParam['labels'];
   colorFullBackground: boolean;
   autoScale?: boolean;
+  renderComplete?: () => void;
 }
 
-export const MetricVisValue = ({
-  style,
-  metric,
-  onFilter,
-  labelConfig,
-  colorFullBackground,
-  autoScale,
-}: MetricVisValueProps) => {
+export const MetricVisValue = (props: MetricVisValueProps) => {
+  const { style, metric, onFilter, labelConfig, colorFullBackground, autoScale } = props;
   const containerClassName = classNames('legacyMtrVis__container', {
     'legacyMtrVis__container--light': metric.lightText,
     'legacyMtrVis__container-isfilterable': onFilter,
     'legacyMtrVis__container-isfull': !autoScale && colorFullBackground,
   });
+
+  useLayoutEffect(() => {
+    props.renderComplete?.();
+  }, [props]);
 
   // for autoScale true we should add background to upper level so that correct colorize full container
   const metricComponent = (
@@ -76,7 +75,7 @@ export const MetricVisValue = ({
       <button
         style={{ display: 'block' }}
         onClick={() => onFilter()}
-        title={i18n.translate('expressionLegacyMetricVis.filterTitle', {
+        title={i18n.translate('expressionMetricVis.filterTitle', {
           defaultMessage: 'Click to filter by field',
         })}
       >
