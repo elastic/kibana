@@ -70,7 +70,6 @@ export class InternalFileShareService implements FileShareServiceStart {
   ) {}
 
   public async share({ file, name, validUntil }: CreateShareArgs): Promise<FileShareJSON> {
-    const token = await generateShareToken();
     const so = await this.savedObjects.create<FileShareSavedObjectAttributes>(
       this.savedObjectsType,
       {
@@ -81,7 +80,7 @@ export class InternalFileShareService implements FileShareServiceStart {
           ? moment(validUntil).toISOString()
           : moment().add(30, 'days').toISOString(),
       },
-      { id: token }
+      { id: generateShareToken() }
     );
 
     return toFileShareJSON(so);

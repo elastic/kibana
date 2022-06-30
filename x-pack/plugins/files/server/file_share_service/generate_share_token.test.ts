@@ -8,11 +8,9 @@
 import { generateShareToken } from './generate_share_token';
 
 describe('generateShareToken', () => {
-  it('should generate a token of 40 chars', async () => {
-    expect(await generateShareToken()).toHaveLength(40);
-  });
-
-  it('should contain only expected chars', async () => {
-    expect(await generateShareToken()).toMatch(/^[a-zA-Z0-9]{40}$/);
+  it('should contain only expected chars of a given length', () => {
+    for (let i = 0; i < 50; i++) {
+      expect(generateShareToken()).toMatch(/^[a-zA-Z0-9]{40}$/);
+    }
   });
 });
