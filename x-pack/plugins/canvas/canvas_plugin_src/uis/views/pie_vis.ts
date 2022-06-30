@@ -71,6 +71,7 @@ export const pieVis = () => ({
     {
       name: 'palette',
       argType: 'palette',
+      help: strings.getPaletteHelp(),
     },
     {
       name: 'distinctColors',
@@ -79,7 +80,7 @@ export const pieVis = () => ({
       argType: 'toggle',
       default: false,
       options: {
-        labelValue: strings.getDistictColorsHelp(),
+        labelValue: strings.getDistictColorsToggleLabel(),
       },
     },
     {
@@ -89,7 +90,7 @@ export const pieVis = () => ({
       argType: 'toggle',
       default: true,
       options: {
-        labelValue: strings.getAddTooltipHelp(),
+        labelValue: strings.getAddTooltipToggleLabel(),
       },
     },
     {
@@ -128,7 +129,7 @@ export const pieVis = () => ({
       argType: 'toggle',
       default: false,
       options: {
-        labelValue: strings.getNestedLegendHelp(),
+        labelValue: strings.getNestedLegendToggleLabel(),
       },
     },
     {
@@ -138,7 +139,7 @@ export const pieVis = () => ({
       argType: 'toggle',
       default: true,
       options: {
-        labelValue: strings.getTruncateLegendHelp(),
+        labelValue: strings.getTruncateLegendToggleLabel(),
       },
     },
     {
@@ -152,20 +153,20 @@ export const pieVis = () => ({
       name: 'respectSourceOrder',
       displayName: strings.getRespectSourceOrderDisplayName(),
       help: strings.getRespectSourceOrderHelp(),
-      argType: 'inlineToggle',
+      argType: 'toggle',
       default: true,
       options: {
-        labelValue: strings.getSaveLabel(),
+        labelValue: strings.getRespectSourceOrderToggleLabel(),
       },
     },
     {
       name: 'startFromSecondLargestSlice',
       displayName: strings.getStartFromSecondLargestSliceDisplayName(),
       help: strings.getStartFromSecondLargestSliceHelp(),
-      argType: 'inlineToggle',
+      argType: 'toggle',
       default: true,
       options: {
-        labelValue: strings.getEnableLabel(),
+        labelValue: strings.getStartFromSecondLargestSliceToggleLabel(),
       },
     },
     {

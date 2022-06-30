@@ -1684,13 +1684,17 @@ export const ViewStrings = {
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.addTooltipHelp', {
         defaultMessage: 'Show tooltip on hover',
       }),
+    getAddTooltipToggleLabel: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.addTooltipToggleLabel', {
+        defaultMessage: 'Show tooltip',
+      }),
     getLegendPositionDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionTitle', {
         defaultMessage: 'Legend position',
       }),
     getLegendPositionHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionLabel', {
-        defaultMessage: 'Specifies the legend position',
+        defaultMessage: 'Set the legend position on the right, top, left, or bottom',
       }),
     getLegendPositionTopOption: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionTopLabel', {
@@ -1714,7 +1718,7 @@ export const ViewStrings = {
       }),
     getLegendDisplayHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayLabel', {
-        defaultMessage: 'Specifies the legend visibility',
+        defaultMessage: 'Show or hide the pie legend',
       }),
     getLegendDisplayDefaultOption: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayDefaultLabel', {
@@ -1730,11 +1734,15 @@ export const ViewStrings = {
       }),
     getNestedLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.nestedLegendDisplayName', {
-        defaultMessage: 'Detailed legend',
+        defaultMessage: 'Detail legend',
       }),
     getNestedLegendHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.nestedLegendHelp', {
-        defaultMessage: 'Show more detailed legend',
+        defaultMessage: 'Include details in the legend',
+      }),
+    getNestedLegendToggleLabel: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.nestedLegendToggleLabel', {
+        defaultMessage: 'Show details',
       }),
     getTruncateLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.truncateLegendDisplayName', {
@@ -1742,6 +1750,10 @@ export const ViewStrings = {
       }),
     getTruncateLegendHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.truncateLegendHelp', {
+        defaultMessage: 'Truncate the legend when it reaches the maximum width',
+      }),
+    getTruncateLegendToggleLabel: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.truncateLegendToggleLabel', {
         defaultMessage: 'Truncate when long',
       }),
     getMaxLegendLinesDisplayName: () =>
@@ -1750,23 +1762,31 @@ export const ViewStrings = {
       }),
     getMaxLegendLinesHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.maxLegendLinesHelp', {
-        defaultMessage: 'Defines the number of lines per legend item',
+        defaultMessage: 'Set the maximum number of lines for each legend item',
       }),
     getDistictColorsDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.distinctColorsDisplayName', {
-        defaultMessage: 'Slice color',
+        defaultMessage: 'Slice colors',
       }),
     getDistictColorsHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.distinctColorsHelp', {
+        defaultMessage: 'Use different colors for slices with unequal values',
+      }),
+    getDistictColorsToggleLabel: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.distictColorsToggleLabel', {
         defaultMessage: 'Use distinct colors',
       }),
     getRespectSourceOrderDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderDisplayName', {
-        defaultMessage: 'Original data order',
+        defaultMessage: 'Data order',
+      }),
+    getRespectSourceOrderToggleLabel: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderToggleLabel', {
+        defaultMessage: 'Use original',
       }),
     getRespectSourceOrderHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderHelp', {
-        defaultMessage: 'Saves a source order of the data',
+        defaultMessage: 'Display the data in its original order instead of sorting it',
       }),
     getIsDonutDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.isDonutDisplayName', {
@@ -1778,23 +1798,38 @@ export const ViewStrings = {
       }),
     getEmptySizeRatioDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioDisplayName', {
-        defaultMessage: 'Size of donut hole',
+        defaultMessage: 'Donut hole size',
       }),
     getEmptySizeRatioHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioHelp', {
+        defaultMessage: 'Size of donut hole',
+      }),
+    getEmptySizeRatioTooltip: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioHelp', {
         defaultMessage: 'Size of the donut hole',
+      }),
+    getPaletteHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.partitionVis.args.paletteHelp', {
+        defaultMessage: 'Specify the colors for the slices in the pie',
       }),
     getStartFromSecondLargestSliceDisplayName: () =>
       i18n.translate(
         'xpack.canvas.uis.views.partitionVis.args.startFromSecondLargestSliceDisplayName',
         {
-          defaultMessage: 'Starts with the second largest slice',
+          defaultMessage: 'Placement',
         }
       ),
     getStartFromSecondLargestSliceHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.startFromSecondLargestSliceHelp', {
-        defaultMessage: 'Starts placement with the second largest slice',
+        defaultMessage: 'Place the second largest slice in the first position of the pie',
       }),
+    getStartFromSecondLargestSliceToggleLabel: () =>
+      i18n.translate(
+        'xpack.canvas.uis.views.partitionVis.args.startFromSecondLargestSliceToggleLabel',
+        {
+          defaultMessage: 'Start with second slice',
+        }
+      ),
     getLabelsDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.labelsDisplayName', {
         defaultMessage: 'Labels configuration',
