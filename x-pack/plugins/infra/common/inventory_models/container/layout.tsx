@@ -43,6 +43,24 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
         metrics={metrics}
         onChangeRangeTime={onChangeRangeTime}
       >
+        <SubSection id="k8sContainerOverview">
+          <GaugesSectionVis
+            seriesOverrides={{
+              cpu: {
+                name: i18n.translate(
+                  'xpack.infra.metricDetailPage.containerMetricsLayout.overviewSection.cpuUsageSeriesLabel',
+                  {
+                    defaultMessage: 'CPU Usage',
+                  }
+                ),
+                color: theme.eui.euiColorFullShade,
+                formatter: 'percent',
+                gaugeMax: 1,
+              },
+            }}
+          />
+        </SubSection>
+
         <SubSection id="containerOverview">
           <GaugesSectionVis
             seriesOverrides={{
@@ -90,6 +108,24 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
                 formatter: 'bits',
                 formatterTemplate: '{{value}}/s',
               },
+            }}
+          />
+        </SubSection>
+        <SubSection
+          id="k8sContainerCpuUsage"
+          label={i18n.translate(
+            'xpack.infra.metricDetailPage.containerMetricsLayout.cpuUsageSection.sectionLabel',
+            {
+              defaultMessage: 'CPU Usage',
+            }
+          )}
+        >
+          <ChartSectionVis
+            stacked={true}
+            type="area"
+            formatter="percent"
+            seriesOverrides={{
+              cpu: { color: theme.eui.euiColorVis1 },
             }}
           />
         </SubSection>

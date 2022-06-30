@@ -11,13 +11,14 @@ import { memory } from './snapshot/memory';
 import { rx } from './snapshot/rx';
 import { tx } from './snapshot/tx';
 
-import { containerOverview } from './tsvb/container_overview';
+import { containerOverview, k8sContainerOverview } from './tsvb/container_overview';
 import { containerCpuUsage } from './tsvb/container_cpu_usage';
 import { containerCpuKernel } from './tsvb/container_cpu_kernel';
 import { containerDiskIOOps } from './tsvb/container_diskio_ops';
 import { containerDiskIOBytes } from './tsvb/container_disk_io_bytes';
 import { containerMemory } from './tsvb/container_memory';
 import { containerNetworkTraffic } from './tsvb/container_network_traffic';
+import { k8sContainerCpuUsage } from './tsvb/container_k8s_cpu_usage';
 
 export const metrics: InventoryMetrics = {
   tsvb: {
@@ -28,6 +29,8 @@ export const metrics: InventoryMetrics = {
     containerDiskIOBytes,
     containerNetworkTraffic,
     containerMemory,
+    k8sContainerCpuUsage,
+    k8sContainerOverview,
   },
   snapshot: { cpu, memory, rx, tx },
   defaultSnapshot: 'cpu',

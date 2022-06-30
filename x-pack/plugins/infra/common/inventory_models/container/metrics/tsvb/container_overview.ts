@@ -65,3 +65,29 @@ export const containerOverview: TSVBMetricModelCreator = (
     },
   ],
 });
+
+export const k8sContainerOverview: TSVBMetricModelCreator = (
+  timeField,
+  indexPattern,
+  interval
+): TSVBMetricModel => ({
+  id: 'k8sContainerOverview',
+  requires: ['kubernetes.container'],
+  index_pattern: indexPattern,
+  interval,
+  time_field: timeField,
+  type: 'timeseries',
+  series: [
+    {
+      id: 'cpu',
+      split_mode: 'everything',
+      metrics: [
+        {
+          field: 'kubernetes.container.cpu.usage.node.pct',
+          id: 'avg-cpu-total',
+          type: 'avg',
+        },
+      ],
+    },
+  ],
+});
