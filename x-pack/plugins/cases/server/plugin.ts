@@ -111,6 +111,7 @@ export class CasePlugin {
     core.savedObjects.registerType(
       createCaseCommentSavedObjectType({
         migrationDeps: {
+          persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           lensEmbeddableFactory: this.lensEmbeddableFactory,
         },
       })

@@ -5,14 +5,26 @@
  * 2.0.
  */
 
-import type { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import { CommentRequestPersistableStateType } from '../../common/api';
 
-export interface PersistableStateAttachmentType extends PersistableStateDefinition {
+export type PersistableStateAttachmentState = Pick<
+  CommentRequestPersistableStateType,
+  'persistableStateAttachmentTypeId' | 'persistableStateAttachmentState'
+>;
+
+export interface PersistableStateAttachmentType
+  extends PersistableState<PersistableStateAttachmentState> {
+  id: string;
+}
+
+export interface PersistableStateAttachmentTypeSetup
+  extends PersistableStateDefinition<PersistableStateAttachmentState> {
   id: string;
 }
 
 export interface AttachmentFramework {
   registerPersistableState: (
-    persistableStateAttachmentType: PersistableStateAttachmentType
+    persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
   ) => void;
 }

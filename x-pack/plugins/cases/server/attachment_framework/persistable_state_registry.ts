@@ -7,15 +7,15 @@
 
 import { identity } from 'lodash';
 import { CaseRegistry } from '../../common/registry';
-import { PersistableStateAttachmentType } from './types';
+import { PersistableStateAttachmentType, PersistableStateAttachmentTypeSetup } from './types';
 
 export class PersistableStateAttachmentTypeRegistry extends CaseRegistry<PersistableStateAttachmentType> {
   constructor() {
     super('PersistableStateAttachmentTypeRegistry');
   }
 
-  public register(attachmentType: PersistableStateAttachmentType): void {
-    const item = {
+  public register(attachmentType: PersistableStateAttachmentTypeSetup): void {
+    const item: PersistableStateAttachmentType = {
       id: attachmentType.id,
       telemetry: attachmentType.telemetry || ((state, stats) => stats),
       inject: attachmentType.inject || identity,

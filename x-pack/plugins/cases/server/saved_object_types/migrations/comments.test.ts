@@ -7,7 +7,6 @@
 
 import {
   createCommentsMigrations,
-  mergeMigrationFunctionMaps,
   migrateByValueLensVisualizations,
   removeAssociationType,
   removeRuleInformation,
@@ -23,6 +22,7 @@ import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { LensDocShape715 } from '@kbn/lens-plugin/server';
 import {
+  mergeSavedObjectMigrationMaps,
   SavedObjectReference,
   SavedObjectsMigrationLogger,
   SavedObjectUnsanitizedDoc,
@@ -288,7 +288,7 @@ describe('comments migrations', () => {
     };
 
     it('logs an error when it fails to parse invalid json', () => {
-      const commentMigrationFunction = migrateByValueLensVisualizations(migrationFunction, '1.0.0');
+      const commentMigrationFunction = migrateByValueLensVisualizations(migrationFunction);
 
       const result = commentMigrationFunction(caseComment, contextMock);
       // the comment should remain unchanged when there is an error
@@ -312,7 +312,7 @@ describe('comments migrations', () => {
     describe('mergeMigrationFunctionMaps', () => {
       it('logs an error when the passed migration functions fails', () => {
         const migrationObj1 = {
-          '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
+          '1.0.0': migrateByValueLensVisualizations(migrationFunction),
         } as unknown as MigrateFunctionsObject;
 
         const migrationObj2 = {
@@ -321,7 +321,7 @@ describe('comments migrations', () => {
           },
         };
 
-        const mergedFunctions = mergeMigrationFunctionMaps(migrationObj1, migrationObj2);
+        const mergedFunctions = mergeSavedObjectMigrationMaps(migrationObj1, migrationObj2);
         mergedFunctions['1.0.0'](caseComment, contextMock);
 
         const log = contextMock.log as jest.Mocked<SavedObjectsMigrationLogger>;
@@ -341,7 +341,7 @@ describe('comments migrations', () => {
 
       it('it does not log an error when the migration function does not use the context', () => {
         const migrationObj1 = {
-          '1.0.0': migrateByValueLensVisualizations(migrationFunction, '1.0.0'),
+          '1.0.0': migrateByValueLensVisualizations(migrationFunction),
         } as unknown as MigrateFunctionsObject;
 
         const migrationObj2 = {
@@ -350,7 +350,7 @@ describe('comments migrations', () => {
           },
         };
 
-        const mergedFunctions = mergeMigrationFunctionMaps(migrationObj1, migrationObj2);
+        const mergedFunctions = mergeSavedObjectMigrationMaps(migrationObj1, migrationObj2);
 
         expect(() => mergedFunctions['2.0.0'](caseComment, contextMock)).toThrow();
 

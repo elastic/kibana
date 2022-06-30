@@ -12,7 +12,7 @@ interface BaseItem {
 }
 
 export class CaseRegistry<T extends BaseItem> {
-  private readonly item: Map<string, T> = new Map();
+  private readonly collection: Map<string, T> = new Map();
 
   constructor(private readonly name: string) {}
 
@@ -20,7 +20,7 @@ export class CaseRegistry<T extends BaseItem> {
    * Returns true if the registry has the given type registered
    */
   public has(id: string) {
-    return this.item.has(id);
+    return this.collection.has(id);
   }
 
   /**
@@ -38,14 +38,14 @@ export class CaseRegistry<T extends BaseItem> {
       );
     }
 
-    this.item.set(item.id, item);
+    this.collection.set(item.id, item);
   }
 
   /**
    * Returns an item, throw error if not registered
    */
   public get(id: string): T {
-    const item = this.item.get(id);
+    const item = this.collection.get(id);
 
     if (!item) {
       throw new Error(
@@ -62,6 +62,6 @@ export class CaseRegistry<T extends BaseItem> {
   }
 
   public list() {
-    return Array.from(this.item).map(([id, item]) => item);
+    return Array.from(this.collection.values());
   }
 }
