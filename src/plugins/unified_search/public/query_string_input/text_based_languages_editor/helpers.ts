@@ -9,6 +9,7 @@
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
+import { i18n } from '@kbn/i18n';
 
 export const useDebounceWithOptions = (
   fn: Function,
@@ -106,4 +107,28 @@ export const parseErrors = (errors: Error[], code: string) => {
       };
     }
   });
+};
+
+export const getDocumentationSections = async (language: string) => {
+  const groups: Array<{
+    label: string;
+    description?: string;
+    items: Array<{ label: string; description?: JSX.Element }>;
+  }> = [];
+  if (language === 'sql') {
+    const { comparisonOperators, logicalOperators, mathOperators, initialSection } = await import(
+      './sql_documentation_sections'
+    );
+    groups.push({
+      label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.howItWorks', {
+        defaultMessage: 'How it works',
+      }),
+      items: [],
+    });
+    groups.push(comparisonOperators, logicalOperators, mathOperators);
+    return {
+      groups,
+      initialSection,
+    };
+  }
 };

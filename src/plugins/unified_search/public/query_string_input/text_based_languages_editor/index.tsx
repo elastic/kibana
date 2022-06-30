@@ -9,6 +9,7 @@
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import { EsqlLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
+import { getAggregateQueryMode } from '@kbn/es-query';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -31,8 +32,8 @@ import {
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
 } from './text_based_languages_editor.styles';
-import { MemoizedDocumentation } from './documentation';
-import { useDebounceWithOptions, parseErrors } from './helpers';
+import { MemoizedDocumentation, DocumentationSections } from './documentation';
+import { useDebounceWithOptions, parseErrors, getDocumentationSections } from './helpers';
 import { EditorFooter } from './editor_footer';
 
 interface TextBasedLanguagesEditorProps {
@@ -48,10 +49,6 @@ const MAX_COMPACT_VIEW_LENGTH = 250;
 const FONT_WIDTH = 8;
 const EDITOR_ONE_LINER_UNUSED_SPACE = 180;
 const EDITOR_ONE_LINER_UNUSED_SPACE_WITH_ERRORS = 220;
-
-const getTextBasedLanguage = (query: any) => {
-  return Object.keys(query)[0];
-};
 
 const languageId = (language: string) => {
   switch (language) {
@@ -75,7 +72,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   errors,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
-  const language = getTextBasedLanguage(query);
+  const language = getAggregateQueryMode(query);
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const [lines, setLines] = useState(1);
@@ -92,6 +89,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorErrors, setEditorErrors] = useState<
     Array<{ startLineNumber: number; message: string }>
   >([]);
+  const [documentationSections, setDocumentationSections] = useState<DocumentationSections>();
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -261,6 +259,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [onTextLangQueryChange]
   );
 
+  useEffect(() => {
+    async function getDocumentation() {
+      const sections = await getDocumentationSections(language);
+      setDocumentationSections(sections);
+    }
+
+    getDocumentation();
+  }, [language]);
+
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
     folding: false,
@@ -361,7 +368,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     />
                   }
                 >
-                  <MemoizedDocumentation />
+                  <MemoizedDocumentation language={language} sections={documentationSections} />
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -458,7 +465,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     />
                   }
                 >
-                  <MemoizedDocumentation />
+                  <MemoizedDocumentation language={language} sections={documentationSections} />
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
