@@ -47,28 +47,19 @@ import {
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
-  ElasticsearchRequestHandlerContext,
 } from './elasticsearch';
 import { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
-import {
-  UiSettingsServiceSetup,
-  UiSettingsServiceStart,
-  UiSettingsRequestHandlerContext,
-} from './ui_settings';
-import {
-  SavedObjectsServiceSetup,
-  SavedObjectsServiceStart,
-  SavedObjectsRequestHandlerContext,
-} from './saved_objects';
+import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
+import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-import { DeprecationsServiceSetup, DeprecationsRequestHandlerContext } from './deprecations';
+import { DeprecationsServiceSetup } from './deprecations';
 // Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -80,6 +71,7 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 import { PrebootServicePreboot } from './preboot';
+import type { CoreRequestHandlerContext } from './core_route_handler_context';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -475,6 +467,8 @@ export type {
   AnalyticsServiceStart,
 } from '@kbn/core-analytics-server';
 
+export type { CoreRequestHandlerContext } from './core_route_handler_context';
+
 /**
  * Base, abstract type for request handler contexts.
  * @public
@@ -512,27 +506,6 @@ export interface RequestHandlerContext extends RequestHandlerContextBase {
 export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
   [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
 };
-
-/**
- * The `core` context provided to route handler.
- *
- * Provides the following clients and services:
- *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
- *      which uses the credentials of the incoming request
- *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
- *      all the registered types.
- *    - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch
- *      data client which uses the credentials of the incoming request
- *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
- *      which uses the credentials of the incoming request
- * @public
- */
-export interface CoreRequestHandlerContext {
-  savedObjects: SavedObjectsRequestHandlerContext;
-  elasticsearch: ElasticsearchRequestHandlerContext;
-  uiSettings: UiSettingsRequestHandlerContext;
-  deprecations: DeprecationsRequestHandlerContext;
-}
 
 /**
  * Context passed to the `setup` method of `preboot` plugins.

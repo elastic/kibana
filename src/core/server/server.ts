@@ -59,6 +59,7 @@ import { config as externalUrlConfig } from './external_url';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
+import type { RequestHandlerContext } from '.';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -415,9 +416,13 @@ export class Server {
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req, res) => {
-      return new CoreRouteHandlerContext(this.coreStart!, req);
-    });
+    coreSetup.http.registerRouteHandlerContext<RequestHandlerContext, 'core'>(
+      coreId,
+      'core',
+      async (context, req, res) => {
+        return new CoreRouteHandlerContext(this.coreStart!, req);
+      }
+    );
   }
 
   public setupCoreConfig() {
