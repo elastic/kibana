@@ -131,6 +131,7 @@ export const createThreatSignals = async ({
     threatQuery,
     pitId: threatPitId,
     reassignPitId: reassignThreatPitId,
+    listClient,
   });
 
   const createSignals = async ({
@@ -253,6 +254,7 @@ export const createThreatSignals = async ({
           pitId: threatPitId,
           reassignPitId: reassignThreatPitId,
           runtimeMappings,
+          listClient,
         }),
 
       createSignal: (slicedChunk) =>
