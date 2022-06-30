@@ -67,23 +67,23 @@ export class KeydownScrollZoom extends Component<Props, State> {
           mapKeydownScrollZoom__show: this.state.show,
         })}
       >
-        <EuiText textAlign="center">
-          <h2>
+        <EuiText textAlign="center" size="s">
+          <h3>
             <EuiTextColor color="ghost">
               {i18n.translate('xpack.maps.keydownScrollZoom.keydownToZoomInstructions', {
                 defaultMessage: 'Use {key} + scroll to zoom the map',
                 values: { key: isMac ? '⌘' : 'ctrl' },
               })}
             </EuiTextColor>
-          </h2>
-          <h2>
+          </h3>
+          <h3>
             <EuiTextColor color="ghost">
               {i18n.translate('xpack.maps.keydownScrollZoom.keydownClickAndDragZoomInstructions', {
                 defaultMessage:
                   'Use shift + click and drag to zoom the map to fit within a bounding box',
               })}
             </EuiTextColor>
-          </h2>
+          </h3>
         </EuiText>
       </div>
     );
