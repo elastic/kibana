@@ -81,6 +81,7 @@ import {
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
+import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -250,6 +251,33 @@ export class SearchSource {
     }
     const parent = this.getParent();
     return parent && parent.getField(field);
+  }
+
+  getActiveIndexFilter() {
+    const { filter: originalFilters } = this.getFields();
+    let filters: Filter[] = [];
+    if (originalFilters) {
+      filters = this.getFilters(originalFilters);
+    }
+    console.log('---filters', filters);
+    const indexFilters = filters?.reduce((acc, f) => {
+      if (f.meta.key === '_index' && f.meta.disabled === false) {
+        if (f.meta.negate === false) {
+          return _.concat(acc, f.meta.params);
+        } else {
+          if (Array.isArray(f.meta.params)) {
+            return _.difference(acc, f.meta.params);
+          } else {
+            const temp = _.difference(acc, [f.meta.params.query]);
+            return temp;
+          }
+        }
+      } else {
+        return acc;
+      }
+    }, []);
+
+    return [...new Set(indexFilters)];
   }
 
   /**
