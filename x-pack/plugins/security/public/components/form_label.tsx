@@ -47,7 +47,7 @@ export const FormLabel: FunctionComponent<FormLabelProps> = (props) => {
 
   return (
     <>
-      {props.children} {!isEqual ? <EuiIcon type="dot" color="success" /> : undefined}
+      {props.children} {!isEqual ? <EuiIcon type="dot" color="success" size="s" /> : undefined}
     </>
   );
 };
