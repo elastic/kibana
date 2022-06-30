@@ -48,7 +48,7 @@ import {
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
 } from './elasticsearch';
-import { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
+import type { HttpServicePreboot, HttpServiceSetup, HttpServiceStart, IRouter } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -207,7 +207,6 @@ export type {
   ResponseHeaders,
   KibanaResponseFactory,
   RouteConfig,
-  IRouter,
   RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
@@ -498,6 +497,16 @@ export interface RequestHandlerContextBase {
 export interface RequestHandlerContext extends RequestHandlerContextBase {
   core: Promise<CoreRequestHandlerContext>;
 }
+
+/**
+ * Public version of IRouter, default-scoped to {@link RequestHandlerContext}
+ * See [@link IRouter}
+ * @public
+ */
+type PluginRouter<ContextType extends RequestHandlerContext = RequestHandlerContext> =
+  IRouter<ContextType>;
+
+export type { PluginRouter as IRouter };
 
 /**
  * @internal
