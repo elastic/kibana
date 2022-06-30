@@ -29,6 +29,7 @@ import {
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
+  ENABLE_SQL,
 } from '../common';
 
 export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
@@ -287,5 +288,17 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
+  },
+  [ENABLE_SQL]: {
+    name: i18n.translate('discover.advancedSettings.enableSQLTitle', {
+      defaultMessage: 'Enable SQL',
+    }),
+    value: false,
+    description: i18n.translate('discover.advancedSettings.enableSQLDescription', {
+      defaultMessage: 'Enables the SQL queries for searching in Discover.',
+    }),
+    requiresPageReload: true,
+    category: ['discover'],
+    schema: schema.boolean(),
   },
 });

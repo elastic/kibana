@@ -10,6 +10,7 @@ import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
@@ -58,7 +59,7 @@ export const DiscoverTopNav = ({
     [indexPattern]
   );
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings } = services;
 
   const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
 
@@ -174,7 +175,11 @@ export const DiscoverTopNav = ({
   const setMenuMountPoint = useMemo(() => {
     return getHeaderActionMenuMounter();
   }, []);
-
+  const SQLModeIsEnabled = uiSettings.get(ENABLE_SQL);
+  const supportedTextBasedLanguages = [];
+  if (SQLModeIsEnabled) {
+    supportedTextBasedLanguages.push('SQL');
+  }
   const dataViewPickerProps = {
     trigger: {
       label: indexPattern?.getName() || '',
@@ -185,7 +190,7 @@ export const DiscoverTopNav = ({
     onAddField: addField,
     onDataViewCreated: createNewDataView,
     onChangeDataView: (newIndexPatternId: string) => onChangeIndexPattern(newIndexPatternId),
-    textBasedLanguages: ['SQL'] as DataViewPickerProps['textBasedLanguages'],
+    textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
   const onTextBasedSavedAndExit = useCallback(
