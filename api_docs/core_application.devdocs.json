@@ -1826,6 +1826,21 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToUrlOptions.state",
+            "type": "Unknown",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "\noptional state to forward to the application"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
