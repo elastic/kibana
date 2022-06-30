@@ -17,7 +17,7 @@ import {
   EuiDataGridStyle,
 } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
-import { ActionButtonIcon, AlertsTableProps } from '../../../types';
+import { AlertsTableProps } from '../../../types';
 import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
@@ -59,7 +59,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pageIndex: activePage,
     pageSize: props.pageSize,
   });
-  const { useActionsColumn = () => ({ getActionButtonIconsProps: undefined, width: undefined }) } =
+  const { useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }) } =
     props.alertsTableConfiguration;
 
   const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
@@ -75,12 +75,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [onColumnsChange, props.columns]
   );
 
-  const { getActionButtonIconsProps, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
+  const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
     useActionsColumn();
 
   const leadingControlColumns = useMemo(() => {
-    if (!props.showExpandToDetails && !getActionButtonIconsProps)
-      return props.leadingControlColumns;
+    if (!props.showExpandToDetails && !renderCustomActionsRow) return props.leadingControlColumns;
 
     return [
       {
@@ -97,8 +96,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
             visibleRowIndex: number;
           };
-          const actionButtonIconsProps =
-            getActionButtonIconsProps && getActionButtonIconsProps(alerts[visibleRowIndex]);
+          const customActionsRow =
+            renderCustomActionsRow && renderCustomActionsRow(alerts[visibleRowIndex]);
 
           return (
             <EuiFlexGroup gutterSize="none" responsive={false}>
@@ -118,13 +117,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              {actionButtonIconsProps?.map((euiButtonIconProps: ActionButtonIcon) => {
-                return (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon {...euiButtonIconProps} />
-                  </EuiFlexItem>
-                );
-              })}
+              {customActionsRow && customActionsRow}
             </EuiFlexGroup>
           );
         },
@@ -134,9 +127,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [
     actionsColumnWidth,
     alerts,
-    getActionButtonIconsProps,
     props.leadingControlColumns,
     props.showExpandToDetails,
+    renderCustomActionsRow,
     setFlyoutAlertIndex,
   ]);
 

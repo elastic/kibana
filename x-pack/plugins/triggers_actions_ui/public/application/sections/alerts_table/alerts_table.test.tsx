@@ -11,7 +11,8 @@ import userEvent from '@testing-library/user-event';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { AlertsTable } from './alerts_table';
-import { ActionButtonIcon, AlertsField } from '../../../types';
+import { AlertsField } from '../../../types';
+import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 
 jest.mock('@kbn/data-plugin/public');
 
@@ -138,20 +139,30 @@ describe('AlertsTable', () => {
             ...alertsTableConfiguration,
             useActionsColumn: () => {
               return {
-                getActionButtonIconsProps: () => [
-                  {
-                    iconType: 'analyzeEvent',
-                    color: 'primary',
-                    onClick: () => {},
-                    'data-test-subj': 'testActionColumn',
-                  } as ActionButtonIcon,
-                  {
-                    iconType: 'invert',
-                    color: 'primary',
-                    onClick: () => {},
-                    'data-test-subj': 'testActionColumn2',
-                  } as ActionButtonIcon,
-                ],
+                renderCustomActionsRow: () => {
+                  return (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="analyzeEvent"
+                          color="primary"
+                          onClick={() => {}}
+                          size="s"
+                          data-test-subj="testActionColumn"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="analyzeEvent"
+                          color="primary"
+                          onClick={() => {}}
+                          size="s"
+                          data-test-subj="testActionColumn2"
+                        />
+                      </EuiFlexItem>
+                    </>
+                  );
+                },
               };
             },
           },
@@ -171,20 +182,30 @@ describe('AlertsTable', () => {
             ...alertsTableConfiguration,
             useActionsColumn: () => {
               return {
-                getActionButtonIconsProps: () => [
-                  {
-                    iconType: 'analyzeEvent',
-                    color: 'primary',
-                    onClick: () => {},
-                    'data-test-subj': 'testActionColumn',
-                  } as ActionButtonIcon,
-                  {
-                    iconType: 'invert',
-                    color: 'primary',
-                    onClick: () => {},
-                    'data-test-subj': 'testActionColumn2',
-                  } as ActionButtonIcon,
-                ],
+                renderCustomActionsRow: () => {
+                  return (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="analyzeEvent"
+                          color="primary"
+                          onClick={() => {}}
+                          size="s"
+                          data-test-subj="testActionColumn"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="analyzeEvent"
+                          color="primary"
+                          onClick={() => {}}
+                          size="s"
+                          data-test-subj="testActionColumn2"
+                        />
+                      </EuiFlexItem>
+                    </>
+                  );
+                },
               };
             },
           },

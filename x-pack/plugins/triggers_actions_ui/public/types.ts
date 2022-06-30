@@ -427,7 +427,7 @@ export interface AlertsTableConfigurationRegistry {
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
   useActionsColumn?: () => {
-    getActionButtonIconsProps?: (alert?: EcsFieldsResponse) => ActionButtonIcon[];
+    renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
     width?: number;
   };
 }
