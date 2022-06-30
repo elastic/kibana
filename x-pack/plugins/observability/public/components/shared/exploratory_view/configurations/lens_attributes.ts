@@ -878,7 +878,7 @@ export class LensAttributes {
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X' as XYCurveType,
       axisTitlesVisibilitySettings: {
-        x: false,
+        x: true,
         yLeft: !this.isMultiSeries,
         yRight: !this.isMultiSeries,
       },
