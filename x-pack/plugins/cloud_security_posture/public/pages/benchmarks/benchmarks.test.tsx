@@ -5,18 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import type { UseQueryResult } from 'react-query/types/react/types';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
-import {
-  ADD_INTEGRATION_TEST_SUBJ,
-  Benchmarks,
-  BENCHMARKS_TABLE_DATA_TEST_SUBJ,
-} from './benchmarks';
-import { BENCHMARK_INTEGRATIONS, TABLE_COLUMN_HEADERS } from './translations';
+import { Benchmarks } from './benchmarks';
+import * as TEST_SUBJ from './test_subjects';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 
@@ -48,13 +43,13 @@ describe('<Benchmarks />', () => {
   it('renders the page header', () => {
     renderBenchmarks();
 
-    expect(screen.getByText(BENCHMARK_INTEGRATIONS)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.BENCHMARKS_PAGE_HEADER)).toBeInTheDocument();
   });
 
   it('renders the "add integration" button', () => {
     renderBenchmarks();
 
-    expect(screen.getByTestId(ADD_INTEGRATION_TEST_SUBJ)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ)).toBeInTheDocument();
   });
 
   it('renders error state while there is an error', () => {
@@ -68,74 +63,13 @@ describe('<Benchmarks />', () => {
     renderBenchmarks(
       createReactQueryResponse({
         status: 'success',
-        data: [createCspBenchmarkIntegrationFixture()],
+        data: { total: 1, items: [createCspBenchmarkIntegrationFixture()] },
       })
     );
 
-    expect(screen.getByTestId(BENCHMARKS_TABLE_DATA_TEST_SUBJ)).toBeInTheDocument();
-  });
-
-  it('supports sorting the table by integrations', () => {
-    renderBenchmarks(
-      createReactQueryResponse({
-        status: 'success',
-        data: [createCspBenchmarkIntegrationFixture()],
-      })
+    expect(screen.getByTestId(TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ)).toBeInTheDocument();
+    Object.values(TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS).forEach((testId) =>
+      expect(screen.getAllByTestId(testId)[0]).toBeInTheDocument()
     );
-
-    // The table is sorted by integrations ascending by default, asserting that
-    const sortedHeaderAscending = screen
-      .getAllByRole('columnheader')
-      .find((element) => element.getAttribute('aria-sort') === 'ascending');
-
-    expect(sortedHeaderAscending).toBeInTheDocument();
-    expect(
-      within(sortedHeaderAscending!).getByText(TABLE_COLUMN_HEADERS.INTEGRATION)
-    ).toBeInTheDocument();
-
-    // A click should now sort it by descending
-    userEvent.click(screen.getByText(TABLE_COLUMN_HEADERS.INTEGRATION));
-
-    const sortedHeaderDescending = screen
-      .getAllByRole('columnheader')
-      .find((element) => element.getAttribute('aria-sort') === 'descending');
-    expect(sortedHeaderDescending).toBeInTheDocument();
-    expect(
-      within(sortedHeaderDescending!).getByText(TABLE_COLUMN_HEADERS.INTEGRATION)
-    ).toBeInTheDocument();
-  });
-
-  it('supports sorting the table by integration type, created by, and created at columns', () => {
-    renderBenchmarks(
-      createReactQueryResponse({
-        status: 'success',
-        data: [createCspBenchmarkIntegrationFixture()],
-      })
-    );
-
-    [
-      TABLE_COLUMN_HEADERS.INTEGRATION_TYPE,
-      TABLE_COLUMN_HEADERS.CREATED_AT,
-      TABLE_COLUMN_HEADERS.CREATED_AT,
-    ].forEach((columnHeader) => {
-      const headerTextElement = screen.getByText(columnHeader);
-      expect(headerTextElement).toBeInTheDocument();
-
-      // Click on the header element to sort the column in ascending order
-      userEvent.click(headerTextElement!);
-
-      const sortedHeaderAscending = screen
-        .getAllByRole('columnheader')
-        .find((element) => element.getAttribute('aria-sort') === 'ascending');
-      expect(within(sortedHeaderAscending!).getByText(columnHeader)).toBeInTheDocument();
-
-      // Click on the header element again to sort the column in descending order
-      userEvent.click(headerTextElement!);
-
-      const sortedHeaderDescending = screen
-        .getAllByRole('columnheader')
-        .find((element) => element.getAttribute('aria-sort') === 'descending');
-      expect(within(sortedHeaderDescending!).getByText(columnHeader)).toBeInTheDocument();
-    });
   });
 });
