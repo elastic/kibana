@@ -97,3 +97,79 @@ DeSerializer.argTypes = {
     },
   },
 };
+
+DeSerializer.parameters = {
+  docs: {
+    source: {
+      code: `
+interface MyForm {
+  endPoint: string;
+}
+
+interface MyFormInternal {
+  protocol: string;
+  hostname: string;
+  port?: number;
+  pathname: string;
+}
+
+const deserializer = (formDefault: MyForm): MyFormInternal => {
+  try {
+    const url = new URL(formDefault.endPoint);
+    const { protocol, hostname, pathname, port } = url;
+
+    return {
+      protocol,
+      hostname,
+      pathname,
+      port: parseInt(port, 10),
+    };
+  } catch (e) {
+    // Invalid URL
+    return {
+      protocol: '',
+      hostname: '',
+      pathname: '',
+    };
+  }
+};
+
+const serializer = ({ protocol, hostname, port, pathname }: MyFormInternal): MyForm => ({
+  endPoint: \`\${protocol}//\${hostname}:\${port}\${pathname === '/' ? '' : pathname}\`,
+});
+
+const MyFormComponent = ({ endPoint }) => {
+  const { form } = useForm<MyForm, MyFormInternal>({
+    serializer,
+    deserializer,
+    defaultValue: {
+      endPoint,
+    },
+  });
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      // ... do something with the data
+    }
+  };
+
+  return (
+    <Form form={form} {...args}>
+      <UseField<string> path="protocol" component={TextField} config={{ label: 'Protocol' }} />
+      <UseField<string> path="hostname" component={TextField} config={{ label: 'Host' }} />
+      <UseField<number>
+        path="port"
+        component={NumericField}
+        config={{ label: 'Port', formatters: [fieldFormatters.toInt] }}
+      />
+      <UseField<string> path="pathname" component={TextField} config={{ label: 'Pathname' }} />
+      <EuiButton onClick={submitForm}>Send</EuiButton>
+    </Form>
+  );
+};
+      `,
+      language: 'tsx',
+    },
+  },
+};

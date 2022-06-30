@@ -15,9 +15,9 @@ import { Form } from '../form';
 import { UseMultiFields } from '../use_multi_fields';
 import { submitForm } from './form_utils';
 
+// map of field ids to "<UseField />" props
 const globalFields = {
   fieldA: {
-    // <UseField /> props are declared here
     path: 'fieldA',
     defaultValue: 'foo',
   },
@@ -126,3 +126,129 @@ export function GlobalFields() {
 }
 
 GlobalFields.storyName = 'GlobalFields';
+
+GlobalFields.parameters = {
+  docs: {
+    source: {
+      code: `
+// map of field ids to "<UseField />" props
+const globalFields = {
+  fieldA: {
+    path: 'fieldA',
+    defaultValue: 'foo',
+  },
+  fieldB: {
+    path: 'fieldB',
+    defaultValue: 123,
+  },
+};
+
+const FormGlobalFieldsContext = createContext(
+  {} as {
+    fieldA: FieldHook<string>;
+    fieldB: FieldHook<number>;
+  }
+);
+
+const useGlobalFields = () => {
+  const ctx = useContext(FormGlobalFieldsContext);
+  if (!ctx) {
+    throw new Error('Missing provider');
+  }
+  return ctx;
+};
+
+const FormGlobalFields: React.FC = ({ children }) => {
+  return (
+    <UseMultiFields fields={globalFields}>
+      {(fields) => {
+        return (
+          <FormGlobalFieldsContext.Provider value={fields}>
+            {children}
+          </FormGlobalFieldsContext.Provider>
+        );
+      }}
+    </UseMultiFields>
+  );
+};
+
+const FormFields = () => {
+  const { fieldA, fieldB } = useGlobalFields();
+
+  return (
+    <>
+      <TextField field={fieldA} />
+      <NumericField field={fieldB} />
+    </>
+  );
+};
+
+const MyFormComponent = () => {
+  const { form } = useForm();
+  const [areFieldsVisible, setAreFieldsVisible] = useState(true);
+  const [areGlobalPresent, setAreGlobalPresent] = useState(true);
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      // ... do something with the data
+    }
+  };
+
+  return (
+    <Form form={form}>
+      {areGlobalPresent && (
+        <FormGlobalFields>
+          <EuiText>
+            <p>
+              <EuiTextColor color="subdued">
+                You might need to have global fields in you form that persist their value event when
+                a field unmounts. The recommended pattern is to use a React context along with
+                &quot;UseMultiFields&quot;
+              </EuiTextColor>
+            </p>
+          </EuiText>
+
+          <EuiSpacer />
+
+          {areFieldsVisible && <FormFields />}
+
+          <EuiButton onClick={() => setAreFieldsVisible((prev) => !prev)}>
+            Toggle fields in DOM
+          </EuiButton>
+          <EuiText size="s">
+            <p>
+              <EuiTextColor color="subdued">
+                Removing fields from DOM (that are connected to globals) will still preserve their
+                value in the form.
+              </EuiTextColor>
+            </p>
+          </EuiText>
+        </FormGlobalFields>
+      )}
+      <div>
+        <EuiSpacer />
+        <EuiButton onClick={() => setAreGlobalPresent((prev) => !prev)}>
+          Toggle globals fields
+        </EuiButton>
+        <EuiText size="s">
+          <p>
+            <EuiTextColor color="subdued">
+              Removing the global fields from DOM remove their value when sending the form.
+            </EuiTextColor>
+          </p>
+        </EuiText>
+      </div>
+
+      <div>
+        <EuiSpacer />
+        <EuiButton onClick={submitForm}>Send form</EuiButton>
+      </div>
+    </Form>
+  );
+};
+      `,
+      language: 'tsx',
+    },
+  },
+};

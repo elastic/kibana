@@ -30,3 +30,33 @@ export const DefaultValue = (args: FormArgs) => {
     </Form>
   );
 };
+
+DefaultValue.parameters = {
+  docs: {
+    source: {
+      code: `
+// The defaultValue would probably come from an HTTP request
+const formDefaultValue = { title: 'Title of the post' };
+
+const MyFormComponent = () => {
+  const { form } = useForm({ defaultValue: formDefaultValue });
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      // ... do something with the data
+    }
+  };
+
+  return (
+    <Form form={form}>
+      <UseField<string> path="title" component={TextField} config={{ ...titleConfigBase }} />
+      <EuiButton onClick={submitForm}>Send</EuiButton>
+    </Form>
+  );
+};
+      `,
+      language: 'tsx',
+    },
+  },
+};

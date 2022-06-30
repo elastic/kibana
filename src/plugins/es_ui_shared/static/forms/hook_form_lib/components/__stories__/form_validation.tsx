@@ -51,7 +51,44 @@ export const Validation = (args: FormArgs) => {
 Validation.parameters = {
   docs: {
     source: {
-      type: 'code',
+      code: `
+const titleConfigWithValidation: FieldConfig<string> = {
+  label: 'Title',
+  helpText: 'Test validation by leaving field empty.',
+  validations: [
+    {
+      validator: ({ value }) => {
+        action('Validating title field')(value);
+
+        if (value.trim() === '') {
+          return {
+            message: "The field can't be empty.",
+          };
+        }
+      },
+    },
+  ],
+};
+
+const MyFormComponent = () => {
+  const { form } = useForm();
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      // ... do something with the data
+    }
+  };
+
+  return (
+    <Form form={form}>
+      <UseField<string> path="title" component={TextField} config={titleConfigWithValidation} />
+      <EuiButton onClick={submitForm}>Send</EuiButton>
+    </Form>
+  );
+};
+      `,
+      language: 'tsx',
     },
   },
 };

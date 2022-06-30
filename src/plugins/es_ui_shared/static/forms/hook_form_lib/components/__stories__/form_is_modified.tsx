@@ -45,3 +45,46 @@ export const IsModified = (args: FormArgs) => {
     </Form>
   );
 };
+
+IsModified.parameters = {
+  docs: {
+    source: {
+      code: `
+const MyFormComponent = () => {
+  const { form } = useForm();
+  const isFormModified = useFormIsModified({ form });
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      // ... do something with the data
+    }
+  };
+
+  useEffect(() => {
+    // Do something whenever the form is modified
+  }, [isFormModified]);
+
+  return (
+    <Form form={form} {...args}>
+      <UseField<string>
+        path="title"
+        defaultValue="Initial value"
+        component={TextField}
+        config={titleConfigBase}
+      />
+      <UseField<boolean>
+        path="isOn"
+        defaultValue={true}
+        component={ToggleField}
+        config={{ label: 'Is on' }}
+      />
+      <EuiButton onClick={submitForm}>Send</EuiButton>
+    </Form>
+  );
+};
+      `,
+      language: 'tsx',
+    },
+  },
+};

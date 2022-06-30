@@ -26,11 +26,6 @@ export default {
   parameters: {
     controls: { hideNoControlsWarning: true },
   },
-  docs: {
-    source: {
-      type: 'code',
-    },
-  },
 } as ComponentMeta<typeof Form>;
 
 type Args = Pick<FormProps, 'children' | 'FormWrapper'>;
@@ -77,6 +72,40 @@ export const Simple = (args: Args) => {
   );
 };
 
+Simple.parameters = {
+  docs: {
+    source: {
+      code: `
+const MyFormComponent = () => {
+  const { form } = useForm();
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      // ... do something with the data
+    }
+  };
+
+  return (
+    <Form form={form}>
+      <UseField<string>
+        path="title"
+        component={TextField}
+        config={{
+          label: 'Title',
+          helpText: 'This is a help text for the field.',
+        }}
+      />
+      <EuiButton onClick={submitForm}>Send</EuiButton>
+    </Form>
+  );
+};
+      `,
+      language: 'tsx',
+    },
+  },
+};
+
 // --- FORM SCHEMA
 
 const formSchema = {
@@ -96,6 +125,42 @@ export const Schema = (args: Args) => {
       <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
     </Form>
   );
+};
+
+Schema.parameters = {
+  docs: {
+    source: {
+      code: `
+const formSchema = {
+  title: {
+    label: 'Title',
+    helpText: 'This is a help text for the field.',
+  },
+};
+
+const MyFormComponent = () => {
+  const { form } = useForm({
+    schema: formSchema,
+  });
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      // ... do something with the data
+    }
+  };
+
+  return (
+    <Form form={form}>
+      <UseField<string> path="title" component={TextField} />
+      <EuiButton onClick={submitForm}>Send</EuiButton>
+    </Form>
+  );
+};
+      `,
+      language: 'tsx',
+    },
+  },
 };
 
 export { DefaultValue, Validation, DeSerializer, IsModified, GlobalFields };
