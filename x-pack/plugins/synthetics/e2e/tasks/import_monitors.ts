@@ -75,7 +75,7 @@ export const importMonitors = async ({
       .then(({ data }) => {
         if (data.id === id) {
           // eslint-disable-next-line no-console
-          console.log('Successfully imported 1 monitor');
+          console.error('Successfully imported 1 monitor');
         }
       });
   } catch (e) {

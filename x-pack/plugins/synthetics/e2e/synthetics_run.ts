@@ -8,7 +8,6 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 import { argv } from '@kbn/observability-plugin/e2e/parse_args_params';
 import { SyntheticsRunner } from '@kbn/observability-plugin/e2e/synthetics_runner';
-import { importMonitors } from './tasks/import_monitors';
 
 const { headless, grep, bail: pauseOnError } = argv;
 
@@ -21,12 +20,6 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
         headless,
         match: grep,
         pauseOnError,
-      });
-
-      await importMonitors({
-        kibanaUrl: syntheticsRunner.kibanaUrl,
-        username: 'elastic',
-        password: 'changeme',
       });
 
       await syntheticsRunner.setup();
