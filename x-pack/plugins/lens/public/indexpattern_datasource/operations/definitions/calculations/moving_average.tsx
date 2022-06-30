@@ -171,7 +171,6 @@ Example: Smooth a line of measurements:
   shiftable: true,
 };
 
-// todo : allow passing only updateColumn
 function MovingAverageParamEditor({
   layer,
   paramEditorUpdater,
