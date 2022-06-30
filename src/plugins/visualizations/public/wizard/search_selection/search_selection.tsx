@@ -70,6 +70,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Saved search',
                   }
                 ),
+                // ignore the saved searches that have text-based languages queries
                 includeFields: ['isTextBasedQuery'],
                 showSavedObject: (savedObject) => {
                   const so = savedObject as unknown as SimpleSavedObject<SavedSearchesAttributes>;

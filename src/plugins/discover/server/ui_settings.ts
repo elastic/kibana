@@ -32,6 +32,10 @@ import {
   ENABLE_SQL,
 } from '../common';
 
+const technicalPreviewLabel = i18n.translate('discover.advancedSettings.technicalPreviewLabel', {
+  defaultMessage: 'technical preview',
+});
+
 export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, UiSettingsParams> = (
   docLinks: DocLinksServiceSetup
 ) => ({
@@ -295,7 +299,8 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     }),
     value: false,
     description: i18n.translate('discover.advancedSettings.enableSQLDescription', {
-      defaultMessage: 'Enables the SQL queries for searching in Discover.',
+      defaultMessage: '{technicalPreviewLabel} Enables the SQL queries for searching in Discover.',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
     }),
     requiresPageReload: true,
     category: ['discover'],

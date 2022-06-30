@@ -19,6 +19,7 @@ export function migrateLegacyQuery(
   query: Query | { [key: string]: any } | string | AggregateQuery
 ): Query | AggregateQuery {
   // Lucene was the only option before, so language-less queries are all lucene
+  // If the query is already a AggregateQuery, just return it
   if (!has(query, 'language')) {
     if (typeof query === 'object' && isOfAggregateQueryType(query)) {
       return query;

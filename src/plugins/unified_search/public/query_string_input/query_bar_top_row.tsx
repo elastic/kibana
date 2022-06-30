@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
-import { getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
+import { getAggregateQueryMode, isOfQueryType, isOfAggregateQueryType } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -516,7 +516,8 @@ export const QueryBarTopRow = React.memo(
     function renderTextLangEditor() {
       return (
         isQueryLangSelected &&
-        props.query && (
+        props.query &&
+        isOfAggregateQueryType(props.query) && (
           <TextBasedLanguagesEditor
             query={props.query}
             onTextLangQueryChange={props.onTextLangQueryChange}

@@ -97,7 +97,7 @@ function Documentation({ language, sections }: DocumentationProps) {
                 placeholder={i18n.translate(
                   'unifiedSearch.query.textBasedLanguagesEditor.documentation.searchPlaceholder',
                   {
-                    defaultMessage: 'Search operators',
+                    defaultMessage: 'Search',
                   }
                 )}
               />

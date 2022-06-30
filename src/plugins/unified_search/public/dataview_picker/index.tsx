@@ -27,22 +27,60 @@ export interface OnSaveTextLanguageQueryProps {
 
 /** @public */
 export interface DataViewPickerProps {
+  /**
+   * The properties of the button that triggers the dataview picker.
+   */
   trigger: ChangeDataViewTriggerProps;
+  /**
+   * Flag that should be enabled when the current dataview is missing.
+   */
   isMissingCurrent?: boolean;
+  /**
+   * Callback that is called when the user changes the currently selected dataview.
+   */
   onChangeDataView: (newId: string) => void;
+  /**
+   * The id of the selected dataview.
+   */
   currentDataViewId?: string;
+  /**
+   * EuiSelectable properties.
+   */
   selectableProps?: EuiSelectableProps;
+  /**
+   * Callback that is called when the user clicks the add runtime field option.
+   * Also works as a flag to show the add runtime field button.
+   */
   onAddField?: () => void;
+  /**
+   * Callback that is called when the user clicks the create dataview option.
+   * Also works as a flag to show the create dataview button.
+   */
   onDataViewCreated?: () => void;
+  /**
+   * Flag to show the tour component for the first time.
+   */
   showNewMenuTour?: boolean;
-  // list of the supported text-based languages per application
+  /**
+   * List of the supported text based languages (SQL, ESQL) etc.
+   * Defined per application, if not provided, no text based languages
+   * will be available.
+   */
   textBasedLanguages?: TextBasedLanguages[];
-  // called when the user clicks the Save and switch transition modal button
+  /**
+   * Callback that is called when the user clicks the Save and switch transition modal button
+   */
   onSaveTextLanguageQuery?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
 }
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {
+  /**
+   * Callback that is called when the user clicks the submit button
+   */
   onTextLangQuerySubmit?: (query?: AggregateQuery) => void;
+  /**
+   * Text based language that is currently selected; depends on the query
+   */
   textBasedLanguage?: string;
 }
 

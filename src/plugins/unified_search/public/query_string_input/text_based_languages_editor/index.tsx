@@ -37,7 +37,7 @@ import { useDebounceWithOptions, parseErrors, getDocumentationSections } from '.
 import { EditorFooter } from './editor_footer';
 
 interface TextBasedLanguagesEditorProps {
-  query: any;
+  query: AggregateQuery;
   onTextLangQueryChange: (query: AggregateQuery) => void;
   onTextLangQuerySubmit: () => void;
   expandCodeEditor: (status: boolean) => void;
@@ -72,11 +72,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   errors,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
-  const language = getAggregateQueryMode(query);
-  const editorModel = useRef<monaco.editor.ITextModel>();
-  const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const language = getAggregateQueryMode(query) as 'sql' | 'esql';
+  const queryString = query[language] ?? '';
   const [lines, setLines] = useState(1);
-  const [code, setCode] = useState(query.sql);
+  const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
@@ -98,9 +97,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCodeEditorExpanded,
     Boolean(errors?.length)
   );
-
+  const editorModel = useRef<monaco.editor.ITextModel>();
+  const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
   const containerRef = useRef<HTMLElement>(null);
 
+  // When the editor is on full size mode, the user can resize the height of the editor.
   const onMouseDownResizeHandler = useCallback(
     (mouseDownEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       const startSize = editorHeight;
@@ -173,6 +174,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         initialRender = false;
         updateLinesFromModel = true;
       });
+      // on CMD/CTRL + Enter submit the query
       // eslint-disable-next-line no-bitwise
       editor1.current?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
         onTextLangQuerySubmit();
@@ -208,11 +210,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     (width: number, force?: boolean) => {
       const containerWidth = containerRef.current?.offsetWidth;
       if (containerWidth && (!isCompactFocused || force)) {
-        const hasLines = /\r|\n/.exec(query.sql);
+        const hasLines = /\r|\n/.exec(queryString);
         if (hasLines && !updateLinesFromModel) {
-          setLines(query.sql.split(/\r|\n/).length);
+          setLines(queryString.split(/\r|\n/).length);
         }
-        const text = hasLines ? query.sql.split(/\r|\n/)[0] : query.sql;
+        const text = hasLines ? queryString.split(/\r|\n/)[0] : queryString;
         const queryLength = text.length;
         const unusedSpace =
           errors && errors.length
@@ -228,7 +230,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
       }
     },
-    [query.sql, errors, isCompactFocused]
+    [queryString, errors, isCompactFocused]
   );
 
   useEffect(() => {
@@ -236,13 +238,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       const editorElement = editor1.current.getDomNode();
       if (editorElement) {
         const contentWidth = Number(editorElement?.style.width.replace('px', ''));
-        if (code !== query.sql) {
-          setCode(query.sql);
+        if (code !== queryString) {
+          setCode(queryString);
           calculateVisibleCode(contentWidth);
         }
       }
     }
-  }, [calculateVisibleCode, code, query.sql]);
+  }, [calculateVisibleCode, code, queryString]);
 
   const onResize = ({ width }: { width: number }) => {
     calculateVisibleCode(width);
@@ -254,9 +256,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onQueryUpdate = useCallback(
     (value: string) => {
       setCode(value);
-      onTextLangQueryChange({ sql: value });
+      onTextLangQueryChange({ [language]: value });
     },
-    [onTextLangQueryChange]
+    [language, onTextLangQueryChange]
   );
 
   useEffect(() => {
@@ -363,7 +365,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     <EuiButtonIcon
                       iconType="documentation"
                       color="text"
-                      aria-label="Documentation"
+                      aria-label={i18n.translate(
+                        'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                        {
+                          defaultMessage: 'Documentation',
+                        }
+                      )}
                       onClick={() => setIsHelpOpen(true)}
                     />
                   }
