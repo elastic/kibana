@@ -25,52 +25,58 @@ const getRequiredEnv = (name: string) => {
   return value;
 };
 
-function getRunGroup(bk: BuildkiteClient, types: RunGroup[], typeName: string): RunGroup {
-  const type = types.find((t) => t.type === typeName);
-  if (!type) {
+function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup[] {
+  const types = allTypes.filter((t) => t.type === typeName);
+  if (!types.length) {
     throw new Error(`missing test group run order for group [${typeName}]`);
   }
 
-  const misses = type.namesWithoutDurations.length;
-  if (misses > 0) {
+  const misses = types.flatMap((t) => t.namesWithoutDurations);
+  if (misses.length > 0) {
     bk.setAnnotation(
       `test-group-missing-durations:${typeName}`,
       'warning',
       [
-        misses === 1
+        misses.length === 1
           ? `The following "${typeName}" config doesn't have a recorded time in ci-stats so the automatically-determined test groups might be a little unbalanced.`
           : `The following "${typeName}" configs don't have recorded times in ci-stats so the automatically-determined test groups might be a little unbalanced.`,
-        misses === 1
+        misses.length === 1
           ? `If this is a new config then this warning can be ignored as times will be reported soon.`
           : `If these are new configs then this warning can be ignored as times will be reported soon.`,
-        misses === 1
+        misses.length === 1
           ? `The other possibility is that there aren't any tests in this config, so times are never reported.`
           : `The other possibility is that there aren't any tests in these configs, so times are never reported.`,
         'Empty test configs should be removed',
         '',
-        ...type.namesWithoutDurations.map((n) => ` - ${n}`),
+        ...misses.map((n) => ` - ${n}`),
       ].join('\n')
     );
   }
 
-  const tooLongs = type.tooLong?.length ?? 0;
-  if (tooLongs > 0) {
+  const tooLongs = types.flatMap((t) => t.tooLong ?? []);
+  if (tooLongs.length > 0) {
     bk.setAnnotation(
       `test-group-too-long:${typeName}`,
       'error',
       [
-        tooLongs === 1
+        tooLongs.length === 1
           ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. Please split it up.`
           : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. Please split them up.`,
         '',
-        ...(type.tooLong ?? []).map(
-          ({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`
-        ),
+        ...tooLongs.map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
       ].join('\n')
     );
   }
 
-  return type;
+  return types;
+}
+
+function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup {
+  const groups = getRunGroups(bk, allTypes, typeName);
+  if (groups.length !== 1) {
+    throw new Error(`expected to find exactly 1 "${typeName}" run group`);
+  }
+  return groups[0];
 }
 
 function getTrackedBranch(): string {
@@ -105,16 +111,39 @@ function getEnabledFtrConfigs(patterns?: string[]) {
     }
     if (
       !Array.isArray(configs.enabled) ||
-      !configs.enabled.every((p): p is string => typeof p === 'string')
+      !configs.enabled.every(
+        (p): p is string | { [configPath: string]: { queue: string } } =>
+          typeof p === 'string' ||
+          (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
+      )
     ) {
-      throw new Error('expected "enabled" value to be an array of strings');
+      throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
+  - {configPath}:
+      queue: {queueName}`);
+    }
+    if (typeof configs.defaultQueue !== 'string') {
+      throw new Error('expected yaml file to have a string "defaultQueue" key');
     }
 
-    if (!patterns) {
-      return configs.enabled;
+    const defaultQueue = configs.defaultQueue;
+    const ftrConfigsByQueue = new Map<string, string[]>();
+    for (const enabled of configs.enabled) {
+      const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
+      const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
+
+      if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
+        continue;
+      }
+
+      const group = ftrConfigsByQueue.get(queue);
+      if (group) {
+        group.push(path);
+      } else {
+        ftrConfigsByQueue.set(queue, [path]);
+      }
     }
 
-    return configs.enabled.filter((path) => patterns.some((pattern) => minimatch(path, pattern)));
+    return { defaultQueue, ftrConfigsByQueue };
   } catch (_) {
     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
     throw new Error(`unable to parse ftr_configs.yml file: ${error.message}`);
@@ -182,9 +211,10 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
-  const ftrConfigs = LIMIT_CONFIG_TYPE.includes('functional')
-    ? getEnabledFtrConfigs(FTR_CONFIG_PATTERNS)
-    : [];
+  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
+  if (!LIMIT_CONFIG_TYPE.includes('functional')) {
+    ftrConfigsByQueue.clear();
+  }
 
   const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
     ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
@@ -200,7 +230,7 @@ export async function pickTestGroupRunOrder() {
       })
     : [];
 
-  if (!ftrConfigs.length && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
+  if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 
@@ -268,14 +298,15 @@ export async function pickTestGroupRunOrder() {
         overheadMin: 0.2,
         names: jestIntegrationConfigs,
       },
-      {
+      ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
         type: FUNCTIONAL_TYPE,
         defaultMin: 60,
+        queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 1.5,
-        names: ftrConfigs,
-      },
+        names,
+      })),
     ],
   });
 
@@ -284,20 +315,61 @@ export async function pickTestGroupRunOrder() {
 
   const unit = getRunGroup(bk, types, UNIT_TYPE);
   const integration = getRunGroup(bk, types, INTEGRATION_TYPE);
-  const functional = getRunGroup(bk, types, FUNCTIONAL_TYPE);
+
+  let configCounter = 0;
+  let groupCounter = 0;
+
+  // the relevant data we will use to define the pipeline steps
+  const functionalGroups: Array<{
+    title: string;
+    key: string;
+    sortBy: number | string;
+    queue: string;
+  }> = [];
+  // the map that we will write to the artifacts for informing ftr config jobs of what they should do
+  const ftrRunOrder: Record<
+    string,
+    { title: string; expectedDurationMin: number; names: string[] }
+  > = {};
+
+  for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
+    for (const group of groups) {
+      if (!group.names.length) {
+        continue;
+      }
+
+      const key = `ftr_configs_${configCounter++}`;
+      let sortBy;
+      let title;
+      if (group.names.length === 1) {
+        title = group.names[0];
+        sortBy = title;
+      } else {
+        sortBy = ++groupCounter;
+        title = `FTR Configs #${sortBy}`;
+      }
+
+      functionalGroups.push({
+        title,
+        key,
+        sortBy,
+        queue: queue ?? defaultQueue,
+      });
+      ftrRunOrder[key] = {
+        title,
+        expectedDurationMin: group.durationMin,
+        names: group.names,
+      };
+    }
+  }
 
   // write the config for each step to an artifact that can be used by the individual jest jobs
   Fs.writeFileSync('jest_run_order.json', JSON.stringify({ unit, integration }, null, 2));
   bk.uploadArtifacts('jest_run_order.json');
 
   // write the config for functional steps to an artifact that can be used by the individual functional jobs
-  Fs.writeFileSync('ftr_run_order.json', JSON.stringify(functional, null, 2));
+  Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
   bk.uploadArtifacts('ftr_run_order.json');
-
-  let smallFtrConfigsCounter = 0;
-  const getSmallFtrConfigsLabel = () => {
-    return `Super Quick FTR Configs #${++smallFtrConfigsCounter}`;
-  };
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(
@@ -342,55 +414,46 @@ export async function pickTestGroupRunOrder() {
             },
           }
         : [],
-      functional.count > 0
-        ? FUNCTIONAL_MINIMUM_ISOLATION_MIN === undefined
-          ? {
-              label: 'FTR Configs',
-              key: 'ftr-configs',
-              depends_on: FTR_CONFIGS_DEPS,
-              parallelism: functional.count,
-              command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-              timeout_in_minutes: 150,
-              agents: {
-                queue: 'n2-4-spot-2',
-              },
-              retry: {
-                automatic: [
-                  { exit_status: '-1', limit: 3 },
-                  ...(FTR_CONFIGS_RETRY_COUNT > 0
-                    ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                    : []),
-                ],
-              },
-            }
-          : {
-              group: 'FTR Configs',
-              key: 'ftr-configs',
-              depends_on: FTR_CONFIGS_DEPS,
-              steps: functional.groups
-                .map(
-                  (group, i): BuildkiteStep => ({
-                    label: group.names.length === 1 ? group.names[0] : getSmallFtrConfigsLabel(),
-                    command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                    timeout_in_minutes: 150,
-                    agents: {
-                      queue: 'n2-4-spot-2',
-                    },
-                    env: {
-                      FTR_CONFIG_GROUP_INDEX: `${i}`,
-                    },
-                    retry: {
-                      automatic: [
-                        { exit_status: '-1', limit: 3 },
-                        ...(FTR_CONFIGS_RETRY_COUNT > 0
-                          ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                          : []),
-                      ],
-                    },
-                  })
-                )
-                .sort((a, b) => a.label.localeCompare(b.label)),
-            }
+      functionalGroups.length
+        ? {
+            group: 'FTR Configs',
+            key: 'ftr-configs',
+            depends_on: FTR_CONFIGS_DEPS,
+            steps: functionalGroups
+              .sort((a, b) =>
+                // if both groups are sorted by number then sort by that
+                typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
+                  ? a.sortBy - b.sortBy
+                  : // if both groups are sorted by string, sort by that
+                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
+                  ? a.sortBy.localeCompare(b.sortBy)
+                  : // if a is sorted by number then order it later than b
+                  typeof a.sortBy === 'number'
+                  ? 1
+                  : -1
+              )
+              .map(
+                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                  label: title,
+                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                  timeout_in_minutes: 150,
+                  agents: {
+                    queue,
+                  },
+                  env: {
+                    FTR_CONFIG_GROUP_KEY: key,
+                  },
+                  retry: {
+                    automatic: [
+                      { exit_status: '-1', limit: 3 },
+                      ...(FTR_CONFIGS_RETRY_COUNT > 0
+                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                        : []),
+                    ],
+                  },
+                })
+              ),
+          }
         : [],
     ].flat()
   );

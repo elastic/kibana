@@ -56,6 +56,7 @@ disabled:
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
 
+defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
   - test/analytics/config.ts
