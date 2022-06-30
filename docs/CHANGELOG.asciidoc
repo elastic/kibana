@@ -499,6 +499,7 @@ Lens & Visualizations::
 * Use elastic-charts axis calculation in *Lens* {kibana-pull}130429[#130429]
 * Make suggestions depend on active data in *Lens* {kibana-pull}129326[#129326]
 * Adds back setMapView function in *Vega* {kibana-pull}128914[#128914]
+* Fixes the Order by setting for split chart in metric and custom metric visualizations {kibana-pull}128185[#128185]
 
 Machine Learning::
 * Fixes creation of the custom URLs for Kibana Dashboard {kibana-pull}134248[#134248]
