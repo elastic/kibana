@@ -89,6 +89,7 @@ const defaultProps = {
   openOnClickTooltip: () => {},
   closeOnHoverTooltip: () => {},
   openOnHoverTooltip: () => {},
+  updateOpenTooltips: () => {},
   layerList: [mockLayer],
   isDrawingFilter: false,
   addFilters: async () => {},
