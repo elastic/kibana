@@ -310,7 +310,7 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 90,
             key: 'jest',
             agents: {
-              queue: 'n2-4-spot',
+              queue: 'pd-test',
             },
             retry: {
               automatic: [
@@ -330,7 +330,7 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest-integration',
             agents: {
-              queue: 'n2-4-spot',
+              queue: 'pd-test',
             },
             retry: {
               automatic: [
@@ -352,7 +352,7 @@ export async function pickTestGroupRunOrder() {
               command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
               timeout_in_minutes: 150,
               agents: {
-                queue: 'n2-4-spot-2',
+                queue: 'pd-test',
               },
               retry: {
                 automatic: [
@@ -374,7 +374,7 @@ export async function pickTestGroupRunOrder() {
                     command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
                     timeout_in_minutes: 150,
                     agents: {
-                      queue: 'n2-4-spot-2',
+                      queue: 'pd-test',
                     },
                     env: {
                       FTR_CONFIG_GROUP_INDEX: `${i}`,
