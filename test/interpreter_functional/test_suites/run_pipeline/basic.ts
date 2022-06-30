@@ -94,7 +94,7 @@ export default function ({
           await expectExpression('partial_test_1', tagCloudExpr, context).toMatchSnapshot()
         ).toMatchScreenshot();
 
-        const metricExpr = `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}`;
+        const metricExpr = `legacyMetricVis metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await (
           await expectExpression('partial_test_2', metricExpr, context).toMatchSnapshot()
         ).toMatchScreenshot();
