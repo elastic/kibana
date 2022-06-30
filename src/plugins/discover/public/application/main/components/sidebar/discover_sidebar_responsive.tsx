@@ -123,10 +123,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
    */
   const fieldCounts = useRef<Record<string, number> | null>(null);
   if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(
-      props.documents$.getValue().result!,
-      selectedDataView
-    );
+    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result!, selectedDataView);
   }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
