@@ -11,7 +11,7 @@ import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { ROLES } from '../../test';
 
-describe('ALL - Metrics', () => {
+describe('ALL - Inventory', () => {
   beforeEach(() => {
     login(ROLES.soc_manager);
     navigateTo('/app/osquery');
@@ -25,7 +25,7 @@ describe('ALL - Metrics', () => {
 
   it('should be able to run the query', () => {
     cy.getBySel('toggleNavButton').click();
-    cy.contains('Metrics').click();
+    cy.contains('Inventory').click();
 
     cy.wait(1000);
 
@@ -38,7 +38,7 @@ describe('ALL - Metrics', () => {
   });
   it('should be able to run the previously saved query', () => {
     cy.getBySel('toggleNavButton').click();
-    cy.getBySel('collapsibleNavAppLink').contains('Metrics').click();
+    cy.getBySel('collapsibleNavAppLink').contains('Inventory').click();
 
     cy.wait(500);
     cy.getBySel('nodeContainer').click();
