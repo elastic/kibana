@@ -16,6 +16,9 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
     async appTitleText() {
       return await testSubjects.getVisibleText('appTitle');
     },
+    async createFollowerIndexButton() {
+      return await testSubjects.find('createFollowerIndexButton');
+    },
     async clickAutoFollowerTab() {
       await testSubjects.click('autoFollowPatternsTab');
       await retry.waitFor('create auto follow button', async () => {
@@ -23,7 +26,7 @@ export function CrossClusterReplicationPageProvider({ getService }: FtrProviderC
       });
     },
     async clickCreateFollowerIndexButton() {
-      await testSubjects.click('createFollowerIndexButton');
+      await (await this.createFollowerIndexButton()).click();
       await retry.waitFor('app title to say Add follower index', async () => {
         return (
           (await (await testSubjects.find('pageTitle')).getVisibleText()) === 'Add follower index'
