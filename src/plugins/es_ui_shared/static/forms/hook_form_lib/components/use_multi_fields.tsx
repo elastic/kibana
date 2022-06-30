@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { useRef } from 'react';
 
-import { UseField, Props as UseFieldProps } from './use_field';
+import { Props as UseFieldProps } from './use_field';
+import { useFieldFromProps } from '../hooks';
 import { FieldHook } from '../types';
-
-type FieldsArray = Array<{ id: string } & Omit<UseFieldProps<unknown, {}, unknown>, 'children'>>;
 
 interface Props<T> {
   fields: { [K in keyof T]: Exclude<UseFieldProps<T[K]>, 'children'> };
-  children: (fields: { [K in keyof T]: FieldHook<T[K]> }) => JSX.Element;
+  children: (fields: { [K in keyof T]: FieldHook<T[K]> }) => JSX.Element | null;
 }
 
 /**
@@ -77,28 +76,27 @@ const fields = {
 ```
  */
 export function UseMultiFields<T = { [key: string]: unknown }>({ fields, children }: Props<T>) {
-  const fieldsArray = Object.entries(fields).reduce(
-    (acc, [fieldId, field]) => [...acc, { id: fieldId, ...(field as FieldHook) }],
-    [] as FieldsArray
-  );
+  // Create a stable reference of fields Ids to prevent creating more fields
+  // by changing the "fields" prop. This is not allowed as it would break
+  // the hook order below.
+  const fieldIds = useRef(Object.keys(fields).sort() as Array<keyof T>);
 
-  const hookFields: { [K in keyof T]: FieldHook<any> } = {} as any;
+  const hookFields = fieldIds.current.reduce((acc, id) => {
+    // We can disable the rules-of-hooks that prevents us to create a hook
+    // from inside a callback as we have the **guarantee** that the field hooks are created
+    // in the same order.
 
-  const renderField = (index: number) => {
-    const { id } = fieldsArray[index];
-    return (
-      <UseField {...fields[id as keyof T]}>
-        {(field) => {
-          hookFields[id as keyof T] = field;
-          return index === fieldsArray.length - 1 ? children(hookFields) : renderField(index + 1);
-        }}
-      </UseField>
-    );
-  };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { field } = useFieldFromProps(fields[id]);
+    return {
+      ...acc,
+      [id]: field,
+    };
+  }, {} as { [K in keyof T]: FieldHook<T[K]> });
 
-  if (!Boolean(fieldsArray.length)) {
+  if (!Boolean(fieldIds.current.length)) {
     return null;
   }
 
-  return renderField(0);
+  return children(hookFields);
 }
