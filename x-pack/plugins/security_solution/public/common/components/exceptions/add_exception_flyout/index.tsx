@@ -176,14 +176,29 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
   useEffect(() => {
     const fetchSingleDataView = async () => {
-      if (dataViewId != null && dataViewId !== '') {
-        const dv = await data.dataViews.get(dataViewId);
+      const notNullDataViewId =
+        dataViewId != null && dataViewId !== ''
+          ? dataViewId
+          : maybeRule?.data_view_id != null && maybeRule?.data_view_id !== ''
+          ? maybeRule.data_view_id
+          : null;
+      if (notNullDataViewId != null) {
+        const dv = await data.dataViews.get(notNullDataViewId);
         setIndexPattern(dv);
       }
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, dataViewId, setIndexPattern]);
+  }, [data.dataViews, dataViewId, maybeRule?.data_view_id, setIndexPattern]);
+
+  const getIndexPattern = useCallback(
+    () =>
+      (dataViewId != null && dataViewId !== '') ||
+      (maybeRule?.data_view_id != null && maybeRule?.data_view_id !== '')
+        ? indexPattern
+        : indexIndexPatterns,
+    [dataViewId, indexIndexPatterns, indexPattern, maybeRule?.data_view_id]
+  );
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -530,8 +545,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 listNamespaceType: ruleExceptionList.namespace_type,
                 listTypeSpecificIndexPatternFilter: filterIndexPatterns,
                 ruleName,
-                indexPatterns:
-                  dataViewId != null && dataViewId !== '' ? indexPattern : indexIndexPatterns,
+                indexPatterns: getIndexPattern(),
                 isOrDisabled: isExceptionBuilderFormDisabled,
                 isAndDisabled: isExceptionBuilderFormDisabled,
                 isNestedDisabled: isExceptionBuilderFormDisabled,

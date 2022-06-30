@@ -190,10 +190,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     threatIndex: threatIndicesConfig,
   };
 
-  if (initialState.index == null) {
-    initialState.index = [];
-  }
-
   const { form } = useForm<DefineStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
