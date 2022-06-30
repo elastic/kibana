@@ -459,4 +459,56 @@ storiesOf('SearchBar', module)
         },
       ],
     } as unknown as SearchBarProps)
+  )
+  .add('with dataviewPicker with SQL', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+        onAddField: action('onAddField'),
+        onDataViewCreated: action('onDataViewCreated'),
+        textBasedLanguages: ['SQL'],
+      },
+    } as SearchBarProps)
+  )
+  .add('with dataviewPicker with SQL and sql query', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'SQL',
+          title: 'SQL',
+        },
+        onChangeDataView: action('onChangeDataView'),
+        onAddField: action('onAddField'),
+        onDataViewCreated: action('onDataViewCreated'),
+        textBasedLanguages: ['SQL'],
+      },
+      query: { sql: 'SELECT field1, field2 FROM DATAVIEW' },
+    } as SearchBarProps)
+  )
+  .add('with dataviewPicker with SQL and large sql query', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'SQL',
+          title: 'SQL',
+        },
+        onChangeDataView: action('onChangeDataView'),
+        onAddField: action('onAddField'),
+        onDataViewCreated: action('onDataViewCreated'),
+        textBasedLanguages: ['SQL'],
+      },
+      query: {
+        sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL',
+      },
+    } as SearchBarProps)
   );
