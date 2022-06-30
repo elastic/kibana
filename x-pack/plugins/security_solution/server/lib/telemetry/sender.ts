@@ -35,6 +35,7 @@ export interface ITelemetryEventsSender {
     telemetryUsageCounter?: UsageCounter
   ): void;
 
+  getTelemetryUsageCluster(): UsageCounter | undefined;
   getClusterID(): string | undefined;
 
   start(
@@ -94,6 +95,10 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         }
       );
     }
+  }
+
+  public getTelemetryUsageCluster(): UsageCounter | undefined {
+    return this.telemetryUsageCounter;
   }
 
   public getClusterID(): string | undefined {
