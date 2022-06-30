@@ -9,18 +9,21 @@ import { useRouteMatch } from 'react-router-dom';
 
 import { useLink } from '../../../../hooks';
 
-export function usePackagePolicyEditorPageUrl() {
+export function usePackagePolicyEditorPageUrl(dataStreamId?: string) {
   const {
     params: { packagePolicyId, policyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
   const { getHref } = useLink();
 
-  return packagePolicyId && policyId
-    ? getHref('edit_integration', {
-        policyId,
-        packagePolicyId,
-      })
-    : getHref('integration_policy_edit', {
-        packagePolicyId,
-      });
+  const baseUrl =
+    packagePolicyId && policyId
+      ? getHref('edit_integration', {
+          policyId,
+          packagePolicyId,
+        })
+      : getHref('integration_policy_edit', {
+          packagePolicyId,
+        });
+
+  return `${baseUrl}${dataStreamId ? `?datastreamId=${encodeURIComponent(dataStreamId)}` : ''}`;
 }

@@ -20,6 +20,7 @@ export interface PackagePolicyConfigRecordEntry {
 export type PackagePolicyConfigRecord = Record<string, PackagePolicyConfigRecordEntry>;
 
 export interface NewPackagePolicyInputStream {
+  id?: string;
   enabled: boolean;
   keep_enabled?: boolean;
   data_stream: {
@@ -41,6 +42,7 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 }
 
 export interface NewPackagePolicyInput {
+  id?: string;
   type: string;
   policy_template?: string;
   enabled: boolean;
