@@ -16,7 +16,7 @@
   padding: $euiSize;
 }
 
-.mapKeydownScrollZoom__show {
+.mapKeydownScrollZoom--show {
   opacity: 1;
-  transition: opacity .1s;
+  transition-duration: $euiAnimSpeedFast;
 }
