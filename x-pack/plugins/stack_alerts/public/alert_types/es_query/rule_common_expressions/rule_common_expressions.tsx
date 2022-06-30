@@ -57,7 +57,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.conditionsPromptLabel"
+            id="xpack.stackAlerts.esQuery.ui.conditionsPrompt"
             defaultMessage="Set the threshold and duration"
           />
         </h5>

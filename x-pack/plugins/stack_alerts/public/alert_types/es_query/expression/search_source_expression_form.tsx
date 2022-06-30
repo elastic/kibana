@@ -193,7 +193,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.searchThreshold.ui.selectDataViewLabel"
+            id="xpack.stackAlerts.searchThreshold.ui.selectDataViewPrompt"
             defaultMessage="Select a data view"
           />
         </h5>
@@ -213,7 +213,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
-                id="xpack.stackAlerts.esQuery.ui.defineQueryLabel"
+                id="xpack.stackAlerts.esQuery.ui.defineQueryPrompt"
                 defaultMessage="Define your query"
               />
             </h5>

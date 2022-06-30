@@ -144,7 +144,7 @@ export const EsQueryExpression: React.FC<
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.selectIndexLabel"
+            id="xpack.stackAlerts.esQuery.ui.selectIndexPrompt"
             defaultMessage="Select an index"
           />
         </h5>
@@ -186,7 +186,7 @@ export const EsQueryExpression: React.FC<
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.defineQueryLabel"
+            id="xpack.stackAlerts.esQuery.ui.defineQueryPrompt"
             defaultMessage="Define your query"
           />
         </h5>
