@@ -19392,7 +19392,6 @@
     "xpack.ml.management.jobsList.noPermissionToAccessLabel": "アクセスが拒否されました",
     "xpack.ml.management.jobsList.syncFlyoutButton": "保存されたオブジェクトを同期",
     "xpack.ml.management.jobsList.trainedModelsDocsLabel": "学習済みモデルドキュメント",
-    "xpack.ml.management.jobsList.trainedModelsTab": "学習済みモデル",
     "xpack.ml.management.jobsListTitle": "機械学習",
     "xpack.ml.management.jobsSpacesList.jobObjectNoun": "ジョブ",
     "xpack.ml.management.jobsSpacesList.modelObjectNoun": "学習済みモデル",

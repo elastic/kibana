@@ -19413,7 +19413,6 @@
     "xpack.ml.management.jobsList.noPermissionToAccessLabel": "访问被拒绝",
     "xpack.ml.management.jobsList.syncFlyoutButton": "同步已保存对象",
     "xpack.ml.management.jobsList.trainedModelsDocsLabel": "已训练模型文档",
-    "xpack.ml.management.jobsList.trainedModelsTab": "已训练模型",
     "xpack.ml.management.jobsListTitle": "Machine Learning",
     "xpack.ml.management.jobsSpacesList.jobObjectNoun": "作业",
     "xpack.ml.management.jobsSpacesList.modelObjectNoun": "已训练模型",

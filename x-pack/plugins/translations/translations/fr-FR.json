@@ -19402,7 +19402,6 @@
     "xpack.ml.management.jobsList.noPermissionToAccessLabel": "Accès refusé",
     "xpack.ml.management.jobsList.syncFlyoutButton": "Synchroniser les objets enregistrés",
     "xpack.ml.management.jobsList.trainedModelsDocsLabel": "Documents relatifs aux modèles entraînés",
-    "xpack.ml.management.jobsList.trainedModelsTab": "Modèles entraînés",
     "xpack.ml.management.jobsListTitle": "Machine Learning",
     "xpack.ml.management.jobsSpacesList.jobObjectNoun": "tâche",
     "xpack.ml.management.jobsSpacesList.modelObjectNoun": "modèle entraîné",
