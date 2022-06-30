@@ -24,16 +24,19 @@ export const SummaryTabContent = () => {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <EuiFlexGroup>
-          <EuiFlexItem style={{ width: 200, height: 150 }}>
-            <EuiPanel style={{ width: 200, height: 200 }}>
-              <EuiTitle size="xs">
-                <h3>{LAST_30DAYS_LABEL}</h3>
-              </EuiTitle>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h3>{LAST_30DAYS_LABEL}</h3>
+          </EuiTitle>
+          <EuiFlexGroup>
+            <EuiFlexItem>
               <AvailabilityPanel />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>{/* TODO: Add availability sparkline*/}</EuiFlexItem>
+            <EuiFlexItem>{/* TODO: Add duration metric*/}</EuiFlexItem>
+            <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
