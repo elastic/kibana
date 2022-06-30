@@ -53,6 +53,21 @@ export default function (providerContext: FtrProviderContext) {
         expect(agent4data.body.item.tags).to.eql(['newTag']);
       });
 
+      it('should not add the same tag again if it exists', async () => {
+        await supertest
+          .post(`/api/fleet/agents/bulk_update_agent_tags`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent2'],
+            tagsToAdd: ['existingTag'],
+          })
+          .expect(200);
+        const [agent2data] = await Promise.all([
+          supertest.get(`/api/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
+        ]);
+        expect(agent2data.body.item.tags).to.eql(['existingTag']);
+      });
+
       it('should allow to update tags of multiple agents by kuery', async () => {
         await supertest
           .post(`/api/fleet/agents/bulk_update_agent_tags`)

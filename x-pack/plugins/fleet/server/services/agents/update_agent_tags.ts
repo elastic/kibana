@@ -92,7 +92,7 @@ async function updateTagsBatch(
     givenAgents.map((agent) => ({
       agentId: agent.id,
       data: {
-        tags: difference(agent.tags ?? [], uniq(tagsToRemove)).concat(uniq(tagsToAdd)),
+        tags: uniq(difference(agent.tags ?? [], tagsToRemove).concat(tagsToAdd)),
       },
     }))
   );
