@@ -41,10 +41,7 @@ import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import {
-  SavedSearchURLConflictCallout,
-  useSavedSearchAliasMatchRedirect,
-} from '../../../../services/saved_searches';
+import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
@@ -120,8 +117,6 @@ export function DiscoverLayout({
       fetchCounter.current++;
     }
   }, [dataState.fetchStatus]);
-
-  useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   // We treat rollup v1 data views as non time based in Discover, since we query them
   // in a non time based way using the regular _search API, since the internal
