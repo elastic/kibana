@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ActionTypeRegistryContract, RuleAction, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
+
 export interface RuleActionsProps {
   ruleActions: RuleAction[];
   actionTypeRegistry: ActionTypeRegistryContract;
