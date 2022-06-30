@@ -1675,7 +1675,7 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"getCase\" | \"getComment\" | \"getTags\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"createCase\" | \"deleteCase\" | \"updateCase\" | \"pushCase\" | \"createComment\" | \"deleteComment\" | \"updateComment\" | \"createConfiguration\" | \"updateConfiguration\""
+          "\"pushCase\" | \"createCase\" | \"createComment\" | \"createConfiguration\" | \"getCase\" | \"getComment\" | \"getTags\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"updateConfiguration\" | \"deleteCase\" | \"deleteComment\""
         ],
         "path": "x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,

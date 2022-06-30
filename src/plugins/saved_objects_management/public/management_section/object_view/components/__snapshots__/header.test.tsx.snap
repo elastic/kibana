@@ -14,7 +14,7 @@ exports[`Intro component renders correctly 1`] = `
         class="euiFlexItem"
       >
         <h1
-          class="euiTitle css-1bexacr-euiTitle-l"
+          class="euiTitle emotion-euiTitle-l"
         >
           Inspect saved object
         </h1>
