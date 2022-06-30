@@ -86,6 +86,15 @@ export const useNavigationProps = ({
     [columns, filterManager]
   );
 
+  const singleDocHref = addBasePath(
+    `/app/discover#/doc/${indexPatternId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
+  );
+  const surDocsHref = addBasePath(
+    `/app/discover#/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
+      rowId
+    )}?${contextSearchHash}`
+  );
+
   /**
    * When history can be accessed via hooks,
    * it is discover main or context route.
@@ -96,7 +105,9 @@ export const useNavigationProps = ({
       exact: true,
     });
 
-    const onOpenSingleDoc = () => {
+    const onOpenSingleDoc = (event: Event) => {
+      event.preventDefault();
+
       history.push({
         pathname: `/doc/${indexPatternId}/${rowIndex}`,
         search: `?id=${encodeURIComponent(rowId)}`,
@@ -106,7 +117,9 @@ export const useNavigationProps = ({
       });
     };
 
-    const onOpenSurrDocs = () =>
+    const onOpenSurrDocs = (event: Event) => {
+      event.preventDefault();
+
       history.push({
         pathname: `/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
           String(rowId)
@@ -116,26 +129,21 @@ export const useNavigationProps = ({
           breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
         },
       });
+    };
 
     return {
-      singleDocProps: { onClick: onOpenSingleDoc },
-      surrDocsProps: { onClick: onOpenSurrDocs },
+      singleDocProps: { onClick: onOpenSingleDoc, href: singleDocHref },
+      surrDocsProps: { onClick: onOpenSurrDocs, href: surDocsHref },
     };
   }
 
   // for embeddable absolute href should be kept
   return {
     singleDocProps: {
-      href: addBasePath(
-        `/app/discover#/doc/${indexPatternId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
-      ),
+      href: singleDocHref,
     },
     surrDocsProps: {
-      href: addBasePath(
-        `/app/discover#/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
-          rowId
-        )}?${contextSearchHash}`
-      ),
+      href: surDocsHref,
     },
   };
 };
