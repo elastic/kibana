@@ -7,7 +7,6 @@
 
 import { useContext, useEffect, useState } from 'react';
 
-// @ts-expect-error types are not available for this package yet
 import { SearchContext } from '@elastic/react-search-ui';
 
 export const useSearchContextState = () => {

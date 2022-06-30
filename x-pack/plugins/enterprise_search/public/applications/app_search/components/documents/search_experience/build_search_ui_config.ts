@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import type { APIConnector, SortDirection } from '@elastic/search-ui';
+
 import { Schema } from '../../../../shared/schema/types';
 
 import { Fields } from './types';
 
 export const buildSearchUIConfig = (
-  apiConnector: object,
+  apiConnector: APIConnector,
   schema: Schema,
   fields: Fields,
-  initialState = { sortDirection: 'desc', sortField: 'id' }
+  initialState = { sortDirection: 'desc' as SortDirection, sortField: 'id' }
 ) => {
   const facets = fields.filterFields.reduce(
     (facetsConfig, fieldName) => ({
