@@ -31,6 +31,7 @@ const STORYBOOKS = [
   'expression_shape',
   'expression_tagcloud',
   'fleet',
+  'home',
   'infra',
   'kibana_react',
   'lists',
