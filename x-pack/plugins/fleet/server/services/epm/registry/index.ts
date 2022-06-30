@@ -329,7 +329,9 @@ export async function getPackageArchiveSignatureOrUndefined({
   const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion);
 
   if (!signaturePath) {
-    logger.warn(`Package ${pkgName}-${pkgVersion} does not have signature_file specified.`);
+    logger.debug(
+      `Package ${pkgName}-${pkgVersion} does not have a signature_path, verification will not be possible.`
+    );
     return undefined;
   }
 

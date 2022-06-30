@@ -440,7 +440,7 @@ async function installPackageByUpload({
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
     const installSource = 'upload';
-    // as we do not verify uploaded packages, we must set the
+    // as we do not verify uploaded packages, we must invalidate the verification cache
     deleteVerificationResult(packageInfo);
     const paths = await unpackBufferToCache({
       name: packageInfo.name,

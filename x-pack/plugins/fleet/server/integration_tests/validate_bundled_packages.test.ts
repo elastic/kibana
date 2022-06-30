@@ -49,7 +49,7 @@ describe('validate bundled packages', () => {
         const packageArchive = await Registry.fetchArchiveBuffer({
           pkgName: bundledPackage.name,
           pkgVersion: bundledPackage.version,
-          verify: true,
+          verify: false,
         });
 
         return { registryPackage, packageArchive };
