@@ -21,10 +21,12 @@ export const fileName = schema.string({
   validate: alphanumericValidation,
 });
 
-export const fileAlt = schema.string({
-  minLength: 1,
-  maxLength: 256,
-  validate: alphanumericValidation,
-});
+export const fileAlt = schema.maybe(
+  schema.string({
+    minLength: 1,
+    maxLength: 256,
+    validate: alphanumericValidation,
+  })
+);
 
 export const fileMeta = schema.maybe(schema.object({}, { unknowns: 'allow' }));
