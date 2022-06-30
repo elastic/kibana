@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../../common/constants';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { useKibana, useUiSetting$ } from '../../../../../../common/lib/kibana';
@@ -171,6 +179,7 @@ export const RulesTableContextProvider = ({
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
+  const autoRefreshBeforePause = useRef<boolean | null>(null);
 
   const toggleInMemorySorting = useCallback(
     (value: boolean) => {
@@ -194,12 +203,30 @@ export const RulesTableContextProvider = ({
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
-  const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
-    setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
-    setPage(1);
-    setSelectedRuleIds([]);
-    setIsAllSelected(false);
-  }, []);
+  useEffect(() => {
+    /**
+     * pause table auto refresh when any of rule selected
+     */
+    if (selectedRuleIds.length > 0) {
+      setIsRefreshOn(false);
+      if (autoRefreshBeforePause.current == null) {
+        autoRefreshBeforePause.current = isRefreshOn;
+      }
+    } else {
+      setIsRefreshOn(autoRefreshBeforePause.current ?? isRefreshOn);
+      autoRefreshBeforePause.current = null;
+    }
+  }, [selectedRuleIds, isRefreshOn]);
+
+  const handleFilterOptionsChange = useCallback(
+    (newFilter: Partial<FilterOptions>) => {
+      setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
+      setPage(1);
+      setSelectedRuleIds([]);
+      setIsAllSelected(false);
+    },
+    [setSelectedRuleIds]
+  );
 
   // Fetch rules
   const {
@@ -289,6 +316,7 @@ export const RulesTableContextProvider = ({
       selectedRuleIds,
       sortingOptions,
       toggleInMemorySorting,
+      setSelectedRuleIds,
       total,
     ]
   );
