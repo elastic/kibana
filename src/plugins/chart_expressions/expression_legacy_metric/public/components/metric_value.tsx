@@ -75,7 +75,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
       <button
         style={{ display: 'block' }}
         onClick={() => onFilter()}
-        title={i18n.translate('expressionMetricVis.filterTitle', {
+        title={i18n.translate('expressionLegacyMetricVis.filterTitle', {
           defaultMessage: 'Click to filter by field',
         })}
       >
