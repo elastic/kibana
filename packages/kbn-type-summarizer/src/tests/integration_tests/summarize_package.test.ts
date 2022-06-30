@@ -46,8 +46,12 @@ describe('summarizePackage()', () => {
         }
       `,
       'helpers.ts': `
-        export const a = () => 'a'
-        export function b() { return 'b' }
+        interface Result<K> {
+          value: K
+        }
+        type A = 'a'
+        export const a = (): A => 'a'
+        export const b = (): Result<A> => ({ value: a() })
       `,
     });
 
@@ -60,25 +64,31 @@ describe('summarizePackage()', () => {
 
       expect(code).toMatchInlineSnapshot(`
         "
-        declare function b(): string;
+        declare type A = 'a';
 
-        declare const a: () => string
+        declare const a: () => A
+
+        interface Result<K> {
+            value: K;
+        }
+
+        declare const b: () => Result<A>
 
         declare namespace Helpers {
           export {
-            b,
             a,
+            b,
           }
         }
         export {Helpers}
         export declare function foo(name: string): string;
 
-        interface Result {
+        interface Result_1 {
             type: 'success';
         }
 
         export declare class Bar {
-            doWork(): Result;
+            doWork(): Result_1;
         }
 
         export declare class Baz extends Bar {
@@ -89,34 +99,43 @@ describe('summarizePackage()', () => {
       `);
 
       expect(map.snapshot).toMatchInlineSnapshot(`
-        "from b @ 2:17
-        to   b @ helpers.ts:2:16
+        "from A @ 2:13
+        to   A @ helpers.ts:4:5
 
         from a @ 4:14
-        to   a @ helpers.ts:1:13
+        to   a @ helpers.ts:5:13
 
-        from Helpers @ 6:18
-        to   export @ helpers.ts:1:0
+        from Result @ 6:10
+        to   Result @ helpers.ts:1:10
 
-        from foo @ 13:24
+        from value @ 7:4
+        to   value @ helpers.ts:2:2
+
+        from b @ 10:14
+        to   b @ helpers.ts:6:13
+
+        from Helpers @ 12:18
+        to   interface @ helpers.ts:1:0
+
+        from foo @ 19:24
         to   foo @ foo.ts:1:16
 
-        from Result @ 15:10
+        from Result_1 @ 21:10
         to   Result @ bar.ts:1:10
 
-        from type @ 16:4
+        from type @ 22:4
         to   type @ bar.ts:2:2
 
-        from Bar @ 19:21
+        from Bar @ 25:21
         to   Bar @ bar.ts:4:13
 
-        from doWork @ 20:4
+        from doWork @ 26:4
         to   doWork @ bar.ts:5:2
 
-        from Baz @ 23:21
+        from Baz @ 29:21
         to   Baz @ baz.ts:4:13
 
-        from hello @ 24:4
+        from hello @ 30:4
         to   hello @ baz.ts:5:2"
       `);
 
@@ -126,8 +145,8 @@ describe('summarizePackage()', () => {
         debg > create type checker
         debg > indexExports() -- packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts
             debg verbose steps:
-                 resolveSymbol()x16
-                 indexSymbolx8
+                 resolveSymbol()x23
+                 indexSymbolx12
         debg loaded sourcemaps for [
                'packages/kbn-type-summarizer/__tmp__/dist_dts/bar.d.ts',
                'packages/kbn-type-summarizer/__tmp__/dist_dts/baz.d.ts',
@@ -136,9 +155,9 @@ describe('summarizePackage()', () => {
                'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
              ]
         debg > printImports() -- 0 imports
-        debg > printLocals() -- 7 decs
+        debg > printLocals() -- 9 decs
             debg verbose steps:
-                 resolveSymbol()x11
+                 resolveSymbol()x18
         "
       `);
     });
