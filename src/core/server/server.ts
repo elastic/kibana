@@ -56,7 +56,10 @@ import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
-import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
+import {
+  PrebootCoreRouteHandlerContext,
+  PrebootCoreRequestHandlerContext,
+} from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
 import type { RequestHandlerContext } from '.';
