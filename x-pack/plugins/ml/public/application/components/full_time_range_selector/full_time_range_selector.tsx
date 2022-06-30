@@ -32,7 +32,6 @@ interface Props {
   query: QueryDslQueryContainer;
   disabled: boolean;
   callback?: (a: GetTimeFieldRangeResponse) => void;
-  allowFutureTime?: boolean;
 }
 
 const FROZEN_TIER_PREFERENCE = {
@@ -48,7 +47,6 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   async function setRange(i: DataView, q: QueryDslQueryContainer, excludeFrozenData = true) {
     const fullTimeRange = await setFullTimeRange(i, q, excludeFrozenData);
-
     if (typeof callback === 'function') {
       callback(fullTimeRange);
     }
