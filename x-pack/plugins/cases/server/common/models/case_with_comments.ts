@@ -386,6 +386,7 @@ export class CaseCommentModel {
       });
     }
   }
+
   public async bulkCreate({
     attachments,
   }: {
