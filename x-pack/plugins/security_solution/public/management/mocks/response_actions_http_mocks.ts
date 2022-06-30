@@ -24,7 +24,7 @@ import {
   ActionListApiResponse,
   HostIsolationResponse,
   PendingActionsResponse,
-  RunningProcessesEntry,
+  ProcessesEntry,
   ActionDetails,
 } from '../../../common/endpoint/types';
 
@@ -39,9 +39,7 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
 
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
 
-  runningProcesses: (
-    options: HttpFetchOptionsWithPath
-  ) => ActionDetailsApiResponse<RunningProcessesEntry>;
+  processes: () => ActionDetailsApiResponse<ProcessesEntry>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -109,21 +107,21 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     },
   },
   {
-    id: 'runningProcesses',
+    id: 'processes',
     path: GET_RUNNING_PROCESSES_ROUTE,
     method: 'post',
-    handler: (): ActionDetailsApiResponse<RunningProcessesEntry> => {
+    handler: (): ActionDetailsApiResponse<ProcessesEntry> => {
       const generator = new EndpointActionGenerator('seed');
       const response = generator.generateActionDetails({
         outputs: {
           '1': {
             type: 'json',
             content: {
-              entries: generator.randomResponseActionRunningProcesses(3),
+              entries: generator.randomResponseActionProcesses(3),
             },
           },
         },
-      }) as ActionDetails<RunningProcessesEntry>;
+      }) as ActionDetails<ProcessesEntry>;
 
       return { data: response };
     },

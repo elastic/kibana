@@ -10,7 +10,7 @@ import { CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
 import { EndpointStatusActionResult } from './status_action';
-import { GetRunningProcessesActionResult } from './get_running_processes_action';
+import { GetProcessesActionResult } from './get_processes_action';
 
 export const getEndpointResponseActionsConsoleCommands = (
   endpointAgentId: string
@@ -67,14 +67,14 @@ export const getEndpointResponseActionsConsoleCommands = (
       },
     },
     {
-      name: 'running-processes',
+      name: 'processes',
       about: i18n.translate(
         'xpack.securitySolution.endpointConsoleCommands.runninProcesses.about',
         {
-          defaultMessage: 'Display the running processes on the endpoint',
+          defaultMessage: 'Display the processes on the endpoint',
         }
       ),
-      RenderComponent: GetRunningProcessesActionResult,
+      RenderComponent: GetProcessesActionResult,
       meta: {
         endpointId: endpointAgentId,
       },

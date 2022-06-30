@@ -19,7 +19,7 @@ import {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   RESPONSE_ACTION_COMMANDS,
-  RunningProcessesEntry,
+  ProcessesEntry,
 } from '../types';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
@@ -188,12 +188,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
-  randomResponseActionRunningProcesses(n?: number): RunningProcessesEntry[] {
+  randomResponseActionProcesses(n?: number): ProcessesEntry[] {
     const numberOfEntries = n ?? this.randomChoice([20, 30, 40, 50]);
     const entries = [];
     for (let i = 0; i < numberOfEntries; i++) {
       entries.push({
-        command: this.randomResponseActionRunningProcessesCommand(),
+        command: this.randomResponseActionProcessesCommand(),
         pid: this.randomN(1000).toString(),
         entity_id: this.randomString(50),
         user: this.randomUser(),
@@ -203,7 +203,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return entries;
   }
 
-  protected randomResponseActionRunningProcessesCommand() {
+  protected randomResponseActionProcessesCommand() {
     const commands = [
       '/opt/cmd1',
       '/opt/cmd2',
