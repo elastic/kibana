@@ -109,6 +109,7 @@ describe('When using Actions service utilities', () => {
       completedAt: undefined,
       wasSuccessful: false,
       errors: undefined,
+      outputs: {},
     });
 
     it('should show complete `false` if no action ids', () => {
@@ -147,6 +148,42 @@ describe('When using Actions service utilities', () => {
         completedAt: COMPLETED_AT,
         errors: undefined,
         wasSuccessful: true,
+        outputs: {},
+      });
+    });
+
+    it('should return action outputs (if any) per agent id', () => {
+      const runningProcesses = endpointActionGenerator.randomResponseActionRunningProcesses(3);
+      const endpointResponse = endpointActionGenerator.generateActivityLogActionResponse({
+        item: {
+          data: {
+            '@timestamp': COMPLETED_AT,
+            agent: { id: '123' },
+            EndpointActions: {
+              completed_at: COMPLETED_AT,
+              output: {
+                type: 'json',
+                content: {
+                  entries: runningProcesses,
+                },
+              },
+            },
+          },
+        },
+      });
+      expect(getActionCompletionInfo(['123'], [endpointResponse])).toEqual({
+        isCompleted: true,
+        completedAt: COMPLETED_AT,
+        errors: undefined,
+        wasSuccessful: true,
+        outputs: {
+          '123': {
+            type: 'json',
+            content: {
+              entries: runningProcesses,
+            },
+          },
+        },
       });
     });
 
@@ -185,6 +222,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Endpoint action response error: endpoint failed to apply'],
           isCompleted: true,
           wasSuccessful: false,
+          outputs: {},
         });
       });
 
@@ -194,6 +232,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Fleet action response error: agent failed to deliver'],
           isCompleted: true,
           wasSuccessful: false,
+          outputs: {},
         });
       });
 
@@ -208,6 +247,7 @@ describe('When using Actions service utilities', () => {
           ],
           isCompleted: true,
           wasSuccessful: false,
+          outputs: {},
         });
       });
     });
@@ -297,6 +337,7 @@ describe('When using Actions service utilities', () => {
           completedAt: COMPLETED_AT,
           wasSuccessful: true,
           errors: undefined,
+          outputs: {},
         });
       });
 
@@ -318,6 +359,7 @@ describe('When using Actions service utilities', () => {
           errors: ['Fleet action response error: something is no good'],
           isCompleted: true,
           wasSuccessful: false,
+          outputs: {},
         });
       });
     });
