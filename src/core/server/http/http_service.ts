@@ -20,7 +20,7 @@ import type { RequestHandlerContextBase } from '..';
 import { InternalContextSetup, InternalContextPreboot } from '../context';
 import { CspConfigType, config as cspConfig } from '../csp';
 
-import { Router } from './router';
+import { Router, IRouter } from './router';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
@@ -39,7 +39,6 @@ import {
   config as externalUrlConfig,
   ExternalUrlConfig,
 } from '../external_url';
-import { IRouter } from '..';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
