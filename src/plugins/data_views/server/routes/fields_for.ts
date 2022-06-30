@@ -29,7 +29,6 @@ const parseMetaFields = (metaFields: string | string[]) => {
 const path = '/api/index_patterns/_fields_for_wildcard';
 
 type IBody = { index_filter?: any } | undefined;
-
 interface IQuery {
   pattern: string;
   meta_fields: string[];
