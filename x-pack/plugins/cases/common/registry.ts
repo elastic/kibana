@@ -30,7 +30,7 @@ export class CaseRegistry<T extends BaseItem> {
     if (this.has(item.id)) {
       throw new Error(
         i18n.translate('xpack.cases.registry.duplicateItemErrorMessage', {
-          defaultMessage: `Item "{id}" is already registered on registry: ${this.name}`,
+          defaultMessage: `Item "{id}" is already registered on registry ${this.name}`,
           values: {
             id: item.id,
           },
