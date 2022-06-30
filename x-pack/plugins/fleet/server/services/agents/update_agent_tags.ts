@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { difference } from 'lodash';
+import { difference, uniq } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
@@ -92,7 +92,7 @@ async function updateTagsBatch(
     givenAgents.map((agent) => ({
       agentId: agent.id,
       data: {
-        tags: difference(agent.tags ?? [], tagsToRemove).concat(tagsToAdd),
+        tags: difference(agent.tags ?? [], uniq(tagsToRemove)).concat(uniq(tagsToAdd)),
       },
     }))
   );

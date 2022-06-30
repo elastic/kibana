@@ -41,7 +41,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             agents: ['agent1', 'agent4'],
-            tagsToAdd: ['newTag'],
+            tagsToAdd: ['newTag', 'newTag'],
             tagsToRemove: ['existingTag'],
           })
           .expect(200);
