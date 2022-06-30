@@ -8,7 +8,15 @@
 
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-jest.mock('./catch_retryable_es_client_errors');
+// Create a mock powered by the actual implementation
+jest.mock('./catch_retryable_es_client_errors', () => ({
+  catchRetryableEsClientErrors: jest
+    .fn()
+    .mockImplementation(
+      jest.requireActual('./catch_retryable_es_client_errors').catchRetryableEsClientErrors
+    ),
+}));
+
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { fetchIndices } from './fetch_indices';
 
@@ -16,16 +24,18 @@ describe('fetchIndices', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  const retryableError = new EsErrors.ResponseError(
-    elasticsearchClientMock.createApiResponse({
-      statusCode: 503,
-      body: { error: { type: 'es_type', reason: 'es_reason' } },
-    })
-  );
-  const client = elasticsearchClientMock.createInternalClient(
-    elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
-  );
+
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
+    const retryableError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 503,
+        body: { error: { type: 'es_type', reason: 'es_reason' } },
+      })
+    );
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
+
     const task = fetchIndices({ client, indices: ['my_index'] });
     try {
       await task();
@@ -33,5 +43,22 @@ describe('fetchIndices', () => {
       /** ignore */
     }
     expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+  });
+
+  it('throws when cloud returns an incorrect 404 response', async () => {
+    const notFoundError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 404,
+        body: { ok: false, message: 'Unknown resource.' },
+      })
+    );
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(notFoundError)
+    );
+    const task = fetchIndices({ client, indices: ['my_index'] });
+
+    expect(task()).rejects.toMatchInlineSnapshot(
+      `[ResponseError: {"ok":false,"message":"Unknown resource."}]`
+    );
   });
 });
