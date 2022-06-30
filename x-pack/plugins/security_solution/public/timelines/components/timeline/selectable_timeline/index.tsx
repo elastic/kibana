@@ -124,7 +124,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   );
 
   const renderTimelineOption = useCallback((option, searchValue) => {
-    const title = isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.label;
+    const title = isUntitled(option) ? i18nTimeline.UNTITLED_TIMELINE : option.title;
     const isDescriptionNonEmpty =
       option.description != null && option.description.trim().length > 0;
     const description = isDescriptionNonEmpty ? option.description : getEmptyTagValue();
