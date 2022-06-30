@@ -508,7 +508,33 @@ describe('indexExports()', () => {
       expect(() =>
         indexer.indexExports(sourceFiles['index.ts'])
       ).toThrowErrorMatchingInlineSnapshot(
-        `"unable to find declarations for symbol imported from \\"missing_node_module\\", is it listed in the type dependencies for this package? Imported: ts.ImportSpecifier (BaseClass) @ packages/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts:1:10"`
+        `"unable to find declarations for symbol imported from \\"missing_node_module\\". If this is an external module, make sure is it listed in the type dependencies for this package. If it's internal then make sure that TypeScript understands the types of the imported value. Imported: ts.ImportSpecifier (BaseClass) @ packages/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts:1:10"`
+      );
+    });
+  });
+
+  describe('undeclared symbols', () => {
+    const project = new TestProject({
+      'index.ts': `
+        // @ts-expect-error
+        export { a } from './foo'
+      `,
+      'foo.js': `
+        export function a() {}
+      `,
+    });
+
+    afterEach(async () => {
+      await project.cleanup();
+    });
+
+    it('throws a helpful error when exported symbols are not found', async () => {
+      const { indexer, sourceFiles } = await project.initAstIndexer();
+
+      expect(() =>
+        indexer.indexExports(sourceFiles['index.ts'])
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"unable to find declarations for symbol imported from \\"./foo\\". If this is an external module, make sure is it listed in the type dependencies for this package. If it's internal then make sure that TypeScript understands the types of the imported value. Imported: ts.ExportSpecifier (a) @ packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts:1:10"`
       );
     });
   });

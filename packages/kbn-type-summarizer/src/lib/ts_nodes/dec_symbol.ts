@@ -18,10 +18,7 @@ export function isDecSymbol(symbol: ts.Symbol): symbol is DecSymbol {
 
 export function assertDecSymbol(symbol: ts.Symbol): asserts symbol is DecSymbol {
   if (!isDecSymbol(symbol)) {
-    throw new Error(
-      // TODO: expand this error message, maybe ignore symbols which resolve to non DecSymbols
-      `Expected symbol to have declarations. This might be caused by importing JS in a TS file. Using \`@ts-expect-error\` or \`@ts-ignore\` is not enough...`
-    );
+    throw new Error(`Expected symbol to have declarations.`);
   }
 }
 

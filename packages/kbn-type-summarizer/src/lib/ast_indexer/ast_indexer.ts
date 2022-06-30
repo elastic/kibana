@@ -160,7 +160,7 @@ export class AstIndexer {
           throw new CliError(
             `unable to find declarations for symbol imported from "${
               importDetails[0].req
-            }", is it listed in the type dependencies for this package? Imported: ${describeNode(
+            }". If this is an external module, make sure is it listed in the type dependencies for this package. If it's internal then make sure that TypeScript understands the types of the imported value. Imported: ${describeNode(
               importDetails[0].node
             )}`
           );

@@ -127,7 +127,9 @@ export class TestProject<FileName extends string> {
   private async buildDtsOutput(ignoreDiags?: DiagFilter) {
     const program = createTsProject(
       loadTsConfigFile(this.tsconfigPath),
-      Array.from(this.fileRels()).map((n) => Path.resolve(this.sourceDir, n))
+      Array.from(this.fileRels())
+        .map((n) => Path.resolve(this.sourceDir, n))
+        .filter((p) => p.endsWith('.ts') || p.endsWith('.tsx'))
     );
 
     this.printDiagnostics(
