@@ -535,15 +535,22 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToStackManagementJobsListPage();
 
             await ml.testExecution.logTestStep('should display the AD job in the list');
-            await ml.jobTable.filterWithSearchString(adJobId, 1, 'stackMgmtJobList');
+            await ml.stackManagementJobs.filterTableWithSearchString(
+              'anomaly-detector',
+              adJobId,
+              1
+            );
 
             await ml.testExecution.logTestStep(
               'should load the analytics jobs list page in stack management'
             );
             await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-
             await ml.testExecution.logTestStep('should display the DFA job in the list');
-            await ml.dataFrameAnalyticsTable.filterWithSearchString(dfaJobId, 1);
+            await ml.stackManagementJobs.filterTableWithSearchString(
+              'data-frame-analytics',
+              dfaJobId,
+              1
+            );
           });
         });
       }

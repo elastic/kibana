@@ -61,7 +61,7 @@ export class JobDetailsUI extends Component {
         </div>
       );
     } else {
-      const { showFullDetails, refreshJobList, showClearButton } = this.props;
+      const { refreshJobList, showClearButton } = this.props;
 
       const {
         general,
@@ -219,7 +219,7 @@ export class JobDetailsUI extends Component {
         },
       ];
 
-      if (showFullDetails && datafeed.items.length) {
+      if (datafeed.items.length) {
         tabs.push(
           {
             id: 'datafeed-preview',
@@ -240,34 +240,32 @@ export class JobDetailsUI extends Component {
         );
       }
 
-      if (showFullDetails) {
-        tabs.push({
-          id: 'annotations',
-          'data-test-subj': 'mlJobListTab-annotations',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
-            defaultMessage: 'Annotations',
-          }),
-          content: (
-            <Fragment>
-              <AnnotationsTable jobs={[job]} drillDown={true} />
-              <AnnotationFlyout />
-            </Fragment>
-          ),
-        });
+      tabs.push({
+        id: 'annotations',
+        'data-test-subj': 'mlJobListTab-annotations',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
+          defaultMessage: 'Annotations',
+        }),
+        content: (
+          <Fragment>
+            <AnnotationsTable jobs={[job]} drillDown={true} />
+            <AnnotationFlyout />
+          </Fragment>
+        ),
+      });
 
-        tabs.push({
-          id: 'modelSnapshots',
-          'data-test-subj': 'mlJobListTab-modelSnapshots',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
-            defaultMessage: 'Model snapshots',
-          }),
-          content: (
-            <Fragment>
-              <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
-            </Fragment>
-          ),
-        });
-      }
+      tabs.push({
+        id: 'modelSnapshots',
+        'data-test-subj': 'mlJobListTab-modelSnapshots',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
+          defaultMessage: 'Model snapshots',
+        }),
+        content: (
+          <Fragment>
+            <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
+          </Fragment>
+        ),
+      });
 
       return (
         <div className="tab-contents" data-test-subj={`mlJobListRowDetails details-${job.job_id}`}>
@@ -282,7 +280,6 @@ JobDetailsUI.propTypes = {
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
-  showFullDetails: PropTypes.bool,
   refreshJobList: PropTypes.func,
 };
 

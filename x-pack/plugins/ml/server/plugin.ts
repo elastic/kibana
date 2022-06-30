@@ -52,6 +52,7 @@ import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
+import { managementRoutes } from './routes/management';
 import {
   setupSavedObjects,
   jobSavedObjectsInitializationFactory,
@@ -214,6 +215,7 @@ export class MlServerPlugin
     jobAuditMessagesRoutes(routeInit);
     jobRoutes(routeInit);
     jobServiceRoutes(routeInit);
+    managementRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
