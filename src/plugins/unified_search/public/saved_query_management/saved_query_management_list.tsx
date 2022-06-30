@@ -247,7 +247,7 @@ export function SavedQueryManagementList({
   };
 
   const renderOption = (option: RenderOptionProps) => {
-    return <>{option.attributes ? itemLabel(option.attributes) : ''}</>;
+    return <>{option.attributes ? itemLabel(option.attributes) : option.label}</>;
   };
 
   const canEditSavedObjects = application.capabilities.savedObjectsManagement.edit;
