@@ -239,10 +239,10 @@ export const getElementStrings = (): ElementStringDict => ({
     }),
   },
   legacyMetricVis: {
-    displayName: i18n.translate('xpack.canvas.elements.metricVisDisplayName', {
+    displayName: i18n.translate('xpack.canvas.elements.legacyMetricVisDisplayName', {
       defaultMessage: 'Legacy Metric Vis',
     }),
-    help: i18n.translate('xpack.canvas.elements.metricVisHelpText', {
+    help: i18n.translate('xpack.canvas.elements.legacyMetricVisHelpText', {
       defaultMessage: 'Legacy metric visualization. We recommend using metricVis instead.',
     }),
   },

@@ -60,7 +60,7 @@ const getFormatter = (
 
   if (!['number', 'currency', 'percent', 'bytes', 'duration'].includes(formatId)) {
     throw new Error(
-      i18n.translate('newMetricVis.errors.unsupportedColumnFormat', {
+      i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
         defaultMessage: 'Metric Visualization - Unsupported column format: "{id}"',
         values: {
           id: formatId,
