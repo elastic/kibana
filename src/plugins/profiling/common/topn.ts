@@ -15,9 +15,12 @@ import {
 
 import { StackFrameMetadata } from './profiling';
 
-export interface TopNSample {
+export interface CountPerTime {
   Timestamp: number;
   Count: number;
+}
+
+export interface TopNSample extends CountPerTime {
   Category: string;
 }
 
@@ -62,15 +65,37 @@ export function createTopNSamples(histogram: AggregationsHistogramAggregate): To
   return orderBy(samples, ['Timestamp', 'Count', 'Category'], ['asc', 'desc', 'asc']);
 }
 
-export function groupSamplesByCategory(samples: TopNSample[]) {
-  const series = new Map();
+export interface TopNSubchart {
+  Category: string;
+  Percentage: number;
+  Series: CountPerTime[];
+}
+
+export function groupSamplesByCategory(samples: TopNSample[]): TopNSubchart[] {
+  const seriesByCategory = new Map<string, CountPerTime[]>();
+  let total = 0;
+
   for (let i = 0; i < samples.length; i++) {
-    const v = samples[i];
-    if (!series.has(v.Category)) {
-      series.set(v.Category, []);
+    const sample = samples[i];
+
+    if (!seriesByCategory.has(sample.Category)) {
+      seriesByCategory.set(sample.Category, []);
     }
-    const value = series.get(v.Category);
-    value.push([v.Timestamp, v.Count]);
+    const series = seriesByCategory.get(sample.Category)!;
+    series.push({ Timestamp: sample.Timestamp, Count: sample.Count });
+
+    total += sample.Count;
   }
-  return series;
+
+  const subcharts: TopNSubchart[] = [];
+  for (const [category, series] of seriesByCategory) {
+    const totalPerCategory = series.reduce((sum, { Count }) => sum + Count, 0);
+    subcharts.push({
+      Category: category,
+      Percentage: (totalPerCategory / total) * 100,
+      Series: series,
+    });
+  }
+
+  return orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']);
 }

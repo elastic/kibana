@@ -62,9 +62,9 @@ export const StackTraceNavigation = ({ index, projectID, n, timeRange, fetchTopN
       (response: TopNSamples) => {
         console.log(new Date().toISOString(), 'finished payload retrieval');
         const samples = response.TopN;
-        const series = groupSamplesByCategory(samples);
+        const subcharts = groupSamplesByCategory(samples);
         const samplesWithoutZero = samples.filter((sample: TopNSample) => sample.Count > 0);
-        setTopN({ samples: samplesWithoutZero, series });
+        setTopN({ samples: samplesWithoutZero, subcharts });
         console.log(new Date().toISOString(), 'updated local state');
       }
     );

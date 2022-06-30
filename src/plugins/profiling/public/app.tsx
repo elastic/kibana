@@ -103,7 +103,7 @@ function App({ fetchTopN, fetchElasticFlamechart }: Props) {
 
   const [topn, setTopN] = useState({
     samples: [],
-    series: new Map(),
+    subcharts: [],
   });
 
   const [elasticFlamegraph, setElasticFlamegraph] = useState({});
