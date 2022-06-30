@@ -511,4 +511,26 @@ storiesOf('SearchBar', module)
         sql: 'SELECT field1, field2, field 3, field 4, field 5 FROM DATAVIEW WHERE field5 IS NOT NULL AND field4 IS NULL',
       },
     } as SearchBarProps)
+  )
+  .add('with dataviewPicker with SQL and errors in sql query', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'SQL',
+          title: 'SQL',
+        },
+        onChangeDataView: action('onChangeDataView'),
+        onAddField: action('onAddField'),
+        onDataViewCreated: action('onDataViewCreated'),
+        textBasedLanguages: ['SQL'],
+      },
+      textBasedLanguageModeErrors: [
+        new Error(
+          '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
+        ),
+      ],
+      query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
+    } as SearchBarProps)
   );
