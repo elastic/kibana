@@ -122,3 +122,30 @@ set_git_merge_base() {
 
   export GITHUB_PR_MERGE_BASE
 }
+
+# If npm install is terminated early, e.g. because the build was cancelled in buildkite,
+# a package directory is left behind in a bad state that can cause all subsequent installs to fail
+# So this function contains some cleanup/retry logic to try to recover from this kind of situation
+npm_install_global() {
+  package="$1"
+  version="${2:-latest}"
+  toInstall="$package@$version"
+
+  npmRoot=$(npm root -g)
+  packageRoot="${npmRoot:?}/$package"
+
+  # The success flag file exists just to try to make sure we know that the full install was done
+  # For example, if a job terminates in the middle of npm install, a directory could be left behind that we don't know the state of
+  successFlag="${packageRoot:?}/.install-success"
+
+  if [[ -d "$packageRoot" && ! -f "$successFlag" ]]; then
+    echo "Removing existing package directory $packageRoot before install, seems previous installation was not successful"
+    rm -rf "$packageRoot"
+  fi
+
+  if [[ ! $(npm install -g "$toInstall" && touch "$successFlag") ]]; then
+    rm -rf "$packageRoot"
+    echo "Trying again to install $toInstall..."
+    npm install -g "$toInstall" && touch "$successFlag"
+  fi
+}
