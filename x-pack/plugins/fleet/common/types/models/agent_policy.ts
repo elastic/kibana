@@ -106,9 +106,7 @@ export interface FullAgentPolicy {
       metrics: boolean;
       logs: boolean;
     };
-  };
-  download: {
-    source_uri: string;
+    download: { source_uri: string };
   };
 }
 

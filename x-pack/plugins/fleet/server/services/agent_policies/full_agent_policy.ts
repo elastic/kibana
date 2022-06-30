@@ -17,11 +17,12 @@ import type {
 } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
-import { downloadSourceService } from '../download_source';
 import { dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
 import { DEFAULT_OUTPUT } from '../../constants';
+
+import { getSourceUriForAgentPolicy } from '../../routes/agent/helpers';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -56,18 +57,11 @@ export async function getFullAgentPolicy(
     throw new Error('Default output is not setup');
   }
 
-  const defaultDownloadSourceId = await downloadSourceService.getDefaultDownloadSourceId(soClient);
-
-  if (!defaultDownloadSourceId) {
-    throw new Error('Default download source host is not setup');
-  }
-
   const dataOutputId: string = agentPolicy.data_output_id || defaultDataOutputId;
   const monitoringOutputId: string =
     agentPolicy.monitoring_output_id ||
     (await outputService.getDefaultMonitoringOutputId(soClient)) ||
     dataOutputId;
-  const downloadSourceId: string = agentPolicy.download_source_id || defaultDownloadSourceId;
 
   const outputs = await Promise.all(
     Array.from(new Set([dataOutputId, monitoringOutputId])).map((outputId) =>
@@ -84,10 +78,7 @@ export async function getFullAgentPolicy(
     throw new Error(`Monitoring output not found ${monitoringOutputId}`);
   }
 
-  const downloadSource = await downloadSourceService.get(soClient, downloadSourceId);
-  if (!downloadSource) {
-    throw new Error(`Download source host not found ${downloadSourceId}`);
-  }
+  const sourceUri = await getSourceUriForAgentPolicy(soClient, agentPolicy);
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
@@ -110,6 +101,9 @@ export async function getFullAgentPolicy(
     ...(agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0
       ? {
           agent: {
+            download: {
+              source_uri: sourceUri,
+            },
             monitoring: {
               namespace: agentPolicy.namespace,
               use_output: getOutputIdForAgentPolicy(monitoringOutput),
@@ -121,12 +115,12 @@ export async function getFullAgentPolicy(
         }
       : {
           agent: {
+            download: {
+              source_uri: sourceUri,
+            },
             monitoring: { enabled: false, logs: false, metrics: false },
           },
         }),
-    download: {
-      source_uri: downloadSource.host,
-    },
   };
 
   const dataPermissions =
