@@ -6,10 +6,11 @@
  */
 
 import pMap from 'p-map';
-import { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import { CasePostRequest, CaseResponse } from '@kbn/cases-plugin/common/api';
 import {
   createCase as createCaseAPI,
   deleteAllCaseItems,
+  createComment,
 } from '../../../cases_api_integration/common/lib/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateRandomCaseWithoutConnector } from './helpers';
@@ -19,12 +20,13 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   return {
-    async createCase(overwrites: Partial<CasePostRequest> = {}) {
+    async createCase(overwrites: Partial<CasePostRequest> = {}): Promise<CaseResponse> {
       const caseData = {
         ...generateRandomCaseWithoutConnector(),
         ...overwrites,
       } as CasePostRequest;
-      await createCaseAPI(kbnSupertest, caseData);
+      const res = await createCaseAPI(kbnSupertest, caseData);
+      return res;
     },
 
     async createNthRandomCases(amount: number = 3) {
@@ -43,6 +45,16 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
 
     async deleteAllCases() {
       deleteAllCaseItems(es);
+    },
+
+    async createAttachment({
+      caseId,
+      params,
+    }: {
+      caseId: Parameters<typeof createComment>[0]['caseId'];
+      params: Parameters<typeof createComment>[0]['params'];
+    }): Promise<CaseResponse> {
+      return createComment({ supertest: kbnSupertest, params, caseId });
     },
   };
 }

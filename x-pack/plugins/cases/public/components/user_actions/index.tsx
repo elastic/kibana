@@ -27,6 +27,7 @@ import type { UserActionTreeProps } from './types';
 import { getDescriptionUserAction } from './description';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
@@ -95,6 +96,7 @@ export const UserActions = React.memo(
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
     const currentUser = useCurrentUser();
+    const { externalReferenceAttachmentTypeRegistry } = useCasesContext();
 
     const alertIdsWithoutRuleInfo = useMemo(
       () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -188,6 +190,7 @@ export const UserActions = React.memo(
 
             const userActionBuilder = builder({
               caseData,
+              externalReferenceAttachmentTypeRegistry,
               userAction,
               caseServices,
               comments: caseData.comments,
@@ -215,6 +218,7 @@ export const UserActions = React.memo(
         ),
       [
         caseUserActions,
+        externalReferenceAttachmentTypeRegistry,
         descriptionCommentListObj,
         caseData,
         caseServices,
