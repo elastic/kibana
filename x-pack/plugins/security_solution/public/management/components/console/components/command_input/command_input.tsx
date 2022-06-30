@@ -31,11 +31,17 @@ const CommandInputContainer = styled.div`
   background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
   background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
   border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
-  outline: 1px solid ${({ theme: { eui } }) => eui.euiFormBorderColor};
+  outline: solid ${({ theme: { eui } }) => eui.euiBorderWidthThin}
+    ${({ theme: { eui } }) => eui.euiFormBorderColor};
   padding: ${({ theme: { eui } }) => eui.euiSizeS};
 
   .prompt {
     padding-right: 1ch;
+  }
+
+  &.active {
+    border-bottom: solid ${({ theme: { eui } }) => eui.euiBorderWidthThin}
+      ${({ theme: { eui } }) => eui.euiColorPrimary};
   }
 
   .textEntered {
@@ -101,6 +107,13 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     return classNames({
       cursor: true,
       inactive: !isKeyInputBeingCaptured,
+    });
+  }, [isKeyInputBeingCaptured]);
+
+  const focusClassName = useMemo(() => {
+    return classNames({
+      cmdInput: true,
+      active: isKeyInputBeingCaptured,
     });
   }, [isKeyInputBeingCaptured]);
 
@@ -240,7 +253,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   return (
     <InputAreaPopover width={popoverWidth}>
-      <CommandInputContainer {...commonProps} onClick={handleTypingAreaClick} ref={containerRef}>
+      <CommandInputContainer
+        {...commonProps}
+        className={focusClassName}
+        onClick={handleTypingAreaClick}
+        ref={containerRef}
+      >
         <EuiFlexGroup
           wrap={true}
           responsive={false}
@@ -274,7 +292,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             <InputPlaceholder />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="playFilled" color="subdued" />
+            <EuiIcon
+              type="playFilled"
+              color={useMemo(() => {
+                return isKeyInputBeingCaptured ? 'primary' : 'subdued';
+              }, [isKeyInputBeingCaptured])}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
