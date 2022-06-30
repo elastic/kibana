@@ -10,10 +10,17 @@ import type { CoreSavedObjectsRouteHandlerContext } from '../saved_objects';
 import type { IUiSettingsClient, InternalUiSettingsServiceStart } from './types';
 
 /**
+ * @public
+ */
+export interface UiSettingsRequestHandlerContext {
+  client: IUiSettingsClient;
+}
+
+/**
  * The uiSettings core route handler sub-context.
  * @internal
  */
-export class CoreUiSettingsRouteHandlerContext {
+export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandlerContext {
   #client?: IUiSettingsClient;
 
   constructor(

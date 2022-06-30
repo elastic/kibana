@@ -46,29 +46,29 @@ import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
-  IScopedClusterClient,
   ElasticsearchServicePreboot,
+  ElasticsearchRequestHandlerContext,
 } from './elasticsearch';
 import { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
-import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
-import { SavedObjectsClientContract } from './saved_objects/types';
 import {
-  ISavedObjectTypeRegistry,
+  UiSettingsServiceSetup,
+  UiSettingsServiceStart,
+  UiSettingsRequestHandlerContext,
+} from './ui_settings';
+import {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
-  ISavedObjectsExporter,
-  ISavedObjectsImporter,
-  SavedObjectsClientProviderOptions,
+  SavedObjectsRequestHandlerContext,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
+import { DeprecationsServiceSetup, DeprecationsRequestHandlerContext } from './deprecations';
 // Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -528,22 +528,10 @@ export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
  * @public
  */
 export interface CoreRequestHandlerContext {
-  savedObjects: {
-    client: SavedObjectsClientContract;
-    typeRegistry: ISavedObjectTypeRegistry;
-    getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-    getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-    getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-  };
-  elasticsearch: {
-    client: IScopedClusterClient;
-  };
-  uiSettings: {
-    client: IUiSettingsClient;
-  };
-  deprecations: {
-    client: DeprecationsClient;
-  };
+  savedObjects: SavedObjectsRequestHandlerContext;
+  elasticsearch: ElasticsearchRequestHandlerContext;
+  uiSettings: UiSettingsRequestHandlerContext;
+  deprecations: DeprecationsRequestHandlerContext;
 }
 
 /**

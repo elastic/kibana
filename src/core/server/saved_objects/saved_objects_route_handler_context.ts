@@ -11,12 +11,25 @@ import type { InternalSavedObjectsServiceStart } from './saved_objects_service';
 import type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import type { SavedObjectsClientContract } from './types';
 import type { SavedObjectsClientProviderOptions } from './service';
+import type { ISavedObjectsExporter } from './export';
+import type { ISavedObjectsImporter } from './import';
+
+/**
+ * @public
+ */
+export interface SavedObjectsRequestHandlerContext {
+  client: SavedObjectsClientContract;
+  typeRegistry: ISavedObjectTypeRegistry;
+  getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+  getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+  getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+}
 
 /**
  * The savedObject core route handler sub-context.
  * @internal
  */
-export class CoreSavedObjectsRouteHandlerContext {
+export class CoreSavedObjectsRouteHandlerContext implements SavedObjectsRequestHandlerContext {
   constructor(
     private readonly savedObjectsStart: InternalSavedObjectsServiceStart,
     private readonly request: KibanaRequest

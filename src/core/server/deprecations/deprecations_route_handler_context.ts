@@ -11,10 +11,17 @@ import type { CoreSavedObjectsRouteHandlerContext } from '../saved_objects';
 import type { DeprecationsClient, InternalDeprecationsServiceStart } from './deprecations_service';
 
 /**
+ * @public
+ */
+export interface DeprecationsRequestHandlerContext {
+  client: DeprecationsClient;
+}
+
+/**
  * The deprecations core route handler sub-context.
  * @internal
  */
-export class CoreDeprecationsRouteHandlerContext {
+export class CoreDeprecationsRouteHandlerContext implements DeprecationsRequestHandlerContext {
   #client?: DeprecationsClient;
 
   constructor(

@@ -57,3 +57,4 @@ export {
   PRODUCT_RESPONSE_HEADER,
 } from './supported_server_response_check';
 export { CoreElasticsearchRouteHandlerContext } from './elasticsearch_route_handler_context';
+export type { ElasticsearchRequestHandlerContext } from './elasticsearch_route_handler_context';

@@ -11,6 +11,7 @@ export type { UiSettingsClient, UiSettingsServiceOptions } from './ui_settings_c
 export { config } from './ui_settings_config';
 export { UiSettingsService } from './ui_settings_service';
 export { CoreUiSettingsRouteHandlerContext } from './ui_settings_route_handler_context';
+export type { UiSettingsRequestHandlerContext } from './ui_settings_route_handler_context';
 
 export type {
   UiSettingsServiceSetup,
