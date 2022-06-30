@@ -6,7 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
+import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../lib/helpers/setup_request';
 import { ProcessorEvent } from '../../../common/processor_event';
 
@@ -19,30 +19,20 @@ export async function getServiceMapTracePathsPreview({
   start: number;
   end: number;
 }) {
-  const params = {
+  const { apmEventClient } = setup;
+  const response = await apmEventClient.search('get_trace_paths', {
     apm: {
       events: [ProcessorEvent.transaction, ProcessorEvent.span],
     },
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            {
-              terms: {
-                [PROCESSOR_EVENT]: ['span', 'transaction'],
-              },
-            },
-          ],
-        },
-      },
+      query: { bool: { filter: [...rangeQuery(start, end)] } },
+      // sort by trace.id to avoid only getting latest traces
+      sort: [{ [TRACE_ID]: { order: 'asc' as const } }],
       aggs: tracePathsAggs,
     },
-  };
+  });
 
-  const { apmEventClient } = setup;
-  const response = await apmEventClient.search('get_trace_paths', params);
   return response.aggregations?.service_map.value;
 }
 
@@ -66,7 +56,8 @@ export const tracePathsAggs = {
             'span.type',
             'span.subtype',
             'agent.name',
-            'transaction.type'
+            'transaction.type',
+            '@timestamp'
           };
           state.fieldsToCopy = fieldsToCopy;`,
       },
@@ -142,8 +133,11 @@ export const tracePathsAggs = {
             'id': event['id'],
             'trace.id': event['trace.id'],
             'leafNode': false
-          ];
-          
+          ];          
+        }
+
+        def isParent(def context, def eventId) {
+          return context.parentIds.contains(eventId);
         }
 
         def processAndReturnEvent(def context, def eventId) {
@@ -230,9 +224,8 @@ export const tracePathsAggs = {
             def fullTracePath = new ArrayList(tracePath);
             fullTracePath.add(leafNode);
             
-            // Only add if leafNode is not a parent (in which case it's not a leaf node)
-            def isParent = context.parentIds.contains(leafNode.id);
-            if(!isParent) {
+            // Only add if leafNode is not a parent (in which case it's not a leaf node)            
+            if(!isParent(context, leafNode.id)) {
               def leafNodeHash = leafNode['upstream.hash'];
               context.paths[leafNodeHash] = fullTracePath;
             }
@@ -256,7 +249,10 @@ export const tracePathsAggs = {
         }
         
         for (eventId in context.eventsById.keySet()) {
-          processAndReturnEvent(context, eventId);
+          // only leaf events (which don't have any children and thus not parents)
+          if (!isParent(context, eventId)) {
+            processAndReturnEvent(context, eventId);
+          }
         }
         
         def tracePaths = new HashSet();
