@@ -98,14 +98,14 @@ export default ({ getService }: FtrProviderContext) => {
 
       const expectedResponse = [
         {
-          id: 'fq_single_space1s1',
+          id: adJobIdSpace1s1,
           description: 'mean(responsetime) on farequote dataset with 15m bucket span',
           jobState: 'closed',
           datafeedState: '',
           spaces: ['space1'],
         },
         {
-          id: 'fq_single_space2s1',
+          id: adJobIdSpace2s1,
           description: 'mean(responsetime) on farequote dataset with 15m bucket span',
           jobState: 'closed',
           datafeedState: '',
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const expectedResponse = [
         {
-          id: 'fq_single_space3s2',
+          id: adJobIdSpace3s2,
           description: 'mean(responsetime) on farequote dataset with 15m bucket span',
           jobState: 'closed',
           datafeedState: '',
@@ -147,19 +147,19 @@ export default ({ getService }: FtrProviderContext) => {
 
       const expectedResponse = [
         {
-          id: 'dfa_single_space1s1',
+          id: dfaJobIdSpace1s1,
           description: 'Classification job based on the bank marketing dataset',
           source_index: ['ft_bank_marketing'],
-          dest_index: 'user-dfa_single_space1s1',
+          dest_index: `user-${dfaJobIdSpace1s1}`,
           job_type: 'classification',
           state: 'stopped',
           spaces: ['space1'],
         },
         {
-          id: 'dfa_single_space2s1',
+          id: dfaJobIdSpace2s1,
           description: 'Classification job based on the bank marketing dataset',
           source_index: ['ft_bank_marketing'],
-          dest_index: 'user-dfa_single_space2s1',
+          dest_index: `user-${dfaJobIdSpace2s1}`,
           job_type: 'classification',
           state: 'stopped',
           spaces: ['space1'],
@@ -178,10 +178,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       const expectedResponse = [
         {
-          id: 'dfa_single_space3s2',
+          id: dfaJobIdSpace3s2,
           description: 'Classification job based on the bank marketing dataset',
           source_index: ['ft_bank_marketing'],
-          dest_index: 'user-dfa_single_space3s2',
+          dest_index: `user-${dfaJobIdSpace3s2}`,
           job_type: 'classification',
           state: 'stopped',
           spaces: ['space2'],
@@ -207,14 +207,14 @@ export default ({ getService }: FtrProviderContext) => {
           spaces: ['*'],
         },
         {
-          id: 'trained_model_space1s1',
+          id: trainedModelIdSpace1s1,
           description: '',
           state: '',
           type: ['tree_ensemble', 'regression'],
           spaces: ['space1'],
         },
         {
-          id: 'trained_model_space2s1',
+          id: trainedModelIdSpace2s1,
           description: '',
           state: '',
           type: ['tree_ensemble', 'regression'],
@@ -241,7 +241,7 @@ export default ({ getService }: FtrProviderContext) => {
           spaces: ['*'],
         },
         {
-          id: 'trained_model_space3s2',
+          id: trainedModelIdSpace3s2,
           description: '',
           state: '',
           type: ['tree_ensemble', 'regression'],
