@@ -14,7 +14,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem, EuiIcon, useResizeObserver } from '@elastic/eui';
+import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { ConsoleDataState } from '../console_state/types';
@@ -30,9 +30,8 @@ import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj'
 const CommandInputContainer = styled.div`
   background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
   border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
-  outline: solid ${({ theme: { eui } }) => eui.euiBorderWidthThin}
-    ${({ theme: { eui } }) => eui.euiFormBorderColor};
   padding: ${({ theme: { eui } }) => eui.euiSizeS};
+  outline: ${({ theme: { eui } }) => eui.euiBorderThin};
 
   .prompt {
     padding-right: 1ch;
@@ -289,14 +288,6 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               </EuiFlexItem>
             </EuiFlexGroup>
             <InputPlaceholder />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              type="playFilled"
-              color={useMemo(() => {
-                return isKeyInputBeingCaptured ? 'primary' : 'subdued';
-              }, [isKeyInputBeingCaptured])}
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
