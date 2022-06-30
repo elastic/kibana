@@ -96,8 +96,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
             visibleRowIndex: number;
           };
-          const customActionsRow =
-            renderCustomActionsRow && renderCustomActionsRow(alerts[visibleRowIndex]);
 
           return (
             <EuiFlexGroup gutterSize="none" responsive={false}>
@@ -117,7 +115,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
-              {customActionsRow && customActionsRow}
+              {renderCustomActionsRow && renderCustomActionsRow(alerts[visibleRowIndex])}
             </EuiFlexGroup>
           );
         },
