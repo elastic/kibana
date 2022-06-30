@@ -19,7 +19,7 @@ import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { withSuspense } from '../../../services/presentation_util';
-
+import { dashboardFeatureCatalog } from '../../../dashboard_strings';
 export interface DashboardViewportProps {
   container: DashboardContainer;
   controlGroup?: ControlGroupContainer;
@@ -108,6 +108,12 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 
     return (
       <>
+        <h1
+          id="dashboardTitle"
+          className="euiScreenReaderOnly"
+          // ref={workpadTitle}
+          tabIndex={-1}
+        >{`${dashboardFeatureCatalog.getTitle()} - ${title}`}</h1>
         {controlsEnabled ? (
           <>
             {isEditMode && panelCount !== 0 && controlGroup?.getPanelCount() === 0 ? (
