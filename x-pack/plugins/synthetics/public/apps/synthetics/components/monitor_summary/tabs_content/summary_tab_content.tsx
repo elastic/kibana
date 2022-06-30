@@ -28,8 +28,17 @@ export const SummaryTabContent = () => {
           <EuiPanel />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-      <StepDurationPanel />
+      <EuiSpacer size="s" />
+      <EuiPanel style={{ height: 100 }}>{/* TODO: Add status panel*/}</EuiPanel>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiPanel>{/* TODO: Add last run panel*/}</EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <StepDurationPanel />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
