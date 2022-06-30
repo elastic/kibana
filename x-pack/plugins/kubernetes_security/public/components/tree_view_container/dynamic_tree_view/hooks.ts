@@ -27,7 +27,7 @@ export const useFetchDynamicTreeView = (
           query: JSON.stringify(query),
           groupBy,
           page: pageParam,
-          perPage: 2, // TODO: set to 50 after testing with pagination is done
+          perPage: 50,
           index,
         },
       }),
