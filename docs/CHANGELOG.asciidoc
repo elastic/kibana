@@ -76,11 +76,6 @@ Fleet::
 Infrastructure::
 Query persistent queue size for metricbeat documents {kibana-pull}134569[#134569]
 
-Machine Learning::
-* Fixes put job endpoint when payload contains datafeed {kibana-pull}134986[#134986]
-* Fixes trained model map associating wrong model to job {kibana-pull}134849[#134849]
-* Use time range when validating datafeed preview {kibana-pull}134073[#134073]
-
 Observability::
 * Fixes a bug that displayed a toast error when deleting a rule {kibana-pull}135132[#135132]
 * Fixes viewInAppUrl for custom metrics for Inventory Threshold Rule {kibana-pull}134114[#134114]
