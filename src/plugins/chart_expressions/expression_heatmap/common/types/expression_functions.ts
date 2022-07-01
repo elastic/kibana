@@ -91,7 +91,6 @@ export interface HeatmapExpressionContext {
   originatingApp?: string;
 }
 
-
 export type HeatmapInput = Datatable;
 
 export interface HeatmapExpressionProps {

@@ -51,16 +51,16 @@ export const getTimeseriesVisRenderer: (deps: {
     const showNoResult = !checkIfDataExists(visData, model);
 
     const initialRender = () => {
-        handlers.done({
-          renderTelemetry: {
-            visType: 'tsvb',
-            events: [
-              model.type,
-              model.use_kibana_indexes === false ? 'index_pattern_string' : undefined,
-              model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE ? 'last_value' : undefined,
-            ],
-          },
-        });
+      handlers.done({
+        renderTelemetry: {
+          visType: 'tsvb',
+          events: [
+            model.type,
+            model.use_kibana_indexes === false ? 'index_pattern_string' : undefined,
+            model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE ? 'last_value' : undefined,
+          ],
+        },
+      });
     };
 
     render(
