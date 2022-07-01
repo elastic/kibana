@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render } from '@testing-library/react';
+import { generateMockIndicator, Indicator } from '../../../../common/types/Indicator';
+import {
+  EMPTY_PROMPT_TEST_ID,
+  IndicatorsFlyoutTable,
+  TABLE_TEST_ID,
+} from './indicators_flyout_table';
+
+const mockIndicator: Indicator = generateMockIndicator();
+
+describe('IndicatorsFlyoutTable', () => {
+  it('should render fields and values in table', () => {
+    const { getByTestId, getByText } = render(<IndicatorsFlyoutTable indicator={mockIndicator} />);
+
+    expect(getByTestId(TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByText('value')).toBeInTheDocument();
+    expect(getByText('feed')).toBeInTheDocument();
+    expect(getByText(mockIndicator.value)).toBeInTheDocument();
+    expect(getByText(mockIndicator.feed)).toBeInTheDocument();
+  });
+
+  it('should render error message on invalid indicator', () => {
+    const { getByTestId, getByText } = render(
+      <IndicatorsFlyoutTable indicator={{} as unknown as Indicator} />
+    );
+
+    expect(getByTestId(EMPTY_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(getByText('Unable to display indicator information')).toBeInTheDocument();
+    expect(
+      getByText('There was an error displaying the indicator fields and values.')
+    ).toBeInTheDocument();
+  });
+});
