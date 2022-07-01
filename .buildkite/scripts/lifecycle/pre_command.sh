@@ -12,7 +12,16 @@ BUILDKITE_TOKEN="$(retry 5 5 vault read -field=buildkite_token_all_jobs secret/k
 export BUILDKITE_TOKEN
 
 echo '--- Install/build buildkite dependencies'
-npm install -g ts-node
+
+# `rm -rf <ts-node node_modules dir>; npm install -g ts-node` will cause ts-node bin files to be messed up
+# but literally just calling `npm install -g ts-node` a second time fixes it
+# this is only on newer versions of npm
+npm_install_global ts-node
+if ! ts-node --version; then
+  npm_install_global ts-node
+  ts-node --version;
+fi
+
 cd '.buildkite'
 retry 5 15 npm ci
 cd ..
