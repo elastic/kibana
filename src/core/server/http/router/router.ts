@@ -15,7 +15,7 @@ import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
 } from '@kbn/es-errors';
-import { KibanaRequest } from './request';
+import { KibanaRequest, CoreKibanaRequest } from './request';
 import {
   KibanaResponseFactory,
   kibanaResponseFactory,
@@ -266,7 +266,7 @@ export class Router<Context extends RequestHandlerContext = RequestHandlerContex
     let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      kibanaRequest = KibanaRequest.from(request, routeSchemas);
+      kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
     } catch (e) {
       return hapiResponseAdapter.toBadRequest(e.message);
     }
