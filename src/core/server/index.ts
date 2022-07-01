@@ -146,7 +146,6 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
-  ElasticsearchErrorDetails,
   PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
