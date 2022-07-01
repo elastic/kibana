@@ -151,6 +151,7 @@ export const migratePersistableStateAttachments =
         ...doc.attributes,
         persistableStateAttachmentState: migratedState.persistableStateAttachmentState,
       },
+      references: doc.references ?? [],
     };
   };
 

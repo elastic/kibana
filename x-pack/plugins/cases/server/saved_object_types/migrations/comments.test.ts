@@ -536,8 +536,8 @@ describe('comments migrations', () => {
   });
 
   describe('Attachment framework', () => {
-    const attachment: PersistableStateAttachmentTypeSetup = {
-      id: 'test',
+    const attachmentSimple: PersistableStateAttachmentTypeSetup = {
+      id: 'test-simple',
       migrations: {
         '8.4.0': (state) => {
           return { ...state, persistableStateAttachmentState: { bar: 'bar' } };
@@ -545,8 +545,32 @@ describe('comments migrations', () => {
       },
     };
 
+    const attachmentChangeAll: PersistableStateAttachmentTypeSetup = {
+      id: 'test-change-all',
+      migrations: {
+        '8.4.0': (state) => {
+          return {
+            excess: '456',
+            type: CommentType.alert,
+            persistableStateAttachmentTypeId: 'changed',
+            owner: 'test',
+            persistableStateAttachmentState: { bar: 'bar' },
+          };
+        },
+      },
+    };
+
+    const attachmentOld: PersistableStateAttachmentTypeSetup = {
+      id: 'test-old',
+      migrations: {
+        '7.14.0': (state) => ({ ...state, persistableStateAttachmentState: { old: 'old' } }),
+      },
+    };
+
     const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-    persistableStateAttachmentTypeRegistry.register(attachment);
+    persistableStateAttachmentTypeRegistry.register(attachmentSimple);
+    persistableStateAttachmentTypeRegistry.register(attachmentChangeAll);
+    persistableStateAttachmentTypeRegistry.register(attachmentOld);
 
     const migrations = createCommentsMigrations({
       persistableStateAttachmentTypeRegistry,
@@ -561,7 +585,7 @@ describe('comments migrations', () => {
           type: 'abc',
           attributes: {
             type: CommentType.persistableState,
-            persistableStateAttachmentTypeId: 'test',
+            persistableStateAttachmentTypeId: 'test-simple',
             persistableStateAttachmentState: { foo: 'foo' },
             owner: SECURITY_SOLUTION_OWNER,
           },
@@ -575,8 +599,106 @@ describe('comments migrations', () => {
           persistableStateAttachmentState: {
             bar: 'bar',
           },
-          persistableStateAttachmentTypeId: 'test',
+          persistableStateAttachmentTypeId: 'test-simple',
           type: 'persistableState',
+        },
+        id: '123',
+        type: 'abc',
+        references: [],
+      });
+    });
+
+    it('should not change any other attribute expect persistableStateAttachmentState or put excess attributes', () => {
+      const migrationFn = migrations['8.4.0'];
+      const res = migrationFn(
+        {
+          id: '123',
+          type: 'abc',
+          attributes: {
+            type: CommentType.persistableState,
+            persistableStateAttachmentTypeId: 'test-change-all',
+            persistableStateAttachmentState: { foo: 'foo' },
+            owner: SECURITY_SOLUTION_OWNER,
+          },
+        },
+        contextMock
+      );
+
+      expect(res).toEqual({
+        attributes: {
+          owner: 'securitySolution',
+          persistableStateAttachmentState: {
+            bar: 'bar',
+          },
+          persistableStateAttachmentTypeId: 'test-change-all',
+          type: 'persistableState',
+        },
+        id: '123',
+        type: 'abc',
+        references: [],
+      });
+    });
+
+    it('combines cases comment migration with persistable attachment migrations correctly', () => {
+      /**
+       * The 7.14.0 migration adds the owner field to all comments.
+       * By executing the 7.14.0 migrations on a persistable state attachment
+       * without an owner we test that the cases migrations are
+       * combined along with the persistable state attachment
+       * migrations
+       */
+      const migrationFn = migrations['7.14.0'];
+      const res = migrationFn(
+        {
+          id: '123',
+          type: 'abc',
+          attributes: {
+            // owner is missing on purpose
+            type: CommentType.persistableState,
+            persistableStateAttachmentTypeId: 'test-old',
+            persistableStateAttachmentState: { foo: 'foo' },
+          },
+        },
+        contextMock
+      );
+
+      expect(res).toEqual({
+        attributes: {
+          // owner was added by the case migrations
+          owner: 'securitySolution',
+          // state changed by the persistable attachment migration
+          persistableStateAttachmentState: {
+            old: 'old',
+          },
+          persistableStateAttachmentTypeId: 'test-old',
+          type: 'persistableState',
+        },
+        id: '123',
+        type: 'abc',
+        references: [],
+      });
+    });
+
+    it('does not run persistable state migration on other attachments', () => {
+      const migrationFn = migrations['8.4.0'];
+      const res = migrationFn(
+        {
+          id: '123',
+          type: 'abc',
+          attributes: {
+            type: CommentType.user,
+            comment: 'test',
+            owner: SECURITY_SOLUTION_OWNER,
+          },
+        },
+        contextMock
+      );
+
+      expect(res).toEqual({
+        attributes: {
+          owner: 'securitySolution',
+          comment: 'test',
+          type: 'user',
         },
         id: '123',
         type: 'abc',

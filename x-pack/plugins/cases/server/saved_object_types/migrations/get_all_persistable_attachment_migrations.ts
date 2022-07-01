@@ -14,9 +14,15 @@ const getMigrateFunction = (
 ) => {
   const migrateFn = (state: PersistableStateAttachmentState, version: string) => {
     let output = state;
+
+    if (!persistableStateAttachmentTypeRegistry.has(state.persistableStateAttachmentTypeId)) {
+      return output;
+    }
+
     const attachment = persistableStateAttachmentTypeRegistry.get(
       state.persistableStateAttachmentTypeId
     );
+
     const migrations = attachment.migrations;
     const attachmentMigrations = typeof migrations === 'function' ? migrations() : migrations;
 
