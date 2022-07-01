@@ -26,20 +26,7 @@ import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
 import type { SenseEditor } from '../../models/sense_editor';
-import type { RequestResult } from '../../hooks/use_send_current_request/send_request';
-
-/**
- *  Sorts the request data by statusCode in increasing order and
- *  returns the last one which will be rendered in network request status bar
- */
-export const getLastDatum = (requestData: RequestResult[] | null) => {
-  if (requestData) {
-    return requestData
-      .slice()
-      .sort((a, b) => a.response.statusCode - b.response.statusCode)
-      .pop();
-  }
-};
+import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 export function Main() {
   const {
@@ -76,7 +63,7 @@ export function Main() {
     );
   }
 
-  const lastDatum = getLastDatum(requestData) ?? requestError;
+  const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
 
   return (
     <div id="consoleRoot">
@@ -109,13 +96,13 @@ export function Main() {
               <NetworkRequestStatusBar
                 requestInProgress={requestInProgress}
                 requestResult={
-                  lastDatum
+                  data
                     ? {
-                        method: lastDatum.request.method.toUpperCase(),
-                        endpoint: lastDatum.request.path,
-                        statusCode: lastDatum.response.statusCode,
-                        statusText: lastDatum.response.statusText,
-                        timeElapsedMs: lastDatum.response.timeMs,
+                        method: data.request.method.toUpperCase(),
+                        endpoint: data.request.path,
+                        statusCode: data.response.statusCode,
+                        statusText: data.response.statusText,
+                        timeElapsedMs: data.response.timeMs,
                       }
                     : undefined
                 }

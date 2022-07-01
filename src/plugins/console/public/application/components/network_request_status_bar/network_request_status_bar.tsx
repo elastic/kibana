@@ -80,10 +80,7 @@ export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
               }`}</EuiText>
             }
           >
-            <EuiBadge
-              color={mapStatusCodeToBadgeColor(statusCode)}
-              data-test-subj="consoleRequestStatusBadge"
-            >
+            <EuiBadge color={mapStatusCodeToBadgeColor(statusCode)}>
               {/*  Use &nbsp; to ensure that no matter the width we don't allow line breaks */}
               {statusCode}&nbsp;-&nbsp;{statusText}
             </EuiBadge>
