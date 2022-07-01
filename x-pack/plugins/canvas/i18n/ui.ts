@@ -1824,11 +1824,11 @@ export const ViewStrings = {
       }),
     getRespectSourceOrderDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderDisplayName', {
-        defaultMessage: 'Data order',
+        defaultMessage: 'Order of data',
       }),
     getRespectSourceOrderToggleLabel: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderToggleLabel', {
-        defaultMessage: 'Use original',
+        defaultMessage: 'Use original order',
       }),
     getRespectSourceOrderHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.respectSourceOrderHelp', {
@@ -1848,7 +1848,7 @@ export const ViewStrings = {
       }),
     getEmptySizeRatioHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.emptySizeRatioHelp', {
-        defaultMessage: 'Size of the donut hole',
+        defaultMessage: 'Set the inner diameter of the donut hole',
       }),
     getPaletteHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.paletteHelp', {
@@ -1858,7 +1858,7 @@ export const ViewStrings = {
       i18n.translate(
         'xpack.canvas.uis.views.partitionVis.args.startFromSecondLargestSliceDisplayName',
         {
-          defaultMessage: 'Placement',
+          defaultMessage: 'Slice placement',
         }
       ),
     getStartFromSecondLargestSliceHelp: () =>
@@ -1874,11 +1874,11 @@ export const ViewStrings = {
       ),
     getLabelsDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.labelsDisplayName', {
-        defaultMessage: 'Labels configuration',
+        defaultMessage: 'Label configuration',
       }),
     getLabelsHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.labelsHelp', {
-        defaultMessage: 'Set up labels configuration',
+        defaultMessage: 'Show label settings',
       }),
     getEnableLabel: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.options.enableHelp', {
