@@ -9,6 +9,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const customDataViewIdParam = 'context-enc:oded-param';
+const customDocIdParam = '1+1=2';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const kibanaServer = getService('kibanaServer');
@@ -22,21 +25,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'context_encoded_param']);
       await PageObjects.common.navigateToApp('settings');
       await es.transport.request({
-        path: '/context-encoded-param/_doc/1+1=2',
+        path: `/context-encoded-param/_doc/${customDocIdParam}`,
         method: 'PUT',
         body: {
           username: 'Dmitry',
           '@timestamp': '2015-09-21T09:30:23',
         },
       });
-      await PageObjects.settings.createIndexPattern('context-encoded-param');
-
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
+      await PageObjects.settings.createIndexPattern(
+        'context-encoded-param',
+        '@timestamp',
+        true,
+        customDataViewIdParam
+      );
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
 
-    it('should navigate correctly', async () => {
+    it('should navigate correctly when ', async () => {
       await PageObjects.discover.selectIndexPattern('context-encoded-param');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

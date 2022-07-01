@@ -119,7 +119,7 @@ For other email servers, you can check the list of well-known services that Node
 [[elasticcloud]]
 ==== Sending email from Elastic Cloud
 
-IMPORTANT: These instructions require you to link:{cloud}/ec-watcher.html#ec-watcher-whitelist[allowlist] the email addresses that notifications get sent.
+IMPORTANT: These instructions require you to link:{cloud}/ec-watcher.html#ec-watcher-allowlist[allowlist] the email addresses that notifications get sent.
 
 Use the following connector settings to send email from Elastic Cloud: 
 
