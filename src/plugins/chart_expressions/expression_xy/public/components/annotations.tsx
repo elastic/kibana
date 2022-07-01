@@ -50,7 +50,7 @@ export interface AnnotationsProps {
   formatter?: FieldFormat;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
-  hide?: boolean;
+  previewMode?: boolean;
   minInterval?: number;
   isBarChart?: boolean;
   outsideDimension: number;
@@ -179,7 +179,7 @@ export const Annotations = ({
   formatter,
   isHorizontal,
   paddingMap,
-  hide,
+  previewMode,
   minInterval,
   isBarChart,
   outsideDimension,
@@ -198,7 +198,7 @@ export const Annotations = ({
         const header =
           formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
           moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
-        const strokeWidth = hide ? 1 : annotation.lineWidth || 1;
+        const strokeWidth = previewMode ? 1 : annotation.lineWidth || 1;
         const dataValue = isGrouped
           ? moment(
               isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
@@ -210,7 +210,7 @@ export const Annotations = ({
             key={id}
             domainType={AnnotationDomainType.XDomain}
             marker={
-              !hide ? (
+              !previewMode ? (
                 <Marker
                   {...{
                     config: annotation,
@@ -223,7 +223,7 @@ export const Annotations = ({
               ) : undefined
             }
             markerBody={
-              !hide ? (
+              !previewMode ? (
                 <MarkerBody
                   label={
                     annotation.textVisibility && !hasReducedPadding ? annotation.label : undefined

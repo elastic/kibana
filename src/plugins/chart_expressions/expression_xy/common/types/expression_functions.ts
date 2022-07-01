@@ -115,7 +115,7 @@ export interface DataLayerArgs {
   accessors: Array<ExpressionValueVisDimension | string>;
   seriesType: SeriesType;
   xAccessor?: string | ExpressionValueVisDimension;
-  hide?: boolean;
+  previewMode?: boolean;
   splitAccessor?: string | ExpressionValueVisDimension;
   markSizeAccessor?: string | ExpressionValueVisDimension;
   lineWidth?: number;
@@ -141,7 +141,7 @@ export interface ExtendedDataLayerArgs {
   accessors: string[];
   seriesType: SeriesType;
   xAccessor?: string;
-  hide?: boolean;
+  previewMode?: boolean;
   splitAccessor?: string;
   markSizeAccessor?: string;
   lineWidth?: number;
@@ -280,7 +280,7 @@ export interface XYProps {
 
 export interface AnnotationLayerArgs {
   annotations: EventAnnotationOutput[];
-  hide?: boolean;
+  previewMode?: boolean;
 }
 
 export type ExtendedAnnotationLayerArgs = AnnotationLayerArgs & {

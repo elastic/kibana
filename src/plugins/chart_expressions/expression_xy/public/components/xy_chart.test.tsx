@@ -1046,7 +1046,7 @@ describe('XYChart component', () => {
       layerId: 'numberLayer',
       type: 'dataLayer',
       layerType: LayerTypes.DATA,
-      hide: false,
+      previewMode: false,
       showLines: true,
       xAccessor: 'xAccessorId',
       xScaleType: 'linear',
@@ -1251,7 +1251,7 @@ describe('XYChart component', () => {
       type: 'dataLayer',
       layerType: LayerTypes.DATA,
       showLines: true,
-      hide: false,
+      previewMode: false,
       xAccessor: 'xAccessorId',
       xScaleType: 'linear',
       isHistogram: true,
@@ -3046,11 +3046,11 @@ describe('XYChart component', () => {
       const component = mount(<XYChart {...defaultProps} args={args} />);
       expect(component.find(RectAnnotation)).toMatchSnapshot();
     });
-    test('should render simplified annotations when hide is true', () => {
+    test('should render simplified annotations when previewMode is true', () => {
       const { args } = sampleArgsWithAnnotations([
         createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
       ]);
-      (args.layers[1] as CommonXYAnnotationLayerConfig).hide = true;
+      (args.layers[1] as CommonXYAnnotationLayerConfig).previewMode = true;
       const component = mount(<XYChart {...defaultProps} args={args} />);
       expect(component.find('LineAnnotation')).toMatchSnapshot();
       expect(component.find('RectAnnotation')).toMatchSnapshot();

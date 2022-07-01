@@ -280,6 +280,78 @@ Array [
 ]
 `;
 
+exports[`XYChart component annotations should render simplified annotations when previewMode is true 1`] = `
+<LineAnnotation
+  dataValues={
+    Array [
+      Object {
+        "dataValue": 1647591917140,
+        "details": "Annotation",
+        "header": "2022-03-18T08:25:17.140Z",
+      },
+    ]
+  }
+  domainType="xDomain"
+  id="annotation"
+  key="annotation"
+  markerPosition="top"
+  style={
+    Object {
+      "line": Object {
+        "dash": undefined,
+        "opacity": 1,
+        "stroke": "#f04e98",
+        "strokeWidth": 1,
+      },
+    }
+  }
+/>
+`;
+
+exports[`XYChart component annotations should render simplified annotations when previewMode is true 2`] = `
+Array [
+  <RectAnnotation
+    customTooltipDetails={[Function]}
+    dataValues={Array []}
+    hideTooltips={false}
+    id="__endzones__"
+    style={
+      Object {
+        "fill": "#69707d",
+        "opacity": 0.2,
+        "stroke": "#69707d",
+        "strokeWidth": 0,
+      }
+    }
+    zIndex={2}
+  />,
+  <RectAnnotation
+    customTooltip={[Function]}
+    dataValues={
+      Array [
+        Object {
+          "coordinates": Object {
+            "x0": 1647591917140,
+            "x1": 1648715117140,
+          },
+          "details": "Event range",
+        },
+      ]
+    }
+    id="event_range"
+    key="event_range"
+    outside={false}
+    outsideDimension={2}
+    style={
+      Object {
+        "fill": "#F04E981A",
+        "opacity": 1,
+      }
+    }
+  />,
+]
+`;
+
 exports[`XYChart component it renders area 1`] = `
 <Chart
   renderer="canvas"

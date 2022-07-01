@@ -92,7 +92,7 @@ export interface XYDataLayerConfig {
   layerType: 'data';
   seriesType: SeriesType;
   xAccessor?: string;
-  hide?: boolean;
+  previewMode?: boolean;
   yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
@@ -113,7 +113,7 @@ export interface XYAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
-  hide?: boolean;
+  previewMode?: boolean;
 }
 
 export type XYLayerConfig =

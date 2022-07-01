@@ -42,7 +42,7 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
   return {
     type: DATA_LAYER,
     seriesType: args.seriesType,
-    hide: args.hide,
+    previewMode: args.previewMode,
     columnToLabel: args.columnToLabel,
     xScaleType: args.xScaleType,
     isHistogram: args.isHistogram,
@@ -72,7 +72,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     seriesType,
     accessors,
     xAccessor,
-    hide,
+    previewMode,
     splitAccessor,
     columnToLabel,
     xScaleType,
