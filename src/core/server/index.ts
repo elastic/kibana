@@ -156,6 +156,7 @@ export type {
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
   UnauthorizedError,
+  ElasticsearchRequestHandlerContext,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
@@ -387,6 +388,7 @@ export type {
   SavedObjectsImportWarning,
   SavedObjectsValidationMap,
   SavedObjectsValidationSpec,
+  SavedObjectsRequestHandlerContext,
 } from './saved_objects';
 
 export type {
@@ -398,6 +400,7 @@ export type {
   UiSettingsServiceStart,
   UserProvidedValues,
   DeprecationSettings,
+  UiSettingsRequestHandlerContext,
 } from './ui_settings';
 
 export type {
@@ -421,6 +424,7 @@ export type {
   GetDeprecationsContext,
   DeprecationsServiceSetup,
   DeprecationsClient,
+  DeprecationsRequestHandlerContext,
 } from './deprecations';
 
 export type { AppCategory } from '../types';
