@@ -136,6 +136,7 @@ export const SearchIndices: React.FC = () => {
         {
           render: ({ name }: SearchIndex) => (
             <EuiButtonIconTo
+              aria-label={name}
               iconType="eye"
               data-test-subj="view-search-index-button"
               to={generatePath(SEARCH_INDEX_PATH, {

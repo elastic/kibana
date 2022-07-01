@@ -22,7 +22,7 @@ export const ApiKey: React.FC<ApiKeyProps> = ({ apiKey, label }) => (
         <EuiSpacer size="xs" />
       </>
     )}
-    <EuiCodeBlock language="bash" fontSize="m" paddingSize="m" color="dark" isCopyable>
+    <EuiCodeBlock fontSize="m" paddingSize="m" color="dark" isCopyable>
       {apiKey}
     </EuiCodeBlock>
   </>
