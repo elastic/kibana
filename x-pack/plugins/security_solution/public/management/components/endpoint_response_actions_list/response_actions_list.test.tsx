@@ -80,7 +80,7 @@ describe('Response Actions List', () => {
   describe('Without agentIds filter', () => {
     it('should show date filters', () => {
       render();
-      expect(renderResult.getByTestId('actionListSuperDatePicker')).toBeTruthy();
+      expect(renderResult.getByTestId(`${testPrefix}-super-date-picker`)).toBeTruthy();
     });
 
     it('should show empty state when there is no data', async () => {

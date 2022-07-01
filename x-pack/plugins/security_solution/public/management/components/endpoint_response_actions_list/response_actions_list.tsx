@@ -501,6 +501,7 @@ export const ResponseActionsList = memo<
       <ActionListDateRangePicker
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
+        onClick={reFetchEndpointActionList}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}
