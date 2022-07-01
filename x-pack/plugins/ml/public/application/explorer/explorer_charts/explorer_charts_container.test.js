@@ -125,7 +125,7 @@ describe('ExplorerChartsContainer', () => {
     );
 
     // We test child components with snapshots separately
-    // so we just do some high level sanity check here.
+    // so we just do a high level check here.
     expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(2);
 
     // Check if the additional y-axis information for rare charts is not part of the chart
@@ -152,7 +152,7 @@ describe('ExplorerChartsContainer', () => {
     );
 
     // We test child components with snapshots separately
-    // so we just do some high level sanity check here.
+    // so we just do a high level check here.
     expect(wrapper.find('.ml-explorer-chart-container').children()).toHaveLength(2);
 
     // Check if the additional y-axis information for rare charts is part of the chart

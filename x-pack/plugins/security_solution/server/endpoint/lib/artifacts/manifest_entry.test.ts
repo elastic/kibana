@@ -10,7 +10,7 @@ import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.m
 import { ManifestEntry } from './manifest_entry';
 
 describe('manifest_entry', () => {
-  describe('ManifestEntry object sanity checks', () => {
+  describe('ManifestEntry object checks', () => {
     let artifact: InternalArtifactSchema;
     let manifestEntry: ManifestEntry;
 
