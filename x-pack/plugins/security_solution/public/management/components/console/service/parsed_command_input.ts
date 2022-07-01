@@ -168,11 +168,13 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
 };
 
 export const parsedPidOrEntityIdParameter = (
-  parameters: { pid: ParsedArgData; entityId?: never } | { pid?: never; entityId: ParsedArgData }
-): { pid: number; entity_id?: never } | { pid?: never; entity_id: string } => {
+  parameters: { pid?: ParsedArgData; entityId?: ParsedArgData }
+): { pid: number; entity_id?: never } | { pid?: never; entity_id: string } | undefined => {
   if (parameters.pid) {
     return { pid: Number(parameters.pid[0]) };
-  } else {
+  } else if (parameters.entityId) {
     return { entity_id: parameters.entityId[0] };
   }
+
+  return undefined;
 };

@@ -17,8 +17,7 @@ import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_
 
 export const KillProcessActionResult = memo<
   CommandExecutionComponentProps<
-    | { comment?: string; pid: number; entityId?: never }
-    | { comment?: string; pid?: never; entityId: string },
+    { comment?: string; pid?: number; entityId?: string },
     {
       actionId?: string;
       actionRequestSent?: boolean;
@@ -41,9 +40,10 @@ export const KillProcessActionResult = memo<
 
   // Send Kill request if not yet done
   useEffect(() => {
+
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
 
-    if (!actionRequestSent && endpointId) {
+    if (!actionRequestSent && endpointId && parameters) {
       killProcessApi.mutate({
         endpoint_ids: [endpointId],
         comment: command.args.args?.comment?.[0],

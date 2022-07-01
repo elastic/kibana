@@ -166,17 +166,9 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
           <EuiSpacer />
           <EuiText>
             <FormattedMessage
-              id="xpack.securitySolution.console.commandUsage.requiredLabel"
+              id="xpack.securitySolution.console.commandUsage.exclusiveOr"
               defaultMessage="Include only one of the following required parameters:"
             />
-            {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
-                  defaultMessage="Note: at least one option must be used"
-                />
-              </EuiText>
-            )}
           </EuiText>
           {commandDef.args && (
             <EuiDescriptionList
@@ -199,14 +191,6 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
               id="xpack.securitySolution.console.commandUsage.optionalLabel"
               defaultMessage="Optional parameters:"
             />
-            {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
-                  defaultMessage="Note: at least one option must be used"
-                />
-              </EuiText>
-            )}
           </EuiText>
           {commandDef.args && (
             <EuiDescriptionList
