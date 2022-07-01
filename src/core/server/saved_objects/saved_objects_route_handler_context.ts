@@ -15,6 +15,7 @@ import type { ISavedObjectsExporter } from './export';
 import type { ISavedObjectsImporter } from './import';
 
 /**
+ * Core's `savedObjects` request handler context.
  * @public
  */
 export interface SavedObjectsRequestHandlerContext {
@@ -26,7 +27,7 @@ export interface SavedObjectsRequestHandlerContext {
 }
 
 /**
- * The savedObject core route handler sub-context.
+ * The {@link SavedObjectsRequestHandlerContext} implementation.
  * @internal
  */
 export class CoreSavedObjectsRouteHandlerContext implements SavedObjectsRequestHandlerContext {

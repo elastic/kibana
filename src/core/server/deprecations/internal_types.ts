@@ -6,14 +6,21 @@
  * Side Public License, v 1.
  */
 
+import type { IRouter } from '../http';
 import type { RequestHandlerContextBase } from '..';
 import type { DeprecationsRequestHandlerContext } from './deprecations_route_handler_context';
 
 /**
- * Request handler context only defining `core.deprecations`.
- * Only used for module isolation purposes.
+ * Request handler context used by core's deprecations routes.
  * @internal
  */
 export interface InternalDeprecationRequestHandlerContext extends RequestHandlerContextBase {
   core: Promise<{ deprecations: DeprecationsRequestHandlerContext }>;
 }
+
+/**
+ * Router bound to the {@link InternalDeprecationRequestHandlerContext}.
+ * Used by core's deprecations routes.
+ * @internal
+ */
+export type InternalDeprecationRouter = IRouter<InternalDeprecationRequestHandlerContext>;

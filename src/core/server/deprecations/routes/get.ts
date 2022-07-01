@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '../../http';
 import type { DeprecationsGetResponse } from '../types';
-import type { InternalDeprecationRequestHandlerContext } from '../internal_types';
+import type { InternalDeprecationRouter } from '../internal_types';
 
-export const registerGetRoute = (router: IRouter<InternalDeprecationRequestHandlerContext>) => {
+export const registerGetRoute = (router: InternalDeprecationRouter) => {
   router.get(
     {
       path: '/',

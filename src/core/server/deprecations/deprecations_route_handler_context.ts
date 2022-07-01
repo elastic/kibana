@@ -11,6 +11,7 @@ import type { CoreSavedObjectsRouteHandlerContext } from '../saved_objects';
 import type { DeprecationsClient, InternalDeprecationsServiceStart } from './deprecations_service';
 
 /**
+ * Core's `deprecations` request handler context.
  * @public
  */
 export interface DeprecationsRequestHandlerContext {
@@ -18,7 +19,7 @@ export interface DeprecationsRequestHandlerContext {
 }
 
 /**
- * The deprecations core route handler sub-context.
+ * The {@link DeprecationsRequestHandlerContext} implementation.
  * @internal
  */
 export class CoreDeprecationsRouteHandlerContext implements DeprecationsRequestHandlerContext {

@@ -12,8 +12,7 @@ import type { ElasticsearchRequestHandlerContext } from '../elasticsearch';
 import type { SavedObjectsRequestHandlerContext } from './saved_objects_route_handler_context';
 
 /**
- * Request handler context only defining `core.savedObjects` and `core.elasticsearch`.
- * Only used for module isolation purposes.
+ * Request handler context used by core's savedObjects routes.
  * @internal
  */
 export interface InternalSavedObjectsRequestHandlerContext extends RequestHandlerContextBase {
@@ -25,7 +24,7 @@ export interface InternalSavedObjectsRequestHandlerContext extends RequestHandle
 
 /**
  * Router bound to the {@link InternalSavedObjectsRequestHandlerContext}.
- * Only used for module isolation purposes.
+ * Used by core's savedObjects routes.
  * @internal
  */
 export type InternalSavedObjectRouter = IRouter<InternalSavedObjectsRequestHandlerContext>;

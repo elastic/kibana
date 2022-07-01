@@ -11,8 +11,7 @@ import type { IRouter } from '../http';
 import type { UiSettingsRequestHandlerContext } from './ui_settings_route_handler_context';
 
 /**
- * Request handler context only defining `core.savedObjects` and `core.elasticsearch`.
- * Only used for module isolation purposes.
+ * Request handler context used by core's uiSetting routes.
  * @internal
  */
 export interface InternalUiSettingsRequestHandlerContext extends RequestHandlerContextBase {
@@ -22,8 +21,8 @@ export interface InternalUiSettingsRequestHandlerContext extends RequestHandlerC
 }
 
 /**
- * Router bound to the {@link InternalSavedObjectsRequestHandlerContext}.
- * Only used for module isolation purposes.
+ * Router bound to the {@link InternalUiSettingsRequestHandlerContext}.
+ * Used by core's uiSetting routes.
  * @internal
  */
 export type InternalUiSettingsRouter = IRouter<InternalUiSettingsRequestHandlerContext>;

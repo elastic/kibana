@@ -11,6 +11,7 @@ import type { IScopedClusterClient } from './client';
 import type { InternalElasticsearchServiceStart } from './types';
 
 /**
+ * Core's `elasticsearch` request handler context.
  * @public
  */
 export interface ElasticsearchRequestHandlerContext {
@@ -18,10 +19,10 @@ export interface ElasticsearchRequestHandlerContext {
 }
 
 /**
- * The elasticsearch core route handler sub-context.
+ * The {@link UiSettingsRequestHandlerContext} implementation.
  * @internal
  */
-export class CoreElasticsearchRouteHandlerContext implements ElasticsearchRequestHandlerContext {
+export class ElasticsearchRequestHandlerContext implements ElasticsearchRequestHandlerContext {
   #client?: IScopedClusterClient;
 
   constructor(
