@@ -36,7 +36,7 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
       path: '/internal/enterprise_search/indices',
       validate: {
         query: schema.object({
-          page: schema.number({ defaultValue: 1, min: 0 }),
+          page: schema.number({ defaultValue: 0, min: 0 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
@@ -57,8 +57,8 @@ export function registerIndexRoutes({ router }: RouteDependencies) {
               page: {
                 current: page,
                 size,
-                totalPages,
-                totalResults,
+                total_pages: totalPages,
+                total_results: totalResults,
               },
             },
           },
