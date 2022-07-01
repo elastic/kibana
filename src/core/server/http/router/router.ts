@@ -14,7 +14,7 @@ import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,
-} from '../../elasticsearch/client/errors';
+} from '@kbn/es-errors';
 import { KibanaRequest } from './request';
 import {
   KibanaResponseFactory,
