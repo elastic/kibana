@@ -160,3 +160,5 @@ export interface BuilderItem {
   series: SeriesUrl;
   seriesConfig?: SeriesConfig;
 }
+
+export type SupportedOperations = 'average' | 'median' | 'sum' | 'unique_count' | 'min' | 'max';
