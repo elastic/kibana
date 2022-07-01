@@ -17,6 +17,7 @@ import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plug
 
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { TIME_RANGE_DATA_MODES } from '../common/enums';
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
 
@@ -49,6 +50,19 @@ export const getTimeseriesVisRenderer: (deps: {
     const { visParams: model, visData, syncColors, syncTooltips } = config;
     const showNoResult = !checkIfDataExists(visData, model);
 
+    const initialRender = () => {
+        handlers.done({
+          renderTelemetry: {
+            visType: 'tsvb',
+            events: [
+              model.type,
+              model.use_kibana_indexes === false ? 'index_pattern_string' : undefined,
+              model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE ? 'last_value' : undefined,
+            ],
+          },
+        });
+    };
+
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={theme.theme$}>
@@ -67,9 +81,7 @@ export const getTimeseriesVisRenderer: (deps: {
               syncColors={syncColors}
               syncTooltips={syncTooltips}
               uiState={handlers.uiState! as PersistedState}
-              initialRender={() => {
-                handlers.done();
-              }}
+              initialRender={initialRender}
             />
           </VisualizationContainer>
         </KibanaThemeProvider>

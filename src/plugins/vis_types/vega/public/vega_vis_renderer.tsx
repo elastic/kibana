@@ -27,13 +27,24 @@ export const getVegaVisRenderer: (
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
+
     render(
       <KibanaThemeProvider theme$={deps.core.theme.theme$}>
         <VisualizationContainer handlers={handlers}>
           <LazyVegaVisComponent
             deps={deps}
             fireEvent={handlers.event}
-            renderComplete={handlers.done}
+            renderComplete={() =>
+              handlers.done({
+                renderTelemetry: {
+                  visType: 'vega',
+                  events: [
+                    visData.useMap ? 'map' : undefined,
+                    visData.isVegaLite ? 'lite' : 'normal',
+                  ],
+                },
+              })
+            }
             renderMode={handlers.getRenderMode()}
             visData={visData}
           />

@@ -73,11 +73,19 @@ export interface IInterpreterRenderEvent<Context = unknown> {
   data?: Context;
 }
 
+export interface IInterpreterRenderHandlersDoneContext {
+  renderTelemetry?: {
+    visType: string;
+    visGroup?: string;
+    events?: string | Array<string | undefined>;
+  };
+}
+
 export interface IInterpreterRenderHandlers {
   /**
    * Done increments the number of rendering successes
    */
-  done(): void;
+  done(context?: IInterpreterRenderHandlersDoneContext): void;
   onDestroy(fn: () => void): void;
   reload(): void;
   update(params: IInterpreterRenderUpdateParams): void;

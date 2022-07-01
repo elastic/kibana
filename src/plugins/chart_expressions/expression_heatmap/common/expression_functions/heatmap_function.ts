@@ -20,6 +20,7 @@ import {
   EXPRESSION_HEATMAP_GRID_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
+import { extractRenderContext } from '../../../common/utils';
 
 const convertToVisDimension = (
   columns: DatatableColumn[],
@@ -159,6 +160,8 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     validateAccessor(args.valueAccessor, data.columns);
     validateAccessor(args.splitRowAccessor, data.columns);
     validateAccessor(args.splitColumnAccessor, data.columns);
+
+    console.log(extractRenderContext(handlers.getExecutionContext()));
 
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.reset();

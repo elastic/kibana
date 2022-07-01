@@ -442,7 +442,7 @@ export class VisualizeEmbeddable
   private async updateHandler() {
     const parentContext = this.parent?.getInput().executionContext || getExecutionContext().get();
     const child: KibanaExecutionContext = {
-      type: 'visualization',
+      type: 'agg_based',
       name: this.vis.type.name,
       id: this.vis.id ?? 'new',
       description: this.vis.title || this.input.title || this.vis.type.name,

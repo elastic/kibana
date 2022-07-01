@@ -87,11 +87,17 @@ export interface HeatmapArguments {
   ariaLabel?: string;
 }
 
+export interface HeatmapExpressionContext {
+  originatingApp?: string;
+}
+
+
 export type HeatmapInput = Datatable;
 
 export interface HeatmapExpressionProps {
   data: Datatable;
   args: HeatmapArguments;
+  context?: HeatmapExpressionContext;
 }
 
 export interface HeatmapRender {

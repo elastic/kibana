@@ -35,7 +35,7 @@ const TableVisualizationComponent = ({
   useLayoutEffect(() => {
     // Temporary solution: DataGrid should provide onRender callback
     setTimeout(() => {
-      handlers.done();
+      handlers.done({ renderTelemetry: { visType: 'table', visGroup: 'agg_based' } });
     }, 300);
   }, [handlers]);
 

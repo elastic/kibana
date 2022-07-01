@@ -11,6 +11,9 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
+import { METRIC_TYPE } from '@kbn/analytics';
+
+import { IInterpreterRenderHandlersDoneContext } from '../common/expression_renderers';
 import {
   ExpressionRenderError,
   RenderErrorHandlerFnType,
@@ -20,7 +23,7 @@ import {
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
 import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
 
-import { getRenderersRegistry } from './services';
+import { getRenderersRegistry, getUsageCollection } from './services';
 
 export type IExpressionRendererExtraHandlers = Record<string, unknown>;
 
@@ -34,6 +37,31 @@ export interface ExpressionRenderHandlerParams {
 }
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
+
+const doRenderTelemetry = (context?: IInterpreterRenderHandlersDoneContext) => {
+  if (context?.renderTelemetry) {
+    const { visGroup, visType, events } = context.renderTelemetry;
+    const usageCollection = getUsageCollection();
+    const toEvent = (item: string | undefined) =>
+      ['render', visGroup, visType, item].filter(Boolean).join('_');
+
+    let uiCounterEvents: string | string[];
+
+    if (!events || typeof events === 'string') {
+      uiCounterEvents = toEvent(events);
+    } else {
+      uiCounterEvents = events.filter(Boolean).map((item) => toEvent(item));
+    }
+
+    if (usageCollection) {
+      usageCollection.reportUiCounter(
+        context.renderTelemetry.visGroup ?? context.renderTelemetry.visType,
+        METRIC_TYPE.COUNT,
+        uiCounterEvents
+      );
+    }
+  }
+};
 
 export class ExpressionRenderHandler {
   render$: Observable<number>;
@@ -77,9 +105,11 @@ export class ExpressionRenderHandler {
       onDestroy: (fn: Function) => {
         this.destroyFn = fn;
       },
-      done: () => {
+      done: (context) => {
         this.renderCount++;
         this.renderSubject.next(this.renderCount);
+
+        doRenderTelemetry(context);
       },
       reload: () => {
         this.updateSubject.next(null);

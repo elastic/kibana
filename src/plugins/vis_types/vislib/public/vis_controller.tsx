@@ -75,7 +75,7 @@ export const createVislibVisController = (
       this.chartEl.dataset.vislibChartType = visParams.type;
 
       if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
-        handlers.done();
+        handlers.done({ renderTelemetry: { visGroup: 'agg_based', visType: visParams.type } });
         return;
       }
 
@@ -86,7 +86,9 @@ export const createVislibVisController = (
       this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
       this.vislibVis.on('brush', fireEvent);
       this.vislibVis.on('click', fireEvent);
-      this.vislibVis.on('renderComplete', handlers.done);
+      this.vislibVis.on('renderComplete', () =>
+        handlers.done({ renderTelemetry: { visGroup: 'agg_based', visType: visParams.type } })
+      );
       this.removeListeners = () => {
         this.vislibVis.off('brush', fireEvent);
         this.vislibVis.off('click', fireEvent);

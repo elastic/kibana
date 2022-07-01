@@ -39,7 +39,7 @@ export const heatmapRenderer: (
     defaultMessage: 'Heatmap',
   }),
   reuseDomNode: true,
-  render: async (domNode, config, handlers) => {
+  render: async (domNode, config, handlers, ) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });

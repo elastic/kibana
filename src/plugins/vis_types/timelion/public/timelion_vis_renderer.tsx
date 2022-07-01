@@ -60,7 +60,9 @@ export const getTimelionVisRenderer: (
                 interval={visParams.interval}
                 ariaLabel={visParams.ariaLabel}
                 seriesList={seriesList}
-                renderComplete={handlers.done}
+                renderComplete={() =>
+                  handlers.done({ renderTelemetry: { visType: 'timelion', visGroup: 'agg_based' } })
+                }
                 onBrushEvent={onBrushEvent}
                 syncTooltips={syncTooltips}
               />

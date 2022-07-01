@@ -42,6 +42,7 @@ export const getXYVisRenderer: (deps: {
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
+
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
@@ -49,7 +50,11 @@ export const getXYVisRenderer: (deps: {
             <VisComponent
               visParams={visConfig}
               visData={visData}
-              renderComplete={handlers.done}
+              renderComplete={() =>
+                handlers.done({
+                  renderTelemetry: { visType: visConfig.type, visGroup: 'agg_based' },
+                })
+              }
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               syncColors={syncColors}

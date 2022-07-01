@@ -169,6 +169,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
+    console.log(handlers?.getExecutionContext?.());
+
     return {
       type: 'render',
       as: EXPRESSION_METRIC_NAME,
