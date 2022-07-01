@@ -6,6 +6,7 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 
 import { CONNECTORS_INDEX } from '../..';
 
@@ -28,6 +29,10 @@ export const updateConnectorConfiguration = async (
       index: CONNECTORS_INDEX,
     });
   } else {
-    throw new Error('Could not find document');
+    throw new Error(
+      i18n.translate('xpack.enterpriseSearch.server.connectors.configuration.error', {
+        defaultMessage: 'Could not find document',
+      })
+    );
   }
 };

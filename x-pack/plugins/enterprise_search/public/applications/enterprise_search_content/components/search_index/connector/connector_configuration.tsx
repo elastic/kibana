@@ -37,9 +37,9 @@ export const ConnectorConfiguration: React.FC = () => {
   const { indexName } = useParams<{ indexName: string }>();
   const indexId = indexData?.connector?.id ?? '';
 
-  const hasApiKey = !!(indexData?.connector?.api_key_id || apiKeyData);
+  const hasApiKey = !!(indexData?.connector?.api_key_id ?? apiKeyData);
 
-  const ConnectorConfig = () =>
+  const ConnectorConfig: React.FC = () =>
     indexData?.connector ? (
       <ConnectorConfigurationConfig
         configuration={indexData.connector.configuration}
@@ -50,7 +50,7 @@ export const ConnectorConfiguration: React.FC = () => {
       <></>
     );
 
-  const ConnectorPackage = () => (
+  const ConnectorPackage: React.FC = () => (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiText size="s">

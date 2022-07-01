@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
 import { addConnector } from '../../lib/connectors/add_connector';
 import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
@@ -29,7 +30,9 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
         return response.ok({ body });
       } catch (error) {
         return response.customError({
-          body: 'Error fetching data from Enterprise Search',
+          body: i18n.translate('xpack.enterpriseSearch.server.routes.addConnector.error', {
+            defaultMessage: 'Error fetching data from Enterprise Search',
+          }),
           statusCode: 502,
         });
       }
@@ -55,7 +58,9 @@ export function registerConnectorRoutes({ router }: RouteDependencies) {
         return response.ok();
       } catch (error) {
         return response.customError({
-          body: 'Error fetching data from Enterprise Search',
+          body: i18n.translate('xpack.enterpriseSearch.server.routes.updateConnector.error', {
+            defaultMessage: 'Error fetching data from Enterprise Search',
+          }),
           statusCode: 502,
         });
       }
