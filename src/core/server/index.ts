@@ -664,7 +664,7 @@ type PublicRequestHandler<
   ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 > = RequestHandler<P, Q, B, Context, Method, ResponseFactory>;
 
-export type { PublicRequestHandler as RequestHandler };
+export type { PublicRequestHandler as RequestHandler, RequestHandler as BaseRequestHandler };
 
 /**
  * Public version of IRouter, default-scoped to {@link RequestHandlerContext}
@@ -674,7 +674,7 @@ export type { PublicRequestHandler as RequestHandler };
 type PublicRouter<ContextType extends RequestHandlerContext = RequestHandlerContext> =
   IRouter<ContextType>;
 
-export type { PublicRouter as IRouter };
+export type { PublicRouter as IRouter, IRouter as IBaseRouter };
 
 /**
  * Public version of RequestHandlerContext, default-scoped to {@link RequestHandlerContext}
@@ -684,4 +684,7 @@ export type { PublicRouter as IRouter };
 type PublicHttpServiceSetup<ContextType extends RequestHandlerContext = RequestHandlerContext> =
   HttpServiceSetup<ContextType>;
 
-export type { PublicHttpServiceSetup as HttpServiceSetup };
+export type {
+  PublicHttpServiceSetup as HttpServiceSetup,
+  HttpServiceSetup as BaseHttpServiceSetup,
+};
