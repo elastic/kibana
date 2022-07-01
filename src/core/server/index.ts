@@ -154,7 +154,6 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
-  UnauthorizedError,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
