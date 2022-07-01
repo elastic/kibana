@@ -77,7 +77,15 @@ export const ConnectorConfiguration: React.FC = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ApiKey apiKey={indexId} label="Connector package ID" />
+        <ApiKey
+          apiKey={indexId}
+          label={i18n.translate(
+            'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.apiKey.label',
+            {
+              defaultMessage: 'Connector package ID',
+            }
+          )}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
