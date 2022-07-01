@@ -14,6 +14,25 @@ import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ParsedArgData, ParsedCommandInterface } from './service/parsed_command_input';
 
+export interface CommandArgs {
+  [longName: string]: {
+    required: boolean;
+    allowMultiples: boolean;
+    exclusiveOr?: boolean;
+    about: string;
+    /**
+     * Validate the individual values given to this argument.
+     * Should return `true` if valid or a string with the error message
+     */
+    validate?: (argData: ParsedArgData) => true | string;
+
+    // Selector: Idea is that the schema can plugin in a rich component for the
+    // user to select something (ex. a file)
+    // FIXME: implement selector
+    selector?: ComponentType;
+  };
+}
+
 export interface CommandDefinition<TMeta = any> {
   name: string;
   about: string;
@@ -48,23 +67,7 @@ export interface CommandDefinition<TMeta = any> {
   validate?: (command: Command) => true | string;
 
   /** The list of arguments supported by this command */
-  args?: {
-    [longName: string]: {
-      required: boolean;
-      allowMultiples: boolean;
-      about: string;
-      /**
-       * Validate the individual values given to this argument.
-       * Should return `true` if valid or a string with the error message
-       */
-      validate?: (argData: ParsedArgData) => true | string;
-
-      // Selector: Idea is that the schema can plugin in a rich component for the
-      // user to select something (ex. a file)
-      // FIXME: implement selector
-      selector?: ComponentType;
-    };
-  };
+  args?: CommandArgs;
 }
 
 /**

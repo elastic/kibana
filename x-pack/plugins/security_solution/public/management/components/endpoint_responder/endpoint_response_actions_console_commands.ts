@@ -72,6 +72,7 @@ export const getEndpointResponseActionsConsoleCommands = (
       },
       exampleUsage: 'kill-process --pid 123',
       exampleInstruction: 'Enter a pid or entity id to execute',
+      mustHaveArgs: true,
       args: {
         comment: {
           required: false,
@@ -82,8 +83,18 @@ export const getEndpointResponseActionsConsoleCommands = (
           ),
         },
         pid: {
-          required: true,
+          required: false,
           allowMultiples: false,
+          exclusiveOr: true,
+          about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
+            defaultMessage:
+              'A PID representng the process to kill.  You can enter a pid or entity id.',
+          }),
+        },
+        entityId: {
+          required: false,
+          allowMultiples: false,
+          exclusiveOr: true,
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
             defaultMessage:
               'A PID representng the process to kill.  You can enter a pid or entity id.',

@@ -83,6 +83,24 @@ describe('When using the kill-process action from response actions console', () 
     );
   });
 
+  it('should only accept one exclusive argument', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid 123 --entityId 123wer');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'This command supports one and only one of the following arguments: --pid, --entityId'
+    );
+  });
+
+  it('should check for at least one exclusive argument', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'This command supports one and only one of the following arguments: --pid, --entityId'
+    );
+  });
+
   it('should call the action status api after creating the `kill-process` request', async () => {
     await render();
     enterConsoleCommand(renderResult, 'kill-process --pid 123');
@@ -92,9 +110,18 @@ describe('When using the kill-process action from response actions console', () 
     });
   });
 
-  it('should show success when `kill-process` action completes with no errors', async () => {
+  it('should show success when `kill-process` action completes with no errors when using `pid`', async () => {
     await render();
     enterConsoleCommand(renderResult, 'kill-process --pid 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('killProcessSuccessCallout')).toBeTruthy();
+    });
+  });
+
+  it('should show success when `kill-process` action completes with no errors when using `entityId`', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --entityId 123wer');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('killProcessSuccessCallout')).toBeTruthy();

@@ -53,6 +53,16 @@ const getUnknownArguments = (
   return response;
 };
 
+const getExclusiveOrArgs = (argDefinitions: CommandDefinition['args']): string[] => {
+  if (!argDefinitions) {
+    return [];
+  }
+
+  return Object.entries(argDefinitions)
+    .filter(([_, argDef]) => argDef.exclusiveOr)
+    .map(([argName]) => argName);
+};
+
 const updateStateWithNewCommandHistoryItem = (
   state: ConsoleDataState,
   newHistoryItem: ConsoleDataState['commandHistory'][number]
@@ -133,6 +143,21 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     commandDefinition,
   };
   const requiredArgs = getRequiredArguments(commandDefinition.args);
+  const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
+
+  const exclusiveOrErrorMessage = (
+    <FormattedMessage
+      id="xpack.securitySolution.console.commandValidation.exlcusiveOr"
+      defaultMessage="This command supports one and only one of the following arguments: {argNames}"
+      values={{
+        argNames: (
+          <EuiCode transparentBackground={true}>
+            {exclusiveOrArgs.map(toCliArgumentOption).join(', ')}
+          </EuiCode>
+        ),
+      }}
+    />
+  );
 
   // If args were entered, then validate them
   if (parsedInput.hasArgs) {
@@ -209,6 +234,18 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       }
     }
 
+    // Validate exclusiveOr arguments, can only have one.
+    const exclusiveArgsUsed = exclusiveOrArgs.filter((arg) => parsedInput.args[arg]);
+    if (exclusiveArgsUsed.length > 1) {
+      return updateStateWithNewCommandHistoryItem(state, {
+        id: uuidV4(),
+        command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        state: createCommandExecutionState({
+          errorMessage: exclusiveOrErrorMessage,
+        }),
+      });
+    }
+
     // Validate each argument given to the command
     for (const argName of Object.keys(parsedInput.args)) {
       const argDefinition = commandDefinition.args[argName];
@@ -282,6 +319,14 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             },
           }
         ),
+      }),
+    });
+  } else if (exclusiveOrArgs.length > 0) {
+    return updateStateWithNewCommandHistoryItem(state, {
+      id: uuidV4(),
+      command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+      state: createCommandExecutionState({
+        errorMessage: exclusiveOrErrorMessage,
       }),
     });
   } else if (commandDefinition.mustHaveArgs) {

@@ -221,4 +221,44 @@ describe('When a Console command is entered by the user', () => {
       );
     });
   });
+
+  it('should show error no options were provided, but has exclusive or arguments', async () => {
+    render();
+    enterCommand('cmd6');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'This command supports one and only one of the following arguments: --foo, --bar'
+      );
+    });
+  });
+
+  it('should show error when it has multiple exclusive arguments', async () => {
+    render();
+    enterCommand('cmd6 --foo 234 --bar 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'This command supports one and only one of the following arguments: --foo, --bar'
+      );
+    });
+  });
+
+  it('should show success when one exlusive argument is used', async () => {
+    render();
+    enterCommand('cmd6 --foo 234');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+    });
+  });
+
+  it('should show success when the other exlusive argument is used', async () => {
+    render();
+    enterCommand('cmd6 --bar 234');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+    });
+  });
 });
