@@ -21,6 +21,8 @@ import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item'
 const ConsoleWindow = styled.div`
   height: 100%;
   background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
+  border: ${({ theme: { eui } }) => eui.euiBorderThin};
+  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
 
   .layout {
     height: 100%;
@@ -44,8 +46,10 @@ const ConsoleWindow = styled.div`
       border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
     }
 
-    &-footer {
+    &-footer,
+    &-commandInput {
       padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
     }
 
     &-rightPanel {
@@ -61,10 +65,6 @@ const ConsoleWindow = styled.div`
     &-historyViewport {
       height: 100%;
       overflow-x: hidden;
-    }
-
-    &-commandInput {
-      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
     }
   }
 
