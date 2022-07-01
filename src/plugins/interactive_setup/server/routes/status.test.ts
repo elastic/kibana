@@ -28,7 +28,7 @@ describe('Status routes', () => {
   });
 
   describe('#status', () => {
-    let routeHandler: RequestHandler<any, any, any, any>;
+    let routeHandler: RequestHandler<any, any, any>;
 
     beforeEach(() => {
       const [, statusRouteHandler] = router.get.mock.calls.find(
