@@ -216,7 +216,7 @@ export const staticValueOperation: OperationDefinition<
 
     return (
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
-        <EuiFormLabel>{paramEditorCustomProps?.label || defaultLabel}</EuiFormLabel>
+        <EuiFormLabel>{paramEditorCustomProps?.labels?.[0] || defaultLabel}</EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiFieldNumber
           fullWidth

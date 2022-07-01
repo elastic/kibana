@@ -258,7 +258,21 @@ export const lastValueOperation: OperationDefinition<
     );
   },
   allowAsReference: true,
-  paramEditor: ({ layer, paramEditorUpdater, currentColumn, indexPattern, isReferenced }) => {
+  paramEditor: ({
+    layer,
+    paramEditorUpdater,
+    currentColumn,
+    indexPattern,
+    isReferenced,
+    paramEditorCustomProps,
+  }) => {
+    const { labels } = paramEditorCustomProps || {};
+    const sortByFieldLabel =
+      labels?.[0] ||
+      i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
+        defaultMessage: 'Sort by date field',
+      });
+
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid = !!getInvalidSortFieldMessage(
       currentColumn.params.sortField,
@@ -282,9 +296,7 @@ export const lastValueOperation: OperationDefinition<
     return (
       <>
         <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
-            defaultMessage: 'Sort by date field',
-          })}
+          label={sortByFieldLabel}
           display="rowCompressed"
           fullWidth
           error={i18n.translate('xpack.lens.indexPattern.sortField.invalid', {
@@ -302,9 +314,7 @@ export const lastValueOperation: OperationDefinition<
             data-test-subj="lns-indexPattern-lastValue-sortField"
             isInvalid={isSortFieldInvalid}
             singleSelection={{ asPlainText: true }}
-            aria-label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
-              defaultMessage: 'Sort by date field',
-            })}
+            aria-label={sortByFieldLabel}
             options={dateFields?.map((field: IndexPatternField) => {
               return {
                 value: field.name,

@@ -547,6 +547,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     existingFields,
     operationDefinitionMap,
     ReferenceEditor,
+    paramEditorCustomProps,
     ...rest
   }) {
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
@@ -754,6 +755,12 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               fieldLabel={i18n.translate('xpack.lens.indexPattern.terms.orderAgg.rankField', {
                 defaultMessage: 'Rank field',
               })}
+              isInline={true}
+              paramEditorCustomProps={{
+                ...paramEditorCustomProps,
+                isInline: true,
+                labels: getLabelForRankFunctions(currentColumn.params.orderAgg.operationType),
+              }}
               layer={layer}
               selectionStyle="full"
               columnId={`${columnId}-orderAgg`}
@@ -996,3 +1003,21 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     );
   },
 };
+function getLabelForRankFunctions(operationType: string) {
+  switch (operationType) {
+    case 'last_value':
+      return [
+        i18n.translate('xpack.lens.indexPattern.terms.lastValue.sortRankBy', {
+          defaultMessage: 'Sort rank by',
+        }),
+      ];
+    case 'percentile':
+      return [
+        i18n.translate('xpack.lens.indexPattern.terms.percentile.', {
+          defaultMessage: 'Rank percentile',
+        }),
+      ];
+    default:
+      return;
+  }
+}

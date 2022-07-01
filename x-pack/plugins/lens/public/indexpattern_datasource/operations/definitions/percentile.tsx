@@ -269,7 +269,18 @@ export const percentileOperation: OperationDefinition<
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
     ]),
-  paramEditor: function PercentileParamEditor({ paramEditorUpdater, currentColumn, indexPattern }) {
+  paramEditor: function PercentileParamEditor({
+    paramEditorUpdater,
+    currentColumn,
+    indexPattern,
+    paramEditorCustomProps,
+  }) {
+    const { labels } = paramEditorCustomProps || {};
+    const percentileLabel =
+      labels?.[0] ||
+      i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
+        defaultMessage: 'Percentile',
+      });
     const onChange = useCallback(
       (value) => {
         if (
@@ -311,9 +322,7 @@ export const percentileOperation: OperationDefinition<
 
     return (
       <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
-          defaultMessage: 'Percentile',
-        })}
+        label={percentileLabel}
         data-test-subj="lns-indexPattern-percentile-form"
         display="rowCompressed"
         fullWidth
@@ -335,9 +344,7 @@ export const percentileOperation: OperationDefinition<
           step={1}
           onChange={handleInputChange}
           showInput
-          aria-label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
-            defaultMessage: 'Percentile',
-          })}
+          aria-label={percentileLabel}
         />
       </EuiFormRow>
     );
