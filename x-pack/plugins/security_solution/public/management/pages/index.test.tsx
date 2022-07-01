@@ -15,7 +15,8 @@ import { endpointPageHttpMock } from './endpoint_hosts/mocks';
 
 jest.mock('../../common/components/user_privileges');
 
-describe('when in the Administration tab', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/135166
+describe.skip('when in the Administration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
 
   beforeEach(() => {
