@@ -31,7 +31,7 @@ describe('updateConnectorConfigurationLogic', () => {
         '/internal/enterprise_search/connectors/anIndexId/configuration',
         { body: JSON.stringify(configuration) }
       );
-      expect(result).resolves.toEqual({ indexName: 'anIndexName' });
+      await expect(result).resolves.toEqual({ configuration, indexName: 'anIndexName' });
     });
   });
 });
