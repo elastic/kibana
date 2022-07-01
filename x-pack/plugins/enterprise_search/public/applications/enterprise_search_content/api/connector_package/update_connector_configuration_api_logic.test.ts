@@ -9,23 +9,29 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { generateApiKey } from './generate_connector_api_key_api_logic';
+import { postConnectorConfiguration } from './update_connector_configuration_api_logic';
 
-describe('generateConnectorApiKeyApiLogic', () => {
+describe('updateConnectorConfigurationLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('generateApiKey', () => {
+  describe('postConnectorConfiguration', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.post.mockReturnValue(promise);
-      const result = generateApiKey({ indexName: 'indexName' });
+      const configuration = { configurationKey: { label: 'hello', value: 'yeahhhh' } };
+      const result = postConnectorConfiguration({
+        configuration,
+        indexId: 'anIndexId',
+        indexName: 'anIndexName',
+      });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/enterprise_search/indices/indexName/api_key'
+        '/internal/enterprise_search/connectors/anIndexId/configuration',
+        { body: JSON.stringify(configuration) }
       );
-      await expect(result).resolves.toEqual('result');
+      await expect(result).resolves.toEqual({ configuration, indexName: 'anIndexName' });
     });
   });
 });
