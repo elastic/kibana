@@ -36,9 +36,6 @@ Object {
                     "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
                   ],
                   "decorations": Array [],
-                  "hide": Array [
-                    false,
-                  ],
                   "isHistogram": Array [
                     false,
                   ],
@@ -63,6 +60,9 @@ Object {
                       ],
                       "type": "expression",
                     },
+                  ],
+                  "previewMode": Array [
+                    false,
                   ],
                   "seriesType": Array [
                     "area",

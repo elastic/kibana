@@ -24,10 +24,10 @@ export function annotationLayerFunction(): ExpressionFunctionDefinition<
     inputTypes: ['datatable'],
     help: strings.getAnnotationLayerFnHelp(),
     args: {
-      hide: {
+      previewMode: {
         types: ['boolean'],
         default: false,
-        help: strings.getAnnotationLayerHideHelp(),
+        help: strings.getAnnotationLayerPreviewModeHelp(),
       },
       annotations: {
         types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
