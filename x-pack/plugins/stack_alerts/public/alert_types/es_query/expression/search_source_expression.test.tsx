@@ -18,8 +18,18 @@ import { Subject } from 'rxjs';
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { copyToClipboard, EuiLoadingSpinner } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ReactWrapper } from 'enzyme';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    __esModule: true,
+    ...original,
+    copyToClipboard: jest.fn(() => true),
+  };
+});
 
 const dataViewPluginMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
@@ -83,6 +93,69 @@ const searchSourceMock = {
   fetch$: jest.fn(() => {
     return mockSearchResult;
   }),
+  getSearchRequestBody: jest.fn(() => ({
+    fields: [
+      {
+        field: '@timestamp',
+        format: 'date_time',
+      },
+      {
+        field: 'timestamp',
+        format: 'date_time',
+      },
+      {
+        field: 'utc_time',
+        format: 'date_time',
+      },
+    ],
+    script_fields: {},
+    stored_fields: ['*'],
+    runtime_mappings: {
+      hour_of_day: {
+        type: 'long',
+        script: {
+          source: "emit(doc['timestamp'].value.getHour());",
+        },
+      },
+    },
+    _source: {
+      excludes: [],
+    },
+    query: {
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              must_not: {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        response: '200',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            },
+          },
+          {
+            range: {
+              timestamp: {
+                format: 'strict_date_optional_time',
+                gte: '2022-06-19T02:49:51.192Z',
+                lte: '2022-06-24T02:49:51.192Z',
+              },
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    },
+  })),
 } as unknown as ISearchSource;
 
 const savedQueryMock = {
@@ -177,6 +250,83 @@ describe('SearchSourceAlertTypeExpression', () => {
     expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
       `Query matched 1234 documents in the last 15s.`
     );
+  });
+
+  it('should call copyToClipboard with the serialized query when the copy query button is clicked', async () => {
+    let wrapper = null as unknown as ReactWrapper;
+    await act(async () => {
+      wrapper = setup(defaultSearchSourceExpressionParams);
+    });
+    wrapper.update();
+    await act(async () => {
+      findTestSubject(wrapper, 'copyQuery').simulate('click');
+    });
+    wrapper.update();
+    expect(copyToClipboard).toHaveBeenCalledWith(`{
+  \"fields\": [
+    {
+      \"field\": \"@timestamp\",
+      \"format\": \"date_time\"
+    },
+    {
+      \"field\": \"timestamp\",
+      \"format\": \"date_time\"
+    },
+    {
+      \"field\": \"utc_time\",
+      \"format\": \"date_time\"
+    }
+  ],
+  \"script_fields\": {},
+  \"stored_fields\": [
+    \"*\"
+  ],
+  \"runtime_mappings\": {
+    \"hour_of_day\": {
+      \"type\": \"long\",
+      \"script\": {
+        \"source\": \"emit(doc['timestamp'].value.getHour());\"
+      }
+    }
+  },
+  \"_source\": {
+    \"excludes\": []
+  },
+  \"query\": {
+    \"bool\": {
+      \"must\": [],
+      \"filter\": [
+        {
+          \"bool\": {
+            \"must_not\": {
+              \"bool\": {
+                \"should\": [
+                  {
+                    \"match\": {
+                      \"response\": \"200\"
+                    }
+                  }
+                ],
+                \"minimum_should_match\": 1
+              }
+            }
+          }
+        },
+        {
+          \"range\": {
+            \"timestamp\": {
+              \"format\": \"strict_date_optional_time\",
+              \"gte\": \"2022-06-19T02:49:51.192Z\",
+              \"lte\": \"2022-06-24T02:49:51.192Z\"
+            }
+          }
+        }
+      ],
+      \"should\": [],
+      \"must_not\": []
+    }
+  }
+}`);
   });
 
   test('should render error prompt', async () => {
