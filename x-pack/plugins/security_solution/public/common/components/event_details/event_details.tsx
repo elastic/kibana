@@ -320,7 +320,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         <>
           <EuiSpacer size="m" />
           <TabContentWrapper data-test-subj="jsonViewWrapper">
-            <JsonView rawEventData={rawEventData} />
+            <JsonView rawEventData={data} />
           </TabContentWrapper>
         </>
       ),

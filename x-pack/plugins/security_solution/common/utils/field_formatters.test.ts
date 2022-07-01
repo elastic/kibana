@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EventHit, EventSource } from '../search_strategy';
-import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './field_formatters';
+import { EventHit } from '../search_strategy';
+import { getDataFromFieldsHits, getDataSafety } from './field_formatters';
 import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
 
 describe('Events Details Helpers', () => {
@@ -131,63 +131,6 @@ describe('Events Details Helpers', () => {
       const result = getDataFromFieldsHits(whackFields);
       expect(result).toEqual(whackResultFields);
     });
-  });
-  it('#getDataFromSourceHits', () => {
-    const _source: EventSource = {
-      '@timestamp': '2021-02-24T00:41:06.527Z',
-      'kibana.alert.workflow_status': 'open',
-      'signal.rule.name': 'Rawr',
-      'threat.indicator': [
-        {
-          provider: 'yourself',
-          type: 'custom',
-          first_seen: ['2021-02-22T17:29:25.195Z'],
-          matched: { atomic: 'atom', field: 'field', type: 'type' },
-        },
-        {
-          provider: 'other_you',
-          type: 'custom',
-          first_seen: '2021-02-22T17:29:25.195Z',
-          matched: { atomic: 'atom', field: 'field', type: 'type' },
-        },
-      ],
-    };
-    expect(getDataFromSourceHits(_source)).toEqual([
-      {
-        category: 'base',
-        field: '@timestamp',
-        values: ['2021-02-24T00:41:06.527Z'],
-        originalValue: ['2021-02-24T00:41:06.527Z'],
-        isObjectArray: false,
-      },
-      {
-        category: 'kibana',
-        field: 'kibana.alert.workflow_status',
-        values: ['open'],
-        originalValue: ['open'],
-        isObjectArray: false,
-      },
-      {
-        category: 'signal',
-        field: 'signal.rule.name',
-        values: ['Rawr'],
-        originalValue: ['Rawr'],
-        isObjectArray: false,
-      },
-      {
-        category: 'threat',
-        field: 'threat.indicator',
-        values: [
-          '{"provider":"yourself","type":"custom","first_seen":["2021-02-22T17:29:25.195Z"],"matched":{"atomic":"atom","field":"field","type":"type"}}',
-          '{"provider":"other_you","type":"custom","first_seen":"2021-02-22T17:29:25.195Z","matched":{"atomic":"atom","field":"field","type":"type"}}',
-        ],
-        originalValue: [
-          '{"provider":"yourself","type":"custom","first_seen":["2021-02-22T17:29:25.195Z"],"matched":{"atomic":"atom","field":"field","type":"type"}}',
-          '{"provider":"other_you","type":"custom","first_seen":"2021-02-22T17:29:25.195Z","matched":{"atomic":"atom","field":"field","type":"type"}}',
-        ],
-        isObjectArray: true,
-      },
-    ]);
   });
   it('#getDataSafety', async () => {
     const result = await getDataSafety(getDataFromFieldsHits, fields);
