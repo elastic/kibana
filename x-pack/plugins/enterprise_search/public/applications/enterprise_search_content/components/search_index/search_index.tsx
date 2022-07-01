@@ -27,7 +27,7 @@ import { baseBreadcrumbs } from '../search_indices';
 
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { SearchIndexDocuments } from './documents';
-import { SearchIndexDomainManagement } from './domain_management';
+import { SearchIndexDomainManagement } from './domain_management/domain_management';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { SearchIndexOverview } from './overview';
 import { SearchIndexScheduling } from './scheduling';

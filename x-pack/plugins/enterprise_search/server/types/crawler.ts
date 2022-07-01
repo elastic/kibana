@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-
-export const SearchIndexDomainManagement: React.FC = () => {
-  // TODO If index && !index.crawler then do something
-
-  return <>Manage Domains</>;
-};
+export interface Crawler {
+  id: string;
+  index_name: string;
+}

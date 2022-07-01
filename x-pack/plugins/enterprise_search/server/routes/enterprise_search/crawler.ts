@@ -27,4 +27,18 @@ export function registerCrawlerRoutes({
       path: '/api/ent/v1/internal/indices/',
     })
   );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/domains',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains',
+    })
+  );
 }
