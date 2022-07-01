@@ -25,9 +25,7 @@ export { FlyoutHeader } from './header';
 export { FlyoutFooter } from './footer';
 
 export const useToGetInternalFlyout = () => {
-  const { browserFields, runtimeMappings } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   const [alert, setAlert] = useState<{ id?: string; indexName?: string }>({
     id: undefined,
     indexName: undefined,

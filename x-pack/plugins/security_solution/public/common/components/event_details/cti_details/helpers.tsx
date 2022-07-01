@@ -24,7 +24,6 @@ import {
   isValidEventField,
 } from '../../../../../common/search_strategy/security_solution/cti';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
-import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 
 export const isInvestigationTimeEnrichment = (type: string | undefined) =>
   type === ENRICHMENT_TYPES.InvestigationTime;
