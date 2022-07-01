@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiIconTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
@@ -31,7 +32,7 @@ import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
-import { RemoveLayerButton } from './remove_layer_button';
+import { LayerMenu } from './layer_menu';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
 import { DimensionButton } from './buttons/dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
@@ -63,6 +64,7 @@ export function LayerPanel(
       newVisualizationState: unknown
     ) => void;
     onRemoveLayer: () => void;
+    onHideLayer: () => void;
     registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
     toggleFullscreen: () => void;
     onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
@@ -78,6 +80,7 @@ export function LayerPanel(
     layerId,
     isOnlyLayer,
     onRemoveLayer,
+    onHideLayer,
     registerNewLayerRef,
     layerIndex,
     activeVisualization,
@@ -293,6 +296,7 @@ export function LayerPanel(
       framePublicAPI,
     ]
   );
+  const isLayerHidden = activeVisualization.isHidden?.(props.visualizationState, layerId);
 
   return (
     <>
@@ -310,11 +314,18 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <RemoveLayerButton
+                {isLayerHidden && <EuiIcon type="eyeClosed" />}
+                <LayerMenu
                   onRemoveLayer={onRemoveLayer}
+                  onHideLayer={onHideLayer}
                   layerIndex={layerIndex}
                   isOnlyLayer={isOnlyLayer}
                   activeVisualization={activeVisualization}
+                  canHideLayer={activeVisualization.canHideLayer?.(
+                    props.visualizationState,
+                    layerId
+                  )}
+                  isLayerHidden={isLayerHidden}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

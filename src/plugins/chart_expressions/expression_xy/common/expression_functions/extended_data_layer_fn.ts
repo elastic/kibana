@@ -18,7 +18,7 @@ import {
   validateShowPointsForChartType,
 } from './validate';
 
-export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args, context) => {
+export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args) => {
   const table = args.table ?? data;
   const accessors = getAccessors<string, ExtendedDataLayerArgs>(args, table);
 

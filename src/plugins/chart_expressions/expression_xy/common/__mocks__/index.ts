@@ -75,6 +75,7 @@ export const sampleExtendedLayer: ExtendedDataLayerConfig = {
   splitAccessor: 'd',
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
+  isHidden: false,
   isHistogram: false,
   isHorizontal: false,
   isStacked: false,

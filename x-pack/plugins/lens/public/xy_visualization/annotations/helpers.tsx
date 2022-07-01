@@ -85,11 +85,13 @@ export const getAnnotationsSupportedLayer = (
 
   const hasDateHistogram = Boolean(
     dataLayers.length &&
-      dataLayers.every(
-        (dataLayer) =>
-          dataLayer.xAccessor &&
-          checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
-      )
+      dataLayers
+        .filter((l) => !l.isHidden)
+        .every(
+          (dataLayer) =>
+            dataLayer.xAccessor &&
+            checkScaleOperation('interval', 'date', frame?.datasourceLayers || {})(dataLayer)
+        )
   );
   const initialDimensions =
     state && hasDateHistogram

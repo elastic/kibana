@@ -39,6 +39,7 @@ export const {
   removeLayers,
   removeOrClearLayer,
   addLayer,
+  hideLayer,
   setLayerDefaultDimension,
 } = lensActions;
 

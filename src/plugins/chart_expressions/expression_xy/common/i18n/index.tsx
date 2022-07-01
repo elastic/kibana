@@ -125,6 +125,10 @@ export const strings = {
     i18n.translate('expressionXY.dataLayer.help', {
       defaultMessage: `Configure a layer in the xy chart`,
     }),
+  getIsHiddenHelp: () =>
+    i18n.translate('expressionXY.dataLayer.isHidden.help', {
+      defaultMessage: 'Show / hide layer',
+    }),
   getPreviewMode: () =>
     i18n.translate('expressionXY.dataLayer.previewMode.help', {
       defaultMessage: 'Show / hide details',
@@ -209,6 +213,10 @@ export const strings = {
     i18n.translate('expressionXY.referenceLineLayer.accessors.help', {
       defaultMessage: 'The columns to display on the y axis.',
     }),
+  getRLIsHiddenHelp: () =>
+    i18n.translate('expressionXY.referenceLineLayer.isHidden', {
+      defaultMessage: 'Show/hide layer',
+    }),
   getRLDecorationConfigHelp: () =>
     i18n.translate('expressionXY.referenceLineLayer.decorationConfig.help', {
       defaultMessage: 'Additional decoration for reference line',
@@ -232,6 +240,10 @@ export const strings = {
   getAnnotationLayerFnHelp: () =>
     i18n.translate('expressionXY.annotationLayer.help', {
       defaultMessage: `Configure an annotation layer in the xy chart`,
+    }),
+  getAnnotationLayerIsHiddenHelp: () =>
+    i18n.translate('expressionXY.annotationLayer.isHidden.help', {
+      defaultMessage: 'Show / hide layer',
     }),
   getAnnotationLayerPreviewModeHelp: () =>
     i18n.translate('expressionXY.annotationLayer.previewMode.help', {

@@ -130,6 +130,34 @@ export const getXyVisualization = ({
       ],
     };
   },
+  canHideLayer(state, layerId) {
+    if (state.layers.length < 2) {
+      return false;
+    }
+    const layer = state.layers.find((l) => l.layerId === layerId);
+    if (!layer) {
+      return false;
+    }
+    if (isAnnotationsLayer(layer) || isReferenceLayer(layer)) {
+      return true;
+    }
+
+    if (getDataLayers(state.layers).filter((l) => !l.isHidden).length > 1) {
+      return true;
+    }
+    return false;
+  },
+  hideLayer(state, layerId) {
+    return {
+      ...state,
+      layers: state.layers.map((l) =>
+        l.layerId === layerId ? { ...l, isHidden: !l.isHidden } : l
+      ),
+    };
+  },
+  isHidden(state, layerId) {
+    return Boolean(state.layers.find((l) => l.layerId === layerId)?.isHidden);
+  },
 
   clearLayer(state, layerId) {
     return {

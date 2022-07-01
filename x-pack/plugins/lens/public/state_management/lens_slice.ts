@@ -155,6 +155,9 @@ export const addLayer = createAction<{
   layerId: string;
   layerType: LayerType;
 }>('lens/addLayer');
+export const hideLayer = createAction<{
+  layerId: string;
+}>('lens/hideLayer');
 
 export const setLayerDefaultDimension = createAction<{
   layerId: string;
@@ -186,6 +189,7 @@ export const lensActions = {
   removeLayers,
   removeOrClearLayer,
   addLayer,
+  hideLayer,
   setLayerDefaultDimension,
 };
 
@@ -663,6 +667,24 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state.visualization.state = activeVisualizationState;
       state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
       state.stagedPreview = undefined;
+    },
+    [hideLayer.type]: (
+      state,
+      {
+        payload: { layerId },
+      }: {
+        payload: {
+          layerId: string;
+        };
+      }
+    ) => {
+      if (!state.activeDatasourceId || !state.visualization.activeId) {
+        return state;
+      }
+
+      const activeVisualization = visualizationMap[state.visualization.activeId];
+      const visualizationState = activeVisualization.hideLayer!(state.visualization.state, layerId);
+      state.visualization.state = visualizationState;
     },
     [setLayerDefaultDimension.type]: (
       state,

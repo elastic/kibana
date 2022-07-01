@@ -100,6 +100,7 @@ export interface XYDataLayerConfig {
   xScaleType?: XScaleType;
   isHistogram?: boolean;
   columnToLabel?: string;
+  isHidden?: boolean;
 }
 
 export interface XYReferenceLineLayerConfig {
@@ -107,6 +108,8 @@ export interface XYReferenceLineLayerConfig {
   accessors: string[];
   yConfig?: YConfig[];
   layerType: 'referenceLine';
+  previewMode?: boolean;
+  isHidden?: boolean;
 }
 
 export interface XYAnnotationLayerConfig {
@@ -114,6 +117,7 @@ export interface XYAnnotationLayerConfig {
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
   previewMode?: boolean;
+  isHidden?: boolean;
 }
 
 export type XYLayerConfig =

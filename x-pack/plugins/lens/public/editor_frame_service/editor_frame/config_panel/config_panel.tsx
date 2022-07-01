@@ -17,6 +17,7 @@ import {
   setLayerDefaultDimension,
   useLensDispatch,
   removeOrClearLayer,
+  hideLayer,
   addLayer,
   updateState,
   updateDatasourceState,
@@ -134,7 +135,6 @@ export function LayerPanels(
     },
     [dispatchLens]
   );
-
   return (
     <EuiForm className="lnsConfigPanel">
       {layerIds.map((layerId, layerIndex) => (
@@ -158,6 +158,9 @@ export function LayerPanels(
               layerIds.length
             ) === 'clear'
           }
+          onHideLayer={() => {
+            dispatchLens(hideLayer({ layerId }));
+          }}
           onEmptyDimensionAdd={(columnId, { groupId }) => {
             // avoid state update if the datasource does not support initializeDimension
             if (

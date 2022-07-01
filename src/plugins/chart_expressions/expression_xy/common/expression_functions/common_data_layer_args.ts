@@ -20,11 +20,6 @@ export const commonDataLayerArgs: Omit<
   CommonDataLayerFnArgs,
   'accessors' | 'xAccessor' | 'splitAccessor'
 > = {
-  previewMode: {
-    types: ['boolean'],
-    default: false,
-    help: strings.getPreviewMode(),
-  },
   seriesType: {
     aliases: ['_'],
     types: ['string'],
@@ -87,5 +82,15 @@ export const commonDataLayerArgs: Omit<
     types: ['palette', 'system_palette'],
     help: strings.getPaletteHelp(),
     default: '{palette}',
+  },
+  isHidden: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsHiddenHelp(),
+  },
+  previewMode: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getPreviewMode(),
   },
 };

@@ -161,8 +161,8 @@ export const buildExpression = (
   eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
   const validDataLayers: ValidXYDataLayerConfig[] = getDataLayers(state.layers)
-    .filter<ValidXYDataLayerConfig>((layer): layer is ValidXYDataLayerConfig =>
-      Boolean(layer.accessors.length)
+    .filter<ValidXYDataLayerConfig>(
+      (layer): layer is ValidXYDataLayerConfig => Boolean(layer.accessors.length) && !layer.isHidden
     )
     .map((layer) => ({
       ...layer,
@@ -170,13 +170,13 @@ export const buildExpression = (
     }));
 
   // sorting doesn't change anything so we don't sort reference layers (TODO: should we make it work?)
-  const validReferenceLayers = getReferenceLayers(state.layers).filter((layer) =>
-    Boolean(layer.accessors.length)
+  const validReferenceLayers = getReferenceLayers(state.layers).filter(
+    (layer) => Boolean(layer.accessors.length) && !layer.isHidden
   );
 
   const uniqueLabels = getUniqueLabels(state.layers);
   const validAnnotationsLayers = getAnnotationsLayers(state.layers)
-    .filter((layer) => Boolean(layer.annotations.length))
+    .filter((layer) => Boolean(layer.annotations.length) && !layer.isHidden)
     .map((layer) => {
       return {
         ...layer,
@@ -386,6 +386,7 @@ const referenceLineLayerToExpression = (
         function: 'referenceLineLayer',
         arguments: {
           layerId: [layer.layerId],
+          isHidden: [Boolean(layer.isHidden)],
           decorations: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
                 extendedYConfigToRLDecorationConfigExpression(yConfig, defaultReferenceLineColor)
@@ -416,6 +417,7 @@ const annotationLayerToExpression = (
           annotations: layer.annotations
             ? layer.annotations.map((ann): Ast => eventAnnotationService.toExpression(ann))
             : [],
+          isHidden: [Boolean(layer.isHidden)],
         },
       },
     ],
@@ -456,6 +458,7 @@ const dataLayerToExpression = (
         arguments: {
           layerId: [layer.layerId],
           previewMode: [Boolean(layer.previewMode)],
+          isHidden: [Boolean(layer.isHidden)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
           xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
           isHistogram: [isHistogramDimension],

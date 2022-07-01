@@ -62,6 +62,7 @@ const groupVisibleConfigsByInterval = (
   firstTimestamp?: number
 ) => {
   return layers
+    .filter((layer) => !layer.isHidden)
     .flatMap(({ annotations }) =>
       annotations.filter((a) => !a.isHidden && a.type === 'manual_point_event_annotation')
     )

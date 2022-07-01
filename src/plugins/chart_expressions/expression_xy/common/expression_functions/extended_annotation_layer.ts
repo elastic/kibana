@@ -38,6 +38,11 @@ export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
         types: ['string'],
         help: strings.getLayerIdHelp(),
       },
+      isHidden: {
+        types: ['boolean'],
+        default: false,
+        help: strings.getAnnotationLayerIsHiddenHelp(),
+      },
     },
     fn: (input, args) => {
       return {

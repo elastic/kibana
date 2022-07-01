@@ -116,6 +116,7 @@ export interface DataLayerArgs {
   seriesType: SeriesType;
   xAccessor?: string | ExpressionValueVisDimension;
   previewMode?: boolean;
+  isHidden?: boolean;
   splitAccessor?: string | ExpressionValueVisDimension;
   markSizeAccessor?: string | ExpressionValueVisDimension;
   lineWidth?: number;
@@ -141,7 +142,6 @@ export interface ExtendedDataLayerArgs {
   accessors: string[];
   seriesType: SeriesType;
   xAccessor?: string;
-  previewMode?: boolean;
   splitAccessor?: string;
   markSizeAccessor?: string;
   lineWidth?: number;
@@ -158,6 +158,8 @@ export interface ExtendedDataLayerArgs {
   // palette will always be set on the expression
   decorations?: DataDecorationConfigResult[];
   table?: Datatable;
+  previewMode?: boolean;
+  isHidden?: boolean;
 }
 
 export interface LegendConfig {
@@ -281,6 +283,7 @@ export interface XYProps {
 export interface AnnotationLayerArgs {
   annotations: EventAnnotationOutput[];
   previewMode?: boolean;
+  isHidden?: boolean;
 }
 
 export type ExtendedAnnotationLayerArgs = AnnotationLayerArgs & {
@@ -310,6 +313,7 @@ export interface ReferenceLineLayerArgs {
   columnToLabel?: string;
   decorations?: ReferenceLineDecorationConfigResult[];
   table?: Datatable;
+  isHidden?: boolean;
 }
 
 export type XYLayerArgs = DataLayerArgs | ReferenceLineArgs | AnnotationLayerArgs;
@@ -333,6 +337,7 @@ export interface ReferenceLineConfigResult {
   layerType: typeof LayerTypes.REFERENCELINE;
   lineLength: number;
   decorations: [ExtendedReferenceLineDecorationConfig];
+  isHidden?: boolean;
 }
 
 export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {

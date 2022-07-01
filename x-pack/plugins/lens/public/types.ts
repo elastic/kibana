@@ -796,7 +796,10 @@ export interface Visualization<T = unknown> {
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
   appendLayer?: (state: T, layerId: string, type: LayerType) => T;
-
+  /** Optional, if visualization supports multiple layers, hides a layer */
+  canHideLayer?: (state: T, layerId: string) => boolean;
+  hideLayer?: (state: T, layerId: string) => T;
+  isHidden?: (state: T, layerId: string) => boolean;
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
     state?: T,

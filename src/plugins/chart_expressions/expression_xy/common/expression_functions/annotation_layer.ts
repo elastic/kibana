@@ -24,6 +24,11 @@ export function annotationLayerFunction(): ExpressionFunctionDefinition<
     inputTypes: ['datatable'],
     help: strings.getAnnotationLayerFnHelp(),
     args: {
+      isHidden: {
+        types: ['boolean'],
+        default: false,
+        help: strings.getAnnotationLayerIsHiddenHelp(),
+      },
       previewMode: {
         types: ['boolean'],
         default: false,

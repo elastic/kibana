@@ -39,6 +39,10 @@ export const referenceLineLayerFunction: ReferenceLineLayerFn = {
       types: ['string'],
       help: strings.getLayerIdHelp(),
     },
+    isHidden: {
+      types: ['boolean'],
+      help: strings.getRLIsHiddenHelp(),
+    },
   },
   async fn(input, args, context) {
     const { referenceLineLayerFn } = await import('./reference_line_layer_fn');

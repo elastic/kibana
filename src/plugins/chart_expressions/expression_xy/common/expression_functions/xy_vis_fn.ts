@@ -57,6 +57,7 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
     layerType: LayerTypes.DATA,
     table: normalizedTable,
     showLines: args.showLines,
+    isHidden: args.isHidden,
     ...accessors,
   };
 };
@@ -87,6 +88,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     pointsRadius,
     lineWidth,
     showLines: realShowLines,
+    isHidden,
     ...restArgs
   } = args;
 
