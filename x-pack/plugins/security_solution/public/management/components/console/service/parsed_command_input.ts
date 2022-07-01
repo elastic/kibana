@@ -167,9 +167,10 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
     : [`${requiredArgs} ${optionalArgs.length > 0 ? `[${optionalArgs}]` : ''}`.trim()];
 };
 
-export const parsedPidOrEntityIdParameter = (
-  parameters: { pid?: ParsedArgData; entityId?: ParsedArgData }
-): { pid: number; entity_id?: never } | { pid?: never; entity_id: string } | undefined => {
+export const parsedPidOrEntityIdParameter = (parameters: {
+  pid?: ParsedArgData;
+  entityId?: ParsedArgData;
+}): { pid: number; entity_id?: never } | { pid?: never; entity_id: string } | undefined => {
   if (parameters.pid) {
     return { pid: Number(parameters.pid[0]) };
   } else if (parameters.entityId) {
