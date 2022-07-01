@@ -129,7 +129,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns, loading } =
+  const { indicesExist, indexPattern, selectedPatterns, loading } =
     useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>

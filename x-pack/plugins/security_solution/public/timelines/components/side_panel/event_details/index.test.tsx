@@ -20,7 +20,6 @@ import {
 } from '../../../../common/lib/kibana';
 import {
   mockBrowserFields,
-  mockDocValueFields,
   mockRuntimeMappings,
 } from '../../../../common/containers/source/mock';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -113,7 +112,6 @@ const defaultProps = {
   detailsData: mockAlertDetailsDataWithIsObject,
   tabType: TimelineTabs.query,
   browserFields: mockBrowserFields,
-  docValueFields: mockDocValueFields,
   runtimeMappings: mockRuntimeMappings,
 };
 
