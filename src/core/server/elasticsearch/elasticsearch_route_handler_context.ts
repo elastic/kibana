@@ -22,7 +22,7 @@ export interface ElasticsearchRequestHandlerContext {
  * The {@link UiSettingsRequestHandlerContext} implementation.
  * @internal
  */
-export class ElasticsearchRequestHandlerContext implements ElasticsearchRequestHandlerContext {
+export class CoreElasticsearchRouteHandlerContext implements ElasticsearchRequestHandlerContext {
   #client?: IScopedClusterClient;
 
   constructor(

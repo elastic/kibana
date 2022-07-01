@@ -45,7 +45,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
     httpSetup.registerRouteHandlerContext<InternalSavedObjectsRequestHandlerContext, 'core'>(
       coreId,
       'core',
-      async (ctx, req, res) => {
+      (ctx, req, res) => {
         return handlerContext;
       }
     );

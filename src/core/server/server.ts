@@ -423,7 +423,7 @@ export class Server {
     coreSetup.http.registerRouteHandlerContext<RequestHandlerContext, 'core'>(
       coreId,
       'core',
-      async (context, req, res) => {
+      (context, req) => {
         return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );

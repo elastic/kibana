@@ -30,7 +30,7 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
   httpSetup.registerRouteHandlerContext<InternalSavedObjectsRequestHandlerContext, 'core'>(
     coreId,
     'core',
-    async (ctx, req, res) => {
+    (ctx, req, res) => {
       return handlerContext;
     }
   );

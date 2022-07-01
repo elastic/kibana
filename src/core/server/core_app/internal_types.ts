@@ -11,8 +11,7 @@ import type { IRouter } from '../http';
 import type { UiSettingsRequestHandlerContext } from '../ui_settings';
 
 /**
- * Request handler context used by the core_app routes.
- * Only used for module isolation purposes.
+ * Request handler context used by core's coreApp routes.
  * @internal
  */
 export interface InternalCoreAppRequestHandlerContext extends RequestHandlerContextBase {
@@ -22,8 +21,8 @@ export interface InternalCoreAppRequestHandlerContext extends RequestHandlerCont
 }
 
 /**
- * Router used by the core_app routes.
- * Only used for module isolation purposes.
+ * Router bound to the {@link InternalCoreAppRequestHandlerContext}.
+ * Used by core's coreApp routes.
  * @internal
  */
 export type InternalCoreAppRouter = IRouter<InternalCoreAppRequestHandlerContext>;

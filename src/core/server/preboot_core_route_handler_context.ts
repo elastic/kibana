@@ -18,6 +18,7 @@ export interface PrebootUiSettingsRequestHandlerContext {
 }
 
 /**
+ * Implementation of {@link PrebootUiSettingsRequestHandlerContext}
  * @internal
  */
 class PrebootCoreUiSettingsRouteHandlerContext implements PrebootUiSettingsRequestHandlerContext {
@@ -32,6 +33,7 @@ export interface PrebootCoreRequestHandlerContext {
 }
 
 /**
+ * Implementation of {@link PrebootCoreRequestHandlerContext}.
  * @internal
  */
 export class PrebootCoreRouteHandlerContext implements PrebootCoreRequestHandlerContext {
