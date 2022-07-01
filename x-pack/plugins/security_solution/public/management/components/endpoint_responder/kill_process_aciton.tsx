@@ -40,7 +40,6 @@ export const KillProcessActionResult = memo<
 
   // Send Kill request if not yet done
   useEffect(() => {
-
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
 
     if (!actionRequestSent && endpointId && parameters) {
