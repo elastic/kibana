@@ -10,7 +10,8 @@ import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Adapters } from '@kbn/inspector-plugin';
-import type { AggGroupNames, AggParam, AggGroupName, Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { AggGroupNames, AggParam, AggGroupName } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
@@ -97,6 +98,7 @@ export interface VisualizeEditorLayersContext {
   termsParams?: Record<string, unknown>;
   splitFields?: string[];
   splitMode?: string;
+  collapseFn?: string;
   splitFilters?: SplitByFilters[];
   palette?: PaletteOutput;
   metrics: VisualizeEditorMetricContext[];

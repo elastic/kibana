@@ -10,6 +10,7 @@ import React from 'react';
 import { Settings, TooltipType, Heatmap } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
@@ -110,9 +111,11 @@ describe('HeatmapComponent', function () {
       uiState,
       onClickValue: jest.fn(),
       onSelectRange: jest.fn(),
+      datatableUtilities: createDatatableUtilitiesMock(),
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
       interactive: true,
+      renderComplete: jest.fn(),
     };
   });
 

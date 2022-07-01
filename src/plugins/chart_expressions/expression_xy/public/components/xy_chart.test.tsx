@@ -32,6 +32,7 @@ import {
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { DataLayerConfig } from '../../common';
@@ -69,7 +70,7 @@ const onSelectRange = jest.fn();
 describe('XYChart component', () => {
   let getFormatSpy: jest.Mock;
   let convertSpy: jest.Mock;
-  let defaultProps: Omit<XYChartRenderProps, 'data' | 'args'>;
+  let defaultProps: Omit<XYChartRenderProps, 'args'>;
 
   const dataWithoutFormats: Datatable = {
     type: 'datatable',
@@ -109,6 +110,7 @@ describe('XYChart component', () => {
     getFormatSpy.mockReturnValue({ convert: convertSpy });
 
     defaultProps = {
+      data: dataPluginMock.createStartContract(),
       formatFactory: getFormatSpy,
       timeZone: 'UTC',
       renderMode: 'view',
@@ -122,6 +124,7 @@ describe('XYChart component', () => {
       syncTooltips: false,
       useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
+      renderComplete: jest.fn(),
     };
   });
 

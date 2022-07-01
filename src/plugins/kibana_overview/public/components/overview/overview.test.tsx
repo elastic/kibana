@@ -166,7 +166,7 @@ describe('Overview', () => {
 
   afterAll(() => jest.clearAllMocks());
 
-  test('render', async () => {
+  test('renders correctly', async () => {
     const component = mountWithIntl(
       <Overview
         newsFetchResult={mockNewsFetchResult}
@@ -181,7 +181,7 @@ describe('Overview', () => {
     expect(component.find(KibanaPageTemplate).length).toBe(1);
   });
 
-  test('without solutions', async () => {
+  test('renders correctly without solutions', async () => {
     const component = mountWithIntl(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={[]} features={mockFeatures} />
     );
@@ -191,7 +191,7 @@ describe('Overview', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('without features', async () => {
+  test('renders correctly without features', async () => {
     const component = mountWithIntl(
       <Overview newsFetchResult={mockNewsFetchResult} solutions={mockSolutions} features={[]} />
     );
@@ -201,7 +201,7 @@ describe('Overview', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('when there is no user data view', async () => {
+  test('renders correctly when there is no user data view', async () => {
     hasESData.mockResolvedValue(true);
     hasUserDataView.mockResolvedValue(false);
 
@@ -221,7 +221,7 @@ describe('Overview', () => {
     expect(component.find(EuiLoadingSpinner).length).toBe(0);
   });
 
-  test('during loading', async () => {
+  test('show loading spinner during loading', async () => {
     hasESData.mockImplementation(() => new Promise(() => {}));
     hasUserDataView.mockImplementation(() => new Promise(() => {}));
 

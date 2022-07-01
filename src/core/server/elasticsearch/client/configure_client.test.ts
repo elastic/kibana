@@ -16,7 +16,7 @@ import {
   createTransportMock,
   ClientMock,
 } from './configure_client.test.mocks';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';

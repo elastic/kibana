@@ -25,7 +25,7 @@ import { getNextValuesForReferenceLines } from './utils';
 export interface ReferenceLinesProps {
   layers: CommonXYReferenceLineLayerConfig[];
   xAxisFormatter: FieldFormat;
-  yAxesConfiguration: GroupsConfiguration;
+  axesConfiguration: GroupsConfiguration;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
   titles?: LayersAccessorsTitles;

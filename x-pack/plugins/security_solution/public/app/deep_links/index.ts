@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { AppDeepLink, AppNavLinkStatus, AppUpdater, Capabilities } from '@kbn/core/public';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { SecurityPageName } from '../types';
 import {
   OVERVIEW,
@@ -37,6 +37,7 @@ import {
   GETTING_STARTED,
   DASHBOARDS,
   CREATE_NEW_RULE,
+  RESPONSE_ACTIONS,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -60,6 +61,7 @@ import {
   USERS_PATH,
   KUBERNETES_PATH,
   RULES_CREATE_PATH,
+  RESPONSE_ACTIONS_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { subscribeAppLinks } from '../../common/links';
@@ -469,6 +471,11 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         title: BLOCKLIST,
         path: BLOCKLIST_PATH,
       },
+      {
+        id: SecurityPageName.responseActions,
+        title: RESPONSE_ACTIONS,
+        path: RESPONSE_ACTIONS_PATH,
+      },
     ],
   },
 ];
@@ -561,8 +568,8 @@ const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
 /**
  * Registers any change in appLinks to be updated in app deepLinks
  */
-export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>) => {
-  subscribeAppLinks((appLinks) => {
+export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>): Subscription => {
+  return subscribeAppLinks((appLinks) => {
     appUpdater$.next(() => ({
       navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
       deepLinks: formatDeepLinks(appLinks),

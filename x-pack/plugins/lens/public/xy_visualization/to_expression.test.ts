@@ -8,6 +8,7 @@
 import { Ast, fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { getXyVisualization } from './xy_visualization';
 import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
@@ -20,6 +21,7 @@ import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
+    datatableUtilities: createDatatableUtilitiesMock(),
     paletteService: chartPluginMock.createPaletteRegistry(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     kibanaTheme: themeServiceMock.createStartContract(),

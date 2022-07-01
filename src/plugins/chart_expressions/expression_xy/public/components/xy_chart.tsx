@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   Chart,
   Settings,
@@ -30,6 +30,7 @@ import {
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
@@ -108,6 +109,7 @@ declare global {
 export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
+  data: DataPublicPluginStart;
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
@@ -120,6 +122,7 @@ export type XYChartRenderProps = XYChartProps & {
   syncColors: boolean;
   syncTooltips: boolean;
   eventAnnotationService: EventAnnotationServiceType;
+  renderComplete: () => void;
 };
 
 function getValueLabelsStyling(isHorizontal: boolean): {
@@ -159,6 +162,7 @@ export const XYChartReportable = React.memo(XYChart);
 
 export function XYChart({
   args,
+  data,
   formatFactory,
   timeZone,
   chartsThemeService,
@@ -171,6 +175,7 @@ export function XYChart({
   syncColors,
   syncTooltips,
   useLegacyTimeAxis,
+  renderComplete,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -200,6 +205,15 @@ export function XYChart({
     datatables: filteredLayers.map(({ table }) => table),
   });
 
+  const onRenderChange = useCallback(
+    (isRendered: boolean = true) => {
+      if (isRendered) {
+        renderComplete();
+      }
+    },
+    [renderComplete]
+  );
+
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
   const formattedDatatables = useMemo(
     () => getFormattedTablesByLayers(dataLayers, formatFactory),
@@ -213,7 +227,9 @@ export function XYChart({
 
   if (dataLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
-    return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
+    return (
+      <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
+    );
   }
 
   // use formatting hint of first x axis column to format ticks
@@ -245,6 +261,14 @@ export function XYChart({
     formatFactory,
     fieldFormats,
     yAxisConfigs
+  );
+
+  const axesConfiguration = getAxesConfiguration(
+    dataLayers,
+    shouldRotate,
+    formatFactory,
+    fieldFormats,
+    [...(yAxisConfigs ?? []), ...(xAxisConfig ? [xAxisConfig] : [])]
   );
 
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name);
@@ -280,6 +304,7 @@ export function XYChart({
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
+    data.datatableUtilities,
     dataLayers,
     minInterval,
     isTimeViz,
@@ -327,7 +352,7 @@ export function XYChart({
       .map((config) => ({
         ...config,
         position: config
-          ? getAxisGroupForReferenceLine(yAxesConfiguration, config, shouldRotate)?.position ??
+          ? getAxisGroupForReferenceLine(axesConfiguration, config, shouldRotate)?.position ??
             Position.Left
           : Position.Bottom,
       })),
@@ -594,6 +619,7 @@ export function XYChart({
   return (
     <Chart ref={chartRef}>
       <Settings
+        onRenderChange={onRenderChange}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{
           tooltip: { visible: syncTooltips, placement: Placement.Right },
@@ -693,16 +719,16 @@ export function XYChart({
         id="x"
         position={
           xAxisConfig?.position
-            ? getAxisPosition(xAxisConfig?.position, shouldRotate)
+            ? getOriginalAxisPosition(xAxisConfig?.position, shouldRotate)
             : defaultXAxisPosition
         }
         title={xTitle}
         gridLine={gridLineStyle}
         hide={xAxisConfig?.hide || dataLayers[0]?.hide || !dataLayers[0]?.xAccessor}
         tickFormat={(d) => {
-          const value = safeXAccessorLabelRenderer(d) || '';
+          let value = safeXAccessorLabelRenderer(d) || '';
           if (xAxisConfig?.truncate && value.length > xAxisConfig.truncate) {
-            return `${value.slice(0, xAxisConfig.truncate)}...`;
+            value = `${value.slice(0, xAxisConfig.truncate)}...`;
           }
           return value;
         }}
@@ -733,9 +759,9 @@ export function XYChart({
             }}
             hide={axis.hide || dataLayers[0]?.hide}
             tickFormat={(d) => {
-              const value = axis.formatter?.convert(d) || '';
+              let value = axis.formatter?.convert(d) || '';
               if (axis.truncate && value.length > axis.truncate) {
-                return `${value.slice(0, axis.truncate)}...`;
+                value = `${value.slice(0, axis.truncate)}...`;
               }
               return value;
             }}
@@ -789,7 +815,7 @@ export function XYChart({
         <ReferenceLines
           layers={referenceLineLayers}
           xAxisFormatter={xAxisFormatter}
-          yAxesConfiguration={yAxesConfiguration}
+          axesConfiguration={axesConfiguration}
           isHorizontal={shouldRotate}
           paddingMap={linesPaddings}
           titles={titles}

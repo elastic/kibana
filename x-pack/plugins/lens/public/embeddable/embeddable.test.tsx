@@ -16,8 +16,8 @@ import {
 } from './embeddable';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { Filter } from '@kbn/es-query';
-import { Query, TimeRange, FilterManager } from '@kbn/data-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Document } from '../persistence';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -107,6 +107,8 @@ const attributeServiceMockFromSavedVis = (document: Document): LensAttributeServ
   return service;
 };
 
+const dataMock = dataPluginMock.createStartContract();
+
 describe('embeddable', () => {
   let mountpoint: HTMLDivElement;
   let expressionRenderer: jest.Mock<null, [ReactExpressionRendererProps]>;
@@ -139,6 +141,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         indexPatternService: {} as DataViewsContract,
@@ -188,6 +191,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         indexPatternService: {} as DataViewsContract,
@@ -238,6 +242,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -298,6 +303,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         inspector: inspectorPluginMock.createStartContract(),
         expressionRenderer,
         basePath,
@@ -347,6 +353,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -396,6 +403,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -443,6 +451,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -494,6 +503,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -549,6 +559,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -602,6 +613,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -662,6 +674,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -723,6 +736,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -787,6 +801,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -836,6 +851,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -887,6 +903,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -935,6 +952,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -998,6 +1016,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -1080,6 +1099,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -1137,6 +1157,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -1191,6 +1212,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService,
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),
@@ -1266,6 +1288,7 @@ describe('embeddable', () => {
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
         attributeService: attributeServiceMockFromSavedVis(visDocument),
+        data: dataMock,
         expressionRenderer,
         basePath,
         inspector: inspectorPluginMock.createStartContract(),

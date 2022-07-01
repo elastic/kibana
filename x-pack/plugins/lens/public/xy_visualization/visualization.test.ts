@@ -17,6 +17,7 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
 } from './types';
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
@@ -68,6 +69,7 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const xyVisualization = getXyVisualization({
+  datatableUtilities: createDatatableUtilitiesMock(),
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,
@@ -474,7 +476,7 @@ describe('xy_visualization', () => {
       });
       it('should copy previous column if passed and assign a new id', () => {
         expect(
-          xyVisualization.setDimension({
+          xyVisualization.onDrop!({
             frame,
             prevState: {
               ...exampleState(),
@@ -486,10 +488,20 @@ describe('xy_visualization', () => {
                 },
               ],
             },
-            layerId: 'annotation',
-            groupId: 'xAnnotation',
-            previousColumn: 'an2',
-            columnId: 'newColId',
+            dropType: 'duplicate_compatible',
+            source: {
+              layerId: 'annotation',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              id: 'an2',
+              humanData: { label: 'an2' },
+            },
+            target: {
+              layerId: 'annotation',
+              groupId: 'xAnnotation',
+              columnId: 'newColId',
+              filterOperations: Boolean,
+            },
           }).layers[0]
         ).toEqual({
           layerId: 'annotation',
@@ -499,7 +511,7 @@ describe('xy_visualization', () => {
       });
       it('should reorder a dimension to a annotation layer', () => {
         expect(
-          xyVisualization.setDimension({
+          xyVisualization.onDrop!({
             frame,
             prevState: {
               ...exampleState(),
@@ -511,16 +523,220 @@ describe('xy_visualization', () => {
                 },
               ],
             },
-            layerId: 'annotation',
-            groupId: 'xAnnotation',
-            previousColumn: 'an2',
-            columnId: 'an1',
+            source: {
+              layerId: 'annotation',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              id: 'an2',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'annotation',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              filterOperations: () => true,
+            },
+            dropType: 'reorder',
           }).layers[0]
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
           annotations: [exampleAnnotation2, exampleAnnotation],
         });
+      });
+
+      it('should duplicate the annotations and replace the target in another annotation layer', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation],
+                },
+                {
+                  layerId: 'second',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation2],
+                },
+              ],
+            },
+            source: {
+              layerId: 'first',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              id: 'an1',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'second',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              filterOperations: () => true,
+            },
+            dropType: 'replace_duplicate_compatible',
+          }).layers
+        ).toEqual([
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation],
+          },
+          {
+            layerId: 'second',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [{ ...exampleAnnotation, id: 'an2' }],
+          },
+        ]);
+      });
+      it('should swap the annotations between layers', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation],
+                },
+                {
+                  layerId: 'second',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation2],
+                },
+              ],
+            },
+            source: {
+              layerId: 'first',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              id: 'an1',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'second',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              filterOperations: () => true,
+            },
+            dropType: 'swap_compatible',
+          }).layers
+        ).toEqual([
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation2],
+          },
+          {
+            layerId: 'second',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation],
+          },
+        ]);
+      });
+      it('should replace the target in another annotation layer', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation],
+                },
+                {
+                  layerId: 'second',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation2],
+                },
+              ],
+            },
+            source: {
+              layerId: 'first',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              id: 'an1',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'second',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              filterOperations: () => true,
+            },
+            dropType: 'replace_compatible',
+          }).layers
+        ).toEqual([
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [],
+          },
+          {
+            layerId: 'second',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation],
+          },
+        ]);
+      });
+      it('should move compatible to another annotation layer', () => {
+        expect(
+          xyVisualization.onDrop!({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'first',
+                  layerType: 'annotations',
+                  annotations: [exampleAnnotation],
+                },
+                {
+                  layerId: 'second',
+                  layerType: 'annotations',
+                  annotations: [],
+                },
+              ],
+            },
+            source: {
+              layerId: 'first',
+              groupId: 'xAnnotation',
+              columnId: 'an1',
+              id: 'an1',
+              humanData: { label: 'label' },
+              filterOperations: () => true,
+            },
+            target: {
+              layerId: 'second',
+              groupId: 'xAnnotation',
+              columnId: 'an2',
+              filterOperations: () => true,
+            },
+            dropType: 'move_compatible',
+          }).layers
+        ).toEqual([
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [],
+          },
+          {
+            layerId: 'second',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [exampleAnnotation],
+          },
+        ]);
       });
     });
   });

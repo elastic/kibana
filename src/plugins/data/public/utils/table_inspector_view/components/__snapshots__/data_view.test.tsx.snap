@@ -2,7 +2,7 @@
 
 exports[`Inspector Data View component should render empty state 1`] = `
 <div
-  class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+  class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
 >
   <div
     class="euiEmptyPrompt__main"
@@ -14,24 +14,20 @@ exports[`Inspector Data View component should render empty state 1`] = `
         class="euiEmptyPrompt__contentInner"
       >
         <h2
-          class="euiTitle css-1w464ad-euiTitle-m"
+          class="euiTitle emotion-euiTitle-m"
         >
           No data available
         </h2>
-        <span
-          class="euiTextColor euiTextColor--subdued"
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiText emotion-euiText-m-euiTextColor-subdued"
         >
-          <div
-            class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
-          />
-          <div
-            class="euiText euiText--medium"
-          >
-            <p>
-              The element did not provide any data.
-            </p>
-          </div>
-        </span>
+          <p>
+            The element did not provide any data.
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -210,7 +206,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
     class="euiBasicTable insDataTableFormat__table"
@@ -338,7 +334,7 @@ Array [
     </div>
     <div>
       <div
-        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"
@@ -463,7 +459,7 @@ Array [
       class="euiFlexItem"
     >
       <div
-        class="euiText euiText--extraSmall"
+        class="euiText emotion-euiText-xs"
       >
         <p
           aria-atomic="true"
@@ -474,7 +470,7 @@ Array [
         </p>
       </div>
       <div
-        class="euiSpacer euiSpacer--xs css-1wffcmx-euiSpacer-xs"
+        class="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -555,7 +551,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
     class="euiBasicTable insDataTableFormat__table"
@@ -684,7 +680,7 @@ Array [
     </div>
     <div>
       <div
-        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"

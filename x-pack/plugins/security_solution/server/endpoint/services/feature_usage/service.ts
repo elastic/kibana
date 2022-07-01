@@ -20,6 +20,7 @@ const FEATURES = {
   BEHAVIOR_PROTECTION: 'Behavior protection',
   KILL_PROCESS: 'Kill process',
   SUSPEND_PROCESS: 'Suspend process',
+  RUNNING_PROCESSES: 'Get running processes',
 } as const;
 
 export type FeatureKeys = keyof typeof FEATURES;

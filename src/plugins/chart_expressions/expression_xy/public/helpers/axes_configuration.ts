@@ -16,6 +16,8 @@ import {
   DataDecorationConfig,
   YAxisConfig,
   ReferenceLineDecorationConfig,
+  YAxisConfigResult,
+  XAxisConfigResult,
 } from '../../common';
 import { LayersFieldFormats } from './layers';
 
@@ -141,6 +143,7 @@ export function groupAxesByType(
 
     series[axisGroupId].push(currentSeries);
   });
+
   return series;
 }
 
@@ -190,19 +193,22 @@ function axisGlobalConfig(position: Position, yAxisConfigs?: YAxisConfig[]) {
   return yAxisConfigs?.find((axis) => !axis.id && axis.position === position) || {};
 }
 
+const getXAxisConfig = (axisConfigs: Array<XAxisConfigResult | YAxisConfigResult> = []) =>
+  axisConfigs.find(({ type }) => type === 'xAxisConfig');
+
 export function getAxesConfiguration(
   layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
   formatFactory: FormatFactory | undefined,
   fieldFormats: LayersFieldFormats,
-  yAxisConfigs?: YAxisConfig[]
+  axisConfigs?: Array<XAxisConfigResult | YAxisConfigResult>
 ): GroupsConfiguration {
-  const series = groupAxesByType(layers, fieldFormats, yAxisConfigs);
+  const series = groupAxesByType(layers, fieldFormats, axisConfigs);
 
   const axisGroups: GroupsConfiguration = [];
   let position: Position;
 
-  yAxisConfigs?.forEach((axis) => {
+  axisConfigs?.forEach((axis) => {
     const groupId = axis.id ? `axis-${axis.id}` : undefined;
     if (groupId && series[groupId] && series[groupId].length > 0) {
       position = getAxisPosition(axis.position || Position.Left, shouldRotate);
@@ -210,7 +216,7 @@ export function getAxesConfiguration(
         groupId,
         formatter: formatFactory?.(series[groupId][0].fieldFormat),
         series: series[groupId].map(({ fieldFormat, ...currentSeries }) => currentSeries),
-        ...axisGlobalConfig(axis.position || Position.Left, yAxisConfigs),
+        ...axisGlobalConfig(axis.position || Position.Left, axisConfigs),
         ...axis,
         position,
       });
@@ -223,7 +229,7 @@ export function getAxesConfiguration(
       groupId: LEFT_GLOBAL_AXIS_ID,
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
-      ...axisGlobalConfig(Position.Left, yAxisConfigs),
+      ...axisGlobalConfig(Position.Left, axisConfigs),
       position,
     });
   }
@@ -234,7 +240,18 @@ export function getAxesConfiguration(
       groupId: RIGHT_GLOBAL_AXIS_ID,
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
-      ...axisGlobalConfig(Position.Right, yAxisConfigs),
+      ...axisGlobalConfig(Position.Right, axisConfigs),
+      position,
+    });
+  }
+
+  const xAxisConfig = getXAxisConfig(axisConfigs);
+  if (xAxisConfig) {
+    position = getAxisPosition(xAxisConfig.position || Position.Bottom, shouldRotate);
+    axisGroups.push({
+      groupId: 'bottom',
+      series: [],
+      ...xAxisConfig,
       position,
     });
   }

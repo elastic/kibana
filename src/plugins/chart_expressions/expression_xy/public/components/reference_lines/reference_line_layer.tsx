@@ -21,13 +21,13 @@ interface ReferenceLineLayerProps {
   isHorizontal: boolean;
   titles?: LayerAccessorsTitles;
   xAxisFormatter: FieldFormat;
-  yAxesConfiguration: GroupsConfiguration;
+  axesConfiguration: GroupsConfiguration;
   yAxesMap: AxesMap;
 }
 
 export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   layer,
-  yAxesConfiguration,
+  axesConfiguration,
   xAxisFormatter,
   paddingMap,
   isHorizontal,
@@ -54,7 +54,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
 
   const referenceLineElements = decorationConfigsByValue.flatMap((decorationConfig) => {
     const axisGroup = getAxisGroupForReferenceLine(
-      yAxesConfiguration,
+      axesConfiguration,
       decorationConfig,
       isHorizontal
     );
@@ -64,7 +64,10 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
       columnToLabelMap[decorationConfig.forAccessor] ??
       titles?.yTitles?.[decorationConfig.forAccessor];
     const value = row[decorationConfig.forAccessor];
-    const yDecorationsWithSameDirection = groupedByDirection[decorationConfig.fill!];
+    const yDecorationsWithSameDirection = groupedByDirection[decorationConfig.fill!].filter(
+      (yDecoration) =>
+        getAxisGroupForReferenceLine(axesConfiguration, yDecoration, isHorizontal) === axisGroup
+    );
     const indexFromSameType = yDecorationsWithSameDirection.findIndex(
       ({ forAccessor }) => forAccessor === decorationConfig.forAccessor
     );

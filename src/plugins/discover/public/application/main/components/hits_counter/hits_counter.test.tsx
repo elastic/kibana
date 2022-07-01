@@ -13,7 +13,7 @@ import { HitsCounter, HitsCounterProps } from './hits_counter';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import { DataTotalHits$ } from '../../utils/use_saved_search';
+import { DataTotalHits$ } from '../../hooks/use_saved_search';
 
 describe('hits counter', function () {
   let props: HitsCounterProps;

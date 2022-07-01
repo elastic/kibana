@@ -10,17 +10,18 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { DocViewerTab } from './doc_viewer_tab';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { ElasticSearchHit } from '../../../../types';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 describe('DocViewerTab', () => {
   test('changing columns triggers an update', () => {
+    const hit = buildDataTableRecord({ _index: 'test', _id: '1' }, indexPatternMock);
     const props = {
       title: 'test',
       component: jest.fn(),
       id: 1,
       render: jest.fn(),
       renderProps: {
-        hit: {} as ElasticSearchHit,
+        hit,
         columns: ['test'],
         indexPattern: indexPatternMock,
       },
@@ -31,7 +32,7 @@ describe('DocViewerTab', () => {
     const nextProps = {
       ...props,
       renderProps: {
-        hit: {} as ElasticSearchHit,
+        hit,
         columns: ['test2'],
         indexPattern: indexPatternMock,
       },

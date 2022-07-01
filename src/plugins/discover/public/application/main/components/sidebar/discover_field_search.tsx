@@ -37,7 +37,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldTypeDescription } from './lib/get_field_type_description';
 import { KNOWN_FIELD_TYPES } from '../../../../../common/field_types';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export interface State {
   searchable: string;

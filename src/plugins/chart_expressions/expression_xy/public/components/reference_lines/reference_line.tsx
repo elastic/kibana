@@ -18,7 +18,7 @@ interface ReferenceLineProps {
   layer: ReferenceLineConfig;
   paddingMap: Partial<Record<Position, number>>;
   xAxisFormatter: FieldFormat;
-  yAxesConfiguration: GroupsConfiguration;
+  axesConfiguration: GroupsConfiguration;
   isHorizontal: boolean;
   nextValue?: number;
   yAxesMap: AxesMap;
@@ -26,7 +26,7 @@ interface ReferenceLineProps {
 
 export const ReferenceLine: FC<ReferenceLineProps> = ({
   layer,
-  yAxesConfiguration,
+  axesConfiguration,
   xAxisFormatter,
   paddingMap,
   isHorizontal,
@@ -43,11 +43,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
 
   const { value } = decorationConfig;
 
-  const axisGroup = getAxisGroupForReferenceLine(
-    yAxesConfiguration,
-    decorationConfig,
-    isHorizontal
-  );
+  const axisGroup = getAxisGroupForReferenceLine(axesConfiguration, decorationConfig, isHorizontal);
 
   const formatter = axisGroup?.formatter || xAxisFormatter;
   const id = `${layer.layerId}-${value}`;

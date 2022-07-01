@@ -72,7 +72,7 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   },
   [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
   [ConfigKey.PARAMS]: '',
-  [ConfigKey.PORT]: undefined,
+  [ConfigKey.PORT]: null,
   [ConfigKey.SCHEDULE]: {
     unit: ScheduleUnit.MINUTES,
     number: '10',

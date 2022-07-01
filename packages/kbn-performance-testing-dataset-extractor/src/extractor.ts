@@ -7,10 +7,14 @@
  */
 
 import fs from 'fs/promises';
+import moment from 'moment';
 import { existsSync } from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { initClient, Document } from './es_client';
+
+const DATE_FORMAT = `YYYY-MM-DD'T'HH:mm:ss.SSS'Z'`;
 
 interface CLIParams {
   param: {
@@ -39,6 +43,24 @@ export interface ScalabilitySetup {
   maxDuration: string;
 }
 
+const parsePayload = (payload: string, traceId: string, log: ToolingLog): string | undefined => {
+  let body;
+  try {
+    body = JSON.parse(payload);
+  } catch (error) {
+    log.error(`Failed to parse payload - trace_id: '${traceId}'`);
+  }
+  return body;
+};
+
+const calculateTransactionTimeRage = (hit: SearchHit<Document>) => {
+  const trSource = hit._source as Document;
+  const startTime = trSource['@timestamp'];
+  const duration = trSource.transaction.duration.us / 1000; // convert microseconds to milliseconds
+  const endTime = moment(startTime, DATE_FORMAT).add(duration, 'milliseconds').toISOString();
+  return { startTime, endTime };
+};
+
 export const extractor = async ({ param, client, log }: CLIParams) => {
   const authOptions = {
     node: client.baseURL,
@@ -50,7 +72,23 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
     `Searching transactions with 'labels.testBuildId=${buildId}' and 'labels.journeyName=${journeyName}'`
   );
   const esClient = initClient(authOptions);
-  const hits = await esClient.getTransactions(buildId, journeyName);
+  const ftrTransactionHits = await esClient.getFtrTransactions(buildId, journeyName);
+  if (!ftrTransactionHits || ftrTransactionHits.length === 0) {
+    log.warning(
+      `No transactions found. Can't calculate journey time range, output file won't be generated.`
+    );
+    return;
+  }
+
+  // There should be a single top-level transaction, representing journey browser starting time and session duration.
+  if (ftrTransactionHits.length > 1) {
+    log.warning(`Filtering doesn't work, more than 1 'functional test runner' transaction found`);
+    return;
+  }
+
+  const timeRange = calculateTransactionTimeRage(ftrTransactionHits[0]);
+  // Filtering out setup/teardown related transactions by time range from 'functional test runner' transaction
+  const hits = await esClient.getKibanaServerTransactions(buildId, journeyName, timeRange);
   if (!hits || hits.length === 0) {
     log.warning(`No transactions found. Output file won't be generated.`);
     return;
@@ -62,6 +100,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
   const data = hits
     .map((hit) => hit!._source as Document)
     .map((hit) => {
+      const payload = hit.http.request?.body?.original;
       return {
         processor: hit.processor,
         traceId: hit.trace.id,
@@ -71,7 +110,7 @@ export const extractor = async ({ param, client, log }: CLIParams) => {
           url: { path: hit.url.path },
           headers: hit.http.request.headers,
           method: hit.http.request.method,
-          body: hit.http.request.body ? JSON.parse(hit.http.request.body.original) : '',
+          body: payload ? parsePayload(payload, hit.trace.id, log) : undefined,
         },
         response: { statusCode: hit.http.response.status_code },
         transaction: {

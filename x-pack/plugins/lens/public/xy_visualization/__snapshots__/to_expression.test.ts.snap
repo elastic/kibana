@@ -173,6 +173,9 @@ Object {
                   "position": Array [
                     "left",
                   ],
+                  "scaleType": Array [
+                    "linear",
+                  ],
                   "showGridLines": Array [
                     true,
                   ],
@@ -224,6 +227,9 @@ Object {
                   ],
                   "position": Array [
                     "right",
+                  ],
+                  "scaleType": Array [
+                    "linear",
                   ],
                   "showGridLines": Array [
                     true,

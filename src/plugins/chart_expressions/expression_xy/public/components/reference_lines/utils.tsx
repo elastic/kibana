@@ -47,6 +47,7 @@ export function getBaseIconPlacement(
       if (position === Position.Left) {
         return axesMap.right ? Position.Left : Position.Right;
       }
+
       return axesMap.left ? Position.Right : Position.Left;
     }
   }
@@ -87,8 +88,13 @@ export const getLineAnnotationProps = (
     axesMap,
     getOriginalAxisPosition(config.axisGroup?.position ?? Position.Bottom, isHorizontal)
   );
+
   // the padding map is built for vertical chart
   const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
+
+  const markerPosition = isHorizontal
+    ? mapVerticalToHorizontalPlacement(markerPositionVertical)
+    : markerPositionVertical;
 
   return {
     groupId: config.axisGroup?.groupId || 'bottom',
@@ -103,16 +109,11 @@ export const getLineAnnotationProps = (
     markerBody: (
       <MarkerBody
         label={labels.markerBodyLabel}
-        isHorizontal={
-          (!isHorizontal && config.axisGroup?.position === Position.Bottom) ||
-          (isHorizontal && config.axisGroup?.position !== Position.Bottom)
-        }
+        isHorizontal={markerPosition === Position.Bottom || markerPosition === Position.Top}
       />
     ),
     // rotate the position if required
-    markerPosition: isHorizontal
-      ? mapVerticalToHorizontalPlacement(markerPositionVertical)
-      : markerPositionVertical,
+    markerPosition,
   };
 };
 
@@ -219,15 +220,16 @@ export const computeChartMargins = (
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('top') : 'top';
     result[placement] = referenceLinePaddings.top;
   }
+
   return result;
 };
 
 export function getAxisGroupForReferenceLine(
-  yAxesConfiguration: GroupsConfiguration,
+  axesConfiguration: GroupsConfiguration,
   decorationConfig: ReferenceLineDecorationConfig | ExtendedReferenceLineDecorationConfig,
   shouldRotate: boolean
 ) {
-  return yAxesConfiguration.find(
+  return axesConfiguration.find(
     (axis) =>
       (decorationConfig.axisId && axis.groupId.includes(decorationConfig.axisId)) ||
       getAxisPosition(decorationConfig.position ?? Position.Left, shouldRotate) === axis.position

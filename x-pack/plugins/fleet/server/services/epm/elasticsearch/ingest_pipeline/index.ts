@@ -6,5 +6,5 @@
  */
 
 export { prepareToInstallPipelines } from './install';
-export { getPipelineNameForDatastream, isTopLevelPipeline } from './helpers';
+export { isTopLevelPipeline } from './helpers';
 export { deletePreviousPipelines, deletePipeline } from './remove';

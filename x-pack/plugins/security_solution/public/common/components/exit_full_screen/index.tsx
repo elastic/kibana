@@ -14,7 +14,7 @@ import * as i18n from './translations';
 export const EXIT_FULL_SCREEN_CLASS_NAME = 'exit-full-screen';
 
 const StyledEuiButton = styled(EuiButton)`
-  margin: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 interface Props {

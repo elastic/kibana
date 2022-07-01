@@ -98,7 +98,7 @@ describe('ReferenceLines', () => {
       defaultProps = {
         xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
-        yAxesConfiguration: [
+        axesConfiguration: [
           {
             groupId: 'left',
             position: 'left',
@@ -385,7 +385,7 @@ describe('ReferenceLines', () => {
       ['above', { y0: 5, y1: 10 }, { y0: 10, y1: undefined }],
       ['below', { y0: undefined, y1: 5 }, { y0: 5, y1: 10 }],
     ] as Array<[Exclude<ExtendedReferenceLineDecorationConfig['fill'], undefined>, YCoords, YCoords]>)(
-      'should be robust and works also for different axes when on same direction: 1x Left + 1x Right both %s',
+      'should allow overlap for different axes when on same direction on different axes: 1x Left + 1x Right both %s',
       (fill, coordsA, coordsB) => {
         const wrapper = shallow(
           <ReferenceLines
@@ -416,7 +416,11 @@ describe('ReferenceLines', () => {
         ).toEqual(
           expect.arrayContaining([
             {
-              coordinates: { ...emptyCoords, ...coordsA },
+              coordinates: {
+                ...emptyCoords,
+                ...coordsA,
+                [fill === 'above' ? 'y1' : 'y0']: undefined,
+              },
               details: coordsA.y0 ?? coordsA.y1,
               header: undefined,
             },
@@ -427,7 +431,11 @@ describe('ReferenceLines', () => {
         ).toEqual(
           expect.arrayContaining([
             {
-              coordinates: { ...emptyCoords, ...coordsB },
+              coordinates: {
+                ...emptyCoords,
+                ...coordsB,
+                [fill === 'above' ? 'y1' : 'y0']: undefined,
+              },
               details: coordsB.y1 ?? coordsB.y0,
               header: undefined,
             },
@@ -444,7 +452,7 @@ describe('ReferenceLines', () => {
       defaultProps = {
         xAxisFormatter: { convert: jest.fn((x) => x) } as unknown as FieldFormat,
         isHorizontal: false,
-        yAxesConfiguration: [
+        axesConfiguration: [
           {
             groupId: 'left',
             position: 'left',

@@ -36,18 +36,18 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   }
 
   .euiAccordion__triggerWrapper {
-    padding-left: ${(props) => props.theme.eui.paddingSizes.m};
+    padding-left: ${(props) => props.theme.eui.euiSizeM};
   }
 
   &.euiAccordion-isOpen {
     .euiAccordion__childWrapper {
-      padding: ${(props) => props.theme.eui.paddingSizes.m};
+      padding: ${(props) => props.theme.eui.euiSizeM};
       padding-top: 0px;
     }
   }
 
   .ingest-integration-title-button {
-    padding: ${(props) => props.theme.eui.paddingSizes.s};
+    padding: ${(props) => props.theme.eui.euiSizeS};
   }
 
   .euiTableRow:last-child .euiTableRowCell {

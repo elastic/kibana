@@ -14,6 +14,12 @@ import {
   getNoDataViewsPromptMockServices,
 } from '@kbn/shared-ux-prompt-no-data-views';
 
+import {
+  getNoDataCardMockServices,
+  getNoDataCardStoryArgTypes,
+  getNoDataCardStoryServices,
+} from '@kbn/shared-ux-card-no-data';
+
 import { KibanaNoDataPageServices } from './services';
 
 // TODO: clintandrewhall - this looks (and is) a bit complicated because the No Data View
@@ -32,6 +38,8 @@ export const getStoryServices = (params: StoryParams) => {
   const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } =
     getNoDataViewsPromptStorybookServices(params);
 
+  const { addBasePath, canAccessFleet } = getNoDataCardStoryServices(params);
+
   // Workaround to leverage the services package.
   const { application, data, docLinks, editors, http, permissions, platform } =
     servicesFactory(params);
@@ -47,6 +55,8 @@ export const getStoryServices = (params: StoryParams) => {
     canCreateNewDataView,
     dataViewsDocLink,
     openDataViewEditor,
+    addBasePath,
+    canAccessFleet,
   };
 
   return services;
@@ -75,6 +85,7 @@ export const getStoryArgTypes = () => ({
     defaultValue: false,
   },
   ...getNoDataViewsPromptStoryArgTypes(),
+  ...getNoDataCardStoryArgTypes(),
 });
 
 /**
@@ -83,6 +94,8 @@ export const getStoryArgTypes = () => ({
 export const getMockServices = (params?: MockServicesFactoryParams) => {
   const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } =
     getNoDataViewsPromptMockServices();
+
+  const { addBasePath, canAccessFleet } = getNoDataCardMockServices();
 
   const { application, data, docLinks, editors, http, permissions, platform } =
     mockServicesFactory(params);
@@ -98,6 +111,8 @@ export const getMockServices = (params?: MockServicesFactoryParams) => {
     canCreateNewDataView,
     dataViewsDocLink,
     openDataViewEditor,
+    addBasePath,
+    canAccessFleet,
   };
 
   return services;
