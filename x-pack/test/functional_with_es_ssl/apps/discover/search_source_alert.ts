@@ -226,7 +226,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  describe('Search source Alert', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/135065
+  describe.skip('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
 

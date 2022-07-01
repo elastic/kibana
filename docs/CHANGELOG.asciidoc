@@ -36,6 +36,27 @@ Review important information about the {kib} 8.3.x releases.
 Review the following information about the {kib} 8.3.1 release.
 
 [float]
+[[known-issues-8.3.1]]
+=== Known issues
+
+Alerting users who are running 8.2 should not upgrade to either 8.3.0 or 8.3.1.
+Both 8.3.0 and 8.3.1 have a bug where alerting rules that were created or edited
+in 8.2 will stop running on upgrade. If you have upgraded to 8.3.0 or 8.3.1 and
+your alerting rules have stopped running with an error similar to the following
+example, you will need to use the *Update API key* operation in
+*{stack-manage-app} > {rules-ui}* to restore the alerting rule to a functional
+state. It should be noted that the *Update API Key* operation causes the
+alerting rule to run as the user that performed the operation. For more details
+about API key authorization, refer to <<alerting-authorization>>.
+
+Example error message::
+
+[source,text]
+----
+<rule-type>:<UUID>: execution failed - security_exception: [security_exception] Reason: missing authentication credentials for REST request [/_security/user/_has_privileges], caused by: ""
+----
+
+[float]
 [[breaking-changes-8.3.1]]
 === Breaking change
 
@@ -86,6 +107,27 @@ Platform::
 == {kib} 8.3.0
 
 Review the following information about the {kib} 8.3.0 release.
+
+[float]
+[[known-issues-8.3.0]]
+=== Known issues
+
+Alerting users who are running 8.2 should not upgrade to either 8.3.0 or 8.3.1.
+Both 8.3.0 and 8.3.1 have a bug where alerting rules that were created or edited
+in 8.2 will stop running on upgrade. If you have upgraded to 8.3.0 or 8.3.1 and
+your alerting rules have stopped running with an error similar to the following
+example, you will need to use the *Update API key* operation in
+*{stack-manage-app} > {rules-ui}* to restore the alerting rule to a functional
+state. It should be noted that the *Update API Key* operation causes the
+alerting rule to run as the user that performed the operation. For more details
+about API key authorization, refer to <<alerting-authorization>>.
+
+Example error message::
+
+[source,text]
+----
+<rule-type>:<UUID>: execution failed - security_exception: [security_exception] Reason: missing authentication credentials for REST request [/_security/user/_has_privileges], caused by: ""
+----
 
 [float]
 [[breaking-changes-8.3.0]]
