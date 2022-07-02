@@ -43,6 +43,7 @@ export type { AgentClient, AgentService } from './agents';
 export { agentPolicyService } from './agent_policy';
 export { packagePolicyService } from './package_policy';
 export { outputService } from './output';
+export { downloadSourceService } from './download_source';
 export { settingsService };
 
 // Plugin services
