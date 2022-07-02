@@ -9,6 +9,7 @@ export const TELEMETRY_MAX_BUFFER_SIZE = 100;
 
 export const MAX_PACK_TELEMETRY_BATCH = 100;
 
+export const TELEMETRY_CHANNEL_CONFIGS = 'osquery-configs';
+export const TELEMETRY_CHANNEL_LIVE_QUERIES = 'osquery-live-queries-test2';
 export const TELEMETRY_CHANNEL_PACKS = 'osquery-packs';
-
 export const TELEMETRY_CHANNEL_SAVED_QUERIES = 'osquery-saved-queries';

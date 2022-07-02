@@ -26,6 +26,7 @@ import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/
 import { ACTIONS_INDEX } from '../../../common/constants';
 import { convertSOQueriesToPack } from '../pack/utils';
 import { PackSavedObjectAttributes } from '../../common/types';
+import { TELEMETRY_CHANNEL_LIVE_QUERIES } from '../../lib/telemetry/constants';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -167,6 +168,14 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
             refresh: 'wait_for',
             body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
           });
+        }
+
+        const telemetryOptIn = await osqueryContext.telemetryEventsSender.isTelemetryOptedIn();
+
+        if (telemetryOptIn) {
+          osqueryContext.telemetryEventsSender.sendOnDemand(TELEMETRY_CHANNEL_LIVE_QUERIES, [
+            osqueryAction,
+          ]);
         }
 
         return response.ok({

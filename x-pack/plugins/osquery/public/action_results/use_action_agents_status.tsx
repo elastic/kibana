@@ -22,7 +22,7 @@ export const useActionAgentStatus = ({
   skip,
   isLive,
 }: UseActionAgentStatusProps) => {
-  console.error('agentss', agentIds);
+  // console.error('agentss', agentIds);
   const [allAgentsResponded, setAllAgentsResponded] = useState(false);
   const {
     // @ts-expect-error update types
@@ -55,7 +55,7 @@ export const useActionAgentStatus = ({
     }
   }, [agentStatus.pending]);
 
-  console.error('agentStatus', agentStatus);
+  // console.error('agentStatus', agentStatus);
 
   return agentStatus;
 };

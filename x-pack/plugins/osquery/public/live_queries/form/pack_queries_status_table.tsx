@@ -17,8 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiNotificationBadge,
-  EuiSpacer,
-  EuiPanel,
   RIGHT_ALIGNMENT,
   EuiBadge,
   EuiText,
@@ -35,13 +33,19 @@ import type {
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import { DataView } from '@kbn/data-plugin/common';
+import { useQuery } from 'react-query';
+import styled from 'styled-components';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { useKibana } from '../../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../../common/types';
-import { ScheduledQueryErrorsTable } from '../../packs/scheduled_query_errors_table';
 import { usePackQueryLastResults } from '../../packs/use_pack_query_last_results';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
-import { useActionAgentStatus } from '../../action_results/use_action_agents_status';
+
+const StyledEuiBasicTable = styled(EuiBasicTable)`
+  .euiTableRow.euiTableRow-isExpandedRow > td > div {
+    padding: 0;
+  }
+`;
 
 const VIEW_IN_DISCOVER = i18n.translate(
   'xpack.osquery.pack.queriesTable.viewDiscoverResultsActionAriaLabel',
@@ -372,91 +376,47 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
 export const ViewResultsInDiscoverAction = React.memo(ViewResultsInDiscoverActionComponent);
 
-interface ScheduledQueryExpandedContentProps {
-  actionId?: string;
-  agentIds?: string[];
-  interval: number;
+interface DocsColumnResultsProps {
+  count?: number;
+  isLive?: boolean;
 }
 
-const ScheduledQueryExpandedContent = React.memo<ScheduledQueryExpandedContentProps>(
-  ({ actionId, agentIds, interval }) => (
-    <EuiFlexGroup direction="column" gutterSize="xl">
-      <EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-          <ScheduledQueryErrorsTable actionId={actionId} agentIds={agentIds} interval={interval} />
-        </EuiPanel>
-        <EuiSpacer size="m" />
+const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexItem grow={false}>
+      {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
+    </EuiFlexItem>
+    {isLive ? (
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner />
       </EuiFlexItem>
-    </EuiFlexGroup>
-  )
+    ) : null}
+  </EuiFlexGroup>
 );
 
-ScheduledQueryExpandedContent.displayName = 'ScheduledQueryExpandedContent';
-
-interface ScheduledQueryLastResultsProps {
-  actionId: string;
-  agentIds?: string[];
-  queryId?: string;
-  interval?: number;
-  startDate?: string;
-  logsDataView: DataView | undefined;
+interface AgentsColumnResultsProps {
+  successful?: number;
+  pending?: number;
+  failed?: number;
 }
 
-const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
-  actionId,
-  interval,
-  logsDataView,
-}) => {
-  const { data: lastResultsData, isLoading } = usePackQueryLastResults({
-    actionId,
-    interval,
-    logsDataView,
-  });
-  if (isLoading) {
-    return <EuiLoadingSpinner />;
-  }
-
-  if (!lastResultsData) {
-    return <>{'-'}</>;
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiNotificationBadge color="subdued">
-          {lastResultsData?.docCount ?? 0}
-        </EuiNotificationBadge>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId, agentIds }) => {
-  const agentStatus = useActionAgentStatus({ actionId, agentIds, isLive: true });
-
-  if (!agentStatus) {
-    return <EuiLoadingSpinner />;
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <div>
-          <EuiText color="subdued">
-            <EuiBadge color="success">{agentStatus.success}</EuiBadge>
-            {' / '}
-            <EuiBadge color="default">{agentStatus.pending}</EuiBadge>
-            {' / '}
-            <EuiBadge color={agentStatus.failed ? 'danger' : 'default'}>
-              {agentStatus.failed}
-            </EuiBadge>
-          </EuiText>
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
+  successful,
+  pending,
+  failed,
+}) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiText color="subdued">
+        <EuiBadge color="success">{successful}</EuiBadge>
+        {' / '}
+        <EuiBadge color="default">{pending}</EuiBadge>
+        {' / '}
+        <EuiBadge color={failed ? 'danger' : 'default'}>{failed}</EuiBadge>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 interface PackViewInActionProps {
   item: {
@@ -538,6 +498,7 @@ const PackViewInLensAction = React.memo(PackViewInLensActionComponent);
 
 interface PackQueriesStatusTableProps {
   agentIds?: string[];
+  actionId: string;
   data: OsqueryManagerPackagePolicyInputStream[];
   startDate?: string;
   expirationDate?: string;
@@ -545,16 +506,22 @@ interface PackQueriesStatusTableProps {
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
   agentIds,
+  actionId,
   data,
   startDate,
   expirationDate,
 }) => {
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
-  >({});
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
 
-  const dataViews = useKibana().services.data.dataViews;
+  const {
+    http,
+    data: { dataViews },
+  } = useKibana().services;
   const [logsDataView, setLogsDataView] = useState<DataView | undefined>(undefined);
+
+  const { data: actionStatus } = useQuery(['liveQueryActionStatus', { actionId }], () =>
+    http.get(`/api/osquery/live_queries/${actionId}/status`)
+  );
 
   useEffect(() => {
     const fetchLogsDataView = async () => {
@@ -582,12 +549,14 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderDocsColumn = useCallback(
     (item) => (
       <DocsColumnResults
-        logsDataView={logsDataView}
-        actionId={item.action_id}
-        interval={item.interval}
+        count={actionStatus?.responses[item.action_id]?.totalRowCount ?? 0}
+        isLive={
+          actionStatus?.status !== 'completed' &&
+          actionStatus?.responses[item.action_id]?.pending === 0
+        }
       />
     ),
-    [logsDataView]
+    [actionStatus?.responses, actionStatus?.status]
   );
 
   const renderAgentsColumn = useCallback(
@@ -596,14 +565,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       return (
         <AgentsColumnResults
-          logsDataView={logsDataView}
-          actionId={item.action_id}
-          agentIds={agentIds}
-          interval={item.interval}
+          successful={actionStatus?.responses[item.action_id]?.successful ?? 0}
+          pending={actionStatus?.responses[item.action_id]?.pending ?? 0}
+          failed={actionStatus?.responses[item.action_id]?.failed ?? 0}
         />
       );
     },
-    [agentIds, logsDataView]
+    [actionStatus?.responses]
   );
 
   const renderDiscoverResultsAction = useCallback(
@@ -619,40 +587,38 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const getHandleErrorsToggle = useCallback(
-    (itemId: string, itemActionId: string) => () => {
+    (item) => () => {
       setItemIdToExpandedRowMap((prevValue) => {
         const itemIdToExpandedRowMapValues = { ...prevValue };
-        if (itemIdToExpandedRowMapValues[itemId]) {
-          delete itemIdToExpandedRowMapValues[itemId];
+        if (itemIdToExpandedRowMapValues[item.id]) {
+          delete itemIdToExpandedRowMapValues[item.id];
         } else {
-          itemIdToExpandedRowMapValues[itemId] = (
-            <>
-              <EuiSpacer />
-              <EuiFlexGroup gutterSize="xl">
-                <EuiFlexItem>
-                  <ResultTabs
-                    actionId={itemActionId}
-                    startDate={startDate}
-                    endDate={expirationDate}
-                    agentIds={agentIds}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer />
-            </>
+          itemIdToExpandedRowMapValues[item.id] = (
+            <EuiFlexGroup gutterSize="xl">
+              <EuiFlexItem>
+                <ResultTabs
+                  actionId={item.action_id}
+                  startDate={startDate}
+                  ecsMapping={item.ecs_mapping}
+                  endDate={expirationDate}
+                  agentIds={agentIds}
+                  failedAgentsCount={actionStatus?.responses[item.action_id]?.failed ?? 0}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         }
 
         return itemIdToExpandedRowMapValues;
       });
     },
-    [agentIds, expirationDate, startDate]
+    [actionStatus?.responses, agentIds, expirationDate, startDate]
   );
 
   const renderToggleResultsAction = useCallback(
     (item) => (
       <EuiButtonIcon
-        onClick={getHandleErrorsToggle(item.id, item.action_id)}
+        onClick={getHandleErrorsToggle(item)}
         iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
       />
     ),
@@ -741,7 +707,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   return (
-    <EuiBasicTable<OsqueryManagerPackagePolicyInputStream>
+    <StyledEuiBasicTable
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data ?? []}
       itemId={getItemId}

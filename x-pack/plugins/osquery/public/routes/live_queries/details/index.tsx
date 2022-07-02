@@ -64,6 +64,7 @@ const LiveQueryDetailsPageComponent = () => {
     <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
       {isPackResults ? (
         <PackQueriesStatusTable
+          actionId={actionId}
           data={data?.actionDetails._source?.queries}
           startDate={data?.actionDetails._source?.['@timestamp']}
           expirationDate={data?.actionDetails._source?.expiration}

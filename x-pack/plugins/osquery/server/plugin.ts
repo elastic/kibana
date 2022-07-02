@@ -237,8 +237,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
 
-    defineRoutes(router, osqueryContext);
-
     core.getStartServices().then(([{ elasticsearch }, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(
         depsStart.data,
@@ -246,6 +244,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       );
 
       plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
+      defineRoutes(router, osqueryContext);
     });
 
     this.telemetryEventsSender.setup(

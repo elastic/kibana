@@ -344,11 +344,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ]
   );
 
+  console.error('aaaa', data);
+
   const resultsStepContent = useMemo(
     () =>
       actionId ? (
         <ResultTabs
           actionId={actionId}
+          ecsMapping={serializedFormData.ecs_mapping}
           endDate={data?.actions[0].expiration}
           agentIds={agentIds}
           addToTimeline={addToTimeline}
@@ -420,8 +423,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   }, [defaultValue, packOptions, updateFieldValues]);
 
-  console.error('data', data);
-
   return (
     <>
       <Form form={form}>
@@ -470,13 +471,15 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 />
               </EuiFlexItem>
               <EuiSpacer />
+              {submitButtonContent}
+              <EuiSpacer />
               <EuiFlexItem>
                 <PackQueriesStatusTable
+                  actionId={actionId}
                   agentIds={agentIds}
                   data={data?.actions[0].queries ?? selectedPackData?.attributes?.queries ?? []}
                 />
               </EuiFlexItem>
-              {submitButtonContent}
             </>
           ) : (
             <>

@@ -7,8 +7,42 @@
 
 import moment from 'moment';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
-import { copyAllowlistedFields, packEventFields, savedQueryEventFields } from './filters';
+import {
+  copyAllowlistedFields,
+  configEventFields,
+  packEventFields,
+  savedQueryEventFields,
+} from './filters';
 import type { ESClusterInfo, ESLicense, ListTemplate, TelemetryEvent } from './types';
+
+/**
+ * Constructs the configs telemetry schema from a collection of config saved objects
+ */
+export const templateConfigs = (
+  configsData: SavedObjectsFindResponse['saved_objects'],
+  clusterInfo: ESClusterInfo,
+  licenseInfo: ESLicense | undefined
+) =>
+  configsData.map((item) => {
+    const template: ListTemplate = {
+      '@timestamp': moment().toISOString(),
+      cluster_uuid: clusterInfo.cluster_uuid,
+      cluster_name: clusterInfo.cluster_name,
+      license_id: licenseInfo?.uid,
+    };
+
+    // cast exception list type to a TelemetryEvent for allowlist filtering
+    const filteredConfigItem = copyAllowlistedFields(
+      configEventFields,
+      item.attributes as unknown as TelemetryEvent
+    );
+
+    return {
+      ...template,
+      id: item.id,
+      ...filteredConfigItem,
+    };
+  });
 
 /**
  * Constructs the packs telemetry schema from a collection of packs saved objects
