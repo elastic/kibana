@@ -42,7 +42,7 @@ import {
 } from './saved_object_types';
 
 import { CasesClient } from './client';
-import type { CasesRequestHandlerContext, CasesSetup } from './types';
+import type { CasesRequestHandlerContext, PluginSetupContract, PluginStartContract } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeature } from './features';
 import { registerRoutes } from './routes/api/register_routes';
@@ -68,19 +68,6 @@ export interface PluginsStart {
   spaces?: SpacesPluginStart;
 }
 
-/**
- * Cases server exposed contract for interacting with cases entities.
- */
-export interface PluginStartContract {
-  /**
-   * Returns a client which can be used to interact with the cases backend entities.
-   *
-   * @param request a KibanaRequest
-   * @returns a {@link CasesClient}
-   */
-  getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
-}
-
 export class CasePlugin {
   private readonly logger: Logger;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -96,7 +83,7 @@ export class CasePlugin {
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup): CasesSetup {
+  public setup(core: CoreSetup, plugins: PluginsSetup): PluginSetupContract {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import {
   ActionTypeConfig,
   ActionTypeSecrets,
@@ -41,6 +41,19 @@ export type RegisterActionType = <
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
 ) => void;
 
-export interface CasesSetup {
+/**
+ * Cases server exposed contract for interacting with cases entities.
+ */
+export interface PluginStartContract {
+  /**
+   * Returns a client which can be used to interact with the cases backend entities.
+   *
+   * @param request a KibanaRequest
+   * @returns a {@link CasesClient}
+   */
+  getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
+}
+
+export interface PluginSetupContract {
   attachmentFramework: AttachmentFramework;
 }
