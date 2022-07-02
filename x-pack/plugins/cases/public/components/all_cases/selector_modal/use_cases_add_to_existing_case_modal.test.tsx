@@ -17,6 +17,7 @@ import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
 
 jest.mock('../../../common/use_cases_toast');
@@ -45,6 +46,8 @@ const TestComponent: React.FC = () => {
 
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
+const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
     createAttachments: jest.fn(),
@@ -56,6 +59,7 @@ describe('use cases add to existing case modal hook', () => {
     return (
       <CasesContext.Provider
         value={{
+          externalReferenceAttachmentTypeRegistry,
           owner: ['test'],
           userCanCrud: true,
           appId: 'test',

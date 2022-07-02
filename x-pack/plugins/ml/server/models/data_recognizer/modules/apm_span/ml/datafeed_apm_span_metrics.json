@@ -3,35 +3,53 @@
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
-  "chunking_config" : {
-    "mode" : "off"
+  "chunking_config": {
+    "mode": "off"
   },
   "query": {
     "bool": {
       "filter": [
-        { "term": { "processor.event": "metric" } },
-        { "term": { "metricset.name": "service_destination" } },
-        { "bool": { "must_not": { "terms": { "agent.name": [ "rum-js" ]} } }}
+        {
+          "term": {
+            "processor.event": "metric"
+          }
+        },
+        {
+          "term": {
+            "metricset.name": "service_destination"
+          }
+        },
+        {
+          "bool": {
+            "must_not": {
+              "terms": {
+                "agent.name": [
+                  "rum-js"
+                ]
+              }
+            }
+          }
+        }
       ]
     }
   },
-  "aggregations" : {
-    "buckets" : {
-      "composite" : {
-        "size" : 5000,
-        "sources" : [
+  "aggregations": {
+    "buckets": {
+      "composite": {
+        "size": 5000,
+        "sources": [
           {
-            "date" : {
-              "date_histogram" : {
-                "field" : "@timestamp",
-                "fixed_interval" : "60s"
+            "date": {
+              "date_histogram": {
+                "field": "@timestamp",
+                "fixed_interval": "60s"
               }
             }
           },
           {
-            "span.destination.service.resource" : {
-              "terms" : {
-                "field" : "span.destination.service.resource"
+            "span.destination.service.resource": {
+              "terms": {
+                "field": "span.destination.service.resource"
               }
             }
           },
@@ -44,8 +62,8 @@
           }
         ]
       },
-      "aggs" : {
-       "@timestamp": {
+      "aggs": {
+        "@timestamp": {
           "max": {
             "field": "@timestamp"
           }
@@ -58,7 +76,7 @@
         },
         "total_duration": {
           "sum": {
-            "field": "span.destination.service.response_time.sum"
+            "field": "span.destination.service.response_time.sum.us"
           }
         },
         "span_latency": {

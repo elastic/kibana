@@ -7,7 +7,7 @@
  */
 
 import { SavedObject } from '../../../types';
-import { KibanaRequest } from '../../http';
+import { CoreKibanaRequest } from '../../http';
 import { httpServerMock } from '../../http/http_server.mocks';
 import { applyExportTransforms } from './apply_export_transforms';
 import { SavedObjectsExportTransform } from './types';
@@ -30,7 +30,7 @@ const createTransform = (
 const toMap = <V>(record: Record<string, V>): Map<string, V> => new Map(Object.entries(record));
 
 const expectedContext = {
-  request: expect.any(KibanaRequest),
+  request: expect.any(CoreKibanaRequest),
 };
 
 describe('applyExportTransforms', () => {
