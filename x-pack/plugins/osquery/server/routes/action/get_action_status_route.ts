@@ -8,21 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { every, mapKeys } from 'lodash';
-import { lastValueFrom, Observable, timer, zip, of, throwError, forkJoin } from 'rxjs';
-import {
-  map,
-  tap,
-  mergeMap,
-  retry,
-  catchError,
-  retryWhen,
-  delayWhen,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { lastValueFrom, Observable, of, throwError, forkJoin } from 'rxjs';
+import { mergeMap, retry, catchError } from 'rxjs/operators';
 import { PLUGIN_ID } from '../../../common';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OsqueryQueries } from '../../../common/search_strategy';
-import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 
 const getActionResponses = (search, actionId, queriedAgentIds, partialResults = false) =>
   lastValueFrom(
