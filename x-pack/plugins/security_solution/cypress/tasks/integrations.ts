@@ -5,46 +5,19 @@
  * 2.0.
  */
 
-export const installPackageWithPolicy = (name: string, version: string) => {
-  cy.request({
-    method: 'POST',
-    url: `api/fleet/epm/packages/${name}/${version}`,
-    body: {
-      force: true,
-      ignore_constraints: true,
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-    failOnStatusCode: false,
-  });
+import {
+  ADD_INTEGRATION_BTN,
+  INTEGRATION_ADDED_POP_UP,
+  QUEU_URL,
+  SAVE_AND_CONTINUE_BTN,
+} from '../screens/integrations';
 
-  cy.request({
-    method: 'POST',
-    url: 'api/fleet/agent_policies',
-    body: {
-      name: 'test policy',
-      namespace: 'default',
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-  }).then((response) => {
-    cy.request({
-      method: 'POST',
-      url: 'api/fleet/package_policies',
-      body: {
-        force: true,
-        name: 'test-1',
-        description: '',
-        namespace: 'default',
-        policy_id: response.body.item.id,
-        enabled: true,
-        output_id: '',
-        inputs: [],
-        package: {
-          name,
-          version,
-        },
-      },
-      headers: { 'kbn-xsrf': 'cypress-creds' },
-      failOnStatusCode: false,
-    });
-  });
+import { visit } from './login';
+
+export const installAwsCloudFrontWithPolicy = () => {
+  visit('app/integrations/detail/aws-1.17.0/overview?integration=cloudfront');
+  cy.get(ADD_INTEGRATION_BTN).click();
+  cy.get(QUEU_URL).type('http://www.example.com');
+  cy.get(SAVE_AND_CONTINUE_BTN).click();
+  cy.get(INTEGRATION_ADDED_POP_UP).should('exist');
 };

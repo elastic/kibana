@@ -49,6 +49,8 @@ export const INDICATOR_MAPPING = 'Indicator mapping';
 
 export const INTEGRATIONS = '[data-test-subj="integrationLink"]';
 
+export const INTEGRATIONS_STATUS = '[data-test-subj="statusBadge"]';
+
 export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
