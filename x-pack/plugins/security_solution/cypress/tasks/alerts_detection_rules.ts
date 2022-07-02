@@ -48,7 +48,6 @@ import {
   RULES_TAGS_POPOVER_WRAPPER,
   INTEGRATIONS_POPOVER,
   SELECTED_RULES_NUMBER_LABEL,
-
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
