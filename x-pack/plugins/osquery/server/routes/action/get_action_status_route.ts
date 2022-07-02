@@ -7,79 +7,28 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
-import { every, mapKeys } from 'lodash';
-import { lastValueFrom, Observable, of, throwError, forkJoin } from 'rxjs';
-import { mergeMap, retry, catchError } from 'rxjs/operators';
+import { every, map, mapKeys } from 'lodash';
+import { lastValueFrom, Observable, zip } from 'rxjs';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { PLUGIN_ID } from '../../../common';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { OsqueryQueries } from '../../../common/search_strategy';
-import { generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { getActionResponses } from './utils';
+import {
+  ActionDetailsRequestOptions,
+  ActionDetailsStrategyResponse,
+  OsqueryQueries,
+} from '../../../common/search_strategy';
 
-const getActionResponses = (search, actionId, queriedAgentIds, partialResults = false) =>
-  lastValueFrom(
-    search
-      .search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
-        {
-          actionId,
-          factoryQueryType: OsqueryQueries.actionResults,
-          filterQuery: '',
-          pagination: generateTablePaginationOptions(0, 1000),
-          sort: {
-            direction: 'desc',
-            field: '@timestamp',
-          },
-        },
-        {
-          strategy: 'osquerySearchStrategy',
-        }
-      )
-      .pipe(
-        mergeMap((val) => {
-          const totalResponded =
-            // @ts-expect-error update types
-            val.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-          const totalRowCount =
-            // @ts-expect-error update types
-            val.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
-          const aggsBuckets =
-            // @ts-expect-error update types
-            val.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
-          const successful =
-            aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
-          // @ts-expect-error update types
-          const failed = aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
-          const pending = queriedAgentIds.length - totalResponded;
-
-          if (!partialResults && pending) {
-            return throwError(() => new Error('Error!'));
-          }
-
-          return of({
-            actionId,
-            totalResponded,
-            totalRowCount,
-            successful,
-            failed,
-            pending,
-          });
-        }),
-        ...(!partialResults ? [retry({ count: 2, delay: 1000 })] : [])
-      )
-      .pipe(
-        catchError(() =>
-          of({
-            actionId,
-          })
-        )
-      )
-  );
-
-export const getActionStatusRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+export const getActionStatusRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
   router.get(
     {
       path: '/api/osquery/live_queries/{id}/status',
       validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
+        query: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({ id: schema.string() }, { unknowns: 'allow' }),
       },
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
@@ -89,7 +38,7 @@ export const getActionStatusRoute = (router: IRouter, osqueryContext: OsqueryApp
       try {
         const search = await context.search;
         const actionDetailsResponse = await lastValueFrom(
-          search.search(
+          search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
             {
               actionId: request.params.id,
               factoryQueryType: OsqueryQueries.actionDetails,
@@ -100,30 +49,27 @@ export const getActionStatusRoute = (router: IRouter, osqueryContext: OsqueryApp
 
         const actionIds = actionDetailsResponse?.actionDetails?.fields['queries.action_id'];
         const queriedAgentIds = actionDetailsResponse?.actionDetails?.fields.agents;
-        const expirationDate = actionDetailsResponse?.actionDetails?.fields.expiration;
+        const expirationDate = actionDetailsResponse?.actionDetails?.fields.expiration[0];
 
         const expired = !expirationDate ? true : new Date(expirationDate) < new Date();
 
-        let responseData;
-        try {
-          responseData = await lastValueFrom(
-            of(actionIds).pipe(
-              mergeMap((actions) =>
-                forkJoin(
-                  actions.map((actionId) =>
-                    getActionResponses(search, actionId, queriedAgentIds, true)
-                  )
-                )
+        const responseData = await lastValueFrom(
+          zip(
+            ...map(actionIds, (actionId) =>
+              getActionResponses(
+                search,
+                actionId,
+                queriedAgentIds,
+                expired ? true : request.query.partial_data || true
               )
             )
-          );
-        } catch (e) {
-          return response.ok({ body: { error: e.message } });
-        }
+          )
+        );
 
         const isCompleted = expired || (responseData && every(responseData, ['pending', 0]));
 
-        return response.ok({
+        return response.custom({
+          statusCode: isCompleted ? 200 : 408,
           body: {
             status: isCompleted ? 'completed' : 'running',
             responses: mapKeys(responseData, 'actionId'),
