@@ -43,6 +43,9 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const testSubj = current.isAnchor
     ? 'docTableExpandToggleColumnAnchor'
     : 'docTableExpandToggleColumn';
+  if (!setExpanded) {
+    return null;
+  }
 
   return (
     <EuiToolTip content={buttonLabel} delay="long">

@@ -32,7 +32,7 @@ export const getTopNavLinks = ({
   onOpenInspector,
   searchSource,
   onOpenSavedSearch,
-  textBasedLanguageMode,
+  isPlainRecord,
 }: {
   indexPattern: DataView;
   navigateTo: (url: string) => void;
@@ -42,7 +42,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
-  textBasedLanguageMode?: string;
+  isPlainRecord: boolean;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -198,8 +198,8 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(services.triggersActionsUi && !textBasedLanguageMode ? [alerts] : []),
-    ...(!textBasedLanguageMode ? [shareSearch] : []),
+    ...(services.triggersActionsUi && !isPlainRecord ? [alerts] : []),
+    ...(!isPlainRecord ? [shareSearch] : []),
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];

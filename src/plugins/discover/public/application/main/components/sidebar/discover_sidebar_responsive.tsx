@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import {
-  EuiTitle,
-  EuiHideFor,
-  EuiShowFor,
-  EuiButton,
   EuiBadge,
-  EuiFlyoutHeader,
+  EuiButton,
   EuiFlyout,
+  EuiFlyoutHeader,
+  EuiHideFor,
   EuiIcon,
   EuiLink,
   EuiPortal,
+  EuiShowFor,
+  EuiTitle,
 } from '@elastic/eui';
-import type { DataViewField, DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewAttributes, DataViewField } from '@kbn/data-views-plugin/public';
 import { SavedObject } from '@kbn/core/types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
@@ -33,6 +33,7 @@ import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
+import { useDiscoverLayoutContext } from '../../hooks/use_discover_layout_context';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -115,6 +116,7 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
+  const { isPlainRecord } = useDiscoverLayoutContext();
   const { selectedIndexPattern, onEditRuntimeField, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -210,7 +212,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      !documentState.textBasedLanguageMode && canEditDataView && selectedIndexPattern
+      !isPlainRecord && canEditDataView && selectedIndexPattern
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
@@ -230,7 +232,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           }
         : undefined,
     [
-      documentState.textBasedLanguageMode,
+      isPlainRecord,
       canEditDataView,
       selectedIndexPattern,
       dataViewFieldEditor,

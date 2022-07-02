@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType } from '@kbn/data-views-plugin/public';
@@ -17,13 +17,14 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
+import { useDiscoverLayoutContext } from '../../hooks/use_discover_layout_context';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
   'indexPattern' | 'navigateTo' | 'savedSearch' | 'searchSource'
 > & {
   onOpenInspector: () => void;
-  query?: Query;
+  query?: Query | AggregateQuery;
   savedQuery?: string;
   updateQuery: (
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
@@ -33,7 +34,6 @@ export type DiscoverTopNavProps = Pick<
   resetSavedSearch: () => void;
   onChangeIndexPattern: (indexPattern: string) => void;
   onEditRuntimeField: () => void;
-  textBasedLanguageMode?: string;
   textBasedLanguageModeErrors?: Error;
 };
 
@@ -50,13 +50,14 @@ export const DiscoverTopNav = ({
   resetSavedSearch,
   onChangeIndexPattern,
   onEditRuntimeField,
-  textBasedLanguageMode,
   textBasedLanguageModeErrors,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
+  const { isPlainRecord, setIsPlainRecord } = useDiscoverLayoutContext();
+
   const showDatePicker = useMemo(
-    () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
-    [indexPattern]
+    () => !isPlainRecord && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
+    [indexPattern, isPlainRecord]
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings } = services;
@@ -133,6 +134,11 @@ export const DiscoverTopNav = ({
     [canEditDataView, dataViewEditor, onChangeIndexPattern]
   );
 
+  const onUpdateIsTextQueryLangSelected = useCallback(
+    (isTextLangSelected: boolean) => setIsPlainRecord(isTextLangSelected),
+    [setIsPlainRecord]
+  );
+
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -144,7 +150,7 @@ export const DiscoverTopNav = ({
         onOpenInspector,
         searchSource,
         onOpenSavedSearch,
-        textBasedLanguageMode,
+        isPlainRecord,
       }),
     [
       indexPattern,
@@ -155,7 +161,7 @@ export const DiscoverTopNav = ({
       onOpenInspector,
       searchSource,
       onOpenSavedSearch,
-      textBasedLanguageMode,
+      isPlainRecord,
     ]
   );
 
@@ -189,7 +195,8 @@ export const DiscoverTopNav = ({
     currentDataViewId: indexPattern?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onChangeDataView: (newIndexPatternId: string) => onChangeIndexPattern(newIndexPatternId),
+    onChangeDataView: onChangeIndexPattern,
+    onUpdateIsTextQueryLangSelected,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
@@ -220,7 +227,7 @@ export const DiscoverTopNav = ({
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={!textBasedLanguageMode && Boolean(services.capabilities.discover.saveQuery)}
+      showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerComponentProps={dataViewPickerProps}

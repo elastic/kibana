@@ -50,11 +50,11 @@ import {
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/utils/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import { getTextBasedLanguageMode } from '../../utils/get_text_based_language_mode';
 import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
+import { useDiscoverLayoutContext } from '../../application/main/hooks/use_discover_layout_context';
 
 interface SortObj {
   id: string;
@@ -203,13 +203,11 @@ export const DiscoverGrid = ({
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
-  const query = services.data.query.queryString.getQuery();
-  const textBasedLanguageMode = getTextBasedLanguageMode(query);
-
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
+  const { isPlainRecord } = useDiscoverLayoutContext();
   const usedSelectedDocs = useMemo(() => {
     if (!selectedDocs.length || !rows?.length) {
       return [];
@@ -487,7 +485,7 @@ export const DiscoverGrid = ({
           className={classnames(
             className,
             'dscDiscoverGrid__table',
-            textBasedLanguageMode ? 'dscDiscoverGrid__textLanguageMode' : ''
+            isPlainRecord ? 'dscDiscoverGrid__textLanguageMode' : ''
           )}
         >
           <EuiDataGridMemoized

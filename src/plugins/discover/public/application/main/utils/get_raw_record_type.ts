@@ -5,18 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import {
   AggregateQuery,
   Query,
   isOfAggregateQueryType,
   getAggregateQueryMode,
 } from '@kbn/es-query';
+import { RecordRawType } from '../hooks/use_saved_search';
 
-export function getTextBasedLanguageMode(query: Query | AggregateQuery): string {
-  let textBasedLanguageMode = '';
-  if (query && isOfAggregateQueryType(query)) {
-    const aggregatedQuery = query as AggregateQuery;
-    textBasedLanguageMode = getAggregateQueryMode(aggregatedQuery);
+export function getRawRecordType(query?: Query | AggregateQuery) {
+  if (query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql') {
+    return RecordRawType.PLAIN;
   }
-  return textBasedLanguageMode;
+
+  return RecordRawType.DOCUMENT;
 }

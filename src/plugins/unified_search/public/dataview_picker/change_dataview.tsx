@@ -91,6 +91,7 @@ export function ChangeDataView({
   textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
+  onUpdateIsTextQueryLangSelected,
   textBasedLanguage,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
@@ -99,6 +100,13 @@ export function ChangeDataView({
   const [triggerLabel, setTriggerLabel] = useState('');
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
     Boolean(textBasedLanguage)
+  );
+  const updateIsTextQueryLangSelected = useCallback(
+    (isTextLangSelected: boolean) => {
+      setIsTextBasedLangSelected(isTextLangSelected);
+      onUpdateIsTextQueryLangSelected?.(isTextLangSelected);
+    },
+    [onUpdateIsTextQueryLangSelected]
   );
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
 
@@ -148,9 +156,9 @@ export function ChangeDataView({
 
   useEffect(() => {
     if (Boolean(textBasedLanguage) !== isTextBasedLangSelected) {
-      setIsTextBasedLangSelected(Boolean(textBasedLanguage));
+      updateIsTextQueryLangSelected(Boolean(textBasedLanguage));
     }
-  }, [isTextBasedLangSelected, textBasedLanguage]);
+  }, [updateIsTextQueryLangSelected, isTextBasedLangSelected, textBasedLanguage]);
 
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
@@ -298,7 +306,7 @@ export function ChangeDataView({
           onChange={(lang) => {
             setTriggerLabel(lang);
             setPopoverIsOpen(false);
-            setIsTextBasedLangSelected(true);
+            updateIsTextQueryLangSelected(true);
             // also update the query with the sql query
             onTextLangQuerySubmit?.({ sql: `SELECT * FROM "${trigger.title}"` });
           }}
@@ -319,7 +327,7 @@ export function ChangeDataView({
   const cleanup = useCallback(
     (shouldDismissModal: boolean) => {
       setIsTextLangTransitionModalVisible(false);
-      setIsTextBasedLangSelected(false);
+      updateIsTextQueryLangSelected(true);
       // clean up the Text based language jQuery
       onTextLangQuerySubmit?.();
       setTriggerLabel(trigger.label);
@@ -327,7 +335,7 @@ export function ChangeDataView({
         onTransitionModalDismiss();
       }
     },
-    [onTextLangQuerySubmit, onTransitionModalDismiss, trigger.label]
+    [updateIsTextQueryLangSelected, onTextLangQuerySubmit, onTransitionModalDismiss, trigger.label]
   );
 
   const onModalClose = useCallback(

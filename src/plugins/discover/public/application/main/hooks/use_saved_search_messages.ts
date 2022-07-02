@@ -12,6 +12,7 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
+  RecordRawType,
   SavedSearchData,
 } from './use_saved_search';
 
@@ -33,12 +34,12 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
   if (main$.getValue().fetchStatus === FetchStatus.COMPLETE) {
     return;
   }
-  const textBasedLanguageMode = main$.getValue().textBasedLanguageMode;
+  const recordRawType = main$.getValue().recordRawType;
   main$.next({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments,
     error: undefined,
-    textBasedLanguageMode,
+    recordRawType,
   });
 }
 
@@ -47,10 +48,10 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
  */
 export function sendPartialMsg(main$: DataMain$) {
   if (main$.getValue().fetchStatus === FetchStatus.LOADING) {
-    const textBasedLanguageMode = main$.getValue().textBasedLanguageMode;
+    const recordRawType = main$.getValue().recordRawType;
     main$.next({
       fetchStatus: FetchStatus.PARTIAL,
-      textBasedLanguageMode,
+      recordRawType,
     });
   }
 }
@@ -60,12 +61,12 @@ export function sendPartialMsg(main$: DataMain$) {
  */
 export function sendLoadingMsg(
   data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
-  textBasedLanguageMode?: string
+  recordRawType: RecordRawType
 ) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
     data$.next({
       fetchStatus: FetchStatus.LOADING,
-      textBasedLanguageMode,
+      recordRawType,
     });
   }
 }
@@ -77,11 +78,11 @@ export function sendErrorMsg(
   data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
   error: Error
 ) {
-  const textBasedLanguageMode = data$.getValue().textBasedLanguageMode;
+  const recordRawType = data$.getValue().recordRawType;
   data$.next({
     fetchStatus: FetchStatus.ERROR,
     error,
-    textBasedLanguageMode,
+    recordRawType,
   });
 }
 
@@ -90,26 +91,26 @@ export function sendErrorMsg(
  * Needed when index pattern is switched or a new runtime field is added
  */
 export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
-  const textBasedLanguageMode = data.main$.getValue().textBasedLanguageMode;
+  const recordRawType = data.main$.getValue().recordRawType;
   data.main$.next({
     fetchStatus: initialFetchStatus,
     foundDocuments: undefined,
-    textBasedLanguageMode,
+    recordRawType,
   });
   data.documents$.next({
     fetchStatus: initialFetchStatus,
     result: [],
-    textBasedLanguageMode,
+    recordRawType,
   });
   data.charts$.next({
     fetchStatus: initialFetchStatus,
     chartData: undefined,
     bucketInterval: undefined,
-    textBasedLanguageMode,
+    recordRawType,
   });
   data.totalHits$.next({
     fetchStatus: initialFetchStatus,
     result: undefined,
-    textBasedLanguageMode,
+    recordRawType,
   });
 }

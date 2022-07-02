@@ -21,12 +21,12 @@ export const resultStatuses = {
 export function getResultState(
   fetchStatus: FetchStatus,
   foundDocuments: boolean = false,
-  textBasedLanguageMode?: string
+  isPlainRecord?: string
 ) {
   if (fetchStatus === FetchStatus.UNINITIALIZED) {
     return resultStatuses.UNINITIALIZED;
   }
-  if (textBasedLanguageMode && fetchStatus === FetchStatus.ERROR) return resultStatuses.NO_RESULTS;
+  if (isPlainRecord && fetchStatus === FetchStatus.ERROR) return resultStatuses.NO_RESULTS;
 
   if (!foundDocuments && fetchStatus === FetchStatus.LOADING) return resultStatuses.LOADING;
   else if (foundDocuments) return resultStatuses.READY;

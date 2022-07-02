@@ -29,6 +29,7 @@ import { PLUGIN_ID } from '../../../common';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverTourContext, DiscoverTourContextProps } from './discover_tour_context';
 import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
+import { useDiscoverLayoutContext } from '../../application/main/hooks/use_discover_layout_context';
 
 const MAX_WIDTH = 350;
 
@@ -40,43 +41,64 @@ interface TourStepDefinition {
   imageAltText: string;
 }
 
+const ADD_FIELDS_STEP = {
+  anchor: DISCOVER_TOUR_STEP_ANCHORS.addFields,
+  title: i18n.translate('discover.dscTour.stepAddFields.title', {
+    defaultMessage: 'Add fields to the table',
+  }),
+  content: (
+    <FormattedMessage
+      id="discover.dscTour.stepAddFields.description"
+      defaultMessage="Click {plusIcon} to add the fields that interest you."
+      values={{
+        plusIcon: <EuiIcon size="s" type="plusInCircleFilled" color="primary" aria-label="+" />,
+      }}
+    />
+  ),
+  imageName: 'add_fields.gif',
+  imageAltText: i18n.translate('discover.dscTour.stepAddFields.imageAltText', {
+    defaultMessage:
+      'In the Available fields list, click the plus icon to toggle a field into the document table.',
+  }),
+};
+
+const ORDER_TABLE_COLUMNS_STEP = {
+  anchor: DISCOVER_TOUR_STEP_ANCHORS.reorderColumns,
+  title: i18n.translate('discover.dscTour.stepReorderColumns.title', {
+    defaultMessage: 'Order the table columns',
+  }),
+  content: (
+    <FormattedMessage
+      id="discover.dscTour.stepReorderColumns.description"
+      defaultMessage="Drag columns to the order you want."
+    />
+  ),
+  imageName: 'reorder_columns.gif',
+  imageAltText: i18n.translate('discover.dscTour.stepReorderColumns.imageAltText', {
+    defaultMessage: 'Use the Columns popover to drag the columns to the order you prefer.',
+  }),
+};
+
+const CHANGE_ROW_HEIGHT_STEP = {
+  anchor: DISCOVER_TOUR_STEP_ANCHORS.changeRowHeight,
+  title: i18n.translate('discover.dscTour.stepChangeRowHeight.title', {
+    defaultMessage: 'Change the row height',
+  }),
+  content: (
+    <FormattedMessage
+      id="discover.dscTour.stepChangeRowHeight.description"
+      defaultMessage="Adjust the number of lines to fit the contents."
+    />
+  ),
+  imageName: 'rows_per_line.gif',
+  imageAltText: i18n.translate('discover.dscTour.stepChangeRowHeight.imageAltText', {
+    defaultMessage: 'Click the display options icon to adjust the row height to fit the contents.',
+  }),
+};
+
 const tourStepDefinitions: TourStepDefinition[] = [
-  {
-    anchor: DISCOVER_TOUR_STEP_ANCHORS.addFields,
-    title: i18n.translate('discover.dscTour.stepAddFields.title', {
-      defaultMessage: 'Add fields to the table',
-    }),
-    content: (
-      <FormattedMessage
-        id="discover.dscTour.stepAddFields.description"
-        defaultMessage="Click {plusIcon} to add the fields that interest you."
-        values={{
-          plusIcon: <EuiIcon size="s" type="plusInCircleFilled" color="primary" aria-label="+" />,
-        }}
-      />
-    ),
-    imageName: 'add_fields.gif',
-    imageAltText: i18n.translate('discover.dscTour.stepAddFields.imageAltText', {
-      defaultMessage:
-        'In the Available fields list, click the plus icon to toggle a field into the document table.',
-    }),
-  },
-  {
-    anchor: DISCOVER_TOUR_STEP_ANCHORS.reorderColumns,
-    title: i18n.translate('discover.dscTour.stepReorderColumns.title', {
-      defaultMessage: 'Order the table columns',
-    }),
-    content: (
-      <FormattedMessage
-        id="discover.dscTour.stepReorderColumns.description"
-        defaultMessage="Drag columns to the order you want."
-      />
-    ),
-    imageName: 'reorder_columns.gif',
-    imageAltText: i18n.translate('discover.dscTour.stepReorderColumns.imageAltText', {
-      defaultMessage: 'Use the Columns popover to drag the columns to the order you prefer.',
-    }),
-  },
+  ADD_FIELDS_STEP,
+  ORDER_TABLE_COLUMNS_STEP,
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.sort,
     title: i18n.translate('discover.dscTour.stepSort.title', {
@@ -94,23 +116,7 @@ const tourStepDefinitions: TourStepDefinition[] = [
         'Click a column header and select the desired sort order. Adjust a multi-field sort using the fields sorted popover.',
     }),
   },
-  {
-    anchor: DISCOVER_TOUR_STEP_ANCHORS.changeRowHeight,
-    title: i18n.translate('discover.dscTour.stepChangeRowHeight.title', {
-      defaultMessage: 'Change the row height',
-    }),
-    content: (
-      <FormattedMessage
-        id="discover.dscTour.stepChangeRowHeight.description"
-        defaultMessage="Adjust the number of lines to fit the contents."
-      />
-    ),
-    imageName: 'rows_per_line.gif',
-    imageAltText: i18n.translate('discover.dscTour.stepChangeRowHeight.imageAltText', {
-      defaultMessage:
-        'Click the display options icon to adjust the row height to fit the contents.',
-    }),
-  },
+  CHANGE_ROW_HEIGHT_STEP,
   {
     anchor: DISCOVER_TOUR_STEP_ANCHORS.expandDocument,
     title: i18n.translate('discover.dscTour.stepExpand.title', {
@@ -195,6 +201,7 @@ const tourConfig: EuiTourState = {
 
 export const DiscoverTourProvider: React.FC = ({ children }) => {
   const services = useDiscoverServices();
+  const { isPlainRecord } = useDiscoverLayoutContext();
   const prependToBasePath = services.core.http.basePath.prepend;
   const getAssetPath = useCallback(
     (imageName: string) => {
@@ -203,8 +210,14 @@ export const DiscoverTourProvider: React.FC = ({ children }) => {
     [prependToBasePath]
   );
   const tourSteps = useMemo(
-    () => prepareTourSteps(tourStepDefinitions, getAssetPath),
-    [getAssetPath]
+    () =>
+      isPlainRecord
+        ? prepareTourSteps(
+            [ADD_FIELDS_STEP, ORDER_TABLE_COLUMNS_STEP, CHANGE_ROW_HEIGHT_STEP],
+            getAssetPath
+          )
+        : prepareTourSteps(tourStepDefinitions, getAssetPath),
+    [getAssetPath, isPlainRecord]
   );
   const [steps, actions, reducerState] = useEuiTour(tourSteps, tourConfig);
   const currentTourStep = reducerState.currentTourStep;

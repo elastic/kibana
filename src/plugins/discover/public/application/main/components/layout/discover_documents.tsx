@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { memo, useCallback, useContext, useMemo } from 'react';
 import {
   EuiFlexItem,
-  EuiSpacer,
-  EuiText,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -28,16 +28,16 @@ import {
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { SavedSearch } from '../../../../services/saved_searches';
-import { DataDocumentsMsg, DataDocuments$ } from '../../hooks/use_saved_search';
+import { DataDocuments$, DataDocumentsMsg } from '../../hooks/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/utils/get_sort';
-import { getTextBasedLanguageMode } from '../../../../utils/get_text_based_language_mode';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { DataTableRecord } from '../../../../types';
+import { DiscoverLayoutContext } from './discover_layout_context';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -69,8 +69,8 @@ function DiscoverDocumentsComponent({
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
   const documentState: DataDocumentsMsg = useDataState(documents$);
-  const textBasedLanguageMode = state.query ? getTextBasedLanguageMode(state.query) : '';
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
+  const { isPlainRecord } = useContext(DiscoverLayoutContext);
 
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
@@ -113,10 +113,10 @@ function DiscoverDocumentsComponent({
 
   const showTimeCol = useMemo(
     () =>
-      !textBasedLanguageMode &&
+      !isPlainRecord &&
       !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
       !!indexPattern.timeFieldName,
-    [uiSettings, indexPattern.timeFieldName, textBasedLanguageMode]
+    [isPlainRecord, uiSettings, indexPattern.timeFieldName]
   );
 
   if (
@@ -156,7 +156,7 @@ function DiscoverDocumentsComponent({
             onFilter={onAddFilter as DocViewFilterFn}
             onMoveColumn={onMoveColumn}
             onRemoveColumn={onRemoveColumn}
-            onSort={!textBasedLanguageMode ? onSort : undefined}
+            onSort={!isPlainRecord ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
           />
@@ -181,19 +181,19 @@ function DiscoverDocumentsComponent({
               sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}
-              setExpandedDoc={!textBasedLanguageMode ? setExpandedDoc : undefined}
+              setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
               showTimeCol={showTimeCol}
               settings={state.grid}
               onAddColumn={onAddColumn}
               onFilter={onAddFilter as DocViewFilterFn}
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
-              onSort={!textBasedLanguageMode ? onSort : undefined}
+              onSort={!isPlainRecord ? onSort : undefined}
               onResize={onResize}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
-              isSortEnabled={!textBasedLanguageMode}
+              isSortEnabled={!isPlainRecord}
             />
           </div>
         </>
