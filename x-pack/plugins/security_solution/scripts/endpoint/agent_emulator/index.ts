@@ -5,51 +5,53 @@
  * 2.0.
  */
 
-import type { RunContext } from '@kbn/dev-cli-runner';
-import { run } from '@kbn/dev-cli-runner';
+import { run, RunContext } from '@kbn/dev-cli-runner';
+import { AgentKeepAliveService } from './keep_alive';
+import { EmulatorRunContext } from './emulator_run_context';
 import { HORIZONTAL_LINE } from '../common/constants';
-import { SUPPORTED_TOKENS } from './constants';
-import { runInAutoMode } from './run_in_auto_mode';
 
 export const cli = () => {
   run(
-    async (context: RunContext) => {
-      context.log.write(`
+    async (cliContext: RunContext) => {
+      cliContext.log.write(`
 ${HORIZONTAL_LINE}
- Endpoint Action Responder
+ Endpoint Agent Emulator
 ${HORIZONTAL_LINE}
 `);
-      if (context.flags.mode === 'auto') {
-        return runInAutoMode(context);
-      }
 
-      context.log.warning(`exiting... Nothing to do. use '--help' to see list of options`);
+      const emulatorContext = new EmulatorRunContext(
+        cliContext.flags.username as string,
+        cliContext.flags.password as string,
+        cliContext.flags.kibana as string,
+        cliContext.flags.elastic as string,
+        cliContext.flags.asSuperuser as boolean,
+        cliContext.log
+      );
+      await emulatorContext.start();
 
-      context.log.write(`
+      const keepAliveService = new AgentKeepAliveService(emulatorContext);
+      keepAliveService.start();
+
+      await keepAliveService.whileRunning;
+
+      cliContext.log.write(`
 ${HORIZONTAL_LINE}
 `);
     },
 
     {
-      description: `Respond to pending Endpoint actions.
-  ${SUPPORTED_TOKENS}`,
+      description: `Endpoint agent emulator.`,
       flags: {
-        string: ['mode', 'kibana', 'elastic', 'username', 'password', 'delay'],
+        string: ['kibana', 'elastic', 'username', 'password'],
         boolean: ['asSuperuser'],
         default: {
-          mode: 'auto',
           kibana: 'http://localhost:5601',
           elastic: 'http://localhost:9200',
           username: 'elastic',
           password: 'changeme',
           asSuperuser: false,
-          delay: '',
         },
         help: `
-        --mode              The mode for running the tool. (Default: 'auto').
-                            Value values are:
-                            auto  : tool will continue to run and checking for pending
-                                    actions periodically.
         --username          User name to be used for auth against elasticsearch and
                             kibana (Default: elastic).
                             **IMPORTANT:** if 'asSuperuser' option is not used, then the
@@ -58,8 +60,6 @@ ${HORIZONTAL_LINE}
         --asSuperuser       If defined, then a Security super user will be created using the
                             the credentials defined via 'username' and 'password' options. This
                             new user will then be used to run this utility.
-        --delay             The delay (in milliseconds) that should be applied before responding
-                            to an action. (Default: 40000 (40s))
         --kibana            The url to Kibana (Default: http://localhost:5601)
         --elastic           The url to Elasticsearch (Default: http:localholst:9200)
       `,
