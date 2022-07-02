@@ -7,19 +7,14 @@
 
 import moment from 'moment';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
-import {
-  copyAllowlistedFields,
-  configEventFields,
-  packEventFields,
-  savedQueryEventFields,
-} from './filters';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { ESClusterInfo, ESLicense, ListTemplate, TelemetryEvent } from './types';
 
 /**
  * Constructs the configs telemetry schema from a collection of config saved objects
  */
 export const templateConfigs = (
-  configsData: SavedObjectsFindResponse['saved_objects'],
+  configsData: PackagePolicy[],
   clusterInfo: ESClusterInfo,
   licenseInfo: ESLicense | undefined
 ) =>
@@ -31,16 +26,9 @@ export const templateConfigs = (
       license_id: licenseInfo?.uid,
     };
 
-    // cast exception list type to a TelemetryEvent for allowlist filtering
-    const filteredConfigItem = copyAllowlistedFields(
-      configEventFields,
-      item.attributes as unknown as TelemetryEvent
-    );
-
     return {
       ...template,
-      id: item.id,
-      ...filteredConfigItem,
+      ...item,
     };
   });
 
@@ -60,16 +48,10 @@ export const templatePacks = (
       license_id: licenseInfo?.uid,
     };
 
-    // cast exception list type to a TelemetryEvent for allowlist filtering
-    const filteredPackItem = copyAllowlistedFields(
-      packEventFields,
-      item.attributes as unknown as TelemetryEvent
-    );
-
     return {
       ...template,
       id: item.id,
-      ...filteredPackItem,
+      ...(item.attributes as TelemetryEvent),
     };
   });
 
@@ -89,16 +71,10 @@ export const templateSavedQueries = (
       license_id: licenseInfo?.uid,
     };
 
-    // cast exception list type to a TelemetryEvent for allowlist filtering
-    const filteredSavedQueryItem = copyAllowlistedFields(
-      savedQueryEventFields,
-      item.attributes as unknown as TelemetryEvent
-    );
-
     return {
       ...template,
       id: item.id,
-      ...filteredSavedQueryItem,
+      ...(item.attributes as TelemetryEvent),
     };
   });
 

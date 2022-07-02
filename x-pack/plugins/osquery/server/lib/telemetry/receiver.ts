@@ -12,7 +12,13 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import {
+  AgentClient,
+  AgentPolicyServiceInterface,
+  PackagePolicyServiceInterface,
+} from '@kbn/fleet-plugin/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 import type { ESLicense, ESClusterInfo } from './types';
 import { OsqueryAppContextService } from '../osquery_app_context_services';
@@ -21,6 +27,7 @@ export class TelemetryReceiver {
   private readonly logger: Logger;
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
+  private packagePolicyService?: PackagePolicyServiceInterface;
   private esClient?: ElasticsearchClient;
   private soClient?: SavedObjectsClientContract;
   private clusterInfo?: ESClusterInfo;
@@ -33,6 +40,7 @@ export class TelemetryReceiver {
   public async start(core?: CoreStart, osqueryContextService?: OsqueryAppContextService) {
     this.agentClient = osqueryContextService?.getAgentService()?.asInternalUser;
     this.agentPolicyService = osqueryContextService?.getAgentPolicyService();
+    this.packagePolicyService = osqueryContextService?.getPackagePolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
@@ -60,6 +68,18 @@ export class TelemetryReceiver {
       perPage: this.max_records,
       sortField: 'updated_at',
       sortOrder: 'desc',
+    });
+  }
+
+  public async fetchConfigs() {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
+    }
+
+    return this.packagePolicyService?.list(this.soClient!, {
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+      perPage: 10000,
+      page: 1,
     });
   }
 

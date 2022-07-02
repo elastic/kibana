@@ -6,8 +6,8 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { TELEMETRY_CHANNEL_SAVED_QUERIES } from '../constants';
-import { templateSavedQueries } from '../helpers';
+import { TELEMETRY_CHANNEL_CONFIGS } from '../constants';
+import { templateConfigs } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
 import type { ESClusterInfo, ESLicense } from '../types';
@@ -47,15 +47,11 @@ export function createTelemetryConfigsTaskConfig() {
         return 0;
       }
 
-      const savedQueriesJson = templateSavedQueries(
-        savedQueriesResponse?.saved_objects,
-        clusterInfo,
-        licenseInfo
-      );
+      const configsJson = templateConfigs(configsResponse?.items, clusterInfo, licenseInfo);
 
-      sender.sendOnDemand(TELEMETRY_CHANNEL_SAVED_QUERIES, savedQueriesJson);
+      sender.sendOnDemand(TELEMETRY_CHANNEL_CONFIGS, configsJson);
 
-      return savedQueriesResponse.total;
+      return configsResponse.total;
     },
   };
 }

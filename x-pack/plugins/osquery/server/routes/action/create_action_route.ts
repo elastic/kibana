@@ -103,11 +103,15 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           expiration: moment().add(5, 'minutes').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
+          alert_ids: request.body.alert_ids,
+          event_ids: request.body.event_ids,
+          case_ids: request.body.case_ids,
           agent_selection: agentSelection,
-          agents: selectedAgents,
           execution_context: request.body.execution_context,
           user_id: currentUser,
           saved_query_id: savedQueryId,
+          // TODO: add condition
+          saved_query_prebuilt: false,
           pack_id: request.body.pack_id,
           pack_name: packSO?.attributes?.name,
           pack_prebuilt: !!(packSO
@@ -123,6 +127,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                     ecs_mapping: packQuery.ecs_mapping,
                     version: packQuery.version,
                     platform: packQuery.platform,
+                    agents: selectedAgents,
                   },
                   (value) => !isEmpty(value)
                 )
@@ -135,6 +140,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                     query: request.body.query,
                     saved_query_id: savedQueryId,
                     ecs_mapping: request.body.ecs_mapping,
+                    agents: selectedAgents,
                   },
                   (value) => !isEmpty(value)
                 ),
@@ -147,7 +153,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           expiration: moment().add(5, 'minutes').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
-          agents: selectedAgents,
+          agents: query.agents,
           user_id: currentUser,
           data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
         }));

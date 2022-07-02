@@ -285,8 +285,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
       // If package is installed we want to make sure all needed assets are installed
       if (packageInfo) {
-        // noinspection ES6MissingAwait
-        this.initialize(core);
+        await this.initialize(core);
       }
 
       if (registerIngestCallback) {

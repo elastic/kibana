@@ -132,7 +132,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   ] = useFormData({
     form,
   });
-  console.error('agentIds', agentIds);
 
   /* recalculate the form data when ecs_mapping changes */
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -344,8 +343,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     ]
   );
 
-  console.error('aaaa', data);
-
   const resultsStepContent = useMemo(
     () =>
       actionId ? (
@@ -357,7 +354,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           addToTimeline={addToTimeline}
         />
       ) : null,
-    [actionId, agentIds, data?.actions, addToTimeline]
+    [actionId, serializedFormData.ecs_mapping, data?.actions, agentIds, addToTimeline]
   );
 
   useEffect(() => {
@@ -378,14 +375,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       });
     }
   }, [defaultValue, updateFieldValues]);
-
-  const card1Clicked = () => {
-    setQueryType('query');
-  };
-
-  const card2Clicked = () => {
-    setQueryType('pack');
-  };
 
   const { data: packsData } = usePacks({});
 
@@ -409,6 +398,22 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const selectedPackData = useMemo(
     () => find(packsData?.saved_objects, { id: packId }),
     [packId, packsData]
+  );
+
+  const queryCardSelectable = useMemo(
+    () => ({
+      onClick: () => setQueryType('query'),
+      isSelected: queryType === 'query',
+    }),
+    [queryType]
+  );
+
+  const packCardSelectable = useMemo(
+    () => ({
+      onClick: () => setQueryType('pack'),
+      isSelected: queryType === 'pack',
+    }),
+    [queryType]
   );
 
   useLayoutEffect(() => {
@@ -439,20 +444,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 <EuiCard
                   title="Single query"
                   description="Run a saved query or start from scratch."
-                  selectable={{
-                    onClick: card1Clicked,
-                    isSelected: queryType === 'query',
-                  }}
+                  selectable={queryCardSelectable}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiCard
                   title="Pack"
                   description="Run a set of queries in a pack."
-                  selectable={{
-                    onClick: card2Clicked,
-                    isSelected: queryType === 'pack',
-                  }}
+                  selectable={packCardSelectable}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
