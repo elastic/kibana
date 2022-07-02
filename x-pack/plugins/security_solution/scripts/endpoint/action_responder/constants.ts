@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const HORIZONTAL_LINE = '-'.repeat(80);
-
 export const SUPPORTED_TOKENS = `The following tokens can be used in the Action request 'comment' to drive
   the type of response that is sent:
   Token                         Description
