@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { hasLicenseExpired } from '../license';
 
 import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
-import { getCapabilities, getManageMlCapabilities } from './get_capabilities';
+import { getCapabilities } from './get_capabilities';
+import type { MlApiServices } from '../services/ml_api_service';
 
 let _capabilities: MlCapabilities = getDefaultCapabilities();
 
-export function checkGetManagementMlJobsResolver() {
+export function checkGetManagementMlJobsResolver({ checkMlCapabilities }: MlApiServices) {
   return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
-    getManageMlCapabilities()
+    checkMlCapabilities()
       .then(({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         _capabilities = capabilities;
         // Loop through all capabilities to ensure they are all set to true.
