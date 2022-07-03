@@ -61,7 +61,11 @@ describe('TokenAuthenticationProvider', () => {
       await expect(provider.login(request, credentials)).resolves.toEqual(
         AuthenticationResult.succeeded(
           { ...user, authentication_provider: { type: 'token', name: 'token' } },
-          { authHeaders: { authorization }, state: tokenPair }
+          {
+            authHeaders: { authorization },
+            userProfileGrant: { type: 'accessToken', accessToken: tokenPair.accessToken },
+            state: tokenPair,
+          }
         )
       );
 

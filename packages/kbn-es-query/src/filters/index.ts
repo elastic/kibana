@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { FilterCompareOptions } from './helpers';
+export type { FilterCompareOptions, TimeRange } from './helpers';
+
 export {
   dedupFilters,
   uniqFilters,
@@ -25,6 +26,9 @@ export {
   toggleFilterDisabled,
   toggleFilterPinned,
   unpinFilter,
+  extractTimeFilter,
+  extractTimeRange,
+  convertRangeFilterToTimeRange,
 } from './helpers';
 
 export {

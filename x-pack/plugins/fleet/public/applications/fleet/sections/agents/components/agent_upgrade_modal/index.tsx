@@ -7,7 +7,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import {
   EuiConfirmModal,
   EuiComboBox,
@@ -25,8 +24,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
+import semverGt from 'semver/functions/gt';
+import semverValid from 'semver/functions/valid';
 
+import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import type { Agent } from '../../../../types';
 import {
   sendPostAgentUpgrade,
@@ -36,8 +37,9 @@ import {
 } from '../../../../hooks';
 
 import { FALLBACK_VERSIONS, MAINTAINANCE_VALUES } from './constants';
+import { useScheduleDateTime } from './hooks';
 
-interface Props {
+export interface AgentUpgradeAgentModalProps {
   onClose: () => void;
   agents: Agent[] | string;
   agentCount: number;
@@ -46,7 +48,7 @@ interface Props {
 
 const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0]?.value as string;
 
-export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
+export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentModalProps> = ({
   onClose,
   agents,
   agentCount,
@@ -58,19 +60,40 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   const [errors, setErrors] = useState<string | undefined>();
 
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
-  const isSmallBatch = Array.isArray(agents) && agents.length > 1 && agents.length <= 10;
+  const isSmallBatch = agentCount <= 10;
   const isAllAgents = agents === '';
 
-  const fallbackVersions = [kibanaVersion].concat(FALLBACK_VERSIONS);
-  const fallbackOptions: Array<EuiComboBoxOptionOption<string>> = fallbackVersions.map(
-    (option) => ({
+  const fallbackVersions = useMemo(
+    () => [kibanaVersion].concat(FALLBACK_VERSIONS),
+    [kibanaVersion]
+  );
+
+  const minVersion = useMemo(() => {
+    if (!Array.isArray(agents)) {
+      return getMinVersion(fallbackVersions);
+    }
+    const versions = (agents as Agent[]).map(
+      (agent) => agent.local_metadata?.elastic?.agent?.version
+    );
+    return getMinVersion(versions);
+  }, [agents, fallbackVersions]);
+
+  const versionOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
+    const displayVersions = minVersion
+      ? fallbackVersions.filter((v) => semverGt(v, minVersion))
+      : fallbackVersions;
+    const options = displayVersions.map((option) => ({
       label: option,
       value: option,
-    })
-  );
-  const maintainanceWindows =
-    isSmallBatch && !isScheduled ? [0].concat(MAINTAINANCE_VALUES) : MAINTAINANCE_VALUES;
-  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = maintainanceWindows.map(
+    }));
+    if (options.length === 0) {
+      return [{ label: '', value: '' }];
+    }
+    return options;
+  }, [fallbackVersions, minVersion]);
+  const noVersions = versionOptions[0]?.value === '';
+
+  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTAINANCE_VALUES.map(
     (option) => ({
       label:
         option === 0
@@ -84,13 +107,13 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       value: option === 0 ? 0 : option * 3600,
     })
   );
-  const [selectedVersion, setSelectedVersion] = useState([fallbackOptions[0]]);
+  const [selectedVersion, setSelectedVersion] = useState([versionOptions[0]]);
   const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([
-    maintainanceOptions[0],
+    isSmallBatch ? maintainanceOptions[0] : maintainanceOptions[1],
   ]);
 
-  const initialDatetime = useMemo(() => moment(), []);
-  const [startDatetime, setStartDatetime] = useState<moment.Moment>(initialDatetime);
+  const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
+    useScheduleDateTime();
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -135,12 +158,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       setIsSubmitting(false);
       const successMessage = isSingleAgent
         ? i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
-            defaultMessage: 'Upgraded {count} agent',
+            defaultMessage: 'Upgrading {count} agent',
             values: { count: 1 },
           })
         : i18n.translate('xpack.fleet.upgradeAgents.successMultiNotificationTitle', {
             defaultMessage:
-              'Upgraded {isMixed, select, true {{success} of {total}} other {{isAllAgents, select, true {all selected} other {{success}} }}} agents',
+              'Upgrading {isMixed, select, true {{success} of {total}} other {{isAllAgents, select, true {all selected} other {{success}} }}} agents',
             values: {
               isMixed: counts.success !== counts.total,
               success: counts.success,
@@ -182,8 +205,17 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   }
 
   const onCreateOption = (searchValue: string) => {
+    if (!semverValid(searchValue)) {
+      return;
+    }
+
     const agentVersionNumber = semverCoerce(searchValue);
-    if (agentVersionNumber?.version && semverLt(agentVersionNumber?.version, kibanaVersion)) {
+    if (
+      agentVersionNumber?.version &&
+      semverGt(kibanaVersion, agentVersionNumber?.version) &&
+      minVersion &&
+      semverGt(agentVersionNumber?.version, minVersion)
+    ) {
       const newOption = {
         label: searchValue,
         value: searchValue,
@@ -225,7 +257,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           defaultMessage="Cancel"
         />
       }
-      confirmButtonDisabled={isSubmitting}
+      confirmButtonDisabled={isSubmitting || noVersions}
       confirmButtonText={
         isSingleAgent ? (
           <FormattedMessage
@@ -247,7 +279,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       }
     >
       <p>
-        {isSingleAgent ? (
+        {noVersions ? (
+          <FormattedMessage
+            id="xpack.fleet.upgradeAgents.noVersionsText"
+            defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
+          />
+        ) : isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
             defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
@@ -274,9 +311,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           data-test-subj="agentUpgradeModal.VersionCombobox"
           fullWidth
           singleSelection={{ asPlainText: true }}
-          options={fallbackOptions}
+          options={versionOptions}
+          isDisabled={noVersions}
+          isClearable={false}
           selectedOptions={selectedVersion}
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
+            if (!selected.length) {
+              return;
+            }
             setSelectedVersion(selected);
           }}
           onCreateOption={onCreateOption}
@@ -310,7 +352,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
               showTimeSelect
               selected={startDatetime}
               minDate={initialDatetime}
-              onChange={(date) => setStartDatetime(date as moment.Moment)}
+              minTime={minTime}
+              maxTime={maxTime}
+              onChange={onChangeStartDateTime}
             />
           </EuiFormRow>
         </>
@@ -322,7 +366,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
                 {i18n.translate('xpack.fleet.upgradeAgents.maintainanceAvailableLabel', {
-                  defaultMessage: 'Maintainance window available',
+                  defaultMessage: 'Maintenance window available',
                 })}
               </EuiFlexItem>
               <EuiSpacer size="xs" />
@@ -347,10 +391,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           <EuiComboBox
             data-test-subj="agentUpgradeModal.MaintainanceCombobox"
             fullWidth
+            isClearable={false}
             singleSelection={{ asPlainText: true }}
             options={maintainanceOptions}
             selectedOptions={selectedMantainanceWindow}
             onChange={(selected: Array<EuiComboBoxOptionOption<number>>) => {
+              if (!selected.length) {
+                return;
+              }
               setSelectedMantainanceWindow(selected);
             }}
           />
@@ -358,6 +406,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       ) : null}
       {errors ? (
         <>
+          <EuiSpacer size="s" />
           <EuiCallOut
             color="danger"
             title={i18n.translate('xpack.fleet.upgradeAgents.warningCalloutErrors', {

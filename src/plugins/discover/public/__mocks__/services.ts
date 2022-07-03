@@ -16,6 +16,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SAMPLE_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
+  HIDE_ANNOUNCEMENTS,
 } from '../../common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { TopNavMenu } from '@kbn/navigation-plugin/public';
@@ -68,6 +69,8 @@ export const discoverServiceMock = {
         return 250;
       } else if (key === MAX_DOC_FIELDS_DISPLAYED) {
         return 50;
+      } else if (key === HIDE_ANNOUNCEMENTS) {
+        return false;
       }
     }),
     isDefault: (key: string) => {
@@ -95,4 +98,8 @@ export const discoverServiceMock = {
   },
   storage: new LocalStorageMock({}) as unknown as Storage,
   addBasePath: jest.fn(),
+  toastNotifications: {
+    addInfo: jest.fn(),
+    addWarning: jest.fn(),
+  },
 } as unknown as DiscoverServices;

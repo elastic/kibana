@@ -27,7 +27,7 @@ describe('Alert_Test', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
   });
 
-  it('should be able to run live query', () => {
+  it.skip('should be able to run live query', () => {
     const PACK_NAME = 'testpack';
     const RULE_NAME = 'Test-rule';
     navigateTo('/app/osquery');

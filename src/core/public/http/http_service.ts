@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import type { CoreService } from '@kbn/core-base-browser-internal';
+import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { HttpSetup, HttpStart } from './types';
-import { InjectedMetadataSetup } from '../injected_metadata';
-import { FatalErrorsSetup } from '../fatal_errors';
 import { BasePath } from './base_path';
 import { AnonymousPathsService } from './anonymous_paths_service';
 import { LoadingCountService } from './loading_count_service';
 import { Fetch } from './fetch';
-import { CoreService } from '../../types';
 import { ExternalUrlService } from './external_url_service';
-import { ExecutionContextSetup } from '../execution_context';
 
 interface HttpDeps {
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
   fatalErrors: FatalErrorsSetup;
   executionContext: ExecutionContextSetup;
 }

@@ -18,7 +18,7 @@ export const AllCases: React.FC = () => {
   const { userCanCrud } = useCasesContext();
   useCasesBreadcrumbs(CasesDeepLinkId.cases);
 
-  const { actionLicense } = useGetActionLicense();
+  const { data: actionLicense = null } = useGetActionLicense();
   const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
 
   return (

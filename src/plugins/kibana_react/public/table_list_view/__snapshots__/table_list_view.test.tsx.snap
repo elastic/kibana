@@ -132,14 +132,14 @@ exports[`TableListView render list view 1`] = `
     onChange={[Function]}
     pagination={
       Object {
-        "initialPageIndex": 0,
-        "initialPageSize": 5,
+        "pageIndex": 0,
+        "pageSize": 20,
         "pageSizeOptions": Array [
           10,
           20,
-          5,
           50,
         ],
+        "totalItemCount": 1,
       }
     }
     responsive={true}
@@ -154,11 +154,6 @@ exports[`TableListView render list view 1`] = `
         "filters": Array [],
         "onChange": [Function],
         "toolsLeft": undefined,
-      }
-    }
-    sorting={
-      Object {
-        "sort": undefined,
       }
     }
     tableCaption="test caption"

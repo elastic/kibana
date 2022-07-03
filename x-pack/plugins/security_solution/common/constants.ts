@@ -95,7 +95,6 @@ export enum SecurityPageName {
   hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
-  hostsAuthentications = 'hosts-authentications',
   investigate = 'investigate',
   landing = 'get_started',
   network = 'network',
@@ -106,6 +105,7 @@ export enum SecurityPageName {
   networkTls = 'network-tls',
   overview = 'overview',
   policies = 'policy',
+  responseActions = 'response_actions',
   rules = 'rules',
   rulesCreate = 'rules-create',
   timelines = 'timelines',
@@ -119,8 +119,10 @@ export enum SecurityPageName {
   sessions = 'sessions',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
+  kubernetes = 'kubernetes',
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
+  noPage = '',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -138,6 +140,7 @@ export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
+export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
@@ -147,6 +150,7 @@ export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
+export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
@@ -162,6 +166,7 @@ export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}` as const;
 export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}` as const;
 export const APP_USERS_PATH = `${APP_PATH}${USERS_PATH}` as const;
 export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}` as const;
+export const APP_KUBERNETES_PATH = `${APP_PATH}${KUBERNETES_PATH}` as const;
 export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -171,6 +176,7 @@ export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as cons
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
+export const APP_RESPONSE_ACTIONS_PATH = `${APP_PATH}${RESPONSE_ACTIONS_PATH}` as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
@@ -215,6 +221,10 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "virustotal.com", "url_template": "https://www.virustotal.com/gui/search/{{ip}}" },
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
+
+/** This Kibana Advanced Setting shows related integrations on the Rules Table */
+export const SHOW_RELATED_INTEGRATIONS_SETTING =
+  'securitySolution:showRelatedIntegrations' as const;
 
 /**
  * Id for the notifications alerting type

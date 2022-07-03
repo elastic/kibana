@@ -50,9 +50,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.setValue('nameInput', connectorName);
 
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
 
-      await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
+      await find.clickByCssSelector(
+        '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
+      );
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created '${connectorName}'`);
@@ -82,10 +84,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.setValue('nameInput', updatedConnectorName);
 
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
 
       await find.clickByCssSelector(
-        '[data-test-subj="saveAndCloseEditedActionButton"]:not(disabled)'
+        '[data-test-subj="edit-connector-flyout-save-close-btn"]:not(disabled)'
       );
 
       const toastTitle = await pageObjects.common.closeToast();
@@ -262,7 +264,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
-      expect(await testSubjects.exists('saveAndCloseEditedActionButton')).to.be(false);
+      expect(await testSubjects.exists('edit-connector-flyout-save-close-btn')).to.be(false);
     });
   });
 
@@ -273,9 +275,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     await testSubjects.setValue('nameInput', connectorName);
 
-    await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+    await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
 
-    await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
+    await find.clickByCssSelector(
+      '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
+    );
     await pageObjects.common.closeToast();
   }
 
@@ -298,7 +302,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).to.be(true);
     });
 
-    await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
+    await find.clickByCssSelector(
+      '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
+    );
     await pageObjects.common.closeToast();
   }
 };

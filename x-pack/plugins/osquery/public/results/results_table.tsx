@@ -319,7 +319,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             const { visibleRowIndex } = actionProps as EuiDataGridCellValueElementProps & {
               visibleRowIndex: number;
             };
-            const eventId = data[visibleRowIndex]._id;
+            const eventId = data[visibleRowIndex]?._id;
 
             return addToTimeline({ query: ['_id', eventId], isIcon: true });
           },

@@ -66,6 +66,7 @@ export const WrappedFormulaEditor = ({
   ...rest
 }: ParamEditorProps<FormulaIndexPatternColumn>) => {
   const dateHistogramInterval = getDateHistogramInterval(
+    rest.data.datatableUtilities,
     rest.layer,
     rest.indexPattern,
     activeData,
@@ -90,6 +91,7 @@ export function FormulaEditor({
   indexPattern,
   operationDefinitionMap,
   unifiedSearch,
+  dataViews,
   toggleFullscreen,
   isFullscreen,
   setIsCloseable,
@@ -417,6 +419,7 @@ export function FormulaEditor({
             indexPattern,
             operationDefinitionMap: visibleOperationsMap,
             unifiedSearch,
+            dataViews,
             dateHistogramInterval: baseIntervalRef.current,
           });
         }
@@ -428,6 +431,7 @@ export function FormulaEditor({
           indexPattern,
           operationDefinitionMap: visibleOperationsMap,
           unifiedSearch,
+          dataViews,
           dateHistogramInterval: baseIntervalRef.current,
         });
       }
@@ -444,7 +448,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, baseIntervalRef]
+    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, baseIntervalRef]
   );
 
   const provideSignatureHelp = useCallback(

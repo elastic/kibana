@@ -12,6 +12,7 @@ import {
   buildCustomFilter,
   buildEsQuery,
   FilterStateStore,
+  TimeRange,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -59,6 +60,7 @@ export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
   activeData: TableInspectorAdapter | undefined,
+  timeRange: TimeRange | undefined,
   capabilities: RecursiveReadonly<{
     navLinks: Capabilities['navLinks'];
     discover?: Capabilities['discover'];
@@ -116,12 +118,22 @@ export function getLayerMetaInfo(
     };
   }
 
+  const filtersOrError = datasourceAPI.getFilters(activeData, timeRange);
+
+  if ('error' in filtersOrError) {
+    return {
+      meta: undefined,
+      error: filtersOrError.error,
+      isVisible,
+    };
+  }
+
   const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
   return {
     meta: {
       id: datasourceAPI.getSourceId()!,
       columns: uniqueFields,
-      filters: datasourceAPI.getFilters(activeData),
+      filters: filtersOrError,
     },
     error: undefined,
     isVisible,

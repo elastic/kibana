@@ -8,9 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { KibanaField, KibanaFilter } from './kibana_context_type';
-import { IndexPattern } from '../..';
 
 interface Arguments {
   field: KibanaField;
@@ -62,7 +62,7 @@ export const phraseFilterFunction: ExpressionFunctionPhraseFilter = {
       return {
         type: 'kibana_filter',
         ...buildFilter(
-          {} as any as IndexPattern,
+          {} as any as DataView,
           args.field.spec,
           FILTERS.PHRASE,
           args.negate || false,
@@ -76,7 +76,7 @@ export const phraseFilterFunction: ExpressionFunctionPhraseFilter = {
     return {
       type: 'kibana_filter',
       ...buildFilter(
-        {} as any as IndexPattern,
+        {} as any as DataView,
         args.field.spec,
         FILTERS.PHRASES,
         args.negate || false,

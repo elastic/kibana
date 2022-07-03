@@ -6,74 +6,54 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { DocLinksStart } from '@kbn/core/public';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { TeamsActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import * as i18n from './translations';
 
-const TeamsActionFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<TeamsActionConnector>
-> = ({ action, editActionSecrets, errors, readOnly }) => {
-  const { webhookUrl } = action.secrets;
+const { urlField } = fieldValidators;
+
+const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
+  label: i18n.WEBHOOK_URL_LABEL,
+  helpText: (
+    <EuiLink href={docLinks.links.alerting.teamsAction} target="_blank">
+      <FormattedMessage
+        id="xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.webhookUrlHelpLabel"
+        defaultMessage="Create a Microsoft Teams Webhook URL"
+      />
+    </EuiLink>
+  ),
+  validations: [
+    {
+      validator: urlField(i18n.WEBHOOK_URL_INVALID),
+    },
+  ],
+});
+
+const TeamsActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+  readOnly,
+  isEdit,
+}) => {
   const { docLinks } = useKibana().services;
 
-  const isWebhookUrlInvalid: boolean =
-    errors.webhookUrl !== undefined && errors.webhookUrl.length > 0 && webhookUrl !== undefined;
-
   return (
-    <>
-      <EuiFormRow
-        id="webhookUrl"
-        fullWidth
-        helpText={
-          <EuiLink href={docLinks.links.alerting.teamsAction} target="_blank">
-            <FormattedMessage
-              id="xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.webhookUrlHelpLabel"
-              defaultMessage="Create a Microsoft Teams Webhook URL"
-            />
-          </EuiLink>
-        }
-        error={errors.webhookUrl}
-        isInvalid={isWebhookUrlInvalid}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.webhookUrlTextFieldLabel',
-          {
-            defaultMessage: 'Webhook URL',
-          }
-        )}
-      >
-        <>
-          {getEncryptedFieldNotifyLabel(
-            !action.id,
-            1,
-            action.isMissingSecrets ?? false,
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',
-              { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
-            )
-          )}
-          <EuiFieldText
-            fullWidth
-            isInvalid={isWebhookUrlInvalid}
-            name="webhookUrl"
-            readOnly={readOnly}
-            value={webhookUrl || ''}
-            data-test-subj="teamsWebhookUrlInput"
-            onChange={(e) => {
-              editActionSecrets('webhookUrl', e.target.value);
-            }}
-            onBlur={() => {
-              if (!webhookUrl) {
-                editActionSecrets('webhookUrl', '');
-              }
-            }}
-          />
-        </>
-      </EuiFormRow>
-    </>
+    <UseField
+      path="secrets.webhookUrl"
+      config={getWebhookUrlConfig(docLinks)}
+      component={Field}
+      componentProps={{
+        euiFieldProps: {
+          readOnly,
+          'data-test-subj': 'teamsWebhookUrlInput',
+          fullWidth: true,
+        },
+      }}
+    />
   );
 };
 

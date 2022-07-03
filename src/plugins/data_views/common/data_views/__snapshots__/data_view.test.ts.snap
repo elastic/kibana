@@ -26,6 +26,28 @@ Object {
 }
 `;
 
+exports[`IndexPattern toSpec can optionally exclude fields 1`] = `
+Object {
+  "allowNoIndex": false,
+  "fieldAttrs": Object {},
+  "fieldFormats": Object {},
+  "id": "test-pattern",
+  "name": "Name",
+  "runtimeFieldMap": Object {
+    "runtime_field": Object {
+      "script": Object {
+        "source": "emit('hello world')",
+      },
+      "type": "keyword",
+    },
+  },
+  "timeFieldName": "time",
+  "title": "title",
+  "type": "index-pattern",
+  "version": "2",
+}
+`;
+
 exports[`IndexPattern toSpec should match snapshot 1`] = `
 Object {
   "allowNoIndex": false,
@@ -801,6 +823,7 @@ Object {
     },
   },
   "id": "test-pattern",
+  "name": "Name",
   "runtimeFieldMap": Object {
     "runtime_field": Object {
       "script": Object {
@@ -809,11 +832,9 @@ Object {
       "type": "keyword",
     },
   },
-  "sourceFilters": undefined,
   "timeFieldName": "time",
   "title": "title",
   "type": "index-pattern",
-  "typeMeta": undefined,
   "version": "2",
 }
 `;

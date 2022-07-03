@@ -18,7 +18,7 @@ import {
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
@@ -45,8 +45,11 @@ import {
 } from './lib/enterprise_search_request_handler';
 
 import { registerAppSearchRoutes } from './routes/app_search';
+import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
-import { registerListRoute } from './routes/enterprise_search/indices';
+import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
+import { registerCrawlerRoutes } from './routes/enterprise_search/crawler';
+import { registerCreateAPIKeyRoute } from './routes/enterprise_search/create_api_key';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
@@ -66,6 +69,7 @@ interface PluginsSetup {
 
 interface PluginsStart {
   spaces: SpacesPluginStart;
+  security: SecurityPluginStart;
 }
 
 export interface RouteDependencies {
@@ -159,8 +163,15 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
+    registerEnterpriseSearchRoutes(dependencies);
     registerWorkplaceSearchRoutes(dependencies);
-    registerListRoute(dependencies);
+    // Enterprise Search Routes
+    registerConnectorRoutes(dependencies);
+    registerCrawlerRoutes(dependencies);
+
+    getStartServices().then(([, { security: securityStart }]) => {
+      registerCreateAPIKeyRoute(dependencies, securityStart);
+    });
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry

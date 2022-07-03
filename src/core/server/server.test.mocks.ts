@@ -29,7 +29,7 @@ jest.doMock('./elasticsearch/elasticsearch_service', () => ({
 
 const realKbnConfig = jest.requireActual('@kbn/config');
 
-import { configServiceMock } from './config/mocks';
+import { configServiceMock } from '@kbn/config-mocks';
 
 export const mockConfigService = configServiceMock.create();
 jest.doMock('@kbn/config', () => ({
@@ -59,7 +59,7 @@ jest.doMock('./ui_settings/ui_settings_service', () => ({
 }));
 
 export const mockEnsureValidConfiguration = jest.fn();
-jest.doMock('./config/ensure_valid_configuration', () => ({
+jest.doMock('@kbn/core-config-server-internal', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
 
@@ -68,11 +68,18 @@ import { RenderingService, mockRenderingService } from './rendering/__mocks__/re
 export { mockRenderingService };
 jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
 
-import { environmentServiceMock } from './environment/environment_service.mock';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 
 export const mockEnvironmentService = environmentServiceMock.create();
-jest.doMock('./environment/environment_service', () => ({
+jest.doMock('@kbn/core-environment-server-internal', () => ({
   EnvironmentService: jest.fn(() => mockEnvironmentService),
+}));
+
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+
+export const mockNodeService = nodeServiceMock.create();
+jest.doMock('@kbn/core-node-server-internal', () => ({
+  NodeService: jest.fn(() => mockNodeService),
 }));
 
 import { metricsServiceMock } from './metrics/metrics_service.mock';
@@ -89,10 +96,10 @@ jest.doMock('./status/status_service', () => ({
   StatusService: jest.fn(() => mockStatusService),
 }));
 
-import { loggingServiceMock } from './logging/logging_service.mock';
+import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
 
 export const mockLoggingService = loggingServiceMock.create();
-jest.doMock('./logging/logging_service', () => ({
+jest.doMock('@kbn/core-logging-server-internal', () => ({
   LoggingService: jest.fn(() => mockLoggingService),
 }));
 
@@ -117,9 +124,9 @@ jest.doMock('./deprecations/deprecations_service', () => ({
   DeprecationsService: jest.fn(() => mockDeprecationService),
 }));
 
-import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 export const mockDocLinksService = docLinksServiceMock.create();
-jest.doMock('./doc_links/doc_links_service', () => ({
+jest.doMock('@kbn/core-doc-links-server-internal', () => ({
   DocLinksService: jest.fn(() => mockDocLinksService),
 }));

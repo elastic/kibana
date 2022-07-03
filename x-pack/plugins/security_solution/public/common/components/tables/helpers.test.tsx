@@ -220,7 +220,7 @@ describe('Table Helpers', () => {
           />
         </TestProviders>
       );
-      wrapper.find('[data-test-subj="overflow-button"]').first().simulate('click');
+      wrapper.find('[data-test-subj="overflow-button"]').first().find('button').simulate('click');
 
       expect(
         wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')

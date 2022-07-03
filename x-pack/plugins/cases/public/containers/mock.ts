@@ -13,6 +13,7 @@ import type {
   SingleCaseMetricsFeature,
   AlertComment,
   CasesMetrics,
+  ExternalReferenceComment,
 } from '../../common/ui/types';
 import {
   Actions,
@@ -33,11 +34,15 @@ import {
   UserActionWithResponse,
   CommentUserAction,
   CaseSeverity,
+  ExternalReferenceStorageType,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
+import {
+  ExternalReferenceAttachmentType,
+  ExternalReferenceAttachmentViewObject,
+} from '../client/attachment_framework/types';
 
 export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
@@ -158,6 +163,23 @@ export const hostReleaseComment: () => Comment = () => {
     updatedBy: null,
     version: 'WzQ3LDFc',
   };
+};
+
+export const externalReferenceAttachment: ExternalReferenceComment = {
+  type: CommentType.externalReference,
+  id: 'external-reference-comment-id',
+  externalReferenceId: 'my-id',
+  externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
 };
 
 export const basicCase: Case = {
@@ -680,13 +702,10 @@ export const caseUserActions: CaseUserActions[] = [
 ];
 
 // components tests
-export const useGetCasesMockState: UseGetCasesState = {
+export const useGetCasesMockState = {
   data: allCases,
-  loading: [],
-  selectedCases: [],
+  isLoading: false,
   isError: false,
-  queryParams: DEFAULT_QUERY_PARAMS,
-  filterOptions: DEFAULT_FILTER_OPTIONS,
 };
 
 export const basicCaseClosed: Case = {
@@ -695,3 +714,36 @@ export const basicCaseClosed: Case = {
   closedBy: elasticUser,
   status: CaseStatuses.closed,
 };
+
+export const getExternalReferenceUserAction = (): SnakeToCamelCase<
+  UserActionWithResponse<CommentUserAction>
+> => ({
+  ...getUserAction(ActionTypes.comment, Actions.create),
+  actionId: 'external-reference-action-id',
+  type: ActionTypes.comment,
+  commentId: 'external-reference-comment-id',
+  payload: {
+    comment: {
+      type: CommentType.externalReference,
+      externalReferenceId: 'my-id',
+      externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+      externalReferenceAttachmentTypeId: '.test',
+      externalReferenceMetadata: null,
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+  },
+});
+
+export const getExternalReferenceAttachment = (
+  viewObject: ExternalReferenceAttachmentViewObject = {}
+): ExternalReferenceAttachmentType => ({
+  id: '.test',
+  icon: 'casesApp',
+  displayName: 'Test',
+  getAttachmentViewObject: () => ({
+    type: 'update',
+    event: 'added a chart',
+    timelineIcon: 'casesApp',
+    ...viewObject,
+  }),
+});

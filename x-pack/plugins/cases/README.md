@@ -16,16 +16,11 @@ This plugin provides cases management in Kibana
 ## Table of Contents
 
 - [Cases API](#cases-api)
-- [Cases Client API](#cases-client-api)
 - [Cases UI](#cases-ui)
 
 ## Cases API
 
 [**Explore the API docs »**](https://www.elastic.co/guide/en/security/current/cases-api-overview.html)
-
-## Cases Client API
-
-[**Cases Client API docs**][cases-client-api-docs]
 
 ## Cases UI
 
@@ -133,9 +128,79 @@ An array of:
 | id       | The ID of the case    | string |
 | title    | The title of the case | string |
 
-### ui 
+#### `find` 
 
-#### `getCases`
+Retrieves a paginated subset of cases.
+
+Arguments
+
+| Property | Description            | Type                  |
+| -------- | ---------------------- | --------------------- |
+| query    | The request parameters | object                |
+| signal   | The abort signal       | Optional, AbortSignal |
+
+`query`
+
+| Property              | Description                                                                                                                                                                                                                                  | Type                                 |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| defaultSearchOperator | The default operator to use for the `simple_query_string`. Defaults to `OR`.                                                                                                                                                                 | Optional, string                     |
+| fields                | The fields in the entity to return in the response.                                                                                                                                                                                          | Optional, array of strings           |
+| from                  | Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression.                                                                                                         | Optional, string                     |
+| owner                 | A filter to limit the retrieved cases to a specific set of applications. Valid values are: `cases`, `observability`, and `securitySolution`. If this parameter is omitted, the response contains all cases that the user has access to read. |
+| page                  | The page number to return. Defaults to `1` .                                                                                                                                                                                                 | Optional, integer                    |
+| perPage               | The number of rules to return per page. Defaults to `20` .                                                                                                                                                                                   | Optional, integer                    |
+| reporters             | Filters the returned cases by the reporter's `username.                                                                                                                                                                                      | Optional, string or array of strings |
+| search                | `simple_query_string` query that filters the objects in the response.                                                                                                                                                                        | Optional, string                     |
+| searchFields          | The fields to perform the `simple_query_string` parsed query against.                                                                                                                                                                        | Optional, string or array of strings |
+| severity              | The severity of the case. Valid values are: `critical`, `high`, `low`, and `medium`.                                                                                                                                                         | Optional, string                     |
+| sortField             | Determines which field is used to sort the results,`createdAt` or `updatedAt`. Defaults to `createdAt`.                                                                                                                                      | Optional, string                     |
+| sortOrder             | Determines the sort order, which can be `desc` or `asc`. Defaults to `desc`.                                                                                                                                                                 | Optional, string                     |
+| status                | Filters the returned cases by state, which can be  `open`, `in-progress`, or `closed`.                                                                                                                                                       | Optional, string                     |
+| tags                  | Filters the returned cases by tags.                                                                                                                                                                                                          | Optional, string or array of strings |
+| to                    | Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.                                                                                                        | Optional, string                     |
+
+#### `getCasesStatus`
+
+Returns the number of cases that are open, closed, and in progress.
+
+Arguments
+
+| Property | Description            | Type                  |
+| -------- | ---------------------- | --------------------- |
+| query    | The request parameters | object                |
+| signal   | The abort signal       | Optional, AbortSignal |
+
+`query`
+
+| Property | Description                                                                                                                                                                                                                                  | Type             |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| from     | Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression.                                                                                                         | Optional, string |
+| owner    | A filter to limit the retrieved cases to a specific set of applications. Valid values are: `cases`, `observability`, and `securitySolution`. If this parameter is omitted, the response contains all cases that the user has access to read. |
+| to       | Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.                                                                                                        | Optional, string |
+
+
+#### `getCasesMetrics`
+
+Returns the number of cases that are open, closed, and in progress.
+
+Arguments
+
+| Property | Description            | Type                  |
+| -------- | ---------------------- | --------------------- |
+| query    | The request parameters | object                |
+| signal   | The abort signal       | Optional, AbortSignal |
+
+`query`
+
+| Property | Description                                                                                                                                                                                                                                  | Type                       |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| features | The metrics to retrieve.                                                                                                                                                                                                                     | Optional, array of strings |
+| from     | Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression.                                                                                                         | Optional, string           |
+| owner    | A filter to limit the retrieved cases to a specific set of applications. Valid values are: `cases`, `observability`, and `securitySolution`. If this parameter is omitted, the response contains all cases that the user has access to read. |
+| to       | Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.                                                                                                        | Optional, string           |
+
+
+### ui 
 
 Arguments:
 
@@ -160,6 +225,7 @@ Arguments:
 | timelineIntegration?.hooks.useInsertTimeline                         | `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`                                                                                           |
 | timelineIntegration?.ui?.renderInvestigateInTimelineActionComponent? | `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`                                                                              |
 | timelineIntegration?.ui?renderTimelineDetailsPanel?                  | `() => JSX.Element;` space to render `TimelineDetailsPanel`                                                                                                                |
+#### `getCases`
 
 UI component:
 ![All Cases Component][all-cases-img]
@@ -284,4 +350,3 @@ Arguments:
 [all-cases-modal-img]: images/all_cases_selector_modal.png
 [recent-cases-img]: images/recent_cases.png
 [case-view-img]: images/case_view.png
-[cases-client-api-docs]: docs/cases_client/README.md

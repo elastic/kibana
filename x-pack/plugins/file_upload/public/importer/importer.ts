@@ -8,6 +8,7 @@
 import { chunk, intersection } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getHttp } from '../kibana_services';
 import { MB } from '../../common/constants';
 import type {
@@ -19,7 +20,6 @@ import type {
   IngestPipeline,
 } from '../../common/types';
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
-import { isPopulatedObject } from '../../common/utils';
 
 const CHUNK_SIZE = 5000;
 const REDUCED_CHUNK_SIZE = 100;

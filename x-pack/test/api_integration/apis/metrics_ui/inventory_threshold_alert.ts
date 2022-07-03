@@ -172,6 +172,46 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       });
+      it('should work with a long threshold', async () => {
+        const results = await evaluateCondition({
+          ...baseOptions,
+          condition: {
+            ...baseCondition,
+            metric: 'rx',
+            threshold: [107374182400],
+            comparator: Comparator.LT,
+          },
+          esClient,
+        });
+        expect(results).to.eql({
+          'host-0': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 1666.6666666666667,
+          },
+          'host-1': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 2000,
+          },
+        });
+      });
       it('should work FOR LAST 5 minute', async () => {
         const options = {
           ...baseOptions,

@@ -12,6 +12,7 @@ import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@ela
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
 import { rangeOperation } from '..';
@@ -53,6 +54,7 @@ jest.mock('lodash', () => {
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
+const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
@@ -87,6 +89,7 @@ const defaultOptions = {
   },
   data: dataPluginMockValue,
   unifiedSearch: unifiedSearchPluginMockValue,
+  dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {
     id: '1',
@@ -680,7 +683,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -727,7 +730,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -814,7 +817,7 @@ describe('ranges', () => {
         );
 
         act(() => {
-          instance.find(RangePopover).last().find(EuiLink).simulate('click');
+          instance.find(RangePopover).last().find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -921,7 +924,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(EuiLink).first().simulate('click');
+          instance.find(EuiLink).first().find('button').simulate('click');
         });
 
         expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({

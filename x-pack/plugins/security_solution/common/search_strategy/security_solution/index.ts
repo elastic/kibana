@@ -19,8 +19,6 @@ import {
   HostsUncommonProcessesStrategyResponse,
   HostsUncommonProcessesRequestOptions,
   HostsKpiQueries,
-  HostsKpiAuthenticationsStrategyResponse,
-  HostsKpiAuthenticationsRequestOptions,
   HostsKpiHostsStrategyResponse,
   HostsKpiHostsRequestOptions,
   HostsKpiUniqueIpsStrategyResponse,
@@ -84,6 +82,12 @@ import {
   TotalUsersKpiRequestOptions,
   TotalUsersKpiStrategyResponse,
 } from './users/kpi/total_users';
+
+import {
+  UsersKpiAuthenticationsRequestOptions,
+  UsersKpiAuthenticationsStrategyResponse,
+} from './users/kpi/authentications';
+
 import { UsersRequestOptions, UsersStrategyResponse } from './users/all';
 import {
   UserAuthenticationsRequestOptions,
@@ -137,8 +141,6 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostFirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
-  : T extends HostsKpiQueries.kpiAuthentications
-  ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
@@ -151,6 +153,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UserAuthenticationsStrategyResponse
   : T extends UsersQueries.users
   ? UsersStrategyResponse
+  : T extends UsersQueries.kpiAuthentications
+  ? UsersKpiAuthenticationsStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -199,8 +203,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostFirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesRequestOptions
-  : T extends HostsKpiQueries.kpiAuthentications
-  ? HostsKpiAuthenticationsRequestOptions
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
@@ -213,6 +215,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? TotalUsersKpiRequestOptions
   : T extends UsersQueries.users
   ? UsersRequestOptions
+  : T extends UsersQueries.kpiAuthentications
+  ? UsersKpiAuthenticationsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -255,4 +259,7 @@ export interface DocValueFieldsInput {
   field: string;
 
   format: string;
+}
+export interface CommonFields {
+  '@timestamp'?: string[];
 }

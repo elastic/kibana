@@ -389,19 +389,23 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
-        return this.unsecuredSavedObjectsClient.find<CommentAttributes>({
-          type: CASE_COMMENT_SAVED_OBJECT,
-          sortField: defaultSortField,
-          ...options,
+        return this.attachmentService.find({
+          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+          options: {
+            sortField: defaultSortField,
+            ...options,
+          },
         });
       }
 
-      return this.unsecuredSavedObjectsClient.find<CommentAttributes>({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        page: 1,
-        perPage: MAX_DOCS_PER_PAGE,
-        sortField: defaultSortField,
-        ...options,
+      return this.attachmentService.find({
+        unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
+        options: {
+          page: 1,
+          perPage: MAX_DOCS_PER_PAGE,
+          sortField: defaultSortField,
+          ...options,
+        },
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);

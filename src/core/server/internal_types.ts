@@ -6,11 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
-
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import {
+  InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+} from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServicePreboot,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from '@kbn/core-analytics-server';
+import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
+import type {
+  InternalExecutionContextSetup,
+  InternalExecutionContextStart,
+} from '@kbn/core-execution-context-server-internal';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { ConfigDeprecationProvider } from './config';
-import { InternalContextPreboot, ContextSetup } from './context';
+import { InternalContextPreboot, InternalContextSetup } from './context';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
@@ -30,26 +42,14 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './ui_settings';
-import { InternalEnvironmentServiceSetup } from './environment';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
-import type {
-  InternalExecutionContextSetup,
-  InternalExecutionContextStart,
-} from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
-import { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
-import type {
-  AnalyticsServicePreboot,
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-} from './analytics';
 
 /** @internal */
 export interface InternalCorePreboot {
@@ -67,7 +67,7 @@ export interface InternalCorePreboot {
 export interface InternalCoreSetup {
   analytics: AnalyticsServiceSetup;
   capabilities: CapabilitiesSetup;
-  context: ContextSetup;
+  context: InternalContextSetup;
   docLinks: DocLinksServiceSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
@@ -100,19 +100,4 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
-}
-
-/**
- * @internal
- */
-export interface ServiceConfigDescriptor<T = any> {
-  path: string;
-  /**
-   * Schema to use to validate the configuration.
-   */
-  schema: Type<T>;
-  /**
-   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
-   */
-  deprecations?: ConfigDeprecationProvider;
 }

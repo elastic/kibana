@@ -15,6 +15,8 @@ import {
   // @ts-ignore not typed yet
 } from './functional_tests/cli';
 
+export { KbnClientRequesterError } from './kbn_client/kbn_client_requester_error';
+
 // @internal
 export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 

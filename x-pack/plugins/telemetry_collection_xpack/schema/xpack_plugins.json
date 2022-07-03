@@ -6759,6 +6759,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -6846,6 +6859,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -6939,6 +6965,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "png_cpu": {
@@ -6999,6 +7038,9 @@
                   "type": "long"
                 },
                 "visual_reporting_soft_disabled_error": {
+                  "type": "long"
+                },
+                "invalid_layout_parameters_error": {
                   "type": "long"
                 }
               }
@@ -7057,6 +7099,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "png_cpu": {
@@ -7118,6 +7173,9 @@
                 },
                 "visual_reporting_soft_disabled_error": {
                   "type": "long"
+                },
+                "invalid_layout_parameters_error": {
+                  "type": "long"
                 }
               }
             }
@@ -7172,6 +7230,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7267,6 +7338,9 @@
                   "type": "long"
                 },
                 "visual_reporting_soft_disabled_error": {
+                  "type": "long"
+                },
+                "invalid_layout_parameters_error": {
                   "type": "long"
                 }
               }
@@ -7325,6 +7399,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "layout": {
               "properties": {
                 "canvas": {
@@ -7417,6 +7504,9 @@
                   "type": "long"
                 },
                 "visual_reporting_soft_disabled_error": {
+                  "type": "long"
+                },
+                "invalid_layout_parameters_error": {
                   "type": "long"
                 }
               }
@@ -7974,6 +8064,19 @@
             }
           }
         },
+        "queue_times": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "max": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            }
+          }
+        },
         "available": {
           "type": "boolean"
         },
@@ -8031,6 +8134,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8124,6 +8240,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "csv_rows": {
@@ -8214,6 +8343,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "png_cpu": {
@@ -8274,6 +8416,9 @@
                       "type": "long"
                     },
                     "visual_reporting_soft_disabled_error": {
+                      "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
                       "type": "long"
                     }
                   }
@@ -8332,6 +8477,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "png_cpu": {
@@ -8393,6 +8551,9 @@
                     },
                     "visual_reporting_soft_disabled_error": {
                       "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -8447,6 +8608,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8542,6 +8716,9 @@
                       "type": "long"
                     },
                     "visual_reporting_soft_disabled_error": {
+                      "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
                       "type": "long"
                     }
                   }
@@ -8600,6 +8777,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "layout": {
                   "properties": {
                     "canvas": {
@@ -8692,6 +8882,9 @@
                       "type": "long"
                     },
                     "visual_reporting_soft_disabled_error": {
+                      "type": "long"
+                    },
+                    "invalid_layout_parameters_error": {
                       "type": "long"
                     }
                   }
@@ -9246,6 +9439,19 @@
                 },
                 "99.0": {
                   "type": "long"
+                }
+              }
+            },
+            "queue_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             }

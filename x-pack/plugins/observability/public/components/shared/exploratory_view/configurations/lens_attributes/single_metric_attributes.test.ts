@@ -13,6 +13,10 @@ import { obsvReportConfigMap } from '../../obsv_exploratory_view';
 import { buildExistsFilter } from '../utils';
 import { LayerConfig, LensAttributes } from '../lens_attributes';
 import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { DataTypes } from '../constants';
+import { sampleMetricFormulaAttribute } from './sample_formula_metric_attribute';
 
 describe('SingleMetricAttributes', () => {
   mockAppDataView();
@@ -39,8 +43,17 @@ describe('SingleMetricAttributes', () => {
     selectedMetricField: TRANSACTION_DURATION,
   };
 
-  beforeEach(() => {
-    lnsAttr = new SingleMetricLensAttributes([layerConfig], ReportTypes.SINGLE_METRIC);
+  const lensPluginMockStart = lensPluginMock.createStartContract();
+
+  let formulaHelper: FormulaPublicApi;
+
+  beforeEach(async () => {
+    formulaHelper = (await lensPluginMockStart.stateHelperApi()).formula;
+    lnsAttr = new SingleMetricLensAttributes(
+      [layerConfig],
+      ReportTypes.SINGLE_METRIC,
+      formulaHelper
+    );
   });
 
   it('returns attributes as expected', () => {
@@ -99,7 +112,11 @@ describe('SingleMetricAttributes', () => {
 
   it('returns attributes as expected for percentile operation', () => {
     layerConfig.operationType = '99th';
-    lnsAttr = new SingleMetricLensAttributes([layerConfig], ReportTypes.SINGLE_METRIC);
+    lnsAttr = new SingleMetricLensAttributes(
+      [layerConfig],
+      ReportTypes.SINGLE_METRIC,
+      formulaHelper
+    );
 
     const jsonAttr = lnsAttr.getJSON();
     expect(jsonAttr).toEqual({
@@ -124,6 +141,7 @@ describe('SingleMetricAttributes', () => {
                 columnOrder: ['layer-0-column-1'],
                 columns: {
                   'layer-0-column-1': {
+                    customLabel: true,
                     dataType: 'number',
                     isBucketed: false,
                     label: 'Page load time',
@@ -155,5 +173,34 @@ describe('SingleMetricAttributes', () => {
       title: 'Prefilled from exploratory view app',
       visualizationType: 'lnsMetric',
     });
+  });
+
+  it('returns attributes as expected for formula column', () => {
+    const reportViewConfigFormula = getDefaultConfigs({
+      reportType: ReportTypes.SINGLE_METRIC,
+      dataType: DataTypes.SYNTHETICS,
+      dataView: mockDataView,
+      reportConfigMap: obsvReportConfigMap,
+    });
+
+    const layerConfigFormula: LayerConfig = {
+      seriesConfig: reportViewConfigFormula,
+      operationType: 'median',
+      indexPattern: mockDataView,
+      reportDefinitions: {},
+      time: { from: 'now-15m', to: 'now' },
+      color: 'green',
+      name: 'test-series',
+      selectedMetricField: 'monitor_availability',
+    };
+
+    lnsAttr = new SingleMetricLensAttributes(
+      [layerConfigFormula],
+      ReportTypes.SINGLE_METRIC,
+      formulaHelper
+    );
+
+    const jsonAttr = lnsAttr.getJSON();
+    expect(jsonAttr).toEqual(sampleMetricFormulaAttribute);
   });
 });

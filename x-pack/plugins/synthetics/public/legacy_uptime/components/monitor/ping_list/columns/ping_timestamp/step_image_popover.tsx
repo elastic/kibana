@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiImage, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import { EuiImage, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { LoadingImageState } from './no_image_available';
 import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types/ping/synthetics';
 import { fullSizeImageAlt } from './translations';
 import { useCompositeImage } from '../../../../../hooks/use_composite_image';
@@ -49,7 +50,7 @@ const DefaultImage: React.FC<ScreenshotImageProps & { imageData?: string }> = ({
       className="syntheticsStepImage"
     />
   ) : (
-    <EuiLoadingSpinner size="l" />
+    <LoadingImageState />
   );
 
 /**
@@ -155,7 +156,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
           style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
         />
       ) : (
-        <EuiLoadingSpinner size="l" />
+        <LoadingImageState />
       )}
     </EuiPopover>
   );

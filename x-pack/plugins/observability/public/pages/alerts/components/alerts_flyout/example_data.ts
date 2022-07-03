@@ -22,7 +22,22 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_RULE_CONSUMER,
   SPACE_IDS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
+
+const createDates = (start: string, duration: number, isEnd?: boolean) => {
+  const started = new Date(start);
+  const lastTimestamp = new Date(started.valueOf() + duration);
+  const dates = {
+    [TIMESTAMP]: lastTimestamp.toISOString(),
+    [ALERT_START]: started.toISOString(),
+    [ALERT_DURATION]: duration,
+  };
+  if (isEnd) {
+    return { ...dates, [ALERT_END]: lastTimestamp.toISOString() };
+  }
+  return dates;
+};
 
 export const apmAlertResponseExample = [
   {
@@ -31,21 +46,19 @@ export const apmAlertResponseExample = [
     [ALERT_RULE_NAME]: ['Error count threshold | opbeans-java (smith test)'],
     [ALERT_RULE_CONSUMER]: ['apm'],
     [SPACE_IDS]: ['default'],
-    [ALERT_DURATION]: [180057000],
     [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
     [ALERT_SEVERITY]: ['warning'],
     tags: ['apm', 'service.name:opbeans-java'],
     [ALERT_UUID]: ['0175ec0a-a3b1-4d41-b557-e21c2d024352'],
     [ALERT_RULE_UUID]: ['474920d0-93e9-11eb-ac86-0b455460de81'],
     'event.action': ['active'],
-    '@timestamp': ['2021-04-12T13:53:49.550Z'],
     [ALERT_INSTANCE_ID]: ['apm.error_rate_opbeans-java_production'],
-    [ALERT_START]: ['2021-04-12T13:50:49.493Z'],
     [ALERT_RULE_PRODUCER]: ['apm'],
     'event.kind': ['state'],
     [ALERT_RULE_CATEGORY]: ['Error count threshold'],
     'service.environment': ['production'],
     'processor.event': ['error'],
+    ...createDates('2021-04-12T13:50:49.493Z', 180057000),
   },
   {
     [ALERT_RULE_TYPE_ID]: ['apm.error_rate'],
@@ -53,28 +66,25 @@ export const apmAlertResponseExample = [
     [ALERT_RULE_NAME]: ['Error count threshold | opbeans-java (smith test)'],
     [ALERT_RULE_CONSUMER]: ['apm'],
     [SPACE_IDS]: ['default'],
-    [ALERT_DURATION]: [2419005000],
-    [ALERT_END]: ['2021-04-12T13:49:49.446Z'],
     [ALERT_STATUS]: [ALERT_STATUS_RECOVERED],
     tags: ['apm', 'service.name:opbeans-java'],
     [ALERT_UUID]: ['32b940e1-3809-4c12-8eee-f027cbb385e2'],
     [ALERT_RULE_UUID]: ['474920d0-93e9-11eb-ac86-0b455460de81'],
     'event.action': ['close'],
-    '@timestamp': ['2021-04-12T13:49:49.446Z'],
     [ALERT_INSTANCE_ID]: ['apm.error_rate_opbeans-java_production'],
-    [ALERT_START]: ['2021-04-12T13:09:30.441Z'],
     [ALERT_RULE_PRODUCER]: ['apm'],
     'event.kind': ['state'],
     [ALERT_RULE_CATEGORY]: ['Error count threshold'],
     'service.environment': ['production'],
     'processor.event': ['error'],
+    ...createDates('2021-04-12T13:09:30.441Z', 2419005000, true),
   },
 ];
 
 export const dynamicIndexPattern = {
   fields: [
     {
-      name: '@timestamp',
+      name: TIMESTAMP,
       type: 'date',
       esTypes: ['date'],
       searchable: true,
@@ -242,6 +252,6 @@ export const dynamicIndexPattern = {
       readFromDocValues: true,
     },
   ],
-  timeFieldName: '@timestamp',
+  timeFieldName: TIMESTAMP,
   title: '.kibana_smith-alerts-observability*',
 };

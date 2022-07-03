@@ -12,6 +12,7 @@ import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/se
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 describe('CspSetupStatus route', () => {
   const logger: ReturnType<typeof loggingSystemMock.createLogger> =
@@ -30,6 +31,7 @@ describe('CspSetupStatus route', () => {
   const cspContext: CspAppContext = {
     logger,
     service: cspAppContextService,
+    security: securityMock.createSetup(),
   };
 
   beforeEach(() => {

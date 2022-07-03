@@ -34,7 +34,6 @@ import { TimelineId } from '../../../../common/types';
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
     detailName,
-    docValueFields,
     filterQuery,
     indexNames,
     indexPattern,
@@ -88,7 +87,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.hosts})`}>
           <HostsQueryTabBody {...tabProps} />

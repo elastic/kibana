@@ -8,14 +8,14 @@
 
 import { Observable, combineLatest, ReplaySubject, firstValueFrom } from 'rxjs';
 import { schema } from '@kbn/config-schema';
+import { PackageInfo } from '@kbn/config';
 
+import type { PluginName } from '@kbn/core-base-common';
 import { IRouter } from '../../http';
 import { MetricsServiceSetup } from '../../metrics';
 import type { CoreIncrementUsageCounter } from '../../core_usage_data/types';
 import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';
-import { PluginName } from '../../plugins';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
-import { PackageInfo } from '../../config';
 import { StatusResponse } from '../../../types/status';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;

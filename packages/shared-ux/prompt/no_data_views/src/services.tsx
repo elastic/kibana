@@ -26,8 +26,6 @@ type DataView = unknown;
 interface DataViewEditorOptions {
   /** Handler to be invoked when the Data View Editor completes a save operation. */
   onSave: (dataView: DataView) => void;
-  /** If set to false, will skip empty prompt in data view editor. */
-  showEmptyPrompt?: boolean;
 }
 
 /**
@@ -51,8 +49,14 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
   children,
   ...services
 }) => {
+  // Typescript types are widened to accept more than what is needed.  Take only what is necessary
+  // so the context remains clean.
+  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } = services;
+
   return (
-    <NoDataViewsPromptContext.Provider value={services}>
+    <NoDataViewsPromptContext.Provider
+      value={{ canCreateNewDataView, dataViewsDocLink, openDataViewEditor }}
+    >
       {children}
     </NoDataViewsPromptContext.Provider>
   );

@@ -68,7 +68,7 @@ export class DateFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val: string | number, options?: { timezone?: string }) => {
+  textConvert: TextContextTypeConvert = (val: string | number, options) => {
     // don't give away our ref to converter so we can hot-swap when config changes
     const pattern = this.param('pattern');
     const timezone = options?.timezone || this.param('timezone');

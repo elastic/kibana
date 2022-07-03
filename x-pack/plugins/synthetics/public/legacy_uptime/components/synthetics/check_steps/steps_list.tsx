@@ -36,6 +36,7 @@ interface Props {
   data: JourneyStep[];
   error?: Error;
   loading: boolean;
+  allStepsLoaded: boolean;
   compactView?: boolean;
   showStepDurationTrend?: boolean;
 }
@@ -90,6 +91,7 @@ export const StepsList = ({
   data,
   error,
   loading,
+  allStepsLoaded,
   showStepDurationTrend = true,
   compactView = false,
 }: Props) => {
@@ -126,7 +128,9 @@ export const StepsList = ({
       align: 'left',
       field: 'timestamp',
       name: STEP_NAME_LABEL,
-      render: (_timestamp: string, item) => <StepImage step={item} compactView={compactView} />,
+      render: (_timestamp: string, item) => (
+        <StepImage step={item} compactView={compactView} allStepsLoaded={allStepsLoaded} />
+      ),
       mobileOptions: {
         render: (item: JourneyStep) => (
           <EuiText>

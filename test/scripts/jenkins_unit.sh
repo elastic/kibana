@@ -16,7 +16,6 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   ./test/scripts/checks/telemetry.sh
   ./test/scripts/checks/ts_projects.sh
   ./test/scripts/checks/jest_configs.sh
-  ./test/scripts/checks/doc_api_changes.sh
   ./test/scripts/checks/type_check.sh
   ./test/scripts/checks/bundle_limits.sh
   ./test/scripts/checks/i18n.sh

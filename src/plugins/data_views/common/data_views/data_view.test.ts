@@ -8,11 +8,11 @@
 
 import { map, last } from 'lodash';
 
-import { IndexPattern } from './data_view';
+import { DataView } from './data_view';
 
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 
-import { IndexPatternField } from '../fields';
+import { DataViewField } from '../fields';
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -48,10 +48,10 @@ function create(id: string) {
   const {
     type,
     version,
-    attributes: { timeFieldName, fields, title },
+    attributes: { timeFieldName, fields, title, name },
   } = stubbedSavedObjectIndexPattern(id);
 
-  return new IndexPattern({
+  return new DataView({
     spec: {
       id,
       type,
@@ -59,6 +59,7 @@ function create(id: string) {
       timeFieldName,
       fields: { ...JSON.parse(fields), runtime_field: runtimeField },
       title,
+      name,
       runtimeFieldMap,
     },
     fieldFormats: fieldFormatsMock,
@@ -68,7 +69,7 @@ function create(id: string) {
 }
 
 describe('IndexPattern', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: DataView;
 
   // create an indexPattern instance for each test
   beforeEach(() => {
@@ -101,8 +102,8 @@ describe('IndexPattern', () => {
   describe('getScriptedFields', () => {
     test('should return all scripted fields', () => {
       const scriptedNames = stubLogstashFields
-        .filter((item: IndexPatternField) => item.scripted === true)
-        .map((item: IndexPatternField) => item.name);
+        .filter((item: DataViewField) => item.scripted === true)
+        .map((item: DataViewField) => item.name);
       const respNames = map(indexPattern.getScriptedFields(), 'name');
 
       expect(respNames).toEqual(scriptedNames);
@@ -151,8 +152,8 @@ describe('IndexPattern', () => {
   describe('getNonScriptedFields', () => {
     test('should return all non-scripted fields', () => {
       const notScriptedNames = stubLogstashFields
-        .filter((item: IndexPatternField) => item.scripted === false)
-        .map((item: IndexPatternField) => item.name);
+        .filter((item: DataViewField) => item.scripted === false)
+        .map((item: DataViewField) => item.name);
       notScriptedNames.push('runtime_field');
       const respNames = map(indexPattern.getNonScriptedFields(), 'name');
 
@@ -186,7 +187,7 @@ describe('IndexPattern', () => {
 
       const scriptedFields = indexPattern.getScriptedFields();
       expect(scriptedFields).toHaveLength(oldCount + 1);
-      expect((indexPattern.fields.getByName(scriptedField.name) as IndexPatternField).name).toEqual(
+      expect((indexPattern.fields.getByName(scriptedField.name) as DataViewField).name).toEqual(
         scriptedField.name
       );
     });
@@ -369,6 +370,8 @@ describe('IndexPattern', () => {
           name: 'scriptedFieldWithEmptyFormatter',
           type: 'number',
           esTypes: ['long'],
+          searchable: true,
+          aggregatable: true,
         })
       ).toEqual(
         expect.objectContaining({
@@ -388,13 +391,17 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()).toMatchSnapshot();
     });
 
+    test('can optionally exclude fields', () => {
+      expect(indexPattern.toSpec(false)).toMatchSnapshot();
+    });
+
     test('can restore from spec', async () => {
       const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
       } as unknown as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
       const spec = indexPattern.toSpec();
-      const restoredPattern = new IndexPattern({
+      const restoredPattern = new DataView({
         spec,
         fieldFormats: fieldFormatsMock,
         shortDotsEnable: false,

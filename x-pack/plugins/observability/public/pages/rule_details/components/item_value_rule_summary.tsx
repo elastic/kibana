@@ -8,9 +8,13 @@ import React from 'react';
 import { EuiFlexItem, EuiText } from '@elastic/eui';
 import { ItemValueRuleSummaryProps } from '../types';
 
-export function ItemValueRuleSummary({ itemValue, extraSpace = true }: ItemValueRuleSummaryProps) {
+export function ItemValueRuleSummary({
+  itemValue,
+  extraSpace = true,
+  ...otherProps
+}: ItemValueRuleSummaryProps) {
   return (
-    <EuiFlexItem grow={extraSpace ? 3 : 1}>
+    <EuiFlexItem grow={extraSpace ? 3 : 1} {...otherProps}>
       <EuiText size="s">{itemValue}</EuiText>
     </EuiFlexItem>
   );

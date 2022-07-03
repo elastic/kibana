@@ -90,15 +90,17 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
     const checkESOrDataViewExist = async () => {
       // check if there is any data view or data source
       const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
-      const hasEsData = await dataViews.hasData.hasESData().catch(() => false);
-      if (!hasUserDataView || !hasEsData) {
-        setShowNoDataPage(true);
+      if (hasUserDataView) {
+        // Adding this check as TSVB asks for the default dataview on initialization
+        const defaultDataView = await dataViews.getDefaultDataView();
+        if (!defaultDataView) {
+          setShowNoDataPage(true);
+        }
+        setIsLoading(false);
+        return;
       }
-      // Adding this check as TSVB asks for the default dataview on initialization
-      const defaultDataView = await dataViews.getDefaultDataView();
-      if (!defaultDataView) {
-        setShowNoDataPage(true);
-      }
+
+      setShowNoDataPage(true);
       setIsLoading(false);
     };
 

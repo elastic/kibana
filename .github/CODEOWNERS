@@ -72,6 +72,7 @@
 /src/plugins/navigation/ @elastic/kibana-app-services
 /src/plugins/share/ @elastic/kibana-app-services
 /src/plugins/ui_actions/ @elastic/kibana-app-services
+/src/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /src/plugins/data_view_field_editor @elastic/kibana-app-services
 /src/plugins/screenshot_mode @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
@@ -80,7 +81,6 @@
 /src/plugins/unified_search/ @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
-/x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
 /x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 /src/plugins/dashboard/public/application/embeddable/viewport/print_media @elastic/kibana-app-services
@@ -90,12 +90,14 @@
 # Observability Shared
 /x-pack/plugins/observability/public/components/shared/date_picker/ @elastic/uptime
 
-# Unified Observability
-/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/unified-observability
-/x-pack/plugins/observability/public/context @elastic/unified-observability
-/x-pack/plugins/observability/public/pages/home @elastic/unified-observability
-/x-pack/plugins/observability/public/pages/landing @elastic/unified-observability
-/x-pack/plugins/observability/public/pages/overview @elastic/unified-observability
+# Unified Observability - on hold due to team capacity shortage
+# For now, if you're changing these pages, get a review from someone who understand the changes
+# /x-pack/plugins/observability/public/context @elastic/unified-observability
+
+# Home/Overview/Landing Pages
+/x-pack/plugins/observability/public/pages/home @elastic/observability-design
+/x-pack/plugins/observability/public/pages/landing @elastic/observability-design
+/x-pack/plugins/observability/public/pages/overview @elastic/observability-design
 
 # Actionable Observability
 /x-pack/plugins/observability/common/rules @elastic/actionable-observability
@@ -141,6 +143,8 @@
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
+
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
@@ -198,7 +202,7 @@
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
-/packages/kbn-aiops-utils @elastic/ml-ui
+/x-pack/packages/ml/ @elastic/ml-ui
 /examples/response_stream/ @elastic/ml-ui
 
 # Maps
@@ -253,6 +257,10 @@
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 
+# Performance testing
+/packages/kbn-performance-testing-dataset-extractor/  @elastic/kibana-performance-testing
+/packages/kbn-scalability-simulation-generator/  @elastic/kibana-performance-testing
+
 # Quality Assurance
 /src/dev/code_coverage @elastic/kibana-qa
 /vars/*Coverage.groovy @elastic/kibana-qa
@@ -274,6 +282,7 @@
 /x-pack/plugins/saved_objects_tagging/ @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test/saved_object_tagging/ @elastic/kibana-core
+/packages/core/  @elastic/kibana-core
 /packages/analytics/ @elastic/kibana-core
 /packages/kbn-config-schema/ @elastic/kibana-core
 /packages/kbn-std/ @elastic/kibana-core
@@ -282,11 +291,6 @@
 /packages/kbn-logging-mocks/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
-/src/dev/run_check_published_api_changes.ts @elastic/kibana-core
-/src/plugins/home/public @elastic/kibana-core
-/src/plugins/home/server/*.ts @elastic/kibana-core
-/src/plugins/home/server/services/ @elastic/kibana-core
-/src/plugins/kibana_overview/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
@@ -296,9 +300,6 @@
 #CC# /x-pack/plugins/features/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
 #CC# /src/plugins/newsfeed @elastic/kibana-core
-#CC# /src/plugins/home/public @elastic/kibana-core
-#CC# /src/plugins/home/server/services/ @elastic/kibana-core
-#CC# /src/plugins/home/ @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
 # Kibana Docs
@@ -362,7 +363,7 @@
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops @elastic/mlr-docs
 /docs/management/connectors/ @elastic/response-ops @elastic/mlr-docs
-#CC# /x-pack/plugins/stack_alerts @elastic/response-ops
+#CC# /x-pack/plugins/stack_alerts/ @elastic/response-ops
 /x-pack/plugins/cases/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops
@@ -569,8 +570,8 @@
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-onboarding-and-lifecycle-mgt
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
-x-pack/plugins/security_solution/server/usage/ @elastic/security-telemetry
-x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-telemetry
+x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
+x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
 
 ## Security Solution sub teams - security-engineering-productivity
 x-pack/plugins/security_solution/cypress/ccs_integration @elastic/security-engineering-productivity
@@ -579,8 +580,10 @@ x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
+x-pack/plugins/kubernetes_security @elastic/awp-platform
 x-pack/plugins/session_view @elastic/awp-platform
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-platform
+x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
@@ -637,9 +640,25 @@ x-pack/plugins/security_solution/public/common/components/sessions_viewer @elast
 
 # Application Experience
 
-## Shared UX
+## Shared UX Team
 /src/plugins/shared_ux/ @elastic/shared-ux
 /packages/shared-ux/ @elastic/shared-ux
 /packages/shared-ux-*/ @elastic/shared-ux
+
+### Kibana React (to be deprecated)
 /src/plugins/kibana_react/ @elastic/shared-ux
 /src/plugins/kibana_react/public/code_editor @elastic/shared-ux @elastic/kibana-presentation
+
+### Home Plugin and Packages
+/packages/home/ @elastic/shared-ux
+/src/plugins/home/public @elastic/shared-ux
+/src/plugins/home/server/*.ts @elastic/shared-ux
+/src/plugins/home/server/services/ @elastic/shared-ux
+
+### Overview Plugin and Packages
+/src/plugins/kibana_overview/ @elastic/shared-ux
+
+### Code Coverage
+#CC# /src/plugins/home/public @elastic/shared-ux
+#CC# /src/plugins/home/server/services/ @elastic/shared-ux
+#CC# /src/plugins/home/ @elastic/shared-ux

@@ -17,6 +17,9 @@ type HelpOutputProps = PropsWithChildren<{
   title?: ReactNode;
 }>;
 export const HelpOutput = memo<HelpOutputProps>(({ title, children }) => {
+  // FIXME:PT Delete this component and add panel below to the Help Command component
+  //          This is left over from the original implementation.
+
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
   return (

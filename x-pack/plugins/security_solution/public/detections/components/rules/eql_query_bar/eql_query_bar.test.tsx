@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
 
-import { TestProviders, useFormFieldMock } from '../../../../common/mock';
+import { mockIndexPattern, TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { mockQueryBar } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 import { EqlQueryBar, EqlQueryBarProps } from './eql_query_bar';
 import { getEqlValidationError } from './validators.mock';
@@ -25,15 +25,42 @@ describe('EqlQueryBar', () => {
   });
 
   it('renders correctly', () => {
-    const wrapper = shallow(<EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />);
+    const wrapper = shallow(
+      <EqlQueryBar
+        dataTestSubj="myQueryBar"
+        field={mockField}
+        isLoading={false}
+        indexPattern={mockIndexPattern}
+      />
+    );
 
     expect(wrapper.find('[data-test-subj="myQueryBar"]')).toHaveLength(1);
+  });
+
+  it('renders correctly filter bar', () => {
+    const wrapper = shallow(
+      <EqlQueryBar
+        dataTestSubj="myQueryBar"
+        field={mockField}
+        isLoading={false}
+        indexPattern={mockIndexPattern}
+        showFilterBar={true}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="unifiedQueryInput"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="eqlFilterBar"]')).toHaveLength(1);
   });
 
   it('sets the field value on input change', () => {
     const wrapper = mount(
       <TestProviders>
-        <EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />
+        <EqlQueryBar
+          dataTestSubj="myQueryBar"
+          field={mockField}
+          isLoading={false}
+          indexPattern={mockIndexPattern}
+        />
       </TestProviders>
     );
 
@@ -43,7 +70,7 @@ describe('EqlQueryBar', () => {
       .simulate('change', { target: { value: 'newQuery' } });
 
     const expected = {
-      filters: [],
+      filters: mockQueryBar.filters,
       query: {
         query: 'newQuery',
         language: 'eql',
@@ -57,7 +84,12 @@ describe('EqlQueryBar', () => {
   it('does not render errors for a valid query', () => {
     const wrapper = mount(
       <TestProviders>
-        <EqlQueryBar dataTestSubj="myQueryBar" field={mockField} />
+        <EqlQueryBar
+          dataTestSubj="myQueryBar"
+          field={mockField}
+          isLoading={false}
+          indexPattern={mockIndexPattern}
+        />
       </TestProviders>
     );
 
@@ -73,7 +105,12 @@ describe('EqlQueryBar', () => {
     });
     const wrapper = mount(
       <TestProviders>
-        <EqlQueryBar dataTestSubj="myQueryBar" field={invalidMockField} />
+        <EqlQueryBar
+          dataTestSubj="myQueryBar"
+          field={invalidMockField}
+          isLoading={false}
+          indexPattern={mockIndexPattern}
+        />
       </TestProviders>
     );
 

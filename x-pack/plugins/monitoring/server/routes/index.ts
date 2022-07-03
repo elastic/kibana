@@ -17,6 +17,7 @@ import {
   registerV1ElasticsearchRoutes,
   registerV1ElasticsearchSettingsRoutes,
   registerV1EnterpriseSearchRoutes,
+  registerV1HealthRoute,
   registerV1LogstashRoutes,
   registerV1SetupRoutes,
   registerV1KibanaRoutes,
@@ -32,14 +33,15 @@ export function requireUIRoutes(
     : server;
 
   registerV1AlertRoutes(decoratedServer, npRoute);
-  registerV1ApmRoutes(server);
-  registerV1BeatsRoutes(server);
-  registerV1CheckAccessRoutes(server);
-  registerV1ClusterRoutes(server);
-  registerV1ElasticsearchRoutes(server);
-  registerV1ElasticsearchSettingsRoutes(server, npRoute);
-  registerV1EnterpriseSearchRoutes(server);
-  registerV1LogstashRoutes(server);
-  registerV1SetupRoutes(server);
-  registerV1KibanaRoutes(server);
+  registerV1ApmRoutes(decoratedServer);
+  registerV1BeatsRoutes(decoratedServer);
+  registerV1CheckAccessRoutes(decoratedServer);
+  registerV1ClusterRoutes(decoratedServer);
+  registerV1ElasticsearchRoutes(decoratedServer);
+  registerV1ElasticsearchSettingsRoutes(decoratedServer, npRoute);
+  registerV1EnterpriseSearchRoutes(decoratedServer);
+  registerV1HealthRoute(decoratedServer);
+  registerV1LogstashRoutes(decoratedServer);
+  registerV1SetupRoutes(decoratedServer);
+  registerV1KibanaRoutes(decoratedServer);
 }
