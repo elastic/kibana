@@ -123,7 +123,9 @@ describe('useCaseItems', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
 
-      unmount();
+      act(() => {
+        unmount();
+      })
 
       expect(mockDeleteQuery).toHaveBeenCalled();
     });

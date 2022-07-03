@@ -130,7 +130,9 @@ describe('useCasesByStatus', () => {
       });
       await waitForNextUpdate();
 
-      unmount();
+      act(() => {
+        unmount();
+      })
 
       expect(mockDeleteQuery).toHaveBeenCalled();
     });
