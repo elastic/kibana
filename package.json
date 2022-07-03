@@ -476,7 +476,6 @@
     "typescript-fsa": "^3.0.0",
     "typescript-fsa-reducers": "^1.2.2",
     "unified": "^9.2.1",
-    "use-memo-one": "^1.1.2",
     "use-resize-observer": "^6.0.0",
     "usng.js": "^0.4.5",
     "utility-types": "^3.10.0",
