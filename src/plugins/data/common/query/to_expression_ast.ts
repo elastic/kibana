@@ -17,8 +17,7 @@ import {
 } from '..';
 
 function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
-  const sql = sqlQuery?.replaceAll('"', '');
-  const matches = sql?.match(/FROM\s+([\w*]+)/);
+  const matches = sqlQuery?.match(/FROM\s+"([^\s]+)"/);
   if (matches) {
     return matches[1];
   }
