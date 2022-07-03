@@ -37,7 +37,7 @@ import {
   caseConfigureSavedObjectType,
   caseConnectorMappingsSavedObjectType,
   createCaseSavedObjectType,
-  caseUserActionSavedObjectType,
+  createCaseUserActionSavedObjectType,
   casesTelemetrySavedObjectType,
 } from './saved_object_types';
 
@@ -106,7 +106,11 @@ export class CasePlugin {
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
     core.savedObjects.registerType(createCaseSavedObjectType(core, this.logger));
-    core.savedObjects.registerType(caseUserActionSavedObjectType);
+    core.savedObjects.registerType(
+      createCaseUserActionSavedObjectType({
+        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      })
+    );
     core.savedObjects.registerType(casesTelemetrySavedObjectType);
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(

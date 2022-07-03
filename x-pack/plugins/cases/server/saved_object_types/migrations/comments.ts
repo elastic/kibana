@@ -140,6 +140,7 @@ export const migratePersistableStateAttachments =
     }
 
     const { persistableStateAttachmentState, persistableStateAttachmentTypeId } = doc.attributes;
+
     const migratedState = migrate({
       persistableStateAttachmentState,
       persistableStateAttachmentTypeId,

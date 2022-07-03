@@ -8,6 +8,7 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 
+import { ActionTypes } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { defaultUser, persistableStateAttachment, postCaseReq } from '../../../../common/lib/mock';
 import {
@@ -26,67 +27,69 @@ export default ({ getService }: FtrProviderContext): void => {
   const kibanaServer = getService('kibanaServer');
 
   describe('Persistable state attachments', () => {
-    afterEach(async () => {
-      await deleteAllCaseItems(es);
-    });
-
-    it('should create a persistable state attachment type', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      const patchedCase = await createComment({
-        supertest,
-        caseId: postedCase.id,
-        params: persistableStateAttachment,
-      });
-      const comment = removeServerGeneratedPropertiesFromSavedObject(patchedCase.comments![0]);
-
-      expect(comment).to.eql({
-        ...persistableStateAttachment,
-        created_by: defaultUser,
-        pushed_at: null,
-        pushed_by: null,
-        updated_by: null,
-        owner: 'securitySolutionFixture',
-      });
-    });
-
-    it('should create a persistable state user action', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      await createComment({
-        supertest,
-        caseId: postedCase.id,
-        params: persistableStateAttachment,
+    describe('references', () => {
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
       });
 
-      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-      const commentUserAction = userActions[1];
+      it('should create a persistable state attachment type', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: persistableStateAttachment,
+        });
+        const comment = removeServerGeneratedPropertiesFromSavedObject(patchedCase.comments![0]);
 
-      expect(commentUserAction.type).to.eql('comment');
-      expect(commentUserAction.action).to.eql('create');
-      expect(commentUserAction.payload).to.eql({ comment: persistableStateAttachment });
-    });
+        expect(comment).to.eql({
+          ...persistableStateAttachment,
+          created_by: defaultUser,
+          pushed_at: null,
+          pushed_by: null,
+          updated_by: null,
+          owner: 'securitySolutionFixture',
+        });
+      });
 
-    it('should return 400 when missing attributes for persistable state attachment type', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      const reqKeys = Object.keys(persistableStateAttachment);
-      for (const key of reqKeys) {
+      it('should create a persistable state user action', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: persistableStateAttachment,
+        });
+
+        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const commentUserAction = userActions[1];
+
+        expect(commentUserAction.type).to.eql('comment');
+        expect(commentUserAction.action).to.eql('create');
+        expect(commentUserAction.payload).to.eql({ comment: persistableStateAttachment });
+      });
+
+      it('should return 400 when missing attributes for persistable state attachment type', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const reqKeys = Object.keys(persistableStateAttachment);
+        for (const key of reqKeys) {
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            // @ts-expect-error
+            params: omit(key, persistableStateAttachment),
+            expectedHttpCode: 400,
+          });
+        }
+      });
+
+      it('400s when adding excess attributes for persistable state attachment type', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
         await createComment({
           supertest,
           caseId: postedCase.id,
           // @ts-expect-error
-          params: omit(key, persistableStateAttachment),
+          params: { ...persistableStateAttachment, notValid: 'test' },
           expectedHttpCode: 400,
         });
-      }
-    });
-
-    it('400s when adding excess attributes for persistable state attachment type', async () => {
-      const postedCase = await createCase(supertest, postCaseReq);
-      await createComment({
-        supertest,
-        caseId: postedCase.id,
-        // @ts-expect-error
-        params: { ...persistableStateAttachment, notValid: 'test' },
-        expectedHttpCode: 400,
       });
     });
 
@@ -125,6 +128,22 @@ export default ({ getService }: FtrProviderContext): void => {
           pushed_by: null,
           type: 'persistableState',
           updated_by: null,
+        });
+      });
+
+      it('migrates a persistable state attachment correctly on user action', async () => {
+        const userActions = await getCaseUserActions({ supertest, caseID: CASE_ID });
+        const attachment = userActions.find(
+          (userAction) => userAction.type === ActionTypes.comment
+        );
+
+        expect(attachment?.payload).to.eql({
+          comment: {
+            owner: 'cases',
+            persistableStateAttachmentState: { migrated: true },
+            persistableStateAttachmentTypeId: '.test',
+            type: 'persistableState',
+          },
         });
       });
     });
