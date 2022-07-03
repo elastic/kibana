@@ -66,12 +66,12 @@ describe('useCasesByStatus', () => {
     jest.clearAllMocks();
   });
   test('init', () => {
-    const { result } = renderHook<
-      UseCasesByStatusProps,
-      UseCasesByStatusResults
-    >(() => useCasesByStatus({}), {
-      wrapper: TestProviders,
-    });
+    const { result } = renderHook<UseCasesByStatusProps, UseCasesByStatusResults>(
+      () => useCasesByStatus({}),
+      {
+        wrapper: TestProviders,
+      }
+    );
     expect(result.current).toEqual({
       closed: 0,
       inProgress: 0,
