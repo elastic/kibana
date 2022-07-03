@@ -125,7 +125,7 @@ describe('useCaseItems', () => {
 
       act(() => {
         unmount();
-      })
+      });
 
       expect(mockDeleteQuery).toHaveBeenCalled();
     });

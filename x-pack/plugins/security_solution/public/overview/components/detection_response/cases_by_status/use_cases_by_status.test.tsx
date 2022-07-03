@@ -132,7 +132,7 @@ describe('useCasesByStatus', () => {
 
       act(() => {
         unmount();
-      })
+      });
 
       expect(mockDeleteQuery).toHaveBeenCalled();
     });
