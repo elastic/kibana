@@ -23,7 +23,7 @@
 .lnsSuggestionPanel__button {
   position: relative; // Let the expression progress indicator position itself against the button
   flex: 0 0 auto;
-  width: $lnsSuggestionWidth !important; // sass-lint:disable-line no-important
+  width: $lnsSuggestionWidth  !important; // sass-lint:disable-line no-important
   height: $lnsSuggestionHeight;
   margin-right: $euiSizeS;
   margin-left: $euiSizeXS / 2;
@@ -40,9 +40,14 @@
   }
 }
 
-.lnsSuggestionPanel__button-isSelected {
-  background-color: $euiColorLightestShade !important; // sass-lint:disable-line no-important
-  border-color: $euiColorMediumShade !important; // sass-lint:disable-line no-important
+.lnsSuggestionPanel__card {
+  width: 100%;
+  height: 100%;
+}
+
+.lnsSuggestionPanel__card-isSelected {
+  background-color: $euiColorLightestShade  !important; // sass-lint:disable-line no-important
+  border-color: $euiColorMediumShade  !important; // sass-lint:disable-line no-important
 
   &:not(:focus) {
     box-shadow: none !important; // sass-lint:disable-line no-important
@@ -93,7 +98,7 @@
 
 .lnsSuggestionPanel__applyChangesPrompt {
   height: $lnsSuggestionHeight;
-  background-color: $euiColorLightestShade !important;
+  background-color: $euiColorLightestShade  !important;
 
   display: flex;
   flex-direction: column;

@@ -723,9 +723,8 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
       instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
-
       act(() => {
-        instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
+        instance.find('[data-test-subj="lnsSuggestion"]').at(1).simulate('click');
       });
 
       expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);

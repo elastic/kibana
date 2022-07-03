@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await testSubjects.click('lnsSuggestion-barChart > lnsSuggestion');
+      await testSubjects.click('lnsSuggestion-barChart');
       await a11y.testAppSnapshot();
     });
 

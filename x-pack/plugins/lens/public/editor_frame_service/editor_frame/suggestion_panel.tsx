@@ -144,16 +144,21 @@ const SuggestionPreview = ({
 }) => {
   return (
     <EuiToolTip content={preview.title}>
-      <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
+      <button
+        className={classNames('lnsSuggestionPanel__button', {
+          'lnsSuggestionPanel__button-isSelected': selected,
+        })}
+        onClick={onSelect}
+        data-test-subj="lnsSuggestion"
+      >
         <EuiPanel
+          className={classNames('lnsSuggestionPanel__card', {
+            'lnsSuggestionPanel__card-isSelected': selected,
+          })}
+          data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}
           hasBorder={true}
           hasShadow={false}
-          className={classNames('lnsSuggestionPanel__button', {
-            'lnsSuggestionPanel__button-isSelected': selected,
-          })}
           paddingSize="none"
-          data-test-subj="lnsSuggestion"
-          onClick={onSelect}
           aria-current={!!selected}
           aria-label={preview.title}
         >
@@ -173,7 +178,7 @@ const SuggestionPreview = ({
             <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
           )}
         </EuiPanel>
-      </div>
+      </button>
     </EuiToolTip>
   );
 };

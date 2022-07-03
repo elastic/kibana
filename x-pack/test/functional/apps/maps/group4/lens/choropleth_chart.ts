@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add filter to force data fetch to set activeData
       await filterBar.addFilter('bytes', 'is between', '200', '10000');
 
-      await testSubjects.click('lnsSuggestion-worldCountriesByCountOfRecords > lnsSuggestion');
+      await testSubjects.click('lnsSuggestion-worldCountriesByCountOfRecords');
 
       await PageObjects.maps.openLegend();
       await PageObjects.maps.waitForLayersToLoad();
