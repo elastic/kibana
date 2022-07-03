@@ -50,7 +50,7 @@ export const WorkpadApp: FC<Props> = ({ deselectElement, isWriteable }) => {
             <div
               id={CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}
               className={CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR}
-              onClick={deselectElement}
+              onMouseDown={deselectElement}
             >
               {/* NOTE: canvasWorkpadContainer is used for exporting */}
               <div

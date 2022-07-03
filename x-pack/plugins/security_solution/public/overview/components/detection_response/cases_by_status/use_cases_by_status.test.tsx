@@ -65,97 +65,81 @@ describe('useCasesByStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  test('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseCasesByStatusProps,
-        UseCasesByStatusResults
-      >(() => useCasesByStatus({ skip: false }), {
-        wrapper: TestProviders,
-      });
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        closed: 0,
-        inProgress: 0,
-        isLoading: true,
-        open: 0,
-        totalCounts: 0,
-        updatedAt: dateNow,
-      });
+  test('init', () => {
+    const { result } = renderHook<
+      UseCasesByStatusProps,
+      UseCasesByStatusResults
+    >(() => useCasesByStatus({}), {
+      wrapper: TestProviders,
+    });
+    expect(result.current).toEqual({
+      closed: 0,
+      inProgress: 0,
+      isLoading: true,
+      open: 0,
+      totalCounts: 0,
+      updatedAt: dateNow,
     });
   });
 
   test('fetch data', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseCasesByStatusProps,
-        UseCasesByStatusResults
-      >(() => useCasesByStatus({ skip: false }), {
-        wrapper: TestProviders,
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        closed: 3,
-        inProgress: 2,
-        isLoading: false,
-        open: 1,
-        totalCounts: 6,
-        updatedAt: dateNow,
-      });
+    const { result, waitForNextUpdate } = renderHook<
+      UseCasesByStatusProps,
+      UseCasesByStatusResults
+    >(() => useCasesByStatus({ skip: false }), {
+      wrapper: TestProviders,
+    });
+    await waitForNextUpdate();
+    expect(result.current).toEqual({
+      closed: 3,
+      inProgress: 2,
+      isLoading: false,
+      open: 1,
+      totalCounts: 6,
+      updatedAt: dateNow,
     });
   });
 
   test('it should call setQuery when fetching', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<UseCasesByStatusProps, UseCasesByStatusResults>(
-        () => useCasesByStatus({ skip: false }),
-        {
-          wrapper: TestProviders,
-        }
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(mockSetQuery).toHaveBeenCalled();
-    });
+    const { waitForNextUpdate } = renderHook<UseCasesByStatusProps, UseCasesByStatusResults>(
+      () => useCasesByStatus({ skip: false }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+    await waitForNextUpdate();
+    expect(mockSetQuery).toHaveBeenCalled();
   });
 
   test('it should call deleteQuery when unmounting', async () => {
-    await act(async () => {
-      const { waitForNextUpdate, unmount } = renderHook<
-        UseCasesByStatusProps,
-        UseCasesByStatusResults
-      >(() => useCasesByStatus({ skip: false }), {
-        wrapper: TestProviders,
-      });
-      await waitForNextUpdate();
-
-      act(() => {
-        unmount();
-      });
-
-      expect(mockDeleteQuery).toHaveBeenCalled();
+    const { waitForNextUpdate, unmount } = renderHook<
+      UseCasesByStatusProps,
+      UseCasesByStatusResults
+    >(() => useCasesByStatus({ skip: false }), {
+      wrapper: TestProviders,
     });
+    await waitForNextUpdate();
+
+    unmount();
+
+    expect(mockDeleteQuery).toHaveBeenCalled();
   });
 
   test('skip', async () => {
     const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
-    await act(async () => {
-      const localProps = { skip: false };
+    const localProps = { skip: false };
 
-      const { rerender, waitForNextUpdate } = renderHook<
-        UseCasesByStatusProps,
-        UseCasesByStatusResults
-      >(() => useCasesByStatus(localProps), {
-        wrapper: TestProviders,
-      });
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      localProps.skip = true;
-      act(() => rerender());
-      act(() => rerender());
-      expect(abortSpy).toHaveBeenCalledTimes(2);
+    const { rerender, waitForNextUpdate } = renderHook<
+      UseCasesByStatusProps,
+      UseCasesByStatusResults
+    >(() => useCasesByStatus(localProps), {
+      wrapper: TestProviders,
     });
+    await waitForNextUpdate();
+
+    localProps.skip = true;
+    act(() => rerender());
+    act(() => rerender());
+    expect(abortSpy).toHaveBeenCalledTimes(2);
   });
 });
