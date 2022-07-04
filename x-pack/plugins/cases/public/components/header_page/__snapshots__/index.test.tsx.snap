@@ -34,6 +34,9 @@ exports[`HeaderPage it renders 1`] = `
         <CasesProvider
           value={
             Object {
+              "externalReferenceAttachmentTypeRegistry": ExternalReferenceAttachmentTypeRegistry {
+                "attachmentTypes": Map {},
+              },
               "features": undefined,
               "owner": Array [
                 "securitySolution",

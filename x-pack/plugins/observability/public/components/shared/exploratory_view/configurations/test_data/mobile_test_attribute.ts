@@ -61,15 +61,16 @@ export const testMobileKPIAttr = {
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X',
-      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       preferredSeriesType: 'line',
       layers: [
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
           layerType: 'data',
+          palette: undefined,
           seriesType: 'line',
           yConfig: [{ forAccessor: 'y-axis-column-layer0', color: 'green', axisMode: 'left' }],
           xAccessor: 'x-axis-column-layer0',

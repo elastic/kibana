@@ -38,7 +38,7 @@ export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height
                   </EuiTitle>
                   <p>
                     <FormattedMessage
-                      id="xpack.timelines.tgrid.empty.description"
+                      id="xpack.triggersActionsUI.empty.description"
                       defaultMessage="Try searching over a longer period of time or modifying your search"
                     />
                   </p>
