@@ -67,7 +67,10 @@ export const RejectedCurationsHistoryPanel: React.FC = () => {
       hasBorder
     >
       <EntSearchLogStream
-        sourceId={ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID}
+        logView={{
+          type: 'log-view-reference',
+          logViewId: ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
+        }}
         hoursAgo={720}
         query={filters.join(' and ')}
         endTimestamp={endTimestamp}
