@@ -2892,10 +2892,32 @@
     "@babel/runtime" "^7.7.2"
     regenerator-runtime "^0.13.3"
 
+"@jridgewell/gen-mapping@^0.3.0":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@jridgewell/gen-mapping/-/gen-mapping-0.3.1.tgz#cf92a983c83466b8c0ce9124fadeaf09f7c66ea9"
+  integrity sha512-GcHwniMlA2z+WFPWuY8lp3fsza0I8xPFMWL5+n8LYyP6PSvPrXf4+n8stDHZY2DM0zy9sVkRDy1jDI4XGzYVqg==
+  dependencies:
+    "@jridgewell/set-array" "^1.0.0"
+    "@jridgewell/sourcemap-codec" "^1.4.10"
+    "@jridgewell/trace-mapping" "^0.3.9"
+
 "@jridgewell/resolve-uri@^3.0.3":
   version "3.0.5"
   resolved "https://registry.yarnpkg.com/@jridgewell/resolve-uri/-/resolve-uri-3.0.5.tgz#68eb521368db76d040a6315cdb24bf2483037b9c"
   integrity sha512-VPeQ7+wH0itvQxnG+lIzWgkysKIr3L9sslimFW55rHMdGu/qCQ5z5h9zq4gI8uBtqkpHhsF4Z/OwExufUCThew==
+
+"@jridgewell/set-array@^1.0.0":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@jridgewell/set-array/-/set-array-1.1.1.tgz#36a6acc93987adcf0ba50c66908bd0b70de8afea"
+  integrity sha512-Ct5MqZkLGEXTVmQYbGtx9SVqD2fqwvdubdps5D3djjAkgkKwT918VNOz65pEHFaYTeWcukmJmH5SwsA9Tn2ObQ==
+
+"@jridgewell/source-map@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@jridgewell/source-map/-/source-map-0.3.2.tgz#f45351aaed4527a298512ec72f81040c998580fb"
+  integrity sha512-m7O9o2uR8k2ObDysZYzdfhb08VuEml5oWGiosa1VdaPZ/A6QyPkAJuwN0Q1lhULOf6B7MtQmHENS743hWtCrgw==
+  dependencies:
+    "@jridgewell/gen-mapping" "^0.3.0"
+    "@jridgewell/trace-mapping" "^0.3.9"
 
 "@jridgewell/sourcemap-codec@^1.4.10":
   version "1.4.11"
@@ -2906,6 +2928,14 @@
   version "0.3.4"
   resolved "https://registry.yarnpkg.com/@jridgewell/trace-mapping/-/trace-mapping-0.3.4.tgz#f6a0832dffd5b8a6aaa633b7d9f8e8e94c83a0c3"
   integrity sha512-vFv9ttIedivx0ux3QSjhgtCVjPZd5l46ZOMDSCwnH1yUO2e964gO8LZGyv2QkqcgR6TnBU1v+1IFqmeoG+0UJQ==
+  dependencies:
+    "@jridgewell/resolve-uri" "^3.0.3"
+    "@jridgewell/sourcemap-codec" "^1.4.10"
+
+"@jridgewell/trace-mapping@^0.3.9":
+  version "0.3.13"
+  resolved "https://registry.yarnpkg.com/@jridgewell/trace-mapping/-/trace-mapping-0.3.13.tgz#dcfe3e95f224c8fe97a87a5235defec999aa92ea"
+  integrity sha512-o1xbKhp9qnIAoHJSWd6KlCZfqslL4valSF81H8ImioOAxluWYWOpWkpyktY2vnt4tbrX9XYaxovq6cgowaJp2w==
   dependencies:
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
@@ -3247,6 +3277,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-errors@link:bazel-bin/packages/kbn-es-errors":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-query@link:bazel-bin/packages/kbn-es-query":
   version "0.0.0"
   uid ""
@@ -3288,6 +3322,10 @@
   uid ""
 
 "@kbn/handlebars@link:bazel-bin/packages/kbn-handlebars":
+  version "0.0.0"
+  uid ""
+
+"@kbn/home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards":
   version "0.0.0"
   uid ""
 
@@ -3816,6 +3854,11 @@
     "@types/proj4" "^2.5.0"
     proj4 "2.6.2"
 
+"@mattiasbuelens/web-streams-adapter@~0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@mattiasbuelens/web-streams-adapter/-/web-streams-adapter-0.1.0.tgz#607b5a25682f4ae2741da7ba6df39302505336b3"
+  integrity sha512-oV4PyZfwJNtmFWhvlJLqYIX1Nn22ML8FZpS16ZUKv0hg7414xV1fjsGqxQzLT2dyK92TKxsJSwMOd7VNHAtPmA==
+
 "@mdx-js/loader@^1.6.22":
   version "1.6.22"
   resolved "https://registry.yarnpkg.com/@mdx-js/loader/-/loader-1.6.22.tgz#d9e8fe7f8185ff13c9c8639c048b123e30d322c4"
@@ -4288,6 +4331,14 @@
   integrity sha512-s1zLBjWhdEI2zwaoSgyOFoKSl109CUcVBCc7biPJ3aAf6LGLU6szDvi31JPU7bxfla2lqfhjbbg/5DdFNxOwHw==
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
+
+"@openpgp/web-stream-tools@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@openpgp/web-stream-tools/-/web-stream-tools-0.0.10.tgz#4496390da9715c9bfc581ad144f9fb8a36a37775"
+  integrity sha512-1ONZADML0fb0RJR5UiGYPnRf9VaYBYUBc1gF9jyq57sHkr58cp5/BQHS+ivrqbRw21Sb70FKTssmJbRe71V+kw==
+  dependencies:
+    "@mattiasbuelens/web-streams-adapter" "~0.1.0"
+    web-streams-polyfill "~3.0.3"
 
 "@opentelemetry/api@^1.1.0":
   version "1.1.0"
@@ -6754,6 +6805,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__es-errors@link:bazel-bin/packages/kbn-es-errors/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__es-query@link:bazel-bin/packages/kbn-es-query/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6775,6 +6830,10 @@
   uid ""
 
 "@types/kbn__handlebars@link:bazel-bin/packages/kbn-handlebars/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__home-sample-data-cards@link:bazel-bin/packages/home/sample_data_cards/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -8402,7 +8461,7 @@ acorn@^7.0.0, acorn@^7.1.1, acorn@^7.4.0, acorn@^7.4.1:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
-acorn@^8.0.4:
+acorn@^8.0.4, acorn@^8.5.0:
   version "8.7.0"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.7.0.tgz#90951fde0f8f09df93549481e5fc141445b791cf"
   integrity sha512-V/LGr1APy+PXIwKebEWrkZPwoeoF+w1jiOBUmuxuiUIaOHtob8Qc9BTrYo7VuI5fR8tqsy+buA2WFooR5olqvQ==
@@ -9130,6 +9189,16 @@ asn1.js@^4.0.0:
     bn.js "^4.0.0"
     inherits "^2.0.1"
     minimalistic-assert "^1.0.0"
+
+asn1.js@^5.0.0:
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/asn1.js/-/asn1.js-5.4.1.tgz#11a980b84ebb91781ce35b0fdc2ee294e3783f07"
+  integrity sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA==
+  dependencies:
+    bn.js "^4.0.0"
+    inherits "^2.0.1"
+    minimalistic-assert "^1.0.0"
+    safer-buffer "^2.1.0"
 
 asn1@~0.2.3:
   version "0.2.4"
@@ -16371,13 +16440,13 @@ gulp-sourcemaps@2.6.5:
     strip-bom-string "1.X"
     through2 "2.X"
 
-gulp-terser@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/gulp-terser/-/gulp-terser-2.0.1.tgz#5f8f4fc54588b79519243809cc8eef4936286d0d"
-  integrity sha512-XCrnCXP8ovNpgLK9McJIXlgm0j3W2TsiWu7K9y3m+Sn5XZgUzi6U8MPHtS3NdLMic9poCj695N0ARJ2B6atypw==
+gulp-terser@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/gulp-terser/-/gulp-terser-2.1.0.tgz#149b693a1adbde922807b60b844bb7351dafbde1"
+  integrity sha512-lQ3+JUdHDVISAlUIUSZ/G9Dz/rBQHxOiYDQ70IVWFQeh4b33TC1MCIU+K18w07PS3rq/CVc34aQO4SUbdaNMPQ==
   dependencies:
     plugin-error "^1.0.1"
-    terser "5.4.0"
+    terser "^5.9.0"
     through2 "^4.0.2"
     vinyl-sourcemaps-apply "^0.2.1"
 
@@ -22092,6 +22161,13 @@ opener@^1.5.2:
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
+openpgp@5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.3.0.tgz#e8fc97e538865b8c095dbd91c7be4203bd1dd1df"
+  integrity sha512-qjCj0vYpV3dmmkE+vURiJ5kVAJwrMk8BPukvpWJiHcTNWKwPVsRS810plIe4klIcHVf1ScgUQwqtBbv99ff+kQ==
+  dependencies:
+    asn1.js "^5.0.0"
+
 opentracing@^0.14.3:
   version "0.14.4"
   resolved "https://registry.yarnpkg.com/opentracing/-/opentracing-0.14.4.tgz#a113408ea740da3a90fde5b3b0011a375c2e4268"
@@ -26848,7 +26924,7 @@ source-map-support@^0.3.2:
   dependencies:
     source-map "0.1.32"
 
-source-map-support@^0.5.16, source-map-support@^0.5.19, source-map-support@^0.5.20, source-map-support@^0.5.21, source-map-support@^0.5.6, source-map-support@~0.5.12, source-map-support@~0.5.19, source-map-support@~0.5.20:
+source-map-support@^0.5.16, source-map-support@^0.5.19, source-map-support@^0.5.20, source-map-support@^0.5.21, source-map-support@^0.5.6, source-map-support@~0.5.12, source-map-support@~0.5.20:
   version "0.5.21"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.21.tgz#04fe7c7f9e1ed2d662233c28cb2b35b9f63f6e4f"
   integrity sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==
@@ -26890,7 +26966,7 @@ source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.0, source-map@~0.6.1:
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
 
-source-map@^0.7.2, source-map@^0.7.3, source-map@~0.7.2:
+source-map@^0.7.2, source-map@^0.7.3:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.7.3.tgz#5302f8169031735226544092e64981f751750383"
   integrity sha512-CkCj6giN3S+n9qrYiBTX5gystlENnRW5jZeNLHpe6aue+SrHcG5VYwujhW9s4dY31mEGsxBDrHR6oI69fTXsaQ==
@@ -28131,15 +28207,6 @@ terser-webpack-plugin@^4.2.3:
     terser "^5.3.4"
     webpack-sources "^1.4.3"
 
-terser@5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-5.4.0.tgz#9815c0839072d5c894e22c6fc508fbe9f5e7d7e8"
-  integrity sha512-3dZunFLbCJis9TAF2VnX+VrQLctRUmt1p3W2kCsJuZE4ZgWqh//+1MZ62EanewrqKoUf4zIaDGZAvml4UDc0OQ==
-  dependencies:
-    commander "^2.20.0"
-    source-map "~0.7.2"
-    source-map-support "~0.5.19"
-
 terser@^4.1.2, terser@^4.6.3:
   version "4.8.0"
   resolved "https://registry.yarnpkg.com/terser/-/terser-4.8.0.tgz#63056343d7c70bb29f3af665865a46fe03a0df17"
@@ -28149,13 +28216,14 @@ terser@^4.1.2, terser@^4.6.3:
     source-map "~0.6.1"
     source-map-support "~0.5.12"
 
-terser@^5.3.4, terser@^5.7.1:
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-5.10.0.tgz#b86390809c0389105eb0a0b62397563096ddafcc"
-  integrity sha512-AMmF99DMfEDiRJfxfY5jj5wNH/bYO09cniSqhfoyxc8sFoYIgkJy86G04UoZU5VjlpnplVu0K6Tx6E9b5+DlHA==
+terser@^5.14.1, terser@^5.3.4, terser@^5.9.0:
+  version "5.14.1"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-5.14.1.tgz#7c95eec36436cb11cf1902cc79ac564741d19eca"
+  integrity sha512-+ahUAE+iheqBTDxXhTisdA8hgvbEG1hHOQ9xmNjeUJSoi6DU/gMrKNcfZjHkyY6Alnuyc+ikYJaxxfHkT3+WuQ==
   dependencies:
+    "@jridgewell/source-map" "^0.3.2"
+    acorn "^8.5.0"
     commander "^2.20.0"
-    source-map "~0.7.2"
     source-map-support "~0.5.20"
 
 test-exclude@^6.0.0:
@@ -30243,6 +30311,11 @@ web-streams-polyfill@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.2.0.tgz#a6b74026b38e4885869fb5c589e90b95ccfc7965"
   integrity sha512-EqPmREeOzttaLRm5HS7io98goBgZ7IVz79aDvqjD0kYXLtFZTc0T/U6wHTPKyIjb+MdN7DFIIX6hgdBEpWmfPA==
+
+web-streams-polyfill@~3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.0.3.tgz#f49e487eedeca47a207c1aee41ee5578f884b42f"
+  integrity sha512-d2H/t0eqRNM4w2WvmTdoeIvzAUSpK7JmATB8Nr2lb7nQ9BTIJVjbQ/TRFVEh2gUH1HwclPdoPtfMoFfetXaZnA==
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
