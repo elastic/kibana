@@ -7,12 +7,14 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string;
+  value: string | null;
 }
+
+export type ConnectorConfiguration = Record<string, KeyValuePair | undefined>;
 
 export interface Connector {
   api_key_id: string | null;
-  configuration: Record<string, KeyValuePair | undefined>;
+  configuration: ConnectorConfiguration;
   created_at: string | null;
   index_name: string;
   last_seen: string | null;

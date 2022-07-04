@@ -34,7 +34,7 @@ describe('task', () => {
     taskType: ManifestTaskConstants.TYPE,
   };
 
-  describe('Periodic task sanity checks', () => {
+  describe('Periodic task checks', () => {
     test('can create task', () => {
       const manifestTask = new ManifestTask({
         endpointAppContext: createMockEndpointAppContext(),
