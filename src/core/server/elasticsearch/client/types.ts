@@ -32,12 +32,3 @@ export interface ShardsResponse {
   failed: number;
   skipped: number;
 }
-
-/**
- * @public
- */
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
-}
