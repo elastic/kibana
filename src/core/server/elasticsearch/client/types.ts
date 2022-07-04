@@ -41,13 +41,3 @@ export interface Explanation {
   description: string;
   details: Explanation[];
 }
-
-/**
- * @public
- */
-export interface ShardsInfo {
-  total: number;
-  successful: number;
-  skipped: number;
-  failed: number;
-}

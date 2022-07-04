@@ -32,7 +32,6 @@ export type {
   ElasticsearchClient,
   IScopedClusterClient,
   // responses
-  ShardsInfo,
   ShardsResponse,
   // unauthorized error handler
   UnauthorizedErrorHandlerOptions,

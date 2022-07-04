@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { ElasticsearchClient, ShardsResponse, ShardsInfo } from './types';
+export type { ElasticsearchClient, ShardsResponse } from './types';
 export { ScopedClusterClient } from './scoped_cluster_client';
 export type { IScopedClusterClient } from './scoped_cluster_client';
 export type { ElasticsearchClientConfig } from './client_config';
