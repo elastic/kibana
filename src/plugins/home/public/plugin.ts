@@ -83,7 +83,7 @@ export class HomePublicPlugin
           trackUiMetric,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
           http: coreStart.http,
-          toastNotifications: core.notifications.toasts,
+          toastNotifications: coreStart.notifications.toasts,
           banners: coreStart.overlays.banners,
           docLinks: coreStart.docLinks,
           savedObjectsClient: coreStart.savedObjects.client,
