@@ -208,25 +208,6 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
     indexName: indices,
   };
 
-  // TODO: Remove these runtime_mappings once they got added to EndpointPackage
-  const runtimeMappings = {
-    'container.image.name': {
-      type: 'keyword',
-    },
-    'orchestrator.namespace': {
-      type: 'keyword',
-    },
-    'orchestrator.cluster.name': {
-      type: 'keyword',
-    },
-    'orchestrator.resource.type': {
-      type: 'keyword',
-    },
-    'orchestrator.resource.name': {
-      type: 'keyword',
-    },
-  };
-
   const collapse = {
     field: 'process.entry_leader.entity_id',
   };
@@ -241,7 +222,7 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 
   const dsl = queryFactory.buildDsl(requestSessionLeaders);
 
-  const params = { ...dsl, collapse, aggs, runtime_mappings: runtimeMappings };
+  const params = { ...dsl, collapse, aggs };
 
   return es.search({ ...requestSessionLeaders, params }, options, deps).pipe(
     map((response) => {
