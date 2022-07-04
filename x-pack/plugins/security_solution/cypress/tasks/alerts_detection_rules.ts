@@ -305,16 +305,17 @@ export const openRefreshSettingsPopover = () => {
   cy.get(REFRESH_SETTINGS_SWITCH).should('be.visible');
 };
 
-export const disableAutoRefresh = () => {
-  cy.get(REFRESH_SETTINGS_SWITCH).click().should('have.attr', 'aria-checked', 'false');
-};
-
 export const checkAutoRefreshIsDisabled = () => {
   cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
 };
 
 export const checkAutoRefreshIsEnabled = () => {
   cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'true');
+};
+
+export const disableAutoRefresh = () => {
+  cy.get(REFRESH_SETTINGS_SWITCH).click();
+  checkAutoRefreshIsDisabled();
 };
 
 export const mockGlobalClock = () => {
