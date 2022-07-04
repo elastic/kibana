@@ -61,7 +61,7 @@ describe('Alerts detection rules table auto-refresh', () => {
 
     selectNumberOfRules(1);
 
-    // mock w minute passing to make sure refresh is not conducted
+    // mock 2 minutes passing to make sure refresh is not conducted
     checkAutoRefresh(2 * DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
 
     // ensure rule is still selected
