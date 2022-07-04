@@ -66,7 +66,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when changing an index pattern
    */
-  onChangeIndexPattern: (id: string) => void;
+  onChangeDataView: (id: string) => void;
   /**
    * Callback function when removing a field
    * @param fieldName

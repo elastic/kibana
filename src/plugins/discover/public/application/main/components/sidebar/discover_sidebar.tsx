@@ -111,7 +111,7 @@ export function DiscoverSidebarComponent({
   trackUiMetric,
   useNewFieldsApi = false,
   onEditRuntimeField,
-  onChangeIndexPattern,
+  onChangeDataView,
   setFieldEditorRef,
   closeFlyout,
   editField,
@@ -324,7 +324,7 @@ export function DiscoverSidebarComponent({
         {Boolean(showDataViewPicker) && (
           <DataViewPicker
             currentDataViewId={selectedDataView.id}
-            onChangeDataView={onChangeIndexPattern}
+            onChangeDataView={onChangeDataView}
             onAddField={editField}
             onDataViewCreated={createNewDataView}
             trigger={{

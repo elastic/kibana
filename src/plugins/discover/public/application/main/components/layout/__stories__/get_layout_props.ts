@@ -115,7 +115,7 @@ export function getLayoutProps(indexPattern: DataView) {
     indexPatternList,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: action('navigate to somewhere nice'),
-    onChangeIndexPattern: action('change the data view'),
+    onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
     resetSavedSearch: action('reset the saved search the query'),
     savedSearch: savedSearchMock,

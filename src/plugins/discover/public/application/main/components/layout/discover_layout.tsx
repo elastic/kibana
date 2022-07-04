@@ -256,7 +256,7 @@ export function DiscoverLayout({
               onAddField={onAddColumn}
               onAddFilter={onAddFilter}
               onRemoveField={onRemoveColumn}
-              onChangeIndexPattern={onChangeDataView}
+              onChangeDataView={onChangeDataView}
               selectedDataView={dataView}
               state={state}
               isClosed={isSidebarClosed}

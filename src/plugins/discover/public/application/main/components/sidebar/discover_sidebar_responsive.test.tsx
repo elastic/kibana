@@ -100,7 +100,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       fields: [] as string[],
     }) as AvailableFields$,
     dataViewList,
-    onChangeIndexPattern: jest.fn(),
+    onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),

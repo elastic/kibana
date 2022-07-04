@@ -61,7 +61,7 @@ function getCompProps(): DiscoverSidebarProps {
     fieldCounts,
     documents: hits,
     dataViewList,
-    onChangeIndexPattern: jest.fn(),
+    onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),

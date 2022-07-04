@@ -16,7 +16,7 @@ async function popularizeField(
   DataViewsService: DataViewsContract,
   capabilities: Capabilities
 ) {
-  if (!dataView.id || !capabilities?.dataViews?.save) return;
+  if (!dataView.id || !capabilities?.indexPatterns?.save) return;
   const field = dataView.fields.getByName(fieldName);
   if (!field) {
     return;

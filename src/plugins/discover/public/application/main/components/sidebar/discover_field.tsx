@@ -212,7 +212,7 @@ export interface DiscoverFieldProps {
    */
   field: DataViewField;
   /**
-   * The currently selected index pattern
+   * The currently selected data view
    */
   dataView: DataView;
   /**
