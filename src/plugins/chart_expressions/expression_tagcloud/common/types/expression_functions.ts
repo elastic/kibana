@@ -15,6 +15,7 @@ import {
 } from '@kbn/expressions-plugin';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
+import type { ExpressionRenderContext } from '../../../common';
 
 interface TagCloudCommonParams {
   scale: $Values<typeof ScaleOptions>;
@@ -41,6 +42,7 @@ export interface TagcloudRendererConfig {
   visData: Datatable;
   visParams: TagCloudRendererParams;
   syncColors: boolean;
+  context?: ExpressionRenderContext;
 }
 
 interface Arguments extends TagCloudVisConfig {

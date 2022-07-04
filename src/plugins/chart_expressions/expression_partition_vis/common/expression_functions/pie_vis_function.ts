@@ -18,6 +18,7 @@ import {
   PARTITION_VIS_RENDERER_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
+import { extractRenderContext } from "../../../common";
 
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   name: PIE_VIS_EXPRESSION_NAME,
@@ -191,6 +192,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         params: {
           listenOnChange: true,
         },
+        context: extractRenderContext(handlers.getExecutionContext()),
       },
     };
   },

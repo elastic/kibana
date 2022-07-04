@@ -41,7 +41,18 @@ export const gaugeRenderer: (
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
-            renderComplete={() => handlers.done()}
+            renderComplete={() =>
+              handlers.done(
+                config.context?.originatingApp
+                  ? {
+                      renderTelemetry: {
+                        visGroup: config.context.originatingApp,
+                        visType: EXPRESSION_GAUGE_NAME,
+                      },
+                    }
+                  : undefined
+              )
+            }
             uiState={handlers.uiState as PersistedState}
           />
         </div>

@@ -17,7 +17,7 @@ export const extractRenderContext = (
       if (item.child) {
         return recursiveGet(item.child);
       } else {
-        return item.child;
+        return item;
       }
     };
 

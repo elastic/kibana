@@ -65,7 +65,18 @@ export const tagcloudRenderer: (
                 <TagCloudChart
                   {...config}
                   palettesRegistry={palettesRegistry}
-                  renderComplete={() => handlers.done()}
+                  renderComplete={() =>
+                    handlers.done(
+                      config.context?.originatingApp
+                        ? {
+                            renderTelemetry: {
+                              visGroup: config.context.originatingApp,
+                              visType: EXPRESSION_NAME,
+                            },
+                          }
+                        : undefined
+                    )
+                  }
                   fireEvent={handlers.event}
                   syncColors={config.syncColors}
                 />

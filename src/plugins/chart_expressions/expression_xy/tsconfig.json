@@ -13,6 +13,7 @@
     "server/**/*",
   ],
   "references": [
+    { "path": "../tsconfig.json" },
     { "path": "../../charts/tsconfig.json" },
     { "path": "../../../core/tsconfig.json" },
     { "path": "../../expressions/tsconfig.json" },

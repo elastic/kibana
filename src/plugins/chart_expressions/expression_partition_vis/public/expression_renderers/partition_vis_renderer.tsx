@@ -46,7 +46,7 @@ export const getPartitionVisRenderer: (
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render: async (domNode, { visConfig, visData, visType, syncColors }, handlers) => {
+  render: async (domNode, { visConfig, visData, visType, syncColors, context }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -64,7 +64,18 @@ export const getPartitionVisRenderer: (
               visParams={visConfig}
               visData={visData}
               visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-              renderComplete={() => handlers.done()}
+              renderComplete={() =>
+                handlers.done(
+                  context?.originatingApp
+                    ? {
+                        renderTelemetry: {
+                          visGroup: context.originatingApp,
+                          visType,
+                        },
+                      }
+                    : undefined
+                )
+              }
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               services={{ data: services.data, fieldFormats: services.fieldFormats }}

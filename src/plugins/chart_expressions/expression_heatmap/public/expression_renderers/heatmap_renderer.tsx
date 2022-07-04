@@ -49,7 +49,7 @@ export const heatmapRenderer: (
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
-
+    console.log(config.context);
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;
@@ -65,7 +65,18 @@ export const heatmapRenderer: (
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
-            renderComplete={() => handlers.done()}
+            renderComplete={() =>
+              handlers.done(
+                config.context?.originatingApp
+                  ? {
+                      renderTelemetry: {
+                        visGroup: config.context.originatingApp,
+                        visType: EXPRESSION_HEATMAP_NAME,
+                      },
+                    }
+                  : undefined
+              )
+            }
             uiState={handlers.uiState as PersistedState}
             interactive={isInteractive()}
           />

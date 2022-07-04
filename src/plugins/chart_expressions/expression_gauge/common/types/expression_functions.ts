@@ -24,6 +24,7 @@ import {
   GaugeColorModes,
   GaugeCentralMajorModes,
 } from '../constants';
+import type { ExpressionRenderContext } from '../../../common';
 
 export type GaugeColorMode = $Values<typeof GaugeColorModes>;
 export type GaugeShape = $Values<typeof GaugeShapes>;
@@ -63,6 +64,7 @@ export type GaugeInput = Datatable;
 export interface GaugeExpressionProps {
   data: Datatable;
   args: GaugeArguments;
+  context?: ExpressionRenderContext;
 }
 
 export interface GaugeRender {

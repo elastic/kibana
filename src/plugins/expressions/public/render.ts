@@ -53,6 +53,13 @@ const doRenderTelemetry = (context?: IInterpreterRenderHandlersDoneContext) => {
       uiCounterEvents = events.filter(Boolean).map((item) => toEvent(item));
     }
 
+    // @todo: REMOVE before merge
+    console.log({
+      a: context.renderTelemetry.visGroup ?? context.renderTelemetry.visType,
+      b: METRIC_TYPE.COUNT,
+      c: uiCounterEvents,
+    });
+
     if (usageCollection) {
       usageCollection.reportUiCounter(
         context.renderTelemetry.visGroup ?? context.renderTelemetry.visType,

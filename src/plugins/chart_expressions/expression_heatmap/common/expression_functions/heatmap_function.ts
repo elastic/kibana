@@ -161,8 +161,6 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
     validateAccessor(args.splitRowAccessor, data.columns);
     validateAccessor(args.splitColumnAccessor, data.columns);
 
-    console.log(extractRenderContext(handlers.getExecutionContext()));
-
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.reset();
       handlers.inspectorAdapters.tables.allowCsvExport = true;
@@ -233,6 +231,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
             (handlers.variables?.embeddableTitle as string) ??
             handlers.getExecutionContext?.()?.description,
         },
+        context: extractRenderContext(handlers.getExecutionContext()),
       },
     };
   },

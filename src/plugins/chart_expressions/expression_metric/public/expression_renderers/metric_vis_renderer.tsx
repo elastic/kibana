@@ -60,7 +60,7 @@ export const getMetricVisRenderer = (
     name: EXPRESSION_METRIC_NAME,
     displayName: 'metric visualization',
     reuseDomNode: true,
-    render: async (domNode, { visData, visConfig }, handlers) => {
+    render: async (domNode, { visData, visConfig, context }, handlers) => {
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
@@ -78,7 +78,18 @@ export const getMetricVisRenderer = (
             <MetricVisComponent
               visData={visData}
               visParams={visConfig}
-              renderComplete={() => handlers.done()}
+              renderComplete={() =>
+                handlers.done(
+                  context?.originatingApp
+                    ? {
+                        renderTelemetry: {
+                          visGroup: context.originatingApp,
+                          visType: EXPRESSION_METRIC_NAME,
+                        },
+                      }
+                    : undefined
+                )
+              }
               fireEvent={handlers.event}
               filterable={filterable}
             />

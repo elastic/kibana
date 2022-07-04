@@ -86,7 +86,18 @@ export const getXyChartRenderer = ({
               renderMode={handlers.getRenderMode()}
               syncColors={handlers.isSyncColorsEnabled()}
               syncTooltips={handlers.isSyncTooltipsEnabled()}
-              renderComplete={() => handlers.done()}
+              renderComplete={() =>
+                handlers.done(
+                  config.context?.originatingApp
+                    ? {
+                        renderTelemetry: {
+                          visGroup: config.context.originatingApp,
+                          visType: 'xyVis',
+                        },
+                      }
+                    : undefined
+                )
+              }
             />
           </div>{' '}
         </I18nProvider>

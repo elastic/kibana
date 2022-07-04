@@ -17,6 +17,7 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VisParams, visType, LabelPositionType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
+import type { ExpressionRenderContext } from '../../../common';
 
 export interface MetricArguments {
   percentageMode: boolean;
@@ -38,6 +39,7 @@ export interface MetricVisRenderConfig {
   visType: typeof visType;
   visData: Datatable;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
+  context?: ExpressionRenderContext;
 }
 
 export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
