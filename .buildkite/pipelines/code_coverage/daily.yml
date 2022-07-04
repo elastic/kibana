@@ -1,7 +1,7 @@
 steps:
   - command: echo "Howdy doody"
 notify:
-  - slack: "#kibana-qa"
+  - slack: "elastic#kibana-qa"
 #steps:
 #  - command: .buildkite/scripts/lifecycle/pre_build.sh
 #    label: Pre-Build
