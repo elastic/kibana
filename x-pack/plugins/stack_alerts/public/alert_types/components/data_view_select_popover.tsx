@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -17,6 +18,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiText,
   useEuiPaddingCSS,
 } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
@@ -144,7 +146,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             currentDataViewId={dataViewId}
           />
         </EuiFormRow>
-        {createDataView && (
+        {createDataView ? (
           <EuiPopoverFooter paddingSize="none">
             <EuiButtonEmpty
               css={createDataViewButtonPadding.s}
@@ -162,6 +164,15 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
                 }
               )}
             </EuiButtonEmpty>
+          </EuiPopoverFooter>
+        ) : (
+          <EuiPopoverFooter>
+            <EuiText color="subdued" size="xs">
+              <FormattedMessage
+                id="xpack.stackAlerts.components.ui.alertParams.dataViewPopover.createDataViewButton.noPermissionDescription"
+                defaultMessage="Contact your system administrator to create new data views."
+              />
+            </EuiText>
           </EuiPopoverFooter>
         )}
       </div>
