@@ -13,8 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Kibana overview Accessibility', () => {
-    const esArchiver = getService('esArchiver');
-
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('kibanaOverview');

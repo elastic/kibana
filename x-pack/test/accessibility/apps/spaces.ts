@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'spaceSelector', 'home', 'header', 'security']);
   const a11y = getService('a11y');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const toasts = getService('toasts');
