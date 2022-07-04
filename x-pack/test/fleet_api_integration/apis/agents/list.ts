@@ -72,18 +72,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(agent.access_api_key_id).to.eql('api-key-2');
     });
 
-    it('should return a 200 when given sort options', async () => {
-      const { body: apiResponse } = await supertest
-        .get(`/api/fleet/agents?sortField=last_checkin&sortOrder=desc`)
-        .expect(200);
-      expect(apiResponse.items.map((agent: { id: string }) => agent.id)).to.eql([
-        'agent4',
-        'agent3',
-        'agent2',
-        'agent1',
-      ]);
-    });
-
     it('should return agents in enrolled_at and hostname order when default sort options and same enrollment time', async () => {
       let { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
       expect(apiResponse.items.map((agent: { id: string }) => agent.id)).to.eql([
