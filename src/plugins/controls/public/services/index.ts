@@ -7,7 +7,6 @@
  */
 
 import { PluginServices } from '@kbn/presentation-util-plugin/public';
-import { CoreStart } from '@kbn/core/public';
 import { ControlsDataViewsService } from './data_views';
 import { ControlsOverlaysService } from './overlays';
 import { registry as stubRegistry } from './stub';

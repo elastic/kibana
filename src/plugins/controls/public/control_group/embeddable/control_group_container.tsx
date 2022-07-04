@@ -33,6 +33,7 @@ import { OverlayRef } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -52,7 +53,6 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
