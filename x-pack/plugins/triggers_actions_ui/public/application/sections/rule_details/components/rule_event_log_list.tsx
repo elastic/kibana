@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import {
@@ -23,6 +23,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogDataGrid } from './rule_event_log_data_grid';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
@@ -107,7 +108,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     );
   });
 
-  const isInitialized = useRef(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   const isOnLastPage = useMemo(() => {
     const { pageIndex, pageSize } = pagination;
@@ -140,6 +141,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         ...pagination,
         totalItemCount: Math.min(result.total, MAX_RESULTS),
       });
+      setIsInitialized(true);
       setActualTotalItemCount(result.total);
     } catch (e) {
       notifications.toasts.addDanger({
@@ -197,18 +199,41 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
     [setPagination, setFilter]
   );
 
+  const renderList = () => {
+    if (!isInitialized) {
+      return <CenterJustifiedSpinner />;
+    }
+    return (
+      <>
+        {isLoading && (
+          <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
+        )}
+        <RuleEventLogDataGrid
+          logs={logs}
+          pagination={pagination}
+          sortingColumns={sortingColumns}
+          visibleColumns={visibleColumns}
+          dateFormat={dateFormat}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+          setVisibleColumns={setVisibleColumns}
+          setSortingColumns={setSortingColumns}
+        />
+      </>
+    );
+  };
+
   useEffect(() => {
     loadEventLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingColumns, dateStart, dateEnd, filter, pagination.pageIndex, pagination.pageSize]);
 
   useEffect(() => {
-    if (isInitialized.current) {
+    if (isInitialized) {
       loadEventLogs();
     }
-    isInitialized.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshToken]);
+  }, [refreshToken, isInitialized]);
 
   useEffect(() => {
     localStorage.setItem(localStorageKey, JSON.stringify(visibleColumns));
@@ -237,20 +262,7 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {isLoading && (
-        <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
-      )}
-      <RuleEventLogDataGrid
-        logs={logs}
-        pagination={pagination}
-        sortingColumns={sortingColumns}
-        visibleColumns={visibleColumns}
-        dateFormat={dateFormat}
-        onChangeItemsPerPage={onChangeItemsPerPage}
-        onChangePage={onChangePage}
-        setVisibleColumns={setVisibleColumns}
-        setSortingColumns={setSortingColumns}
-      />
+      {renderList()}
       {isOnLastPage && (
         <RefineSearchPrompt
           documentSize={actualTotalItemCount}
