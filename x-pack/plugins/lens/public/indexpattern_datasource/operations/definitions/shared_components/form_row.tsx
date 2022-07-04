@@ -17,8 +17,10 @@ export const FormRow = ({ children, label, isInline, ...props }: FormRowProps) =
       {children}
     </EuiFormRow>
   ) : (
-    React.cloneElement(children, {
-      prepend: <EuiFormLabel className="lnsInnerIndexPattern__inlineRow">{label}</EuiFormLabel>,
-    })
+    <div data-test-subj={props['data-test-subj']}>
+      {React.cloneElement(children, {
+        prepend: <EuiFormLabel className="lnsInnerIndexPattern__inlineRow">{label}</EuiFormLabel>,
+      })}
+    </div>
   );
 };
