@@ -203,6 +203,8 @@ export async function getAgentsByKuery(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
   }
 ): Promise<{
   agents: Agent[];
@@ -213,8 +215,8 @@ export async function getAgentsByKuery(
   const {
     page = 1,
     perPage = 20,
-    sortField = 'enrolled_at',
-    sortOrder = 'desc',
+    sortField = options.sortField ?? 'enrolled_at',
+    sortOrder = options.sortOrder ?? 'desc',
     kuery,
     showInactive = false,
     showUpgradeable,
@@ -231,6 +233,11 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  const isDefaultSort = sortField === 'enrolled_at' && sortOrder === 'desc';
+  // if using default sorting (enrolled_at), adding a secondary sort on hostname, so that the results are not changing randomly in case many agents were enrolled at the same time
+  const secondarySort: estypes.Sort = isDefaultSort
+    ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
+    : [];
   const queryAgents = async (from: number, size: number) =>
     esClient.search<FleetServerAgent, {}>({
       index: AGENTS_INDEX,
@@ -241,7 +248,7 @@ export async function getAgentsByKuery(
       ignore_unavailable: true,
       body: {
         ...body,
-        sort: [{ [sortField]: { order: sortOrder } }],
+        sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
       },
     });
   const res = await queryAgents((page - 1) * perPage, perPage);

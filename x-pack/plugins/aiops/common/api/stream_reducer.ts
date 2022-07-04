@@ -5,14 +5,22 @@
  * 2.0.
  */
 
+import type { ChangePoint } from '../types';
+
 import { API_ACTION_NAME, AiopsExplainLogRateSpikesApiAction } from './explain_log_rate_spikes';
 
 interface StreamState {
-  fields: string[];
+  ccsWarning: boolean;
+  changePoints: ChangePoint[];
+  loaded: number;
+  loadingState: string;
 }
 
 export const initialState: StreamState = {
-  fields: [],
+  ccsWarning: false,
+  changePoints: [],
+  loaded: 0,
+  loadingState: '',
 };
 
 export function streamReducer(
@@ -24,10 +32,10 @@ export function streamReducer(
   }
 
   switch (action.type) {
-    case API_ACTION_NAME.ADD_FIELDS:
-      return {
-        fields: [...state.fields, ...action.payload],
-      };
+    case API_ACTION_NAME.ADD_CHANGE_POINTS:
+      return { ...state, changePoints: [...state.changePoints, ...action.payload] };
+    case API_ACTION_NAME.UPDATE_LOADING_STATE:
+      return { ...state, ...action.payload };
     default:
       return state;
   }
