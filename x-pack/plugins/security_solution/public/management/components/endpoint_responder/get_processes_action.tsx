@@ -169,13 +169,13 @@ export const GetProcessesActionResult = memo<
       <ResultComponent
         showAs="failure"
         title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.getProcesses.errorMessageTitle',
+          'xpack.securitySolution.endpointResponseActions.getProcesses.performApiErrorMessageTitle',
           { defaultMessage: 'Perform get processes action failed' }
         )}
         data-test-subj="performGetProcessesErrorCallout"
       >
         <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.getProcesses.errorMessage"
+          id="xpack.securitySolution.endpointResponseActions.getProcesses.performApiErrorMessage"
           defaultMessage="The following error was encountered: {error}"
           values={{ error: apiError.message }}
         />
