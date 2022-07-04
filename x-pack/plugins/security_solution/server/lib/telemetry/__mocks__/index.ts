@@ -22,6 +22,7 @@ export const createMockTelemetryEventsSender = (
     start: jest.fn(),
     stop: jest.fn(),
     getClusterID: jest.fn(),
+    getTelemetryUsageCluster: jest.fn(),
     fetchTelemetryUrl: jest.fn(),
     queueTelemetryEvents: jest.fn(),
     processEvents: jest.fn(),
