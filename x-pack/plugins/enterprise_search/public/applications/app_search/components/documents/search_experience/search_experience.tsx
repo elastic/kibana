@@ -91,7 +91,7 @@ export const SearchExperience: React.FC = () => {
     additionalHeaders: {
       'kbn-xsrf': true,
     },
-  });
+  } as ConstructorParameters<typeof AppSearchAPIConnector>[0]);
 
   const initialState = {
     sortField: sortOptions[0].value,

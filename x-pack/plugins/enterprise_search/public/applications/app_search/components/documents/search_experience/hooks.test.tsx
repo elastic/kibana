@@ -34,8 +34,8 @@ import { useSearchContextState, useSearchContextActions } from './hooks';
 describe('hooks', () => {
   describe('useSearchContextState', () => {
     const TestComponent = () => {
-      const { foo } = useSearchContextState();
-      return <div>{foo}</div>;
+      const { searchTerm } = useSearchContextState();
+      return <div>{searchTerm}</div>;
     };
 
     let wrapper: ReactWrapper;
@@ -65,8 +65,8 @@ describe('hooks', () => {
   describe('useSearchContextActions', () => {
     it('exposes actions', () => {
       const TestComponent = () => {
-        const { bar } = useSearchContextActions();
-        bar();
+        const { setSearchTerm } = useSearchContextActions();
+        setSearchTerm('bar');
         return null;
       };
 

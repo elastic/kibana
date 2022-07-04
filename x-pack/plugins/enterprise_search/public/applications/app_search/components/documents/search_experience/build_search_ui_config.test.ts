@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { APIConnector } from '@elastic/search-ui';
+
 import { SchemaType } from '../../../../shared/schema/types';
 
 import { buildSearchUIConfig } from './build_search_ui_config';
@@ -21,7 +23,7 @@ describe('buildSearchUIConfig', () => {
       sortFields: [],
     };
 
-    const config = buildSearchUIConfig(connector, schema, fields);
+    const config = buildSearchUIConfig(connector as APIConnector, schema, fields);
     expect(config).toEqual({
       alwaysSearchOnInitialLoad: true,
       apiConnector: connector,
