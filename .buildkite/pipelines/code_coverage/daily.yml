@@ -1,15 +1,13 @@
 notify:
-  - slack:
-      if: build.state == "passed"
-      channels:
-        - "elastic#kibana-qa"
-steps:
-  - command: .buildkite/scripts/lifecycle/pre_build.sh
-    label: Pre-Build
-    timeout_in_minutes: 10
-    agents:
-      queue: kibana-default
-
+  - slack: "#kibana-qa"
+    if: build.state == "passed"
+#steps:
+#  - command: .buildkite/scripts/lifecycle/pre_build.sh
+#    label: Pre-Build
+#    timeout_in_minutes: 10
+#    agents:
+#      queue: kibana-default
+#
 #  - wait
 #
 #  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
