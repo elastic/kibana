@@ -69,7 +69,7 @@ export function ViewAlertRoute() {
       displayRuleChangedWarn,
       displayPossibleDocsDiffInfoAlert,
       showDataViewFetchError,
-      dataViewUpdatedWarn,
+      showDataViewUpdatedWarning,
     } = getAlertUtils(toastNotifications, core, data);
 
     const navigateToResults = async () => {
@@ -112,7 +112,7 @@ export function ViewAlertRoute() {
         openActualAlert &&
         new Date(dataViewUpdatedAt).valueOf() > new Date(alertUpdatedAt).valueOf()
       ) {
-        dataViewUpdatedWarn();
+        showDataViewUpdatedWarning();
       }
 
       const timeRange = openActualAlert

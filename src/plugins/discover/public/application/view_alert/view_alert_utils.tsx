@@ -106,7 +106,7 @@ export const getAlertUtils = (
     }
   };
 
-  const dataViewUpdatedWarn = async () => {
+  const showDataViewUpdatedWarning = async () => {
     const warnTitle = i18n.translate('discover.viewAlert.dataViewChangedWarnTitle', {
       defaultMessage: 'Data View has changed',
     });
@@ -121,11 +121,11 @@ export const getAlertUtils = (
   };
 
   return {
+    fetchAlert,
+    fetchSearchSource,
     displayRuleChangedWarn,
     displayPossibleDocsDiffInfoAlert,
     showDataViewFetchError,
-    fetchAlert,
-    fetchSearchSource,
-    dataViewUpdatedWarn,
+    showDataViewUpdatedWarning,
   };
 };
