@@ -52,6 +52,7 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 const ControlGroupReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
@@ -345,9 +346,11 @@ export class ControlGroupContainer extends Container<
     const PresentationUtilProvider = pluginServices.getContextProvider();
     ReactDOM.render(
       <PresentationUtilProvider>
-        <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
-          <ControlGroup />
-        </ControlGroupReduxWrapper>
+        <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+          <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
+            <ControlGroup />
+          </ControlGroupReduxWrapper>
+        </KibanaThemeProvider>
       </PresentationUtilProvider>,
       dom
     );
