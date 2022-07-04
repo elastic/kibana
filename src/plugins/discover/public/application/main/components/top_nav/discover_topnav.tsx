@@ -23,7 +23,7 @@ export type DiscoverTopNavProps = Pick<
   'indexPattern' | 'navigateTo' | 'savedSearch' | 'searchSource'
 > & {
   onOpenInspector: () => void;
-  query?: Query;
+  query?: Query | AggregateQuery;
   savedQuery?: string;
   updateQuery: (
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },

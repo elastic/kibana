@@ -442,6 +442,7 @@ function DiscoverFieldComponent({
       button={button}
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
+      data-test-subj="discoverFieldListPanelPopover"
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >

@@ -39,6 +39,7 @@ export async function queryStateToExpressionAst({ filters, query, time, dataView
 
   if (query && isOfAggregateQueryType(query)) {
     const mode = getAggregateQueryMode(query);
+    // sql query
     if (mode === 'sql') {
       const idxPattern = getIndexPatternFromSQLQuery(query.sql);
       const idsTitles = await dataViewsService.getIdsWithTitle();

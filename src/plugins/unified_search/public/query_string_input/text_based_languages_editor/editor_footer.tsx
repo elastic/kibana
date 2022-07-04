@@ -91,7 +91,7 @@ export const EditorFooter = memo(function EditorFooter({
                     isOpen={isPopoverOpen}
                     closePopover={() => setIsPopoverOpen(false)}
                   >
-                    <div style={{ width: 300 }}>
+                    <div style={{ width: 500 }}>
                       <EuiPopoverTitle paddingSize="s">
                         {i18n.translate(
                           'unifiedSearch.query.textBasedLanguagesEditor.errorsTitle',

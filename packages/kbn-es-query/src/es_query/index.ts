@@ -18,7 +18,7 @@ export {
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
-} from './es_query.sql';
+} from './es_query_sql';
 export type {
   IFieldSubType,
   BoolQuery,
