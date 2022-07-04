@@ -11,7 +11,7 @@ import { uniqBy } from 'lodash';
 import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
-import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
+import { EMPTY, merge, Observable, pipe, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   distinctUntilChanged,
@@ -29,7 +29,7 @@ import {
   ReduxEmbeddableWrapperPropsWithChildren,
   SolutionToolbarPopover,
 } from '@kbn/presentation-util-plugin/public';
-import { OverlayRef } from '@kbn/core/public';
+import { CoreTheme, OverlayRef } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
@@ -105,25 +105,35 @@ export class ControlGroupContainer extends Container<
     buttonType: CreateControlButtonTypes,
     closePopover?: () => void
   ) => {
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+
     return (
-      <CreateControlButton
-        buttonType={buttonType}
-        defaultControlWidth={this.getInput().defaultControlWidth}
-        defaultControlGrow={this.getInput().defaultControlGrow}
-        updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-        updateDefaultGrow={(defaultControlGrow: boolean) =>
-          this.updateInput({ defaultControlGrow })
-        }
-        addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
-        closePopover={closePopover}
-        getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
-        setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
-      />
+      <ControlsServicesProvider>
+        <CreateControlButton
+          buttonType={buttonType}
+          defaultControlWidth={this.getInput().defaultControlWidth}
+          defaultControlGrow={this.getInput().defaultControlGrow}
+          updateDefaultWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+          updateDefaultGrow={(defaultControlGrow: boolean) =>
+            this.updateInput({ defaultControlGrow })
+          }
+          addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+          closePopover={closePopover}
+          getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
+          setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
+        />
+      </ControlsServicesProvider>
     );
   };
 
   private getEditControlGroupButton = (closePopover: () => void) => {
-    return <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />;
+    const ControlsServicesProvider = pluginServices.getContextProvider();
+
+    return (
+      <ControlsServicesProvider>
+        <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
+      </ControlsServicesProvider>
+    );
   };
 
   /**

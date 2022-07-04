@@ -51,9 +51,10 @@ export const CreateControlButton = ({
   updateDefaultGrow,
 }: CreateControlButtonProps) => {
   // Controls Services Context
-  const { overlays, controls, theme } = pluginServices.getServices();
-  const { getControlTypes, getControlFactory } = controls;
-  const { openFlyout, openConfirm } = overlays;
+  const { overlays, controls, theme } = pluginServices.getHooks();
+  const { getControlTypes, getControlFactory } = controls.useService();
+  const { openFlyout, openConfirm } = overlays.useService();
+  const themeService = theme.useService();
 
   const createNewControl = async () => {
     const ControlsServicesProvider = pluginServices.getContextProvider();
@@ -114,7 +115,7 @@ export const CreateControlButton = ({
               }
             />
           </ControlsServicesProvider>,
-          { theme$: theme.theme$ }
+          { theme$: themeService.theme$ }
         ),
         {
           'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
