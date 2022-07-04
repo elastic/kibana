@@ -367,6 +367,8 @@
       "@kbn/osquery-plugin/*": ["x-pack/plugins/osquery/*"],
       "@kbn/painless-lab-plugin": ["x-pack/plugins/painless_lab"],
       "@kbn/painless-lab-plugin/*": ["x-pack/plugins/painless_lab/*"],
+      "@kbn/profiling-plugin": ["x-pack/plugins/profiling"],
+      "@kbn/profiling-plugin/*": ["x-pack/plugins/profiling/*"],
       "@kbn/remote-clusters-plugin": ["x-pack/plugins/remote_clusters"],
       "@kbn/remote-clusters-plugin/*": ["x-pack/plugins/remote_clusters/*"],
       "@kbn/reporting-plugin": ["x-pack/plugins/reporting"],

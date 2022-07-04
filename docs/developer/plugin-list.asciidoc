@@ -557,6 +557,10 @@ Elastic.
 |This plugin helps users learn how to use the Painless scripting language.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/profiling[profiling]
+|WARNING: Missing README.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/remote_clusters/README.md[remoteClusters]
 |This plugin helps users manage their remote clusters, which enable cross-cluster search and cross-cluster replication.
 
