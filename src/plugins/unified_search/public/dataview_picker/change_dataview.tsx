@@ -264,47 +264,48 @@ export function ChangeDataView({
           searchListInputId={searchListInputId}
           isTextBasedLangSelected={isTextBasedLangSelected}
         />
+
+        {textBasedLanguages?.length && (
+          <>
+            <EuiHorizontalRule margin="none" />
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="none"
+              justifyContent="spaceBetween"
+              data-test-subj="select-text-based-language-panel"
+              css={css`
+                margin: ${euiTheme.size.s};
+                margin-bottom: 0;
+              `}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <h5>
+                    {i18n.translate(
+                      'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesLabel',
+                      {
+                        defaultMessage: 'Text-based query languages',
+                      }
+                    )}
+                  </h5>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <TextBasedLanguagesList
+              textBasedLanguages={textBasedLanguages}
+              selectedOption={triggerLabel}
+              onChange={(lang) => {
+                setTriggerLabel(lang);
+                setPopoverIsOpen(false);
+                setIsTextBasedLangSelected(true);
+                // also update the query with the sql query
+                onTextLangQuerySubmit?.({ sql: `SELECT * FROM "${trigger.title}"` });
+              }}
+            />
+          </>
+        )}
       </>
     );
-
-    if (textBasedLanguages?.length) {
-      panelItems.push(
-        <EuiHorizontalRule margin="none" />,
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="none"
-          justifyContent="spaceBetween"
-          css={css`
-            margin: ${euiTheme.size.s};
-            margin-bottom: 0;
-          `}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <h5>
-                {i18n.translate(
-                  'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesLabel',
-                  {
-                    defaultMessage: 'Text-based query languages',
-                  }
-                )}
-              </h5>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>,
-        <TextBasedLanguagesList
-          textBasedLanguages={textBasedLanguages}
-          selectedOption={triggerLabel}
-          onChange={(lang) => {
-            setTriggerLabel(lang);
-            setPopoverIsOpen(false);
-            setIsTextBasedLangSelected(true);
-            // also update the query with the sql query
-            onTextLangQuerySubmit?.({ sql: `SELECT * FROM "${trigger.title}"` });
-          }}
-        />
-      );
-    }
 
     return panelItems;
   };

@@ -70,4 +70,10 @@ describe('DataView list component', () => {
       'dataview-2',
     ]);
   });
+
+  it('should render a warning icon if a text based language is selected', () => {
+    const component = shallow(<DataViewsList {...props} isTextBasedLangSelected />);
+
+    expect(getDataViewPickerOptions(component)!.map((option: any) => option.append)).not.toBeNull();
+  });
 });

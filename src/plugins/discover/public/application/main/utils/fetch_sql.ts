@@ -7,7 +7,7 @@
  */
 import { pluck } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import { Query } from '@kbn/es-query';
+import { Query, AggregateQuery } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -23,7 +23,7 @@ interface SQLErrorResponse {
 }
 
 export function fetchSql(
-  query: Query,
+  query: Query | AggregateQuery,
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart
