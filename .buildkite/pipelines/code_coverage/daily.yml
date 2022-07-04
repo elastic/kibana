@@ -1,7 +1,7 @@
 notify:
   - slack:
       channels:
-        - "#kibana-qa"
+        - "elastic#kibana-qa"
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
