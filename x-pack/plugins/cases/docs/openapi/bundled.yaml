@@ -2173,6 +2173,41 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /api/cases/tags:
+    get:
+      summary: Aggregates and returns a list of case tags.
+      description: >
+        You must have read privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            tags from all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /api/cases/{caseId}/comments:
     post:
       summary: Adds a comment or alert to a case.
@@ -4882,6 +4917,42 @@ paths:
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/tags:
+    get:
+      summary: Aggregates and returns a list of case tags.
+      description: >
+        You must have read privileges for the **Cases*** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            tags from all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+            examples: {}
       servers:
         - url: https://localhost:5601
     servers:
