@@ -14,7 +14,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'security', 'savedObjects', 'tagManagement']);
   const tagManagementPage = PageObjects.tagManagement;
 
-  describe('table bulk actions', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/135348
+  describe.skip('table bulk actions', () => {
     beforeEach(async () => {
       await esArchiver.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base'
