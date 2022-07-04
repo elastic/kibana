@@ -43,6 +43,7 @@ export interface TestGroupRunOrderResponse {
   types: Array<{
     type: string;
     count: number;
+    queue?: string;
     groups: Array<{
       durationMin: number;
       names: string[];
@@ -159,6 +160,7 @@ export class CiStatsClient {
     >;
     groups: Array<{
       type: string;
+      queue?: string;
       defaultMin?: number;
       maxMin: number;
       minimumIsolationMin?: number;

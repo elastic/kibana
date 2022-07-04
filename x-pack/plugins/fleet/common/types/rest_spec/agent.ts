@@ -132,6 +132,14 @@ export type PostBulkAgentReassignResponse = Record<
   }
 >;
 
+export type PostBulkUpdateAgentTagsResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
+
 export interface DeleteAgentRequest {
   params: {
     agentId: string;
@@ -143,7 +151,8 @@ export interface UpdateAgentRequest {
     agentId: string;
   };
   body: {
-    user_provided_metadata: Record<string, any>;
+    user_provided_metadata?: Record<string, any>;
+    tags?: string[];
   };
 }
 
