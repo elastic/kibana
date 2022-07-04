@@ -207,6 +207,21 @@ export const RulesTableContextProvider = ({
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
+  const handleFilterOptionsChange = useCallback(
+    (newFilter: Partial<FilterOptions>) => {
+      setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
+      setPage(1);
+      setSelectedRuleIds([]);
+      setIsAllSelected(false);
+    },
+    [setSelectedRuleIds]
+  );
+
+  const clearRulesSelection = useCallback(() => {
+    setSelectedRuleIds([]);
+    setIsAllSelected(false);
+  }, []);
+
   useEffect(() => {
     // pause table auto refresh when any of rule selected
     // store current auto refresh value, to use it later, when all rules selection will be cleared
@@ -221,21 +236,6 @@ export const RulesTableContextProvider = ({
       autoRefreshBeforePause.current = null;
     }
   }, [selectedRuleIds, isRefreshOn]);
-
-  const clearRulesSelection = useCallback(() => {
-    setSelectedRuleIds([]);
-    setIsAllSelected(false);
-  }, []);
-
-  const handleFilterOptionsChange = useCallback(
-    (newFilter: Partial<FilterOptions>) => {
-      setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
-      setPage(1);
-      setSelectedRuleIds([]);
-      setIsAllSelected(false);
-    },
-    [setSelectedRuleIds]
-  );
 
   // Fetch rules
   const {
