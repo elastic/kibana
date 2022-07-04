@@ -15,7 +15,7 @@ import {
 import { TagCloudRendererParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
-import { extractRenderContext } from "../../../common";
+import { extractRenderContext } from '../../../common';
 
 const strings = {
   help: i18n.translate('expressionTagcloud.functions.tagcloudHelpText', {

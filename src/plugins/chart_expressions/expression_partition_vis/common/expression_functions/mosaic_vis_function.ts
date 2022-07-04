@@ -18,7 +18,7 @@ import {
   MOSAIC_VIS_EXPRESSION_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
-import { extractRenderContext } from "../../../common";
+import { extractRenderContext } from '../../../common';
 
 export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
   name: MOSAIC_VIS_EXPRESSION_NAME,

@@ -18,7 +18,7 @@ import {
   TREEMAP_VIS_EXPRESSION_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
-import { extractRenderContext } from "../../../common";
+import { extractRenderContext } from '../../../common';
 
 export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => ({
   name: TREEMAP_VIS_EXPRESSION_NAME,

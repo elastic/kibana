@@ -17,7 +17,7 @@ import { ColorMode } from '@kbn/charts-plugin/common';
 import { visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
-import { extractRenderContext } from "../../../common";
+import { extractRenderContext } from '../../../common';
 
 const errors = {
   severalMetricsAndColorFullBackgroundSpecifiedError: () =>

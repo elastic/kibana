@@ -18,7 +18,7 @@ import {
   WAFFLE_VIS_EXPRESSION_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
-import { extractRenderContext } from "../../../common";
+import { extractRenderContext } from '../../../common';
 
 export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
   name: WAFFLE_VIS_EXPRESSION_NAME,
