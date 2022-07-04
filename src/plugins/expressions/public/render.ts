@@ -50,7 +50,10 @@ const doRenderTelemetry = (context?: IInterpreterRenderHandlersDoneContext) => {
     if (!events || typeof events === 'string') {
       uiCounterEvents = toEvent(events);
     } else {
-      uiCounterEvents = events.filter(Boolean).map((item) => toEvent(item));
+      uiCounterEvents = [
+        toEvent(undefined),
+        ...events.filter(Boolean).map((item) => toEvent(item)),
+      ];
     }
 
     // @todo: REMOVE before merge
