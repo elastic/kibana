@@ -676,10 +676,12 @@
            "consumer":"siem",
            "params":{
               "author":[
+                 
               ],
               "description":"enabled 7.16.1 query rule",
               "ruleId":"064e3fed-6328-416b-bb85-c08265088f41",
               "falsePositives":[
+                 
               ],
               "from":"now-36000060s",
               "immutable":false,
@@ -691,14 +693,18 @@
               "maxSignals":100,
               "riskScore":21,
               "riskScoreMapping":[
+                 
               ],
               "severity":"low",
               "severityMapping":[
+                 
               ],
               "threat":[
+                 
               ],
               "to":"now",
               "references":[
+                 
               ],
               "version":4,
               "exceptionsList":[
@@ -718,6 +724,7 @@
               ],
               "query":"*:*",
               "filters":[
+                 
               ]
            },
            "schedule":{
@@ -725,6 +732,7 @@
            },
            "enabled":true,
            "actions":[
+              
            ],
            "throttle":null,
            "apiKeyOwner":"3270256467",
@@ -734,6 +742,7 @@
            "createdAt":"2022-02-16T01:24:02.121Z",
            "muteAll":true,
            "mutedInstanceIds":[
+              
            ],
            "scheduledTaskId":"2030ade0-8ec7-11ec-a700-5524407a7653"
         },
@@ -760,10 +769,12 @@
            "consumer":"siem",
            "params":{
               "author":[
+                 
               ],
               "description":"disabled 7.16.1 query rule",
               "ruleId":"364e3fed-6328-416b-bb85-c08265088f41",
               "falsePositives":[
+                 
               ],
               "from":"now-36000060s",
               "immutable":false,
@@ -775,14 +786,18 @@
               "maxSignals":100,
               "riskScore":21,
               "riskScoreMapping":[
+                 
               ],
               "severity":"low",
               "severityMapping":[
+                 
               ],
               "threat":[
+                 
               ],
               "to":"now",
               "references":[
+                 
               ],
               "version":4,
               "exceptionsList":[
@@ -802,6 +817,7 @@
               ],
               "query":"*:*",
               "filters":[
+                 
               ]
            },
            "schedule":{
@@ -809,6 +825,7 @@
            },
            "enabled":true,
            "actions":[
+              
            ],
            "throttle":null,
            "apiKeyOwner":"3270256467",
@@ -818,6 +835,7 @@
            "createdAt":"2022-02-16T01:25:02.121Z",
            "muteAll":true,
            "mutedInstanceIds":[
+              
            ],
            "scheduledTaskId":null
         },
@@ -938,9 +956,11 @@
               "immutable":true,
               "ruleId":"bf9638eb-7d3c-4f40-83d7-8c40a7c80f2e",
               "author":[
+                 
               ],
               "description":"remove interns tags mock rule",
               "falsePositives":[
+                 
               ],
               "from":"now-36000060s",
               "license":"",
@@ -951,14 +971,18 @@
               "maxSignals":100,
               "riskScore":21,
               "riskScoreMapping":[
+                 
               ],
               "severity":"low",
               "severityMapping":[
+                 
               ],
               "threat":[
+                 
               ],
               "to":"now",
               "references":[
+                 
               ],
               "version":4,
               "exceptionsList":[
@@ -978,6 +1002,7 @@
               ],
               "query":"*:*",
               "filters":[
+                 
               ]
            },
            "schedule":{
@@ -985,6 +1010,7 @@
            },
            "enabled":true,
            "actions":[
+              
            ],
            "throttle":null,
            "apiKeyOwner":null,
@@ -994,6 +1020,7 @@
            "createdAt":"2021-07-27T20:42:55.896Z",
            "muteAll":false,
            "mutedInstanceIds":[
+              
            ],
            "scheduledTaskId":null,
            "tags":[
@@ -1009,86 +1036,8 @@
         },
         "updated_at":"2021-08-13T23:00:11.985Z",
         "references":[
+           
         ]
      }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "alert:bdfce750-fba0-11ec-9157-2f379249da99",
-    "index": ".kibana_1",
-    "source": {
-      "alert": {
-        "name": "Test rule with snoozeEndTime",
-        "enabled": true,
-        "consumer": "alerts",
-        "tags": [],
-        "throttle": null,
-        "params": {
-          "aggType": "count",
-          "termSize": 5,
-          "thresholdComparator": ">",
-          "timeWindowSize": 5,
-          "timeWindowUnit": "d",
-          "groupBy": "all",
-          "threshold": [0],
-          "index": [".test-test-test"],
-          "timeField": "@timestamp"
-        },
-        "schedule": {
-          "interval": "1m"
-        },
-        "actions": [],
-        "alertTypeId": ".index-threshold",
-        "notifyWhen": "onActiveAlert",
-        "apiKeyOwner": "elastic",
-        "apiKey": "3RxLHwjIipxz4cGSVzAl711AQylKFzBcobdALVbJ4r8b4nGsLhv5OGdcS/OZuTJqli21hZGfc/3DDmGCC+uviMYif92+yVUFza/k5rUv7OrZWP0UaycKhQLLqJRXqYlVFOz4VfprGHbKC8fLgBvbidmGnpvoTdBkkP0NICtnwZOwqcjoqHCHY2LsXg7MYR+SXI8RaGcafXd+0Q==",
-        "legacyId": null,
-        "createdBy": "elastic",
-        "updatedBy": "elastic",
-        "createdAt": "2022-07-04T13:53:54.686Z",
-        "updatedAt": "2022-07-04T13:53:54.686Z",
-        "snoozeEndTime": null,
-        "muteAll": false,
-        "mutedInstanceIds": [],
-        "executionStatus": {
-          "status": "ok",
-          "lastExecutionDate": "2022-07-04T13:53:58.350Z",
-          "error": null,
-          "warning": null,
-          "lastDuration": 51
-        },
-        "monitoring": {
-          "execution": {
-            "history": [
-              {
-                "duration": 51,
-                "success": true,
-                "timestamp": 1656942838402
-              }
-            ],
-            "calculated_metrics": {
-              "success_ratio": 1,
-              "p99": 51,
-              "p50": 51,
-              "p95": 51
-            }
-          }
-        },
-        "meta": {
-          "versionApiKeyLastmodified": "8.2.1"
-        },
-        "scheduledTaskId": "bdfce750-fba0-11ec-9157-2f379249da99"
-      },
-      "type": "alert",
-      "references": [],
-      "namespaces": ["default"],
-      "migrationVersion": {
-        "alert": "8.2.0"
-      },
-      "updated_at": "2022-07-04T13:53:58.403Z"
-    }
   }
 }
