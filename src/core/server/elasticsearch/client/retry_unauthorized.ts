@@ -7,9 +7,9 @@
  */
 
 import { MaybePromise } from '@kbn/utility-types';
+import { UnauthorizedError } from '@kbn/es-errors';
 import { AuthHeaders, KibanaRequest, SetAuthHeaders, isRealRequest } from '../../http';
 import { ScopeableRequest } from '../types';
-import { UnauthorizedError } from './errors';
 
 /**
  * @public

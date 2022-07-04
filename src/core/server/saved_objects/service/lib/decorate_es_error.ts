@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { errors as esErrors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
-import { ElasticsearchErrorDetails, isSupportedEsServer } from '../../../elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import { isSupportedEsServer } from '../../../elasticsearch';
 
 const responseErrors = {
   isServiceUnavailable: (statusCode?: number) => statusCode === 503,

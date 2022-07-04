@@ -38,7 +38,6 @@ export type {
   ShardsResponse,
   GetResponse,
   DeleteDocumentResponse,
-  ElasticsearchErrorDetails,
   // unauthorized error handler
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
@@ -47,7 +46,6 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
-  UnauthorizedError,
 } from './client';
 export { getRequestDebugMeta, getErrorMessage } from './client';
 export { pollEsNodesVersion } from './version_check/ensure_es_version';

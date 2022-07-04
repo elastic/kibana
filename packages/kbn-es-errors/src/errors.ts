@@ -8,15 +8,26 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-/** @public */
+/**
+ * An unauthorized (401) error returned by elasticsearch
+ * @public
+ */
 export type UnauthorizedError = errors.ResponseError & {
   statusCode: 401;
 };
 
+/**
+ * Checks if the provided `error` is an {@link errors.ResponseError | elasticsearch response error}
+ * @public
+ */
 export function isResponseError(error: unknown): error is errors.ResponseError {
   return error instanceof errors.ResponseError;
 }
 
+/**
+ * Checks if the provided `error` is an {@link UnauthorizedError | elasticsearch unauthorized error}
+ * @public
+ */
 export function isUnauthorizedError(error: unknown): error is UnauthorizedError {
   return isResponseError(error) && error.statusCode === 401;
 }
