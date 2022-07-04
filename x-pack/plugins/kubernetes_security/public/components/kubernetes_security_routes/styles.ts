@@ -21,10 +21,6 @@ export const useStyles = () => {
       marginBottom: size.l,
     };
 
-    const hideShowWidgetButton: CSSObject = {
-      marginLeft: 'auto',
-    };
-
     const widgetBadge: CSSObject = {
       position: 'absolute',
       bottom: size.base,
@@ -56,7 +52,6 @@ export const useStyles = () => {
 
     return {
       titleSection,
-      hideShowWidgetButton,
       widgetBadge,
       treeViewContainer,
       percentageWidgets,
