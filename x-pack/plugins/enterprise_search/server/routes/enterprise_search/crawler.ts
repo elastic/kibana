@@ -30,6 +30,59 @@ export function registerCrawlerRoutes({
 
   router.get(
     {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2',
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/ent_search/indices/{indexName}/crawler/crawl_requests',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+        body: schema.object({
+          overrides: schema.maybe(
+            schema.object({
+              domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+              max_crawl_depth: schema.maybe(schema.number()),
+              seed_urls: schema.maybe(schema.arrayOf(schema.string())),
+              sitemap_urls: schema.maybe(schema.arrayOf(schema.string())),
+              sitemap_discovery_disabled: schema.maybe(schema.boolean()),
+            })
+          ),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_requests',
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/ent_search/indices/{indexName}/crawler/crawl_requests/cancel',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_requests/active/cancel',
+    })
+  );
+
+  router.get(
+    {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains',
       validate: {
         params: schema.object({

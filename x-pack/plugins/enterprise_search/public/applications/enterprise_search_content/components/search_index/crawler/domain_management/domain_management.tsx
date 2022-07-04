@@ -12,10 +12,10 @@ import { useValues } from 'kea';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
+import { Loading } from '../../../../../shared/loading';
 
-import { DeleteCrawlerDomainApiLogic } from '../../../api/crawler/delete_crawler_domain_api_logic';
-import { GetCrawlerDomainsApiLogic } from '../../../api/crawler/get_crawler_domains_api_logic';
+import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
+import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
 
 import { AddDomainFlyout } from './add_domain/add_domain_flyout';
 import { DomainManagementLogic } from './domain_management_logic';

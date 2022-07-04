@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -31,25 +30,17 @@ import { AddDomainForm } from './add_domain_form';
 import { AddDomainFormErrors } from './add_domain_form_errors';
 import { AddDomainFormSubmitButton } from './add_domain_form_submit_button';
 
-interface Props {
-  isCta?: boolean;
-}
-export const AddDomainFlyout: React.FC<Props> = ({ isCta = true }) => {
+export const AddDomainFlyout: React.FC = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
-  const buttonProps: EuiButtonProps = isCta
-    ? {
-        color: 'primary',
-      }
-    : {
-        size: 's',
-        color: 'success',
-        iconType: 'plusInCircle',
-      };
 
   return (
     <>
-      <EuiButton onClick={() => setIsFlyoutVisible(true)} {...buttonProps}>
+      <EuiButton
+        size="s"
+        color="success"
+        iconType="plusInCircle"
+        onClick={() => setIsFlyoutVisible(true)}
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.openButtonLabel',
           {

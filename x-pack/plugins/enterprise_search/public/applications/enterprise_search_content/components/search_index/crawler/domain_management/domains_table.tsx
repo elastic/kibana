@@ -17,18 +17,16 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedNumber } from '@kbn/i18n-react';
 
-import { generateEncodedPath } from '../../../../app_search/utils/encode_path_params';
+import { generateEncodedPath } from '../../../../../app_search/utils/encode_path_params';
 
-import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../shared/constants';
-import { KibanaLogic } from '../../../../shared/kibana';
-import { EuiLinkTo } from '../../../../shared/react_router_helpers';
-import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
+import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { convertMetaToPagination, handlePageChange } from '../../../../../shared/table_pagination';
+import { CrawlerDomain } from '../../../../api/crawler/types';
+import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../routes';
+import { CustomFormattedTimestamp } from '../custom_formatted_timestamp';
 
-import { CrawlerDomain } from '../../../api/crawler/types';
-
-import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../routes';
-
-import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 import { DomainManagementLogic } from './domain_management_logic';
 
 const getDeleteDomainConfirmationMessage = (domainUrl: string) => {

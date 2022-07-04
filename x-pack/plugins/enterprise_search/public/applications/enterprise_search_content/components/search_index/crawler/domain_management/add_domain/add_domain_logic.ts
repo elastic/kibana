@@ -9,14 +9,14 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { generateEncodedPath } from '../../../../../app_search/utils/encode_path_params';
-import { flashSuccessToast } from '../../../../../shared/flash_messages';
-import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
-import { HttpLogic } from '../../../../../shared/http';
-import { KibanaLogic } from '../../../../../shared/kibana';
-import { CrawlerDomain, CrawlerDomainFromServer } from '../../../../api/crawler/types';
-import { crawlerDomainServerToClient } from '../../../../api/crawler/utils';
-import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../routes';
+import { generateEncodedPath } from '../../../../../../app_search/utils/encode_path_params';
+import { flashSuccessToast } from '../../../../../../shared/flash_messages';
+import { getErrorsFromHttpResponse } from '../../../../../../shared/flash_messages/handle_api_errors';
+import { HttpLogic } from '../../../../../../shared/http';
+import { KibanaLogic } from '../../../../../../shared/kibana';
+import { CrawlerDomain, CrawlerDomainFromServer } from '../../../../../api/crawler/types';
+import { crawlerDomainServerToClient } from '../../../../../api/crawler/utils';
+import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../../routes';
 import { DomainManagementLogic } from '../domain_management_logic';
 
 import {

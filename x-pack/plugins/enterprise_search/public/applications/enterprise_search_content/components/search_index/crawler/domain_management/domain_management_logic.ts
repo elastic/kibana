@@ -15,14 +15,14 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { Meta } from '../../../../../../common/types';
-import { HttpError, Status } from '../../../../../../common/types/api';
-import { DEFAULT_META } from '../../../../shared/constants';
-import { flashAPIErrors, flashSuccessToast } from '../../../../shared/flash_messages';
-import { updateMetaPageIndex } from '../../../../shared/table_pagination';
-import { DeleteCrawlerDomainApiLogic } from '../../../api/crawler/delete_crawler_domain_api_logic';
-import { GetCrawlerDomainsApiLogic } from '../../../api/crawler/get_crawler_domains_api_logic';
-import { CrawlerDomain, CrawlerDomains } from '../../../api/crawler/types';
+import { Meta } from '../../../../../../../common/types';
+import { HttpError, Status } from '../../../../../../../common/types/api';
+import { DEFAULT_META } from '../../../../../shared/constants';
+import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
+import { updateMetaPageIndex } from '../../../../../shared/table_pagination';
+import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
+import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
+import { CrawlerDomain, CrawlerDomains } from '../../../../api/crawler/types';
 
 interface DomainManagementProps {
   indexName: string;

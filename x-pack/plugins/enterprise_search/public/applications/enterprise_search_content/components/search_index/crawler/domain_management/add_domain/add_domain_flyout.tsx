@@ -25,7 +25,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
+import { CANCEL_BUTTON_LABEL } from '../../../../../../shared/constants';
 
 import { AddDomainForm } from './add_domain_form';
 import { AddDomainFormErrors } from './add_domain_form_errors';

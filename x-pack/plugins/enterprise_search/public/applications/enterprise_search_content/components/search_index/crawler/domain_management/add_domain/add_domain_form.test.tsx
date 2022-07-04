@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,7 +15,7 @@ import { EuiButton, EuiFieldText, EuiForm } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { rerender } from '../../../../../test_helpers';
+import { rerender } from '../../../../../../test_helpers';
 
 import { AddDomainForm } from './add_domain_form';
 import { AddDomainValidation } from './add_domain_validation';

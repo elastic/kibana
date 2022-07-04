@@ -40,16 +40,3 @@ export type CrawlerDomainValidationStepName =
   | 'networkConnectivity'
   | 'indexingRestrictions'
   | 'contentVerification';
-// See SharedTogo::Crawler::Status for details on how these are generated
-export enum CrawlerStatus {
-  Pending = 'pending',
-  Suspended = 'suspended',
-  Starting = 'starting',
-  Running = 'running',
-  Suspending = 'suspending',
-  Canceling = 'canceling',
-  Success = 'success',
-  Failed = 'failed',
-  Canceled = 'canceled',
-  Skipped = 'skipped',
-}
