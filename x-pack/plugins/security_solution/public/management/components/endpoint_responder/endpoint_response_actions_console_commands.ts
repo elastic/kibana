@@ -68,12 +68,9 @@ export const getEndpointResponseActionsConsoleCommands = (
     },
     {
       name: 'processes',
-      about: i18n.translate(
-        'xpack.securitySolution.endpointConsoleCommands.runninProcesses.about',
-        {
-          defaultMessage: 'Display the processes on the endpoint',
-        }
-      ),
+      about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.processes.about', {
+        defaultMessage: 'Display the processes on the endpoint',
+      }),
       RenderComponent: GetProcessesActionResult,
       meta: {
         endpointId: endpointAgentId,
@@ -83,7 +80,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           required: false,
           allowMultiples: false,
           about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.isolate.arg.comment',
+            'xpack.securitySolution.endpointConsoleCommands.processes.arg.comment',
             { defaultMessage: 'A comment to go along with the action' }
           ),
         },
