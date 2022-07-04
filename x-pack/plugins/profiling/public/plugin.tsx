@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { getServices } from './services';
 
 export class ProdfilerPlugin implements Plugin {

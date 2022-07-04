@@ -7,8 +7,8 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { topNElasticSearchQuery } from './topn';
-import { ElasticsearchClient, kibanaResponseFactory } from '../../../../core/server';
-import { coreMock } from '../../../../core/server/mocks';
+import { ElasticsearchClient, kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 const anyQuery = 'any::query';

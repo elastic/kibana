@@ -12,7 +12,7 @@ import {
   AggregationsHistogramBucket,
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { DataRequestHandlerContext } from '../../../data/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { fromMapToRecord, getRoutePaths } from '../../common';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
 import { createTopNSamples } from '../../common/topn';

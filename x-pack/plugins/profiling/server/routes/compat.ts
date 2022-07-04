@@ -20,7 +20,7 @@ import type {
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '../../../data/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 // Search results in 8.1 have 'body' but not in 8.3.
 export function getHits(

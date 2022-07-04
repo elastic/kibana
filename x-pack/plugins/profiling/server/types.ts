@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginSetup, PluginStart } from '../../data/server';
+import { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   data: PluginSetup;

@@ -6,7 +6,7 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import { DataRequestHandlerContext } from '../../../data/server';
+import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import { registerFlameChartElasticSearchRoute } from './flamechart';
 

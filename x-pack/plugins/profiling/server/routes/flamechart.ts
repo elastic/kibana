@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, Logger } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '../../../data/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
 import { StackTraceID } from '../../common/profiling';

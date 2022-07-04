@@ -8,8 +8,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/profiling'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/profiling',
+  roots: ['<rootDir>/x-pack/plugins/profiling'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/profiling',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/profiling/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/profiling/{common,public,server}/**/*.{ts,tsx}'],
 };

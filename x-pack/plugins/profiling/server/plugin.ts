@@ -7,7 +7,7 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import type { DataRequestHandlerContext } from '../../data/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import {
   ProfilingPluginSetup,

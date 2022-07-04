@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchRequest, IEsSearchResponse } from '../../data/common';
+import { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
 
 export interface IMyStrategyRequest extends IEsSearchRequest {
   get_project_id: number;
