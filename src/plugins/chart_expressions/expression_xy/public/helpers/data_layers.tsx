@@ -209,21 +209,22 @@ function getSplitValues(
     return [];
   }
 
-  const splitValues: Array<string | number> = [];
-  splitAccessorsMap.forEach((value, key) => {
+  return [...splitAccessorsMap].reduce<Array<string | number>>((acc, [splitAccessor, value]) => {
     const split = splitAccessors.find(
-      (accessor) => getAccessorByDimension(accessor, columns) === key
+      (accessor) => getAccessorByDimension(accessor, columns) === splitAccessor
     );
     if (split) {
       const splitColumnId = getAccessorByDimension(split, columns);
       const splitFormatByAccessor = getFormat(columns, split);
       const splitFormatter = formatFactory(splitFormatByAccessor);
-      splitValues.push(
-        alreadyFormattedColumns[splitColumnId] ? value : splitFormatter.convert(value)
-      );
+      return [
+        ...acc,
+        alreadyFormattedColumns[splitColumnId] ? value : splitFormatter.convert(value),
+      ];
     }
-  });
-  return splitValues;
+
+    return acc;
+  }, []);
 }
 
 export const getSeriesName: GetSeriesNameFn = (
@@ -366,11 +367,10 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   const scaleType = yAxis?.scaleType || ScaleType.Linear;
   const isBarChart = layer.seriesType === SeriesTypes.BAR;
   const xColumnId = layer.xAccessor && getAccessorByDimension(layer.xAccessor, table.columns);
-  const splitColumnIds = layer.splitAccessors
-    ? layer.splitAccessors.map((splitAccessor) => {
-        return getAccessorByDimension(splitAccessor, table.columns);
-      })
-    : [];
+  const splitColumnIds =
+    layer.splitAccessors?.map((splitAccessor) => {
+      return getAccessorByDimension(splitAccessor, table.columns);
+    }) || [];
   const enableHistogramMode =
     layer.isHistogram &&
     (isStacked || !splitColumnIds.length) &&
@@ -395,11 +395,10 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   // To not display them in the legend, they need to be filtered out.
   let rows = formattedTable.rows.filter(
     (row) =>
-      !(xColumnId && typeof row[xColumnId] === 'undefined') &&
+      !(xColumnId && row[xColumnId] === undefined) &&
       !(
-        splitColumnIds.length &&
-        splitColumnIds.some((splitColumnId) => typeof row[splitColumnId] === 'undefined') &&
-        typeof row[accessor] === 'undefined'
+        splitColumnIds.some((splitColumnId) => row[splitColumnId] === undefined) &&
+        row[accessor] === undefined
       )
   );
 

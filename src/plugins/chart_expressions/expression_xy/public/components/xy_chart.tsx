@@ -490,7 +490,7 @@ export function XYChart({
         ? formatFactory(xFormat)
         : xAxisFormatter;
 
-    let rowIndex = table.rows.findIndex((row) => {
+    const rowIndex = table.rows.findIndex((row) => {
       if (xAccessor) {
         if (formattedDatatables[layer.layerId]?.formattedColumns[xAccessor]) {
           // stringify the value to compare with the chart value
@@ -505,23 +505,37 @@ export function XYChart({
         row: rowIndex,
         column: table.columns.findIndex((col) => col.id === xAccessor),
         value: xAccessor ? table.rows[rowIndex][xAccessor] : xyGeometry.x,
+        table,
       },
     ];
 
+    let splitPoints: FilterEvent['data']['data'] = [];
+
     if (xySeries.seriesKeys.length > 1) {
-      xySeries.splitAccessors.forEach((value, key) => {
-        rowIndex = table.rows.findIndex((row) => {
-          return row[key] === value;
-        });
-        points.push({
-          row: rowIndex,
-          column: table.columns.findIndex((column) => column.id === key),
-          value: table.rows[rowIndex][key],
-        });
-      });
+      splitPoints = [...xySeries.splitAccessors].reduce<FilterEvent['data']['data']>(
+        (acc, [accessor, value]) => {
+          const splitPointRowIndex = table.rows.findIndex((row) => {
+            return row[accessor] === value;
+          });
+          if (splitPointRowIndex !== -1) {
+            return [
+              ...acc,
+              {
+                row: splitPointRowIndex,
+                column: table.columns.findIndex((column) => column.id === accessor),
+                value: table.rows[splitPointRowIndex][accessor],
+                table,
+              },
+            ];
+          }
+
+          return acc;
+        },
+        []
+      );
     }
     const context: FilterEvent['data'] = {
-      data: points.map(({ row, column, value }) => ({ row, column, value, table })),
+      data: [...points, ...splitPoints],
     };
     onClickValue(context);
   };

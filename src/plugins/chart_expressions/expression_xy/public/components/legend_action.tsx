@@ -43,21 +43,27 @@ export const getLegendAction = (
 
     const { table } = layer;
 
-    const data: FilterEvent['data']['data'] = [];
-
-    series.splitAccessors.forEach((value, key) => {
-      const rowIndex = table.rows.findIndex((row) => {
-        return row[key] === value;
-      });
-      if (rowIndex !== -1) {
-        data.push({
-          row: rowIndex,
-          column: table.columns.findIndex((column) => column.id === key),
-          value: table.rows[rowIndex][key],
-          table,
+    const data = [...series.splitAccessors].reduce<FilterEvent['data']['data']>(
+      (acc, [accessor, value]) => {
+        const rowIndex = table.rows.findIndex((row) => {
+          return row[accessor] === value;
         });
-      }
-    });
+        if (rowIndex !== -1) {
+          return [
+            ...acc,
+            {
+              row: rowIndex,
+              column: table.columns.findIndex((column) => column.id === accessor),
+              value: table.rows[rowIndex][accessor],
+              table,
+            },
+          ];
+        }
+
+        return acc;
+      },
+      []
+    );
 
     if (data.length === 0) {
       return null;

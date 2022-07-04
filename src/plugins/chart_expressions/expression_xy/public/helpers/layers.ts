@@ -84,13 +84,12 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
         !accessors.length ||
         !table ||
         table.rows.length === 0 ||
-        (xAccessor &&
-          table.rows.every((row) => xAccessor && typeof row[xAccessor] === 'undefined')) ||
+        (xAccessor && table.rows.every((row) => xAccessor && row[xAccessor] === undefined)) ||
         // stacked percentage bars have no xAccessors but splitAccessor with undefined values in them when empty
         (!xAccessor &&
           splitAccessors.length &&
           table.rows.every((row) =>
-            splitAccessors.every((splitAccessor) => typeof row[splitAccessor] === 'undefined')
+            splitAccessors.every((splitAccessor) => row[splitAccessor] === undefined)
           ))
       );
     }

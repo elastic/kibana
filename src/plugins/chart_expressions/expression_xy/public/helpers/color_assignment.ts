@@ -7,12 +7,13 @@
  */
 
 import { mapValues } from 'lodash';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
 import { euiLightVars } from '@kbn/ui-theme';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
@@ -29,54 +30,56 @@ export type ColorAssignments = Record<
   }
 >;
 
+function getSplitName(
+  splitAccessors: Array<ExpressionValueVisDimension | string> = [],
+  table: Datatable,
+  row: DatatableRow,
+  formatFactory: FormatFactory
+) {
+  return splitAccessors.reduce<string>((splitName, accessor) => {
+    const splitColumn = getColumnByAccessor(accessor, table.columns);
+    if (!splitColumn) return;
+    const splitAccessor = getAccessorByDimension(accessor, table.columns);
+    const columnFormatter = splitAccessor && formatFactory(getFormat(table.columns, splitAccessor));
+    const name = columnFormatter ? columnFormatter.convert(row[splitAccessor]) : row[splitAccessor];
+    if (splitName) {
+      return `${splitName} - ${name}`;
+    } else {
+      return name;
+    }
+  }, '');
+}
+
 export const getAllSeries = (
   table: Datatable,
   splitAccessors: CommonXYDataLayerConfig['splitAccessors'] = [],
-  accessors: CommonXYDataLayerConfig['accessors'],
+  accessors: Array<ExpressionValueVisDimension | string>,
   columnToLabel: CommonXYDataLayerConfig['columnToLabel'],
   titles: LayerAccessorsTitles,
   formatFactory: FormatFactory
 ) => {
-  const allSeries: string[] = [];
   if (!table) {
     return [];
   }
 
   const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
 
-  table.rows.forEach((row) => {
-    let seriesName = '';
-    splitAccessors.forEach((accessor) => {
-      const splitColumn = getColumnByAccessor(accessor, table.columns);
-      if (!splitColumn) return;
-      const splitAccessor = getAccessorByDimension(accessor, table.columns);
-      const columnFormatter =
-        splitAccessor && formatFactory(getFormat(table.columns, splitAccessor));
-      const name = columnFormatter
-        ? columnFormatter.convert(row[splitAccessor])
-        : row[splitAccessor];
-      if (seriesName) {
-        seriesName += ` - ${name}`;
-      } else {
-        seriesName = name;
-      }
-    });
+  return table.rows.reduce<string[]>((acc, row) => {
+    const splitName = getSplitName(splitAccessors, table, row, formatFactory);
 
-    accessors.forEach((accessor) => {
+    const allRowSeries = accessors.reduce<string[]>((names, accessor) => {
       const yAccessor = getAccessorByDimension(accessor, table.columns);
       const yTitle = columnToLabelMap[yAccessor] ?? titles?.yTitles?.[yAccessor] ?? null;
-      let name;
-      if (seriesName) {
-        name = accessors.length > 1 ? `${seriesName} - ${yTitle}` : seriesName;
+      if (splitName) {
+        return [...names, accessors.length > 1 ? `${splitName} - ${yTitle}` : splitName];
       } else {
-        name = yTitle;
+        return [...names, yTitle];
       }
-      if (!allSeries.includes(name)) {
-        allSeries.push(name);
-      }
-    });
-  });
-  return allSeries;
+    }, []);
+
+    // need only uniq values
+    return [...new Set([...acc, ...allRowSeries])];
+  }, []);
 };
 
 export function getColorAssignments(
