@@ -8,8 +8,6 @@
 import React from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
 
 const heights = {
@@ -22,8 +20,6 @@ const panelStyle = {
 };
 
 export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height = 'tall' }) => {
-  const { http } = useKibana<CoreStart>().services;
-
   return (
     <EuiPanel color="subdued" data-test-subj="alertsStateTableEmptyState">
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
