@@ -148,7 +148,10 @@ describe('discover sidebar', function () {
     findTestSubject(compWithPicker, 'dataView-switch-link').simulate('click');
     expect(findTestSubject(compWithPicker, 'changeDataViewPopover').length).toBe(1);
     // click "Add a field"
-    const addFieldButtonInDataViewPicker = findTestSubject(compWithPicker, 'dataView-add-field');
+    const addFieldButtonInDataViewPicker = findTestSubject(
+      compWithPicker,
+      'indexPattern-add-field'
+    );
     expect(addFieldButtonInDataViewPicker.length).toBe(1);
     addFieldButtonInDataViewPicker.simulate('click');
     expect(props.editField).toHaveBeenCalledWith();

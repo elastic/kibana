@@ -75,7 +75,7 @@ describe('Discover flyout', function () {
     const { component, props } = mountComponent({});
 
     const url = findTestSubject(component, 'docTableRowAction').prop('href');
-    expect(url).toMatchInlineSnapshot(`"/base/app/discover#/doc/the-index-pattern-id/i?id=1"`);
+    expect(url).toMatchInlineSnapshot(`"/base/app/discover#/doc/the-data-view-id/i?id=1"`);
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(props.onClose).toHaveBeenCalled();
   });

@@ -105,4 +105,4 @@ export const buildDataViewMock = ({
   return dataView;
 };
 
-export const dataViewMock = buildDataViewMock({ name: 'the-index-pattern', fields });
+export const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields });

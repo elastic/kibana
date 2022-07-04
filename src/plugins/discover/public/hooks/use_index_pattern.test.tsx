@@ -22,7 +22,7 @@ describe('Use data view', () => {
 
   test('returning an error', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useDataView(dataViewsMock, 'invalid-index-pattern-id')
+      useDataView(dataViewsMock, 'invalid-data-view-id')
     );
     await waitForNextUpdate();
     expect(result.current.dataView).toBe(undefined);

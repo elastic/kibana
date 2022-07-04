@@ -16,7 +16,7 @@ export const dataViewsMock = {
   get: async (id: string) => {
     if (id === 'the-data-view-id') {
       return Promise.resolve(dataViewMock);
-    } else if (id === 'invalid-index-pattern-id') {
+    } else if (id === 'invalid-data-view-id') {
       return Promise.reject('Invald');
     }
   },
