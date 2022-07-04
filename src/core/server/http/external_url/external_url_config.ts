@@ -7,9 +7,9 @@
  */
 
 import { createSHA256Hash } from '@kbn/crypto';
-import { config } from './config';
+import { externalUrlConfig } from './config';
 
-const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
+const DEFAULT_CONFIG = Object.freeze(externalUrlConfig.schema.validate({}));
 
 /**
  * External Url configuration for use in Kibana.
