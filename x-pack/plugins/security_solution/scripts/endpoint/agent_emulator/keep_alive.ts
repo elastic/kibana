@@ -78,6 +78,14 @@ export class AgentKeepAliveService {
 
     // FIXME: process here
 
+    // 1. Retrieve endpoints
+    // 2. for each Endpoint:
+    //    a. send a checkin message to fleet
+    //    b. send a metadata update
+
+    // INFO:
+    // How Fleet calculates different types of Agent status: https://github.com/elastic/kibana/blob/14c640573c18d0c47ad397662a68a330f12cfcd1/x-pack/plugins/fleet/common/services/agent_status.ts#L13-L44
+
     log.verbose(`${this.loggerPrefix('runKeepAlive()')}   ended: ${new Date().toISOString()}`);
 
     this.setNextRun();
