@@ -147,4 +147,94 @@ describe('getSavedSearch', () => {
       }
     `);
   });
+
+  test('should find saved search with sql mode', async () => {
+    savedObjectsClient.resolve = jest.fn().mockReturnValue({
+      saved_object: {
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON:
+              '{"query":{"sql":"SELECT * FROM foo"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          },
+          title: 'test2',
+          sort: [['order_date', 'desc']],
+          columns: ['_source'],
+          description: 'description',
+          grid: {},
+          hideChart: true,
+          isTextBasedQuery: true,
+        },
+        id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
+        type: 'search',
+        references: [
+          {
+            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+            type: 'index-pattern',
+          },
+        ],
+        namespaces: ['default'],
+      },
+      outcome: 'exactMatch',
+    });
+
+    const savedSearch = await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
+      savedObjectsClient,
+      search,
+    });
+
+    expect(savedObjectsClient.resolve).toHaveBeenCalled();
+    expect(savedSearch).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          "_source",
+        ],
+        "description": "description",
+        "grid": Object {},
+        "hideAggregatedPreview": undefined,
+        "hideChart": true,
+        "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
+        "isTextBasedQuery": true,
+        "rowHeight": undefined,
+        "searchSource": Object {
+          "create": [MockFunction],
+          "createChild": [MockFunction],
+          "createCopy": [MockFunction],
+          "destroy": [MockFunction],
+          "fetch": [MockFunction],
+          "fetch$": [MockFunction],
+          "getField": [MockFunction],
+          "getFields": [MockFunction],
+          "getId": [MockFunction],
+          "getOwnField": [MockFunction],
+          "getParent": [MockFunction],
+          "getSearchRequestBody": [MockFunction],
+          "getSerializedFields": [MockFunction],
+          "history": Array [],
+          "onRequestStart": [MockFunction],
+          "removeField": [MockFunction],
+          "serialize": [MockFunction],
+          "setField": [MockFunction],
+          "setFields": [MockFunction],
+          "setOverwriteDataViewType": [MockFunction],
+          "setParent": [MockFunction],
+          "toExpressionAst": [MockFunction],
+        },
+        "sharingSavedObjectProps": Object {
+          "aliasPurpose": undefined,
+          "aliasTargetId": undefined,
+          "errorJSON": undefined,
+          "outcome": "exactMatch",
+        },
+        "sort": Array [
+          Array [
+            "order_date",
+            "desc",
+          ],
+        ],
+        "title": "test2",
+        "viewMode": undefined,
+      }
+    `);
+  });
 });

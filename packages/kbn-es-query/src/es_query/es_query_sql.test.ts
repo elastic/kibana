@@ -57,6 +57,23 @@ describe('sql query helpers', () => {
 
       const idxPattern2 = getIndexPatternFromSQLQuery('SELECT woof, meow FROM "foo"');
       expect(idxPattern2).toBe('foo');
+
+      const idxPattern3 = getIndexPatternFromSQLQuery('SELECT woof, meow FROM "the_index_pattern"');
+      expect(idxPattern3).toBe('the_index_pattern');
+
+      const idxPattern4 = getIndexPatternFromSQLQuery('SELECT woof, meow FROM "the-index-pattern"');
+      expect(idxPattern4).toBe('the-index-pattern');
+
+      const idxPattern5 = getIndexPatternFromSQLQuery('SELECT woof, meow from "the-index-pattern"');
+      expect(idxPattern5).toBe('the-index-pattern');
+
+      const idxPattern6 = getIndexPatternFromSQLQuery('SELECT woof, meow from "logstash-*"');
+      expect(idxPattern6).toBe('logstash-*');
+
+      const idxPattern7 = getIndexPatternFromSQLQuery(
+        'SELECT woof, meow from logstash-1234! WHERE field > 100'
+      );
+      expect(idxPattern7).toBe('logstash-1234!');
     });
   });
 });

@@ -105,6 +105,7 @@ describe('saved_searches_utils', () => {
         description: 'description',
         grid: {},
         hideChart: true,
+        isTextBasedQuery: true,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
@@ -117,7 +118,7 @@ describe('saved_searches_utils', () => {
           "grid": Object {},
           "hideAggregatedPreview": undefined,
           "hideChart": true,
-          "isTextBasedQuery": false,
+          "isTextBasedQuery": true,
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },

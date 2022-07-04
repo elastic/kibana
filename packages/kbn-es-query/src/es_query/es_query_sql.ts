@@ -27,7 +27,9 @@ export function getAggregateQueryMode(query: AggregateQuery): string {
 // retrieves the index pattern from the aggregate query
 export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
   const sql = sqlQuery?.replaceAll('"', '').replaceAll("'", '');
-  const matches = sql?.match(/FROM\s+([\w*]+)/);
+  // case insensitive match for the index pattern
+  const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;]+)/, 'i');
+  const matches = sql?.match(regex);
   if (matches) {
     return matches[1];
   }
