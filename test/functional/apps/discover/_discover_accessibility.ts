@@ -54,7 +54,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await hasFocus('discover-dataView-switch-link')).to.be(true);
     });
 
-    describe('top nav menu buttons', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/135305
+    describe.skip('top nav menu buttons', () => {
       const focusAndPressButton = async (buttonTestSubject: string | WebElementWrapper) => {
         const button =
           typeof buttonTestSubject === 'string'
