@@ -13,7 +13,7 @@ import { Server as HapiServer } from '@hapi/hapi';
 import { createHttpServer } from '../../http/test_utils';
 import { HttpService, IRouter } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
-import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ServerMetricsCollector } from '../collectors/server';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 

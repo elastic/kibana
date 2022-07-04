@@ -15,6 +15,7 @@ import { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
+import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
@@ -29,7 +30,6 @@ import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
-import { InternalEnvironmentServicePreboot } from '../environment';
 
 /** @internal */
 export type DiscoveredPlugins = {
