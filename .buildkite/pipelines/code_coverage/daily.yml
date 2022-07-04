@@ -1,5 +1,6 @@
 notify:
   - slack:
+      if: build.state == "passed"
       channels:
         - "elastic#kibana-qa"
 steps:
