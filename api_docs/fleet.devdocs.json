@@ -15721,13 +15721,7 @@
             "text": "ListWithKuery"
           },
           " extends ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.HttpFetchQuery",
-            "text": "HttpFetchQuery"
-          }
+          "HttpFetchQuery"
         ],
         "path": "x-pack/plugins/fleet/common/types/rest_spec/common.ts",
         "deprecated": false,

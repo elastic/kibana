@@ -4401,6 +4401,9 @@
         "tags": [],
         "label": "METRIC_TYPE",
         "description": [],
+        "signature": [
+          "METRIC_TYPE"
+        ],
         "path": "node_modules/@types/kbn__analytics/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -4516,6 +4519,9 @@
         "tags": [],
         "label": "DropResult",
         "description": [],
+        "signature": [
+          "DropResult"
+        ],
         "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
         "deprecated": false,
         "initialIsOpen": false
