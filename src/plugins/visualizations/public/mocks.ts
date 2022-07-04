@@ -14,7 +14,6 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
@@ -52,7 +51,6 @@ const createInstance = async () => {
     embeddable: embeddablePluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
     inspector: inspectorPluginMock.createSetupContract(),
-    usageCollection: usageCollectionPluginMock.createSetupContract(),
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
     uiActions: uiActionsPluginMock.createSetupContract(),
   });
