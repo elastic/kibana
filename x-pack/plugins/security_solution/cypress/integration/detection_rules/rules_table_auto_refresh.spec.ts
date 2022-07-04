@@ -15,6 +15,7 @@ import {
   clearAllRuleSelection,
   selectNumberOfRules,
   mockGlobalClock,
+  disableAutoRefresh,
 } from '../../tasks/alerts_detection_rules';
 import { login, visit } from '../../tasks/login';
 
@@ -29,10 +30,9 @@ describe('Alerts detection rules table auto-refresh', () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRule(getNewRule(), '1');
-    createCustomRule(getNewRule(), '2');
-    createCustomRule(getNewRule(), '3');
-    createCustomRule(getNewRule(), '4');
+    for (let i = 1; i < 7; i += 1) {
+      createCustomRule({ ...getNewRule(), name: `Test rule ${i}` }, `${i}`);
+    }
   });
 
   it('Auto refreshes rules', () => {
@@ -40,6 +40,10 @@ describe('Alerts detection rules table auto-refresh', () => {
 
     mockGlobalClock();
     waitForRulesTableToBeLoaded();
+
+    // ensure rules have rendered. As there is no user interaction in this test,
+    // rules were not rendered before test completes
+    cy.get(RULE_CHECKBOX).should('have.length', 6);
 
     // mock 1 minute passing to make sure refresh is conducted
     checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
@@ -60,10 +64,7 @@ describe('Alerts detection rules table auto-refresh', () => {
     cy.get(RULE_CHECKBOX).first().should('be.checked');
   });
 
-  it('should stop auto refresh when any rule selected', () => {
-    createCustomRule(getNewRule(), '5');
-    createCustomRule(getNewRule(), '6');
-
+  it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     changeRowsPerPageTo(5);
@@ -82,5 +83,24 @@ describe('Alerts detection rules table auto-refresh', () => {
 
     // after all rules unselected, auto refresh should renew
     cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'true');
+  });
+
+  it('should not enable auto refresh after rules deselection if auto refresh was disabled', () => {
+    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+    waitForRulesTableToBeLoaded();
+    changeRowsPerPageTo(5);
+
+    openRefreshSettingsPopover();
+    disableAutoRefresh();
+
+    selectAllRules();
+
+    openRefreshSettingsPopover();
+    cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
+
+    clearAllRuleSelection();
+
+    // after all rules unselected, auto refresh should still be disabled
+    cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
   });
 });

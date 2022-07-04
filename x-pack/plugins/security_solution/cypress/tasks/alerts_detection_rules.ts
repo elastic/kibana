@@ -305,6 +305,10 @@ export const openRefreshSettingsPopover = () => {
   cy.get(REFRESH_SETTINGS_SWITCH).should('be.visible');
 };
 
+export const disableAutoRefresh = () => {
+  cy.get(REFRESH_SETTINGS_SWITCH).click().should('have.attr', 'aria-checked', 'false');
+};
+
 export const mockGlobalClock = () => {
   /**
    * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
