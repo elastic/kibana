@@ -208,15 +208,15 @@ export const RulesTableContextProvider = ({
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
   useEffect(() => {
-    /**
-     * pause table auto refresh when any of rule selected
-     */
+    // pause table auto refresh when any of rule selected
+    // store current auto refresh value, to use it later, when all rules selection will be cleared
     if (selectedRuleIds.length > 0) {
       setIsRefreshOn(false);
       if (autoRefreshBeforePause.current == null) {
         autoRefreshBeforePause.current = isRefreshOn;
       }
     } else {
+      // if no rules selected, update auto refresh value, with previously stored value
       setIsRefreshOn(autoRefreshBeforePause.current ?? isRefreshOn);
       autoRefreshBeforePause.current = null;
     }
