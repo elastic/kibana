@@ -13,7 +13,7 @@ describe('expression params validation', () => {
     const initialParams: EsQueryAlertParams<SearchType.esQuery> =
       {} as EsQueryAlertParams<SearchType.esQuery>;
     expect(validateExpression(initialParams).errors.searchType.length).toBeGreaterThan(0);
-    expect(validateExpression(initialParams).errors.searchType[0]).toBe('Query is required.');
+    expect(validateExpression(initialParams).errors.searchType[0]).toBe('Query type is required.');
   });
 
   test('if index property is invalid should return proper error message', () => {
