@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type {
-  Event,
-  EventType,
-  EventContext,
-  TelemetryCounter,
-  TelemetryCounterType,
-} from './types';
+export { schemaToIoTs } from './schema_to_io_ts';
+export { validateSchema } from './validate_schema';
