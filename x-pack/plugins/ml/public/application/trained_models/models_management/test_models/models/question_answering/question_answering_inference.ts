@@ -48,6 +48,12 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
     'xpack.ml.trainedModels.testModelsFlyout.questionAnswer.label',
     { defaultMessage: 'Question answering' }
   );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.questionAnswer.info1', {
+      defaultMessage:
+        'Provide a question and test how well the model extracts an answer from your input text',
+    }),
+  ];
 
   public questionText$ = new BehaviorSubject<string>('');
 

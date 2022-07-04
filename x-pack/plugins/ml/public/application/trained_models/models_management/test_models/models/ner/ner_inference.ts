@@ -25,6 +25,11 @@ export class NerInference extends InferenceBase<NerResponse> {
     'xpack.ml.trainedModels.testModelsFlyout.ner.label',
     { defaultMessage: 'Named entity recognition' }
   );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.info1', {
+      defaultMessage: 'Test how well the model identifies named entities in your input text',
+    }),
+  ];
 
   public async infer() {
     try {

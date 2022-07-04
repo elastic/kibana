@@ -32,6 +32,11 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
     'xpack.ml.trainedModels.testModelsFlyout.textEmbedding.label',
     { defaultMessage: 'Text embedding' }
   );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.textEmbedding.info1', {
+      defaultMessage: 'Test how well the model generates embeddings for your text',
+    }),
+  ];
 
   public async infer() {
     try {

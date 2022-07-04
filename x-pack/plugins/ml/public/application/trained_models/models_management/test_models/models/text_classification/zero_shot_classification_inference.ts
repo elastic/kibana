@@ -21,6 +21,12 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
     'xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.label',
     { defaultMessage: 'Zero shot classification' }
   );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.info1', {
+      defaultMessage:
+        'Provide a set of labels and test how well the model classifies your input text',
+    }),
+  ];
 
   public labelsText$ = new BehaviorSubject<string>('');
 
