@@ -23,3 +23,13 @@ export function isOfAggregateQueryType(query: AggregateQuery | Query): query is 
 export function getAggregateQueryMode(query: AggregateQuery): string {
   return Object.keys(query)[0];
 }
+
+// retrieves the index pattern from the aggregate query
+export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
+  const sql = sqlQuery?.replaceAll('"', '').replaceAll("'", '');
+  const matches = sql?.match(/FROM\s+([\w*]+)/);
+  if (matches) {
+    return matches[1];
+  }
+  return '';
+}

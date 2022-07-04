@@ -8,7 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, getIndexPatternFromSQLQuery } from '@kbn/es-query';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -26,15 +26,6 @@ import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
-
-function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
-  const sql = sqlQuery?.replaceAll('"', '');
-  const matches = sql?.match(/FROM\s+([\w*]+)/);
-  if (matches) {
-    return matches[1];
-  }
-  return '';
-}
 
 export function useDiscoverState({
   services,

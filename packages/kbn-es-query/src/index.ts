@@ -56,6 +56,7 @@ export {
   isOfQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
+  getIndexPatternFromSQLQuery,
 } from './es_query';
 
 export {
