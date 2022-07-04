@@ -16,7 +16,7 @@ import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mock
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
 
-describe('When using processes action from response actions console', () => {
+describe('When using running-processes action from response actions console', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
@@ -52,9 +52,9 @@ describe('When using processes action from response actions console', () => {
     };
   });
 
-  it('should call `processes` api when command is entered', async () => {
+  it('should call `running-procs` api when command is entered', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes');
+    enterConsoleCommand(renderResult, 'running-processes');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.runningProcesses).toHaveBeenCalledTimes(1);
@@ -63,7 +63,7 @@ describe('When using processes action from response actions console', () => {
 
   it('should accept an optional `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes --comment "This is a comment"');
+    enterConsoleCommand(renderResult, 'running-processes --comment "This is a comment"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.runningProcesses).toHaveBeenCalledWith(
@@ -76,32 +76,32 @@ describe('When using processes action from response actions console', () => {
 
   it('should only accept one `--comment`', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes --comment "one" --comment "two"');
+    enterConsoleCommand(renderResult, 'running-processes --comment "one" --comment "two"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
     );
   });
 
-  it('should call the action status api after creating the `processes` request', async () => {
+  it('should call the action status api after creating the `running-processes` request', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes');
+    enterConsoleCommand(renderResult, 'running-processes');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
     });
   });
 
-  it('should show success when `processes` action completes with no errors', async () => {
+  it('should show success when `running-processes` action completes with no errors', async () => {
     await render();
-    enterConsoleCommand(renderResult, 'processes');
+    enterConsoleCommand(renderResult, 'running-processes');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getRunningProcessesSuccessCallout')).toBeTruthy();
     });
   });
 
-  it('should show error if get processes failed to complete successfully', async () => {
+  it('should show error if get running-processes failed to complete successfully', async () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/1.2.3',
     });
@@ -109,7 +109,7 @@ describe('When using processes action from response actions console', () => {
     pendingDetailResponse.data.errors = ['error one', 'error two'];
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
-    enterConsoleCommand(renderResult, 'processes');
+    enterConsoleCommand(renderResult, 'running-processes');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('getRunningProcessesErrorCallout').textContent).toMatch(
@@ -124,7 +124,7 @@ describe('When using processes action from response actions console', () => {
 
       render = async () => {
         const response = await _render();
-        enterConsoleCommand(response, 'processes');
+        enterConsoleCommand(response, 'running-processes');
 
         await waitFor(() => {
           expect(apiMocks.responseProvider.runningProcesses).toHaveBeenCalledTimes(1);
@@ -137,7 +137,7 @@ describe('When using processes action from response actions console', () => {
       };
     });
 
-    it('should NOT send the `processes` request again', async () => {
+    it('should NOT send the `running-processes` request again', async () => {
       await render();
       await consoleManagerMockAccess.openRunningConsole();
 
