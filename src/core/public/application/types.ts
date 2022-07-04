@@ -762,6 +762,10 @@ export interface NavigateToUrlOptions {
    * if true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using `window.location.assign` instead of `push`)
    */
   forceRedirect?: boolean;
+  /**
+   * optional state to forward to the application
+   */
+  state?: unknown;
 }
 
 /** @public */

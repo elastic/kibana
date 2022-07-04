@@ -27,12 +27,11 @@ import {
   getLayerList,
   getMapReady,
   getMapSettings,
-  getScrollZoom,
   getSpatialFiltersLayer,
   getTimeslice,
 } from '../../selectors/map_selectors';
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
-import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
+import { getInspectorAdapters, getOnMapMove } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
 import { DRAW_MODE } from '../../../common/constants';
 import { TileMetaFeature } from '../../../common/descriptor_types';
@@ -47,12 +46,12 @@ function mapStateToProps(state: MapStoreState) {
     spatialFiltersLayer: getSpatialFiltersLayer(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
-    scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
     timeslice: getTimeslice(state),
     featureModeActive:
       getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
     filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
+    onMapMove: getOnMapMove(state),
   };
 }
 
