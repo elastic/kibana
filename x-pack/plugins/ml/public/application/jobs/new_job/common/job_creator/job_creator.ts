@@ -774,7 +774,8 @@ export class JobCreator {
       runtimeMappings: this.datafeedConfig.runtime_mappings,
       indicesOptions: this.datafeedConfig.indices_options,
     });
-    this.setTimeRange(start.epoch, end.epoch);
+
+    this.setTimeRange(start, end);
   }
 
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {
