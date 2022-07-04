@@ -27,6 +27,8 @@ import type { Agent } from '../../types';
 
 import { getAllFleetServerAgents } from '../../collectors/get_all_fleet_server_agents';
 
+import { getSourceUriForAgent } from './helpers';
+
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
   undefined,
@@ -48,7 +50,10 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
+
   const agent = await getAgentById(esClient, request.params.agentId);
+  const sourceUriForAgent = await getSourceUriForAgent(soClient, agent);
+
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return response.customError({
       statusCode: 400,
@@ -72,7 +77,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       esClient,
       agentId: request.params.agentId,
       version,
-      sourceUri,
+      sourceUri: sourceUriForAgent,
     });
 
     const body: PostAgentUpgradeResponse = {};

@@ -132,7 +132,6 @@ async function upgradeBatch(
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
-
   // results from getAgents with options.kuery '' (or even 'active:false') may include hosted agents
   // filter them out unless options.force
   const agentsToCheckUpgradeable =

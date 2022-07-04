@@ -48,6 +48,7 @@ export interface NewAgentAction {
   expiration?: string;
   start_time?: string;
   minimum_execution_duration?: number;
+  source_uri?: string;
 }
 
 export interface AgentAction extends NewAgentAction {
