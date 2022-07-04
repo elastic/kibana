@@ -29,10 +29,11 @@ export class CaseRegistry<T extends BaseItem> {
   public register(item: T) {
     if (this.has(item.id)) {
       throw new Error(
-        i18n.translate('xpack.cases.registry.duplicateItemErrorMessage', {
-          defaultMessage: `Item "{id}" is already registered on registry ${this.name}`,
+        i18n.translate('xpack.cases.registry.register.duplicateItemErrorMessage', {
+          defaultMessage: 'Item "{id}" is already registered on registry {name}',
           values: {
             id: item.id,
+            name: this.name,
           },
         })
       );
@@ -49,10 +50,11 @@ export class CaseRegistry<T extends BaseItem> {
 
     if (!item) {
       throw new Error(
-        i18n.translate('xpack.cases.typeRegistry.get.missingActionTypeErrorMessage', {
-          defaultMessage: `Item "{id}" is not registered on registry ${this.name}`,
+        i18n.translate('xpack.cases.registry.get.missingItemErrorMessage', {
+          defaultMessage: 'Item "{id}" is not registered on registry {name}',
           values: {
             id,
+            name: this.name,
           },
         })
       );
