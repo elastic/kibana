@@ -64,7 +64,7 @@ export interface FieldBrowserProps {
   /** Callback to reset the default columns */
   onResetColumns: () => void;
   /** Callback to toggle a field column */
-  onToggleColumn: (fieldId: string) => void;
+  onToggleColumn: (columnId: string) => void;
   /** The options to customize the field browser, supporting columns rendering and button to create fields */
   options?: FieldBrowserOptions;
   /** The width of the field browser */

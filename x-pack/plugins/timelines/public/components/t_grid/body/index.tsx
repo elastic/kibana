@@ -457,18 +457,18 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     }, [defaultColumns, dispatch, id]);
 
     const onToggleColumn = useCallback(
-      (fieldId: string) => {
-        if (columnHeaders.some(({ id: columnId }) => columnId === fieldId)) {
+      (columnId: string) => {
+        if (columnHeaders.some(({ id: columnHeaderId }) => columnId === columnHeaderId)) {
           dispatch(
             tGridActions.removeColumn({
-              columnId: fieldId,
+              columnId,
               id,
             })
           );
         } else {
           dispatch(
             tGridActions.upsertColumn({
-              column: getColumnHeader(fieldId, defaultColumns),
+              column: getColumnHeader(columnId, defaultColumns),
               id,
               index: 1,
             })

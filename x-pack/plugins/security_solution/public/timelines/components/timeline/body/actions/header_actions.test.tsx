@@ -34,7 +34,7 @@ jest.mock('../../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn(),
 }));
 
-const fieldId = 'test-field';
+const columnId = 'test-field';
 const timelineId = 'test-timeline';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -43,11 +43,11 @@ mockTriggersActionsUi.getFieldBrowser.mockImplementation(
     onToggleColumn,
     onResetColumns,
   }: {
-    onToggleColumn: (field: string) => void;
+    onToggleColumn: (columnId: string) => void;
     onResetColumns: () => void;
   }) => (
     <div data-test-subj="mock-field-browser">
-      <div data-test-subj="mock-toggle-button" onClick={() => onToggleColumn(fieldId)} />
+      <div data-test-subj="mock-toggle-button" onClick={() => onToggleColumn(columnId)} />
       <div data-test-subj="mock-reset-button" onClick={onResetColumns} />
     </div>
   )
@@ -99,7 +99,7 @@ describe('HeaderActions', () => {
 
       expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.upsertColumn({
-          column: getColumnHeader(fieldId, []),
+          column: getColumnHeader(columnId, []),
           id: timelineId,
           index: 1,
         })
@@ -111,7 +111,7 @@ describe('HeaderActions', () => {
         <TestProviders>
           <HeaderActions
             {...defaultProps}
-            columnHeaders={[{ id: fieldId } as unknown as ColumnHeaderOptions]}
+            columnHeaders={[{ id: columnId } as unknown as ColumnHeaderOptions]}
           />
         </TestProviders>
       );
@@ -119,7 +119,7 @@ describe('HeaderActions', () => {
 
       expect(mockDispatch).toHaveBeenCalledWith(
         timelineActions.removeColumn({
-          columnId: fieldId,
+          columnId,
           id: timelineId,
         })
       );

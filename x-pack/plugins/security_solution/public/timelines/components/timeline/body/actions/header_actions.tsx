@@ -179,18 +179,18 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   }, [defaultColumns, dispatch, timelineId]);
 
   const onToggleColumn = useCallback(
-    (fieldId: string) => {
-      if (columnHeaders.some(({ id }) => id === fieldId)) {
+    (columnId: string) => {
+      if (columnHeaders.some(({ id }) => id === columnId)) {
         dispatch(
           timelineActions.removeColumn({
-            columnId: fieldId,
+            columnId,
             id: timelineId,
           })
         );
       } else {
         dispatch(
           timelineActions.upsertColumn({
-            column: getColumnHeader(fieldId, defaultColumns),
+            column: getColumnHeader(columnId, defaultColumns),
             id: timelineId,
             index: 1,
           })

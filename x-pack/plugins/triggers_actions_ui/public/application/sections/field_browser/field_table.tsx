@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
 import { getFieldColumns, getFieldItems, isActionsColumn } from './field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from './helpers';
-import type { BrowserFields, GetFieldTableColumns } from './types';
+import type { BrowserFields, FieldBrowserProps, GetFieldTableColumns } from './types';
 import { FieldTableHeader } from './field_table_header';
 import { styles } from './field_table.styles';
 
@@ -17,8 +17,7 @@ const DEFAULT_SORTING: { field: string; direction: Direction } = {
   direction: 'asc',
 } as const;
 
-export interface FieldTableProps {
-  columnIds: string[];
+export interface FieldTableProps extends Pick<FieldBrowserProps, 'columnIds' | 'onToggleColumn'> {
   /**
    * A map of categoryId -> metadata about the fields in that category,
    * filtered such that the name of every field in the category includes
@@ -28,7 +27,6 @@ export interface FieldTableProps {
   /** when true, show only the the selected field */
   filterSelectedEnabled: boolean;
   onFilterSelectedChange: (enabled: boolean) => void;
-  onToggleColumn: (fieldId: string) => void;
   /**
    * Optional function to customize field table columns
    */
