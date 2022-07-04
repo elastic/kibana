@@ -10,6 +10,7 @@ import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
 
 const heights = {
   tall: 490,
@@ -48,13 +49,7 @@ export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage
-                  size="200"
-                  alt=""
-                  url={http.basePath.prepend(
-                    '/plugins/triggers_actions_ui/application/section/alerts_table/assets/illustration_product_no_results_magnifying_glass.svg'
-                  )}
-                />
+                <EuiImage size="200" alt="" url={icon} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
