@@ -190,6 +190,7 @@ export interface GetThreatListOptions {
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  listClient: ListClient;
 }
 
 export interface ThreatListCountOptions {
@@ -242,6 +243,7 @@ export interface BuildThreatEnrichmentOptions {
   threatQuery: ThreatQuery;
   pitId: string;
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  listClient: ListClient;
 }
 
 export interface EventsOptions {
@@ -287,3 +289,8 @@ export type GetDocumentListInterface = (params: {
 export type CreateSignalInterface = (
   params: EventItem[] | ThreatListItem[]
 ) => Promise<SearchAfterAndBulkCreateReturnType>;
+
+export interface GetSortForThreatList {
+  index: string[];
+  listItemIndex: string;
+}

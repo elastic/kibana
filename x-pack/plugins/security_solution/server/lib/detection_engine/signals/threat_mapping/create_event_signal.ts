@@ -79,6 +79,7 @@ export const createEventSignal = async ({
       },
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
+      listClient,
     });
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);
