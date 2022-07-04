@@ -119,11 +119,21 @@ const useInitSearchBarUrlParams = () => {
     (savedQueryId: string | null) => {
       if (savedQueryId != null && savedQueryId !== '') {
         savedQueries.getSavedQuery(savedQueryId).then((savedQueryData) => {
-          filterManager.setFilters(savedQueryData.attributes.filters || []);
+          const filters = savedQueryData.attributes.filters || [];
+          const query = savedQueryData.attributes.query;
+
+          filterManager.setFilters(filters);
+          dispatch(
+            inputsActions.setSearchBarFilter({
+              id: 'global',
+              filters,
+            })
+          );
+
           dispatch(
             inputsActions.setFilterQuery({
               id: 'global',
-              ...savedQueryData.attributes.query,
+              ...query,
             })
           );
           dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));

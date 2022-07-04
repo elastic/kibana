@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { HomePage } from '.';
 import { SavedQuery } from '@kbn/data-plugin/public';
@@ -136,7 +136,7 @@ describe('HomePage', () => {
     );
   });
 
-  it('dispatches setSavedQuery and setFilterQuery when initializing savedQuery', () => {
+  it('initializes saved query store', async () => {
     const state = 'test-query-id';
     const savedQueryData: SavedQuery = {
       id: 'testSavedquery',
@@ -144,11 +144,21 @@ describe('HomePage', () => {
         title: 'testtitle',
         description: 'testDescription',
         query: { query: 'testQuery', language: 'testLanguage' },
+        filters: [
+          {
+            meta: {
+              alias: null,
+              negate: false,
+              disabled: false,
+            },
+            query: {},
+          },
+        ],
       },
     };
 
     mockGetSavedQuery.mockResolvedValue(savedQueryData);
-    mockUseInitializeUrlParam(CONSTANTS.appQuery, state);
+    mockUseInitializeUrlParam(CONSTANTS.savedQuery, state);
 
     render(
       <TestProviders>
@@ -158,16 +168,22 @@ describe('HomePage', () => {
       </TestProviders>
     );
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData })
-    );
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith(
+        inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData })
+      );
 
-    expect(mockDispatch).toHaveBeenCalledWith(
-      inputsActions.setFilterQuery({
+      expect(mockDispatch).toHaveBeenCalledWith(
+        inputsActions.setFilterQuery({
+          id: 'global',
+          ...savedQueryData.attributes.query,
+        })
+      );
+      expect(setSearchBarFilter).toHaveBeenCalledWith({
         id: 'global',
-        ...savedQueryData.attributes.query,
-      })
-    );
+        filters: savedQueryData.attributes.filters,
+      });
+    });
   });
 
   describe('Filters', () => {
