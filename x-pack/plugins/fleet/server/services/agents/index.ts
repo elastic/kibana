@@ -13,5 +13,6 @@ export * from './update';
 export * from './actions';
 export * from './reassign';
 export * from './setup';
+export * from './update_agent_tags';
 export { AgentServiceImpl } from './agent_service';
 export type { AgentClient, AgentService } from './agent_service';
