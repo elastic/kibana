@@ -25,5 +25,5 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 This software consists of voluntary contributions made by many
 individuals. For exact contribution history, see the revision history
 available at the following locations:
-
-- https://github.com/benfred/venn.js
+ - https://github.com/benfred/venn.js
+ - https://github.com/elastic/kibana/tree/main/x-pack/plugins/graph/public/components/venn_diagram/vennjs
