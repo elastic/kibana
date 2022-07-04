@@ -7677,7 +7677,6 @@
     "xpack.apm.errorsTable.groupIdColumnDescription": "Hachage de la trace de pile. Regroupe les erreurs similaires, même lorsque le message d'erreur est différent en raison des paramètres dynamiques.",
     "xpack.apm.errorsTable.groupIdColumnLabel": "ID du groupe",
     "xpack.apm.errorsTable.lastSeenColumnLabel": "Vu en dernier",
-    "xpack.apm.errorsTable.noErrorsLabel": "Aucune erreur trouvée",
     "xpack.apm.errorsTable.occurrencesColumnLabel": "Occurrences",
     "xpack.apm.errorsTable.typeColumnLabel": "Type",
     "xpack.apm.errorsTable.unhandledLabel": "Non géré",

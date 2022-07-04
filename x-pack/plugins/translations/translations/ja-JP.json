@@ -7671,7 +7671,6 @@
     "xpack.apm.errorsTable.groupIdColumnDescription": "スタックトレースのハッシュ。動的パラメータのため、エラーメッセージが異なる場合でも、類似したエラーをグループ化します。",
     "xpack.apm.errorsTable.groupIdColumnLabel": "グループ ID",
     "xpack.apm.errorsTable.lastSeenColumnLabel": "前回の認識",
-    "xpack.apm.errorsTable.noErrorsLabel": "エラーが見つかりません",
     "xpack.apm.errorsTable.occurrencesColumnLabel": "オカレンス",
     "xpack.apm.errorsTable.typeColumnLabel": "型",
     "xpack.apm.errorsTable.unhandledLabel": "未対応",
