@@ -48,6 +48,34 @@ export const EmptyExample = () => {
   return <Grid columns={24} />;
 };
 
+export const SimpleNestedExample = () => {
+  return (
+    <Grid
+      columns={24}
+      gridData={[
+        {
+          id: 'panel-group',
+          x: 0,
+          y: 0,
+          w: 24,
+          h: 6,
+          content: 'panel-group',
+          subGrid: {
+            acceptWidgets: true,
+            float: false,
+            cellHeight: `${64}px`,
+            margin: 4,
+            minRow: 6,
+            column: 24,
+            children: [{ id: 'nested-panel', x: 0, y: 0, w: 6, h: 3, content: 'nested-panel' }],
+          },
+        },
+        { id: 'panel1', x: 0, y: 7, w: 6, h: 3, content: 'panel1' },
+      ]}
+    />
+  );
+};
+
 export const SmallGridExample = () => {
   return <TestReactGrid columns={12} gridData={smallGridData} />;
 };

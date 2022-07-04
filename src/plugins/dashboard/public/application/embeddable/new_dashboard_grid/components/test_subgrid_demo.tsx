@@ -118,7 +118,9 @@ export const SubgridDemo = () => {
         );
 
         newGrid.batchUpdate();
-        newGrid.column(COLUMN_COUNT); // if we want panel groups that **don't** take up an entire row, this won't work
+        // H: if we want panel groups that **don't** take up an entire row, this won't work
+        // C: I think we can set column count to the same number as the width of the group widget, e.g. item.w?
+        newGrid.column(COLUMN_COUNT);
         newGrid.removeAll(false);
         const children = (item.subGrid as GridStackOptions)?.children ?? [];
         children.forEach((child) => {

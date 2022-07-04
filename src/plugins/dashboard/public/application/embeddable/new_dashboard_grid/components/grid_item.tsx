@@ -36,7 +36,7 @@ export const GridItem: FC<Props> = ({ panel, children }) => {
                 data-test-subj="embeddablePanelTitleLink"
                 aria-label="Click to edit title: [No Title]"
               >
-                {content}
+                {panel.id}
               </button>
             </span>
           </h2>
