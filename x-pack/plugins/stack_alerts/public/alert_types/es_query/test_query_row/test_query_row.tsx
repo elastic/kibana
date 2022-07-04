@@ -24,7 +24,11 @@ export interface TestQueryRowProps {
   hasValidationErrors: boolean;
 }
 
-export const TestQueryRow: React.FC<TestQueryRowProps> = ({ fetch, copyQuery, hasValidationErrors }) => {
+export const TestQueryRow: React.FC<TestQueryRowProps> = ({
+  fetch,
+  copyQuery,
+  hasValidationErrors,
+}) => {
   const { onTestQuery, testQueryResult, testQueryError, testQueryLoading } = useTestQuery(fetch);
   const [copiedMessage, setCopiedMessage] = useState<ReactNode | null>(null);
 

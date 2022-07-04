@@ -35,6 +35,7 @@ export interface RuleCommonExpressionsProps {
   onChangeWindowUnit: Parameters<typeof ForLastExpression>[0]['onChangeWindowUnit'];
   onChangeSizeValue: Parameters<typeof ValueExpression>[0]['onChangeSelectedValue'];
   onTestFetch: TestQueryRowProps['fetch'];
+  onCopyQuery?: TestQueryRowProps['copyQuery'];
 }
 
 export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
@@ -51,6 +52,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
   onChangeWindowUnit,
   onChangeSizeValue,
   onTestFetch,
+  onCopyQuery,
 }) => {
   return (
     <>
@@ -120,7 +122,11 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
         onChangeSelectedValue={onChangeSizeValue}
       />
       <EuiSpacer size="s" />
-      <TestQueryRow fetch={onTestFetch} hasValidationErrors={hasValidationErrors} />
+      <TestQueryRow
+        fetch={onTestFetch}
+        copyQuery={onCopyQuery}
+        hasValidationErrors={hasValidationErrors}
+      />
     </>
   );
 };

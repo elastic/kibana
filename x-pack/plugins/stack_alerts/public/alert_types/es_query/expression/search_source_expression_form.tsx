@@ -274,6 +274,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         errors={errors}
         hasValidationErrors={hasExpressionValidationErrors(ruleParams) || !dataView}
         onTestFetch={onTestFetch}
+        onCopyQuery={onCopyQuery}
       />
 
       <EuiSpacer />
