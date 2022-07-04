@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { Cases } from '@kbn/cases-plugin/common/ui';
 
+import uuid from 'uuid';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -40,10 +41,12 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
   const {
     services: { cases },
   } = useKibana();
-  const { to, from } = useGlobalTime();
+  const { to, from, setQuery, deleteQuery } = useGlobalTime();
   const [isLoading, setIsLoading] = useState(true);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<CaseItem[]>([]);
+  // create a unique, but stable (across re-renders) query id
+  const uniqueQueryId = useMemo(() => `useCaseItems-${uuid.v4()}`, []);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -75,6 +78,13 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
 
     if (!skip) {
       fetchCases();
+
+      setQuery({
+        id: uniqueQueryId,
+        inspect: null,
+        loading: false,
+        refetch: fetchCases,
+      });
     }
 
     if (skip) {
@@ -86,8 +96,9 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
+      deleteQuery({ id: uniqueQueryId });
     };
-  }, [cases.api.cases, from, skip, to]);
+  }, [cases.api.cases, from, skip, to, setQuery, deleteQuery, uniqueQueryId]);
 
   return { items, isLoading, updatedAt };
 };

@@ -7,7 +7,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
   <EuiHorizontalRule
     margin="xs"
   />
-  <WithEuiTheme(EuiAccordionClass)
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         data-test-subj="network-stat-group-auditbeat"
@@ -77,11 +77,11 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </WithEuiTheme(EuiAccordionClass)>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <WithEuiTheme(EuiAccordionClass)
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         data-test-subj="network-stat-group-filebeat"
@@ -291,11 +291,11 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </WithEuiTheme(EuiAccordionClass)>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <WithEuiTheme(EuiAccordionClass)
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         data-test-subj="network-stat-group-packetbeat"
@@ -435,6 +435,6 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </WithEuiTheme(EuiAccordionClass)>
+  </EuiAccordionClass>
 </styled.div>
 `;

@@ -16,8 +16,13 @@ import type {
   AnalyticsServiceSetup,
   AnalyticsServiceStart,
 } from '@kbn/core-analytics-server';
+import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
+import type {
+  InternalExecutionContextSetup,
+  InternalExecutionContextStart,
+} from '@kbn/core-execution-context-server-internal';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { InternalContextPreboot, ContextSetup } from './context';
+import { InternalContextPreboot, InternalContextSetup } from './context';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
@@ -37,7 +42,6 @@ import {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './ui_settings';
-import { InternalEnvironmentServiceSetup } from './environment';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
@@ -45,10 +49,6 @@ import { InternalStatusServiceSetup } from './status';
 import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
-import type {
-  InternalExecutionContextSetup,
-  InternalExecutionContextStart,
-} from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
 
 /** @internal */
@@ -67,7 +67,7 @@ export interface InternalCorePreboot {
 export interface InternalCoreSetup {
   analytics: AnalyticsServiceSetup;
   capabilities: CapabilitiesSetup;
-  context: ContextSetup;
+  context: InternalContextSetup;
   docLinks: DocLinksServiceSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;

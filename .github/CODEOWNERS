@@ -203,7 +203,6 @@
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
 /x-pack/packages/ml/ @elastic/ml-ui
-/packages/kbn-aiops-utils @elastic/ml-ui
 /examples/response_stream/ @elastic/ml-ui
 
 # Maps
@@ -291,6 +290,7 @@
 /packages/kbn-logging/ @elastic/kibana-core
 /packages/kbn-logging-mocks/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
+/packages/kbn-es-errors/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
@@ -364,7 +364,7 @@
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops @elastic/mlr-docs
 /docs/management/connectors/ @elastic/response-ops @elastic/mlr-docs
-#CC# /x-pack/plugins/stack_alerts @elastic/response-ops
+#CC# /x-pack/plugins/stack_alerts/ @elastic/response-ops
 /x-pack/plugins/cases/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops
@@ -571,8 +571,8 @@
 /x-pack/test/security_solution_endpoint_api_int/ @elastic/security-onboarding-and-lifecycle-mgt
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
-x-pack/plugins/security_solution/server/usage/ @elastic/security-telemetry
-x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-telemetry
+x-pack/plugins/security_solution/server/usage/ @elastic/security-data-analytics
+x-pack/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
 
 ## Security Solution sub teams - security-engineering-productivity
 x-pack/plugins/security_solution/cypress/ccs_integration @elastic/security-engineering-productivity
@@ -641,16 +641,25 @@ x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 
 # Application Experience
 
-## Shared UX
+## Shared UX Team
 /src/plugins/shared_ux/ @elastic/shared-ux
 /packages/shared-ux/ @elastic/shared-ux
 /packages/shared-ux-*/ @elastic/shared-ux
+
+### Kibana React (to be deprecated)
 /src/plugins/kibana_react/ @elastic/shared-ux
 /src/plugins/kibana_react/public/code_editor @elastic/shared-ux @elastic/kibana-presentation
+
+### Home Plugin and Packages
+/packages/home/ @elastic/shared-ux
 /src/plugins/home/public @elastic/shared-ux
 /src/plugins/home/server/*.ts @elastic/shared-ux
 /src/plugins/home/server/services/ @elastic/shared-ux
+
+### Overview Plugin and Packages
+/src/plugins/kibana_overview/ @elastic/shared-ux
+
+### Code Coverage
 #CC# /src/plugins/home/public @elastic/shared-ux
 #CC# /src/plugins/home/server/services/ @elastic/shared-ux
 #CC# /src/plugins/home/ @elastic/shared-ux
-/src/plugins/kibana_overview/ @elastic/shared-ux
