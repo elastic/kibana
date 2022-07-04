@@ -252,6 +252,7 @@ export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
 export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
+export type AttributesTypePersistableState = rt.TypeOf<typeof AttributesTypePersistableStateRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentAttributesWithoutSORefs = rt.TypeOf<typeof CommentAttributesWithoutSORefsRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;

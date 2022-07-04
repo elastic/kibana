@@ -75,7 +75,7 @@ export const extractPersistableStateReferencesFromSO = <T extends CommentRequest
   attachmentAttributes: T,
   deps: ExtractDeps
 ) => {
-  let attributes = {};
+  let attributes = { ...attachmentAttributes };
   let references: SavedObjectReference[] = [];
 
   if (isCommentRequestTypePersistableState(attachmentAttributes)) {

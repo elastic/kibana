@@ -7,7 +7,13 @@
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  CommentType,
+  ConnectorTypes,
+  ExternalReferenceStorageType,
+} from '../../../common/api';
 import { createCaseSavedObjectResponse } from '../test_utils';
 import { transformSavedObjectToExternalModel } from '../cases/transform';
 
@@ -97,3 +103,23 @@ export const attachments = [
   { id: '1', attachment: { ...comment }, owner: SECURITY_SOLUTION_OWNER },
   { id: '2', attachment: { ...alertComment }, owner: SECURITY_SOLUTION_OWNER },
 ];
+
+export const externalReferenceAttachmentSO = {
+  type: CommentType.externalReference,
+  externalReferenceId: 'my-id',
+  externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-so' },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const externalReferenceAttachmentES = {
+  type: CommentType.externalReference,
+  externalReferenceId: 'my-id',
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.elasticSearchDoc,
+  },
+  externalReferenceAttachmentTypeId: '.test',
+  externalReferenceMetadata: null,
+  owner: SECURITY_SOLUTION_OWNER,
+};
