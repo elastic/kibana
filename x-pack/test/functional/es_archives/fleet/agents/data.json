@@ -11,7 +11,8 @@
       "local_metadata": {},
       "user_provided_metadata": {},
       "enrolled_at": "2022-06-21T12:14:25Z",
-      "last_checkin": "2022-06-27T12:26:29Z"
+      "last_checkin": "2022-06-27T12:26:29Z",
+      "tags": ["existingTag", "tag1"]
     }
   }
 }
@@ -29,7 +30,8 @@
       "local_metadata": {},
       "user_provided_metadata": {},
       "enrolled_at": "2022-06-21T12:15:25Z",
-      "last_checkin": "2022-06-27T12:27:29Z"
+      "last_checkin": "2022-06-27T12:27:29Z",
+      "tags": ["existingTag"]
     }
   }
 }
@@ -47,7 +49,8 @@
       "local_metadata": {},
       "user_provided_metadata": {},
       "enrolled_at": "2022-06-21T12:16:25Z",
-      "last_checkin": "2022-06-27T12:28:29Z"
+      "last_checkin": "2022-06-27T12:28:29Z",
+      "tags": ["tag1"]
     }
   }
 }

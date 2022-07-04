@@ -26,6 +26,8 @@ import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
 import type { FleetAuthzRouter } from '../security';
 
+import { PostBulkUpdateAgentTagsRequestSchema } from '../../types/rest_spec/agent';
+
 import {
   getAgentsHandler,
   getAgentHandler,
@@ -35,6 +37,7 @@ import {
   putAgentsReassignHandler,
   postBulkAgentsReassignHandler,
   getAgentDataHandler,
+  bulkUpdateAgentTagsHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -69,6 +72,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     updateAgentHandler
+  );
+  // Bulk Update Tags
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_UPDATE_AGENT_TAGS_PATTERN,
+      validate: PostBulkUpdateAgentTagsRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    bulkUpdateAgentTagsHandler
   );
   // Delete
   router.delete(
