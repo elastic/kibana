@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import {
   HapiResponseAdapter,
   KibanaRequest,
+  CoreKibanaRequest,
   IKibanaResponse,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
@@ -161,7 +162,7 @@ export function adoptToHapiAuthFormat(
     responseToolkit: ResponseToolkit
   ): Promise<Lifecycle.ReturnValue> {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
-    const kibanaRequest = KibanaRequest.from(request, undefined, false);
+    const kibanaRequest = CoreKibanaRequest.from(request, undefined, false);
 
     try {
       const result = await fn(kibanaRequest, lifecycleResponseFactory, toolkit);
