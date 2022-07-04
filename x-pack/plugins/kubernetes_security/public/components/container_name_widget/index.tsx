@@ -6,8 +6,9 @@
  */
 
 import React, { ReactNode, useMemo, useState, useRef } from 'react';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiTableSortingType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useStyles } from './styles';
 import { RowContainerNameHelper } from './row_container_name_helper';
 import type { IndexPattern, GlobalFilter } from '../../types';
@@ -78,7 +79,7 @@ export const ContainerNameWidget = ({
     setSortDirection(sortingDirection);
   };
 
-  const sorting = {
+  const sorting: EuiTableSortingType<ContainerNameArrayDataValue> = {
     sort: {
       field: sortField,
       direction: sortDirection,
@@ -87,7 +88,7 @@ export const ContainerNameWidget = ({
   };
 
   const { getFilterForValueButton, getFilterOutValueButton, filterManager } = useSetFilter();
-  const filterButtons = useMemo(() => {
+  const filterButtons = useMemo((): FilterButtons => {
     const result: FilterButtons = {
       filterForButtons:
         data &&
@@ -140,7 +141,7 @@ export const ContainerNameWidget = ({
     }
   );
 
-  const containerNameArray: ContainerNameArrayDataValue[] = useMemo(() => {
+  const containerNameArray = useMemo((): ContainerNameArrayDataValue[] => {
     return data
       ? data?.pages
           ?.map((aggsData) => {
@@ -155,7 +156,7 @@ export const ContainerNameWidget = ({
       : [];
   }, [data]);
 
-  const columns = useMemo(() => {
+  const columns = useMemo((): Array<EuiBasicTableColumn<ContainerNameArrayDataValue>> => {
     return [
       {
         field: 'name',

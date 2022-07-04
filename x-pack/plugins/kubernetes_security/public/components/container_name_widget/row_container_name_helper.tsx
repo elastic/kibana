@@ -29,7 +29,7 @@ export const RowContainerNameHelper = ({
   return (
     <EuiFlexItem
       key={`percentage-widget--haha}`}
-      onMouseEnter={() => setHoveredFilter(index)}
+      onMouseEnter={() => setHoveredFilter(index!)}
       onMouseLeave={() => setHoveredFilter(null)}
       data-test-subj={'containerNameSessionRow'}
     >

@@ -33,7 +33,7 @@ export const useFetchContainerNameData = (
   const query = useInfiniteQuery(
     cachingKeys,
     async ({ pageParam = 0 }) => {
-      const res = await http.get<AggregateResult[]>(AGGREGATE_ROUTE, {
+      const res = await http.get<AggregateResult>(AGGREGATE_ROUTE, {
         query: {
           query: filterQuery,
           groupBy,
