@@ -76,6 +76,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   const snoozeRuleAndStoreInterval = useCallback(
     (newSnoozeEndTime: string | -1, intervalToStore: string | null) => {
       if (intervalToStore) {
+        if (intervalToStore.startsWith('-')) throw new Error('Cannot store a negative interval');
         setPreviousSnoozeInterval(intervalToStore);
       }
       const newSnoozeSchedule = {
@@ -170,7 +171,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">
         <EuiFlexItem>
           <EuiFieldNumber
-            min={0}
+            min={1}
             value={intervalValue}
             onChange={onChangeValue}
             aria-label={i18n.translate(
@@ -201,6 +202,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            disabled={!intervalValue || intervalValue < 1}
             isLoading={isLoading}
             onClick={onClickApplyButton}
             data-test-subj="ruleSnoozeApply"
