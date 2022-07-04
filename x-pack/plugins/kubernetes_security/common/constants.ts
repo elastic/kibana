@@ -6,6 +6,8 @@
  */
 
 export const KUBERNETES_PATH = '/kubernetes' as const;
+export const KUBERNETES_TITLE = 'Kubernetes';
+export const LOCAL_STORAGE_HIDE_WIDGETS_KEY = 'sessionView:shouldHideWidgets';
 
 export const AGGREGATE_ROUTE = '/internal/kubernetes_security/aggregate';
 export const COUNT_ROUTE = '/internal/kubernetes_security/count';

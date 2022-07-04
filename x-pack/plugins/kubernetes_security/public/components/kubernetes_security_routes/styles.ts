@@ -15,6 +15,16 @@ export const useStyles = () => {
   const cached = useMemo(() => {
     const { size, font } = euiTheme;
 
+    const titleSection: CSSObject = {
+      display: 'flex',
+      alignContent: 'center',
+      marginBottom: size.l,
+    };
+
+    const hideShowWidgetButton: CSSObject = {
+      marginLeft: 'auto',
+    };
+
     const widgetBadge: CSSObject = {
       position: 'absolute',
       bottom: size.base,
@@ -45,6 +55,8 @@ export const useStyles = () => {
     };
 
     return {
+      titleSection,
+      hideShowWidgetButton,
       widgetBadge,
       treeViewContainer,
       percentageWidgets,
