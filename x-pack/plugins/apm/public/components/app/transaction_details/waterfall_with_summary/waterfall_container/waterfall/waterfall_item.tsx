@@ -195,10 +195,6 @@ export function WaterfallItem({
   marginLeftLevel,
   onClick,
 }: IWaterfallItemProps) {
-  if (!totalDuration) {
-    return null;
-  }
-
   const [widthFactor, setWidthFactor] = useState(1);
   const waterfallItemRef: React.RefObject<any> = useRef(null);
   useEffect(() => {
@@ -208,6 +204,10 @@ export function WaterfallItem({
       );
     }
   }, [marginLeftLevel]);
+
+  if (!totalDuration) {
+    return null;
+  }
 
   const width = (item.duration / totalDuration) * widthFactor * 100;
   const left =
