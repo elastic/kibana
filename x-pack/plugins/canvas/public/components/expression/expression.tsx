@@ -110,7 +110,7 @@ export const Expression: FC<Props> = ({
 
   const onEditorDidMount: OnExpressionInputEditorDidMount = (editor) => {
     /*
-      To enable the CMD+R keybinding, which is running the expression,
+      To enable the CMD+ENTER keybinding, which is running the expression,
       it is necessary to disable the `-editor.action.insertLineAfter`,
       which has the same keybinding in the Monaco editor.
       The only available way is adding the empty dynamic keybinding
