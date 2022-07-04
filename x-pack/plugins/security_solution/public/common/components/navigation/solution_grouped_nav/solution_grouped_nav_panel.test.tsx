@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LinkCategories } from '../../../links';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
@@ -34,6 +35,17 @@ const mockItems: DefaultSideNavItem[] = [
     label: 'Network',
     href: '/network',
     description: 'Network description',
+  },
+];
+
+const mockCategories: LinkCategories = [
+  {
+    label: 'HOSTS CATEGORY',
+    linkIds: [SecurityPageName.hosts],
+  },
+  {
+    label: 'Empty category',
+    linkIds: [],
   },
 ];
 
@@ -71,6 +83,18 @@ describe('SolutionGroupedNav', () => {
       expect(result.getByText(item.label)).toBeInTheDocument();
       if (item.description) {
         expect(result.getByText(item.description)).toBeInTheDocument();
+      }
+    });
+  });
+
+  it('should only render categories with items', () => {
+    const result = renderNavPanel({ categories: mockCategories });
+
+    mockCategories.forEach((mockCategory) => {
+      if (mockCategory.linkIds.length) {
+        expect(result.getByText(mockCategory.label)).toBeInTheDocument();
+      } else {
+        expect(result.queryByText(mockCategory.label)).not.toBeInTheDocument();
       }
     });
   });
