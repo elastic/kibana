@@ -184,7 +184,7 @@ describe('url state', () => {
     cy.get(NETWORK).should(
       'have.attr',
       'href',
-      `/app/security/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))`
+      `/app/security/network?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')`
     );
   });
 
@@ -197,12 +197,12 @@ describe('url state', () => {
     cy.get(HOSTS).should(
       'have.attr',
       'href',
-      `/app/security/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))`
+      `/app/security/hosts?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')`
     );
     cy.get(NETWORK).should(
       'have.attr',
       'href',
-      `/app/security/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))`
+      `/app/security/network?timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))&sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')`
     );
     cy.get(HOSTS_NAMES).first().should('have.text', 'siem-kibana');
 

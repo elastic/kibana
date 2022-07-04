@@ -44,8 +44,7 @@ export const useInitializeUrlParam = <State>(
 
   useEffect(() => {
     // window.location.search provides the most updated representation of the url search.
-    // It prevents unnecessary re-renders which useLocation would create because 'replaceUrlParams' does update the location.
-    // window.location.search also guarantees that we don't overwrite URL param managed outside react-router.
+    // It also guarantees that we don't overwrite URL param managed outside react-router.
     const initialValue = getParamFromQueryString(
       getQueryStringFromLocation(window.location.search),
       urlParamKey

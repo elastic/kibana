@@ -144,7 +144,7 @@ describe('SearchBarComponent', () => {
   });
 
   it('calls useUpdateUrlParam for filter and query', () => {
-    const query = { query: 'testQuery' };
+    const query = { query: 'testQuery', language: 'kuery' };
     const filters = [
       {
         meta: {

@@ -36,12 +36,9 @@ jest.mock('react-redux', () => {
   };
 });
 
-const mockLocation = jest.fn();
-
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => mockHistory,
-  useLocation: () => mockLocation(),
 }));
 
 const defaultLinkInfo: LinkInfo = {
@@ -94,7 +91,7 @@ describe('global query string', () => {
   describe('useInitializeUrlParam', () => {
     it('calls onInitialize with decoded URL param value', () => {
       const urlParamKey = 'testKey';
-      mockLocation.mockReturnValue({ search: '?testKey=(test:(value:123))' });
+      window.location.search = '?testKey=(test:(value:123))';
 
       const onInitialize = jest.fn();
 
@@ -107,7 +104,7 @@ describe('global query string', () => {
 
     it('deregister during unmount', () => {
       const urlParamKey = 'testKey';
-      mockLocation.mockReturnValue({ search: "?testKey='123'" });
+      window.location.search = "?testKey='123'";
 
       const { unmount } = renderHook(() => useInitializeUrlParam(urlParamKey, () => {}), {
         wrapper: makeWrapper(),
@@ -124,7 +121,7 @@ describe('global query string', () => {
     it('calls registerUrlParam global URL param action', () => {
       const urlParamKey = 'testKey';
       const initialValue = 123;
-      mockLocation.mockReturnValue({ search: `?testKey=${initialValue}` });
+      window.location.search = `?testKey=${initialValue}`;
 
       renderHook(() => useInitializeUrlParam(urlParamKey, () => {}), {
         wrapper: makeWrapper(),
