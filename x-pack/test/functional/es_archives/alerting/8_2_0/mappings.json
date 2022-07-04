@@ -3140,7 +3140,7 @@
 {
   "type": "index",
   "value": {
-    "index": "kibana_task_manager",
+    "index": ".kibana_task_manager",
     "mappings": {
       "_meta": {
         "migrationMappingPropertyHashes": {

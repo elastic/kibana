@@ -27,30 +27,65 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/alerting/8_2_0');
     });
 
-    it('8.2.0 rules have snoozeEndTime removed in favor of snoozeSchedule', async () => {
-      const response = await es.get<{ alert: RawRule }>(
-        {
-          index: '.kibana',
-          id: 'alert:bdfce750-fba0-11ec-9157-2f379249da99',
-        },
-        { meta: true }
-      );
+    describe('rule with null snoozeEndTime value', async () => {
+      it('has snoozeEndTime removed', async () => {
+        const response = await es.get<{ alert: RawRule }>(
+          {
+            index: '.kibana',
+            id: 'alert:bdfce750-fba0-11ec-9157-2f379249da99',
+          },
+          { meta: true }
+        );
 
-      expect(response.statusCode).to.equal(200);
-      expect(response.body._source?.alert?.snoozeEndTime).to.be(undefined);
-      expect(response.body._source?.alert?.snoozeSchedule).not.to.be(undefined);
+        expect(response.statusCode).to.equal(200);
+        expect(response.body._source?.alert?.snoozeEndTime).to.be(undefined);
+        expect(response.body._source?.alert?.snoozeSchedule).not.to.be(undefined);
 
-      const snoozeSchedule = response.body._source?.alert.snoozeSchedule!;
-      expect(snoozeSchedule.length).to.eql(0);
+        const snoozeSchedule = response.body._source?.alert.snoozeSchedule!;
+        expect(snoozeSchedule.length).to.eql(0);
+      });
+
+      it('runs successfully after migration', async () => {
+        await retry.try(async () => {
+          const { body: rule } = await supertest.get(
+            `/api/alerting/rule/bdfce750-fba0-11ec-9157-2f379249da99`
+          );
+          expect(Date.parse(rule.execution_status.last_execution_date)).to.be.greaterThan(
+            testStart!
+          );
+          expect(rule.execution_status.status).to.be('ok');
+        });
+      });
     });
 
-    it('8.2.0 rules run successfully after migration', async () => {
-      await retry.try(async () => {
-        const { body: rule } = await supertest.get(
-          `/api/alerting/rule/bdfce750-fba0-11ec-9157-2f379249da99`
+    describe('rules with snoozeEndTime value', async () => {
+      it('has snoozeEndTime migrated to snoozeSchedule', async () => {
+        const response = await es.get<{ alert: RawRule }>(
+          {
+            index: '.kibana',
+            id: 'alert:402084f0-fbb8-11ec-856c-39466bd4c433',
+          },
+          { meta: true }
         );
-        expect(Date.parse(rule.execution_status.last_execution_date)).to.be.greaterThan(testStart!);
-        expect(rule.execution_status.status).to.be('ok');
+
+        expect(response.statusCode).to.equal(200);
+        expect(response.body._source?.alert?.snoozeEndTime).to.be(undefined);
+        expect(response.body._source?.alert?.snoozeSchedule).not.to.be(undefined);
+
+        const snoozeSchedule = response.body._source?.alert.snoozeSchedule!;
+        expect(snoozeSchedule.length).to.eql(1);
+      });
+
+      it('runs successfully after migration', async () => {
+        await retry.try(async () => {
+          const { body: rule } = await supertest.get(
+            `/api/alerting/rule/402084f0-fbb8-11ec-856c-39466bd4c433`
+          );
+          expect(Date.parse(rule.execution_status.last_execution_date)).to.be.greaterThan(
+            testStart!
+          );
+          expect(rule.execution_status.status).to.be('ok');
+        });
       });
     });
   });
