@@ -1157,7 +1157,9 @@ describe('loader', () => {
       const setState = jest.fn();
       const fetchJson = jest.fn((path: string) => {
         return new Promise((resolve, reject) => {
-          reject(new Error('timeout'));
+          // mock HttpFetchError's properties
+          const error = Object.assign({}, new Error('timeout'), { res: { status: 408 } });
+          reject(error);
         });
       }) as unknown as HttpHandler;
 
