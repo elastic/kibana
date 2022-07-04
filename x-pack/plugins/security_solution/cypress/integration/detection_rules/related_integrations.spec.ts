@@ -10,12 +10,21 @@ import {
   INTEGRATIONS_POPOVER_TITLE,
 } from '../../screens/alerts_detection_rules';
 import { INTEGRATIONS, INTEGRATIONS_STATUS } from '../../screens/rule_details';
-import { goToTheRuleDetailsOf, openIntegrationsPopover } from '../../tasks/alerts_detection_rules';
+import {
+  enableRule,
+  goToTheRuleDetailsOf,
+  openIntegrationsPopover,
+  waitForRuleToChangeStatus,
+} from '../../tasks/alerts_detection_rules';
 import { importRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, cleanPackages } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { installAwsCloudFrontWithPolicy } from '../../tasks/integrations';
+import { expandFirstAlert } from '../../tasks/alerts';
+import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
+import { filterBy, openTable } from '../../tasks/alerts_details';
+import { FIELD } from '../../screens/alerts_details';
 
 /*
  Note that the rule we are using for testing purposes has the following characteristics, changing that may affect the coverage.
@@ -147,6 +156,26 @@ describe('Related integrations', () => {
           cy.get(INTEGRATIONS).eq(index).should('contain', integration.name);
           cy.get(INTEGRATIONS_STATUS).eq(index).should('have.text', expectedStatus);
         });
+      });
+
+      it('the alerts generated should have a "kibana.alert.rule.parameters.related_integrations" field containing the integrations', () => {
+        const firstRule = 0;
+        const relatedIntegrationsField = 'kibana.alert.rule.parameters.related_integrations';
+        const expectedRelatedIntegrationsText =
+          '{"package":"system","version":"1.17.0"}{"package":"aws","integration":"cloudtrail","version":"1.17.0"}{"package":"aws","integration":"cloudfront","version":"1.17.0"}{"package":"aws","integration":"unknown","version":"1.17.0"}';
+
+        visit(DETECTIONS_RULE_MANAGEMENT_URL);
+        enableRule(firstRule);
+        waitForRuleToChangeStatus();
+        goToTheRuleDetailsOf(rule.name);
+        waitForAlertsToPopulate();
+        expandFirstAlert();
+        openTable();
+        filterBy(relatedIntegrationsField);
+        cy.get(FIELD(relatedIntegrationsField)).should(
+          'have.text',
+          expectedRelatedIntegrationsText
+        );
       });
     }
   );
