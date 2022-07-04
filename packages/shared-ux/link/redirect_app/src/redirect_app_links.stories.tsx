@@ -10,11 +10,12 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { action } from '@storybook/addon-actions';
-import { RedirectAppLinks } from '.';
+import { RedirectAppLinks as Component } from '.';
+import { getStoryArgTypes, getStoryServices } from './mocks';
 import mdx from '../README.mdx';
 
 export default {
-  title: 'Redirect App Links',
+  title: 'Link',
   description:
     'An "area of effect" component which intercepts clicks on anchor elements and redirects them to Kibana solutions without a page refresh.',
   parameters: {
@@ -24,16 +25,10 @@ export default {
   },
 };
 
-export const Component = () => {
-  const navigateToUrl = async (url: string) => {
-    action('navigateToUrl')(url);
-  };
-
-  const currentAppId = 'abc123';
-
+export const RedirectAppLinks = () => {
   return (
     <>
-      <RedirectAppLinks {...{ currentAppId, navigateToUrl }}>
+      <Component {...getStoryServices()}>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -54,7 +49,7 @@ export const Component = () => {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </RedirectAppLinks>
+      </Component>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -69,3 +64,5 @@ export const Component = () => {
     </>
   );
 };
+
+RedirectAppLinks.argTypes = getStoryArgTypes();

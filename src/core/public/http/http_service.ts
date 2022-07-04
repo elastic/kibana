@@ -7,15 +7,15 @@
  */
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
+import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { HttpSetup, HttpStart } from './types';
-import { FatalErrorsSetup } from '../fatal_errors';
 import { BasePath } from './base_path';
 import { AnonymousPathsService } from './anonymous_paths_service';
 import { LoadingCountService } from './loading_count_service';
 import { Fetch } from './fetch';
 import { ExternalUrlService } from './external_url_service';
-import { ExecutionContextSetup } from '../execution_context';
 
 interface HttpDeps {
   injectedMetadata: InternalInjectedMetadataSetup;

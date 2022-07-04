@@ -101,6 +101,9 @@
       "label": "Tutorials",
       "items": [
         {
+          "id": "kibDevTutorialSetupWindowsDevWSL"
+        },
+        {
           "id": "kibDevTutorialTestingPlugins"
         },
         {
@@ -149,6 +152,9 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibJune2022ContributorNewsletter"
+        },
         {
           "id": "kibMay2022ContributorNewsletter"
         },

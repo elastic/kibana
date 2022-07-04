@@ -7,10 +7,20 @@
 
 import type { WeekdayStr } from 'rrule';
 
+type SnoozeRRule = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
+
+export interface RuleSnoozeSchedule {
+  duration: number;
+  rRule: SnoozeRRule;
+  // For scheduled/recurring snoozes, `id` uniquely identifies them so that they can be displayed, modified, and deleted individually
+  id?: string;
+}
+
+// Type signature of has to be repeated here to avoid issues with SavedObject compatibility
+// RuleSnooze = RuleSnoozeSchedule[] throws typescript errors across the whole lib
 export type RuleSnooze = Array<{
   duration: number;
-  rRule: Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
-  // For scheduled/recurring snoozes, `id` uniquely identifies them so that they can be displayed, modified, and deleted individually
+  rRule: SnoozeRRule;
   id?: string;
 }>;
 
@@ -26,7 +36,7 @@ export interface RRuleRecord {
   byweekday?: Array<string | number>;
   bymonth?: number[];
   bysetpos?: number[];
-  bymonthday: number;
+  bymonthday: number[];
   byyearday: number[];
   byweekno: number[];
   byhour: number[];

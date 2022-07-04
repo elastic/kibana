@@ -8,6 +8,9 @@
 
 import { AddConfigDeprecation } from '@kbn/config';
 import { AnalyticsClient } from '@kbn/analytics-client';
+import { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import apm from 'elastic-apm-node';
 import { AppenderConfigType } from '@kbn/core-logging-server';
 import { AwaitedProperties } from '@kbn/utility-types';
@@ -82,20 +85,11 @@ export { AddConfigDeprecation }
 
 export { AnalyticsClient }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
+export { AnalyticsServicePreboot }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
+export { AnalyticsServiceSetup }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
-//
-// @public
-export type AnalyticsServiceStart = Pick<AnalyticsClient, 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
+export { AnalyticsServiceStart }
 
 // @public
 export const APP_WRAPPER_CLASS = "kbnAppWrapper";
@@ -438,6 +432,8 @@ export type CoreIncrementUsageCounter = (params: CoreIncrementCounterParams) => 
 
 // @public
 export interface CorePreboot {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServicePreboot;
     // (undocumented)
@@ -495,6 +491,8 @@ export interface CoreServicesUsageData {
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServiceSetup;
     // (undocumented)
@@ -537,6 +535,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
 
 // @public
 export interface CoreStart {
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     analytics: AnalyticsServiceStart;
     // (undocumented)

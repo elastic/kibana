@@ -28,6 +28,7 @@ Array [
       }
     }
     onFilter={[Function]}
+    renderComplete={[MockFunction]}
     style={
       Object {
         "bgColor": false,
@@ -63,6 +64,7 @@ Array [
         "value": 445842.4634666484,
       }
     }
+    renderComplete={[MockFunction]}
     style={
       Object {
         "bgColor": false,
@@ -103,6 +105,7 @@ exports[`MetricVisComponent should render correct structure for single metric 1`
     }
   }
   onFilter={[Function]}
+  renderComplete={[MockFunction]}
   style={
     Object {
       "bgColor": false,

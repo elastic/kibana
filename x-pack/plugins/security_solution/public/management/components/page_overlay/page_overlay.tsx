@@ -55,19 +55,19 @@ const OverlayRootContainer = styled.div`
   }
 
   &.padding-xs {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.xs};
+    padding: ${({ theme: { eui } }) => eui.euiSizeXS};
   }
   &.padding-s {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.s};
+    padding: ${({ theme: { eui } }) => eui.euiSizeS};
   }
   &.padding-m {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.m};
+    padding: ${({ theme: { eui } }) => eui.euiSizeM};
   }
   &.padding-l {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.l};
+    padding: ${({ theme: { eui } }) => eui.euiSizeL};
   }
   &.padding-xl {
-    padding: ${({ theme: { eui } }) => eui.paddingSizes.xl};
+    padding: ${({ theme: { eui } }) => eui.euiSizeXL};
   }
 
   .fullHeight {

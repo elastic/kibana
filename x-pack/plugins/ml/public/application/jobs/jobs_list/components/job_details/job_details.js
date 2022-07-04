@@ -17,6 +17,7 @@ import { DatafeedPreviewPane } from './datafeed_preview_tab';
 import { AnnotationsTable } from '../../../../components/annotations/annotations_table';
 import { DatafeedChartFlyout } from '../datafeed_chart_flyout';
 import { AnnotationFlyout } from '../../../../components/annotations/annotation_flyout';
+import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { ModelSnapshotTable } from '../../../../components/model_snapshots';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
@@ -29,6 +30,8 @@ export class JobDetailsUI extends Component {
 
     this.state = {
       datafeedChartFlyoutVisible: false,
+      modelSnapshot: null,
+      revertSnapshotFlyoutVisible: false,
     };
     if (this.props.addYourself) {
       this.props.addYourself(props.jobId, (j) => this.updateJob(j));
@@ -58,7 +61,7 @@ export class JobDetailsUI extends Component {
         </div>
       );
     } else {
-      const { showFullDetails, refreshJobList, showClearButton } = this.props;
+      const { refreshJobList, showClearButton } = this.props;
 
       const {
         general,
@@ -151,8 +154,29 @@ export class JobDetailsUI extends Component {
                       datafeedChartFlyoutVisible: false,
                     });
                   }}
+                  onModelSnapshotAnnotationClick={(modelSnapshot) => {
+                    this.setState({
+                      modelSnapshot,
+                      revertSnapshotFlyoutVisible: true,
+                      datafeedChartFlyoutVisible: false,
+                    });
+                  }}
                   end={job.data_counts.latest_bucket_timestamp}
                   jobId={this.props.jobId}
+                />
+              ) : null}
+              {this.state.revertSnapshotFlyoutVisible === true &&
+              this.state.modelSnapshot !== null ? (
+                <RevertModelSnapshotFlyout
+                  snapshot={this.state.modelSnapshot}
+                  snapshots={[this.state.modelSnapshot]}
+                  job={job}
+                  closeFlyout={() => {
+                    this.setState({
+                      revertSnapshotFlyoutVisible: false,
+                    });
+                  }}
+                  refresh={refreshJobList}
                 />
               ) : null}
             </>
@@ -195,7 +219,7 @@ export class JobDetailsUI extends Component {
         },
       ];
 
-      if (showFullDetails && datafeed.items.length) {
+      if (datafeed.items.length) {
         tabs.push(
           {
             id: 'datafeed-preview',
@@ -216,34 +240,32 @@ export class JobDetailsUI extends Component {
         );
       }
 
-      if (showFullDetails) {
-        tabs.push({
-          id: 'annotations',
-          'data-test-subj': 'mlJobListTab-annotations',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
-            defaultMessage: 'Annotations',
-          }),
-          content: (
-            <Fragment>
-              <AnnotationsTable jobs={[job]} drillDown={true} />
-              <AnnotationFlyout />
-            </Fragment>
-          ),
-        });
+      tabs.push({
+        id: 'annotations',
+        'data-test-subj': 'mlJobListTab-annotations',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
+          defaultMessage: 'Annotations',
+        }),
+        content: (
+          <Fragment>
+            <AnnotationsTable jobs={[job]} drillDown={true} />
+            <AnnotationFlyout />
+          </Fragment>
+        ),
+      });
 
-        tabs.push({
-          id: 'modelSnapshots',
-          'data-test-subj': 'mlJobListTab-modelSnapshots',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
-            defaultMessage: 'Model snapshots',
-          }),
-          content: (
-            <Fragment>
-              <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
-            </Fragment>
-          ),
-        });
-      }
+      tabs.push({
+        id: 'modelSnapshots',
+        'data-test-subj': 'mlJobListTab-modelSnapshots',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
+          defaultMessage: 'Model snapshots',
+        }),
+        content: (
+          <Fragment>
+            <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
+          </Fragment>
+        ),
+      });
 
       return (
         <div className="tab-contents" data-test-subj={`mlJobListRowDetails details-${job.job_id}`}>
@@ -258,7 +280,6 @@ JobDetailsUI.propTypes = {
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
-  showFullDetails: PropTypes.bool,
   refreshJobList: PropTypes.func,
 };
 

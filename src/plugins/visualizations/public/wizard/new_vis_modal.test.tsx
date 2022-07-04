@@ -151,7 +151,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visType-vis"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
       visCard.simulate('click');
       expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
     });
@@ -170,7 +170,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visType-vis"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
       visCard.simulate('click');
       expect(window.location.assign).toBeCalledWith(
         'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
@@ -196,7 +196,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
       visCard.simulate('click');
       expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
         path: '#/aliasUrl',
@@ -221,7 +221,7 @@ describe('NewVisModal', () => {
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').at(0);
+      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
       visCard.simulate('click');
       expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
       expect(onClose).toHaveBeenCalled();

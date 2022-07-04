@@ -29,12 +29,9 @@ import type {
   FieldTableColumns,
   GetFieldTableColumns,
 } from '../../../../../common/types';
-import { defaultColumnHeaderType } from '../../body/column_headers/default_headers';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../body/constants';
 import { TruncatableText } from '../../../truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
-import { getAlertColumnHeader } from './helpers';
 
 const TypeIcon = styled(EuiIcon)`
   margin: 0 4px;
@@ -86,16 +83,6 @@ export const getFieldItems = ({
     }, [])
   );
 };
-
-/**
- * Returns the column header for a field
- */
-export const getColumnHeader = (timelineId: string, fieldName: string): ColumnHeaderOptions => ({
-  columnHeaderType: defaultColumnHeaderType,
-  id: fieldName,
-  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-  ...getAlertColumnHeader(timelineId, fieldName),
-});
 
 const getDefaultFieldTableColumns = (highlight: string): FieldTableColumns => [
   {

@@ -553,14 +553,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
@@ -2311,14 +2303,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/isolation.test.ts"
               },
               {
                 "plugin": "securitySolution",

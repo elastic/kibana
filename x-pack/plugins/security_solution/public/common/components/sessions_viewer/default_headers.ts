@@ -59,10 +59,13 @@ export const sessionsHeaders: ColumnHeaderOptions[] = [
   },
 ];
 
-export const sessionsDefaultModel: SubsetTimelineModel = {
+export const getSessionsDefaultModel = (
+  columns: ColumnHeaderOptions[],
+  defaultColumns: ColumnHeaderOptions[]
+): SubsetTimelineModel => ({
   ...timelineDefaults,
-  columns: sessionsHeaders,
-  defaultColumns: sessionsHeaders,
+  columns,
+  defaultColumns,
   excludedRowRendererIds: Object.values(RowRendererId),
   sort: [
     {
@@ -71,4 +74,4 @@ export const sessionsDefaultModel: SubsetTimelineModel = {
       sortDirection: 'desc',
     },
   ],
-};
+});
