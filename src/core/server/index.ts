@@ -139,7 +139,6 @@ export type {
   ICustomClusterClient,
   ElasticsearchClientConfig,
   IScopedClusterClient,
-  CountResponse,
   ShardsInfo,
   ShardsResponse,
   ElasticsearchConfigPreboot,

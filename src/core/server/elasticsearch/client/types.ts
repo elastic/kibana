@@ -51,11 +51,3 @@ export interface ShardsInfo {
   skipped: number;
   failed: number;
 }
-
-/**
- * @public
- */
-export interface CountResponse {
-  _shards: ShardsInfo;
-  count: number;
-}
