@@ -94,7 +94,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           ),
           icon: <EuiIcon type="tag" size="m" />,
           disabled: !atLeastOneActiveAgentSelected,
-          onClick: (event) => {
+          onClick: (event: any) => {
             setTagsPopoverButton((event.target as Element).closest('button')!);
             setIsTagAddVisible(!isTagAddVisible);
           },

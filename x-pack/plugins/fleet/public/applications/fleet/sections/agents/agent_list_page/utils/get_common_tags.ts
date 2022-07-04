@@ -9,7 +9,7 @@ import { intersection } from 'lodash';
 
 import type { Agent } from '../../../../types';
 
-export const getCommonTags = (agents: string | Agent[], allAgents: Agent[]): string[] => {
+export const getCommonTags = (agents: string | Agent[], allAgents?: Agent[]): string[] => {
   const commonSelectedTags = (agentList: Agent[]) =>
     agentList.reduce(
       (acc: string[], curr: Agent) =>
