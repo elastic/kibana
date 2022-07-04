@@ -62,12 +62,12 @@ describe('Alerts detection rules table auto-refresh', () => {
     selectNumberOfRules(1);
 
     // mock w minute passing to make sure refresh is not conducted
-    checkAutoRefresh(2 * DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
+    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
 
     // ensure rule is still selected
     cy.get(RULE_CHECKBOX).first().should('be.checked');
 
-    cy.contains(REFRESH_RULES_STATUS, 'Updated 2 minutes ago');
+    cy.contains(REFRESH_RULES_STATUS, 'Updated 1 minute ago');
   });
 
   it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {
