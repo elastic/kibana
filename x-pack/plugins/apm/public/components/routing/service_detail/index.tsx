@@ -239,10 +239,10 @@ export const serviceDetail = {
             element: <ServiceNodeOverview />,
             params: t.partial({
               query: t.partial({
-                sortDirection: t.string,
+                page: toNumberRt,
+                pageSize: toNumberRt,
                 sortField: t.string,
-                pageSize: t.string,
-                page: t.string,
+                sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
               }),
             }),
           },
