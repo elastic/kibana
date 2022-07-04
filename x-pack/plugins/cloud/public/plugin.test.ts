@@ -6,7 +6,7 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { Sha256 } from '@kbn/crypto';
+import { Sha256 } from '@kbn/crypto-browser';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';

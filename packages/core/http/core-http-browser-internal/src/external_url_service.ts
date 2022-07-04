@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Sha256 } from '@kbn/crypto';
+import { Sha256 } from '@kbn/crypto-browser';
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { IExternalUrl } from '@kbn/core-http-browser';
 import type { IExternalUrlPolicy } from '@kbn/core-http-common';

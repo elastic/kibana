@@ -3227,6 +3227,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/crypto-browser@link:bazel-bin/packages/kbn-crypto-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto@link:bazel-bin/packages/kbn-crypto":
   version "0.0.0"
   uid ""
@@ -6760,6 +6764,10 @@
   uid ""
 
 "@types/kbn__core-theme-browser@link:bazel-bin/packages/core/theme/core-theme-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__crypto-browser@link:bazel-bin/packages/kbn-crypto-browser/npm_module_types":
   version "0.0.0"
   uid ""
 

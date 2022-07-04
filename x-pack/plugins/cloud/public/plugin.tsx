@@ -21,7 +21,7 @@ import { BehaviorSubject, catchError, from, map, of } from 'rxjs';
 
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { Sha256 } from '@kbn/crypto';
+import { Sha256 } from '@kbn/crypto-browser';
 import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import {

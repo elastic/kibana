@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createSHA256Hash } from './sha256_utils';
+import { createSHA256Hash } from './sha256';
 
 describe('createSHA256Hash', () => {
   it('creates a hex-encoded hash by default', () => {
