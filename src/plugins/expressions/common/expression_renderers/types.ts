@@ -78,6 +78,7 @@ export interface IInterpreterRenderHandlersDoneContext {
     visType: string;
     visGroup?: string;
     events?: string | Array<string | undefined>;
+    onlyEvents?: boolean;
   };
 }
 

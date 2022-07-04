@@ -49,7 +49,7 @@ export const heatmapRenderer: (
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
-    console.log(config.context);
+
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;

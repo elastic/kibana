@@ -84,7 +84,7 @@ export const getMetricVisRenderer = (
                     ? {
                         renderTelemetry: {
                           visGroup: context.originatingApp,
-                          visType: EXPRESSION_METRIC_NAME,
+                          visType: 'metric',
                         },
                       }
                     : undefined

@@ -50,18 +50,12 @@ const doRenderTelemetry = (context?: IInterpreterRenderHandlersDoneContext) => {
     if (!events || typeof events === 'string') {
       uiCounterEvents = toEvent(events);
     } else {
-      uiCounterEvents = [
-        toEvent(undefined),
-        ...events.filter(Boolean).map((item) => toEvent(item)),
-      ];
-    }
+      uiCounterEvents = events.filter(Boolean).map((item) => toEvent(item));
 
-    // @todo: REMOVE before merge
-    console.log({
-      a: context.renderTelemetry.visGroup ?? context.renderTelemetry.visType,
-      b: METRIC_TYPE.COUNT,
-      c: uiCounterEvents,
-    });
+      if (!context.renderTelemetry.onlyEvents) {
+        uiCounterEvents.push(toEvent(undefined));
+      }
+    }
 
     if (usageCollection) {
       usageCollection.reportUiCounter(

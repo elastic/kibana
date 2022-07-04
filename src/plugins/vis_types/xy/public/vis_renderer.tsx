@@ -50,11 +50,19 @@ export const getXYVisRenderer: (deps: {
             <VisComponent
               visParams={visConfig}
               visData={visData}
-              renderComplete={() =>
+              renderComplete={() => {
+                // Renaming according to business requirements
+                const visTypeTelemetryMap: Record<string, string> = {
+                  histogram: 'vertical_bar',
+                };
+
                 handlers.done({
-                  renderTelemetry: { visType: visConfig.type, visGroup: 'agg_based' },
-                })
-              }
+                  renderTelemetry: {
+                    visType: visTypeTelemetryMap[visType] ?? visType,
+                    visGroup: 'agg_based',
+                  },
+                });
+              }}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               syncColors={syncColors}
