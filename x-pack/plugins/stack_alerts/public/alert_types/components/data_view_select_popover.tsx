@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  useEuiPaddingCSS,
 } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
@@ -75,6 +76,8 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   useEffect(() => {
     loadDataViews();
   }, [loadDataViews]);
+
+  const createDataViewButtonPadding = useEuiPaddingCSS('left');
 
   if (!dataViewItems) {
     return null;
@@ -142,8 +145,9 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           />
         </EuiFormRow>
         {createDataView && (
-          <EuiPopoverFooter>
+          <EuiPopoverFooter paddingSize="none">
             <EuiButtonEmpty
+              css={createDataViewButtonPadding.s}
               iconType="plusInCircleFilled"
               data-test-subj="chooseDataViewPopover.createDataViewButton"
               onClick={() => {
