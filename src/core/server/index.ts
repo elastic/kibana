@@ -139,7 +139,6 @@ export type {
   ICustomClusterClient,
   ElasticsearchClientConfig,
   IScopedClusterClient,
-  ShardsResponse,
   ElasticsearchConfigPreboot,
   PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,

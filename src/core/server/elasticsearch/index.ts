@@ -31,8 +31,6 @@ export type {
   ElasticsearchClientConfig,
   ElasticsearchClient,
   IScopedClusterClient,
-  // responses
-  ShardsResponse,
   // unauthorized error handler
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,

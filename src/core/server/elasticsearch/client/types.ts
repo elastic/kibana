@@ -17,18 +17,3 @@ export type ElasticsearchClient = Omit<
   Client,
   'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
 >;
-
-/**
- * All response typings are maintained until elasticsearch-js provides them out of the box
- * https://github.com/elastic/elasticsearch-js/pull/970
- */
-
-/**
- * @public
- */
-export interface ShardsResponse {
-  total: number;
-  successful: number;
-  failed: number;
-  skipped: number;
-}
