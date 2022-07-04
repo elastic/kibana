@@ -12,22 +12,22 @@ import { formatApiName } from '../../utils/format_api_name';
 import { DEFAULT_LANGUAGE } from './constants';
 
 export interface NewSearchIndexValues {
-  rawName: string;
-  name: string;
   language: string;
+  name: string;
+  rawName: string;
 }
 
 export interface NewSearchIndexActions {
-  setRawName(rawName: string): { rawName: string };
   setLanguage(language: string): { language: string };
+  setRawName(rawName: string): { rawName: string };
 }
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
-  path: ['enterprise_search', 'content', 'new_search_index'],
   actions: {
-    setRawName: (rawName) => ({ rawName }),
     setLanguage: (language) => ({ language }),
+    setRawName: (rawName) => ({ rawName }),
   },
+  path: ['enterprise_search', 'content', 'new_search_index'],
   reducers: {
     language: [
       DEFAULT_LANGUAGE,
