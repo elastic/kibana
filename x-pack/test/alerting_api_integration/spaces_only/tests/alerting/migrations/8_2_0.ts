@@ -16,7 +16,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('migrates 8.2.0 rules to the latest version approriately', () => {
+  // Race condition between task manager running tasks and Kibana running the migrations after loading the ES Archive
+  describe.skip('migrates 8.2.0 rules to the latest version approriately', () => {
     let testStart: null | number = null;
     before(async () => {
       testStart = Date.now();
