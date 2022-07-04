@@ -20,7 +20,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../common';
 import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
 import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
@@ -88,7 +88,7 @@ export async function _installPackage({
       } else {
         // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
         // (it might be stuck) update the saved object and proceed
-        await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+        await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
           install_version: pkgVersion,
           install_status: 'installing',
           install_started_at: new Date().toISOString(),
@@ -254,6 +254,7 @@ export async function _installPackage({
         install_version: pkgVersion,
         install_status: 'installed',
         package_assets: packageAssetRefs,
+        install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
       })
     );
 
