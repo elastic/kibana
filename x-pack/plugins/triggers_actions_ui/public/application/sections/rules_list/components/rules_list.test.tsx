@@ -827,6 +827,196 @@ describe('rules_list component with props', () => {
       expect(wrapper.find('EuiButton[data-test-subj="createRuleButton"]').length).toEqual(1);
     });
   });
+
+  describe('filteredRuleTypes prop', () => {
+    let wrapper: ReactWrapper<any>;
+    const allRulesData = [
+      {
+        id: '1',
+        name: 'test rule',
+        tags: ['tag1'],
+        enabled: true,
+        ruleTypeId: 'test_rule_type',
+        schedule: { interval: '1s' },
+        actions: [],
+        params: { name: 'test rule type name' },
+        scheduledTaskId: null,
+        createdBy: null,
+        updatedBy: null,
+        apiKeyOwner: null,
+        throttle: '1m',
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'active',
+          lastDuration: 500,
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+          error: null,
+        },
+        monitoring: {
+          execution: {
+            history: [
+              {
+                success: true,
+                duration: 1000000,
+              },
+              {
+                success: true,
+                duration: 200000,
+              },
+              {
+                success: false,
+                duration: 300000,
+              },
+            ],
+            calculated_metrics: {
+              success_ratio: 0.66,
+              p50: 200000,
+              p95: 300000,
+              p99: 300000,
+            },
+          },
+        },
+      },
+      {
+        id: '2',
+        name: 'test rule ok',
+        tags: ['tag1'],
+        enabled: true,
+        ruleTypeId: 'test_rule_type2',
+        schedule: { interval: '5d' },
+        actions: [],
+        params: { name: 'test rule type name' },
+        scheduledTaskId: null,
+        createdBy: null,
+        updatedBy: null,
+        apiKeyOwner: null,
+        throttle: '1m',
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'ok',
+          lastDuration: 61000,
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+          error: null,
+        },
+        monitoring: {
+          execution: {
+            history: [
+              {
+                success: true,
+                duration: 100000,
+              },
+              {
+                success: true,
+                duration: 500000,
+              },
+            ],
+            calculated_metrics: {
+              success_ratio: 1,
+              p50: 0,
+              p95: 100000,
+              p99: 500000,
+            },
+          },
+        },
+      },
+      {
+        id: '3',
+        name: 'test rule pending',
+        tags: ['tag1'],
+        enabled: true,
+        ruleTypeId: 'test_rule_type2',
+        schedule: { interval: '5d' },
+        actions: [],
+        params: { name: 'test rule type name' },
+        scheduledTaskId: null,
+        createdBy: null,
+        updatedBy: null,
+        apiKeyOwner: null,
+        throttle: '1m',
+        muteAll: false,
+        mutedInstanceIds: [],
+        executionStatus: {
+          status: 'pending',
+          lastDuration: 30234,
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+          error: null,
+        },
+        monitoring: {
+          execution: {
+            history: [{ success: false, duration: 100 }],
+            calculated_metrics: {
+              success_ratio: 0,
+            },
+          },
+        },
+      },
+    ];
+    async function setup(editable: boolean = true, filteredRuleTypes: string[]) {
+      loadRules.mockResolvedValue({
+        page: 1,
+        perPage: 10000,
+        total: 2,
+        data: allRulesData.filter(({ ruleTypeId }) => filteredRuleTypes.includes(ruleTypeId)),
+      });
+
+      loadActionTypes.mockResolvedValue([
+        {
+          id: 'test',
+          name: 'Test',
+        },
+        {
+          id: 'test2',
+          name: 'Test2',
+        },
+      ]);
+      loadRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+      loadAllActions.mockResolvedValue([]);
+      loadRuleAggregations.mockResolvedValue({
+        ruleEnabledStatus: { enabled: 2, disabled: 0 },
+        ruleExecutionStatus: { ok: 1, active: 2, error: 3, pending: 4, unknown: 5, warning: 6 },
+        ruleMutedStatus: { muted: 0, unmuted: 2 },
+        ruleTags,
+      });
+      loadRuleTags.mockResolvedValue({
+        ruleTags,
+      });
+
+      const ruleTypeMock: RuleTypeModel = {
+        id: 'test_rule_type',
+        iconClass: 'test',
+        description: 'Rule when testing',
+        documentationUrl: 'https://localhost.local/docs',
+        validate: () => {
+          return { errors: {} };
+        },
+        ruleParamsExpression: jest.fn(),
+        requiresAppContext: !editable,
+      };
+
+      ruleTypeRegistry.has.mockReturnValue(true);
+      ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+
+      wrapper = mountWithIntl(<RulesList filteredRuleTypes={filteredRuleTypes} />);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+    }
+
+    it('renders only rules for the specified rule types', async () => {
+      const filteredRuleTypes = ['test_rule_type2'];
+      await setup(true, filteredRuleTypes);
+      expect(wrapper.find('EuiTableRow')).not.toHaveLength(allRulesData.length);
+      expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    });
+  });
 });
 
 describe('rules_list component with items', () => {
