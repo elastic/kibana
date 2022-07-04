@@ -71,7 +71,11 @@ export const mapFiltersToKql = ({
     }
   }
   if (tagsFilter && tagsFilter.length) {
-    filters.push(`alert.attributes.tags:(${tagsFilter.join(' or ')})`);
+    filters.push(
+      `alert.attributes.tags:(${tagsFilter
+        .map((tag) => tag.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&'))
+        .join(' or ')})`
+    );
   }
 
   return filters;

@@ -622,7 +622,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await assertRulesLength(3);
     });
 
-    it('should filter alerts by the tag', async () => {
+    it('should filter rules by the tag', async () => {
       await createAlert({
         supertest,
         objectRemover,
@@ -684,6 +684,47 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleTagFilterOption-c');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
+    });
+
+    it('should filter rules by tags with special characters', async () => {
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['a:b'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['a<b'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['a{b'],
+        },
+      });
+
+      await refreshAlertsList();
+      await testSubjects.click('ruleTagFilter');
+
+      await testSubjects.click('ruleTagFilterOption-a:b');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(1);
+
+      await testSubjects.click('ruleTagFilterOption-a:b');
+      await testSubjects.click('ruleTagFilterOption-a<b');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(1);
+
+      await testSubjects.click('ruleTagFilterOption-a<b');
+      await testSubjects.click('ruleTagFilterOption-a{b');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(1);
     });
 
     it('should not prevent rules with action execution capabilities from being edited', async () => {

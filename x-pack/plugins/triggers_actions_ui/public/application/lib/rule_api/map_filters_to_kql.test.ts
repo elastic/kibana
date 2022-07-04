@@ -123,4 +123,14 @@ describe('mapFiltersToKql', () => {
       'alert.attributes.tags:(a or b or c)',
     ]);
   });
+
+  test('should handle tags with special characters', () => {
+    expect(
+      mapFiltersToKql({
+        tagsFilter: ['a:b', 'b{c', 'c}d', 'd<f', 'f>e', '"ab', 'a\\b'],
+      })
+    ).toEqual([
+      'alert.attributes.tags:(a\\:b or b\\{c or c\\}d or d\\<f or f\\>e or \\"ab or a\\\\b)',
+    ]);
+  });
 });
