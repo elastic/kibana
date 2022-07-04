@@ -15,9 +15,10 @@ import { stringify } from 'query-string';
 import { schema } from '@kbn/config-schema';
 
 import {
-  KibanaRequest,
+  CoreKibanaRequest,
   LifecycleResponseFactory,
   RouteMethod,
+  KibanaRequest,
   KibanaResponseFactory,
   RouteValidationSpec,
   KibanaRouteOptions,
@@ -62,13 +63,16 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   routeAuthRequired,
   validation = {},
   kibanaRouteOptions = { xsrfRequired: true },
-  kibanaRequestState = { requestId: '123', requestUuid: '123e4567-e89b-12d3-a456-426614174000' },
+  kibanaRequestState = {
+    requestId: '123',
+    requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+  },
   auth = { isAuthenticated: true },
-}: RequestFixtureOptions<P, Q, B> = {}) {
+}: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> {
   const queryString = stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
-  return KibanaRequest.from<P, Q, B>(
+  return CoreKibanaRequest.from<P, Q, B>(
     createRawRequestMock({
       app: kibanaRequestState,
       auth,
