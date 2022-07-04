@@ -16,10 +16,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header']);
 
-  /**
-   * Attachment types are being registered in
-   * x-pack/test/functional_with_es_ssl/fixtures/plugins/cases/public/plugin.ts
-   */
   describe('Cases', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
