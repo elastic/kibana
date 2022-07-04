@@ -20,14 +20,11 @@ import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 import './index_nav.scss';
 import { SearchIndexTabId } from './search_index';
 
-// TODO: replace once logic in place.
-const indexName = 'Index name goes here';
-
 export const useSearchIndicesNav = () => {
   const isIndexRoute = !!useRouteMatch(SEARCH_INDEX_PATH);
-  const { indexSlug } = useParams() as { indexSlug: string };
+  const { indexName } = useParams<{ indexName: string }>();
 
-  if (!indexSlug || !isIndexRoute) return undefined;
+  if (!indexName || !isIndexRoute) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -46,7 +43,7 @@ export const useSearchIndicesNav = () => {
         defaultMessage: 'Overview',
       }),
       ...generateNavLink({
-        to: generatePath(SEARCH_INDEX_TAB_PATH, { indexSlug, tabId: SearchIndexTabId.OVERVIEW }),
+        to: generatePath(SEARCH_INDEX_TAB_PATH, { indexName, tabId: SearchIndexTabId.OVERVIEW }),
       }),
       'data-test-subj': 'IndexOverviewLink',
     },
@@ -56,7 +53,7 @@ export const useSearchIndicesNav = () => {
         defaultMessage: 'Documents',
       }),
       ...generateNavLink({
-        to: generatePath(SEARCH_INDEX_TAB_PATH, { indexSlug, tabId: SearchIndexTabId.DOCUMENTS }),
+        to: generatePath(SEARCH_INDEX_TAB_PATH, { indexName, tabId: SearchIndexTabId.DOCUMENTS }),
       }),
       'data-test-subj': 'IndexDocumentsLink',
     },
@@ -67,7 +64,7 @@ export const useSearchIndicesNav = () => {
       }),
       ...generateNavLink({
         to: generatePath(SEARCH_INDEX_TAB_PATH, {
-          indexSlug,
+          indexName,
           tabId: SearchIndexTabId.INDEX_MAPPINGS,
         }),
       }),
