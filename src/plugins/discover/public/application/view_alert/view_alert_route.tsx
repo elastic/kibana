@@ -104,7 +104,7 @@ export function ViewAlertRoute() {
         : buildTimeRangeFilter(dataView, fetchedAlert, timeFieldName);
       const state: DiscoverAppLocatorParams = {
         query: fetchedSearchSource.getField('query') || data.query.queryString.getDefaultQuery(),
-        indexPatternId: dataView.id,
+        dataViewId: dataView.id,
         timeRange,
       };
 

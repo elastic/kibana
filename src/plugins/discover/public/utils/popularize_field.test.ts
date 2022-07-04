@@ -11,7 +11,7 @@ import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { popularizeField } from './popularize_field';
 
 const capabilities = {
-  dataViews: {
+  indexPatterns: {
     save: true,
   },
 } as unknown as Capabilities;

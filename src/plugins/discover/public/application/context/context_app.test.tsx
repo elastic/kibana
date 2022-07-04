@@ -38,7 +38,7 @@ describe('ContextApp test', () => {
       discover: {
         save: true,
       },
-      dataViews: {
+      indexPatterns: {
         save: true,
       },
     },

@@ -173,7 +173,7 @@ export const DiscoverTopNav = ({
     currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onChangeDataView: (newIndexPatternId: string) => onChangeDataView(newIndexPatternId),
+    onChangeDataView: (newDataViewId: string) => onChangeDataView(newDataViewId),
   };
 
   return (
