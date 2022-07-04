@@ -30,7 +30,7 @@ export const EditControlGroup = ({
   const { openConfirm, openFlyout } = overlays;
 
   const editControlGroup = () => {
-    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const ControlsServicesProvider = pluginServices.getContextProvider();
 
     const onDeleteAll = (ref: OverlayRef) => {
       openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
@@ -49,7 +49,7 @@ export const EditControlGroup = ({
 
     const flyoutInstance = openFlyout(
       toMountPoint(
-        <PresentationUtilProvider>
+        <ControlsServicesProvider>
           <ControlGroupEditor
             initialInput={controlGroupContainer.getInput()}
             updateInput={(changes) => controlGroupContainer.updateInput(changes)}
@@ -57,7 +57,7 @@ export const EditControlGroup = ({
             onDeleteAll={() => onDeleteAll(flyoutInstance)}
             onClose={() => flyoutInstance.close()}
           />
-        </PresentationUtilProvider>,
+        </ControlsServicesProvider>,
         { theme$: theme.theme$ }
       ),
       {

@@ -61,7 +61,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   }, [panels, embeddableId]);
 
   const editControl = async () => {
-    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const ControlsServicesProvider = pluginServices.getContextProvider();
     const embeddable = (await untilEmbeddableLoaded(
       embeddableId
     )) as ControlEmbeddable<DataControlInput>;
@@ -126,7 +126,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
       const flyoutInstance = openFlyout(
         toMountPoint(
-          <PresentationUtilProvider>
+          <ControlsServicesProvider>
             <ControlEditor
               isCreate={false}
               width={panel.width}
@@ -159,7 +159,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
                 });
               }}
             />
-          </PresentationUtilProvider>,
+          </ControlsServicesProvider>,
           { theme$: theme.theme$ }
         ),
         {

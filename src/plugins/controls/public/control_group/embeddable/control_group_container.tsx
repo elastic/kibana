@@ -343,15 +343,15 @@ export class ControlGroupContainer extends Container<
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
-    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
-      <PresentationUtilProvider>
+      <ControlsServicesProvider>
         <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
           <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
             <ControlGroup />
           </ControlGroupReduxWrapper>
         </KibanaThemeProvider>
-      </PresentationUtilProvider>,
+      </ControlsServicesProvider>,
       dom
     );
   }

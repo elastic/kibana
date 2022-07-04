@@ -56,7 +56,7 @@ export const CreateControlButton = ({
   const { openFlyout, openConfirm } = overlays;
 
   const createNewControl = async () => {
-    const PresentationUtilProvider = pluginServices.getContextProvider();
+    const ControlsServicesProvider = pluginServices.getContextProvider();
 
     const initialInputPromise = new Promise<CreateControlResult>((resolve, reject) => {
       let inputToReturn: Partial<DataControlInput> = {};
@@ -97,7 +97,7 @@ export const CreateControlButton = ({
 
       const flyoutInstance = openFlyout(
         toMountPoint(
-          <PresentationUtilProvider>
+          <ControlsServicesProvider>
             <ControlEditor
               setLastUsedDataViewId={setLastUsedDataViewId}
               getRelevantDataViewId={getRelevantDataViewId}
@@ -113,7 +113,7 @@ export const CreateControlButton = ({
                 (inputToReturn = { ...inputToReturn, ...partialInput })
               }
             />
-          </PresentationUtilProvider>,
+          </ControlsServicesProvider>,
           { theme$: theme.theme$ }
         ),
         {

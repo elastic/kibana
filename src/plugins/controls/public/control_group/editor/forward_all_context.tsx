@@ -25,12 +25,12 @@ export const forwardAllContext = (
   component: ReactElement,
   reduxContainerContext: ReduxContainerContextServices<ControlGroupInput>
 ) => {
-  const PresentationUtilProvider = pluginServices.getContextProvider();
+  const ControlsServicesProvider = pluginServices.getContextProvider();
   const StoreProvider = reduxContainerContext.ReduxEmbeddableStoreProvider;
   return toMountPoint(
     <StoreProvider>
       <ReduxEmbeddableContext.Provider value={reduxContainerContext}>
-        <PresentationUtilProvider>{component}</PresentationUtilProvider>
+        <ControlsServicesProvider>{component}</ControlsServicesProvider>
       </ReduxEmbeddableContext.Provider>
     </StoreProvider>
   );
