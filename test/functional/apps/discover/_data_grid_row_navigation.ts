@@ -40,8 +40,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.createIndexPattern('similar_index*', '@timestamp', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.timePicker.setDefaultDataRange();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('should navigate through rows with the same id but different indices correctly', async () => {
