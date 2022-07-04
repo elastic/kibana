@@ -111,7 +111,7 @@ export const getLegendActions = (
 
     return (
       <EuiPopover
-        id="contextMenuNormal"
+        id={`contextMenuNormal-${title}`}
         button={Button}
         isOpen={popoverOpen}
         closePopover={() => {

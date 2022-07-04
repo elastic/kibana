@@ -88,7 +88,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   );
   return (
     <EuiPopover
-      id="contextMenuNormal"
+      id={`contextMenuNormal-${label}`}
       button={Button}
       isOpen={popoverOpen}
       closePopover={() => {
