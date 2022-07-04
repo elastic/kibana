@@ -144,7 +144,6 @@ export type {
   ShardsInfo,
   ShardsResponse,
   GetResponse,
-  DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
   PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,

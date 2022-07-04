@@ -37,7 +37,6 @@ export type {
   ShardsInfo,
   ShardsResponse,
   GetResponse,
-  DeleteDocumentResponse,
   // unauthorized error handler
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,

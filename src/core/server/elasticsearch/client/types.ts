@@ -104,19 +104,3 @@ export interface GetResponse<T> {
   _seq_no: number;
   _primary_term: number;
 }
-
-/**
- * @public
- */
-export interface DeleteDocumentResponse {
-  _shards: ShardsResponse;
-  found: boolean;
-  _index: string;
-  _type: string;
-  _id: string;
-  _version: number;
-  result: string;
-  error?: {
-    type: string;
-  };
-}
