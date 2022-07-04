@@ -145,6 +145,7 @@ export function CollapsibleNav({
       ...(needsIcon && { basePath }),
     });
   };
+  const focusTrapProps = useMemo(() => ({ closeOnMouseup: true }), []);
 
   return (
     <EuiCollapsibleNav
@@ -157,6 +158,7 @@ export function CollapsibleNav({
       onClose={closeNav}
       button={button}
       ownFocus={false}
+      focusTrapProps={focusTrapProps}
       size={248}
     >
       {customNavLink && (

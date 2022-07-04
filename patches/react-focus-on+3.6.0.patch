@@ -1,0 +1,28 @@
+diff --git a/node_modules/react-focus-on/dist/es2015/Effect.js b/node_modules/react-focus-on/dist/es2015/Effect.js
+index 06fe55c..1994a65 100644
+--- a/node_modules/react-focus-on/dist/es2015/Effect.js
++++ b/node_modules/react-focus-on/dist/es2015/Effect.js
+@@ -50,15 +50,15 @@ export function Effect(_a) {
+             mouseTouches.current = event.touches.length;
+         };
+         if (activeNode) {
+-            document.addEventListener('keydown', onKeyDown);
+-            document.addEventListener('mousedown', onMouseDown);
+-            document.addEventListener('touchstart', onTouchStart);
+-            document.addEventListener('touchend', onTouchEnd);
++            document.addEventListener('keydown', onKeyDown, { capture: true });
++            document.addEventListener('mousedown', onMouseDown, { capture: true });
++            document.addEventListener('touchstart', onTouchStart, { capture: true });
++            document.addEventListener('touchend', onTouchEnd, { capture: true });
+             return function () {
+-                document.removeEventListener('keydown', onKeyDown);
+-                document.removeEventListener('mousedown', onMouseDown);
+-                document.removeEventListener('touchstart', onTouchStart);
+-                document.removeEventListener('touchend', onTouchEnd);
++                document.removeEventListener('keydown', onKeyDown, { capture: true });
++                document.removeEventListener('mousedown', onMouseDown, { capture: true });
++                document.removeEventListener('touchstart', onTouchStart, { capture: true });
++                document.removeEventListener('touchend', onTouchEnd, { capture: true });
+             };
+         }
+     }, [activeNode, onClickOutside, onEscapeKey]);

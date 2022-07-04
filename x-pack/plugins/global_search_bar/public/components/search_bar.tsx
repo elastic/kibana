@@ -18,7 +18,6 @@ import {
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
-  EuiPopover,
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -38,7 +37,9 @@ import './search_bar.scss';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
-const blurEvent = new FocusEvent('blur');
+const blurEvent = new FocusEvent('focusout',  {
+  bubbles: true
+});
 
 const sortByScore = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
   if (a.score < b.score) return 1;
@@ -78,7 +79,6 @@ export const SearchBar: FC<SearchBarProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
-  const [popoverRef, setPopoverRef] = useState<EuiPopover | null>(null);
   const searchSubscription = useRef<Subscription | null>(null);
   const [options, _setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
@@ -250,11 +250,8 @@ export const SearchBar: FC<SearchBarProps> = ({
         clearField();
         searchRef.dispatchEvent(blurEvent);
       }
-      if (popoverRef) {
-        popoverRef.closePopover();
-      }
     },
-    [trackUiMetric, navigateToUrl, searchRef, popoverRef]
+    [trackUiMetric, navigateToUrl, searchRef]
   );
 
   const clearField = () => setSearchValue('');
@@ -325,8 +322,6 @@ export const SearchBar: FC<SearchBarProps> = ({
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         buttonRef: setButtonRef,
-        // @ts-expect-error update types
-        ref: setPopoverRef,
       }}
       popoverButton={
         <EuiHeaderSectionItemButton
