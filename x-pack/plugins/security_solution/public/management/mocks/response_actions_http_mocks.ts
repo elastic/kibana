@@ -10,7 +10,7 @@ import { EndpointActionGenerator } from '../../../common/endpoint/data_generator
 import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
-  GET_RUNNING_PROCESSES_ROUTE,
+  GET_PROCESSES_ROUTE,
   ENDPOINTS_ACTION_LIST_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
@@ -108,7 +108,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
   },
   {
     id: 'processes',
-    path: GET_RUNNING_PROCESSES_ROUTE,
+    path: GET_PROCESSES_ROUTE,
     method: 'post',
     handler: (): ActionDetailsApiResponse<ProcessesEntry> => {
       const generator = new EndpointActionGenerator('seed');

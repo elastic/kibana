@@ -12,7 +12,7 @@ import {
   ResponseActionApiResponse,
   ProcessesEntry,
 } from '../../../../common/endpoint/types/actions';
-import { GET_RUNNING_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
+import { GET_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 /**
@@ -36,7 +36,7 @@ export const useSendGetEndpointProcessesRequest = (
     ProcessesRequestBody
   >((getRunningProcessesData: ProcessesRequestBody) => {
     return KibanaServices.get().http.post<ResponseActionApiResponse<ProcessesEntry>>(
-      GET_RUNNING_PROCESSES_ROUTE,
+      GET_PROCESSES_ROUTE,
       {
         body: JSON.stringify(getRunningProcessesData),
       }
