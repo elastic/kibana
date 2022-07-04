@@ -36,7 +36,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
               class="root"
             >
               <div
-                class="container s2042575598"
+                class="container"
+                css="css-159kt7d"
                 style="overflow: hidden;"
               >
                 <div
@@ -92,7 +93,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                     class="root"
                   >
                     <div
-                      class="container s2042575598"
+                      class="container"
+                      css="css-159kt7d"
                       style="overflow: hidden;"
                     >
                       <div
@@ -137,7 +139,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                 style="flex-shrink: 0;"
               >
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink css-102pf9n-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -152,7 +154,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                 style="min-width: 0; cursor: default;"
               >
                 <div
-                  class="euiText emotion-euiText-s-euiTextColor-ghost"
+                  class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                 >
                   <div
                     class="eui-textTruncate"
@@ -206,7 +208,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with default propertie
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                         >
                           Page 1
                         </div>
@@ -308,7 +310,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
               class="root"
             >
               <div
-                class="container s2042575598"
+                class="container"
+                css="css-159kt7d"
                 style="overflow: hidden;"
               >
                 <div
@@ -364,7 +367,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                     class="root"
                   >
                     <div
-                      class="container s2042575598"
+                      class="container"
+                      css="css-159kt7d"
                       style="overflow: hidden;"
                     >
                       <div
@@ -409,7 +413,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                 style="flex-shrink: 0;"
               >
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink css-102pf9n-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -424,7 +428,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                 style="min-width: 0; cursor: default;"
               >
                 <div
-                  class="euiText emotion-euiText-s-euiTextColor-ghost"
+                  class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                 >
                   <div
                     class="eui-textTruncate"
@@ -478,7 +482,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with height specified 
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                         >
                           Page 1
                         </div>
@@ -580,7 +584,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
               class="root"
             >
               <div
-                class="container s2042575598"
+                class="container"
+                css="css-159kt7d"
                 style="overflow: hidden;"
               >
                 <div
@@ -636,7 +641,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                     class="root"
                   >
                     <div
-                      class="container s2042575598"
+                      class="container"
+                      css="css-159kt7d"
                       style="overflow: hidden;"
                     >
                       <div
@@ -681,7 +687,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                 style="flex-shrink: 0;"
               >
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink css-102pf9n-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -696,7 +702,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                 style="min-width: 0; cursor: default;"
               >
                 <div
-                  class="euiText emotion-euiText-s-euiTextColor-ghost"
+                  class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                 >
                   <div
                     class="eui-textTruncate"
@@ -750,7 +756,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with page specified 2`
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                         >
                           Page 1
                         </div>
@@ -853,7 +859,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
               class="root"
             >
               <div
-                class="container s2042575598"
+                class="container"
+                css="css-159kt7d"
                 style="overflow: hidden;"
               >
                 <div
@@ -909,7 +916,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                     class="root"
                   >
                     <div
-                      class="container s2042575598"
+                      class="container"
+                      css="css-159kt7d"
                       style="overflow: hidden;"
                     >
                       <div
@@ -954,7 +962,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                 style="flex-shrink: 0;"
               >
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink css-102pf9n-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -969,7 +977,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                 style="min-width: 0; cursor: default;"
               >
                 <div
-                  class="euiText emotion-euiText-s-euiTextColor-ghost"
+                  class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                 >
                   <div
                     class="eui-textTruncate"
@@ -1023,7 +1031,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width and height 
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                         >
                           Page 1
                         </div>
@@ -1125,7 +1133,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
               class="root"
             >
               <div
-                class="container s2042575598"
+                class="container"
+                css="css-159kt7d"
                 style="overflow: hidden;"
               >
                 <div
@@ -1181,7 +1190,8 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                     class="root"
                   >
                     <div
-                      class="container s2042575598"
+                      class="container"
+                      css="css-159kt7d"
                       style="overflow: hidden;"
                     >
                       <div
@@ -1226,7 +1236,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                 style="flex-shrink: 0;"
               >
                 <a
-                  class="euiLink emotion-euiLink-primary"
+                  class="euiLink css-102pf9n-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -1241,7 +1251,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                 style="min-width: 0; cursor: default;"
               >
                 <div
-                  class="euiText emotion-euiText-s-euiTextColor-ghost"
+                  class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                 >
                   <div
                     class="eui-textTruncate"
@@ -1295,7 +1305,7 @@ exports[`Canvas Shareable Workpad API Placed successfully with width specified 2
                         class="euiButtonEmpty__text"
                       >
                         <div
-                          class="euiText emotion-euiText-s-euiTextColor-ghost"
+                          class="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
                         >
                           Page 1
                         </div>
