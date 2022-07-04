@@ -207,15 +207,12 @@ export const RulesTableContextProvider = ({
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
-  const handleFilterOptionsChange = useCallback(
-    (newFilter: Partial<FilterOptions>) => {
-      setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
-      setPage(1);
-      setSelectedRuleIds([]);
-      setIsAllSelected(false);
-    },
-    [setSelectedRuleIds]
-  );
+  const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
+    setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
+    setPage(1);
+    setSelectedRuleIds([]);
+    setIsAllSelected(false);
+  }, []);
 
   const clearRulesSelection = useCallback(() => {
     setSelectedRuleIds([]);
