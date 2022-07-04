@@ -329,3 +329,11 @@ The `_meta` adds the invaluable information of a `description` and whether a fie
 It can be attached to any schema definition as seen in the examples above. For high-order types, like arrays or objects, the `_meta` field is optional. For first-order types, like numbers, strings, booleans or `pass_through`, the `_meta` key is mandatory.
 
 The field `_meta.optional` is not required unless the schema is describing an optional field. In that case, `_meta.optional: true` is required. However, it's highly encouraged to be explicit about declaring it even when the described field is not optional.
+
+### Schema Validation
+
+Apart from documentation, the schema is used to validate the payload during the dev cycle. This adds an extra layer of confidence over the data to be sent.
+
+The validation, however, is disabled in production because users cannot do anything to fix the bug after it is released. Additionally, receiving _buggy_ events can be considered an additional insight into how our users use our products. For example, the buggy event can be caused by a user following an unexpected path in the UI like clicking an "Upload" button when the file has not been selected [#125013](https://github.com/elastic/kibana/issues/125013). In those cases, receiving the _incomplete_ event tells us the user didn't select a file, but they still hit the "Upload" button. 
+
+The validation is performed with the `io-ts` library. In order to do that, the schema is firstly parsed into the `io-ts` equivalent, and then used to validate the event & context payloads.
