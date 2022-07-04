@@ -546,6 +546,7 @@ module.exports = {
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
               KBN_HANDLEBARS_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],

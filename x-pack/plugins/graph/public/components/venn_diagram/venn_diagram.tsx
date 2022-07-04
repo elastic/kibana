@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// @ts-ignore
 import React from 'react';
 import { distanceFromIntersectArea } from './vennjs';
 
