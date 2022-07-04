@@ -18,26 +18,26 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
       </div>
     </div>
   </div>
-  .c8 {
+  .c7 {
   -webkit-transition: background-color 0.7s ease;
   transition: background-color 0.7s ease;
   width: 100%;
   height: 100%;
 }
 
-.c8 .flyout-overlay .euiPanel {
+.c7 .flyout-overlay .euiPanel {
   background-color: #16171c;
 }
 
-.c8 > div.timeline-drop-area .drop-and-provider-timeline {
+.c7 > div.timeline-drop-area .drop-and-provider-timeline {
   display: none;
 }
 
-.c8 > div.timeline-drop-area + div {
+.c7 > div.timeline-drop-area + div {
   display: none !important;
 }
 
-.c14 {
+.c13 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -62,34 +62,34 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   width: 34px;
 }
 
-.c14 .euiBadge__content {
+.c13 .euiBadge__content {
   position: relative;
   top: -1px;
 }
 
-.c14 .euiBadge__text {
+.c13 .euiBadge__text {
   text-overflow: clip;
 }
 
-.c11 {
+.c10 {
   overflow: hidden;
   margin: 5px 0 5px 0;
   padding: 3px;
   white-space: nowrap;
 }
 
-.c13 {
+.c12 {
   height: 20px;
   margin: 0 5px 0 5px;
   maxwidth: 85px;
   minwidth: 85px;
 }
 
-.c12 {
+.c11 {
   background-color: #343741;
 }
 
-.c9 {
+.c8 {
   width: auto;
   -webkit-align-items: center;
   -webkit-box-align: center;
@@ -119,11 +119,11 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   min-height: 100px;
 }
 
-.c9 + div {
+.c8 + div {
   display: none !important;
 }
 
-.c10 {
+.c9 {
   -webkit-align-items: center;
   -webkit-box-align: center;
   -ms-flex-align: center;
@@ -140,24 +140,24 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   flex-wrap: no-wrap;
 }
 
-.c6 {
+.c5 {
   padding: 2px 0 4px 0;
 }
 
-.is-dragging .c6 .drop-target-data-providers {
+.is-dragging .c5 .drop-target-data-providers {
   background: rgba(125,222,216,0.1);
   border: 0.2rem dashed #7dded8;
 }
 
-.is-dragging .c6 .drop-target-data-providers .timeline-drop-area-empty__text {
+.is-dragging .c5 .drop-target-data-providers .timeline-drop-area-empty__text {
   color: #7dded8;
 }
 
-.is-dragging .c6 .drop-target-data-providers .euiFormHelpText {
+.is-dragging .c5 .drop-target-data-providers .euiFormHelpText {
   color: #7dded8;
 }
 
-.c7 {
+.c6 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -182,29 +182,25 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
   background-color: #16171c;
 }
 
-.c3 {
+.c2 {
   display: block;
 }
 
-.c2 > span {
+.c1 > span {
   padding: 0;
 }
 
-.c4 {
+.c3 {
   overflow: hidden;
   display: inline-block;
   text-overflow: ellipsis;
 }
 
 .c0 {
-  margin: 0 -1px 0;
-}
-
-.c1 {
   overflow: hidden;
 }
 
-.c5 {
+.c4 {
   border-radius: 0;
   padding: 0 4px 0 4px;
   -webkit-user-select: none;
@@ -219,8 +215,9 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
     data-test-subj="flyoutBottomBar"
   >
     <div
-      class="euiPanel euiPanel--plain euiPanel--paddingSmall c0 emotion-euiPanel-none-s-plain"
+      class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-none-s-plain"
       data-test-subj="timeline-flyout-header-panel"
+      style="background-color: rgb(255, 255, 255); color: rgb(52, 55, 65);"
     >
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -252,12 +249,12 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero c1"
+          class="euiFlexItem euiFlexItem--flexGrowZero c0"
         >
           <button
             aria-label="Open timeline Untitled timeline"
             aria-pressed="false"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushBoth c2 active-timeline-button"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushBoth c1 active-timeline-button"
             data-test-subj="flyoutOverlay"
             type="button"
           >
@@ -277,7 +274,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                       class="euiToolTipAnchor"
                     >
                       <div
-                        class="euiHealth c3 emotion-euiHealth-s"
+                        class="euiHealth c2 emotion-euiHealth-s"
                       >
                         <div
                           class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -298,7 +295,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero c4"
+                    class="euiFlexItem euiFlexItem--flexGrowZero c3"
                   >
                     Untitled timeline
                   </div>
@@ -315,39 +312,39 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
       </div>
     </div>
     <div
-      class="euiPanel euiPanel--plain c5 emotion-euiPanel-grow-m-plain-hasShadow"
+      class="euiPanel euiPanel--plain c4 emotion-euiPanel-grow-m-plain-hasShadow"
     >
       <div
         aria-label="You are in the timeline query area, which contains groups of data providers that query for events"
-        class="c6 drop-target-data-providers-container"
+        class="c5 drop-target-data-providers-container"
       >
         <div
-          class="c7 drop-target-data-providers"
+          class="c6 drop-target-data-providers"
           data-test-subj="dataProviders"
         >
           <div
-            class="c8"
+            class="c7"
             data-rbd-droppable-context-id="123"
             data-rbd-droppable-id="123"
             height="100%"
           >
             <div
-              class="c9 timeline-drop-area-empty"
+              class="c8 timeline-drop-area-empty"
               data-test-subj="empty"
             >
               <div
-                class="c10"
+                class="c9"
               >
                 <div
-                  class="euiText c11 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
+                  class="euiText c10 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
                 >
                   Drop anything
                 </div>
                 <span
-                  class="c12"
+                  class="c11"
                 >
                   <span
-                    class="euiBadge euiBadge--iconLeft c13 highlighted-drop-target"
+                    class="euiBadge euiBadge--iconLeft c12 highlighted-drop-target"
                     style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
                     title="highlighted"
                   >
@@ -363,12 +360,12 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   </span>
                 </span>
                 <div
-                  class="euiText c11 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
+                  class="euiText c10 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
                 >
                   here to build an
                 </div>
                 <span
-                  class="euiBadge euiBadge--hollow euiBadge--iconLeft c14"
+                  class="euiBadge euiBadge--hollow euiBadge--iconLeft c13"
                   data-test-subj="and-or-badge"
                   title="OR"
                 >
@@ -383,7 +380,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                   </span>
                 </span>
                 <div
-                  class="euiText c11 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
+                  class="euiText c10 timeline-drop-area-empty__text emotion-euiText-s-euiTextColor-subdued"
                 >
                   query
                 </div>
