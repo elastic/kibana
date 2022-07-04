@@ -173,8 +173,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     []
   );
 
-  const onTestFetch = useCallback(async () => {
-    const timeWindow = `${ruleConfiguration.timeWindowSize}${ruleConfiguration.timeWindowUnit}`;
+  const timeWindow = `${ruleConfiguration.timeWindowSize}${ruleConfiguration.timeWindowUnit}`;
+
+  const createTestSearchSource = useCallback(() => {
     const testSearchSource = searchSource.createCopy();
     const timeFilter = getTime(searchSource.getField('index')!, {
       from: `now-${timeWindow}`,
@@ -184,9 +185,19 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       'filter',
       timeFilter ? [timeFilter, ...ruleConfiguration.filter] : ruleConfiguration.filter
     );
+    return testSearchSource;
+  }, [searchSource, timeWindow, ruleConfiguration]);
+
+  const onCopyQuery = useCallback(() => {
+    const testSearchSource = createTestSearchSource();
+    return JSON.stringify(testSearchSource.getSearchRequestBody(), null, 2);
+  }, [createTestSearchSource]);
+
+  const onTestFetch = useCallback(async () => {
+    const testSearchSource = createTestSearchSource();
     const { rawResponse } = await lastValueFrom(testSearchSource.fetch$());
     return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
-  }, [searchSource, ruleConfiguration]);
+  }, [timeWindow, createTestSearchSource]);
 
   return (
     <Fragment>
