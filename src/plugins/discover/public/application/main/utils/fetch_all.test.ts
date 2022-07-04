@@ -121,9 +121,10 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
+      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
       {
         fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: 'document',
         result: documents,
       },
     ]);
@@ -143,9 +144,9 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
-      { fetchStatus: FetchStatus.PARTIAL, result: 2 },
-      { fetchStatus: FetchStatus.COMPLETE, result: 42 },
+      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
+      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document', result: 2 },
+      { fetchStatus: FetchStatus.COMPLETE, recordRawType: 'document', result: 42 },
     ]);
   });
 
@@ -155,8 +156,13 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
-      { fetchStatus: FetchStatus.COMPLETE, bucketInterval: {}, chartData: {} },
+      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
+      {
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: 'document',
+        bucketInterval: {},
+        chartData: {},
+      },
     ]);
   });
 
@@ -168,9 +174,9 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
-      { fetchStatus: FetchStatus.PARTIAL, result: 0 }, // From documents query
-      { fetchStatus: FetchStatus.COMPLETE, result: 32 },
+      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
+      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document', result: 0 }, // From documents query
+      { fetchStatus: FetchStatus.COMPLETE, recordRawType: 'document', result: 32 },
     ]);
     expect(mockFetchTotalHits).not.toHaveBeenCalled();
   });
@@ -186,19 +192,19 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collectTotalHits()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
-      { fetchStatus: FetchStatus.PARTIAL, result: 1 },
-      { fetchStatus: FetchStatus.ERROR, error: { msg: 'Oh noes!' } },
+      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
+      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document', result: 1 },
+      { fetchStatus: FetchStatus.ERROR, recordRawType: 'document', error: { msg: 'Oh noes!' } },
     ]);
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
-      { fetchStatus: FetchStatus.PARTIAL, textBasedLanguageMode: '' },
+      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
+      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document' },
       {
         fetchStatus: FetchStatus.COMPLETE,
         foundDocuments: true,
         error: undefined,
-        textBasedLanguageMode: '',
+        recordRawType: 'document',
       },
     ]);
   });
@@ -210,12 +216,12 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: '' },
-      { fetchStatus: FetchStatus.PARTIAL, textBasedLanguageMode: '' }, // From totalHits query
+      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
+      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document' }, // From totalHits query
       {
         fetchStatus: FetchStatus.ERROR,
         error: { msg: 'This query failed' },
-        textBasedLanguageMode: '',
+        recordRawType: 'document',
       },
       // Here should be no COMPLETE coming anymore
     ]);

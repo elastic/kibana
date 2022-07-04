@@ -131,11 +131,11 @@ export function DiscoverLayout({
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
-  const resultState = useMemo(
-    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, dataState.recordRawType),
-    [dataState.fetchStatus, dataState.foundDocuments, dataState.recordRawType]
-  );
   const isPlainRecord = dataState.recordRawType === RecordRawType.PLAIN;
+  const resultState = useMemo(
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, isPlainRecord),
+    [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
+  );
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
@@ -210,10 +210,10 @@ export function DiscoverLayout({
   }, []);
 
   const textBasedLanguageModeErrors = useMemo(() => {
-    if (dataState.recordRawType) {
+    if (isPlainRecord) {
       return dataState.error;
     }
-  }, [dataState.error, dataState.recordRawType]);
+  }, [dataState.error, isPlainRecord]);
 
   return (
     <DiscoverLayoutContextProvider initialIsPlainRecord={isPlainRecord}>

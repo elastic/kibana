@@ -36,6 +36,7 @@ test('getTopNavLinks result', () => {
     state,
     searchSource: {} as ISearchSource,
     onOpenSavedSearch: () => {},
+    isPlainRecord: false,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
