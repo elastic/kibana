@@ -21,7 +21,7 @@ import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import './_markdown.scss';
 
 function MarkdownVisualization(props) {
-  const { backgroundColor, model, visData, getConfig, fieldFormatMap } = props;
+  const { backgroundColor, model, visData, getConfig, fieldFormatMap, initialRender } = props;
   const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, getConfig, fieldFormatMap);
 
@@ -58,10 +58,19 @@ function MarkdownVisualization(props) {
         {markdownError && <ErrorComponent error={markdownError} />}
         <ClassNames>
           {({ css, cx }) => (
-            <div className={cx(contentClasses, css(model.markdown_css))}>
+            <div
+              className={cx(
+                contentClasses,
+                // wrapping select for markdown body to make sure selector specificity wins over base styles
+                css(`.kbnMarkdown__body {
+                  ${model.markdown_css}
+                }`)
+              )}
+            >
               <div>
                 {!markdownError && (
                   <Markdown
+                    onRender={initialRender}
                     markdown={markdownSource}
                     openLinksInNewTab={model.markdown_openLinksInNewTab}
                   />

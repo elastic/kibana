@@ -544,13 +544,11 @@ describe(`POST ${URL}`, () => {
             type: 'visualization',
             id: 'new-id-1',
             references: [{ name: 'ref_0', type: 'index-pattern', id: 'my-pattern' }],
-            originId: undefined,
           }),
           expect.objectContaining({
             type: 'dashboard',
             id: 'new-id-2',
             references: [{ name: 'ref_0', type: 'visualization', id: 'new-id-1' }],
-            originId: undefined,
           }),
         ],
         expect.any(Object) // options
