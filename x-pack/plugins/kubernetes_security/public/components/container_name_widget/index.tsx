@@ -6,9 +6,10 @@
  */
 
 import React, { ReactNode, useMemo, useState, useRef } from 'react';
-import { EuiFlexItem, EuiText, EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStyles } from './styles';
+import { RowContainerNameHelper } from './row_container_name_helper';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter, useScroll } from '../../hooks';
 import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
@@ -48,7 +49,6 @@ export const ContainerNameWidget = ({
   groupedBy,
   countBy,
 }: ContainerNameWidgetDeps) => {
-  const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const [sortField, setSortField] = useState('count');
   const [sortDirection, setSortDirection] = useState('desc');
   const styles = useStyles();
@@ -72,10 +72,10 @@ export const ContainerNameWidget = ({
 
   const onTableChange = ({ sort = {} }) => {
     // @ts-ignore
-    const { field: sortField, direction: sortDirection } = sort;
+    const { field: sortingField, direction: sortingDirection } = sort;
 
-    setSortField(sortField);
-    setSortDirection(sortDirection);
+    setSortField(sortingField);
+    setSortDirection(sortingDirection);
   };
 
   const sorting = {
@@ -131,7 +131,7 @@ export const ContainerNameWidget = ({
     };
     // return true
     return result;
-  }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager, hoveredFilter]);
+  }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager]);
 
   const widgetTitle = i18n.translate(
     'xpack.kubernetesSecurity.containerNameWidget.ContainerImage',
@@ -167,30 +167,22 @@ export const ContainerNameWidget = ({
           });
 
           return (
-            <EuiFlexItem
-              key={`percentage-widget--haha}`}
-              onMouseEnter={() => setHoveredFilter(indexHelper)}
-              onMouseLeave={() => setHoveredFilter(null)}
-              data-test-subj={'containerNameSessionRow'}
-            >
-              <EuiText size="xs" css={styles.dataInfo}>
-                {name}
-                {hoveredFilter === indexHelper && (
-                  <div css={styles.filters}>
-                    {filterButtons.filterForButtons[indexHelper]}
-                    {filterButtons.filterOutButtons[indexHelper]}
-                  </div>
-                )}
-              </EuiText>
-            </EuiFlexItem>
+            <RowContainerNameHelper
+              name={name}
+              index={indexHelper}
+              filterButtonIn={filterButtons.filterForButtons[indexHelper]}
+              filterButtonOut={filterButtons.filterOutButtons[indexHelper]}
+            />
           );
         },
         align: 'left',
+        width: '216px',
         sortable: false,
       },
       {
         field: 'count',
         name: 'Count',
+        width: '76px',
         'data-test-subj': 'containerImageNameSessionCountColumn',
         render: (count: number) => {
           return <span css={styles.countValue}>{count}</span>;
@@ -199,7 +191,13 @@ export const ContainerNameWidget = ({
         align: 'right',
       },
     ];
-  }, [filterButtons.filterForButtons, filterButtons.filterOutButtons, containerNameArray]);
+  }, [
+    filterButtons.filterForButtons,
+    filterButtons.filterOutButtons,
+    containerNameArray,
+    styles,
+    widgetTitle,
+  ]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   useScroll({

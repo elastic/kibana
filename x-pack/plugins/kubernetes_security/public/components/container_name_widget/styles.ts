@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
+import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
@@ -21,6 +22,7 @@ export const useStyles = () => {
       borderRadius: euiTheme.border.radius.medium,
       overflow: 'auto',
       height: '250px',
+      minWidth: '332px',
     };
 
     const dataInfo: CSSObject = {
@@ -28,10 +30,18 @@ export const useStyles = () => {
       display: 'flex',
       alignItems: 'center',
       height: size.l,
+      position: 'relative',
     };
 
     const filters: CSSObject = {
       marginLeft: size.s,
+      position: 'absolute',
+      left: '50%',
+      backgroundColor: 'white',
+      borderRadius: euiTheme.border.radius.small,
+      border: euiTheme.border.thin,
+      bottom: '-25px',
+      boxShadow: `0 ${size.xs} ${size.xs} ${transparentize(euiTheme.colors.shadow, 0.04)}`,
     };
 
     const countValue: CSSObject = {
