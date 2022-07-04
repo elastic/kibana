@@ -8,7 +8,11 @@
 import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { sendPutAgentTagsUpdate, useStartServices } from '../../../../hooks';
+import {
+  sendPostBulkAgentTagsUpdate,
+  sendPutAgentTagsUpdate,
+  useStartServices,
+} from '../../../../hooks';
 
 export const useUpdateTags = () => {
   const { notifications } = useStartServices();
@@ -40,5 +44,37 @@ export const useUpdateTags = () => {
     [notifications.toasts]
   );
 
-  return { updateTags };
+  const bulkUpdateTags = useCallback(
+    async (
+      agents: string[] | string,
+      tagsToAdd: string[],
+      tagsToRemove: string[],
+      onSuccess: () => void
+    ) => {
+      try {
+        const res = await sendPostBulkAgentTagsUpdate({ agents, tagsToAdd, tagsToRemove });
+
+        if (res.error) {
+          throw res.error;
+        }
+        const successMessage = i18n.translate(
+          'xpack.fleet.updateAgentTags.successNotificationTitle',
+          {
+            defaultMessage: 'Tags updated',
+          }
+        );
+        notifications.toasts.addSuccess(successMessage);
+
+        onSuccess();
+      } catch (error) {
+        const errorMessage = i18n.translate('xpack.fleet.updateAgentTags.errorNotificationTitle', {
+          defaultMessage: 'Tags update failed',
+        });
+        notifications.toasts.addError(error, { title: errorMessage });
+      }
+    },
+    [notifications.toasts]
+  );
+
+  return { updateTags, bulkUpdateTags };
 };

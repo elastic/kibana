@@ -89,6 +89,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   selectedAgents: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
+  allAgents: Agent[];
 }> = ({
   agentPolicies,
   draftKuery,
@@ -110,6 +111,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   selectedAgents,
   refreshAgents,
   onClickAddAgent,
+  allAgents,
 }) => {
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
@@ -336,7 +338,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 selectionMode={selectionMode}
                 currentQuery={currentQuery}
                 selectedAgents={selectedAgents}
+                allAgents={allAgents}
                 refreshAgents={refreshAgents}
+                allTags={tags}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
