@@ -151,6 +151,7 @@ const KubernetesSecurityRoutesComponent = ({
                   }),
                   fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis1,
+                  shouldHideFilter: true,
                 },
               }}
               groupedBy={ENTRY_LEADER_INTERACTIVE}
