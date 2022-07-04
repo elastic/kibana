@@ -21,7 +21,7 @@ export const resultStatuses = {
 export function getResultState(
   fetchStatus: FetchStatus,
   foundDocuments: boolean = false,
-  isPlainRecord?: string
+  isPlainRecord: boolean
 ) {
   if (fetchStatus === FetchStatus.UNINITIALIZED) {
     return resultStatuses.UNINITIALIZED;
