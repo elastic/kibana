@@ -31,7 +31,7 @@ export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height
                   <EuiTitle>
                     <h3>
                       <FormattedMessage
-                        id="xpack.timelines.tgrid.empty.title"
+                        id="xpack.triggersActionsUI.empty.title"
                         defaultMessage="No results match your search criteria"
                       />
                     </h3>
