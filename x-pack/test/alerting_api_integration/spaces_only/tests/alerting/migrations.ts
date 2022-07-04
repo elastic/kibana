@@ -448,7 +448,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const response = await es.get<{ alert: RawRule }>(
         {
           index: '.kibana',
-          id: 'alert:734def70-f8b1-11ec-b8e0-c99fab63aaae',
+          id: 'alert:bdfce750-fba0-11ec-9157-2f379249da99',
         },
         { meta: true }
       );
@@ -458,7 +458,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body._source?.alert?.snoozeSchedule).not.to.be(undefined);
 
       const snoozeSchedule = response.body._source?.alert.snoozeSchedule!;
-      expect(snoozeSchedule.length).to.eql(1);
+      expect(snoozeSchedule.length).to.eql(0);
     });
   });
 }
