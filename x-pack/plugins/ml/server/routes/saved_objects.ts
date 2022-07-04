@@ -7,7 +7,7 @@
 
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
-import { checksFactory, syncSavedObjectsFactory, JobSavedObjectStatus } from '../saved_objects';
+import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
 import {
   updateJobsSpaces,
   updateTrainedModelsSpaces,
@@ -330,26 +330,11 @@ export function savedObjectsRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ response, mlSavedObjectService, client }) => {
       try {
-        const { checkStatus } = checksFactory(client, mlSavedObjectService);
-        const savedObjects = (await checkStatus()).savedObjects;
-        const jobStatus = (
-          Object.entries(savedObjects)
-            .filter(([type]) => type === 'anomaly-detector' || type === 'data-frame-analytics')
-            .map(([, status]) => status)
-            .flat() as JobSavedObjectStatus[]
-        )
-          .filter((s) => s.checks.jobExists)
-          .reduce((acc, cur) => {
-            const type = cur.type;
-            if (acc[type] === undefined) {
-              acc[type] = {};
-            }
-            acc[type][cur.jobId] = cur.namespaces;
-            return acc;
-          }, {} as { [id: string]: { [id: string]: string[] | undefined } });
+        const { jobsSpaces } = checksFactory(client, mlSavedObjectService);
+        const jobsStatus = await jobsSpaces();
 
         return response.ok({
-          body: jobStatus,
+          body: jobsStatus,
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -375,17 +360,8 @@ export function savedObjectsRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ response, mlSavedObjectService, client }) => {
       try {
-        const { checkStatus } = checksFactory(client, mlSavedObjectService);
-        const savedObjects = (await checkStatus()).savedObjects;
-        const modelStatus = savedObjects['trained-model']
-          .filter((s) => s.checks.trainedModelExists)
-          .reduce(
-            (acc, cur) => {
-              acc.trainedModels[cur.modelId] = cur.namespaces;
-              return acc;
-            },
-            { trainedModels: {} } as { trainedModels: { [id: string]: string[] | undefined } }
-          );
+        const { trainedModelsSpaces } = checksFactory(client, mlSavedObjectService);
+        const modelStatus = await trainedModelsSpaces();
 
         return response.ok({
           body: modelStatus,
