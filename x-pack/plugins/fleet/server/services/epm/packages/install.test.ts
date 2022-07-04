@@ -206,6 +206,7 @@ describe('install', () => {
     });
 
     it('should install from bundled package if one exists', async () => {
+      (install._installPackage as jest.Mock).mockResolvedValue({});
       mockGetBundledPackages.mockResolvedValue([
         {
           name: 'test_package',
