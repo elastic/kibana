@@ -325,9 +325,6 @@ export const DiscoverGrid = ({
   const showDisclaimer = rowCount === sampleSize && isOnLastPage;
   const randomId = useMemo(() => htmlIdGenerator()(), []);
   const closeFieldEditor = useRef<() => void | undefined>();
-  const setFieldEditorRef = useCallback((ref: () => void | undefined) => {
-    closeFieldEditor.current = ref;
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -337,23 +334,22 @@ export const DiscoverGrid = ({
     };
   }, []);
 
-  const editField = useCallback(
-    (fieldName: string) => {
-      const ref = services.dataViewFieldEditor.openEditor({
-        ctx: {
-          dataView: indexPattern,
-        },
-        fieldName,
-        onSave: async () => {
-          onEditRuntimeField?.();
-        },
-      });
-
-      if (setFieldEditorRef) {
-        setFieldEditorRef(ref);
-      }
-    },
-    [indexPattern, onEditRuntimeField, services.dataViewFieldEditor, setFieldEditorRef]
+  const editField = useMemo(
+    () =>
+      onEditRuntimeField
+        ? (fieldName: string) => {
+            closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
+              ctx: {
+                dataView: indexPattern,
+              },
+              fieldName,
+              onSave: async () => {
+                onEditRuntimeField();
+              },
+            });
+          }
+        : undefined,
+    [indexPattern, onEditRuntimeField, services.dataViewFieldEditor]
   );
 
   const euiGridColumns = useMemo(
@@ -368,7 +364,7 @@ export const DiscoverGrid = ({
         isSortEnabled,
         services,
         valueToStringConverter,
-        editField: onEditRuntimeField ? editField : undefined,
+        editField,
       }),
     [
       displayedColumns,
@@ -380,7 +376,6 @@ export const DiscoverGrid = ({
       isSortEnabled,
       services,
       valueToStringConverter,
-      onEditRuntimeField,
       editField,
     ]
   );
