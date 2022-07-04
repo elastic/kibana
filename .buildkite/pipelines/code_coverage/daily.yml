@@ -1,6 +1,8 @@
 notify:
   - slack: "#kibana-qa"
     if: build.state == "passed"
+steps:
+  - command: echo "Howdy doody"
 #steps:
 #  - command: .buildkite/scripts/lifecycle/pre_build.sh
 #    label: Pre-Build
