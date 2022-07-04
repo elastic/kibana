@@ -11,6 +11,7 @@ import type { HeatmapArguments } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { EXPRESSION_HEATMAP_GRID_NAME, EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
+import { ExecutionContext } from '@kbn/expressions-plugin';
 
 describe('interpreter/functions#heatmap', () => {
   const fn = functionWrapper(heatmapFunction());
@@ -56,7 +57,7 @@ describe('interpreter/functions#heatmap', () => {
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, args, undefined);
+    const actual = fn(context, args);
 
     expect(actual).toMatchSnapshot();
   });
@@ -72,8 +73,10 @@ describe('interpreter/functions#heatmap', () => {
           reset: () => {},
         },
       },
-    };
-    await fn(context, args, handlers as any);
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+
+    await fn(context, args, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
   });

@@ -45,6 +45,7 @@ Object {
   "as": "partitionVis",
   "type": "render",
   "value": Object {
+    "context": undefined,
     "params": Object {
       "listenOnChange": true,
     },

@@ -37,6 +37,7 @@ Object {
   "as": "tagcloud",
   "type": "render",
   "value": Object {
+    "context": undefined,
     "syncColors": false,
     "visData": Object {
       "columns": Array [
@@ -86,6 +87,7 @@ Object {
   "as": "tagcloud",
   "type": "render",
   "value": Object {
+    "context": undefined,
     "syncColors": false,
     "visData": Object {
       "columns": Array [
