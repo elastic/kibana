@@ -8,14 +8,15 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { servicesFactory, DataServiceFactoryConfig } from '@kbn/shared-ux-storybook';
 
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page';
-import { AnalyticsNoDataPageProvider, Services } from './services';
+import { AnalyticsNoDataPageProvider } from './services';
 import mdx from '../README.mdx';
 
+import { Params, getStoryArgTypes, getStoryServices } from './mocks';
+
 export default {
-  title: 'Analytics No Data Page',
+  title: 'No Data/Analytics Page',
   description: 'An Analytics-specific version of KibanaNoDataPage.',
   parameters: {
     docs: {
@@ -24,22 +25,27 @@ export default {
   },
 };
 
-type Params = Pick<DataServiceFactoryConfig, 'hasESData' | 'hasUserDataView'>;
-
 export const AnalyticsNoDataPage = (params: Params) => {
-  // Workaround to leverage the services package.
-  const { application, data, docLinks, editors, http, permissions, platform } =
-    servicesFactory(params);
+  return (
+    <AnalyticsNoDataPageProvider {...getStoryServices(params)}>
+      <Component onDataViewCreated={action('onDataViewCreated')} />
+    </AnalyticsNoDataPageProvider>
+  );
+};
 
-  const services: Services = {
-    ...application,
-    ...data,
-    ...docLinks,
-    ...editors,
-    ...http,
-    ...permissions,
-    ...platform,
-    kibanaGuideDocLink: 'Kibana guide',
+AnalyticsNoDataPage.argTypes = {
+  ...getStoryArgTypes(),
+};
+
+export const LoadingState = (params: Params) => {
+  // Simulate loading with a Promise that doesn't resolve.
+  const dataCheck = () => new Promise<boolean>((_reject, _resolve) => {});
+
+  const services = {
+    ...getStoryServices(params),
+    hasESData: dataCheck,
+    hasUserDataView: dataCheck,
+    hasDataView: dataCheck,
   };
 
   return (
@@ -47,15 +53,4 @@ export const AnalyticsNoDataPage = (params: Params) => {
       <Component onDataViewCreated={action('onDataViewCreated')} />
     </AnalyticsNoDataPageProvider>
   );
-};
-
-AnalyticsNoDataPage.argTypes = {
-  hasESData: {
-    control: 'boolean',
-    defaultValue: false,
-  },
-  hasUserDataView: {
-    control: 'boolean',
-    defaultValue: false,
-  },
 };

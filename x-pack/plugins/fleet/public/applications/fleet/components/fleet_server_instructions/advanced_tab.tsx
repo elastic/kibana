@@ -47,9 +47,12 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
     getSetDeploymentModeStep({
       deploymentMode,
       setDeploymentMode,
-      disabled: !Boolean(fleetServerPolicyId),
+      disabled: !Boolean(fleetServerPolicyId || selectedPolicyId),
     }),
-    getAddFleetServerHostStep({ fleetServerHostForm, disabled: !Boolean(fleetServerPolicyId) }),
+    getAddFleetServerHostStep({
+      fleetServerHostForm,
+      disabled: !Boolean(fleetServerPolicyId || selectedPolicyId),
+    }),
     getGenerateServiceTokenStep({
       serviceToken,
       generateServiceToken,
@@ -60,7 +63,7 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
       isFleetServerReady,
       serviceToken,
       fleetServerHost: fleetServerHostForm.fleetServerHost,
-      fleetServerPolicyId,
+      fleetServerPolicyId: fleetServerPolicyId || selectedPolicyId,
       deploymentMode,
       disabled: !Boolean(serviceToken),
     }),

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Outlet, Route } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
@@ -30,6 +30,8 @@ import { BackendDetailOperations } from '../../app/backend_detail_operations';
 import { BackendDetailView } from '../../app/backend_detail_view';
 import { RedirectPathBackendDetailView } from './redirect_path_backend_detail_view';
 import { RedirectBackendsToBackendDetailOverview } from './redirect_backends_to_backend_detail_view';
+import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 function page<
   TPath extends string,
@@ -69,6 +71,7 @@ function page<
         </Breadcrumb>
       ),
       children,
+      params,
     },
   } as any;
 }
@@ -149,7 +152,11 @@ export const DependenciesOperationsTitle = i18n.translate(
 
 export const home = {
   '/': {
-    element: <Outlet />,
+    element: (
+      <TimeRangeMetadataContextProvider>
+        <Outlet />
+      </TimeRangeMetadataContextProvider>
+    ),
     params: t.type({
       query: t.intersection([
         environmentRt,
@@ -162,6 +169,10 @@ export const home = {
         t.partial({
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
           refreshInterval: t.string,
+          page: toNumberRt,
+          pageSize: toNumberRt,
+          sortField: t.string,
+          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         }),
         offsetRt,
       ]),
@@ -273,16 +284,21 @@ export const home = {
             children: {
               '/backends/operations': {
                 element: <BackendDetailOperations />,
-                children: {
-                  '/backends/operation': {
-                    params: t.type({
-                      query: t.type({
-                        spanName: t.string,
-                      }),
+              },
+
+              '/backends/operation': {
+                params: t.type({
+                  query: t.intersection([
+                    t.type({
+                      spanName: t.string,
                     }),
-                    element: <Outlet />,
-                  },
-                },
+                    t.partial({
+                      sampleRangeFrom: toNumberRt,
+                      sampleRangeTo: toNumberRt,
+                    }),
+                  ]),
+                }),
+                element: <BackendOperationDetailView />,
               },
               '/backends/overview': {
                 element: <BackendDetailOverview />,

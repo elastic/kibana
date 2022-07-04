@@ -91,6 +91,7 @@ NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
   ariaLabel?: string;
+  isDisabled?: boolean;
   showNotes: boolean;
   toggleShowNotes: () => void;
   toolTip?: string;
@@ -99,6 +100,7 @@ interface NotesButtonProps {
 
 interface SmallNotesButtonProps {
   ariaLabel?: string;
+  isDisabled?: boolean;
   toggleShowNotes: () => void;
   timelineType: TimelineTypeLiteral;
 }
@@ -106,7 +108,7 @@ interface SmallNotesButtonProps {
 export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
 
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({ ariaLabel = i18n.NOTES, toggleShowNotes, timelineType }) => {
+  ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType }) => {
     const isTemplate = timelineType === TimelineType.template;
 
     return (
@@ -114,6 +116,7 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
         aria-label={ariaLabel}
         className={NOTES_BUTTON_CLASS_NAME}
         data-test-subj="timeline-notes-button-small"
+        disabled={isDisabled}
         iconType="editorComment"
         onClick={toggleShowNotes}
         size="s"
@@ -125,10 +128,11 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 export const NotesButton = React.memo<NotesButtonProps>(
-  ({ ariaLabel, showNotes, timelineType, toggleShowNotes, toolTip }) =>
+  ({ ariaLabel, isDisabled, showNotes, timelineType, toggleShowNotes, toolTip }) =>
     showNotes ? (
       <SmallNotesButton
         ariaLabel={ariaLabel}
+        isDisabled={isDisabled}
         toggleShowNotes={toggleShowNotes}
         timelineType={timelineType}
       />
@@ -136,6 +140,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
         <SmallNotesButton
           ariaLabel={ariaLabel}
+          isDisabled={isDisabled}
           toggleShowNotes={toggleShowNotes}
           timelineType={timelineType}
         />

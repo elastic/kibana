@@ -8,9 +8,9 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
-import { KibanaContext, Query, TimeRange } from '@kbn/data-plugin/public';
+import { KibanaContext } from '@kbn/data-plugin/public';
 import { TimelionSuccessResponse } from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from './timelion_vis_type';
 import { TimelionVisDependencies } from './plugin';

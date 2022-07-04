@@ -59,14 +59,6 @@ describe('renderApp', () => {
       theme: themeServiceMock.createStartContract(),
     } as unknown as CoreStart;
 
-    const config = {
-      unsafe: {
-        alertingExperience: { enabled: true },
-        cases: { enabled: true },
-        rules: { enabled: true },
-      },
-    };
-
     const params = {
       element: window.document.createElement('div'),
       history: createMemoryHistory(),
@@ -76,7 +68,6 @@ describe('renderApp', () => {
 
     expect(() => {
       const unmount = renderApp({
-        config,
         core,
         plugins,
         appMountParameters: params,

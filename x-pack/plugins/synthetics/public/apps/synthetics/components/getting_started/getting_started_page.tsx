@@ -13,8 +13,6 @@ import styled from 'styled-components';
 import { useBreadcrumbs } from '../../hooks';
 import { getServiceLocations } from '../../state';
 import { SimpleMonitorForm } from './simple_monitor_form';
-import { MONITORING_OVERVIEW_LABEL } from '../../../../legacy_uptime/routes';
-
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
 
@@ -94,4 +92,8 @@ const SELECT_DIFFERENT_MONITOR = i18n.translate(
 
 const OR_LABEL = i18n.translate('xpack.synthetics.gettingStarted.orLabel', {
   defaultMessage: 'Or',
+});
+
+const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.synthetics.overview.heading', {
+  defaultMessage: 'Monitors',
 });

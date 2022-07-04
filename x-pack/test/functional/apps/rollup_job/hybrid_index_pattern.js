@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
       // ensure all fields are available
       await PageObjects.settings.clickIndexPatternByName(rollupIndexPatternName);
       const fields = await PageObjects.settings.getFieldNames();
-      expect(fields).to.eql(['@timestamp', '_id', '_index', '_score', '_source', '_type']);
+      expect(fields).to.eql(['@timestamp', '_id', '_index', '_score', '_source']);
     });
 
     after(async () => {

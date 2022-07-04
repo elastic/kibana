@@ -7,24 +7,27 @@
  */
 
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { NoDataCard } from '@kbn/shared-ux-card-no-data';
+import { SharedUxServicesProvider, mockServicesFactory } from '@kbn/shared-ux-services';
+
 import { NoDataPage } from './no_data_page';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { ElasticAgentCard } from './no_data_card';
 
 describe('NoDataPage', () => {
   test('render', () => {
-    const component = shallowWithIntl(
-      <NoDataPage
-        solution="Analytics"
-        action={{
-          elasticAgent: {},
-        }}
-        logo={'logoKibana'}
-        docsLink="test"
-      />
+    const component = mountWithIntl(
+      <SharedUxServicesProvider {...mockServicesFactory()}>
+        <NoDataPage
+          solution="Analytics"
+          action={{
+            elasticAgent: {},
+          }}
+          logo={'logoKibana'}
+          docsLink="test"
+        />
+      </SharedUxServicesProvider>
     );
-    expect(component).toMatchSnapshot();
     expect(component.find('h1').html()).toContain('Welcome to Elastic Analytics!');
-    expect(component.find(ElasticAgentCard).length).toBe(1);
+    expect(component.find(NoDataCard).length).toBe(1);
   });
 });

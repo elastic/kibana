@@ -8,7 +8,6 @@
 import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut } from '@elastic/eui';
 import { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { EndpointCommandDefinitionMeta } from './types';
@@ -17,6 +16,7 @@ import { CommandExecutionComponentProps } from '../console/types';
 
 export const ReleaseActionResult = memo<
   CommandExecutionComponentProps<
+    { comment?: string },
     {
       actionId?: string;
       actionRequestSent?: boolean;
@@ -24,7 +24,7 @@ export const ReleaseActionResult = memo<
     },
     EndpointCommandDefinitionMeta
   >
->(({ command, setStore, store, status, setStatus }) => {
+>(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId;
   const { actionId, completedActionDetails } = store;
   const isPending = status === 'pending';
@@ -42,14 +42,14 @@ export const ReleaseActionResult = memo<
     if (!actionRequestSent && endpointId) {
       releaseHostApi.mutate({
         endpoint_ids: [endpointId],
-        comment: command.args.args?.comment?.value,
+        comment: command.args.args?.comment?.[0],
       });
 
       setStore((prevState) => {
         return { ...prevState, actionRequestSent: true };
       });
     }
-  }, [actionRequestSent, command.args.args?.comment?.value, endpointId, releaseHostApi, setStore]);
+  }, [actionRequestSent, command.args.args?.comment, endpointId, releaseHostApi, setStore]);
 
   // If release request was created, store the action id if necessary
   useEffect(() => {
@@ -74,46 +74,38 @@ export const ReleaseActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return null;
+    return <ResultComponent showAs="pending" />;
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <EuiCallOut
-        color="danger"
-        iconType="alert"
+      <ResultComponent
+        showAs="failure"
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.release.errorMessageTitle',
-          { defaultMessage: 'Failure' }
+          { defaultMessage: 'Error. Release action failed.' }
         )}
         data-test-subj="releaseErrorCallout"
       >
         <FormattedMessage
           id="xpack.securitySolution.endpointResponseActions.release.errorMessage"
-          defaultMessage="Release action failed with: {errors}"
+          defaultMessage="The following errors were encountered: {errors}"
           values={{ errors: completedActionDetails.errors.join(' | ') }}
         />
-      </EuiCallOut>
+      </ResultComponent>
     );
   }
 
   // Show Success
   return (
-    <EuiCallOut
-      color="success"
-      iconType="check"
+    <ResultComponent
       title={i18n.translate(
         'xpack.securitySolution.endpointResponseActions.release.successMessageTitle',
-        { defaultMessage: 'Success' }
+        { defaultMessage: 'Success. Host released.' }
       )}
       data-test-subj="releaseSuccessCallout"
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.endpointResponseActions.release.successMessage"
-        defaultMessage="A host isolation request was sent and an acknowledgement was received from Host."
-      />
-    </EuiCallOut>
+    />
   );
 });
 ReleaseActionResult.displayName = 'ReleaseActionResult';

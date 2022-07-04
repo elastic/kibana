@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-echo "### Ingesting Code Coverage"
-echo ""
-
 COVERAGE_JOB_NAME=$1
 export COVERAGE_JOB_NAME
 echo "### debug COVERAGE_JOB_NAME: ${COVERAGE_JOB_NAME}"
@@ -31,27 +28,42 @@ echo "### debug TEAM_ASSIGN_PATH: ${TEAM_ASSIGN_PATH}"
 
 BUFFER_SIZE=500
 export BUFFER_SIZE
-echo "### debug BUFFER_SIZE: ${BUFFER_SIZE}"
 
-# Build team assignments file
-echo "### Generate Team Assignments"
-CI_STATS_DISABLED=true node scripts/generate_team_assignments.js \
-  --verbose --src '.github/CODEOWNERS' --dest $TEAM_ASSIGN_PATH
+annotateForKibanaLinks() {
+  local currentBuildNumber="$BUILDKITE_BUILD_NUMBER"
+  local coverageUrl="https://kibana-stats.elastic.dev/app/discover#/?_g=(filters:!(),query:(language:kuery,query:''),refreshInterval:(pause:!t,value:0),time:(from:now-7d,to:now))&_a=(columns:!(),filters:!(),hideChart:!f,index:'64419790-4218-11ea-b2d8-81bcbf78dfcb',interval:auto,query:(language:kuery,query:'BUILD_ID%20:%20${currentBuildNumber}'),sort:!(!('@timestamp',desc)))"
+  local totalCoverageUrl="https://kibana-stats.elastic.dev/app/discover#/?_g=(filters:!(),query:(language:kuery,query:''),refreshInterval:(pause:!t,value:0),time:(from:now-7d,to:now))&_a=(columns:!(),filters:!(),hideChart:!f,index:d78f9120-4218-11ea-b2d8-81bcbf78dfcb,interval:auto,query:(language:kuery,query:'BUILD_ID%20:%20${currentBuildNumber}'),sort:!(!('@timestamp',desc)))"
 
-#for x in functional jest; do
-#  echo "### Ingesting coverage for ${x}"
-#  COVERAGE_SUMMARY_FILE="target/kibana-coverage/${x}-combined/coverage-summary.json"
-#
-#  CI_STATS_DISABLED=true node scripts/ingest_coverage.js --path ${COVERAGE_SUMMARY_FILE} \
-#    --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH &
-#done
-#wait
+  cat <<EOF | buildkite-agent annotate --style "info" --context 'ctx-kibana-links'
+### Browse the following url(s) to visually verify in Kibana
 
-echo "### Ingesting coverage for JEST"
-COVERAGE_SUMMARY_FILE="target/kibana-coverage/jest-combined/coverage-summary.json"
+_Links are pinned to the current build number._
 
-CI_STATS_DISABLED=true node scripts/ingest_coverage.js --path ${COVERAGE_SUMMARY_FILE} \
-  --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
+  - [Code Coverage]($coverageUrl)
+  - [Total Code Coverage]($totalCoverageUrl)
 
-echo "---  Ingesting Code Coverage - Complete"
-echo ""
+EOF
+
+}
+
+ingestModular() {
+  local xs=("$@")
+
+  echo "--- Generate Team Assignments"
+  CI_STATS_DISABLED=true node scripts/generate_team_assignments.js \
+    --verbose --src '.github/CODEOWNERS' --dest "$TEAM_ASSIGN_PATH"
+
+  echo "--- Ingest results to Kibana stats cluster"
+  for x in "${xs[@]}"; do
+    echo "--- Ingesting coverage for ${x}"
+
+    COVERAGE_SUMMARY_FILE="target/kibana-coverage/${x}-combined/coverage-summary.json"
+
+    CI_STATS_DISABLED=true node scripts/ingest_coverage.js --path "${COVERAGE_SUMMARY_FILE}" \
+      --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath "$TEAM_ASSIGN_PATH" &
+  done
+  wait
+
+  echo "---  Ingesting Code Coverage - Complete"
+  echo ""
+}

@@ -67,7 +67,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <span
     aria-label="Loading"
@@ -75,34 +75,34 @@ Array [
     role="progressbar"
   >
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
     <span
-      class="css-1mpwu6v-euiLoadingContent__singleLine"
+      class="emotion-euiLoadingContent__singleLine"
     />
   </span>,
   <div
@@ -144,7 +144,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
   -ms-flex: 1;
   flex: 1;
   overflow: hidden;
-  padding: 0 16px 16px;
+  padding: 0 12px 12px;
 }
 
 <div
@@ -184,34 +184,34 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
           role="progressbar"
         >
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
           <span
-            class="css-1mpwu6v-euiLoadingContent__singleLine"
+            class="emotion-euiLoadingContent__singleLine"
           />
         </span>
       </div>
@@ -235,6 +235,10 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
 exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `
 .c3 {
   color: #535966;
+}
+
+.c2 {
+  word-break: break-word;
 }
 
 .c2 dt {
@@ -293,7 +297,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 }
 
 .c4 {
-  padding: 16px;
+  padding: 12px;
   background: rgba(250,251,253,0.9);
   bottom: 0;
   left: 0;
@@ -555,7 +559,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
             data-test-subj="loading-spinner"
             role="progressbar"
           />
@@ -569,6 +573,10 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it should render the Network Details view in the Details Panel when the panelView is networkDetail and the ip is set 1`] = `
 .c3 {
   color: #535966;
+}
+
+.c2 {
+  word-break: break-word;
 }
 
 .c2 dt {
@@ -627,7 +635,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
 }
 
 .c4 {
-  padding: 16px;
+  padding: 12px;
   background: rgba(250,251,253,0.9);
   bottom: 0;
   left: 0;
@@ -774,7 +782,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
             class="euiToolTipAnchor"
           >
             <a
-              class="euiLink css-102pf9n-euiLink-primary"
+              class="euiLink emotion-euiLink-primary"
               data-test-subj="externalLink"
               href="https://www.iana.org/whois?q=woohoo!"
               rel="noopener noreferrer"
@@ -782,7 +790,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
             >
               iana.org
               <span
-                class="css-q4vwwx-euiLink__externalIcon"
+                class="emotion-euiLink__externalIcon"
                 data-euiicon-type="popout"
               >
                 External link
@@ -817,7 +825,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
             data-test-subj="loading-spinner"
             role="progressbar"
           />

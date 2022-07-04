@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
@@ -26,6 +26,7 @@ import { extract, inject } from '../../common/embeddable_factory';
 import { DatasourceMap, VisualizationMap } from '../types';
 
 export interface LensEmbeddableStartServices {
+  data: DataPublicPluginStart;
   timefilter: TimefilterContract;
   coreHttp: HttpSetup;
   inspector: InspectorStart;
@@ -85,6 +86,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
 
   async create(input: LensEmbeddableInput, parent?: IContainer) {
     const {
+      data,
       timefilter,
       expressionRenderer,
       documentToExpression,
@@ -107,6 +109,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     return new Embeddable(
       {
         attributeService,
+        data,
         indexPatternService,
         timefilter,
         inspector,

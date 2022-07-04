@@ -70,6 +70,7 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: [],
+        dataViewId: undefined,
         threatIndex: ['threat-*'],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
@@ -86,6 +87,7 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: false,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
         threatIndex: ['threat-*'],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
@@ -102,6 +104,7 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: false,
         index: ['test-*'],
+        dataViewId: undefined,
         threatIndex: ['threat-*'],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
@@ -118,6 +121,7 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
         threatIndex: [],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
@@ -134,6 +138,7 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: ['test-ml-job-id'],
@@ -148,6 +153,7 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],
@@ -162,6 +168,7 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],
@@ -176,6 +183,7 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
         threatIndex: ['threat-*'],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
@@ -192,6 +200,7 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],

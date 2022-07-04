@@ -21,7 +21,8 @@ export const DocumentCountContent: FC<Props> = ({ documentCountStats, totalCount
   }
 
   const { timeRangeEarliest, timeRangeLatest } = documentCountStats;
-  if (timeRangeEarliest === undefined || timeRangeLatest === undefined) return null;
+  if (timeRangeEarliest === undefined || timeRangeLatest === undefined)
+    return <TotalCountHeader totalCount={totalCount} />;
 
   let chartPoints: DocumentCountChartPoint[] = [];
   if (documentCountStats.buckets !== undefined) {

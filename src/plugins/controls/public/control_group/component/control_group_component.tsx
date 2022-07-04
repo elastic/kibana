@@ -115,7 +115,6 @@ export const ControlGroup = () => {
             responsive={false}
             alignItems="center"
             data-test-subj="controls-group"
-            data-shared-items-count={idsInOrder.length}
           >
             <EuiFlexItem>
               <DndContext

@@ -29,6 +29,7 @@ const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const GridStyles: EuiDataGridStyle = {
   border: 'none',
   header: 'underline',
+  fontSize: 's',
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
@@ -174,17 +175,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   );
 
   return (
-    <section
-      className="alertsTableResponseOps"
-      style={{ width: '100%' }}
-      data-test-subj={props['data-test-subj']}
-    >
+    <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
       <Suspense fallback={null}>
         {flyoutAlertIndex > -1 && (
           <AlertsFlyout
             alert={alerts[flyoutAlertIndex]}
             alertsCount={alertsCount}
-            state={props.flyoutState}
             onClose={handleFlyoutClose}
             alertsTableConfiguration={props.alertsTableConfiguration}
             flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
@@ -193,24 +189,26 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           />
         )}
       </Suspense>
-      <EuiDataGrid
-        aria-label="Alerts table"
-        data-test-subj="alertsTable"
-        columns={props.columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
-        trailingControlColumns={props.trailingControlColumns}
-        leadingControlColumns={leadingControlColumns}
-        rowCount={alertsCount}
-        renderCellValue={handleRenderCellValue}
-        gridStyle={{ ...GridStyles, rowClasses }}
-        sorting={{ columns: sortingColumns, onSort }}
-        pagination={{
-          ...pagination,
-          pageSizeOptions: props.pageSizeOptions,
-          onChangeItemsPerPage: onChangePageSize,
-          onChangePage: onChangePageIndex,
-        }}
-      />
+      {alertsCount >= 0 && (
+        <EuiDataGrid
+          aria-label="Alerts table"
+          data-test-subj="alertsTable"
+          columns={props.columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
+          trailingControlColumns={props.trailingControlColumns}
+          leadingControlColumns={leadingControlColumns}
+          rowCount={alertsCount}
+          renderCellValue={handleRenderCellValue}
+          gridStyle={{ ...GridStyles, rowClasses }}
+          sorting={{ columns: sortingColumns, onSort }}
+          pagination={{
+            ...pagination,
+            pageSizeOptions: props.pageSizeOptions,
+            onChangeItemsPerPage: onChangePageSize,
+            onChangePage: onChangePageIndex,
+          }}
+        />
+      )}
     </section>
   );
 };

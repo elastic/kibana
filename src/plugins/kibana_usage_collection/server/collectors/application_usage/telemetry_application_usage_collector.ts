@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import { timer } from 'rxjs';
+import { type Observable, takeUntil, timer } from 'rxjs';
 import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
@@ -48,13 +48,14 @@ export function registerApplicationUsageCollector(
   logger: Logger,
   usageCollection: UsageCollectionSetup,
   registerType: SavedObjectsServiceSetup['registerType'],
-  getSavedObjectsClient: () => ISavedObjectsRepository | undefined
+  getSavedObjectsClient: () => ISavedObjectsRepository | undefined,
+  pluginStop$: Observable<void>
 ) {
   registerMappings(registerType);
 
-  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL).subscribe(() =>
-    rollTotals(logger, getSavedObjectsClient())
-  );
+  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL)
+    .pipe(takeUntil(pluginStop$))
+    .subscribe(() => rollTotals(logger, getSavedObjectsClient()));
 
   const collector = usageCollection.makeUsageCollector<ApplicationUsageTelemetryReport | undefined>(
     {

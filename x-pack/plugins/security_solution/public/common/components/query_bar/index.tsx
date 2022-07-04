@@ -8,11 +8,10 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   FilterManager,
   TimeHistory,
-  TimeRange,
   SavedQuery,
   SavedQueryTimeFilter,
 } from '@kbn/data-plugin/public';

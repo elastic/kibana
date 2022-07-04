@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 import {
   filter,
   Subject,
+  ReplaySubject,
   interval,
   concatMap,
   merge,
@@ -19,7 +20,7 @@ import {
   retryWhen,
   tap,
   delayWhen,
-  takeWhile,
+  takeUntil,
 } from 'rxjs';
 import type {
   AnalyticsClientInitContext,
@@ -28,7 +29,6 @@ import type {
   IShipper,
   TelemetryCounter,
 } from '@kbn/analytics-client';
-import { TelemetryCounterType } from '@kbn/analytics-client';
 import type { ElasticV3ShipperOptions } from '@kbn/analytics-shippers-elastic-v3-common';
 import {
   buildHeaders,
@@ -60,7 +60,7 @@ export class ElasticV3ServerShipper implements IShipper {
   );
 
   private readonly internalQueue: Event[] = [];
-  private readonly shutdown$ = new Subject<void>();
+  private readonly shutdown$ = new ReplaySubject<void>(1);
 
   private readonly url: string;
 
@@ -141,7 +141,7 @@ export class ElasticV3ServerShipper implements IShipper {
       const toDrop = events.length - freeSpace;
       const droppedEvents = events.splice(-toDrop, toDrop);
       this.reportTelemetryCounters(droppedEvents, {
-        type: TelemetryCounterType.dropped,
+        type: 'dropped',
         code: 'queue_full',
       });
     }
@@ -154,6 +154,7 @@ export class ElasticV3ServerShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
+    this.shutdown$.next();
     this.shutdown$.complete();
   }
 
@@ -169,7 +170,7 @@ export class ElasticV3ServerShipper implements IShipper {
     let backoff = 1 * MINUTE;
     timer(0, 1 * MINUTE)
       .pipe(
-        takeWhile(() => this.shutdown$.isStopped === false),
+        takeUntil(this.shutdown$),
         filter(() => this.isOptedIn === true && this.firstTimeOffline !== null),
         concatMap(async () => {
           const { ok } = await fetch(this.url, {
@@ -185,7 +186,7 @@ export class ElasticV3ServerShipper implements IShipper {
         }),
         retryWhen((errors) =>
           errors.pipe(
-            takeWhile(() => this.shutdown$.isStopped === false),
+            takeUntil(this.shutdown$),
             tap(() => {
               if (!this.firstTimeOffline) {
                 this.firstTimeOffline = Date.now();
@@ -207,7 +208,7 @@ export class ElasticV3ServerShipper implements IShipper {
   private setInternalSubscriber() {
     // Check the status of the queues every 1 second.
     merge(
-      interval(1000),
+      interval(1000).pipe(takeUntil(this.shutdown$)),
       // Using a promise because complete does not emit through the pipe.
       from(firstValueFrom(this.shutdown$, { defaultValue: true }))
     )
@@ -235,10 +236,7 @@ export class ElasticV3ServerShipper implements IShipper {
           this.lastBatchSent = Date.now();
           const eventsToSend = this.getEventsToSend();
           await this.sendEvents(eventsToSend);
-        }),
-
-        // Stop the subscriber if we are shutting down.
-        takeWhile(() => !this.shutdown$.isStopped)
+        })
       )
       .subscribe();
   }

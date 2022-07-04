@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -22,6 +22,9 @@ import {
   BackendOperation,
   getTopBackendOperations,
 } from './get_top_backend_operations';
+import { getBackendLatencyDistribution } from './get_backend_latency_distribution';
+import { OverallLatencyDistributionResponse } from '../latency_distribution/types';
+import { BackendSpan, getTopBackendSpans } from './get_top_backend_spans';
 
 const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/top_backends',
@@ -278,7 +281,11 @@ const backendLatencyChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/charts/latency',
   params: t.type({
     query: t.intersection([
-      t.type({ backendName: t.string }),
+      t.type({
+        backendName: t.string,
+        spanName: t.string,
+        searchServiceDestinationMetrics: toBooleanRt,
+      }),
       rangeRt,
       kueryRt,
       environmentRt,
@@ -296,12 +303,22 @@ const backendLatencyChartsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { backendName, kuery, environment, offset, start, end } =
-      params.query;
+    const {
+      backendName,
+      searchServiceDestinationMetrics,
+      spanName,
+      kuery,
+      environment,
+      offset,
+      start,
+      end,
+    } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getLatencyChartsForBackend({
         backendName,
+        spanName,
+        searchServiceDestinationMetrics,
         setup,
         start,
         end,
@@ -311,6 +328,8 @@ const backendLatencyChartsRoute = createApmServerRoute({
       offset
         ? getLatencyChartsForBackend({
             backendName,
+            spanName,
+            searchServiceDestinationMetrics,
             setup,
             start,
             end,
@@ -329,7 +348,11 @@ const backendThroughputChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/charts/throughput',
   params: t.type({
     query: t.intersection([
-      t.type({ backendName: t.string }),
+      t.type({
+        backendName: t.string,
+        spanName: t.string,
+        searchServiceDestinationMetrics: toBooleanRt,
+      }),
       rangeRt,
       kueryRt,
       environmentRt,
@@ -347,27 +370,39 @@ const backendThroughputChartsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { backendName, kuery, environment, offset, start, end } =
-      params.query;
+    const {
+      backendName,
+      searchServiceDestinationMetrics,
+      spanName,
+      kuery,
+      environment,
+      offset,
+      start,
+      end,
+    } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getThroughputChartsForBackend({
         backendName,
+        spanName,
         setup,
         start,
         end,
         kuery,
         environment,
+        searchServiceDestinationMetrics,
       }),
       offset
         ? getThroughputChartsForBackend({
             backendName,
+            spanName,
             setup,
             start,
             end,
             kuery,
             environment,
             offset,
+            searchServiceDestinationMetrics,
           })
         : null,
     ]);
@@ -380,7 +415,11 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/charts/error_rate',
   params: t.type({
     query: t.intersection([
-      t.type({ backendName: t.string }),
+      t.type({
+        backendName: t.string,
+        spanName: t.string,
+        searchServiceDestinationMetrics: toBooleanRt,
+      }),
       rangeRt,
       kueryRt,
       environmentRt,
@@ -398,27 +437,39 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { backendName, kuery, environment, offset, start, end } =
-      params.query;
+    const {
+      backendName,
+      spanName,
+      searchServiceDestinationMetrics,
+      kuery,
+      environment,
+      offset,
+      start,
+      end,
+    } = params.query;
 
     const [currentTimeseries, comparisonTimeseries] = await Promise.all([
       getErrorRateChartsForBackend({
         backendName,
+        spanName,
         setup,
         start,
         end,
         kuery,
         environment,
+        searchServiceDestinationMetrics,
       }),
       offset
         ? getErrorRateChartsForBackend({
             backendName,
+            spanName,
             setup,
             start,
             end,
             kuery,
             environment,
             offset,
+            searchServiceDestinationMetrics,
           })
         : null,
     ]);
@@ -462,6 +513,100 @@ const backendOperationsRoute = createApmServerRoute({
   },
 });
 
+const backendLatencyDistributionChartsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/backends/charts/distribution',
+  params: t.type({
+    query: t.intersection([
+      t.type({
+        backendName: t.string,
+        spanName: t.string,
+        percentileThreshold: toNumberRt,
+      }),
+      rangeRt,
+      kueryRt,
+      environmentRt,
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    allSpansDistribution: OverallLatencyDistributionResponse;
+    failedSpansDistribution: OverallLatencyDistributionResponse;
+  }> => {
+    const setup = await setupRequest(resources);
+    const { params } = resources;
+    const {
+      backendName,
+      spanName,
+      percentileThreshold,
+      kuery,
+      environment,
+      start,
+      end,
+    } = params.query;
+
+    return getBackendLatencyDistribution({
+      setup,
+      backendName,
+      spanName,
+      percentileThreshold,
+      kuery,
+      environment,
+      start,
+      end,
+    });
+  },
+});
+
+const topBackendSpansRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/backends/operations/spans',
+  options: {
+    tags: ['access:apm'],
+  },
+  params: t.type({
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      kueryRt,
+      t.type({ backendName: t.string, spanName: t.string }),
+      t.partial({ sampleRangeFrom: toNumberRt, sampleRangeTo: toNumberRt }),
+    ]),
+  }),
+  handler: async (resources): Promise<{ spans: BackendSpan[] }> => {
+    const setup = await setupRequest(resources);
+
+    const {
+      query: {
+        backendName,
+        spanName,
+        start,
+        end,
+        environment,
+        kuery,
+        sampleRangeFrom,
+        sampleRangeTo,
+      },
+    } = resources.params;
+
+    const spans = await getTopBackendSpans({
+      setup,
+      backendName,
+      spanName,
+      start,
+      end,
+      environment,
+      kuery,
+      sampleRangeFrom,
+      sampleRangeTo,
+    });
+
+    return { spans };
+  },
+});
+
 export const backendsRouteRepository = {
   ...topBackendsRoute,
   ...upstreamServicesForBackendRoute,
@@ -470,4 +615,6 @@ export const backendsRouteRepository = {
   ...backendThroughputChartsRoute,
   ...backendFailedTransactionRateChartsRoute,
   ...backendOperationsRoute,
+  ...backendLatencyDistributionChartsRoute,
+  ...topBackendSpansRoute,
 };

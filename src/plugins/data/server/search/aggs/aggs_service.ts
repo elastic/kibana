@@ -8,7 +8,8 @@
 
 import { pick } from 'lodash';
 
-import {
+import type {
+  IUiSettingsClient,
   UiSettingsServiceStart,
   SavedObjectsClientContract,
   ElasticsearchClient,
@@ -16,14 +17,7 @@ import {
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import {
-  AggConfigs,
-  AggsCommonService,
-  AggTypesDependencies,
-  aggsRequiredUiSettings,
-  calculateBounds,
-  TimeRange,
-} from '../../../common';
+import { AggsCommonService, aggsRequiredUiSettings } from '../../../common';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */
@@ -38,22 +32,26 @@ export interface AggsStartDependencies {
   indexPatterns: DataViewsServerPluginStart;
 }
 
+async function getConfigFn(uiSettingsClient: IUiSettingsClient) {
+  // cache ui settings, only including items which are explicitly needed by aggs
+  const uiSettingsCache = pick(await uiSettingsClient.getAll(), aggsRequiredUiSettings);
+  return <T = any>(key: string): T => {
+    return uiSettingsCache[key];
+  };
+}
+
 /**
  * The aggs service provides a means of modeling and manipulating the various
  * Elasticsearch aggregations supported by Kibana, providing the ability to
  * output the correct DSL when you are ready to send your request to ES.
  */
 export class AggsService {
-  private readonly aggsCommonService = new AggsCommonService();
-
-  /**
-   * getForceNow uses window.location on the client, so we must have a
-   * separate implementation of calculateBounds on the server.
-   */
-  private calculateBounds = (timeRange: TimeRange) => calculateBounds(timeRange, {});
+  private readonly aggsCommonService = new AggsCommonService({ shouldDetectTimeZone: false });
 
   public setup({ registerFunction }: AggsSetupDependencies): AggsSetup {
-    return this.aggsCommonService.setup({ registerFunction });
+    return this.aggsCommonService.setup({
+      registerFunction,
+    });
   }
 
   public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
@@ -63,63 +61,20 @@ export class AggsService {
         elasticsearchClient: ElasticsearchClient
       ) => {
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-        const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
-
-        // cache ui settings, only including items which are explicitly needed by aggs
-        const uiSettingsCache = pick(await uiSettingsClient.getAll(), aggsRequiredUiSettings);
-        const getConfig = <T = any>(key: string): T => {
-          return uiSettingsCache[key];
-        };
-
-        const aggExecutionContext: AggTypesDependencies['aggExecutionContext'] = {
-          shouldDetectTimeZone: false,
-        };
-
-        const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
-          getConfig,
-          aggExecutionContext,
-          getIndexPattern: (
-            await indexPatterns.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient)
-          ).get,
-        });
-
-        const aggTypesDependencies: AggTypesDependencies = {
-          calculateBounds: this.calculateBounds,
-          aggExecutionContext,
-          getConfig,
-          getFieldFormatsStart: () => ({
-            deserialize: formats.deserialize,
-            getDefaultInstance: formats.getDefaultInstance,
-          }),
-        };
-
-        const typesRegistry = {
-          get: (name: string) => {
-            const type = types.get(name);
-            if (!type) {
-              return;
-            }
-            return type(aggTypesDependencies);
-          },
-          getAll: () => {
-            return {
-              // initialize each agg type on the fly
-              buckets: types.getAll().buckets.map((type) => type(aggTypesDependencies)),
-              metrics: types.getAll().metrics.map((type) => type(aggTypesDependencies)),
-            };
-          },
-        };
+        const { calculateAutoTimeExpression, types, createAggConfigs } =
+          this.aggsCommonService.start({
+            getConfig: await getConfigFn(uiSettingsClient),
+            fieldFormats: await fieldFormats.fieldFormatServiceFactory(uiSettingsClient),
+            calculateBoundsOptions: {},
+            getIndexPattern: (
+              await indexPatterns.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient)
+            ).get,
+          });
 
         return {
           calculateAutoTimeExpression,
-          createAggConfigs: (indexPattern, configStates = []) =>
-            new AggConfigs(
-              indexPattern,
-              configStates,
-              { typesRegistry, aggExecutionContext },
-              getConfig
-            ),
-          types: typesRegistry,
+          createAggConfigs,
+          types,
         };
       },
     };

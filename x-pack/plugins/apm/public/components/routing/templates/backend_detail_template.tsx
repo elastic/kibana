@@ -87,7 +87,8 @@ export function BackendDetailTemplate({ children }: Props) {
           label: i18n.translate('xpack.apm.backendDetailOperations.title', {
             defaultMessage: 'Operations',
           }),
-          isSelected: path === '/backends/operations',
+          isSelected:
+            path === '/backends/operations' || path === '/backends/operation',
         },
       ]
     : [];

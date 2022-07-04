@@ -6,13 +6,24 @@
  */
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { apm, timerange } from '@elastic/apm-synthtrace';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { ValuesType } from 'utility-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
+import { generateOperationData, generateOperationDataConfig } from './generate_operation_data';
 
 type TopOperations = APIReturnType<'GET /internal/apm/backends/operations'>['operations'];
+
+const {
+  ES_BULK_DURATION,
+  ES_BULK_RATE,
+  ES_SEARCH_DURATION,
+  ES_SEARCH_FAILURE_RATE,
+  ES_SEARCH_SUCCESS_RATE,
+  ES_SEARCH_UNKNOWN_RATE,
+  REDIS_SET_DURATION,
+  REDIS_SET_RATE,
+} = generateOperationDataConfig;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -47,76 +58,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       .then(({ body }) => body.operations);
   }
 
-  const ES_SEARCH_DURATION = 100;
-  const ES_SEARCH_UNKNOWN_RATE = 5;
-  const ES_SEARCH_SUCCESS_RATE = 4;
-  const ES_SEARCH_FAILURE_RATE = 1;
-
-  const ES_BULK_RATE = 20;
-  const ES_BULK_DURATION = 1000;
-
-  const REDIS_SET_RATE = 10;
-  const REDIS_SET_DURATION = 10;
-
-  async function generateData() {
-    const synthGoInstance = apm.service('synth-go', 'production', 'go').instance('instance-a');
-    const synthJavaInstance = apm
-      .service('synth-java', 'development', 'java')
-      .instance('instance-a');
-
-    const interval = timerange(start, end).interval('1m');
-
-    return await synthtraceEsClient.index([
-      interval
-        .rate(ES_SEARCH_UNKNOWN_RATE)
-        .generator((timestamp) =>
-          synthGoInstance
-            .span('/_search', 'db', 'elasticsearch')
-            .destination('elasticsearch')
-            .timestamp(timestamp)
-            .duration(ES_SEARCH_DURATION)
-        ),
-      interval
-        .rate(ES_SEARCH_SUCCESS_RATE)
-        .generator((timestamp) =>
-          synthGoInstance
-            .span('/_search', 'db', 'elasticsearch')
-            .destination('elasticsearch')
-            .timestamp(timestamp)
-            .success()
-            .duration(ES_SEARCH_DURATION)
-        ),
-      interval
-        .rate(ES_SEARCH_FAILURE_RATE)
-        .generator((timestamp) =>
-          synthGoInstance
-            .span('/_search', 'db', 'elasticsearch')
-            .destination('elasticsearch')
-            .timestamp(timestamp)
-            .failure()
-            .duration(ES_SEARCH_DURATION)
-        ),
-      interval
-        .rate(ES_BULK_RATE)
-        .generator((timestamp) =>
-          synthJavaInstance
-            .span('/_bulk', 'db', 'elasticsearch')
-            .destination('elasticsearch')
-            .timestamp(timestamp)
-            .duration(ES_BULK_DURATION)
-        ),
-      interval
-        .rate(REDIS_SET_RATE)
-        .generator((timestamp) =>
-          synthJavaInstance
-            .span('SET', 'db', 'redis')
-            .destination('redis')
-            .timestamp(timestamp)
-            .duration(REDIS_SET_DURATION)
-        ),
-    ]);
-  }
-
   registry.when('Top operations when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles empty state', async () => {
       const operations = await callApi({ backendName: 'elasticsearch' });
@@ -128,7 +69,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Top operations when data is generated',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      before(() => generateData());
+      before(() =>
+        generateOperationData({
+          synthtraceEsClient,
+          start,
+          end,
+        })
+      );
 
       after(() => synthtraceEsClient.clean());
 

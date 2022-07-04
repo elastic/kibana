@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
-import { stringify } from 'query-string';
+import { useCallback } from 'react';
+import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import { SyntheticsUrlParams, getSupportedUrlParams } from '../utils/url_params';
 
-// TODO: Create the following imports for new Synthetics App
-import { selectedFiltersSelector } from '../../../legacy_uptime/state/selectors';
-import { setSelectedFilters } from '../../../legacy_uptime/state/actions/selected_filters';
-import { getFiltersFromMap } from '../../../legacy_uptime/hooks/use_selected_filters';
-import { getParsedParams } from '../../../legacy_uptime/lib/helper/parse_search';
+function getParsedParams(search: string) {
+  return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
+}
 
 export type GetUrlParams = () => SyntheticsUrlParams;
 export type UpdateUrlParams = (updatedParams: {
@@ -30,29 +27,9 @@ export const useGetUrlParams: GetUrlParams = () => {
   return getSupportedUrlParams(getParsedParams(search));
 };
 
-const getMapFromFilters = (value: any): Map<string, any> | undefined => {
-  try {
-    return new Map(JSON.parse(value));
-  } catch {
-    return undefined;
-  }
-};
-
 export const useUrlParams: SyntheticsUrlParamsHook = () => {
   const { pathname, search } = useLocation();
   const history = useHistory();
-  const dispatch = useDispatch();
-  const selectedFilters = useSelector(selectedFiltersSelector);
-  const { filters } = useGetUrlParams();
-
-  useEffect(() => {
-    if (selectedFilters === null) {
-      const filterMap = getMapFromFilters(filters);
-      if (filterMap) {
-        dispatch(setSelectedFilters(getFiltersFromMap(filterMap)));
-      }
-    }
-  }, [dispatch, filters, selectedFilters]);
 
   const updateUrlParams: UpdateUrlParams = useCallback(
     (updatedParams) => {
@@ -69,6 +46,7 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
           if (value === undefined || value === '') {
             return params;
           }
+
           return {
             ...params,
             [key]: value,
@@ -80,14 +58,8 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
       if (search !== updatedSearch) {
         history.push({ pathname, search: updatedSearch });
       }
-      const filterMap = getMapFromFilters(mergedParams.filters);
-      if (!filterMap) {
-        dispatch(setSelectedFilters(null));
-      } else {
-        dispatch(setSelectedFilters(getFiltersFromMap(filterMap)));
-      }
     },
-    [dispatch, history, pathname, search]
+    [history, pathname, search]
   );
 
   return [useGetUrlParams, updateUrlParams];

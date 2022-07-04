@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
-import { useNetworkTopCountries } from '.';
+import { ID, useNetworkTopCountries } from '.';
 import { NetworkType } from '../../store/model';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
@@ -19,6 +19,7 @@ describe('useNetworkTopCountries', () => {
       flowTarget: FlowTargetSourceDest.source,
       startDate: '2020-07-07T08:20:18.966Z',
       endDate: '2020-07-08T08:20:18.966Z',
+      id: `${ID}-${NetworkType.page}`,
       indexNames: ['cool'],
       type: NetworkType.page,
       skip: false,

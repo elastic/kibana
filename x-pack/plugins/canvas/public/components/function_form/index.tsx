@@ -77,9 +77,11 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
 
   const addArgument = useCallback(
     (argName: string, argValue: string | Ast | null) => () => {
-      dispatch(addArgumentValue({ element, pageId, argName, value: argValue, path }));
+      dispatch(
+        addArgumentValue({ elementId: element?.id, pageId, argName, value: argValue, path })
+      );
     },
-    [dispatch, element, pageId, path]
+    [dispatch, element?.id, pageId, path]
   );
 
   const updateContext = useCallback(() => {
@@ -88,9 +90,11 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
 
   const setArgument = useCallback(
     (argName: string, valueIndex: number) => (value: string | Ast | null) => {
-      dispatch(setArgumentValue({ element, pageId, argName, value, valueIndex, path }));
+      dispatch(
+        setArgumentValue({ elementId: element?.id, pageId, argName, value, valueIndex, path })
+      );
     },
-    [dispatch, element, pageId, path]
+    [dispatch, element?.id, pageId, path]
   );
 
   const deleteArgument = useCallback(

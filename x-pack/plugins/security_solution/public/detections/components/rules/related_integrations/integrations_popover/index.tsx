@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import styled from 'styled-components';
 import {
   EuiPopover,
   EuiBadge,
@@ -14,16 +15,15 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import styled from 'styled-components';
-import { IntegrationDescription } from '../integrations_description';
-import { getInstalledRelatedIntegrations } from '../utils';
-import { useInstalledIntegrations } from '../use_installed_integrations';
+
 import type { RelatedIntegrationArray } from '../../../../../../common/detection_engine/schemas/common';
+import { IntegrationDescription } from '../integrations_description';
+import { useRelatedIntegrations } from '../use_related_integrations';
 
 import * as i18n from '../translations';
 
 export interface IntegrationsPopoverProps {
-  integrations: RelatedIntegrationArray;
+  relatedIntegrations: RelatedIntegrationArray;
 }
 
 const IntegrationsPopoverWrapper = styled(EuiFlexGroup)`
@@ -51,20 +51,24 @@ const IntegrationListItem = styled('li')`
  * Component to render installed and available integrations
  * @param integrations - array of integrations to display
  */
-const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps) => {
+const IntegrationsPopoverComponent = ({ relatedIntegrations }: IntegrationsPopoverProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const { data: allInstalledIntegrations } = useInstalledIntegrations({ packages: [] });
+  const { integrations, isLoaded } = useRelatedIntegrations(relatedIntegrations);
 
-  const integrationDetails = getInstalledRelatedIntegrations(
-    integrations,
-    allInstalledIntegrations
-  );
+  const enabledIntegrations = useMemo(() => {
+    return integrations.filter(
+      (i) => i.installationStatus.isKnown && i.installationStatus.isEnabled
+    );
+  }, [integrations]);
 
-  const totalRelatedIntegrationsInstalled = integrationDetails.filter((i) => i.is_enabled).length;
-  const badgeTitle =
-    allInstalledIntegrations != null
-      ? `${totalRelatedIntegrationsInstalled}/${integrations.length} ${i18n.INTEGRATIONS_BADGE}`
-      : `${integrations.length} ${i18n.INTEGRATIONS_BADGE}`;
+  const numIntegrations = integrations.length;
+  const numIntegrationsEnabled = enabledIntegrations.length;
+
+  const badgeTitle = useMemo(() => {
+    return isLoaded
+      ? `${numIntegrationsEnabled}/${numIntegrations} ${i18n.INTEGRATIONS_BADGE}`
+      : `${numIntegrations} ${i18n.INTEGRATIONS_BADGE}`;
+  }, [isLoaded, numIntegrations, numIntegrationsEnabled]);
 
   return (
     <IntegrationsPopoverWrapper
@@ -91,14 +95,14 @@ const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps
         repositionOnScroll
       >
         <PopoverTitleWrapper data-test-subj={'IntegrationsPopoverTitle'}>
-          {i18n.INTEGRATIONS_POPOVER_TITLE(integrations.length)}
+          {i18n.INTEGRATIONS_POPOVER_TITLE(numIntegrations)}
         </PopoverTitleWrapper>
         <PopoverContentWrapper data-test-subj={'IntegrationsPopoverContentWrapper'}>
-          <EuiText size={'s'}>{i18n.INTEGRATIONS_POPOVER_DESCRIPTION(integrations.length)}</EuiText>
+          <EuiText size={'s'}>{i18n.INTEGRATIONS_POPOVER_DESCRIPTION(numIntegrations)}</EuiText>
           <EuiSpacer size={'s'} />
           <ul>
-            {integrationDetails.map((integration, index) => (
-              <IntegrationListItem key={`${integration.package_name}-${index}`}>
+            {integrations.map((integration, index) => (
+              <IntegrationListItem key={`${integration.packageName}-${index}`}>
                 <IntegrationDescription integration={integration} />
               </IntegrationListItem>
             ))}

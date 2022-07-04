@@ -20,7 +20,7 @@ import { useDispatch } from 'react-redux';
 import * as i18n from './translations';
 import { sourcererActions, sourcererModel, sourcererSelectors } from '../../store/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import { FormRow, PopoverContent, StyledButton, StyledFormRow } from './helpers';
 import { TemporarySourcerer } from './temporary';
@@ -29,6 +29,8 @@ import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { useUpdateUrlParam } from '../../utils/global_query_string';
+import { CONSTANTS } from '../url_state/constants';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;
@@ -38,6 +40,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const dispatch = useDispatch();
   const isDetectionsSourcerer = scopeId === SourcererScopeName.detections;
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
+  const isDefaultSourcerer = scopeId === SourcererScopeName.default;
+  const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(CONSTANTS.sourcerer);
 
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
@@ -144,8 +148,17 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
           shouldValidateSelectedPatterns,
         })
       );
+
+      if (isDefaultSourcerer) {
+        updateUrlParam({
+          [SourcererScopeName.default]: {
+            id: newSelectedDataView,
+            selectedPatterns: newSelectedPatterns,
+          },
+        });
+      }
     },
-    [dispatch, scopeId]
+    [dispatch, scopeId, isDefaultSourcerer, updateUrlParam]
   );
 
   const onChangeDataView = useCallback(

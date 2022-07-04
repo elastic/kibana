@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -14,6 +15,7 @@ import type {
   GetAgentStatusResponse,
   PutAgentReassignResponse,
   PostBulkAgentReassignResponse,
+  PostBulkUpdateAgentTagsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -24,6 +26,7 @@ import type {
   GetAgentDataRequestSchema,
   PutAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
+  PostBulkUpdateAgentTagsRequestSchema,
 } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { licenseService } from '../../services';
@@ -87,10 +90,16 @@ export const updateAgentHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
+  const partialAgent: any = {};
+  if (request.body.user_provided_metadata) {
+    partialAgent.user_provided_metadata = request.body.user_provided_metadata;
+  }
+  if (request.body.tags) {
+    partialAgent.tags = uniq(request.body.tags);
+  }
+
   try {
-    await AgentService.updateAgent(esClient, request.params.agentId, {
-      user_provided_metadata: request.body.user_provided_metadata,
-    });
+    await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
       item: await AgentService.getAgentById(esClient, request.params.agentId),
     };
@@ -103,6 +112,39 @@ export const updateAgentHandler: RequestHandler<
       });
     }
 
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const bulkUpdateAgentTagsHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostBulkUpdateAgentTagsRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const agentOptions = Array.isArray(request.body.agents)
+    ? { agentIds: request.body.agents }
+    : { kuery: request.body.agents };
+
+  try {
+    const results = await AgentService.updateAgentTags(
+      esClient,
+      { ...agentOptions, batchSize: request.body.batchSize },
+      request.body.tagsToAdd ?? [],
+      request.body.tagsToRemove ?? []
+    );
+
+    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error?.message,
+      };
+      return acc;
+    }, {});
+
+    return response.ok({ body });
+  } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
 };
@@ -121,6 +163,8 @@ export const getAgentsHandler: RequestHandler<
       showInactive: request.query.showInactive,
       showUpgradeable: request.query.showUpgradeable,
       kuery: request.query.kuery,
+      sortField: request.query.sortField,
+      sortOrder: request.query.sortOrder,
     });
     const totalInactive = request.query.showInactive
       ? await AgentService.countInactiveAgents(esClient, {
@@ -188,7 +232,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     const results = await AgentService.reassignAgents(
       soClient,
       esClient,
-      agentOptions,
+      { ...agentOptions, batchSize: request.body.batchSize },
       request.body.policy_id
     );
 

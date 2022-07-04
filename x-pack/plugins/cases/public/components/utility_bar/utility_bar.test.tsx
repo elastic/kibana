@@ -74,7 +74,7 @@ describe('UtilityBar', () => {
     const casesUtilityBar = wrapper.find('.casesUtilityBar').first();
 
     expect(casesUtilityBar).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesUtilityBar).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.s);
+    expect(casesUtilityBar).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeS);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -104,6 +104,6 @@ describe('UtilityBar', () => {
     const casesUtilityBar = wrapper.find('.casesUtilityBar').first();
 
     expect(casesUtilityBar).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesUtilityBar).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.s);
+    expect(casesUtilityBar).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeS);
   });
 });

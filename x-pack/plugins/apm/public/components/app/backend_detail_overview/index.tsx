@@ -4,22 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiPanel } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { BackendLatencyChart } from './backend_latency_chart';
 import { BackendDetailDependenciesTable } from './backend_detail_dependencies_table';
-import { BackendThroughputChart } from './backend_throughput_chart';
-import { BackendFailedTransactionRateChart } from './backend_error_rate_chart';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { BackendMetricCharts } from '../../shared/backend_metric_charts';
 
 export function BackendDetailOverview() {
   const {
@@ -56,54 +49,11 @@ export function BackendDetailOverview() {
       }),
     },
   ]);
-  const largeScreenOrSmaller = useBreakpoints().isLarge;
 
   return (
     <>
       <ChartPointerEventContextProvider>
-        <EuiFlexGroup
-          direction={largeScreenOrSmaller ? 'column' : 'row'}
-          gutterSize="s"
-        >
-          <EuiFlexItem>
-            <EuiPanel hasBorder={true}>
-              <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate('xpack.apm.backendDetailLatencyChartTitle', {
-                    defaultMessage: 'Latency',
-                  })}
-                </h2>
-              </EuiTitle>
-              <BackendLatencyChart height={200} />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel hasBorder={true}>
-              <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate(
-                    'xpack.apm.backendDetailThroughputChartTitle',
-                    { defaultMessage: 'Throughput' }
-                  )}
-                </h2>
-              </EuiTitle>
-              <BackendThroughputChart height={200} />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel hasBorder={true}>
-              <EuiTitle size="xs">
-                <h2>
-                  {i18n.translate(
-                    'xpack.apm.backendDetailFailedTransactionRateChartTitle',
-                    { defaultMessage: 'Failed transaction rate' }
-                  )}
-                </h2>
-              </EuiTitle>
-              <BackendFailedTransactionRateChart height={200} />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <BackendMetricCharts />
       </ChartPointerEventContextProvider>
       <EuiSpacer size="l" />
       <BackendDetailDependenciesTable />

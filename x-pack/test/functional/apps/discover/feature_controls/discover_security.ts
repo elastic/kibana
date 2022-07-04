@@ -10,6 +10,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const esSupertest = getService('esSupertest');
+  const dataGrid = getService('dataGrid');
+  const find = getService('find');
+  const indexPatterns = getService('indexPatterns');
+  const retry = getService('retry');
+  const monacoEditor = getService('monacoEditor');
   const security = getService('security');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects([
@@ -27,6 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const kibanaServer = getService('kibanaServer');
+  const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -443,6 +450,117 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectForbidden();
+      });
+    });
+
+    describe('when has privileges to read data views but no privileges to read index', () => {
+      before(async () => {
+        await esSupertest
+          .post('/_aliases')
+          .send({
+            actions: [
+              {
+                add: { index: logstashIndexName, alias: 'alias-logstash-discover' },
+              },
+            ],
+          })
+          .expect(200);
+
+        await indexPatterns.create(
+          { title: 'alias-logstash-discover', timeFieldName: '@timestamp' },
+          { override: true }
+        );
+
+        await security.role.create('discover_only_data_views_role', {
+          elasticsearch: {
+            indices: [
+              { names: ['alias-logstash-discover'], privileges: ['read', 'view_index_metadata'] },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create('discover_only_data_views_user', {
+          password: 'discover_only_data_views_user-password',
+          roles: ['discover_only_data_views_role'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.login(
+          'discover_only_data_views_user',
+          'discover_only_data_views_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
+
+        await PageObjects.common.navigateToApp('discover');
+      });
+
+      after(async () => {
+        await esSupertest
+          .post('/_aliases')
+          .send({
+            actions: [
+              {
+                remove: { index: logstashIndexName, alias: 'alias-logstash-discover' },
+              },
+            ],
+          })
+          .expect(200);
+
+        await security.role.delete('discover_only_data_views_role');
+        await security.user.delete('discover_only_data_views_user');
+      });
+
+      it('allows to access only via a permitted index alias', async () => {
+        await globalNav.badgeExistsOrFail('Read only');
+
+        // can't access logstash index directly
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('discoverNoResultsCheckIndices');
+
+        // but can access via a permitted alias for the logstash index
+        await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await setDiscoverTimeRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('discoverNoResultsCheckIndices');
+        await PageObjects.discover.waitForDocTableLoadingComplete();
+
+        // expand a row
+        await dataGrid.clickRowToggle();
+
+        // check the fields tab
+        await retry.waitForWithTimeout(
+          'index in flyout fields tab is matching the logstash index',
+          5000,
+          async () => {
+            return (
+              (await testSubjects.getVisibleText('tableDocViewRow-_index-value')) ===
+              logstashIndexName
+            );
+          }
+        );
+
+        // check the JSON tab
+        await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
+        await retry.waitForWithTimeout(
+          'index in flyout JSON tab is matching the logstash index',
+          5000,
+          async () => {
+            const text = await monacoEditor.getCodeEditorValue();
+            return JSON.parse(text)._index === logstashIndexName;
+          }
+        );
       });
     });
   });
