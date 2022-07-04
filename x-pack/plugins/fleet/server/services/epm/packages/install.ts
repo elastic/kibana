@@ -19,6 +19,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import pRetry from 'p-retry';
 
+import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
+
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import type {
   BulkInstallPackageInfo,
@@ -214,6 +216,13 @@ interface InstallRegistryPackageParams {
   force?: boolean;
   ignoreConstraints?: boolean;
 }
+interface InstallUploadedArchiveParams {
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  archiveBuffer: Buffer;
+  contentType: string;
+  spaceId: string;
+}
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
   return {
@@ -387,14 +396,6 @@ async function installPackageFromRegistry({
   } finally {
     span?.end();
   }
-}
-
-interface InstallUploadedArchiveParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
-  archiveBuffer: Buffer;
-  contentType: string;
-  spaceId: string;
 }
 
 async function installPackageByUpload({
@@ -612,6 +613,7 @@ export async function createInstallation(options: {
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
       install_source: installSource,
+      install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
       keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     },
     { id: pkgName, overwrite: true }

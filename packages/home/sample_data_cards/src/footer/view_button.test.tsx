@@ -7,26 +7,27 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { renderWithIntl } from '@kbn/test-jest-helpers';
 
-import { SampleDataViewDataButton } from './sample_data_view_data_button';
+import { ViewButton } from './view_button';
+import { SampleDataCardsProvider } from '../services';
+import { getMockServices } from '../mocks';
 
-jest.mock('../kibana_services', () => ({
-  getServices: () => ({
-    addBasePath: (path) => `root${path}`,
-  }),
-}));
+const render = (element: React.ReactElement) =>
+  renderWithIntl(
+    <SampleDataCardsProvider {...getMockServices()}>{element}</SampleDataCardsProvider>
+  );
 
 test('should render simple button when appLinks is empty', () => {
-  const component = shallow(
-    <SampleDataViewDataButton
+  const component = render(
+    <ViewButton
       id="ecommerce"
       name="Sample eCommerce orders"
       overviewDashboard="722b74f0-b882-11e8-a6d9-e546fe2bba5f"
       appLinks={[]}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('should render popover when appLinks is not empty', () => {
@@ -38,15 +39,15 @@ test('should render popover when appLinks is not empty', () => {
     },
   ];
 
-  const component = shallow(
-    <SampleDataViewDataButton
+  const component = render(
+    <ViewButton
       id="ecommerce"
       name="Sample eCommerce orders"
       overviewDashboard="722b74f0-b882-11e8-a6d9-e546fe2bba5f"
       appLinks={appLinks}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('should render popover with ordered appLinks', () => {
@@ -76,13 +77,13 @@ test('should render popover with ordered appLinks', () => {
     },
   ];
 
-  const component = shallow(
-    <SampleDataViewDataButton
+  const component = render(
+    <ViewButton
       id="ecommerce"
       name="Sample eCommerce orders"
       overviewDashboard="722b74f0-b882-11e8-a6d9-e546fe2bba5f"
       appLinks={appLinks}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
