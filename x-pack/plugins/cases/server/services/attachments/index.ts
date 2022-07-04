@@ -19,6 +19,7 @@ import {
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
+import { uniqBy } from 'lodash';
 import {
   AttributesTypeAlerts,
   CommentAttributes as AttachmentAttributes,
@@ -37,6 +38,11 @@ import { defaultSortField } from '../../common/utils';
 import { AggregationResponse } from '../../client/metrics/types';
 import { getAttachmentSOExtractor } from '../so_reference_extractor';
 import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import {
+  extractPersistableStateReferencesFromSO,
+  injectPersistableReferencesToSO,
+} from '../../attachment_framework/so_references';
 
 interface AttachedToCaseArgs extends ClientArgs {
   caseId: string;
@@ -91,7 +97,10 @@ interface CommentStats {
 }
 
 export class AttachmentService {
-  constructor(private readonly log: Logger) {}
+  constructor(
+    private readonly log: Logger,
+    private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
+  ) {}
 
   public async countAlertsAttachedToCase(
     params: AlertsAttachedToCaseArgs
@@ -242,8 +251,12 @@ export class AttachmentService {
       );
 
       const soExtractor = getAttachmentSOExtractor(res.attributes);
+      const so = soExtractor.populateFieldsFromReferences<AttachmentAttributes>(res);
+      const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {
+        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      });
 
-      return soExtractor.populateFieldsFromReferences<AttachmentAttributes>(res);
+      return { ...so, attributes: { ...so.attributes, ...injectedAttributes } };
     } catch (error) {
       this.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
       throw error;
@@ -277,17 +290,27 @@ export class AttachmentService {
           existingReferences: references,
         });
 
+      const { attributes: extractedAttributes, references: extractedReferences } =
+        extractPersistableStateReferencesFromSO(migratedAttributes, {
+          persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+        });
+
       const attachment =
         await unsecuredSavedObjectsClient.create<AttachmentAttributesWithoutSORefs>(
           CASE_COMMENT_SAVED_OBJECT,
-          migratedAttributes,
+          { ...migratedAttributes, ...extractedAttributes },
           {
-            references: refsWithExternalRefId,
+            references: [...refsWithExternalRefId, ...extractedReferences],
             id,
           }
         );
 
-      return soExtractor.populateFieldsFromReferences<AttachmentAttributes>(attachment);
+      const so = soExtractor.populateFieldsFromReferences<AttachmentAttributes>(attachment);
+      const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {
+        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      });
+
+      return { ...so, attributes: { ...so.attributes, ...injectedAttributes } };
     } catch (error) {
       this.log.error(`Error on POST a new comment: ${error}`);
       throw error;
@@ -310,11 +333,16 @@ export class AttachmentService {
               existingReferences: attachment.references,
             });
 
+          const { attributes: extractedAttributes, references: extractedReferences } =
+            extractPersistableStateReferencesFromSO(migratedAttributes, {
+              persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            });
+
           return {
             type: CASE_COMMENT_SAVED_OBJECT,
             ...attachment,
-            attributes: migratedAttributes,
-            references: refsWithExternalRefId,
+            attributes: { ...migratedAttributes, ...extractedAttributes },
+            references: [...refsWithExternalRefId, ...extractedReferences],
           };
         })
       );
@@ -322,7 +350,21 @@ export class AttachmentService {
       return {
         saved_objects: res.saved_objects.map((so) => {
           const soExtractor = getAttachmentSOExtractor(so.attributes);
-          return soExtractor.populateFieldsFromReferences<AttachmentAttributes>(so);
+          const soWithFieldsFromReferences =
+            soExtractor.populateFieldsFromReferences<AttachmentAttributes>(so);
+
+          const injectedAttributes = injectPersistableReferencesToSO(
+            soWithFieldsFromReferences.attributes,
+            soWithFieldsFromReferences.references,
+            {
+              persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            }
+          );
+
+          return {
+            ...soWithFieldsFromReferences,
+            attributes: { ...soWithFieldsFromReferences.attributes, ...injectedAttributes },
+          };
         }),
       };
     } catch (error) {
@@ -350,10 +392,15 @@ export class AttachmentService {
         existingReferences: options?.references,
       });
 
+      const { attributes: extractedAttributes, references: extractedReferences } =
+        extractPersistableStateReferencesFromSO(migratedAttributes, {
+          persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+        });
+
       const res = await unsecuredSavedObjectsClient.update<AttachmentAttributesWithoutSORefs>(
         CASE_COMMENT_SAVED_OBJECT,
         attachmentId,
-        migratedAttributes,
+        { ...migratedAttributes, ...extractedAttributes },
         {
           ...options,
           /**
@@ -364,7 +411,9 @@ export class AttachmentService {
            */
           references:
             refsWithExternalRefId.length > 0 || didDeleteOperation
-              ? refsWithExternalRefId
+              ? uniqBy([...refsWithExternalRefId, ...extractedReferences], 'id')
+              : extractedReferences.length > 0
+              ? extractedReferences
               : undefined,
         }
       );
@@ -400,11 +449,16 @@ export class AttachmentService {
             existingReferences: c.options?.references,
           });
 
+          const { attributes: extractedAttributes, references: extractedReferences } =
+            extractPersistableStateReferencesFromSO(migratedAttributes, {
+              persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            });
+
           return {
             ...c.options,
             type: CASE_COMMENT_SAVED_OBJECT,
             id: c.attachmentId,
-            attributes: migratedAttributes,
+            attributes: { ...migratedAttributes, ...extractedAttributes },
             /* If c.options?.references are undefined and there is no field to move to the refs
              * then the refsWithExternalRefId will be an empty array. If we pass the empty array
              * on the update then all previously refs will be removed. The check below is needed
@@ -412,7 +466,9 @@ export class AttachmentService {
              */
             references:
               refsWithExternalRefId.length > 0 || didDeleteOperation
-                ? refsWithExternalRefId
+                ? uniqBy([...refsWithExternalRefId, ...extractedReferences], 'id')
+                : extractedReferences.length > 0
+                ? extractedReferences
                 : undefined,
           };
         })
@@ -503,7 +559,22 @@ export class AttachmentService {
         ...res,
         saved_objects: res.saved_objects.map((so) => {
           const soExtractor = getAttachmentSOExtractor(so.attributes);
-          return { ...so, ...soExtractor.populateFieldsFromReferences<AttachmentAttributes>(so) };
+          const soWithFieldsFromReferences =
+            soExtractor.populateFieldsFromReferences<AttachmentAttributes>(so);
+
+          const injectedAttributes = injectPersistableReferencesToSO(
+            soWithFieldsFromReferences.attributes,
+            soWithFieldsFromReferences.references,
+            {
+              persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            }
+          );
+
+          return {
+            ...so,
+            ...soWithFieldsFromReferences,
+            attributes: { ...soWithFieldsFromReferences.attributes, ...injectedAttributes },
+          };
         }),
       };
     } catch (error) {

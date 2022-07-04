@@ -21,6 +21,7 @@ export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup 
   }),
   extract: (state) => ({
     state: {
+      ...state,
       persistableStateAttachmentTypeId: '.test',
       persistableStateAttachmentState: { foo: 'foo' },
     },

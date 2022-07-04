@@ -171,6 +171,7 @@ export class CasePlugin {
        */
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
     });
 
     const client = core.elasticsearch.client;

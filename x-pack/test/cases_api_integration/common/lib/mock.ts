@@ -101,8 +101,8 @@ export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType =
 export const persistableStateAttachment: CommentRequestPersistableStateType = {
   type: CommentType.persistableState,
   owner: 'securitySolutionFixture',
-  persistableStateAttachmentTypeId: 'test',
-  persistableStateAttachmentState: { foo: 'foo' },
+  persistableStateAttachmentTypeId: '.test',
+  persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
 };
 
 export const postCaseResp = (

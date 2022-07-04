@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { CommentRequest, CommentRequestPersistableStateType } from '../../common/api';
+import { isCommentRequestTypePersistableState } from '../common/utils';
 import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
 
 interface SavedObjectAttributesAndReferences {
-  attributes: SavedObjectAttributes;
+  state: CommentRequestPersistableStateType;
   references: SavedObjectReference[];
 }
 
@@ -19,12 +21,92 @@ interface ExtractDeps {
 
 type InjectDeps = ExtractDeps;
 
-export function extractReferences(
-  { attributes, references = [] }: SavedObjectAttributesAndReferences,
+export function extractPersistableStateReferences(
+  state: CommentRequestPersistableStateType,
   deps: ExtractDeps
-): SavedObjectAttributesAndReferences {}
+): SavedObjectAttributesAndReferences {
+  const { persistableStateAttachmentState, persistableStateAttachmentTypeId } = state;
 
-export function injectReferences(
-  { attributes, references = [] }: SavedObjectAttributesAndReferences,
+  if (!deps.persistableStateAttachmentTypeRegistry.has(persistableStateAttachmentTypeId)) {
+    return { state, references: [] };
+  }
+
+  const attachment = deps.persistableStateAttachmentTypeRegistry.get(
+    persistableStateAttachmentTypeId
+  );
+
+  const { state: persistableState, references: persistableStateReferences } = attachment.extract({
+    persistableStateAttachmentState,
+    persistableStateAttachmentTypeId,
+  });
+
+  return {
+    state: { ...state, ...persistableState, persistableStateAttachmentTypeId },
+    references: persistableStateReferences,
+  };
+}
+
+export function injectPersistableReferences(
+  { state, references = [] }: SavedObjectAttributesAndReferences,
   deps: InjectDeps
-): SavedObjectAttributes {}
+): CommentRequestPersistableStateType {
+  const { persistableStateAttachmentState, persistableStateAttachmentTypeId } = state;
+
+  if (!deps.persistableStateAttachmentTypeRegistry.has(persistableStateAttachmentTypeId)) {
+    return state;
+  }
+
+  const attachment = deps.persistableStateAttachmentTypeRegistry.get(
+    persistableStateAttachmentTypeId
+  );
+
+  const injectedState = attachment.inject(
+    {
+      persistableStateAttachmentState,
+      persistableStateAttachmentTypeId,
+    },
+    references
+  );
+
+  return { ...state, ...injectedState, persistableStateAttachmentTypeId };
+}
+
+export const extractPersistableStateReferencesFromSO = <T extends CommentRequest>(
+  attachmentAttributes: T,
+  deps: ExtractDeps
+) => {
+  let attributes = {};
+  let references: SavedObjectReference[] = [];
+
+  if (isCommentRequestTypePersistableState(attachmentAttributes)) {
+    const { state, references: extractedReferences } = extractPersistableStateReferences(
+      attachmentAttributes,
+      deps
+    );
+
+    references = [...references, ...extractedReferences];
+    attributes = { ...attributes, ...state };
+  }
+
+  return { attributes: attributes as T, references };
+};
+
+export const injectPersistableReferencesToSO = <T extends CommentRequest>(
+  attachmentAttributes: T,
+  references: SavedObjectReference[],
+  deps: InjectDeps
+) => {
+  if (isCommentRequestTypePersistableState(attachmentAttributes)) {
+    const injectedState = injectPersistableReferences(
+      {
+        state: attachmentAttributes,
+        references,
+      },
+      deps
+    );
+
+    return { ...attachmentAttributes, ...injectedState };
+  }
+
+  return attachmentAttributes;
+};
