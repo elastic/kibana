@@ -58,7 +58,12 @@ export const GetProcessesActionResult = memo<
   const isError = status === 'error';
   const actionRequestSent = Boolean(store.actionRequestSent);
 
-  const getProcessesApi = useSendGetEndpointProcessesRequest();
+  const {
+    mutate: getProcesses,
+    data: getProcessesData,
+    isSuccess: isGetProcessesSuccess,
+    error: getProcessesError,
+  } = useSendGetEndpointProcessesRequest();
 
   const { data: actionDetails } = useGetActionDetails<ProcessesEntry>(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
@@ -68,7 +73,7 @@ export const GetProcessesActionResult = memo<
   // Send get processes request if not yet done
   useEffect(() => {
     if (!actionRequestSent && endpointId) {
-      getProcessesApi.mutate({
+      getProcesses({
         endpoint_ids: [endpointId],
         comment: command.args.args?.comment?.[0],
       });
@@ -77,25 +82,25 @@ export const GetProcessesActionResult = memo<
         return { ...prevState, actionRequestSent: true };
       });
     }
-  }, [actionRequestSent, command.args.args?.comment, endpointId, getProcessesApi, setStore]);
+  }, [actionRequestSent, command.args.args?.comment, endpointId, getProcesses, setStore]);
 
   // If get processes request was created, store the action id if necessary
   useEffect(() => {
-    if (getProcessesApi.isSuccess && actionId !== getProcessesApi.data.data.id) {
+    if (isGetProcessesSuccess && actionId !== getProcessesData?.data.id) {
       setStore((prevState) => {
-        return { ...prevState, actionId: getProcessesApi.data.data.id };
+        return { ...prevState, actionId: getProcessesData?.data.id };
       });
-    } else if (getProcessesApi.error) {
+    } else if (getProcessesError) {
       setStatus('error');
       setStore((prevState) => {
-        return { ...prevState, apiError: getProcessesApi.error };
+        return { ...prevState, apiError: getProcessesError };
       });
     }
   }, [
     actionId,
-    getProcessesApi.data?.data.id,
-    getProcessesApi.error,
-    getProcessesApi.isSuccess,
+    getProcessesData?.data.id,
+    getProcessesError,
+    isGetProcessesSuccess,
     setStatus,
     setStore,
   ]);
