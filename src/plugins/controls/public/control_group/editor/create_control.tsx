@@ -51,7 +51,7 @@ export const CreateControlButton = ({
   updateDefaultGrow,
 }: CreateControlButtonProps) => {
   // Controls Services Context
-  const { overlays, controls } = pluginServices.getServices();
+  const { overlays, controls, theme } = pluginServices.getServices();
   const { getControlTypes, getControlFactory } = controls;
   const { openFlyout, openConfirm } = overlays;
 
@@ -113,7 +113,8 @@ export const CreateControlButton = ({
                 (inputToReturn = { ...inputToReturn, ...partialInput })
               }
             />
-          </PresentationUtilProvider>
+          </PresentationUtilProvider>,
+          { theme$: theme.theme$ }
         ),
         {
           'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
