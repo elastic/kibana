@@ -193,6 +193,29 @@ describe('Agents CRUD test', () => {
         total: 7,
       });
     });
+
+    it('should pass secondary sort for default sort', async () => {
+      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
+      await getAgentsByKuery(esClientMock, {
+        showInactive: false,
+      });
+
+      expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
+        { enrolled_at: { order: 'desc' } },
+        { 'local_metadata.host.hostname.keyword': { order: 'asc' } },
+      ]);
+    });
+
+    it('should not pass secondary sort for non-default sort', async () => {
+      searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
+      await getAgentsByKuery(esClientMock, {
+        showInactive: false,
+        sortField: 'policy_id',
+      });
+      expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
+        { policy_id: { order: 'desc' } },
+      ]);
+    });
   });
 
   describe('processAgentsInBatches', () => {

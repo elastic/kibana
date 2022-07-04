@@ -83,5 +83,23 @@ export default function ({ getService }: FtrProviderContext) {
         'agent1',
       ]);
     });
+
+    it('should return agents in enrolled_at and hostname order when default sort options and same enrollment time', async () => {
+      let { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
+      expect(apiResponse.items.map((agent: { id: string }) => agent.id)).to.eql([
+        'agent4',
+        'agent1',
+        'agent2',
+        'agent3',
+      ]);
+
+      ({ body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200));
+      expect(apiResponse.items.map((agent: { id: string }) => agent.id)).to.eql([
+        'agent4',
+        'agent1',
+        'agent2',
+        'agent3',
+      ]);
+    });
   });
 }
