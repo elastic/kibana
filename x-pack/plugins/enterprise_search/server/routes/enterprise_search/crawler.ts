@@ -41,4 +41,56 @@ export function registerCrawlerRoutes({
       path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains',
     })
   );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/domains',
+      validate: {
+        body: schema.object({
+          entry_points: schema.arrayOf(
+            schema.object({
+              value: schema.string(),
+            })
+          ),
+          name: schema.string(),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains',
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
+      validate: {
+        params: schema.object({
+          domainId: schema.string(),
+          indexName: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v1/engines/:indexName/crawler2/domains/:domainId',
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
+      validate: {
+        params: schema.object({
+          domainId: schema.string(),
+          indexName: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v1/engines/:indexName/crawler2/domains/:domainId',
+    })
+  );
 }

@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { generateEncodedPath } from '../../../../app_search/utils/encode_path_params';
+
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 
 import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
@@ -33,7 +35,9 @@ export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
       flashAPIErrors(error);
     },
     apiSuccess: ({ created }) => {
-      KibanaLogic.values.navigateToUrl(SEARCH_INDEX_PATH.replace(':indexName', created));
+      KibanaLogic.values.navigateToUrl(
+        generateEncodedPath(SEARCH_INDEX_PATH, { indexName: created })
+      );
     },
     makeRequest: () => clearFlashMessages(),
   },
