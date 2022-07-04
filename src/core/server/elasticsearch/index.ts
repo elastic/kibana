@@ -36,7 +36,6 @@ export type {
   CountResponse,
   ShardsInfo,
   ShardsResponse,
-  GetResponse,
   // unauthorized error handler
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,

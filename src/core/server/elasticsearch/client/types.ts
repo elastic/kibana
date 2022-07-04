@@ -89,18 +89,3 @@ export interface SearchResponse<T = unknown> {
   aggregations?: any;
   pit_id?: string;
 }
-
-/**
- * @public
- */
-export interface GetResponse<T> {
-  _index: string;
-  _type: string;
-  _id: string;
-  _version: number;
-  _routing?: string;
-  found: boolean;
-  _source: T;
-  _seq_no: number;
-  _primary_term: number;
-}

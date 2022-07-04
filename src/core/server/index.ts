@@ -143,7 +143,6 @@ export type {
   CountResponse,
   ShardsInfo,
   ShardsResponse,
-  GetResponse,
   ElasticsearchConfigPreboot,
   PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,
