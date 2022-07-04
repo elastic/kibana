@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { filter, firstValueFrom } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
-  InjectedMetadataParams,
-  InternalInjectedMetadataSetup,
-  InternalInjectedMetadataStart,
+  type InjectedMetadataParams,
+  type InternalInjectedMetadataSetup,
+  type InternalInjectedMetadataStart,
 } from '@kbn/core-injected-metadata-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
@@ -303,14 +304,11 @@ export class CoreSystem {
       });
 
       // Wait for the first app navigation to report Kibana Loaded
-      const appSub = application.currentAppId$.subscribe((appId) => {
-        if (appId === undefined) return;
-
+      firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
         performance.mark(KBN_LOAD_MARKS, {
           detail: 'first_app_nav',
         });
         this.reportKibanaLoadedEvent(analytics);
-        appSub.unsubscribe();
       });
 
       return {
