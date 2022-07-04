@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
@@ -27,6 +28,25 @@ import { useRedirectToPathOrRedirectPath } from '../../hooks';
 interface MatchParams {
   name: string;
 }
+
+const ManagedPipelineCallout = () => (
+  <EuiCallOut
+    color="danger"
+    iconType="alert"
+    data-test-subj="managedPipelineCallout"
+    title={
+      <FormattedMessage
+        id="xpack.ingestPipelines.edit.managedCalloutTitle"
+        defaultMessage="Editing a managed pipeline can break Kibana."
+      />
+    }
+  >
+    <FormattedMessage
+      id="xpack.ingestPipelines.edit.managedCalloutDescription"
+      defaultMessage="Managed pipelines are critical for internal operations."
+    />
+  </EuiCallOut>
+);
 
 export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
@@ -150,6 +170,12 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       />
 
       <EuiSpacer size="l" />
+      {pipeline?.isManaged && (
+        <>
+          <ManagedPipelineCallout />
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <PipelineForm
         onSave={onSave}
