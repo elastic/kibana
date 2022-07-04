@@ -17,7 +17,6 @@ import {
   EuiIconTip,
   htmlIdGenerator,
   EuiButtonGroup,
-  EuiPanel,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -746,7 +745,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           />
         </EuiFormRow>
         {currentColumn.params.orderAgg && ReferenceEditor && (
-          <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s" style={{ margin: `8px 0` }}>
+          <>
+            <EuiSpacer size="s" />
             <ReferenceEditor
               operationDefinitionMap={operationDefinitionMap}
               functionLabel={i18n.translate('xpack.lens.indexPattern.terms.orderAgg.rankFunction', {
@@ -848,7 +848,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               }}
               {...rest}
             />
-          </EuiPanel>
+            <EuiSpacer size="m" />
+          </>
         )}
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {

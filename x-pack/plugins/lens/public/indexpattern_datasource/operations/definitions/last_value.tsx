@@ -30,6 +30,7 @@ import {
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { isScriptedField } from './terms/helpers';
+import { FormRow } from './shared_components/form_row';
 
 function ofName(name: string, timeShift: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -266,7 +267,7 @@ export const lastValueOperation: OperationDefinition<
     isReferenced,
     paramEditorCustomProps,
   }) => {
-    const { labels } = paramEditorCustomProps || {};
+    const { labels, isInline } = paramEditorCustomProps || {};
     const sortByFieldLabel =
       labels?.[0] ||
       i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
@@ -295,7 +296,8 @@ export const lastValueOperation: OperationDefinition<
 
     return (
       <>
-        <EuiFormRow
+        <FormRow
+          isInline={isInline}
           label={sortByFieldLabel}
           display="rowCompressed"
           fullWidth
@@ -346,7 +348,7 @@ export const lastValueOperation: OperationDefinition<
                 : []) as unknown as EuiComboBoxOptionOption[]
             }
           />
-        </EuiFormRow>
+        </FormRow>
         {!isReferenced && (
           <EuiFormRow
             error={i18n.translate(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
+import { EuiFieldNumber, EuiRange } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping, METRIC_TYPES } from '@kbn/data-plugin/public';
@@ -29,6 +29,7 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { FormRow } from './shared_components';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -275,7 +276,7 @@ export const percentileOperation: OperationDefinition<
     indexPattern,
     paramEditorCustomProps,
   }) {
-    const { labels } = paramEditorCustomProps || {};
+    const { labels, isInline } = paramEditorCustomProps || {};
     const percentileLabel =
       labels?.[0] ||
       i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
@@ -315,13 +316,14 @@ export const percentileOperation: OperationDefinition<
     });
     const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
 
-    const handleInputChange: EuiRangeProps['onChange'] = useCallback(
+    const handleInputChange = useCallback(
       (e) => handleInputChangeWithoutValidation(String(e.currentTarget.value)),
       [handleInputChangeWithoutValidation]
     );
 
     return (
-      <EuiFormRow
+      <FormRow
+        isInline={isInline}
         label={percentileLabel}
         data-test-subj="lns-indexPattern-percentile-form"
         display="rowCompressed"
@@ -334,19 +336,33 @@ export const percentileOperation: OperationDefinition<
           })
         }
       >
-        <EuiRange
-          fullWidth
-          data-test-subj="lns-indexPattern-percentile-input"
-          compressed
-          value={inputValue ?? ''}
-          min={1}
-          max={99}
-          step={1}
-          onChange={handleInputChange}
-          showInput
-          aria-label={percentileLabel}
-        />
-      </EuiFormRow>
+        {isInline ? (
+          <EuiFieldNumber
+            fullWidth
+            data-test-subj="lns-indexPattern-percentile-input"
+            compressed
+            value={inputValue ?? ''}
+            min={1}
+            max={99}
+            step={1}
+            onChange={handleInputChange}
+            aria-label={percentileLabel}
+          />
+        ) : (
+          <EuiRange
+            fullWidth
+            data-test-subj="lns-indexPattern-percentile-input"
+            compressed
+            value={inputValue ?? ''}
+            min={1}
+            max={99}
+            step={1}
+            onChange={handleInputChange}
+            showInput
+            aria-label={percentileLabel}
+          />
+        )}
+      </FormRow>
     );
   },
   documentation: {

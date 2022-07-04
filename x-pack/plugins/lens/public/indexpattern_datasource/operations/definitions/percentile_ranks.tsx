@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiFieldNumberProps, EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumberProps, EuiFieldNumber } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -24,6 +24,7 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { FormRow } from './shared_components';
 
 export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile_rank';
@@ -150,7 +151,7 @@ export const percentileRanksOperation: OperationDefinition<
     indexPattern,
     paramEditorCustomProps,
   }) {
-    const { labels } = paramEditorCustomProps || {};
+    const { labels, isInline } = paramEditorCustomProps || {};
     const percentileRanksLabel =
       labels?.[0] ||
       i18n.translate('xpack.lens.indexPattern.percentile.percentileRanksValue', {
@@ -198,7 +199,8 @@ export const percentileRanksOperation: OperationDefinition<
     );
 
     return (
-      <EuiFormRow
+      <FormRow
+        isInline={isInline}
         label={percentileRanksLabel}
         data-test-subj="lns-indexPattern-percentile_ranks-form"
         display="rowCompressed"
@@ -220,7 +222,7 @@ export const percentileRanksOperation: OperationDefinition<
           step="any"
           aria-label={percentileRanksLabel}
         />
-      </EuiFormRow>
+      </FormRow>
     );
   },
   documentation: {

@@ -432,6 +432,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
 };
 export type ParamEditorCustomProps = Record<string, unknown> & {
   labels?: string[];
+  isInline?: boolean;
 };
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {

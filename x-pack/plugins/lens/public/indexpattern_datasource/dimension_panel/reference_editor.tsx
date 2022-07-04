@@ -8,13 +8,7 @@
 import './dimension_editor.scss';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFormRow,
-  EuiFormRowProps,
-  EuiSpacer,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiFormRowProps, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -42,6 +36,7 @@ import type {
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import type { ParamEditorCustomProps } from '../../types';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
+import { FormRow } from '../operations/definitions/shared_components';
 
 const operationDisplay = getOperationDisplay();
 
@@ -87,7 +82,7 @@ export interface ReferenceEditorProps {
   functionLabel?: string;
   fieldLabel?: string;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
-
+  isInline?: boolean;
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
   labelAppend?: EuiFormRowProps['labelAppend'];
@@ -130,6 +125,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     onChooseFunction,
     fieldLabel,
     operationDefinitionMap,
+    isInline,
   } = props;
 
   const selectedOperationDefinition = column && operationDefinitionMap[column.operationType];
@@ -239,7 +235,8 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     <div>
       {selectionStyle !== 'field' ? (
         <>
-          <EuiFormRow
+          <FormRow
+            isInline={isInline}
             data-test-subj="indexPattern-subFunction-selection-row"
             label={
               functionLabel ||
@@ -288,13 +285,14 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
                 return;
               }}
             />
-          </EuiFormRow>
+          </FormRow>
           <EuiSpacer size="s" />
         </>
       ) : null}
 
       {!column || selectedOperationDefinition?.input === 'field' ? (
-        <EuiFormRow
+        <FormRow
+          isInline={isInline}
           data-test-subj="indexPattern-reference-field-selection-row"
           label={
             fieldLabel ||
@@ -324,11 +322,12 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
             onDeleteColumn={onDeleteColumn}
             onChoose={onChooseField}
           />
-        </EuiFormRow>
+        </FormRow>
       ) : null}
 
       {column && !incompleteColumn && ParamEditor && (
         <>
+          <EuiSpacer size="s" />
           <ParamEditor
             {...props}
             isReferenced={true}
