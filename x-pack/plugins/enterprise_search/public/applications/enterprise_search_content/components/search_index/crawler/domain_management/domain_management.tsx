@@ -18,6 +18,7 @@ import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_craw
 import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
 
 import { AddDomainFlyout } from './add_domain/add_domain_flyout';
+import { CrawlerStatusBanner } from './crawler_status_banner';
 import { DomainManagementLogic } from './domain_management_logic';
 import { DomainsPanel } from './domains_panel';
 import { EmptyStatePanel } from './empty_state_panel';
@@ -39,6 +40,7 @@ export const SearchIndexDomainManagement: React.FC = () => {
   return (
     <>
       <EuiSpacer />
+      <CrawlerStatusBanner />
       {domains.length > 0 ? <DomainsPanel /> : <EmptyStatePanel />}
       <AddDomainFlyout />
     </>
