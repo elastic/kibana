@@ -18,6 +18,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { monaco } from '@kbn/monaco';
 
 // @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
@@ -120,7 +121,7 @@ export const Expression: FC<Props> = ({
     editor?._standaloneKeybindingService.addDynamicKeybinding(
       '-editor.action.insertLineAfter',
       // eslint-disable-next-line no-bitwise
-      2048 /* CtrlCmd */ | 3 /* Enter */,
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
       () => {}
     );
   };
