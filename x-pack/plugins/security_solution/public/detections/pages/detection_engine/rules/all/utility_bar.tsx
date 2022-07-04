@@ -186,7 +186,7 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
           )}
         </UtilityBarSection>
         {rulesTableContext && (
-          <UtilityBarSection>
+          <UtilityBarSection dataTestSubj="refreshRulesStatus">
             {timelines.getLastUpdated({
               showUpdating: rulesTableContext.state.isFetching,
               updatedAt: rulesTableContext.state.lastUpdated,

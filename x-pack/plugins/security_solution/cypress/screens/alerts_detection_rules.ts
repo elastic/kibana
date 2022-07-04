@@ -130,3 +130,5 @@ export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
 export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
 
 export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]';
+
+export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';

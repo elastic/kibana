@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RULE_CHECKBOX, REFRESH_SETTINGS_SWITCH } from '../../screens/alerts_detection_rules';
+import { RULE_CHECKBOX, REFRESH_RULES_STATUS } from '../../screens/alerts_detection_rules';
 import {
   changeRowsPerPageTo,
   checkAutoRefresh,
@@ -16,6 +16,8 @@ import {
   selectNumberOfRules,
   mockGlobalClock,
   disableAutoRefresh,
+  checkAutoRefreshIsDisabled,
+  checkAutoRefreshIsEnabled,
 } from '../../tasks/alerts_detection_rules';
 import { login, visit } from '../../tasks/login';
 
@@ -47,6 +49,8 @@ describe('Alerts detection rules table auto-refresh', () => {
 
     // mock 1 minute passing to make sure refresh is conducted
     checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
+
+    cy.contains(REFRESH_RULES_STATUS, 'Updated now');
   });
 
   it('should prevent table from rules refetch if any rule selected', () => {
@@ -57,11 +61,13 @@ describe('Alerts detection rules table auto-refresh', () => {
 
     selectNumberOfRules(1);
 
-    // mock 1 minute passing to make sure refresh is not conducted
-    checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
+    // mock w minute passing to make sure refresh is not conducted
+    checkAutoRefresh(2 * DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
 
     // ensure rule is still selected
     cy.get(RULE_CHECKBOX).first().should('be.checked');
+
+    cy.contains(REFRESH_RULES_STATUS, 'Updated 2 minutes ago');
   });
 
   it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {
@@ -72,20 +78,20 @@ describe('Alerts detection rules table auto-refresh', () => {
     openRefreshSettingsPopover();
 
     // check refresh settings if it's enabled before selecting
-    cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'true');
+    checkAutoRefreshIsEnabled();
 
     selectAllRules();
 
     // auto refresh should be disabled after rules selected
-    cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
+    checkAutoRefreshIsDisabled();
 
     clearAllRuleSelection();
 
     // after all rules unselected, auto refresh should renew
-    cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'true');
+    checkAutoRefreshIsEnabled();
   });
 
-  it('should not enable auto refresh after rules deselection if auto refresh was disabled', () => {
+  it('should not enable auto refresh after rules were unselected if auto refresh was disabled', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     changeRowsPerPageTo(5);
@@ -96,11 +102,11 @@ describe('Alerts detection rules table auto-refresh', () => {
     selectAllRules();
 
     openRefreshSettingsPopover();
-    cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
+    checkAutoRefreshIsDisabled();
 
     clearAllRuleSelection();
 
     // after all rules unselected, auto refresh should still be disabled
-    cy.get(REFRESH_SETTINGS_SWITCH).should('have.attr', 'aria-checked', 'false');
+    checkAutoRefreshIsDisabled();
   });
 });
