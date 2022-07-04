@@ -10,17 +10,16 @@ import { merge } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import {
+import type {
   ActionDetails,
-  ActivityLogItemTypes,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   EndpointPendingActions,
   LogsEndpointAction,
   LogsEndpointActionResponse,
-  RESPONSE_ACTION_COMMANDS,
   ProcessesEntry,
 } from '../types';
+import { ActivityLogItemTypes, RESPONSE_ACTION_COMMANDS } from '../types';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
