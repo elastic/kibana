@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   KillProcessRequestBody,
   ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
 import { KibanaServices } from '../kibana';
 import { KILL_PROCESS_ROUTE } from '../../../../common/endpoint/constants';
 
-/** Isolates a Host running either elastic endpoint or fleet agent */
+/** Kills a process specified by pid or entity id on a host running Endpoint Security */
 export const killProcess = async (
   params: KillProcessRequestBody
 ): Promise<ResponseActionApiResponse> => {

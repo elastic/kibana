@@ -8,7 +8,6 @@
 import React, { memo, useMemo } from 'react';
 import {
   EuiBadge,
-  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ConsoleCodeBlock } from './console_code_block';
 import { getArgumentsForCommand } from '../service/parsed_command_input';
 import { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -28,7 +28,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
       return (
         <EuiText size="s">
           <EuiBadge>{commandDef.name}</EuiBadge>
-          <EuiCode transparentBackground={true}>{usage}</EuiCode>
+          <ConsoleCodeBlock>{usage}</ConsoleCodeBlock>
         </EuiText>
       );
     });
@@ -45,7 +45,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow>
+        <EuiFlexItem>
           <code>{usageHelp}</code>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -60,9 +60,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <code>
-              <EuiCode transparentBackground={true}>{commandDef.exampleUsage}</EuiCode>
-            </code>
+            <ConsoleCodeBlock>{commandDef.exampleUsage}</ConsoleCodeBlock>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -79,45 +77,47 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const hasArgs = useMemo(() => Object.keys(commandDef.args ?? []).length > 0, [commandDef.args]);
 
-  const commandOptionsRequired = useMemo(() => {
-    // `command.args` only here to silence TS check
+  type CommandDetails = Array<{
+    title: string;
+    description: string;
+  }>;
+
+  const commandOptions = useMemo(() => {
     if (!hasArgs || !commandDef.args) {
-      return [];
+      return {
+        required: [],
+        exclusiveOr: [],
+        optional: [],
+      };
     }
 
-    const requiredEntries = Object.entries(commandDef.args).filter((arg) => arg[1].required);
-    return requiredEntries.map(([option, { about: description }]) => ({
-      title: `--${option}`,
-      description,
-    }));
-  }, [commandDef.args, hasArgs]);
+    const enteredCommands = Object.entries(commandDef.args).reduce<{
+      required: CommandDetails;
+      exclusiveOr: CommandDetails;
+      optional: CommandDetails;
+    }>(
+      (acc, curr) => {
+        const item = {
+          title: `--${curr[0]}`,
+          description: curr[1].about,
+        };
+        if (curr[1].required) {
+          acc.required.push(item);
+        } else if (curr[1].exclusiveOr) {
+          acc.exclusiveOr.push(item);
+        } else {
+          acc.optional.push(item);
+        }
 
-  const commandOptionsExclusiveOr = useMemo(() => {
-    // `command.args` only here to silence TS check
-    if (!hasArgs || !commandDef.args) {
-      return [];
-    }
-
-    const exclusiveOrEntries = Object.entries(commandDef.args).filter((arg) => arg[1].exclusiveOr);
-    return exclusiveOrEntries.map(([option, { about: description }]) => ({
-      title: `--${option}`,
-      description,
-    }));
-  }, [commandDef.args, hasArgs]);
-
-  const commandOptionsOptional = useMemo(() => {
-    // `command.args` only here to silence TS check
-    if (!hasArgs || !commandDef.args) {
-      return [];
-    }
-
-    const optionalEntries = Object.entries(commandDef.args).filter(
-      (arg) => !arg[1].required && !arg[1].exclusiveOr
+        return acc;
+      },
+      {
+        required: [],
+        exclusiveOr: [],
+        optional: [],
+      }
     );
-    return optionalEntries.map(([option, { about: description }]) => ({
-      title: `--${option}`,
-      description,
-    }));
+    return enteredCommands;
   }, [commandDef.args, hasArgs]);
 
   const additionalProps = useMemo(
@@ -131,7 +131,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
     <EuiPanel color="transparent" data-test-subj={getTestId('commandUsage')}>
       <EuiText>{commandDef.about}</EuiText>
       <CommandInputUsage commandDef={commandDef} />
-      {commandOptionsRequired && commandOptionsRequired.length > 0 && (
+      {commandOptions.required && commandOptions.required.length > 0 && (
         <>
           <EuiSpacer />
           <EuiText>
@@ -153,7 +153,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
               compressed
               type="column"
               className="descriptionList-20_80"
-              listItems={commandOptionsRequired}
+              listItems={commandOptions.required}
               descriptionProps={additionalProps}
               titleProps={additionalProps}
               data-test-subj={getTestId('commandUsage-options')}
@@ -161,7 +161,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
           )}
         </>
       )}
-      {commandOptionsExclusiveOr && commandOptionsExclusiveOr.length > 0 && (
+      {commandOptions.exclusiveOr && commandOptions.exclusiveOr.length > 0 && (
         <>
           <EuiSpacer />
           <EuiText>
@@ -175,7 +175,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
               compressed
               type="column"
               className="descriptionList-20_80"
-              listItems={commandOptionsExclusiveOr}
+              listItems={commandOptions.exclusiveOr}
               descriptionProps={additionalProps}
               titleProps={additionalProps}
               data-test-subj={getTestId('commandUsage-options')}
@@ -183,7 +183,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
           )}
         </>
       )}
-      {commandOptionsOptional && commandOptionsOptional.length > 0 && (
+      {commandOptions.optional && commandOptions.optional.length > 0 && (
         <>
           <EuiSpacer />
           <EuiText>
@@ -197,7 +197,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
               compressed
               type="column"
               className="descriptionList-20_80"
-              listItems={commandOptionsOptional}
+              listItems={commandOptions.optional}
               descriptionProps={additionalProps}
               titleProps={additionalProps}
               data-test-subj={getTestId('commandUsage-options')}

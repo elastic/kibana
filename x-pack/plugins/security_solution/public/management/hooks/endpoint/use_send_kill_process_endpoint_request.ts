@@ -7,14 +7,14 @@
 
 import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
 import { HttpFetchError } from '@kbn/core/public';
-import {
+import type {
   KillProcessRequestBody,
   ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
 import { killProcess } from '../../../common/lib/process_actions';
 
 /**
- * Create host release requests
+ * Create kill process requests
  * @param customOptions
  */
 export const useSendKillProcessRequest = (

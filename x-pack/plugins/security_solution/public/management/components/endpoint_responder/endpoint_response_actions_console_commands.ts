@@ -9,9 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
-import { KillProcessActionResult } from './kill_process_aciton';
+import { KillProcessActionResult } from './kill_process_action';
 import { EndpointStatusActionResult } from './status_action';
 import { GetRunningProcessesActionResult } from './get_running_processes_action';
+import type { ParsedArgData } from '../console/service/parsed_command_input';
+
+const emptyArgumentValidator = (argData: ParsedArgData) => {
+  if (argData?.length > 0 && argData[0]?.trim().length > 0) {
+    return true;
+  } else {
+    return 'Argument cannot be empty';
+  }
+};
 
 export const getEndpointResponseActionsConsoleCommands = (
   endpointAgentId: string
@@ -71,7 +80,7 @@ export const getEndpointResponseActionsConsoleCommands = (
         endpointId: endpointAgentId,
       },
       exampleUsage: 'kill-process --pid 123',
-      exampleInstruction: 'Enter a pid or entity id to execute',
+      exampleInstruction: 'Enter a pid or an entity id to execute',
       mustHaveArgs: true,
       args: {
         comment: {
@@ -88,17 +97,22 @@ export const getEndpointResponseActionsConsoleCommands = (
           exclusiveOr: true,
           about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
             defaultMessage:
-              'A PID representng the process to kill.  You can enter a pid or entity id.',
+              'A PID representing the process to kill.  You can enter a pid or an entity id, but not both.',
           }),
+          validate: emptyArgumentValidator,
         },
         entityId: {
           required: false,
           allowMultiples: false,
           exclusiveOr: true,
-          about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.pid.arg.comment', {
-            defaultMessage:
-              'A PID representng the process to kill.  You can enter a pid or entity id.',
-          }),
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.entityId.arg.comment',
+            {
+              defaultMessage:
+                'An entity id representing the process to kill.  You can enter a pid or an entity id, but not both.',
+            }
+          ),
+          validate: emptyArgumentValidator,
         },
       },
     },
@@ -113,7 +127,7 @@ export const getEndpointResponseActionsConsoleCommands = (
       },
     },
     {
-      name: 'processes',
+      name: 'running-processes',
       about: i18n.translate(
         'xpack.securitySolution.endpointConsoleCommands.runninProcesses.about',
         {

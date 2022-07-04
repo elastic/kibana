@@ -10,9 +10,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
-import { EuiCode } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ConsoleCodeBlock } from '../../console_code_block';
 import { handleInputAreaState } from './handle_input_area_state';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
 import {
@@ -58,9 +58,14 @@ const getExclusiveOrArgs = (argDefinitions: CommandDefinition['args']): string[]
     return [];
   }
 
-  return Object.entries(argDefinitions)
-    .filter(([_, argDef]) => argDef.exclusiveOr)
-    .map(([argName]) => argName);
+  const exclusiveOrArgs: string[] = [];
+
+  return Object.entries(argDefinitions).reduce((acc, [argName, argDef]) => {
+    if (argDef.exclusiveOr) {
+      acc.push(argName);
+    }
+    return acc;
+  }, exclusiveOrArgs);
 };
 
 const updateStateWithNewCommandHistoryItem = (
@@ -151,9 +156,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       defaultMessage="This command supports one and only one of the following arguments: {argNames}"
       values={{
         argNames: (
-          <EuiCode transparentBackground={true}>
-            {exclusiveOrArgs.map(toCliArgumentOption).join(', ')}
-          </EuiCode>
+          <ConsoleCodeBlock>{exclusiveOrArgs.map(toCliArgumentOption).join(', ')}</ConsoleCodeBlock>
         ),
       }}
     />
@@ -200,11 +203,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not support by this command: {unknownArgs}"
               values={{
                 countOfInvalidArgs: unknownInputArgs.length,
-                command: <EuiCode transparentBackground={true}>{parsedInput.name}</EuiCode>,
+                command: <ConsoleCodeBlock>{parsedInput.name}</ConsoleCodeBlock>,
                 unknownArgs: (
-                  <EuiCode transparentBackground={true}>
+                  <ConsoleCodeBlock>
                     {unknownInputArgs.map(toCliArgumentOption).join(', ')}
-                  </EuiCode>
+                  </ConsoleCodeBlock>
                 ),
               }}
             />

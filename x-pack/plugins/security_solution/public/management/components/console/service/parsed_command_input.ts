@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { CommandDefinition } from '..';
+import type { EndpointActionDataParameterTypes } from '../../../../../common/endpoint/types';
 
 export type ParsedArgData = string[];
 
@@ -170,7 +171,7 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
 export const parsedPidOrEntityIdParameter = (parameters: {
   pid?: ParsedArgData;
   entityId?: ParsedArgData;
-}): { pid: number; entity_id?: never } | { pid?: never; entity_id: string } | undefined => {
+}): EndpointActionDataParameterTypes | undefined => {
   if (parameters.pid) {
     return { pid: Number(parameters.pid[0]) };
   } else if (parameters.entityId) {

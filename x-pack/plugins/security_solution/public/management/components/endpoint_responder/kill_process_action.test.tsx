@@ -101,6 +101,42 @@ describe('When using the kill-process action from response actions console', () 
     );
   });
 
+  it('should check the pid has a passed value', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument cannot be empty'
+    );
+  });
+
+  it('should check the pid has a non-empty value', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --pid "   "');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --pid. Argument cannot be empty'
+    );
+  });
+
+  it('should check the entity id has a passed value', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --entityId');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --entityId. Argument cannot be empty'
+    );
+  });
+
+  it('should check the entity id has a non-empty value', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'kill-process --entityId "   "');
+
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Invalid argument value: --entityId. Argument cannot be empty'
+    );
+  });
+
   it('should call the action status api after creating the `kill-process` request', async () => {
     await render();
     enterConsoleCommand(renderResult, 'kill-process --pid 123');
