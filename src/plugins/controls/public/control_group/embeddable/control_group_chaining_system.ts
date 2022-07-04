@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
-
 import { Subject } from 'rxjs';
+import { memoize } from 'lodash';
+import { Filter } from '@kbn/es-query';
+import deepEqual from 'fast-deep-equal';
 import { EmbeddableContainerSettings, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+
 import { ControlEmbeddable } from '../../types';
-import { ChildEmbeddableOrderCache } from './control_group_container';
-import { ControlGroupChainingSystem, ControlGroupInput } from '../../../common/control_group/types';
+import {
+  ControlGroupChainingSystem,
+  ControlGroupInput,
+  ControlsPanels,
+} from '../../../common/control_group/types';
 
 interface GetPrecedingFiltersProps {
   id: string;
@@ -34,6 +39,38 @@ interface ChainingSystem {
   getPrecedingFilters: (props: GetPrecedingFiltersProps) => Filter[] | undefined;
   onChildChange: (props: OnChildChangedProps) => void;
 }
+
+export interface ChildEmbeddableOrderCache {
+  IdsToOrder: { [key: string]: number };
+  idsInOrder: string[];
+  lastChildId: string;
+}
+
+const getOrdersFromPanels = (panels?: ControlsPanels) => {
+  return Object.values(panels ?? {}).map((panel) => ({
+    id: panel.explicitInput.id,
+    order: panel.order,
+  }));
+};
+
+export const controlOrdersAreEqual = (panelsA?: ControlsPanels, panelsB?: ControlsPanels) =>
+  deepEqual(getOrdersFromPanels(panelsA), getOrdersFromPanels(panelsB));
+
+export const cachedChildEmbeddableOrder = memoize(
+  (panels: ControlsPanels) => {
+    const IdsToOrder: { [key: string]: number } = {};
+    const idsInOrder: string[] = [];
+    Object.values(panels)
+      .sort((a, b) => (a.order > b.order ? 1 : -1))
+      .forEach((panel) => {
+        IdsToOrder[panel.explicitInput.id] = panel.order;
+        idsInOrder.push(panel.explicitInput.id);
+      });
+    const lastChildId = idsInOrder[idsInOrder.length - 1];
+    return { IdsToOrder, idsInOrder, lastChildId } as ChildEmbeddableOrderCache;
+  },
+  (panels) => JSON.stringify(getOrdersFromPanels(panels))
+);
 
 export const ControlGroupChainingSystems: {
   [key in ControlGroupChainingSystem]: ChainingSystem;
