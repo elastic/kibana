@@ -17,12 +17,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const toasts = getService('toasts');
+  const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/135341
-  describe.skip('Kibana Spaces Accessibility', () => {
+  describe('Kibana Spaces Accessibility', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
+    });
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('a11y test for manage spaces menu from top nav on Kibana home', async () => {

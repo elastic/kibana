@@ -12,14 +12,14 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings']);
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Kibana users Accessibility', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.security.clickElasticsearchUsers();
     });
 
