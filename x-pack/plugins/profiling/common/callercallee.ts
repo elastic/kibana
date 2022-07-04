@@ -45,7 +45,7 @@ export function createCallerCalleeIntermediateNode(
   };
 }
 
-interface relevantTrace {
+interface RelevantTrace {
   frames: StackFrameMetadata[];
   index: number;
 }
@@ -62,8 +62,8 @@ interface relevantTrace {
 function selectRelevantTraces(
   rootFrame: StackFrameMetadata,
   frames: Map<StackTraceID, StackFrameMetadata[]>
-): Map<StackTraceID, relevantTrace> {
-  const result = new Map<StackTraceID, relevantTrace>();
+): Map<StackTraceID, RelevantTrace> {
+  const result = new Map<StackTraceID, RelevantTrace>();
   const rootString = hashFrameGroup(defaultGroupBy(rootFrame));
   for (const [stackTraceID, frameMetadata] of frames) {
     if (rootFrame.FileID === '' && rootFrame.AddressOrLine === 0) {
@@ -74,7 +74,7 @@ function selectRelevantTraces(
       result.set(stackTraceID, {
         frames: frameMetadata,
         index: frameMetadata.length,
-      } as relevantTrace);
+      } as RelevantTrace);
     } else {
       // Search for the right index of the root frame in the frameMetadata, and
       // set it in the result.
@@ -83,7 +83,7 @@ function selectRelevantTraces(
           result.set(stackTraceID, {
             frames: frameMetadata,
             index: i,
-          } as relevantTrace);
+          } as RelevantTrace);
         }
       }
     }
@@ -91,7 +91,7 @@ function selectRelevantTraces(
   return result;
 }
 
-function sortRelevantTraces(relevantTraces: Map<StackTraceID, relevantTrace>): StackTraceID[] {
+function sortRelevantTraces(relevantTraces: Map<StackTraceID, RelevantTrace>): StackTraceID[] {
   const sortedRelevantTraces = new Array<StackTraceID>();
   for (const trace of relevantTraces.keys()) {
     sortedRelevantTraces.push(trace);

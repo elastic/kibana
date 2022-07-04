@@ -111,11 +111,16 @@ async function queryFlameGraph(
     }
   );
 
-  let totalCount: number = getAggs(resEvents)?.total_count.value;
+  let totalCount: number =
+    (getAggs(resEvents) as { total_count: { value: number } } | undefined)?.total_count.value ?? 0;
   const stackTraceEvents = new Map<StackTraceID, number>();
 
   await logExecutionLatency(logger, 'processing events data', async () => {
-    getAggs(resEvents)?.group_by.buckets.forEach((item: any) => {
+    (
+      getAggs(resEvents) as
+        | { group_by: { buckets: Array<{ key: string; count: { value: number } }> } }
+        | undefined
+    )?.group_by.buckets.forEach((item: any) => {
       const traceid: StackTraceID = item.key;
       stackTraceEvents.set(traceid, item.count.value);
     });
@@ -193,7 +198,7 @@ export function registerFlameChartElasticSearchRoute(
           body: flamegraph.toElastic(),
         });
       } catch (e) {
-        logger.error('Caught exception when fetching Flamegraph data: ' + e.message);
+        logger.error(e);
         return response.customError({
           statusCode: e.statusCode ?? 500,
           body: {

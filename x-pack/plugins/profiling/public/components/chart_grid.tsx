@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import {
   EuiFlexGrid,
@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { BarChart } from './bar-chart';
+import { BarChart } from './bar_chart';
 import { TopNContext } from './contexts/topn';
 import { TopNSubchart } from '../../common/topn';
 
@@ -68,10 +68,6 @@ function printSubCharts(subcharts: TopNSubchart[], maximum: number) {
 
 export const ChartGrid: React.FC<ChartGridProps> = ({ maximum }) => {
   const ctx = useContext(TopNContext);
-
-  useEffect(() => {
-    console.log(new Date().toISOString(), 'updated chart-grid');
-  }, [ctx]);
 
   return (
     <>

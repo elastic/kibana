@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 
 import { Chart, ColumnarViewModel, Datum, Flame, PartialTheme, Settings } from '@elastic/charts';
 
@@ -28,10 +28,6 @@ const nullColumnarViewModel = {
 
 export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
   const ctx = useContext(FlameGraphContext);
-
-  useEffect(() => {
-    console.log(new Date().toISOString(), 'updated flamegraph');
-  });
 
   const columnarData = useMemo(() => {
     if (!ctx || !ctx.Label || ctx.Label.length === 0) {
@@ -70,7 +66,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
             valueAccessor={(d: Datum) => d.value as number}
             valueFormatter={(value) => `${value}`}
             animation={{ duration: 250 }}
-            controlProviderCallback={() => {}}
+            controlProviderCallback={{}}
           />
         </Chart>
       )}

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ObservabilityPublicSetup } from '@kbn/observability-plugin/public';
 
-import { createContext } from 'react';
-import { ElasticFlameGraph } from '../../../common/flamegraph';
-
-export const FlameGraphContext = createContext<ElasticFlameGraph | undefined>(undefined);
+export interface ProfilingPluginPublicSetupDeps {
+  observability: ObservabilityPublicSetup;
+}

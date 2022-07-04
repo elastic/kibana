@@ -16,3 +16,12 @@ export interface IMyStrategyRequest extends IEsSearchRequest {
 export interface IMyStrategyResponse extends IEsSearchResponse {
   executed_at: number;
 }
+
+export interface TimeRange {
+  start: string;
+  end: string;
+  isoStart: string;
+  isoEnd: string;
+  unixStart: number;
+  unixEnd: number;
+}

@@ -23,7 +23,7 @@ interface ColumnarCallerCallee {
   Color: number[];
 }
 
-interface ElasticFlameGraph {
+export interface ElasticFlameGraph {
   Label: string[];
   Value: number[];
   Position: number[];

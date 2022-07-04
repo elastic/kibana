@@ -10,47 +10,44 @@
 // Currently, we work with 8.1 and 8.3 and thus this code only needs
 // to address the incompatibilities between those two versions.
 
-import type { TransportResult } from '@elastic/transport/lib/types';
 import type {
   SearchResponse,
   SearchHitsMetadata,
   SearchHit,
   MgetResponse,
-  MgetResponseItem,
   AggregationsAggregate,
-} from '@elastic/elasticsearch/lib/api/types';
+  SearchTotalHits,
+  GetGetResult,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
-// Search results in 8.1 have 'body' but not in 8.3.
+type HitsWithTotalHits = Omit<SearchHitsMetadata<unknown>, 'total'> & {
+  total: SearchTotalHits;
+};
+
 export function getHits(
-  res: TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
-): SearchHitsMetadata<unknown> {
-  return 'body' in res ? res.body.hits : res.hits;
+  res: SearchResponse<unknown, Record<string, AggregationsAggregate>>
+): HitsWithTotalHits {
+  return res.hits as unknown as HitsWithTotalHits;
 }
 
 export function getAggs(
-  res: TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  res: SearchResponse<unknown, Record<string, AggregationsAggregate>>
 ): Record<string, AggregationsAggregate> | undefined {
-  return 'body' in res ? res.body.aggregations : res.aggregations;
+  return res.aggregations;
 }
 
 export function getHitsItems(
-  res: TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
+  res: SearchResponse<unknown, Record<string, AggregationsAggregate>>
 ): Array<SearchHit<unknown>> {
   return getHits(res)?.hits ?? [];
 }
 
-// Mget results in 8.1 have 'body' but not in 8.3.
-export function getDocs(
-  res: TransportResult<MgetResponse<any>, unknown>
-): Array<MgetResponseItem<any>> {
-  return ('body' in res ? res.body.docs : res.docs) ?? [];
+export function getDocs(res: MgetResponse<any>): Array<GetGetResult<any>> {
+  return res.docs as unknown as Array<GetGetResult<any>>;
 }
 
-// In 8.3, context.core is a Promise.
 export async function getClient(context: DataRequestHandlerContext): Promise<ElasticsearchClient> {
-  return typeof context.core.then === 'function'
-    ? (await context.core).elasticsearch.client.asCurrentUser
-    : context.core.elasticsearch.client.asCurrentUser;
+  return (await context.core).elasticsearch.client.asCurrentUser;
 }

@@ -21,18 +21,21 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 
-import { SettingsFlyout } from './components/settings-flyout';
+import { SettingsFlyout } from './components/settings_flyout';
 
 import { TopNContext } from './components/contexts/topn';
-import { StackTraceNavigation } from './components/stacktrace-nav';
-import { StackedBarChart } from './components/stacked-bar-chart';
-import { ChartGrid } from './components/chart-grid';
+import { StackTraceNavigation } from './components/stacktrace_nav';
+import { StackedBarChart } from './components/stacked_bar_chart';
+import { ChartGrid } from './components/chart_grid';
 
 import { FlameGraphContext } from './components/contexts/flamegraph';
-import { FlameGraphNavigation } from './components/flamegraph-nav';
+import { FlameGraphNavigation } from './components/flamegraph_nav';
 import { FlameGraph } from './components/flamegraph';
 
 import { Services } from './services';
+import { TimeRange } from '../common/types';
+import { TopNSample, TopNSubchart } from '../common/topn';
+import { ElasticFlameGraph } from '../common/flamegraph';
 
 interface CommonlyUsedRange {
   start: string;
@@ -68,18 +71,9 @@ const commonlyUsedRanges: CommonlyUsedRange[] = [
   },
 ];
 
-interface TimeRange {
-  start: string;
-  end: string;
-  isoStart: string;
-  isoEnd: string;
-  unixStart: number;
-  unixEnd: number;
-}
-
 function buildTimeRange(start: string, end: string): TimeRange {
-  const timeStart = dateMath.parse(start);
-  const timeEnd = dateMath.parse(end);
+  const timeStart = dateMath.parse(start)!;
+  const timeEnd = dateMath.parse(end)!;
   return {
     start,
     end,
@@ -100,12 +94,12 @@ function App({ fetchTopN, fetchElasticFlamechart }: Props) {
   const [projectID, setProjectID] = useState(5);
   const [n, setN] = useState(100);
 
-  const [topn, setTopN] = useState({
+  const [topn, setTopN] = useState<{ samples: TopNSample[]; subcharts: TopNSubchart[] }>({
     samples: [],
     subcharts: [],
   });
 
-  const [elasticFlamegraph, setElasticFlamegraph] = useState({});
+  const [elasticFlamegraph, setElasticFlamegraph] = useState<ElasticFlameGraph>();
 
   const handleTimeChange = (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
     if (selectedTime.isInvalid) {
@@ -117,8 +111,8 @@ function App({ fetchTopN, fetchElasticFlamechart }: Props) {
   };
 
   const updateIndex = (idx: string) => setIndex(idx);
-  const updateProjectID = (n: number) => setProjectID(n);
-  const updateN = (n: number) => setN(n);
+  const updateProjectID = (projectId: number) => setProjectID(projectId);
+  const updateN = (nextN: number) => setN(nextN);
 
   const tabs = [
     {
