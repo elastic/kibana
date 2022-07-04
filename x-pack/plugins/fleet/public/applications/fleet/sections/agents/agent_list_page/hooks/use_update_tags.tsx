@@ -17,10 +17,10 @@ import {
 export const useUpdateTags = () => {
   const { notifications } = useStartServices();
 
-  const updateTags = useCallback(
-    async (agentId: string, newTags: string[], onSuccess: () => void) => {
+  const wrapRequest = useCallback(
+    async (requestFn: () => Promise<any>, onSuccess: () => void) => {
       try {
-        const res = await sendPutAgentTagsUpdate(agentId, { tags: newTags });
+        const res = await requestFn();
 
         if (res.error) {
           throw res.error;
@@ -44,6 +44,16 @@ export const useUpdateTags = () => {
     [notifications.toasts]
   );
 
+  const updateTags = useCallback(
+    async (agentId: string, newTags: string[], onSuccess: () => void) => {
+      await wrapRequest(
+        async () => await sendPutAgentTagsUpdate(agentId, { tags: newTags }),
+        onSuccess
+      );
+    },
+    [wrapRequest]
+  );
+
   const bulkUpdateTags = useCallback(
     async (
       agents: string[] | string,
@@ -51,29 +61,12 @@ export const useUpdateTags = () => {
       tagsToRemove: string[],
       onSuccess: () => void
     ) => {
-      try {
-        const res = await sendPostBulkAgentTagsUpdate({ agents, tagsToAdd, tagsToRemove });
-
-        if (res.error) {
-          throw res.error;
-        }
-        const successMessage = i18n.translate(
-          'xpack.fleet.updateAgentTags.successNotificationTitle',
-          {
-            defaultMessage: 'Tags updated',
-          }
-        );
-        notifications.toasts.addSuccess(successMessage);
-
-        onSuccess();
-      } catch (error) {
-        const errorMessage = i18n.translate('xpack.fleet.updateAgentTags.errorNotificationTitle', {
-          defaultMessage: 'Tags update failed',
-        });
-        notifications.toasts.addError(error, { title: errorMessage });
-      }
+      await wrapRequest(
+        async () => await sendPostBulkAgentTagsUpdate({ agents, tagsToAdd, tagsToRemove }),
+        onSuccess
+      );
     },
-    [notifications.toasts]
+    [wrapRequest]
   );
 
   return { updateTags, bulkUpdateTags };

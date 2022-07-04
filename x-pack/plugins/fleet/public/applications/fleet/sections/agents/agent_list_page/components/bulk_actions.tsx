@@ -7,7 +7,6 @@
 
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { intersection } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +26,8 @@ import {
 } from '../../components';
 import { useLicense } from '../../../../hooks';
 import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common';
+
+import { getCommonTags } from '../utils';
 
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
@@ -93,7 +94,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           ),
           icon: <EuiIcon type="tag" size="m" />,
           disabled: !atLeastOneActiveAgentSelected,
-          onClick: (event: MouseEvent) => {
+          onClick: (event) => {
             setTagsPopoverButton((event.target as Element).closest('button')!);
             setIsTagAddVisible(!isTagAddVisible);
           },
@@ -171,27 +172,10 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     },
   ];
 
-  const getSelectedTagsFromAgents = useMemo(() => {
-    const commonSelectedTags = (agentList: Agent[]) =>
-      agentList.reduce(
-        (acc: string[], curr: Agent) =>
-          acc.length > 0 ? intersection(curr.tags ?? [], acc) : curr.tags ?? [],
-        []
-      );
-
-    if (!Array.isArray(agents)) {
-      // in query mode, returning common tags of all agents in current page
-      // this is a simplification to avoid querying all agents from backend to determine common tags
-      return commonSelectedTags(allAgents ?? []);
-    }
-    // taking latest tags from freshly loaded agents data, as selected agents array does not contain the latest tags of agents
-    const freshSelectedAgentsData =
-      allAgents?.filter((newAgent) =>
-        agents.find((existingAgent) => existingAgent.id === newAgent.id)
-      ) ?? agents;
-
-    return commonSelectedTags(freshSelectedAgentsData);
-  }, [agents, allAgents]);
+  const getSelectedTagsFromAgents = useMemo(
+    () => getCommonTags(agents, allAgents),
+    [agents, allAgents]
+  );
 
   return (
     <>
