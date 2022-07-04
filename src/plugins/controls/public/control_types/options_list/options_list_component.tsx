@@ -14,6 +14,7 @@ import { debounce, isEmpty } from 'lodash';
 
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { OptionsListStrings } from './options_list_strings';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListPopover } from './options_list_popover_component';
@@ -22,7 +23,6 @@ import './options_list.scss';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { OptionsListEmbeddableInput } from './types';
 import { pluginServices } from '../../services';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 // OptionsListComponentState is controlled by the embeddable, but is not considered embeddable input.
 export interface OptionsListComponentState {

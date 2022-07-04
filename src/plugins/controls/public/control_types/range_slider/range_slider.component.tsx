@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { RangeSliderPopover } from './range_slider_popover';
 import { rangeSliderReducers } from './range_slider_reducers';
@@ -18,7 +19,6 @@ import { RangeSliderEmbeddableInput, RangeValue } from './types';
 
 import './range_slider.scss';
 import { pluginServices } from '../../services';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 interface Props {
   componentStateSubject: BehaviorSubject<RangeSliderComponentState>;
