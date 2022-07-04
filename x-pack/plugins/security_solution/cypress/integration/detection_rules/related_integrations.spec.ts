@@ -8,6 +8,7 @@
 import {
   INTEGRATIONS_POPOVER,
   INTEGRATIONS_POPOVER_TITLE,
+  RULE_NAME,
 } from '../../screens/alerts_detection_rules';
 import { INTEGRATIONS, INTEGRATIONS_STATUS } from '../../screens/rule_details';
 import {
@@ -25,6 +26,10 @@ import { expandFirstAlert } from '../../tasks/alerts';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { filterBy, openTable } from '../../tasks/alerts_details';
 import { FIELD } from '../../screens/alerts_details';
+import {
+  disableRelatedIntegrations,
+  enableRelatedIntegrations,
+} from '../../tasks/api_calls/kibana_advanced_settings';
 
 /*
  Note that the rule we are using for testing purposes has the following characteristics, changing that may affect the coverage.
@@ -179,4 +184,39 @@ describe('Related integrations', () => {
       });
     }
   );
+
+  context('related Integrations Advanced Setting is disabled', () => {
+    const rule = {
+      name: 'Related integrations rule',
+      integrations: ['Aws Cloudfront', 'Aws Cloudtrail', 'Aws Unknown', 'System'],
+      enabledIntegrations: '0',
+    };
+
+    before(() => {
+      cleanPackages();
+      disableRelatedIntegrations();
+      visit(DETECTIONS_RULE_MANAGEMENT_URL);
+    });
+
+    after(() => {
+      enableRelatedIntegrations();
+    });
+
+    it('should not display a badge with the installed integrations on the rule management page', () => {
+      cy.get(RULE_NAME).should('have.text', rule.name);
+      cy.get(INTEGRATIONS).should('not.exist');
+    });
+
+    it('should display the integrations on the definition section', () => {
+      goToTheRuleDetailsOf(rule.name);
+
+      cy.get(INTEGRATIONS).should('have.length', rule.integrations.length);
+      cy.get(INTEGRATIONS_STATUS).should('have.length', rule.integrations.length);
+
+      rule.integrations.forEach((integration, index) => {
+        cy.get(INTEGRATIONS).eq(index).should('contain', integration);
+        cy.get(INTEGRATIONS_STATUS).eq(index).should('have.text', 'Not installed');
+      });
+    });
+  });
 });
