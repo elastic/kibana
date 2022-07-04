@@ -10,7 +10,6 @@ import { Route, Switch } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -30,13 +29,13 @@ import {
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_ENTITY_ID,
 } from '../../../common/constants';
-import { WIDGET_TOGGLE_SHOW, WIDGET_TOGGLE_HIDE } from '../../../common/translations';
 import { KubernetesWidget } from '../kubernetes_widget';
 import { PercentWidget } from '../percent_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { AggregateResult } from '../../../common/types/aggregate';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
+import { WidgetsToggle } from '../widgets_toggle';
 
 const KubernetesSecurityRoutesComponent = ({
   filter,
@@ -86,13 +85,10 @@ const KubernetesSecurityRoutesComponent = ({
           <EuiTitle size="l">
             <h1>{KUBERNETES_TITLE}</h1>
           </EuiTitle>
-          <EuiButtonEmpty
-            onClick={handleToggleHideWidgets}
-            iconType={shouldHideWidgets ? 'eye' : 'eyeClosed'}
-            css={styles.hideShowWidgetButton}
-          >
-            {shouldHideWidgets ? WIDGET_TOGGLE_SHOW : WIDGET_TOGGLE_HIDE}
-          </EuiButtonEmpty>
+          <WidgetsToggle
+            shouldHideWidgets={shouldHideWidgets}
+            handleToggleHideWidgets={handleToggleHideWidgets}
+          />
         </div>
         {!shouldHideWidgets && (
           <>
