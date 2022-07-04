@@ -88,7 +88,7 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   }, [getLastNumberOfExecutions]);
 
   return (
-    <EuiPanel hasBorder paddingSize="none">
+    <EuiPanel data-test-subj="ruleStatusPanel" hasBorder paddingSize="none">
       <EuiPanel hasShadow={false}>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
