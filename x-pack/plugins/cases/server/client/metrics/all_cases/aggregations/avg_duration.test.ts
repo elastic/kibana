@@ -30,19 +30,19 @@ describe('AverageDuration', () => {
     const agg = new AverageDuration();
     // @ts-expect-error
     const res = agg.formatResponse();
-    expect(res).toEqual({ mttr: 0 });
+    expect(res).toEqual({ mttr: null });
   });
 
   it('formats the response correctly if the mttr is not defined', async () => {
     const agg = new AverageDuration();
     const res = agg.formatResponse({});
-    expect(res).toEqual({ mttr: 0 });
+    expect(res).toEqual({ mttr: null });
   });
 
   it('formats the response correctly if the value is not defined', async () => {
     const agg = new AverageDuration();
     const res = agg.formatResponse({ mttr: {} });
-    expect(res).toEqual({ mttr: 0 });
+    expect(res).toEqual({ mttr: null });
   });
 
   it('gets the name correctly', async () => {

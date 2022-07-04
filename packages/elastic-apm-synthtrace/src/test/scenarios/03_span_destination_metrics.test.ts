@@ -68,7 +68,7 @@ describe('span destination metrics', () => {
               )
           )
       )
-      .filter((fields) => fields['metricset.name'] === 'span_destination');
+      .filter((fields) => fields['metricset.name'] === 'service_destination');
   });
 
   it('generates the right amount of span metrics', () => {

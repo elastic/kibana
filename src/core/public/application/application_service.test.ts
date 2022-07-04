@@ -19,7 +19,7 @@ import { mount, shallow } from 'enzyme';
 
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { themeServiceMock } from '../theme/theme_service.mock';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppDeepLink, AppNavLinkStatus, AppStatus, AppUpdater, PublicAppInfo } from './types';
@@ -1170,6 +1170,17 @@ describe('#start()', () => {
 
         expect(setupDeps.redirectTo).toHaveBeenCalledWith('/an-app-path');
         expect(MockHistory.push).not.toHaveBeenCalled();
+      });
+
+      it('calls `navigateToApp` with `state` option', async () => {
+        parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
+        service.setup(setupDeps);
+        const { navigateToUrl } = await service.start(startDeps);
+
+        await navigateToUrl('/an-app-path', { state: { toto: 123 } });
+
+        expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', { toto: 123 });
+        expect(setupDeps.redirectTo).not.toHaveBeenCalled();
       });
 
       it('removes the beforeunload listener and calls `redirectTo` when `forceRedirect` and `skipAppLeave` option are both true', async () => {

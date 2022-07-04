@@ -137,6 +137,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper
           .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
+          .find('button')
           .simulate('click');
         wrapper.update();
         expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
@@ -152,6 +153,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper
           .find('[data-test-subj="superDatePickerCommonlyUsed_This_week"]')
           .first()
+          .find('button')
           .simulate('click');
         wrapper.update();
         expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
@@ -185,6 +187,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper
           .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
+          .find('button')
           .simulate('click');
         wrapper.update();
       });
@@ -218,6 +221,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper
           .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
           .first()
+          .find('button')
           .simulate('click');
         wrapper.update();
 

@@ -11,11 +11,11 @@ import { BehaviorSubject, firstValueFrom, Observable, Subject, Subscription } fr
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
-import { PluginOpaqueId } from '../plugins';
-import type { ThemeServiceStart } from '../theme';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
@@ -320,7 +320,7 @@ export class ApplicationService {
       navigateToApp,
       navigateToUrl: async (
         url: string,
-        { skipAppLeave = false, forceRedirect = false }: NavigateToUrlOptions = {}
+        { skipAppLeave = false, forceRedirect = false, state }: NavigateToUrlOptions = {}
       ) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
         if ((forceRedirect || !appInfo) === true) {
@@ -330,7 +330,7 @@ export class ApplicationService {
           return this.redirectTo!(url);
         }
         if (appInfo) {
-          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave });
+          return navigateToApp(appInfo.app, { path: appInfo.path, skipAppLeave, state });
         }
       },
       getComponent: () => {

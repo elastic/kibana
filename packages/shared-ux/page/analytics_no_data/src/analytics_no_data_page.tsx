@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-
-import { LegacyServicesProvider, getLegacyServices } from './legacy_services';
 import { useServices } from './services';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 
@@ -15,25 +13,24 @@ import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.compo
  * Props for the `AnalyticsNoDataPage` component.
  */
 export interface AnalyticsNoDataPageProps {
+  /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
 }
 
 /**
  * An entire page that can be displayed when Kibana "has no data", specifically for Analytics.  Uses
- * services from a provider to provide props to a pure component.
+ * services from a Provider to supply props to a pure component.
  */
 export const AnalyticsNoDataPage = ({ onDataViewCreated }: AnalyticsNoDataPageProps) => {
   const services = useServices();
   const { kibanaGuideDocLink } = services;
 
   return (
-    <LegacyServicesProvider {...getLegacyServices(services)}>
-      <Component
-        {...{
-          onDataViewCreated,
-          kibanaGuideDocLink,
-        }}
-      />
-    </LegacyServicesProvider>
+    <Component
+      {...{
+        onDataViewCreated,
+        kibanaGuideDocLink,
+      }}
+    />
   );
 };

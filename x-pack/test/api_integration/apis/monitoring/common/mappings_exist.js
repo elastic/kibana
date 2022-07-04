@@ -56,6 +56,7 @@ export default function ({ getService }) {
       describe(`for ${name}`, () => {
         // eslint-disable-line no-loop-func
         for (const metric of Object.values(metrics)) {
+          if (metric.isNotSupportedInInternalCollection) continue;
           for (const field of metric.getFields()) {
             // eslint-disable-next-line no-loop-func
             it(`${field} should exist in the mappings`, () => {

@@ -1,4 +1,4 @@
-summary: Retrieve the first five cases with the `phishing` tag, in ascending order by last update time.
+summary: Retrieve the first five cases with the `tag-1` tag, in ascending order by last update time.
 value: 
   {
     "page": 1,
@@ -12,26 +12,26 @@ value:
         "totalComment": 1,
         "totalAlerts": 0,
         "title": "Case title",
-        "tags": [ "phishing" ],
+        "tags": [ "tag-1" ],
         "description": "Case description",
         "settings": { "syncAlerts": true },
-        "owner": "securitySolution",
+        "owner": "cases",
         "duration": null,
         "severity": "low",
         "closed_at": null,
         "closed_by": null,
         "created_at": "2022-05-12T00:16:36.371Z",
         "created_by": {
-          "email": "jdoe@email.com",
-          "full_name": "Jane Doe",
-          "username": "jdoe"
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
         },
         "status": "open",
         "updated_at": "2022-05-12T00:27:58.162Z",
         "updated_by": {
-          "email": "jsmith@email.com",
-          "full_name": "Joe Smith",
-          "username": "jsmith"
+          "email": null,
+          "full_name": null,
+          "username": "elastic"
         },
         "connector": {
           "id": "none",

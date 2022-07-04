@@ -10,7 +10,7 @@ import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
@@ -42,6 +42,7 @@ import {
   DataRequestDescriptor,
   CustomIcon,
   DrawState,
+  EMSVectorTileLayerDescriptor,
   EditState,
   Goto,
   HeatmapLayerDescriptor,
@@ -79,7 +80,10 @@ export function createLayerInstance(
     case LAYER_TYPE.RASTER_TILE:
       return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
     case LAYER_TYPE.EMS_VECTOR_TILE:
-      return new EmsVectorTileLayer({ layerDescriptor, source: source as EMSTMSSource });
+      return new EmsVectorTileLayer({
+        layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,
+        source: source as EMSTMSSource,
+      });
     case LAYER_TYPE.HEATMAP:
       return new HeatmapLayer({
         layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
@@ -168,8 +172,6 @@ export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
 
 export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
-
-export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
 
 export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 

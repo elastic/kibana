@@ -22,7 +22,7 @@ import { ActionTypeExecutorResult } from '../common';
 import { TaskInfo } from './lib/action_executor';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 
-export type { ActionTypeExecutorResult } from '../common';
+export type { ActionTypeExecutorResult, ActionTypeExecutorRawResult } from '../common';
 export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
 export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
 export type { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';

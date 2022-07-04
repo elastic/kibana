@@ -11,9 +11,9 @@ import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '../../context/context_service.mock';
-import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
-import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
 import { Router } from '../router';

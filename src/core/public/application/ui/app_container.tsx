@@ -19,8 +19,8 @@ import React, {
 import { EuiLoadingElastic } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '../../types';
-import { CoreTheme } from '../../theme';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';

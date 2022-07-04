@@ -133,6 +133,48 @@ describe('alert actions', () => {
     },
   });
 
+  const ecsDataMockWithNoTemplateTimelineAndNoFilters = getThresholdDetectionAlertAADMock({
+    ...mockAADEcsDataWithAlert,
+    kibana: {
+      alert: {
+        ...mockAADEcsDataWithAlert.kibana?.alert,
+        rule: {
+          ...mockAADEcsDataWithAlert.kibana?.alert?.rule,
+          parameters: {
+            ...mockAADEcsDataWithAlert.kibana?.alert?.rule?.parameters,
+            threshold: {
+              field: ['destination.ip'],
+              value: 1,
+            },
+            filters: undefined,
+          },
+          name: ['mock threshold rule'],
+          saved_id: [],
+          type: ['threshold'],
+          uuid: ['c5ba41ab-aaf3-4f43-971b-bdf9434ce0ea'],
+          timeline_id: undefined,
+          timeline_title: undefined,
+        },
+        threshold_result: {
+          count: 99,
+          from: '2021-01-10T21:11:45.839Z',
+          cardinality: [
+            {
+              field: 'source.ip',
+              value: 1,
+            },
+          ],
+          terms: [
+            {
+              field: 'destination.ip',
+              value: 1,
+            },
+          ],
+        },
+      },
+    },
+  });
+
   beforeEach(() => {
     // jest carries state between mocked implementations when using
     // spyOn. So now we're doing all three of these.
@@ -533,7 +575,7 @@ describe('alert actions', () => {
     });
 
     describe('Threshold', () => {
-      beforeEach(() => {
+      test('Exceptions and filters are included', async () => {
         fetchMock.mockResolvedValue({
           hits: {
             hits: [
@@ -545,9 +587,6 @@ describe('alert actions', () => {
             ],
           },
         });
-      });
-
-      test('Exceptions and filters are included', async () => {
         mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
         await sendAlertToTimelineAction({
           createTimeline,
@@ -663,6 +702,31 @@ describe('alert actions', () => {
           from: expectedFrom,
           to: expectedTo,
         });
+      });
+
+      test('Does not crash when no filters provided', async () => {
+        fetchMock.mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: ecsDataMockWithNoTemplateTimelineAndNoFilters[0]._id,
+                _index: 'mock',
+                _source: ecsDataMockWithNoTemplateTimelineAndNoFilters[0],
+              },
+            ],
+          },
+        });
+        mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: ecsDataMockWithNoTemplateTimelineAndNoFilters,
+          updateTimelineIsLoading,
+          searchStrategyClient,
+          getExceptions: mockGetExceptions,
+        });
+
+        expect(createTimeline).not.toThrow();
+        expect(toastMock).not.toHaveBeenCalled();
       });
     });
 

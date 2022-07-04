@@ -171,7 +171,6 @@ export const CaseViewActivity = ({
           />
         ) : null}
         <TagList
-          data-test-subj="case-view-tag-list"
           userCanCrud={userCanCrud}
           tags={caseData.tags}
           onSubmit={onSubmitTags}

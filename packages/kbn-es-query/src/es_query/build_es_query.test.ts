@@ -202,5 +202,60 @@ describe('build query', () => {
 
       expect(result).toEqual(expectedResult);
     });
+
+    it('should allow to use ignore_unmapped for nested fields', () => {
+      const queries = [
+        { query: 'nestedField: { child: "something" }', language: 'kuery' },
+      ] as Query[];
+
+      const filters = [
+        {
+          query: { exists: { field: 'nestedField.child' } },
+          meta: { type: 'exists', alias: '', disabled: false, negate: false },
+        },
+      ];
+
+      const result = buildEsQuery(indexPattern, queries, filters, { nestedIgnoreUnmapped: true });
+      const expected = {
+        bool: {
+          must: [],
+          filter: [
+            {
+              nested: {
+                ignore_unmapped: true,
+                path: 'nestedField',
+                query: {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match_phrase: {
+                          'nestedField.child': 'something',
+                        },
+                      },
+                    ],
+                  },
+                },
+                score_mode: 'none',
+              },
+            },
+            {
+              nested: {
+                path: 'nestedField',
+                query: {
+                  exists: {
+                    field: 'nestedField.child',
+                  },
+                },
+                ignore_unmapped: true,
+              },
+            },
+          ],
+          should: [],
+          must_not: [],
+        },
+      };
+      expect(result).toEqual(expected);
+    });
   });
 });

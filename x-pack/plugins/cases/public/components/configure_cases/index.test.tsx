@@ -553,7 +553,7 @@ describe('ConfigureCases', () => {
         expect(wrapper.find('[data-test-subj="add-connector-flyout"]').exists()).toBe(true);
         expect(getAddConnectorFlyoutMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            actionTypes: [
+            supportedActionTypes: [
               expect.objectContaining({
                 id: '.servicenow',
               }),
@@ -575,9 +575,6 @@ describe('ConfigureCases', () => {
     test('it show the edit flyout when pressing the update connector button', async () => {
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: '.resilient',
-        validateConnector: () => {
-          return Promise.resolve({});
-        },
         validateParams: () => {
           const validationResult = { errors: {} };
           return Promise.resolve(validationResult);
@@ -603,7 +600,7 @@ describe('ConfigureCases', () => {
         wrapper.update();
         expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBe(true);
         expect(getEditConnectorFlyoutMock).toHaveBeenCalledWith(
-          expect.objectContaining({ initialConnector: connectors[1] })
+          expect.objectContaining({ connector: connectors[1] })
         );
       });
 

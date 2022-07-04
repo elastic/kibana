@@ -13,24 +13,30 @@ import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { extractErrorMessage } from '../../../../../common/utils/helpers';
-import * as TEXT from '../../translations';
-import type { ResourceFindingsResult } from './use_resource_findings';
-import { getExpandColumn, getFindingsColumns } from '../../layout/findings_layout';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  baseFindingsColumns,
+  createColumnWithFilters,
+  getExpandColumn,
+  type OnAddFilter,
+} from '../../layout/findings_layout';
 import type { CspFinding } from '../../types';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
 
-interface Props extends ResourceFindingsResult {
+interface Props {
+  items: CspFinding[];
+  loading: boolean;
   pagination: Pagination;
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
+  onAddFilter: OnAddFilter;
 }
 
 const ResourceFindingsTableComponent = ({
-  error,
-  data,
+  items,
   loading,
   pagination,
   setTableOptions,
+  onAddFilter,
 }: Props) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
@@ -38,19 +44,39 @@ const ResourceFindingsTableComponent = ({
     EuiTableActionsColumnType<CspFinding>,
     ...Array<EuiBasicTableColumn<CspFinding>>
   ] = useMemo(
-    () => [getExpandColumn<CspFinding>({ onClick: setSelectedFinding }), ...getFindingsColumns()],
-    []
+    () => [
+      getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
+      baseFindingsColumns['resource.id'],
+      createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
+      baseFindingsColumns['rule.section'],
+      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
+      baseFindingsColumns['@timestamp'],
+    ],
+    [onAddFilter]
   );
-
-  if (!loading && !data?.page.length)
-    return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
+  if (!loading && !items.length)
+    return (
+      <EuiEmptyPrompt
+        iconType="logoKibana"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.csp.findings.resourceFindings.noFindingsTitle"
+              defaultMessage="There are no Findings"
+            />
+          </h2>
+        }
+      />
+    );
 
   return (
     <>
       <EuiBasicTable
         loading={loading}
-        error={error ? extractErrorMessage(error) : undefined}
-        items={data?.page || []}
+        items={items}
         columns={columns}
         onChange={setTableOptions}
         pagination={pagination}

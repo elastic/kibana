@@ -49,6 +49,7 @@ describe('<MonitorManagementList />', () => {
         total: 6,
         monitors,
         syncErrors: null,
+        absoluteTotal: 6,
       },
       locations: [],
       enablement: null,

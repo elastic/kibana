@@ -76,7 +76,7 @@ export const TagList = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [onSubmit, submit]);
 
-    const { tags: tagOptions } = useGetTags();
+    const { data: tagOptions = [] } = useGetTags();
     const [options, setOptions] = useState(
       tagOptions.map((label) => ({
         label,
@@ -93,7 +93,7 @@ export const TagList = React.memo(
       [tagOptions]
     );
     return (
-      <EuiText>
+      <EuiText data-test-subj="case-view-tag-list">
         <EuiFlexGroup
           alignItems="center"
           gutterSize="xs"

@@ -70,6 +70,7 @@ export class BulkUploader implements IBulkUploader {
   private _timer: NodeJS.Timer | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
+
   constructor({
     log,
     config,

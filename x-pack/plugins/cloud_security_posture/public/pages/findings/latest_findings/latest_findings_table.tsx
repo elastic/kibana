@@ -8,70 +8,100 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
-  EuiBasicTableColumn,
   type Pagination,
   type EuiBasicTableProps,
   type CriteriaWithPagination,
   type EuiTableActionsColumnType,
+  type EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import { extractErrorMessage } from '../../../../common/utils/helpers';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as TEST_SUBJECTS from '../test_subjects';
-import * as TEXT from '../translations';
 import type { CspFinding } from '../types';
-import type { CspFindingsResult } from './use_latest_findings';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
-import { getExpandColumn, getFindingsColumns } from '../layout/findings_layout';
+import {
+  baseFindingsColumns,
+  createColumnWithFilters,
+  getExpandColumn,
+  type OnAddFilter,
+} from '../layout/findings_layout';
 
 type TableProps = Required<EuiBasicTableProps<CspFinding>>;
 
-interface BaseFindingsTableProps {
+interface Props {
+  loading: boolean;
+  items: CspFinding[];
   pagination: Pagination;
   sorting: TableProps['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
+  onAddFilter: OnAddFilter;
 }
 
-type FindingsTableProps = CspFindingsResult & BaseFindingsTableProps;
-
 const FindingsTableComponent = ({
-  error,
-  data,
   loading,
+  items,
   pagination,
   sorting,
   setTableOptions,
-}: FindingsTableProps) => {
+  onAddFilter,
+}: Props) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
+
+  const getRowProps = (row: CspFinding) => ({
+    'data-test-subj': TEST_SUBJECTS.getFindingsTableRowTestId(row.resource.id),
+  });
+
+  const getCellProps = (row: CspFinding, column: EuiTableFieldDataColumnType<CspFinding>) => ({
+    'data-test-subj': TEST_SUBJECTS.getFindingsTableCellTestId(column.field, row.resource.id),
+  });
 
   const columns: [
     EuiTableActionsColumnType<CspFinding>,
-    ...Array<EuiBasicTableColumn<CspFinding>>
+    ...Array<EuiTableFieldDataColumnType<CspFinding>>
   ] = useMemo(
-    () => [getExpandColumn<CspFinding>({ onClick: setSelectedFinding }), ...getFindingsColumns()],
-    []
+    () => [
+      getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
+      createColumnWithFilters(baseFindingsColumns['resource.id'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
+      baseFindingsColumns['rule.section'],
+      createColumnWithFilters(baseFindingsColumns.cluster_id, { onAddFilter }),
+      baseFindingsColumns['@timestamp'],
+    ],
+    [onAddFilter]
   );
 
   // Show "zero state"
-  if (!loading && !data?.page.length)
+  if (!loading && !items.length)
     // TODO: use our own logo
     return (
       <EuiEmptyPrompt
         iconType="logoKibana"
-        title={<h2>{TEXT.NO_FINDINGS}</h2>}
-        data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE_ZERO_STATE}
+        data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.csp.findings.latestFindings.noFindingsTitle"
+              defaultMessage="There are no Findings"
+            />
+          </h2>
+        }
       />
     );
 
   return (
     <>
       <EuiBasicTable
-        data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
         loading={loading}
-        error={error ? extractErrorMessage(error) : undefined}
-        items={data?.page || []}
+        data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
+        items={items}
         columns={columns}
         pagination={pagination}
         sorting={sorting}
         onChange={setTableOptions}
+        rowProps={getRowProps}
+        cellProps={getCellProps}
         hasActions
       />
       {selectedFinding && (

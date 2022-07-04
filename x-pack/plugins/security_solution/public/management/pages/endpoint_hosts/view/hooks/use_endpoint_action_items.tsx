@@ -8,7 +8,8 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { useShowEndpointResponseActionsConsole } from '../../../../hooks';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { useWithShowEndpointResponder } from '../../../../hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { getEndpointDetailsPath } from '../../../../common/routing';
@@ -32,10 +33,11 @@ export const useEndpointActionItems = (
   const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
-  const showEndpointResponseActionsConsole = useShowEndpointResponseActionsConsole();
+  const showEndpointResponseActionsConsole = useWithShowEndpointResponder();
   const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsConsoleEnabled'
   );
+  const canAccessResponseConsole = useUserPrivileges().endpointPrivileges.canAccessResponseConsole;
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -107,7 +109,7 @@ export const useEndpointActionItems = (
 
       return [
         ...isolationActions,
-        ...(isResponseActionsConsoleEnabled
+        ...(isResponseActionsConsoleEnabled && canAccessResponseConsole
           ? [
               {
                 'data-test-subj': 'console',
@@ -219,6 +221,7 @@ export const useEndpointActionItems = (
     return [];
   }, [
     allCurrentUrlParams,
+    canAccessResponseConsole,
     endpointMetadata,
     fleetAgentPolicies,
     getAppUrl,

@@ -127,11 +127,14 @@ export class DataView implements DataViewBase {
    * Map of runtime field definitions by field name
    */
   private runtimeFieldMap: Record<string, RuntimeFieldSpec>;
-
   /**
    * Prevents errors when index pattern exists before indices
    */
   public readonly allowNoIndex: boolean = false;
+  /**
+   * Name of the data view. Human readable name used to differentiate data view.
+   */
+  public name: string = '';
 
   /**
    * constructor
@@ -167,7 +170,13 @@ export class DataView implements DataViewBase {
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
     this.namespaces = spec.namespaces || [];
+    this.name = spec.name || '';
   }
+
+  /**
+   * Get name of Data View
+   */
+  getName = () => (this.name ? this.name : this.title);
 
   /**
    * Get last saved saved object fields
@@ -256,25 +265,39 @@ export class DataView implements DataViewBase {
     };
   }
 
+  isPersisted() {
+    return typeof this.version === 'string';
+  }
+
   /**
    * Creates static representation of the data view.
+   * @param includeFields Whether or not to include the `fields` list as part of this spec. If not included, the list
+   * will be fetched from Elasticsearch when instantiating a new Data View with this spec.
    */
-  public toSpec(): DataViewSpec {
-    return {
+  public toSpec(includeFields = true): DataViewSpec {
+    const fields =
+      includeFields && this.fields
+        ? this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) })
+        : undefined;
+
+    const spec: DataViewSpec = {
       id: this.id,
       version: this.version,
-
       title: this.title,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
-      fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
+      fields,
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: this.fieldFormatMap,
       runtimeFieldMap: this.runtimeFieldMap,
       fieldAttrs: this.fieldAttrs,
       allowNoIndex: this.allowNoIndex,
+      name: this.name,
     };
+
+    // Filter any undefined values from the spec
+    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
   }
 
   /**
@@ -379,6 +402,7 @@ export class DataView implements DataViewBase {
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
+      name: this.name,
     };
   }
 

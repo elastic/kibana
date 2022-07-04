@@ -7,18 +7,19 @@
 
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { Embeddable } from '../embeddable';
 import { DOC_TYPE } from '../../common';
 
 interface Context {
   embeddable: IEmbeddable;
   filters?: Filter[];
-  timeRange?: TimeRange;
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
+  dataViews: Pick<DataViewsService, 'get'>;
   discover: Pick<DiscoverSetup, 'locator'>;
+  timeFieldName?: string;
 }
 
 export function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embeddable {
@@ -30,7 +31,14 @@ export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   return isLensEmbeddable(embeddable) && (await embeddable.canViewUnderlyingData());
 }
 
-export function execute({ embeddable, discover, timeRange, filters, openInSameTab }: Context) {
+export async function execute({
+  embeddable,
+  discover,
+  filters,
+  openInSameTab,
+  dataViews,
+  timeFieldName,
+}: Context) {
   if (!isLensEmbeddable(embeddable)) {
     // shouldn't be executed because of the isCompatible check
     throw new Error('Can only be executed in the context of Lens visualization');
@@ -40,10 +48,22 @@ export function execute({ embeddable, discover, timeRange, filters, openInSameTa
     // shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
   }
+  const dataView = await dataViews.get(args.indexPatternId);
+  let filtersToApply = [...(filters || []), ...args.filters];
+  let timeRangeToApply = args.timeRange;
+  // if the target data view is time based, attempt to split out a time range from the provided filters
+  if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
+    const { extractTimeRange } = await import('@kbn/es-query');
+    const { restOfFilters, timeRange } = extractTimeRange(filters || [], timeFieldName);
+    filtersToApply = restOfFilters;
+    if (timeRange) {
+      timeRangeToApply = timeRange;
+    }
+  }
   const discoverUrl = discover.locator?.getRedirectUrl({
     ...args,
-    timeRange: timeRange || args.timeRange,
-    filters: [...(filters || []), ...args.filters],
+    timeRange: timeRangeToApply,
+    filters: filtersToApply,
   });
   window.open(discoverUrl, !openInSameTab ? '_blank' : '_self');
 }

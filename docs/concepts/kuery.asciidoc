@@ -10,8 +10,7 @@ The performance of the suggestions is controlled by <<settings, {kib} settings>>
 
 KQL has a different set of features than the <<lucene-query>>. KQL is able to query
 nested fields and <<scripted-fields, scripted fields>>. KQL does not support regular expressions
-or searching with fuzzy terms. To use the legacy Lucene syntax, click *KQL* next to the *Search* field,
-and then turn off KQL.
+or searching with fuzzy terms.
 
 [discrete]
 === Terms query

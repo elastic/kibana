@@ -9,7 +9,7 @@
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { FieldFormatParams, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { DataViewsService } from '../../../common';
 import { handleErrors } from '../util/handle_errors';
 import { serializedFieldFormatSchema } from '../util/schemas';
@@ -83,7 +83,7 @@ export const updateFields = async ({
 interface FieldUpdateType {
   customLabel?: string | null;
   count?: number | null;
-  format?: SerializedFieldFormat<FieldFormatParams> | null;
+  format?: SerializedFieldFormat | null;
 }
 
 const fieldUpdateSchema = schema.object({

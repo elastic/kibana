@@ -135,9 +135,14 @@ describe('SearchSource', () => {
     test('sets the value for the property with AggConfigs', () => {
       const typesRegistry = mockAggTypesRegistry();
 
-      const ac = new AggConfigs(indexPattern3, [{ type: 'avg', params: { field: 'field1' } }], {
-        typesRegistry,
-      });
+      const ac = new AggConfigs(
+        indexPattern3,
+        [{ type: 'avg', params: { field: 'field1' } }],
+        {
+          typesRegistry,
+        },
+        jest.fn()
+      );
 
       searchSource.setField('aggs', ac);
       const request = searchSource.getSearchRequestBody();
@@ -803,13 +808,29 @@ describe('SearchSource', () => {
   });
 
   describe('#serialize', () => {
+    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
     test('should reference index patterns', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       const { searchSourceJSON, references } = searchSource.serialize();
       expect(references[0].id).toEqual('123');
       expect(references[0].type).toEqual('index-pattern');
       expect(JSON.parse(searchSourceJSON).indexRefName).toEqual(references[0].name);
+    });
+
+    test('should contain persisted data view by value', () => {
+      const localDataView = {
+        id: 'local-123',
+        isPersisted: () => false,
+        toSpec: () => ({ id: 'local-123' }),
+      } as DataView;
+      searchSource.setField('index', localDataView);
+      const { searchSourceJSON, references } = searchSource.serialize();
+      expect(references.length).toEqual(0);
+      expect(JSON.parse(searchSourceJSON).index).toMatchInlineSnapshot(`
+        Object {
+          "id": "local-123",
+        }
+      `);
     });
 
     test('should add other fields', () => {
@@ -846,7 +867,6 @@ describe('SearchSource', () => {
     });
 
     test('should reference index patterns in filters separately from index field', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
@@ -903,8 +923,9 @@ describe('SearchSource', () => {
       },
     ];
 
+    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
+
     test('should return serialized fields', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('filter', () => {
         return filter;
@@ -936,7 +957,6 @@ describe('SearchSource', () => {
     });
 
     test('should support nested search sources', () => {
-      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('from', 123);
       const childSearchSource = searchSource.createChild();
@@ -1154,7 +1174,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
       }
 
@@ -1239,7 +1260,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1274,7 +1296,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1416,20 +1439,21 @@ describe('SearchSource', () => {
       const aggConfigs = new AggConfigs(
         stubIndexPattern,
         [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
-        { typesRegistry }
+        { typesRegistry },
+        jest.fn()
       );
       searchSource.setField('aggs', aggConfigs);
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context
-        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
+        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
       `);
     });
 
     test('should generate the `esaggs` function if there are aggregations configs', () => {
       const typesRegistry = mockAggTypesRegistry();
       searchSourceDependencies.aggs.createAggConfigs.mockImplementationOnce(
-        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry })
+        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry }, jest.fn())
       );
       searchSource.setField('index', stubIndexPattern);
       searchSource.setField('aggs', [
@@ -1438,7 +1462,7 @@ describe('SearchSource', () => {
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context
-        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
+        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
       `);
     });
 

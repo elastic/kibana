@@ -19,9 +19,9 @@ import { encodeQuery } from '../../../common/navigation/query_utils';
 import { useLocation } from 'react-router-dom';
 import { RisonObject } from 'rison-node';
 import { buildEsQuery } from '@kbn/es-query';
-import { getFindingsCountAggQuery } from '../use_findings_count';
 import { getPaginationQuery } from '../utils';
 import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 jest.mock('../../../common/api/use_latest_findings_data_view');
 jest.mock('../../../common/api/use_cis_kubernetes_integration');
@@ -38,7 +38,10 @@ beforeEach(() => {
 
 describe('<LatestFindingsContainer />', () => {
   it('data#search.search fn called with URL query', () => {
-    const query = getDefaultQuery();
+    const query = getDefaultQuery({
+      filters: [],
+      query: { language: 'kuery', query: '' },
+    });
     const dataMock = dataPluginMock.createStartContract();
     const dataView = createStubDataView({
       spec: {
@@ -62,6 +65,7 @@ describe('<LatestFindingsContainer />', () => {
         deps={{
           data: dataMock,
           unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+          charts: chartPluginMock.createStartContract(),
         }}
       >
         <FindingsEsPitContext.Provider value={{ setPitId, pitIdRef, pitQuery }}>
@@ -76,14 +80,11 @@ describe('<LatestFindingsContainer />', () => {
     };
 
     expect(dataMock.search.search).toHaveBeenNthCalledWith(1, {
-      params: getFindingsCountAggQuery(baseQuery),
-    });
-
-    expect(dataMock.search.search).toHaveBeenNthCalledWith(2, {
       params: getFindingsQuery({
         ...baseQuery,
         ...getPaginationQuery(query),
         sort: query.sort,
+        enabled: true,
       }),
     });
   });

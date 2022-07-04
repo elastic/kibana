@@ -154,6 +154,16 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.BaseVisType.isDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.BaseVisType.group",
             "type": "Enum",
             "tags": [],
@@ -237,6 +247,19 @@
             "tags": [],
             "label": "requiresSearch",
             "description": [],
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.BaseVisType.hasPartialRows",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasPartialRows",
+            "description": [],
+            "signature": [
+              "boolean | ((vis: { params: TVisParams; }) => boolean)"
+            ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
@@ -344,6 +367,16 @@
               },
               ") | undefined"
             ],
+            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.BaseVisType.fetchDatatable",
+            "type": "boolean",
+            "tags": [],
+            "label": "fetchDatatable",
+            "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false
           },
@@ -1274,13 +1307,7 @@
             "text": "SerializedFieldFormat"
           },
           "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           "> | undefined; source?: string | undefined; sourceParams?: ",
           "SerializableRecord",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; meta?: ",
@@ -2378,22 +2405,9 @@
             "label": "format",
             "description": [],
             "signature": [
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.SerializedFieldFormat",
-                "text": "SerializedFieldFormat"
-              },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
-              ">"
+              "{ id?: string | undefined; params?: ",
+              "SerializableRecord",
+              " | undefined; }"
             ],
             "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false
@@ -2612,7 +2626,15 @@
               },
               "[] | undefined; fieldsFromSource?: ",
               "Fields",
-              " | undefined; index?: string | undefined; searchAfter?: ",
+              " | undefined; index?: string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | undefined; searchAfter?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -3177,21 +3199,9 @@
               ">; getFetch$: () => ",
               "Observable",
               "<void>; getTime: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               "; getAbsoluteTime: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               "; setTime: (time: ",
               "InputTimeRange",
               ") => void; getRefreshInterval: () => ",
@@ -3215,17 +3225,11 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IIndexPattern",
-                "text": "IIndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               ", timeRange?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               " | undefined) => ",
               "RangeFilter",
               " | ",
@@ -3235,17 +3239,11 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IIndexPattern",
-                "text": "IIndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               ", timeRange?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               " | undefined) => ",
               "RangeFilter",
               " | ",
@@ -3259,13 +3257,7 @@
                 "text": "TimeRangeBounds"
               },
               "; calculateBounds: (timeRange: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               ") => ",
               {
                 "pluginId": "data",
@@ -3283,13 +3275,7 @@
                 "text": "TimeRangeBounds"
               },
               " | undefined; enableTimeRangeSelector: () => void; disableTimeRangeSelector: () => void; enableAutoRefreshSelector: () => void; disableAutoRefreshSelector: () => void; getTimeDefaults: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               "; getRefreshIntervalDefaults: () => ",
               {
                 "pluginId": "data",
@@ -3452,6 +3438,19 @@
             "description": [],
             "signature": [
               "\"experimental\" | \"beta\" | \"production\""
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeAlias.isDeprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false
@@ -3777,6 +3776,21 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeDefinition.isDeprecated",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [
+              "\nIt sets the vis type on a deprecated mode when is true"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VisTypeDefinition.group",
             "type": "CompoundType",
             "tags": [
@@ -3825,6 +3839,21 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeDefinition.hasPartialRows",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasPartialRows",
+            "description": [
+              "\nIn case when the visualization performs an aggregation, this option will be used to display or hide the rows with partial data."
+            ],
+            "signature": [
+              "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
@@ -3932,6 +3961,23 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisTypeDefinition.fetchDatatable",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "fetchDatatable",
+            "description": [
+              "\nWhen truthy, it will perform a search and pass the results to the visualization as a `datatable`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4477,6 +4523,19 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEditorLayersContext.collapseFn",
+            "type": "string",
+            "tags": [],
+            "label": "collapseFn",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-public.VisualizeEditorLayersContext.splitFilters",
             "type": "Array",
             "tags": [],
@@ -4720,13 +4779,7 @@
             "label": "timeRange",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
+              "TimeRange",
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
@@ -4863,13 +4916,7 @@
             "text": "SerializedFieldFormat"
           },
           "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           ">; }"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
@@ -5136,7 +5183,15 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
+          ") => void; renderError: (domNode: HTMLElement, error: string | ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ErrorLike",
+            "text": "ErrorLike"
+          },
+          ") => () => boolean; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6046,30 +6101,8 @@
             "text": "SerializedFieldFormat"
           },
           "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
-          "> | undefined) => ",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.SerializedFieldFormat",
-            "text": "SerializedFieldFormat"
-          },
-          "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
-          "> | undefined"
+          "SerializableRecord",
+          "> | undefined) => { id?: string | undefined; params?: Record<string, any> | undefined; } | undefined"
         ],
         "path": "src/plugins/visualizations/common/utils/accessors.ts",
         "deprecated": false,
@@ -6132,13 +6165,7 @@
                 "text": "SerializedFieldFormat"
               },
               "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "SerializableRecord",
               "> | undefined"
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
@@ -6237,13 +6264,7 @@
             "text": "SerializedFieldFormat"
           },
           "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "SerializableRecord",
           "> | undefined; source?: string | undefined; sourceParams?: ",
           "SerializableRecord",
           " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; meta?: ",
@@ -6762,7 +6783,15 @@
               },
               "[] | undefined; fieldsFromSource?: ",
               "Fields",
-              " | undefined; index?: string | undefined; searchAfter?: ",
+              " | undefined; index?: string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | undefined; searchAfter?: ",
               {
                 "pluginId": "data",
                 "scope": "common",

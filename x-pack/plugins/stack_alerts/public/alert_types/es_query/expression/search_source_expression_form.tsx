@@ -7,7 +7,7 @@
 
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
@@ -72,26 +72,33 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   useEffect(() => setSavedQuery(initialSavedQuery), [initialSavedQuery]);
 
-  const [{ index: dataView, query, filter: filters, threshold, timeWindowSize, size }, dispatch] =
-    useReducer<LocalStateReducer>(
-      (currentState, action) => {
-        if (isSearchSourceParam(action)) {
-          searchSource.setParent(undefined).setField(action.type, action.payload);
-          setParam('searchConfiguration', searchSource.getSerializedFields());
-        } else {
-          setParam(action.type, action.payload);
-        }
-        return { ...currentState, [action.type]: action.payload };
-      },
-      {
-        index: searchSource.getField('index')!,
-        query: searchSource.getField('query')!,
-        filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
-        threshold: ruleParams.threshold,
-        timeWindowSize: ruleParams.timeWindowSize,
-        size: ruleParams.size,
+  const [ruleConfiguration, dispatch] = useReducer<LocalStateReducer>(
+    (currentState, action) => {
+      if (isSearchSourceParam(action)) {
+        searchSource.setParent(undefined).setField(action.type, action.payload);
+        setParam('searchConfiguration', searchSource.getSerializedFields());
+      } else {
+        setParam(action.type, action.payload);
       }
-    );
+      return { ...currentState, [action.type]: action.payload };
+    },
+    {
+      index: searchSource.getField('index')!,
+      query: searchSource.getField('query')!,
+      filter: mapAndFlattenFilters(searchSource.getField('filter') as Filter[]),
+      threshold: ruleParams.threshold,
+      timeWindowSize: ruleParams.timeWindowSize,
+      size: ruleParams.size,
+    }
+  );
+  const {
+    index: dataView,
+    query,
+    filter: filters,
+    threshold,
+    timeWindowSize,
+    size,
+  } = ruleConfiguration;
   const dataViews = useMemo(() => [dataView], [dataView]);
 
   const onSelectDataView = useCallback(
@@ -165,17 +172,32 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     (updatedValue: number) => dispatch({ type: 'size', payload: updatedValue }),
     []
   );
-  const onTestFetch = useCallback(async () => {
-    const timeWindow = `${timeWindowSize}${timeWindowUnit}`;
+
+  const timeWindow = `${timeWindowSize}${timeWindowUnit}`;
+
+  const createTestSearchSource = useCallback(() => {
     const testSearchSource = searchSource.createCopy();
     const timeFilter = getTime(searchSource.getField('index')!, {
       from: `now-${timeWindow}`,
       to: 'now',
     });
-    testSearchSource.setField('filter', timeFilter);
-    const { rawResponse } = await firstValueFrom(testSearchSource.fetch$());
+    testSearchSource.setField(
+      'filter',
+      timeFilter ? [timeFilter, ...ruleConfiguration.filter] : ruleConfiguration.filter
+    );
+    return testSearchSource;
+  }, [searchSource, timeWindow, ruleConfiguration]);
+
+  const onCopyQuery = useCallback(() => {
+    const testSearchSource = createTestSearchSource();
+    return JSON.stringify(testSearchSource.getSearchRequestBody(), null, 2);
+  }, [createTestSearchSource]);
+
+  const onTestFetch = useCallback(async () => {
+    const testSearchSource = createTestSearchSource();
+    const { rawResponse } = await lastValueFrom(testSearchSource.fetch$());
     return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
-  }, [searchSource, timeWindowSize, timeWindowUnit]);
+  }, [timeWindow, createTestSearchSource]);
 
   return (
     <Fragment>
@@ -279,7 +301,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onChangeSelectedValue={onChangeSizeValue}
       />
       <EuiSpacer size="s" />
-      <TestQueryRow fetch={onTestFetch} hasValidationErrors={false} />
+      <TestQueryRow fetch={onTestFetch} copyQuery={onCopyQuery} hasValidationErrors={false} />
       <EuiSpacer />
     </Fragment>
   );

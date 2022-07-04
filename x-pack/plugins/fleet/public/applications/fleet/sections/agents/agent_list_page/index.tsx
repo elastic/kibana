@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { differenceBy, isEqual } from 'lodash';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -51,6 +51,7 @@ import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 import { Tags } from './components/tags';
+import { TagsAddRemove } from './components/tags_add_remove';
 import { TableRowActions } from './components/table_row_actions';
 import { EmptyPrompt } from './components/empty_prompt';
 import { useCurrentUpgrades } from './hooks';
@@ -82,6 +83,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
   const tableRef = useRef<EuiBasicTable<Agent>>(null);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
+  const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const VERSION_FIELD = 'local_metadata.elastic.agent.version';
+  const HOSTNAME_FIELD = 'local_metadata.host.hostname';
 
   const onSubmitSearch = useCallback(
     (newKuery: string) => {
@@ -132,6 +137,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
   const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
   const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
+  const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
+  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
 
   // Kuery
   const kuery = useMemo(() => {
@@ -198,86 +206,107 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
 
+  const getSortFieldForAPI = (field: keyof Agent): string => {
+    if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
+      return `${field}.keyword`;
+    }
+    return field;
+  };
+
+  const sorting = {
+    sort: {
+      field: sortField,
+      direction: sortOrder,
+    },
+  };
+
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
-  const fetchData = useCallback(() => {
-    async function fetchDataAsync() {
-      currentRequestRef.current++;
-      const currentRequest = currentRequestRef.current;
+  const fetchData = useCallback(
+    ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
+      async function fetchDataAsync() {
+        currentRequestRef.current++;
+        const currentRequest = currentRequestRef.current;
 
-      try {
-        setIsLoading(true);
-        const [agentsRequest, agentsStatusRequest] = await Promise.all([
-          sendGetAgents({
-            page: pagination.currentPage,
-            perPage: pagination.pageSize,
-            kuery: kuery && kuery !== '' ? kuery : undefined,
-            showInactive,
-            showUpgradeable,
-          }),
-          sendGetAgentStatus({
-            kuery: kuery && kuery !== '' ? kuery : undefined,
-          }),
-        ]);
-        // Return if a newer request as been triggered
-        if (currentRequestRef.current !== currentRequest) {
-          return;
-        }
-        if (agentsRequest.error) {
-          throw agentsRequest.error;
-        }
-        if (!agentsRequest.data) {
-          throw new Error('Invalid GET /agents response');
-        }
-        if (agentsStatusRequest.error) {
-          throw agentsStatusRequest.error;
-        }
-        if (!agentsStatusRequest.data) {
-          throw new Error('Invalid GET /agents-status response');
-        }
+        try {
+          setIsLoading(true);
+          const [agentsRequest, agentsStatusRequest] = await Promise.all([
+            sendGetAgents({
+              page: pagination.currentPage,
+              perPage: pagination.pageSize,
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              sortField: getSortFieldForAPI(sortField),
+              sortOrder,
+              showInactive,
+              showUpgradeable,
+            }),
+            sendGetAgentStatus({
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+            }),
+          ]);
+          // Return if a newer request as been triggered
+          if (currentRequestRef.current !== currentRequest) {
+            return;
+          }
+          if (agentsRequest.error) {
+            throw agentsRequest.error;
+          }
+          if (!agentsRequest.data) {
+            throw new Error('Invalid GET /agents response');
+          }
+          if (agentsStatusRequest.error) {
+            throw agentsStatusRequest.error;
+          }
+          if (!agentsStatusRequest.data) {
+            throw new Error('Invalid GET /agents-status response');
+          }
 
-        setAgentsStatus({
-          healthy: agentsStatusRequest.data.results.online,
-          unhealthy: agentsStatusRequest.data.results.error,
-          offline: agentsStatusRequest.data.results.offline,
-          updating: agentsStatusRequest.data.results.updating,
-          inactive: agentsRequest.data.totalInactive,
-        });
+          setAgentsStatus({
+            healthy: agentsStatusRequest.data.results.online,
+            unhealthy: agentsStatusRequest.data.results.error,
+            offline: agentsStatusRequest.data.results.offline,
+            updating: agentsStatusRequest.data.results.updating,
+            inactive: agentsRequest.data.totalInactive,
+          });
 
-        const newAllTags = Array.from(
-          new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
-        );
+          const newAllTags = Array.from(
+            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
+          );
 
-        // We only want to update the list of available tags if we've either received
-        // more tags than we currently have from the API (e.g. new agents have been enrolled)
-        // or we haven't set our list of tags yet. TODO: Would it be possible to remove a tag
-        // from the filterable list if an agent is unenrolled and no agents remain with that tag?
-        if (!allTags || newAllTags.length > allTags.length) {
-          setAllTags(newAllTags);
+          // We only want to update the list of available tags if
+          // - We haven't set any tags yet
+          // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
+          // - Tags are modified (add, remove, edit)
+          if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
+            setAllTags(newAllTags);
+          }
+
+          setAgents(agentsRequest.data.items);
+          setTotalAgents(agentsRequest.data.total);
+          setTotalInactiveAgents(agentsRequest.data.totalInactive);
+        } catch (error) {
+          notifications.toasts.addError(error, {
+            title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
+              defaultMessage: 'Error fetching agents',
+            }),
+          });
         }
-
-        setAgents(agentsRequest.data.items);
-        setTotalAgents(agentsRequest.data.total);
-        setTotalInactiveAgents(agentsRequest.data.totalInactive);
-      } catch (error) {
-        notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
-            defaultMessage: 'Error fetching agents',
-          }),
-        });
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }
-    fetchDataAsync();
-  }, [
-    pagination.currentPage,
-    pagination.pageSize,
-    kuery,
-    showInactive,
-    showUpgradeable,
-    allTags,
-    notifications.toasts,
-  ]);
+      fetchDataAsync();
+    },
+    [
+      pagination.currentPage,
+      pagination.pageSize,
+      kuery,
+      showInactive,
+      showUpgradeable,
+      allTags,
+      notifications.toasts,
+      sortField,
+      sortOrder,
+    ]
+  );
 
   // Send request to get agent list and status
   useEffect(() => {
@@ -316,6 +345,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return !isHosted;
   };
 
+  const onSelectionChange = (newAgents: Agent[]) => {
+    setSelectedAgents(newAgents);
+    if (selectionMode === 'query' && newAgents.length < selectedAgents.length) {
+      // differentiating between selection changed by agents dropping from current page or user action
+      const areSelectedAgentsStillVisible =
+        selectedAgents.length > 0 && differenceBy(selectedAgents, agents, 'id').length === 0;
+      if (areSelectedAgentsStillVisible) {
+        setSelectionMode('manual');
+      } else {
+        // force selecting all agents on current page if staying in query mode
+        if (tableRef?.current) {
+          tableRef.current.setSelection(agents);
+        }
+      }
+    }
+  };
+
   const agentToUnenrollHasFleetServer = useMemo(() => {
     if (!agentToUnenroll || !agentToUnenroll.policy_id) {
       return false;
@@ -344,7 +390,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const columns = [
     {
-      field: 'local_metadata.host.hostname',
+      field: HOSTNAME_FIELD,
+      sortable: true,
       name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
@@ -357,6 +404,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
+      sortable: false,
       width: '85px',
       name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
@@ -365,6 +413,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'tags',
+      sortable: false,
       width: '210px',
       name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
         defaultMessage: 'Tags',
@@ -373,6 +422,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'policy_id',
+      sortable: true,
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
@@ -401,7 +451,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       },
     },
     {
-      field: 'local_metadata.elastic.agent.version',
+      field: VERSION_FIELD,
+      sortable: true,
       width: '135px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
@@ -428,6 +479,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'last_checkin',
+      sortable: true,
       name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
@@ -446,6 +498,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               typeof agent.policy_id === 'string'
                 ? agentPoliciesIndexedById[agent.policy_id]
                 : undefined;
+
+            // refreshing agent tags passed to TagsAddRemove component
+            if (
+              agentToAddRemoveTags?.id === agent.id &&
+              !isEqual(agent.tags, agentToAddRemoveTags.tags)
+            ) {
+              setAgentToAddRemoveTags(agent);
+            }
             return (
               <TableRowActions
                 agent={agent}
@@ -453,6 +513,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 onReassignClick={() => setAgentToReassign(agent)}
                 onUnenrollClick={() => setAgentToUnenroll(agent)}
                 onUpgradeClick={() => setAgentToUpgrade(agent)}
+                onAddRemoveTagsClick={(button) => {
+                  setTagsPopoverButton(button);
+                  setAgentToAddRemoveTags(agent);
+                  setShowTagsAddRemove(!showTagsAddRemove);
+                }}
+                allTags={allTags ?? []}
               />
             );
           },
@@ -494,7 +560,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agentCount={1}
             onClose={() => {
               setAgentToUnenroll(undefined);
-              fetchData();
+              fetchData({ refreshTags: true });
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
             hasFleetServer={agentToUnenrollHasFleetServer}
@@ -513,6 +579,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             }}
           />
         </EuiPortal>
+      )}
+      {showTagsAddRemove && (
+        <TagsAddRemove
+          agentId={agentToAddRemoveTags?.id!}
+          allTags={allTags ?? []}
+          selectedTags={agentToAddRemoveTags?.tags ?? []}
+          button={tagsPopoverButton!}
+          onTagsUpdated={() => {
+            fetchData();
+          }}
+        />
       )}
       {isFleetServerUnhealthy && (
         <>
@@ -551,7 +628,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={() => Promise.all([fetchData(), refreshUpgrades()])}
+        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) =>
+          Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
+        }
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
       />
       <EuiSpacer size="m" />
@@ -621,15 +700,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,
-          totalItemCount: totalAgents,
+          totalItemCount: Math.min(totalAgents, SO_SEARCH_LIMIT),
           pageSizeOptions,
         }}
         isSelectable={true}
         selection={{
-          onSelectionChange: (newAgents: Agent[]) => {
-            setSelectedAgents(newAgents);
-            setSelectionMode('manual');
-          },
+          onSelectionChange,
           selectable: isAgentSelectable,
           selectableMessage: (selectable, agent) => {
             if (selectable) return '';
@@ -642,14 +718,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             return '';
           },
         }}
-        onChange={({ page }: { page: { index: number; size: number } }) => {
+        onChange={({
+          page,
+          sort,
+        }: {
+          page?: { index: number; size: number };
+          sort?: { field: keyof Agent; direction: 'asc' | 'desc' };
+        }) => {
           const newPagination = {
             ...pagination,
-            currentPage: page.index + 1,
-            pageSize: page.size,
+            currentPage: page!.index + 1,
+            pageSize: page!.size,
           };
           setPagination(newPagination);
+          setSortField(sort!.field);
+          setSortOrder(sort!.direction);
         }}
+        sorting={sorting}
       />
     </>
   );

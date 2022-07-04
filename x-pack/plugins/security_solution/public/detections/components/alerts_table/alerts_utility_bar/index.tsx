@@ -51,7 +51,7 @@ const UtilityBarFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const AdditionalFiltersItem = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const BuildingBlockContainer = styled(AdditionalFiltersItem)`

@@ -755,8 +755,7 @@ describe('terms', () => {
             },
           },
         },
-        'col2',
-        'col1'
+        'col2'
       );
 
       expect(updatedColumn).toBe(initialColumn);
@@ -796,8 +795,7 @@ describe('terms', () => {
           columnOrder: [],
           indexPatternId: '',
         },
-        'col2',
-        'col1'
+        'col2'
       );
       expect(updatedColumn.params).toEqual(
         expect.objectContaining({
@@ -843,8 +841,7 @@ describe('terms', () => {
           columnOrder: [],
           indexPatternId: '',
         },
-        'col2',
-        'col1'
+        'col2'
       );
       expect(updatedColumn.params).toEqual(
         expect.objectContaining({
@@ -875,8 +872,7 @@ describe('terms', () => {
           columnOrder: [],
           indexPatternId: '',
         },
-        'col2',
-        'col1'
+        'col2'
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
@@ -919,8 +915,7 @@ describe('terms', () => {
           columnOrder: [],
           indexPatternId: '',
         },
-        'col2',
-        'col1'
+        'col2'
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
@@ -951,8 +946,7 @@ describe('terms', () => {
           columnOrder: [],
           indexPatternId: '',
         },
-        'col2',
-        'col1'
+        'col2'
       );
       expect(termsColumn.params).toEqual(
         expect.objectContaining({
@@ -991,8 +985,7 @@ describe('terms', () => {
             },
           },
         },
-        'col2',
-        'col1'
+        'col2'
       );
 
       expect(updatedColumn.params).toEqual(

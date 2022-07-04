@@ -44,6 +44,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
@@ -62,6 +63,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([]);
   });
@@ -112,6 +114,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchErrors).toEqual([
       'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
@@ -135,6 +138,7 @@ describe('singleSearchAfter', () => {
       filter: {},
       timestampOverride: undefined,
       buildRuleMessage,
+      runtimeMappings: undefined,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId());
   });
@@ -155,6 +159,7 @@ describe('singleSearchAfter', () => {
         filter: {},
         timestampOverride: undefined,
         buildRuleMessage,
+        runtimeMappings: undefined,
       })
     ).rejects.toThrow('Fake Error');
   });

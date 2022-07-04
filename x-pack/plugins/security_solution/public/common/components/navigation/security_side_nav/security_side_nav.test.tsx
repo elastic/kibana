@@ -12,6 +12,7 @@ import { TestProviders } from '../../../mock';
 import { SecuritySideNav } from './security_side_nav';
 import { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
 import { NavLinkItem } from '../types';
+import { bottomNavOffset } from '../../../lib/helpers';
 
 const manageNavLink: NavLinkItem = {
   id: SecurityPageName.administration,
@@ -41,10 +42,6 @@ jest.mock('../../../utils/route/use_route_spy', () => ({
   useRouteSpy: () => mockUseRouteSpy(),
 }));
 
-const mockedUseCanSeeHostIsolationExceptionsMenu = jest.fn();
-jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks', () => ({
-  useCanSeeHostIsolationExceptionsMenu: () => mockedUseCanSeeHostIsolationExceptionsMenu(),
-}));
 jest.mock('../../../links', () => ({
   getAncestorLinksInfo: (id: string) => [{ id }],
 }));
@@ -59,6 +56,15 @@ jest.mock('../../links', () => ({
     ({ deepLinkId }: { deepLinkId: SecurityPageName }) => ({
       href: `/${deepLinkId}`,
     }),
+}));
+
+const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
+jest.mock('../../../utils/timeline/use_show_timeline', () => ({
+  useShowTimeline: () => mockUseShowTimeline(),
+}));
+const mockUseIsPolicySettingsBarVisible = jest.fn((): boolean => false);
+jest.mock('../../../../management/pages/policy/view/policy_hooks', () => ({
+  useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
 }));
 
 const renderNav = () =>
@@ -164,77 +170,6 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should render hostIsolationExceptionsLink when useCanSeeHostIsolationExceptionsMenu is true', () => {
-    mockedUseCanSeeHostIsolationExceptionsMenu.mockReturnValue(true);
-    const hostIsolationExceptionsLink = {
-      id: SecurityPageName.hostIsolationExceptions,
-      title: 'test hostIsolationExceptions',
-      description: 'test description hostIsolationExceptions',
-    };
-
-    mockUseAppNavLinks.mockReturnValueOnce([
-      {
-        ...manageNavLink,
-        links: [hostIsolationExceptionsLink],
-      },
-    ]);
-    renderNav();
-    expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: [],
-        selectedId: SecurityPageName.alerts,
-        footerItems: [
-          {
-            id: SecurityPageName.administration,
-            label: 'manage',
-            href: '/administration',
-            categories: manageNavLink.categories,
-            items: [
-              {
-                id: hostIsolationExceptionsLink.id,
-                label: hostIsolationExceptionsLink.title,
-                description: hostIsolationExceptionsLink.description,
-                href: '/host_isolation_exceptions',
-              },
-            ],
-          },
-        ],
-      })
-    );
-  });
-
-  it('should not render hostIsolationExceptionsLink when useCanSeeHostIsolationExceptionsMenu is false', () => {
-    mockedUseCanSeeHostIsolationExceptionsMenu.mockReturnValue(false);
-    const hostIsolationExceptionsLink = {
-      id: SecurityPageName.hostIsolationExceptions,
-      title: 'test hostIsolationExceptions',
-      description: 'test description hostIsolationExceptions',
-    };
-
-    mockUseAppNavLinks.mockReturnValueOnce([
-      {
-        ...manageNavLink,
-        links: [hostIsolationExceptionsLink],
-      },
-    ]);
-    renderNav();
-    expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: [],
-        selectedId: SecurityPageName.alerts,
-        footerItems: [
-          {
-            id: SecurityPageName.administration,
-            label: 'manage',
-            href: '/administration',
-            categories: manageNavLink.categories,
-            items: [],
-          },
-        ],
-      })
-    );
-  });
-
   it('should render custom item', () => {
     mockUseAppNavLinks.mockReturnValueOnce([
       { id: SecurityPageName.landing, title: 'get started' },
@@ -252,5 +187,40 @@ describe('SecuritySideNav', () => {
         ],
       })
     );
+  });
+
+  describe('bottom offset', () => {
+    it('should render with bottom offset when timeline bar visible', () => {
+      mockUseIsPolicySettingsBarVisible.mockReturnValueOnce(false);
+      mockUseShowTimeline.mockReturnValueOnce([true]);
+      renderNav();
+      expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bottomOffset: bottomNavOffset,
+        })
+      );
+    });
+
+    it('should render with bottom offset when policy settings bar visible', () => {
+      mockUseShowTimeline.mockReturnValueOnce([false]);
+      mockUseIsPolicySettingsBarVisible.mockReturnValueOnce(true);
+      renderNav();
+      expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bottomOffset: bottomNavOffset,
+        })
+      );
+    });
+
+    it('should not render with bottom offset when not needed', () => {
+      mockUseShowTimeline.mockReturnValueOnce([false]);
+      mockUseIsPolicySettingsBarVisible.mockReturnValueOnce(false);
+      renderNav();
+      expect(mockSolutionGroupedNav).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          bottomOffset: bottomNavOffset,
+        })
+      );
+    });
   });
 });

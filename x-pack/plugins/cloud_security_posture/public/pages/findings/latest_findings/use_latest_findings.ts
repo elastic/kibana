@@ -8,23 +8,24 @@ import { useContext } from 'react';
 import { useQuery } from 'react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { Criteria, Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { i18n } from '@kbn/i18n';
 import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
-import * as TEXT from '../translations';
-import type { CspFindingsQueryData } from '../types';
-import type { CspFinding, FindingsQueryResult } from '../types';
+import type { CspFinding } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
+import { getAggregationCount, getFindingsCountAggQuery } from '../utils';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;
   size: NonNullable<estypes.SearchRequest['size']>;
   sort: Sort;
+  enabled: boolean;
 }
 
 type Sort = NonNullable<Criteria<CspFinding>['sort']>;
@@ -35,12 +36,20 @@ export interface FindingsGroupByNoneQuery {
   sort: Sort;
 }
 
-export type CspFindingsResult = FindingsQueryResult<CspFindingsQueryData | undefined, unknown>;
+type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
+type LatestFindingsResponse = IKibanaSearchResponse<
+  estypes.SearchResponse<CspFinding, FindingsAggs>
+>;
+
+interface FindingsAggs {
+  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+}
 
 const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
   '@timestamp',
   'resource.sub_type',
   'resource.name',
+  'resource.id',
   'rule.name',
 ]);
 
@@ -48,12 +57,17 @@ const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
 const getSortKey = (key: string): string =>
   FIELDS_WITHOUT_KEYWORD_MAPPING.has(key) ? key : `${key}.keyword`;
 
+const SEARCH_FAILED_TEXT = i18n.translate(
+  'xpack.csp.findings.findingsErrorToast.searchFailedTitle',
+  { defaultMessage: 'Search failed' }
+);
+
 export const showErrorToast = (
   toasts: CoreStart['notifications']['toasts'],
   error: unknown
 ): void => {
-  if (error instanceof Error) toasts.addError(error, { title: TEXT.SEARCH_FAILED });
-  else toasts.addDanger(extractErrorMessage(error, TEXT.SEARCH_FAILED));
+  if (error instanceof Error) toasts.addError(error, { title: SEARCH_FAILED_TEXT });
+  else toasts.addDanger(extractErrorMessage(error, SEARCH_FAILED_TEXT));
 };
 
 export const getFindingsQuery = ({
@@ -63,42 +77,52 @@ export const getFindingsQuery = ({
   sort,
   pitId,
 }: UseFindingsOptions & { pitId: string }) => ({
-  query,
-  size,
-  from,
-  sort: [{ [getSortKey(sort.field)]: sort.direction }],
+  body: {
+    query,
+    sort: [{ [getSortKey(sort.field)]: sort.direction }],
+    size,
+    from,
+    aggs: getFindingsCountAggQuery(),
+  },
   pit: { id: pitId },
   ignore_unavailable: false,
 });
 
-export const useLatestFindings = ({ query, sort, from, size }: UseFindingsOptions) => {
+export const useLatestFindings = (options: UseFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
   const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
-  const pitId = pitIdRef.current;
+  const params = { ...options, pitId: pitIdRef.current };
 
-  return useQuery<
-    IEsSearchResponse<CspFinding>,
-    unknown,
-    CspFindingsQueryData & { newPitId: string }
-  >(
-    ['csp_findings', { query, sort, from, size, pitId }],
-    () =>
-      lastValueFrom<IEsSearchResponse<CspFinding>>(
-        data.search.search({
-          params: getFindingsQuery({ query, sort, from, size, pitId }),
+  return useQuery(
+    ['csp_findings', { params }],
+    async () => {
+      const {
+        rawResponse: { hits, aggregations, pit_id: newPitId },
+      } = await lastValueFrom(
+        data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
+          params: getFindingsQuery(params),
         })
-      ),
-    {
-      keepPreviousData: true,
-      select: ({ rawResponse: { hits, pit_id: newPitId } }) => ({
+      );
+
+      if (!aggregations) throw new Error('expected aggregations to be an defined');
+
+      if (!Array.isArray(aggregations.count.buckets))
+        throw new Error('expected buckets to be an array');
+
+      return {
         page: hits.hits.map((hit) => hit._source!),
         total: number.is(hits.total) ? hits.total : 0,
+        count: getAggregationCount(aggregations.count.buckets),
         newPitId: newPitId!,
-      }),
-      onError: (err) => showErrorToast(toasts, err),
+      };
+    },
+    {
+      enabled: options.enabled,
+      keepPreviousData: true,
+      onError: (err: Error) => showErrorToast(toasts, err),
       onSuccess: ({ newPitId }) => {
         setPitId(newPitId);
       },
