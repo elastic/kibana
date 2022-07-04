@@ -101,6 +101,12 @@ export function createTelemetryTimelineTaskConfig() {
           nodeIds.push(nodeId);
         }
 
+        sender.getTelemetryUsageCluster()?.incrementCounter({
+          counterName: 'telemetry_timeline',
+          counterType: 'timeline_node_count',
+          incrementBy: nodeIds.length,
+        });
+
         // Fetch event lineage
 
         const timelineEvents = await receiver.fetchTimelineEvents(nodeIds);
@@ -114,6 +120,12 @@ export function createTelemetryTimelineTaskConfig() {
             if (entityId !== null && entityId !== undefined) eventsStore.set(entityId, doc);
           }
         }
+
+        sender.getTelemetryUsageCluster()?.incrementCounter({
+          counterName: 'telemetry_timeline',
+          counterType: 'timeline_event_count',
+          incrementBy: eventsStore.size,
+        });
 
         // Create telemetry record
 

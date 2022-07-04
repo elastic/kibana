@@ -25,7 +25,7 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
-import { ConfigurationConnector } from './configuration_connector';
+import { ConnectorConfiguration } from './connector/connector_configuration';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexDomainManagement } from './domain_management';
 import { SearchIndexIndexMappings } from './index_mappings';
@@ -83,7 +83,7 @@ export const SearchIndex: React.FC = () => {
 
   const CONNECTOR_TABS: EuiTabbedContentTab[] = [
     {
-      content: <ConfigurationConnector />,
+      content: <ConnectorConfiguration />,
       id: SearchIndexTabId.CONFIGURATION,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.configurationTabLabel', {
         defaultMessage: 'Configuration',
