@@ -17,6 +17,8 @@ import { rangeSliderReducers } from './range_slider_reducers';
 import { RangeSliderEmbeddableInput, RangeValue } from './types';
 
 import './range_slider.scss';
+import { pluginServices } from '../../services';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 interface Props {
   componentStateSubject: BehaviorSubject<RangeSliderComponentState>;
@@ -33,6 +35,8 @@ export interface RangeSliderComponentState {
 }
 
 export const RangeSliderComponent: FC<Props> = ({ componentStateSubject, ignoreValidation }) => {
+  const { theme } = pluginServices.getServices();
+
   // Redux embeddable Context to get state from Embeddable input
   const {
     useEmbeddableDispatch,
@@ -58,16 +62,18 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject, ignoreV
   );
 
   return (
-    <RangeSliderPopover
-      id={id}
-      isLoading={loading}
-      min={min}
-      max={max}
-      title={title}
-      value={value ?? ['', '']}
-      onChange={onChangeComplete}
-      fieldFormatter={fieldFormatter}
-      isInvalid={!ignoreValidation && isInvalid}
-    />
+    <KibanaThemeProvider theme$={theme.theme$}>
+      <RangeSliderPopover
+        id={id}
+        isLoading={loading}
+        min={min}
+        max={max}
+        title={title}
+        value={value ?? ['', '']}
+        onChange={onChangeComplete}
+        fieldFormatter={fieldFormatter}
+        isInvalid={!ignoreValidation && isInvalid}
+      />
+    </KibanaThemeProvider>
   );
 };

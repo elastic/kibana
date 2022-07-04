@@ -21,6 +21,8 @@ import { OptionsListPopover } from './options_list_popover_component';
 import './options_list.scss';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { OptionsListEmbeddableInput } from './types';
+import { pluginServices } from '../../services';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 // OptionsListComponentState is controlled by the embeddable, but is not considered embeddable input.
 export interface OptionsListComponentState {
@@ -39,6 +41,8 @@ export const OptionsListComponent = ({
   typeaheadSubject: Subject<string>;
   componentStateSubject: BehaviorSubject<OptionsListComponentState>;
 }) => {
+  const { theme } = pluginServices.getServices();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [searchString, setSearchString] = useState('');
 
@@ -126,33 +130,35 @@ export const OptionsListComponent = ({
   );
 
   return (
-    <EuiFilterGroup
-      className={classNames('optionsList--filterGroup', {
-        'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
-      })}
-    >
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        className="optionsList__popoverOverride"
-        anchorClassName="optionsList__anchorOverride"
-        closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-        ownFocus
-        repositionOnScroll
+    <KibanaThemeProvider theme$={theme.theme$}>
+      <EuiFilterGroup
+        className={classNames('optionsList--filterGroup', {
+          'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
+        })}
       >
-        <OptionsListPopover
-          field={field}
-          width={dimensions.width}
-          loading={loading}
-          searchString={searchString}
-          totalCardinality={totalCardinality}
-          availableOptions={availableOptions}
-          invalidSelections={invalidSelections}
-          updateSearchString={updateSearchString}
-        />
-      </EuiPopover>
-    </EuiFilterGroup>
+        <EuiPopover
+          button={button}
+          isOpen={isPopoverOpen}
+          className="optionsList__popoverOverride"
+          anchorClassName="optionsList__anchorOverride"
+          closePopover={() => setIsPopoverOpen(false)}
+          panelPaddingSize="none"
+          anchorPosition="downCenter"
+          ownFocus
+          repositionOnScroll
+        >
+          <OptionsListPopover
+            field={field}
+            width={dimensions.width}
+            loading={loading}
+            searchString={searchString}
+            totalCardinality={totalCardinality}
+            availableOptions={availableOptions}
+            invalidSelections={invalidSelections}
+            updateSearchString={updateSearchString}
+          />
+        </EuiPopover>
+      </EuiFilterGroup>
+    </KibanaThemeProvider>
   );
 };
