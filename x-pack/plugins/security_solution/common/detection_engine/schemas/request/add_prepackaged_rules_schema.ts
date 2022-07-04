@@ -70,7 +70,7 @@ import {
   license,
   rule_name_override,
   timestamp_override,
-  should_disable_timestamp_fallback,
+  disable_timestamp_fallback,
   Author,
   timestamp_field,
   event_category_override,
@@ -139,7 +139,7 @@ export const addPrepackagedRulesSchema = t.intersection([
       threshold, // defaults to "undefined" if not set during decode
       throttle: DefaultThrottleNull, // defaults to "null" if not set during decode
       timestamp_override, // defaults to "undefined" if not set during decode
-      should_disable_timestamp_fallback, // defaults to "undefined" if not set during decode
+      disable_timestamp_fallback, // defaults to "undefined" if not set during decode
       references: DefaultStringArray, // defaults to empty array of strings if not set during decode
       note, // defaults to "undefined" if not set during decode
       exceptions_list: DefaultListArray, // defaults to empty array if not set during decode

@@ -87,7 +87,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             meta,
             ruleId,
             timestampOverride,
-            shouldDisableTimestampFallback,
+            disableTimestampFallback,
             to,
           } = params;
           const {
@@ -208,10 +208,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     {
                       index: inputIndex,
                       fields: hasTimestampOverride
-                        ? [
-                            timestampOverride,
-                            ...(shouldDisableTimestampFallback ? [] : ['@timestamp']),
-                          ]
+                        ? [timestampOverride, ...(disableTimestampFallback ? [] : ['@timestamp'])]
                         : ['@timestamp'],
                       include_unmapped: true,
                       runtime_mappings: runtimeMappings,

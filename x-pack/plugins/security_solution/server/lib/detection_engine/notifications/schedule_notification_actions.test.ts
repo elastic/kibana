@@ -45,7 +45,7 @@ describe('schedule_notification_actions', () => {
     severityMapping: [],
     threat: [],
     timestampOverride: undefined,
-    shouldDisableTimestampFallback: undefined,
+    disableTimestampFallback: undefined,
     to: 'now',
     type: 'query',
     references: ['http://www.example.com'],

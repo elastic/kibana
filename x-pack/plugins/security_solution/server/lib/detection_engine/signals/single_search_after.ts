@@ -17,7 +17,7 @@ import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
 import {
-  ShouldDisableTimestampFallbackOrUndefined,
+  DisableTimestampFallbackOrUndefined,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -34,7 +34,7 @@ interface SingleSearchAfterParams {
   sortOrder?: estypes.SortOrder;
   filter: estypes.QueryDslQueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
-  shouldDisableTimestampFallback: ShouldDisableTimestampFallbackOrUndefined;
+  disableTimestampFallback: DisableTimestampFallbackOrUndefined;
   buildRuleMessage: BuildRuleMessage;
   trackTotalHits?: boolean;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -54,7 +54,7 @@ export const singleSearchAfter = async ({
   pageSize,
   sortOrder,
   timestampOverride,
-  shouldDisableTimestampFallback,
+  disableTimestampFallback,
   buildRuleMessage,
   trackTotalHits,
 }: SingleSearchAfterParams): Promise<{
@@ -75,7 +75,7 @@ export const singleSearchAfter = async ({
         sortOrder,
         searchAfterSortIds,
         timestampOverride,
-        shouldDisableTimestampFallback,
+        disableTimestampFallback,
         trackTotalHits,
       });
 

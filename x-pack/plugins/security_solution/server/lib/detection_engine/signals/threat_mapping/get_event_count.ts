@@ -26,7 +26,7 @@ export const getEventList = async ({
   logger,
   tuple,
   timestampOverride,
-  shouldDisableTimestampFallback,
+  disableTimestampFallback,
   runtimeMappings,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
@@ -53,7 +53,7 @@ export const getEventList = async ({
     filter,
     pageSize: Math.ceil(Math.min(tuple.maxSignals, calculatedPerPage)),
     timestampOverride,
-    shouldDisableTimestampFallback,
+    disableTimestampFallback,
     sortOrder: 'desc',
     trackTotalHits: false,
     runtimeMappings,
@@ -74,7 +74,7 @@ export const getEventCount = async ({
   exceptionItems,
   tuple,
   timestampOverride,
-  shouldDisableTimestampFallback,
+  disableTimestampFallback,
 }: EventCountOptions): Promise<number> => {
   const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
@@ -84,7 +84,7 @@ export const getEventCount = async ({
     filter,
     size: 0,
     timestampOverride,
-    shouldDisableTimestampFallback,
+    disableTimestampFallback,
     searchAfterSortIds: undefined,
     runtimeMappings: undefined,
   }).body.query;

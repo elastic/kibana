@@ -158,7 +158,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
-  should_disable_timestamp_fallback: false,
+  disable_timestamp_fallback: false,
   note: '# this is some markdown documentation',
   version: 1,
 });

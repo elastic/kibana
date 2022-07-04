@@ -128,7 +128,7 @@ describe('rule helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
-        shouldDisableTimestampFallback: false,
+        disableTimestampFallback: false,
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {

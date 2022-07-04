@@ -392,7 +392,7 @@ export const formatAboutStepData = (
     ruleNameOverride,
     threatIndicatorPath,
     timestampOverride,
-    shouldDisableTimestampFallback,
+    disableTimestampFallback,
     ...rest
   } = aboutStepData;
 
@@ -436,7 +436,7 @@ export const formatAboutStepData = (
     })),
     threat_indicator_path: threatIndicatorPath,
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
-    should_disable_timestamp_fallback: shouldDisableTimestampFallback,
+    disable_timestamp_fallback: disableTimestampFallback,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,
   };

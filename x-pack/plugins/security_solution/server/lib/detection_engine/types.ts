@@ -54,7 +54,7 @@ import {
   TimestampFieldOrUndefined,
   EventCategoryOverrideOrUndefined,
   TiebreakerFieldOrUndefined,
-  ShouldDisableTimestampFallbackOrUndefined,
+  DisableTimestampFallbackOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 
 export type PartialFilter = Partial<Filter>;
@@ -99,7 +99,7 @@ export interface RuleTypeParams extends AlertingRuleTypeParams {
   threatMapping?: ThreatMappingOrUndefined;
   threatLanguage?: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
-  shouldDisableTimestampFallback: ShouldDisableTimestampFallbackOrUndefined;
+  disableTimestampFallback: DisableTimestampFallbackOrUndefined;
   to: To;
   type: Type;
   references: References;

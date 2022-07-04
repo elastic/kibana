@@ -402,10 +402,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             {!!formTimestampOverride && formTimestampOverride !== '@timestamp' && (
               <>
                 <CommonUseField
-                  path="shouldDisableTimestampFallback"
+                  path="disableTimestampFallback"
                   componentProps={{
-                    idAria: 'detectionShouldDisableTimestampFallback',
-                    'data-test-subj': 'detectionShouldDisableTimestampFallback',
+                    idAria: 'detectionDisableTimestampFallback',
+                    'data-test-subj': 'detectionDisableTimestampFallback',
                     euiFieldProps: {
                       disabled: isLoading,
                     },

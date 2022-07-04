@@ -121,7 +121,7 @@ describe('getEventCount', () => {
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
       timestampOverride: 'event.ingested',
-      shouldDisableTimestampFallback: true,
+      disableTimestampFallback: true,
     });
 
     expect(esClient.count).toHaveBeenCalledWith({

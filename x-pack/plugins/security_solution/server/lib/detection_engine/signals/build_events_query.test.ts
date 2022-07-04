@@ -27,7 +27,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      shouldDisableTimestampFallback: undefined,
+      disableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -86,7 +86,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
-      shouldDisableTimestampFallback: undefined,
+      disableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -177,7 +177,7 @@ describe('create_signals', () => {
     });
   });
 
-  test('it builds a filter without @timestamp fallback if shouldDisableTimestampFallback is true', () => {
+  test('it builds a filter without @timestamp fallback if disableTimestampFallback is true', () => {
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
       from: 'now-5m',
@@ -186,7 +186,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
-      shouldDisableTimestampFallback: true,
+      disableTimestampFallback: true,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -259,7 +259,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortId],
       timestampOverride: undefined,
-      shouldDisableTimestampFallback: undefined,
+      disableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -319,7 +319,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortIdNumber],
       timestampOverride: undefined,
-      shouldDisableTimestampFallback: undefined,
+      disableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -378,7 +378,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      shouldDisableTimestampFallback: undefined,
+      disableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -444,7 +444,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      shouldDisableTimestampFallback: undefined,
+      disableTimestampFallback: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -510,7 +510,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      shouldDisableTimestampFallback: undefined,
+      disableTimestampFallback: undefined,
       trackTotalHits: false,
       runtimeMappings: undefined,
     });
@@ -526,7 +526,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      shouldDisableTimestampFallback: undefined,
+      disableTimestampFallback: undefined,
       sortOrder: 'desc',
       trackTotalHits: false,
       runtimeMappings: undefined,
@@ -548,7 +548,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
-      shouldDisableTimestampFallback: undefined,
+      disableTimestampFallback: undefined,
       sortOrder: 'desc',
       runtimeMappings: undefined,
     });
@@ -576,7 +576,7 @@ describe('create_signals', () => {
         size: 100,
         filters: undefined,
         timestampOverride: undefined,
-        shouldDisableTimestampFallback: undefined,
+        disableTimestampFallback: undefined,
         exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
@@ -627,7 +627,7 @@ describe('create_signals', () => {
         size: 100,
         filters: undefined,
         timestampOverride: 'event.ingested',
-        shouldDisableTimestampFallback: undefined,
+        disableTimestampFallback: undefined,
         exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
@@ -706,7 +706,7 @@ describe('create_signals', () => {
       });
     });
 
-    test('should build a request without @timestamp fallback if shouldDisableTimestampFallback is true', () => {
+    test('should build a request without @timestamp fallback if disableTimestampFallback is true', () => {
       const request = buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
@@ -715,7 +715,7 @@ describe('create_signals', () => {
         size: 100,
         filters: undefined,
         timestampOverride: 'event.ingested',
-        shouldDisableTimestampFallback: true,
+        disableTimestampFallback: true,
         exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
@@ -775,7 +775,7 @@ describe('create_signals', () => {
         size: 100,
         filters: undefined,
         timestampOverride: undefined,
-        shouldDisableTimestampFallback: undefined,
+        disableTimestampFallback: undefined,
         exceptionLists: [getExceptionListItemSchemaMock()],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
@@ -910,7 +910,7 @@ describe('create_signals', () => {
         size: 100,
         filters,
         timestampOverride: undefined,
-        shouldDisableTimestampFallback: undefined,
+        disableTimestampFallback: undefined,
         exceptionLists: [],
         runtimeMappings: undefined,
       });

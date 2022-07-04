@@ -82,7 +82,7 @@ export const eqlExecutor = async ({
       size: completeRule.ruleParams.maxSignals,
       filters: ruleParams.filters,
       timestampOverride: ruleParams.timestampOverride,
-      shouldDisableTimestampFallback: ruleParams.shouldDisableTimestampFallback,
+      disableTimestampFallback: ruleParams.disableTimestampFallback,
       exceptionLists: exceptionItems,
       runtimeMappings,
       eventCategoryOverride: ruleParams.eventCategoryOverride,

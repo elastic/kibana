@@ -81,7 +81,7 @@ export const searchAfterAndBulkCreate = async ({
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
-            shouldDisableTimestampFallback: ruleParams.shouldDisableTimestampFallback,
+            disableTimestampFallback: ruleParams.disableTimestampFallback,
             trackTotalHits,
             sortOrder,
           });
