@@ -122,7 +122,7 @@ async function createSetupSideEffects(
 
   const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
 
-  logger.debug('Upgrade Fleet package instal versions');
+  logger.debug('Upgrade Fleet package install versions');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
 
   logger.debug('Setting up Fleet enrollment keys');

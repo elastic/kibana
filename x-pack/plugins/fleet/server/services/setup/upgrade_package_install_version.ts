@@ -45,6 +45,7 @@ export async function upgradePackageInstallVersion({
     ({ attributes: installation }) => {
       // Uploaded package cannot be reinstalled
       if (installation.install_source === 'upload') {
+        logger.warn(`Uploaded package needs to be manually reinstalled ${installation.name}.`);
         return;
       }
       return reinstallPackageForInstallation({
