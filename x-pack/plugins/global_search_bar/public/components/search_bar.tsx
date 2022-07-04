@@ -37,8 +37,8 @@ import './search_bar.scss';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
-const blurEvent = new FocusEvent('focusout',  {
-  bubbles: true
+const blurEvent = new FocusEvent('focusout', {
+  bubbles: true,
 });
 
 const sortByScore = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
