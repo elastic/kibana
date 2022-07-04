@@ -13,10 +13,12 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { Meta } from '../../../../../../common/types';
 import { HttpError, Status } from '../../../../../../common/types/api';
 import { DEFAULT_META } from '../../../../shared/constants';
-import { flashAPIErrors } from '../../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../../shared/flash_messages';
 import { updateMetaPageIndex } from '../../../../shared/table_pagination';
 import { DeleteCrawlerDomainApiLogic } from '../../../api/crawler/delete_crawler_domain_api_logic';
 import { GetCrawlerDomainsApiLogic } from '../../../api/crawler/get_crawler_domains_api_logic';
@@ -36,7 +38,7 @@ interface DomainManagementValues {
 
 interface DomainManagementActions {
   deleteApiError(error: HttpError): HttpError;
-  deleteDomain(domainId: string): { domainId: string };
+  deleteDomain(domain: CrawlerDomain): { domain: CrawlerDomain };
   deleteSuccess(): void;
   getApiError(error: HttpError): HttpError;
   getApiSuccess(data: CrawlerDomains): CrawlerDomains;
@@ -63,7 +65,7 @@ export const DomainManagementLogic = kea<
   },
   path: ['enterprise_search', 'domain_management'],
   actions: {
-    deleteDomain: (domainId) => ({ domainId }),
+    deleteDomain: (domain) => ({ domain }),
     getDomains: () => true,
     onPaginate: (newPageIndex) => ({
       newPageIndex,
@@ -89,12 +91,23 @@ export const DomainManagementLogic = kea<
     deleteApiError: (error) => {
       flashAPIErrors(error);
     },
-    deleteApiSuccess: () => {
+    deleteApiSuccess: ({ domain }) => {
       actions.getDomains();
+      flashSuccessToast(
+        i18n.translate(
+          'xpack.enterpriseSearch.appSearch.crawler.domainsTable.action.add.successMessage',
+          {
+            defaultMessage: "Successfully deleted domain '{domainUrl}'",
+            values: {
+              domainUrl: domain.url,
+            },
+          }
+        )
+      );
     },
-    deleteDomain: ({ domainId }) => {
+    deleteDomain: ({ domain }) => {
       const { indexName } = props;
-      DeleteCrawlerDomainApiLogic.actions.makeRequest({ domainId, indexName });
+      DeleteCrawlerDomainApiLogic.actions.makeRequest({ domain, indexName });
     },
     getApiError: (error) => {
       flashAPIErrors(error);

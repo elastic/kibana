@@ -19,7 +19,8 @@ import {
   CreateCrawlerIndexArgs,
   CreateCrawlerIndexResponse,
 } from '../../../api/crawler/create_crawler_index_api_logic';
-import { SEARCH_INDEX_PATH } from '../../../routes';
+import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
+import { SearchIndexTabId } from '../../search_index/search_index';
 
 type MethodCrawlerActions = Pick<
   Actions<CreateCrawlerIndexArgs, CreateCrawlerIndexResponse>,
@@ -36,7 +37,10 @@ export const MethodCrawlerLogic = kea<MakeLogicType<{}, MethodCrawlerActions>>({
     },
     apiSuccess: ({ created }) => {
       KibanaLogic.values.navigateToUrl(
-        generateEncodedPath(SEARCH_INDEX_PATH, { indexName: created })
+        generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          indexName: created,
+          tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
+        })
       );
     },
     makeRequest: () => clearFlashMessages(),

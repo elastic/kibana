@@ -9,24 +9,24 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { generateEncodedPath } from '../../../../../app_search/utils/encode_path_params';
 import { flashSuccessToast } from '../../../../../shared/flash_messages';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
-
 import { HttpLogic } from '../../../../../shared/http';
-import { FetchIndexApiLogic } from '../../../../api/index/fetch_index_api_logic';
-
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { CrawlerDomain, CrawlerDomainFromServer } from '../../../../api/crawler/types';
+import { crawlerDomainServerToClient } from '../../../../api/crawler/utils';
+import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../routes';
 import { DomainManagementLogic } from '../domain_management_logic';
 
 import {
-  CrawlerDomain,
   CrawlerDomainValidationResult,
   CrawlerDomainValidationResultChange,
   CrawlerDomainValidationResultFromServer,
   CrawlerDomainValidationStepName,
 } from './types';
-import { crawlDomainValidationToResult } from './utils';
-
 import {
+  crawlDomainValidationToResult,
   domainValidationFailureResultChange,
   extractDomainAndEntryPointFromUrl,
   getDomainWithProtocol,
@@ -43,13 +43,16 @@ export interface AddDomainLogicValues {
   hasBlockingFailure: boolean;
   hasValidationCompleted: boolean;
   ignoreValidationFailure: boolean;
+  isFlyoutVisible: boolean;
   isValidationLoading: boolean;
 }
 
 export interface AddDomainLogicActions {
   clearDomainFormInputValue(): void;
+  closeFlyout(): void;
   onSubmitNewDomainError(errors: string[]): { errors: string[] };
   onSubmitNewDomainSuccess(domain: CrawlerDomain): { domain: CrawlerDomain };
+  openFlyout(): void;
   performDomainValidationStep(
     stepName: CrawlerDomainValidationStepName,
     checks: string[]
@@ -93,9 +96,11 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
   path: ['enterprise_search', 'app_search', 'crawler', 'add_domain'],
   actions: () => ({
     clearDomainFormInputValue: true,
+    closeFlyout: true,
     initialValidation: true,
     onSubmitNewDomainError: (errors) => ({ errors }),
     onSubmitNewDomainSuccess: (domain) => ({ domain }),
+    openFlyout: true,
     performDomainValidationStep: (stepName, checks) => ({ checks, stepName }),
     setAddDomainFormInputValue: (newValue) => newValue,
     setDomainValidationResult: (change: CrawlerDomainValidationResultChange) => ({ change }),
@@ -166,6 +171,14 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
         setIgnoreValidationFailure: (_, newValue: boolean) => newValue,
       },
     ],
+    isFlyoutVisible: [
+      false,
+      {
+        closeFlyout: () => false,
+        onSubmitNewDomainSuccess: () => false,
+        openFlyout: () => true,
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
     allowSubmit: [
@@ -220,7 +233,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
   }),
   listeners: ({ actions, values }) => ({
     onSubmitNewDomainSuccess: ({ domain }) => {
-      DomainManagementLogic.actions.getDomains();
+      const { indexName } = DomainManagementLogic.props;
       flashSuccessToast(
         i18n.translate(
           'xpack.enterpriseSearch.appSearch.crawler.domainsTable.action.add.successMessage',
@@ -232,9 +245,12 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
           }
         )
       );
-      // KibanaLogic.values.navigateToUrl(
-      //   generateEnginePath(ENGINE_CRAWLER_DOMAIN_PATH, { domainId: domain.id })
-      // );
+      KibanaLogic.values.navigateToUrl(
+        generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
+          domainId: domain.id,
+          indexName,
+        })
+      );
     },
     performDomainValidationStep: async ({ stepName, checks }) => {
       const { http } = HttpLogic.values;
@@ -289,8 +305,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
     },
     submitNewDomain: async () => {
       const { http } = HttpLogic.values;
-      const { data } = FetchIndexApiLogic.values;
-      const indexName = data?.index.name;
+      const { indexName } = DomainManagementLogic.props;
 
       const requestBody = JSON.stringify({
         entry_points: [{ value: values.entryPointValue }],
@@ -298,12 +313,13 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       });
 
       try {
-        const domain = await http.post<CrawlerDomain>(
+        const response = await http.post<CrawlerDomainFromServer>(
           `/internal/enterprise_search/indices/${indexName}/crawler/domains`,
           {
             body: requestBody,
           }
         );
+        const domain = crawlerDomainServerToClient(response);
         actions.onSubmitNewDomainSuccess(domain);
       } catch (e) {
         // we surface errors inside the form instead of in flash messages

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+
+import { useValues, useActions } from 'kea';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,77 +30,59 @@ import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
 import { AddDomainForm } from './add_domain_form';
 import { AddDomainFormErrors } from './add_domain_form_errors';
 import { AddDomainFormSubmitButton } from './add_domain_form_submit_button';
+import { AddDomainLogic } from './add_domain_logic';
 
 export const AddDomainFlyout: React.FC = () => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const { isFlyoutVisible } = useValues(AddDomainLogic);
+  const { closeFlyout } = useActions(AddDomainLogic);
 
-  return (
-    <>
-      <EuiButton
-        size="s"
-        color="success"
-        iconType="plusInCircle"
-        onClick={() => setIsFlyoutVisible(true)}
-      >
-        {i18n.translate(
-          'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.openButtonLabel',
-          {
-            defaultMessage: 'Add domain',
-          }
-        )}
-      </EuiButton>
-
-      {isFlyoutVisible && (
-        <EuiPortal>
-          <EuiFlyout onClose={() => setIsFlyoutVisible(false)}>
-            <EuiFlyoutHeader>
-              <EuiTitle size="m">
-                <h2>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.title',
-                    {
-                      defaultMessage: 'Add a new domain',
-                    }
-                  )}
-                </h2>
-              </EuiTitle>
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody
-              banner={
-                <>
-                  <EuiSpacer size="l" />
-                  <AddDomainFormErrors />
-                </>
-              }
-            >
-              <EuiText>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.description',
-                  {
-                    defaultMessage:
-                      'You can add multiple domains to this engine\'s web crawler. Add another domain here and modify the entry points and crawl rules from the "Manage" page.',
-                  }
-                )}
-                <p />
-              </EuiText>
-              <EuiSpacer size="l" />
-              <AddDomainForm />
-            </EuiFlyoutBody>
-            <EuiFlyoutFooter>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={() => setIsFlyoutVisible(false)}>
-                    {CANCEL_BUTTON_LABEL}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <AddDomainFormSubmitButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlyoutFooter>
-          </EuiFlyout>
-        </EuiPortal>
-      )}
-    </>
-  );
+  if (isFlyoutVisible) {
+    return (
+      <EuiPortal>
+        <EuiFlyout onClose={closeFlyout}>
+          <EuiFlyoutHeader>
+            <EuiTitle size="m">
+              <h2>
+                {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.title', {
+                  defaultMessage: 'Add a new domain',
+                })}
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody
+            banner={
+              <>
+                <EuiSpacer size="l" />
+                <AddDomainFormErrors />
+              </>
+            }
+          >
+            <EuiText>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.description',
+                {
+                  defaultMessage:
+                    'You can add multiple domains to this engine\'s web crawler. Add another domain here and modify the entry points and crawl rules from the "Manage" page.',
+                }
+              )}
+              <p />
+            </EuiText>
+            <EuiSpacer size="l" />
+            <AddDomainForm />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={closeFlyout}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AddDomainFormSubmitButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      </EuiPortal>
+    );
+  }
+  return null;
 };

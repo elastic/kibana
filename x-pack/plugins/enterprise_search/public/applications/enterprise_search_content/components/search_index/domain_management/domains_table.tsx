@@ -17,11 +17,16 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedNumber } from '@kbn/i18n-react';
 
+import { generateEncodedPath } from '../../../../app_search/utils/encode_path_params';
+
 import { DELETE_BUTTON_LABEL, MANAGE_BUTTON_LABEL } from '../../../../shared/constants';
+import { KibanaLogic } from '../../../../shared/kibana';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 
 import { CrawlerDomain } from '../../../api/crawler/types';
+
+import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../routes';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 import { DomainManagementLogic } from './domain_management_logic';
@@ -46,7 +51,7 @@ export const DomainsTable: React.FC = () => {
 
   const domainManagementLogic = DomainManagementLogic({ indexName });
   const { domains, meta, isLoading } = useValues(domainManagementLogic);
-  const { onPaginate } = useActions(domainManagementLogic);
+  const { deleteDomain, onPaginate } = useActions(domainManagementLogic);
 
   const columns: Array<EuiBasicTableColumn<CrawlerDomain>> = [
     {
@@ -58,7 +63,13 @@ export const DomainsTable: React.FC = () => {
         }
       ),
       render: (_, domain: CrawlerDomain) => (
-        <EuiLinkTo data-test-subj="CrawlerDomainURL" to={'' /* TODO */}>
+        <EuiLinkTo
+          data-test-subj="CrawlerDomainURL"
+          to={generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
+            domainId: domain.id,
+            indexName,
+          })}
+        >
           {domain.url}
         </EuiLinkTo>
       ),
@@ -101,13 +112,13 @@ export const DomainsTable: React.FC = () => {
           ),
           type: 'icon',
           icon: 'eye',
-          onClick: () => {
-            // KibanaLogic.values.navigateToUrl(
-            //   generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
-            //     indexName,
-            //     domainId: domain.id,
-            //   })
-            // );
+          onClick: (domain) => {
+            KibanaLogic.values.navigateToUrl(
+              generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
+                domainId: domain.id,
+                indexName,
+              })
+            );
           },
         },
         {
@@ -123,7 +134,7 @@ export const DomainsTable: React.FC = () => {
           color: 'danger',
           onClick: (domain) => {
             if (window.confirm(getDeleteDomainConfirmationMessage(domain.url))) {
-              // deleteDomain(domain);
+              deleteDomain(domain);
             }
           },
         },

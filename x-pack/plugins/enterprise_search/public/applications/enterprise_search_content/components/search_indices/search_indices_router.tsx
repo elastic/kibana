@@ -13,7 +13,9 @@ import {
   SEARCH_INDEX_PATH,
   SEARCH_INDEX_TAB_PATH,
   NEW_INDEX_PATH,
+  SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,
 } from '../../routes';
+import { CrawlerDomainDetail } from '../crawler_domain_detail/crawler_domain_detail';
 
 import { NewIndex } from '../new_index';
 import { SearchIndex } from '../search_index/search_index';
@@ -31,6 +33,9 @@ export const SearchIndicesRouter: React.FC = () => {
       </Route>
       <Route path={SEARCH_INDEX_PATH} exact>
         <SearchIndex />
+      </Route>
+      <Route path={SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH}>
+        <CrawlerDomainDetail />
       </Route>
       <Route path={SEARCH_INDEX_TAB_PATH}>
         <SearchIndex />

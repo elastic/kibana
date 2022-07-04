@@ -10,9 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiPanel, EuiIcon } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
 
@@ -21,7 +19,8 @@ import { GetCrawlerDomainsApiLogic } from '../../../api/crawler/get_crawler_doma
 
 import { AddDomainFlyout } from './add_domain/add_domain_flyout';
 import { DomainManagementLogic } from './domain_management_logic';
-import { DomainsTable } from './domains_table';
+import { DomainsPanel } from './domains_panel';
+import { EmptyStatePanel } from './empty_state_panel';
 
 export const SearchIndexDomainManagement: React.FC = () => {
   const { indexName } = useParams<{
@@ -31,7 +30,7 @@ export const SearchIndexDomainManagement: React.FC = () => {
   DeleteCrawlerDomainApiLogic.mount();
   GetCrawlerDomainsApiLogic.mount();
   const domainManagementLogic = DomainManagementLogic({ indexName });
-  const { isLoading } = useValues(domainManagementLogic);
+  const { domains, isLoading } = useValues(domainManagementLogic);
 
   if (isLoading) {
     return <Loading />;
@@ -40,27 +39,8 @@ export const SearchIndexDomainManagement: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <EuiPanel>
-        <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="globe" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h2>
-                {i18n.translate('xpack.enterpriseSearch.appSearch.crawler.domainsTitle', {
-                  defaultMessage: 'Domains',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddDomainFlyout />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <DomainsTable />
-      </EuiPanel>
+      {domains.length > 0 ? <DomainsPanel /> : <EmptyStatePanel />}
+      <AddDomainFlyout />
     </>
   );
 };

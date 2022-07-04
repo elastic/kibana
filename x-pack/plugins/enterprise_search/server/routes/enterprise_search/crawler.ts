@@ -75,7 +75,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v1/engines/:indexName/crawler2/domains/:domainId',
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains/:domainId',
     })
   );
 
@@ -90,7 +90,7 @@ export function registerCrawlerRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v1/engines/:indexName/crawler2/domains/:domainId',
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains/:domainId',
     })
   );
 }

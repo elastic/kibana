@@ -34,6 +34,8 @@ export const CrawlerDomainDetail: React.FC = () => {
       pageChrome={[...baseBreadcrumbs, indexName, domainData?.url ?? '...']}
       isLoading={domainApiStatus === Status.LOADING || domainApiStatus === Status.IDLE}
       pageHeader={{ pageTitle: indexName }}
-    />
+    >
+      {JSON.stringify(domainData)}
+    </EnterpriseSearchContentPageTemplate>
   );
 };
