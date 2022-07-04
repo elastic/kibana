@@ -10,12 +10,11 @@ import { Observable } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
 import { HttpService } from '../http_service';
 
-import { annotations } from './annotations';
-import { dataFrameAnalytics } from './data_frame_analytics';
-import { filters } from './filters';
+import { annotationsApiProvider } from './annotations';
+import { dataFrameAnalyticsApiProvider } from './data_frame_analytics';
+import { filtersApiProvider } from './filters';
 import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
-import { fileDatavisualizer } from './datavisualizer';
 import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import type {
@@ -384,13 +383,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    checkManageMLCapabilities() {
-      return httpService.http<MlCapabilitiesResponse>({
-        path: `${basePath()}/ml_capabilities`,
-        method: 'GET',
-      });
-    },
-
     checkIndicesExists({ indices }: { indices: string[] }) {
       const body = JSON.stringify({ indices });
 
@@ -722,12 +714,11 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    annotations,
-    dataFrameAnalytics,
-    filters,
+    annotations: annotationsApiProvider(httpService),
+    dataFrameAnalytics: dataFrameAnalyticsApiProvider(httpService),
+    filters: filtersApiProvider(httpService),
     results: resultsApiProvider(httpService),
     jobs: jobsApiProvider(httpService),
-    fileDatavisualizer,
     savedObjects: savedObjectsApiProvider(httpService),
     trainedModels: trainedModelsApiProvider(httpService),
   };
