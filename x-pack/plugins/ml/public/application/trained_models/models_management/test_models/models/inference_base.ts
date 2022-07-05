@@ -38,14 +38,14 @@ export enum RUNNING_STATE {
 }
 
 export abstract class InferenceBase<TInferResponse> {
-  protected abstract inferenceType: InferenceType;
-  protected abstract inferenceTypeLabel: string;
+  protected abstract readonly inferenceType: InferenceType;
+  protected abstract readonly inferenceTypeLabel: string;
   protected readonly inputField: string;
   public inputText$ = new BehaviorSubject<string>('');
   public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
   public inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
   public runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
-  protected info: string[] = [];
+  protected readonly info: string[] = [];
 
   constructor(
     protected trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
@@ -73,11 +73,7 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   public getInfoComponent(): JSX.Element {
-    return getInferenceInfoComponent(this.inferenceType, this.info);
-  }
-
-  public label(): string {
-    return this.inferenceTypeLabel;
+    return getInferenceInfoComponent(this.inferenceTypeLabel, this.info);
   }
 
   protected abstract getInputComponent(): JSX.Element;

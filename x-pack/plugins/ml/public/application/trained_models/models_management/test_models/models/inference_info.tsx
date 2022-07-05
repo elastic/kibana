@@ -10,15 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
 
 interface Props {
-  inferenceType: string;
+  taskLabel: string;
   info: string[];
 }
 
-export const getInferenceInfoComponent = (inferenceType: string, info: string[]) => (
-  <InferenceInfo inferenceType={inferenceType} info={info} />
+export const getInferenceInfoComponent = (taskLabel: string, info: string[]) => (
+  <InferenceInfo taskLabel={taskLabel} info={info} />
 );
 
-export const InferenceInfo: FC<Props> = ({ inferenceType, info }) => {
+const InferenceInfo: FC<Props> = ({ taskLabel, info }) => {
   if (info.length === 0) {
     return null;
   }
@@ -26,8 +26,8 @@ export const InferenceInfo: FC<Props> = ({ inferenceType, info }) => {
     <>
       <EuiCallOut
         title={i18n.translate('xpack.ml.editModelSnapshotFlyout.calloutTitle', {
-          defaultMessage: 'Task: {inferenceType}',
-          values: { inferenceType },
+          defaultMessage: 'Task: {taskLabel}',
+          values: { taskLabel },
         })}
       >
         {info.map((i) => (
