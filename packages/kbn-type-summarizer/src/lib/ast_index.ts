@@ -82,14 +82,13 @@ export interface AmbientRef {
 /**
  * LocalDecs represent the different rootSymbols which will be declared locally in
  * the type summary. They are either declarations copied from the .d.ts files, or
- * namespaces which are synthesized to represent imported namespaces which are then
- * exported.
+ * namespaces which are synthesized to represent imported namespaces.
  */
 export type LocalDecs = CopiedDecs | NamespaceDec;
 
 /**
  * A NamespaceDec represents a synthetic namepace which needs to be created in the
- * type summary to power a namespace export in the source types
+ * type summary to power a namespace import in the source types.
  */
 export interface NamespaceDec {
   type: 'namespace dec';
@@ -114,8 +113,8 @@ export interface NamespaceDec {
 
   /**
    * If this namespace is exported then this will be set to ExportDetails. We don't
-   * know if a namespace is exported until we have traversed through all references
-   * so this property has to be mutable.
+   * know if it is exported until all references to this specific rootSymbol are
+   * traversed, so `exported` can't be read only and is only defined at the end of indexing.
    */
   exported: ExportDetails | undefined;
 }
@@ -138,9 +137,9 @@ export interface CopiedDecs {
   readonly decs: ExportableDec[];
 
   /**
-   * We don't know if CopiedDecs are exported until all references to this specific
-   * rootSymbol are traversed, so `exported` can't be read only and is only defined
-   * after the object is created.
+   * If these declarations are exported then this will be set to ExportDetails. We don't
+   * know if these decs are exported until all references to this specific rootSymbol are
+   * traversed, so `exported` can't be read only and is only defined at the end of indexing.
    */
   exported: ExportDetails | undefined;
 }

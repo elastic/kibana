@@ -158,18 +158,20 @@ export class AstIndexer {
    * declarations, and ambient refs that should end up in the public type
    * summary file.
    *
-   * To do this we use "symbols" from the `TypeChecker` provided by TypeScript. A
-   * symbol in the `TypeChecker` is not related to `Symbol`s in JS. They describe
-   * a specific sourceFile/Type/Value in the source code, and allow us to traverse
-   * the source code from the AST. For instance, we can ask the `TypeChecker` for
-   * the symbol of an `Identifier` node in the AST (the node representing most named
-   * "keywords"; `a` and `foo` in `a(foo)` are both `Identifiers`). Every identifier
-   * in the source code should map to a specific symbol in the type system, which would
-   * be returned by the `TypeChecker`. These symbols then list the "declarations" which
-   * define/declare this symbol. This is often a `class {}` or `interface {}` declaration
-   * but there are many types of declarations that could have defined this symbol.
-   * Additionally, if function overloads or interface extensions are used the symbol may
-   * have multiple declarations.
+   * To do this we use "symbols" from the `TypeChecker` provided by TypeScript.
+   *
+   *  > "symbols" in the `TypeChecker` are not related to `Symbol`s in JS.
+   *
+   * Symbols describe a specific sourceFile/Type/Value in the source code, and allow
+   * us to understand the types referenced by specific AST nodes. For instance, we
+   * can ask the `TypeChecker` for the symbol of an `Identifier` node in the AST (the
+   * node type representing most named "keywords"; `a` and `foo` in `a(foo)` are both
+   * `Identifiers`). Every identifier in the source code should map to a specific symbol
+   * in the type system, which would be returned by the `TypeChecker`. These symbols
+   * then list the "declarations" which define/declare them. This is often a `class {}`
+   * or `interface {}` declaration but there are many types of declarations that could
+   * have defined this symbol. Additionally, the symbol may have multiple declarations
+   * if function overloads or interface extensions are used.
    *
    * Symbols can be "alias" symbols, indicating that they are declared in the source code
    * but actually point to another declaration, either by variable assignment or via
@@ -178,7 +180,7 @@ export class AstIndexer {
    * elsewhere. Thankfully, the `TypeChecker` has an API to traverse up the alias chain
    * to the "root symbol". While indexing exports we regularly use the `SymbolResolver`
    * to convert a symbol to it's `rootSymbol`, so that we can compare two references and
-   * determine if they are pointing to the same value.
+   * determine if they are pointing to the same underlying declarations/type/value.
    *
    * To determine the full index of exports for a source file we start by asking the
    * TypeChecker for the list of exported symbols of some sourceFile, then we traverse
@@ -197,14 +199,15 @@ export class AstIndexer {
    * references to other symbols. These references cause additional `ImportedDecs`,
    * `AmbientRef`, or `LocalDecs` objects to be added to the index before the exported
    * `LocalDecs`, ensuring that referenced declarations come first in the resulting type
-   * summary file and that all code referenced by the decalarations is includes in the type
-   * symmary file.
+   * summary file and that all code referenced by the decalarations is included in the type
+   * summary file.
    *
    * Once all referenced declarations are found and added to the index the exported
-   * `LocalDecs` object is added to the index.
+   * `LocalDecs` object is added to the index and the process is repeated for the next exported
+   * symbol.
    *
    * To ensure that we don't end up with duplicate declarations all `LocalDecs`, `ImportedDecs`
-   * and `AmbientRef` objects track the "root symbol" that they represent and any time we
+   * and `AmbientRef` objects track the "root symbol" that they represent. Any time we
    * encounter a new symbol which might need to be added to the index it is first resolved
    * to it's root symbol to ensure we haven't already handled it.
    */
@@ -212,7 +215,7 @@ export class AstIndexer {
     return this.log.step('indexExports()', sourceFile.fileName, () => {
       const sourceFileSymbol = this.typeChecker.getSymbolAtLocation(sourceFile);
       if (!sourceFileSymbol) {
-        throw new Error('sourceFile symbol for source file not found');
+        throw new Error(`symbol for source file not found: ${sourceFile.fileName}`);
       }
 
       /**
@@ -256,7 +259,7 @@ export class AstIndexer {
       /**
        * These are the symbols which are exported from the `sourceFile` being indexed
        * grouped by their rootSymbol. This allows us to get the export details for
-       * external symbols when we are created ImportedDecs.
+       * external symbols when we are creating ImportedDecs.
        */
       const exportSymbolsByRootSymbols = new SetMap<DecSymbol, DecSymbol>();
       /**
@@ -271,7 +274,7 @@ export class AstIndexer {
        * with all the internal symbols referenced by the declarations of `symbol`.
        */
       const indexSymbol = (symbol: ts.Symbol) => {
-        return this.log.verboseStep('indexSymbol', symbol, () => {
+        return this.log.verboseStep('indexSymbol()', symbol, () => {
           if (indexedSymbols.has(symbol)) {
             return;
           }
