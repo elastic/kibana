@@ -16,7 +16,7 @@ export async function fetchAllSavedObjects<T>(
   soRepository: ISavedObjectsRepository,
   findOptions: SavedObjectsCreatePointInTimeFinderOptions
 ): Promise<Array<SavedObjectsFindResult<T>>> {
-  const finder = soRepository.createPointInTimeFinder<T>({ ...findOptions, perPage: 100 });
+  const finder = soRepository.createPointInTimeFinder<T>({ ...findOptions, perPage: 1000 });
 
   const allSavedObjects: Array<SavedObjectsFindResult<T>> = [];
 
