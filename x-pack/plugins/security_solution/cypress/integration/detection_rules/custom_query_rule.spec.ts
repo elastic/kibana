@@ -110,7 +110,6 @@ describe('Custom query rules', () => {
   before(() => {
     cleanKibana();
     esArchiverResetKibana();
-    postDataView('auditbeat-*');
 
     login();
   });
@@ -122,7 +121,6 @@ describe('Custom query rules', () => {
     const expectedNumberOfRules = 1;
 
     beforeEach(() => {
-      // esArchiverResetKibana();
       deleteAlertsAndRules();
       createTimeline(getNewRule().timeline).then((response) => {
         cy.wrap({
@@ -207,6 +205,9 @@ describe('Custom query rules', () => {
       cy.get(ALERT_GRID_CELL).contains(this.rule.name);
     });
   });
+
+  // adding these tests as "skipped" as they are a work-in-progress
+  // don't want these tests to hold up pushing in bug fixes as part of this PR.
   describe.skip('Custom detection rules creation with data view', () => {
     const expectedNumberOfRules = 1;
 
@@ -247,28 +248,12 @@ describe('Custom query rules', () => {
 
       cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
       cy.get(RULE_NAME).should('have.text', this.rule.name);
-      // cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
-      // cy.get(SEVERITY).should('have.text', this.rule.severity);
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
       goToRuleDetails();
 
       cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
-      cy.get(ABOUT_DETAILS).within(() => {
-        // getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);
-        // getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
-        // getDetails(REFERENCE_URLS_DETAILS).should((details) => {
-        //   expect(removeExternalLinkText(details.text())).equal(expectedUrls);
-        // });
-        // getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
-        // getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
-        //   expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
-        // });
-        // getDetails(TAGS_DETAILS).should('have.text', expectedTags);
-      });
-      // cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
-      // cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails('Data View').should('have.text', 'auditbeat-*');
         getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
