@@ -4,10 +4,16 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-export JOB_NUM=${BUILDKITE_PARALLEL_JOB:-0}
-export JOB=ftr-configs-${JOB_NUM}
+BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
+FTR_CONFIG_GROUP_KEY=${FTR_CONFIG_GROUP_KEY:-}
+if [ "$FTR_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; then
+  echo "Missing FTR_CONFIG_GROUP_KEY env var"
+  exit 1
+fi
 
-FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${JOB_NUM}"
+export JOB="$FTR_CONFIG_GROUP_KEY"
+
+FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
 
 # a FTR failure will result in the script returning an exit code of 10
 exitCode=0
@@ -24,10 +30,15 @@ if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
   fi
 fi
 
-if [[ "$configs" == "" ]]; then
+if [ "$configs" == "" ] && [ "$FTR_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- downloading ftr test run order"
   buildkite-agent artifact download ftr_run_order.json .
-  configs=$(jq -r '.groups[env.JOB_NUM | tonumber].names | .[]' ftr_run_order.json)
+  configs=$(jq -r '.[env.FTR_CONFIG_GROUP_KEY].names[]' ftr_run_order.json)
+fi
+
+if [ "$configs" == "" ]; then
+  echo "unable to determine configs to run"
+  exit 1
 fi
 
 failedConfigs=""
