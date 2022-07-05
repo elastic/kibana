@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -38,17 +39,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('dashboard integration', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard'
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
       );
       await esArchiver.loadIfNeeded(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
     });
     after(async () => {
-      await esArchiver.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard'
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
       );
+      await kibanaServer.savedObjects.clean({ types: ['tag'] });
       await esArchiver.unload(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
