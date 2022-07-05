@@ -10,7 +10,6 @@ import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'reac
 import styled from 'styled-components';
 
 import { DataViewBase } from '@kbn/es-query';
-import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
 import {
   RuleStepProps,
   RuleStep,
@@ -45,6 +44,7 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useRuleIndices } from '../../../containers/detection_engine/rules/use_rule_indices';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -102,16 +102,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
 
-  const memoMlJobIds = useMemo(() => defineRuleData?.machineLearningJobId ?? [], [defineRuleData]);
-  const { jobs } = useGetInstalledJob(memoMlJobIds);
-
-  const memoRuleIndices = useMemo(() => {
-    if (jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
-    } else {
-      return defineRuleData?.index ?? [];
-    }
-  }, [jobs, defineRuleData]);
+  const { ruleIndices } = useRuleIndices(
+    defineRuleData?.machineLearningJobId,
+    defineRuleData?.index
+  );
 
   /**
    * 1. if not null, fetch data view from id saved on rule form
@@ -119,8 +113,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
    * 3. useEffect if indexIndexPattern is updated and dataView from rule form is empty
    */
 
-  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] =
-    useFetchIndex(memoRuleIndices);
+  const [indexPatternLoading, { indexPatterns: indexIndexPattern }] = useFetchIndex(ruleIndices);
 
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPattern);
 

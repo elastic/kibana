@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { ThemeProvider } from 'styled-components';
 import { act } from '@testing-library/react';
 
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
@@ -24,13 +23,7 @@ import {
   DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiColorLightestShade: '#ece',
-  },
-});
+import { TestProviders } from '../../../../common/mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
@@ -86,16 +79,17 @@ describe('StepAboutRuleComponent', () => {
 
   it('is invalid if description is not present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     await act(async () => {
@@ -114,17 +108,18 @@ describe('StepAboutRuleComponent', () => {
 
   it('is invalid if threat match rule and threat_indicator_path is not present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          defineRuleData={{ ruleType: 'threat_match' } as DefineStepRule}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        defineRuleData={{ ruleType: 'threat_match' } as DefineStepRule}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     await act(async () => {
@@ -143,16 +138,17 @@ describe('StepAboutRuleComponent', () => {
 
   it('is valid if is not a threat match rule and threat_indicator_path is not present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     wrapper
@@ -176,16 +172,17 @@ describe('StepAboutRuleComponent', () => {
 
   it('is invalid if no "name" is present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     await act(async () => {
@@ -204,16 +201,17 @@ describe('StepAboutRuleComponent', () => {
 
   it('is valid if both "name" and "description" are present', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     wrapper
@@ -261,16 +259,17 @@ describe('StepAboutRuleComponent', () => {
 
   it('it allows user to set the risk score as a number (and not a string)', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     wrapper
@@ -324,16 +323,17 @@ describe('StepAboutRuleComponent', () => {
 
   it('does not modify the provided risk score until the user changes the severity', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     wrapper
@@ -374,17 +374,18 @@ describe('StepAboutRuleComponent', () => {
     });
 
     mount(
-      <ThemeProvider theme={mockTheme}>
-        <StepAboutRule
-          addPadding={true}
-          defaultValues={stepAboutDefaultValue}
-          defineRuleData={stepDefineStepMLRule}
-          descriptionColumns="multi"
-          isReadOnlyView={false}
-          setForm={setFormHook}
-          isLoading={false}
-        />
-      </ThemeProvider>
+      <StepAboutRule
+        addPadding={true}
+        defaultValues={stepAboutDefaultValue}
+        defineRuleData={stepDefineStepMLRule}
+        descriptionColumns="multi"
+        isReadOnlyView={false}
+        setForm={setFormHook}
+        isLoading={false}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
     );
 
     const indexNames = ['.ml-anomalies-shared'];
