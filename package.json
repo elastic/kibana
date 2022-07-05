@@ -1026,7 +1026,7 @@
     "json-schema-typed": "^7.0.3",
     "json5": "^1.0.1",
     "jsondiffpatch": "0.4.1",
-    "license-checker": "^16.0.0",
+    "license-checker": "^25.0.1",
     "listr": "^0.14.1",
     "lmdb-store": "^1.6.11",
     "marge": "^1.0.1",
