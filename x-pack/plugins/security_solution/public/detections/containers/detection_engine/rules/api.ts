@@ -105,6 +105,25 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
   });
 
 /**
+ * Patch provided rule
+ * NOTE: The rule edit flow does NOT use patch as it relies on the
+ * functionality of PUT to delete field values when not provided, if
+ * just expecting changes, use this `patchRule`
+ *
+ * @param ruleProperties to patch
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+ export const createDefaultExceptionListForRule = async ({ list, ruleSoId, ruleId, signal }: PatchRuleProps): Promise<RulesSchema> =>
+ KibanaServices.get().http.fetch<RulesSchema>(`${DETECTION_ENGINE_RULES_URL}/exceptions`, {
+   method: 'POST',
+   body: JSON.stringify({ list, rule_so_id: ruleSoId, rule_id: ruleId }),
+   signal,
+ });
+
+
+/**
  * Preview provided Rule
  *
  * @param rule CreateRulesSchema to add

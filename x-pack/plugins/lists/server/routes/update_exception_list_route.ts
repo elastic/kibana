@@ -11,6 +11,7 @@ import {
   UpdateExceptionListSchemaDecoded,
   exceptionListSchema,
   updateExceptionListSchema,
+  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
@@ -53,6 +54,14 @@ export const updateExceptionListRoute = (router: ListsPluginRouter): void => {
           type,
           version,
         } = request.body;
+
+        if (type === ExceptionListTypeEnum.DETECTION_RULE) {
+          return siemResponse.error({
+            body: `exception list type: "${ExceptionListTypeEnum.DETECTION_RULE}" cannot be patched - it is a system only exception list`,
+            statusCode: 405,
+          });
+        }
+
         const exceptionLists = await getExceptionListClient(context);
         if (id == null && listId == null) {
           return siemResponse.error({

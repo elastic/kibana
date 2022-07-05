@@ -11,6 +11,7 @@ import {
   DeleteExceptionListSchemaDecoded,
   deleteExceptionListSchema,
   exceptionListSchema,
+  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
@@ -42,12 +43,26 @@ export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
       try {
         const exceptionLists = await getExceptionListClient(context);
         const { list_id: listId, id, namespace_type: namespaceType } = request.query;
+
         if (listId == null && id == null) {
           return siemResponse.error({
             body: 'Either "list_id" or "id" needs to be defined in the request',
             statusCode: 400,
           });
         } else {
+          const exceptionList = await exceptionLists.getExceptionList({
+            id,
+            listId,
+            namespaceType,
+          });
+
+          if (exceptionList != null && exceptionList.type === ExceptionListTypeEnum.DETECTION_RULE) {
+            return siemResponse.error({
+              body: `exception list type: "${ExceptionListTypeEnum.DETECTION_RULE}" cannot be deleted - it is a system only exception list`,
+              statusCode: 405,
+            });
+          }
+
           const deleted = await exceptionLists.deleteExceptionList({
             id,
             listId,

@@ -22,6 +22,7 @@ import { HttpStart } from '@kbn/core/public';
 
 import { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import {
+  createDefaultExceptionListForRule,
   fetchRuleById,
   patchRule,
 } from '../../../detections/containers/detection_engine/rules/api';
@@ -59,65 +60,21 @@ export const useFetchOrCreateRuleExceptionList = ({
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function createExceptionList(ruleResponse: Rule): Promise<ExceptionListSchema> {
-      let newExceptionList: ExceptionListSchema;
-      if (exceptionListType === 'endpoint') {
-        const possibleEndpointExceptionList = await addEndpointExceptionList({
-          http,
-          signal: abortCtrl.signal,
-        });
-        if (Object.keys(possibleEndpointExceptionList).length === 0) {
-          // Endpoint exception list already exists, fetch it
-          newExceptionList = await fetchExceptionListById({
-            http,
-            id: ENDPOINT_LIST_ID,
-            namespaceType: 'agnostic',
-            signal: abortCtrl.signal,
-          });
-        } else {
-          newExceptionList = possibleEndpointExceptionList as ExceptionListSchema;
-        }
-      } else {
-        const exceptionListToCreate: CreateExceptionListSchema = {
+    async function createAndAssociateExceptionList(
+      ruleResponse: Rule
+    ): Promise<ExceptionListSchema> {
+      const newExceptionList = await createDefaultExceptionListForRule({
+        ruleId: ruleResponse.id,
+        ruleSoId: ruleResponse.rule_id,
+        list: {
           name: ruleResponse.name,
           description: ruleResponse.description,
-          type: exceptionListType,
+          type: 'detection_rule_default',
           namespace_type: 'single',
           list_id: undefined,
           tags: undefined,
           meta: undefined,
-        };
-        newExceptionList = await addExceptionList({
-          http,
-          list: exceptionListToCreate,
-          signal: abortCtrl.signal,
-        });
-      }
-      return Promise.resolve(newExceptionList);
-    }
-
-    async function createAndAssociateExceptionList(
-      ruleResponse: Rule
-    ): Promise<ExceptionListSchema> {
-      const newExceptionList = await createExceptionList(ruleResponse);
-
-      const newExceptionListReference = {
-        id: newExceptionList.id,
-        list_id: newExceptionList.list_id,
-        type: newExceptionList.type,
-        namespace_type: newExceptionList.namespace_type,
-      };
-      const newExceptionListReferences: ListArray = [
-        ...(ruleResponse.exceptions_list ?? []),
-        newExceptionListReference,
-      ];
-
-      await patchRule({
-        ruleProperties: {
-          rule_id: ruleResponse.rule_id,
-          exceptions_list: newExceptionListReferences,
-        },
-        signal: abortCtrl.signal,
+        }
       });
 
       return Promise.resolve(newExceptionList);
@@ -130,44 +87,15 @@ export const useFetchOrCreateRuleExceptionList = ({
       });
     }
 
-    async function fetchRuleExceptionLists(ruleResponse: Rule): Promise<ExceptionListSchema[]> {
-      const exceptionListReferences = ruleResponse.exceptions_list;
-      if (exceptionListReferences && exceptionListReferences.length > 0) {
-        const exceptionListPromises = exceptionListReferences.map(
-          (exceptionListReference: List) => {
-            return fetchExceptionListById({
-              http,
-              id: exceptionListReference.id,
-              namespaceType: exceptionListReference.namespace_type,
-              signal: abortCtrl.signal,
-            });
-          }
-        );
-        return Promise.all(exceptionListPromises);
-      } else {
-        return Promise.resolve([]);
-      }
-    }
-
     async function fetchOrCreateRuleExceptionList() {
       try {
         setIsLoading(true);
         const ruleResponse = await fetchRule();
-        const exceptionLists = await fetchRuleExceptionLists(ruleResponse);
+        // const exceptionLists = await fetchRuleExceptionLists(ruleResponse);
 
-        let exceptionListToUse: ExceptionListSchema;
-        const matchingList = exceptionLists.find((list) => {
-          if (exceptionListType === 'endpoint') {
-            return list.type === exceptionListType && list.list_id === ENDPOINT_LIST_ID;
-          } else {
-            return list.type === exceptionListType;
-          }
-        });
-        if (matchingList !== undefined) {
-          exceptionListToUse = matchingList;
-        } else {
-          exceptionListToUse = await createAndAssociateExceptionList(ruleResponse);
-        }
+        
+          const exceptionListToUse = await createAndAssociateExceptionList(ruleResponse);
+        console.log({exceptionListToUse})
 
         if (isSubscribed) {
           setExceptionList(exceptionListToUse);

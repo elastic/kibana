@@ -70,6 +70,7 @@ import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/
 import { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
+import { createRuleDefaultExceptionListRoute } from '../lib/detection_engine/routes/rules/create_rule_default_exception_list_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -90,6 +91,7 @@ export const initRoutes = (
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc
   createRulesRoute(router, ml);
+  createRuleDefaultExceptionListRoute(router);
   readRulesRoute(router, logger);
   updateRulesRoute(router, ml);
   patchRulesRoute(router, ml);
