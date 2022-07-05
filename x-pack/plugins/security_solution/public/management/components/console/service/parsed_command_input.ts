@@ -168,7 +168,7 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
     exclusive?: string;
     optional?: string;
   }) => {
-    return `${required ? required : ''} ${exclusive ? exclusive : ''} ${
+    return `${required ? required : ''}${exclusive ? ` ${exclusive}` : ''} ${
       optional && optional.length > 0 ? `[${optional}]` : ''
     }`.trim();
   };
