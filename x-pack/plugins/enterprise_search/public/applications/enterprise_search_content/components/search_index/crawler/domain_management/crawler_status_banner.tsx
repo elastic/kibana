@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useValues } from 'kea';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
@@ -17,7 +19,13 @@ import { CrawlerStatus } from '../../../../api/crawler/types';
 import { CrawlerLogic } from '../crawler_logic';
 
 export const CrawlerStatusBanner: React.FC = () => {
-  const { mostRecentCrawlRequestStatus } = useValues(CrawlerLogic);
+  const { indexName } = useParams<{
+    indexName: string;
+  }>();
+
+  const crawlerLogic = CrawlerLogic({ indexName });
+
+  const { mostRecentCrawlRequestStatus } = useValues(crawlerLogic);
   if (
     mostRecentCrawlRequestStatus === CrawlerStatus.Running ||
     mostRecentCrawlRequestStatus === CrawlerStatus.Starting ||

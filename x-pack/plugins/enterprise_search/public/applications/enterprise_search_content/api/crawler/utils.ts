@@ -21,16 +21,40 @@ import {
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
-  const { id, name: url, last_visited_at: lastCrawl, document_count: documentCount } = payload;
+  const {
+    id,
+    name,
+    sitemaps,
+    created_on: createdOn,
+    last_visited_at: lastCrawl,
+    document_count: documentCount,
+    crawl_rules: crawlRules,
+    default_crawl_rule: defaultCrawlRule,
+    entry_points: entryPoints,
+    deduplication_enabled: deduplicationEnabled,
+    deduplication_fields: deduplicationFields,
+    available_deduplication_fields: availableDeduplicationFields,
+  } = payload;
 
   const clientPayload: CrawlerDomain = {
-    documentCount,
     id,
-    url,
+    url: name,
+    documentCount,
+    createdOn,
+    crawlRules,
+    sitemaps,
+    entryPoints,
+    deduplicationEnabled,
+    deduplicationFields,
+    availableDeduplicationFields,
   };
 
   if (lastCrawl) {
     clientPayload.lastCrawl = lastCrawl;
+  }
+
+  if (defaultCrawlRule) {
+    clientPayload.defaultCrawlRule = defaultCrawlRule;
   }
 
   return clientPayload;

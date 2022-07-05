@@ -7,18 +7,63 @@
 
 import { Meta } from '../../../../../common/types';
 
+export enum CrawlerPolicies {
+  allow = 'allow',
+  deny = 'deny',
+}
+
+export enum CrawlerRules {
+  beginsWith = 'begins',
+  endsWith = 'ends',
+  contains = 'contains',
+  regex = 'regex',
+}
+
+export interface CrawlRule {
+  id: string;
+  policy: CrawlerPolicies;
+  rule: CrawlerRules;
+  pattern: string;
+}
+
+export interface EntryPoint {
+  id: string;
+  value: string;
+}
+
+export interface Sitemap {
+  id: string;
+  url: string;
+}
+
 export interface CrawlerDomain {
+  createdOn: string;
   documentCount: number;
   id: string;
   lastCrawl?: string;
   url: string;
+  crawlRules: CrawlRule[];
+  defaultCrawlRule?: CrawlRule;
+  entryPoints: EntryPoint[];
+  sitemaps: Sitemap[];
+  deduplicationEnabled: boolean;
+  deduplicationFields: string[];
+  availableDeduplicationFields: string[];
 }
 
 export interface CrawlerDomainFromServer {
-  document_count: number;
   id: string;
-  last_visited_at?: string;
   name: string;
+  created_on: string;
+  last_visited_at?: string;
+  document_count: number;
+  crawl_rules: CrawlRule[];
+  default_crawl_rule?: CrawlRule;
+  entry_points: EntryPoint[];
+  sitemaps: Sitemap[];
+  deduplication_enabled: boolean;
+  deduplication_fields: string[];
+  available_deduplication_fields: string[];
 }
 
 export interface CrawlerDomains {

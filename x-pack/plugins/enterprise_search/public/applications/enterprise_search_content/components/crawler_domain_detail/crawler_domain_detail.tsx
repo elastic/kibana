@@ -5,37 +5,87 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useParams } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
-import { Status } from '../../../../../common/types/api';
-import { GetCrawlerDomainApiLogic } from '../../api/crawler/get_crawler_domain_api_logic';
+import { EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
+
+import { generateEncodedPath } from '../../../app_search/utils/encode_path_params';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { SEARCH_INDEX_TAB_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+import { CrawlerStatusIndicator } from '../search_index/crawler/crawler_status_indicator/crawler_status_indicator';
+import { CrawlerStatusBanner } from '../search_index/crawler/domain_management/crawler_status_banner';
+import { SearchIndexTabId } from '../search_index/search_index';
 import { baseBreadcrumbs } from '../search_indices';
 
+import { CrawlRulesTable } from './crawl_rules_table';
+import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';
+import { DeduplicationPanel } from './deduplication_panel/deduplication_panel';
+import { EntryPointsTable } from './entry_points_table';
+import { SitemapsTable } from './sitemaps_table';
+
 export const CrawlerDomainDetail: React.FC = () => {
-  const { makeRequest, apiReset } = useActions(GetCrawlerDomainApiLogic);
-  const { data: domainData, status: domainApiStatus } = useValues(GetCrawlerDomainApiLogic);
   const { domainId, indexName } = useParams<{
     domainId: string;
     indexName: string;
   }>();
 
-  useEffect(() => {
-    makeRequest({ domainId, indexName });
-    return apiReset;
-  }, [indexName]);
+  const crawlerDomainDetailLogic = CrawlerDomainDetailLogic({ indexName, domainId });
+  const { domain, dataLoading } = useValues(crawlerDomainDetailLogic);
+  const domainUrl = domain?.url ?? '...';
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[...baseBreadcrumbs, indexName, domainData?.url ?? '...']}
-      isLoading={domainApiStatus === Status.LOADING || domainApiStatus === Status.IDLE}
-      pageHeader={{ pageTitle: indexName }}
+      pageChrome={[...baseBreadcrumbs, indexName, domainUrl]}
+      isLoading={dataLoading}
+      pageHeader={{
+        pageTitle: domainUrl,
+        rightSideItems: [
+          <CrawlerStatusIndicator />,
+          <EuiButton color="danger">Delete domain</EuiButton>,
+        ],
+      }}
     >
-      {JSON.stringify(domainData)}
+      <CrawlerStatusBanner />
+      <EuiButtonTo
+        size="s"
+        color="text"
+        iconType="arrowLeft"
+        to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          indexName,
+          tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
+        })}
+      >
+        All domains
+      </EuiButtonTo>
+      <EuiSpacer />
+      {domain && (
+        <>
+          <EuiPanel paddingSize="l" hasBorder>
+            <EntryPointsTable domain={domain} indexName={indexName} items={domain.entryPoints} />
+          </EuiPanel>
+          <EuiSpacer />
+          <EuiPanel paddingSize="l" hasBorder>
+            <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
+          </EuiPanel>
+
+          <EuiSpacer size="xl" />
+          <EuiPanel paddingSize="l" hasBorder>
+            <CrawlRulesTable
+              domainId={domainId}
+              indexName={indexName}
+              crawlRules={domain.crawlRules}
+              defaultCrawlRule={domain.defaultCrawlRule}
+            />
+          </EuiPanel>
+          <EuiSpacer />
+          <DeduplicationPanel />
+        </>
+      )}
     </EnterpriseSearchContentPageTemplate>
   );
 };
