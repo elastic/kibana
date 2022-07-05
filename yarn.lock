@@ -3214,6 +3214,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-errors@link:bazel-bin/packages/kbn-es-errors":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-query@link:bazel-bin/packages/kbn-es-query":
   version "0.0.0"
   uid ""
@@ -6672,6 +6676,10 @@
   uid ""
 
 "@types/kbn__es-archiver@link:bazel-bin/packages/kbn-es-archiver/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__es-errors@link:bazel-bin/packages/kbn-es-errors/npm_module_types":
   version "0.0.0"
   uid ""
 
