@@ -25,7 +25,7 @@ describe('generateConnectorApiKeyApiLogic', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/indices/indexName/api_key'
       );
-      expect(result).resolves.toEqual('result');
+      await expect(result).resolves.toEqual('result');
     });
   });
 });
