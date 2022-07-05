@@ -12,7 +12,7 @@ import { useKibanaSpace } from './hooks/use_kibana_space';
 import { getServiceLocations } from '../../state';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
-import { ADD_MONITOR_STEPS } from './form/config';
+import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 
 export const MonitorAddPage = () => {

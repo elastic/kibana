@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { FIELD_CONFIG } from '../form/config';
+import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
 import { ConfigKey, FormMonitorType } from '../types';
 
@@ -20,7 +20,7 @@ export const AdvancedConfig = () => {
   } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
 
-  return FIELD_CONFIG[type]?.advanced ? (
+  return FORM_CONFIG[type]?.advanced ? (
     <EuiPanel hasBorder>
       <EuiAccordion
         id="syntheticsAdvancedPanel"
@@ -29,7 +29,7 @@ export const AdvancedConfig = () => {
         })}
       >
         <EuiSpacer />
-        {FIELD_CONFIG[type].advanced?.map((configGroup) => {
+        {FORM_CONFIG[type].advanced?.map((configGroup) => {
           return (
             <EuiDescribedFormGroup
               description={configGroup.description}

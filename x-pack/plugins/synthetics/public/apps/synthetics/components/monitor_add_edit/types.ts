@@ -7,7 +7,19 @@
 
 import React from 'react';
 import { UseFormReturn, ControllerRenderProps, ControllerFieldState } from 'react-hook-form';
-import { ServiceLocations } from '../../../../../common/runtime_types/monitor_management';
+import {
+  ServiceLocations,
+  FormMonitorType,
+} from '../../../../../common/runtime_types/monitor_management';
+
+export type StepKey = 'step1' | 'step2' | 'step3' | 'scriptEdit';
+
+export interface Step {
+  title: string;
+  children: React.ReactNode;
+}
+
+export type StepMap = Record<FormMonitorType, Step[]>;
 
 export * from '../../../../../common/runtime_types/monitor_management';
 export * from '../../../../../common/types/monitor_validation';

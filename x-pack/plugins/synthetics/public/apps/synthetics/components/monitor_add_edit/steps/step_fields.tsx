@@ -8,9 +8,9 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Step } from './step';
-import { FIELD_CONFIG, StepKey } from '../form/config';
+import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
-import { ConfigKey, FormMonitorType } from '../types';
+import { ConfigKey, FormMonitorType, StepKey } from '../types';
 
 export const StepFields = ({
   description,
@@ -27,7 +27,7 @@ export const StepFields = ({
 
   return (
     <Step description={description}>
-      {FIELD_CONFIG[type][stepKey]?.map((field) => {
+      {FORM_CONFIG[type][stepKey]?.map((field) => {
         return <Field {...field} key={field.fieldKey} fieldError={errors[field.fieldKey]} />;
       })}
     </Step>

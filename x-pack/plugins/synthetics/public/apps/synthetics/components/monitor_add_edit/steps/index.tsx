@@ -8,9 +8,8 @@
 import React from 'react';
 import { EuiSteps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { ConfigKey, FormMonitorType } from '../types';
+import { ConfigKey, FormMonitorType, StepMap } from '../types';
 import { AdvancedConfig } from '../advanced';
-import { StepMap } from '../form/config';
 import { MonitorTypePortal } from './monitor_type_portal';
 
 export const MonitorSteps = ({
