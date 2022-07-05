@@ -21,14 +21,12 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
  */
 
 interface Props extends Omit<LogStreamProps, 'startTimestamp' | 'endTimestamp'> {
-  sourceId?: string;
   startTimestamp?: LogStreamProps['startTimestamp'];
   endTimestamp?: LogStreamProps['endTimestamp'];
   hoursAgo?: number;
 }
 
 export const EntSearchLogStream: React.FC<Props> = ({
-  sourceId,
   startTimestamp,
   endTimestamp,
   hoursAgo = 24,
@@ -39,12 +37,7 @@ export const EntSearchLogStream: React.FC<Props> = ({
 
   return (
     <EuiThemeProvider>
-      <LogStream
-        sourceId={sourceId}
-        startTimestamp={startTimestamp}
-        endTimestamp={endTimestamp}
-        {...props}
-      />
+      <LogStream startTimestamp={startTimestamp} endTimestamp={endTimestamp} {...props} />
     </EuiThemeProvider>
   );
 };
