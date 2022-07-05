@@ -21,6 +21,113 @@
     "functions": [
       {
         "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.getWindowParameters",
+        "type": "Function",
+        "tags": [],
+        "label": "getWindowParameters",
+        "description": [
+          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the change point and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
+        ],
+        "signature": [
+          "(clickTime: number, minTime: number, maxTime: number) => ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          }
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/lib/get_window_parameters.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getWindowParameters.$1",
+            "type": "number",
+            "tags": [],
+            "label": "clickTime",
+            "description": [
+              "timestamp of the clicked log rate spike."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/get_window_parameters.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getWindowParameters.$2",
+            "type": "number",
+            "tags": [],
+            "label": "minTime",
+            "description": [
+              "minimum timestamp of the time window to be analysed"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/get_window_parameters.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.getWindowParameters.$3",
+            "type": "number",
+            "tags": [],
+            "label": "maxTime",
+            "description": [
+              "maximum timestamp of the time window to be analysed"
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/get_window_parameters.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "WindowParameters"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.ProgressControls",
+        "type": "Function",
+        "tags": [],
+        "label": "ProgressControls",
+        "description": [],
+        "signature": [
+          "({\n  progress,\n  progressMessage,\n  onRefresh,\n  onCancel,\n  isRunning,\n}: ProgressControlProps) => JSX.Element"
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/components/progress_controls.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.ProgressControls.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  progress,\n  progressMessage,\n  onRefresh,\n  onCancel,\n  isRunning,\n}",
+            "description": [],
+            "signature": [
+              "ProgressControlProps"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/components/progress_controls.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
         "id": "def-common.streamFactory",
         "type": "Function",
         "tags": [],
@@ -29,7 +136,9 @@
           "\nOverload to set up a string based response stream with support\nfor gzip compression depending on provided request headers.\n"
         ],
         "signature": [
-          "(headers: Headers) => StreamFactoryReturnType<T>"
+          "(headers: Headers, logger: ",
+          "Logger",
+          ") => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
         "deprecated": false,
@@ -45,6 +154,20 @@
             ],
             "signature": [
               "Headers"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
             "deprecated": false,
@@ -66,7 +189,9 @@
           "\nSets up a response stream with support for gzip compression depending on provided\nrequest headers. Any non-string data pushed to the stream will be stream as NDJSON.\n"
         ],
         "signature": [
-          "(headers: Headers) => StreamFactoryReturnType<T>"
+          "(headers: Headers, logger: ",
+          "Logger",
+          ") => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
         "deprecated": false,
@@ -82,6 +207,20 @@
             ],
             "signature": [
               "Headers"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
             "deprecated": false,
@@ -528,6 +667,61 @@
                 "deprecated": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/aiops-utils",
+        "id": "def-common.WindowParameters",
+        "type": "Interface",
+        "tags": [],
+        "label": "WindowParameters",
+        "description": [
+          "\nTime range definition for baseline and deviation to be used by spike log analysis."
+        ],
+        "path": "x-pack/packages/ml/aiops_utils/src/lib/get_window_parameters.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.WindowParameters.baselineMin",
+            "type": "number",
+            "tags": [],
+            "label": "baselineMin",
+            "description": [],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/get_window_parameters.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.WindowParameters.baselineMax",
+            "type": "number",
+            "tags": [],
+            "label": "baselineMax",
+            "description": [],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/get_window_parameters.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.WindowParameters.deviationMin",
+            "type": "number",
+            "tags": [],
+            "label": "deviationMin",
+            "description": [],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/get_window_parameters.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.WindowParameters.deviationMax",
+            "type": "number",
+            "tags": [],
+            "label": "deviationMax",
+            "description": [],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/get_window_parameters.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

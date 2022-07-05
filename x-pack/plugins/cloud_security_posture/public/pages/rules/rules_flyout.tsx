@@ -18,26 +18,39 @@ import {
   EuiFlexGroup,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getRuleList } from '../findings/findings_flyout/rule_tab';
 import { getRemediationList } from '../findings/findings_flyout/overview_tab';
 import type { RuleSavedObject } from './use_csp_rules';
-import * as TEXT from './translations';
 import * as TEST_SUBJECTS from './test_subjects';
 
 interface RuleFlyoutProps {
   onClose(): void;
   toggleRule(rule: RuleSavedObject): void;
   rule: RuleSavedObject;
+  canUpdate: boolean;
 }
 
 const tabs = [
-  { label: TEXT.OVERVIEW, id: 'overview', disabled: false },
-  { label: TEXT.REMEDIATION, id: 'remediation', disabled: false },
+  {
+    label: i18n.translate('xpack.csp.rules.ruleFlyout.overviewTabLabel', {
+      defaultMessage: 'Overview',
+    }),
+    id: 'overview',
+    disabled: false,
+  },
+  {
+    label: i18n.translate('xpack.csp.rules.ruleFlyout.remediationTabLabel', {
+      defaultMessage: 'Remediation',
+    }),
+    id: 'remediation',
+    disabled: false,
+  },
 ] as const;
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule, toggleRule, canUpdate }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
 
   return (
@@ -65,7 +78,9 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {tab === 'overview' && <RuleOverviewTab rule={rule} toggleRule={() => toggleRule(rule)} />}
+        {tab === 'overview' && (
+          <RuleOverviewTab rule={rule} toggleRule={() => toggleRule(rule)} canUpdate={canUpdate} />
+        )}
         {tab === 'remediation' && (
           <EuiDescriptionList
             compressed={false}
@@ -77,12 +92,23 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
   );
 };
 
-const RuleOverviewTab = ({ rule, toggleRule }: { rule: RuleSavedObject; toggleRule(): void }) => (
+const RuleOverviewTab = ({
+  rule,
+  toggleRule,
+  canUpdate,
+}: {
+  rule: RuleSavedObject;
+  toggleRule(): void;
+  canUpdate: RuleFlyoutProps['canUpdate'];
+}) => (
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <span>
         <EuiSwitch
-          label={TEXT.ACTIVATED}
+          disabled={!canUpdate}
+          label={i18n.translate('xpack.csp.rules.ruleFlyout.overviewTab.activatedSwitchLabel', {
+            defaultMessage: 'Activated',
+          })}
           checked={rule.attributes.enabled}
           onChange={toggleRule}
           data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}

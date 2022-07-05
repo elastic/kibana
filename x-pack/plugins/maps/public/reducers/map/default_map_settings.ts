@@ -22,6 +22,7 @@ export function getDefaultMapSettings(): MapSettings {
     initialLocation: INITIAL_LOCATION.LAST_SAVED_LOCATION,
     fixedLocation: { lat: 0, lon: 0, zoom: 2 },
     browserLocation: { zoom: 2 },
+    keydownScrollZoom: false,
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
     showScaleControl: false,

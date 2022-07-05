@@ -10,6 +10,8 @@ import { EndpointActionGenerator } from '../../../common/endpoint/data_generator
 import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
+  GET_PROCESSES_ROUTE,
+  ENDPOINTS_ACTION_LIST_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
 } from '../../../common/endpoint/constants';
@@ -19,8 +21,11 @@ import {
 } from '../../common/mock/endpoint/http_handler_mock_factory';
 import {
   ActionDetailsApiResponse,
+  ActionListApiResponse,
   HostIsolationResponse,
   PendingActionsResponse,
+  ProcessesEntry,
+  ActionDetails,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -30,7 +35,11 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
 
   actionDetails: (options: HttpFetchOptionsWithPath) => ActionDetailsApiResponse;
 
+  actionList: (options: HttpFetchOptionsWithPath) => ActionListApiResponse;
+
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
+
+  processes: () => ActionDetailsApiResponse<ProcessesEntry>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -64,6 +73,26 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     },
   },
   {
+    id: 'actionList',
+    path: ENDPOINTS_ACTION_LIST_ROUTE,
+    method: 'get',
+    handler: (): ActionListApiResponse => {
+      const response = new EndpointActionGenerator('seed').generateActionDetails();
+
+      return {
+        elasticAgentIds: ['agent-a'],
+        commands: ['isolate'],
+        page: 0,
+        pageSize: 10,
+        startDate: 'now-10d',
+        endDate: 'now',
+        data: [response],
+        userIds: ['elastic'],
+        total: 1,
+      };
+    },
+  },
+  {
     id: 'agentPendingActionsSummary',
     path: ACTION_STATUS_ROUTE,
     method: 'get',
@@ -75,6 +104,26 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           generator.generateAgentPendingActionsSummary({ agent_id: id })
         ),
       };
+    },
+  },
+  {
+    id: 'processes',
+    path: GET_PROCESSES_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<ProcessesEntry> => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails({
+        outputs: {
+          '1': {
+            type: 'json',
+            content: {
+              entries: generator.randomResponseActionProcesses(3),
+            },
+          },
+        },
+      }) as ActionDetails<ProcessesEntry>;
+
+      return { data: response };
     },
   },
 ]);

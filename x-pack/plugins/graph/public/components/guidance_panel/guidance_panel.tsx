@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -38,7 +38,6 @@ export interface GuidancePanelProps {
   hasDatasource: boolean;
   hasFields: boolean;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
-  noIndexPatterns: boolean;
 }
 
 function ListItem({
@@ -73,18 +72,21 @@ function ListItem({
 }
 
 function GuidancePanelComponent(props: GuidancePanelProps) {
-  const {
-    onFillWorkspace,
-    onOpenFieldPicker,
-    onIndexPatternSelected,
-    hasDatasource,
-    hasFields,
-    noIndexPatterns,
-  } = props;
+  const { onFillWorkspace, onOpenFieldPicker, onIndexPatternSelected, hasDatasource, hasFields } =
+    props;
 
   const kibana = useKibana<IDataPluginServices>();
   const { services, overlays } = kibana;
-  const { savedObjects, uiSettings, application } = services;
+  const { savedObjects, uiSettings, application, data } = services;
+  const [hasDataViews, setHasDataViews] = useState<boolean>(true);
+
+  useEffect(() => {
+    const checkIfDataViewsExist = async () => {
+      setHasDataViews(await data.dataViews.hasData.hasUserDataView());
+    };
+    checkIfDataViewsExist();
+  }, [setHasDataViews, data.dataViews]);
+
   if (!overlays || !application) return null;
 
   const onOpenDatasourcePicker = () => {
@@ -146,9 +148,9 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
     </EuiPanel>
   );
 
-  if (noIndexPatterns) {
-    const indexPatternUrl = application.getUrlForApp('management', {
-      path: '/kibana/indexPatterns',
+  if (!hasDataViews) {
+    const dataViewManagementUrl = application.getUrlForApp('management', {
+      path: '/kibana/dataViews',
     });
     const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
     content = (
@@ -174,7 +176,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
               defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create a data view for your Elasticsearch indices."
               values={{
                 managementIndexPatternsLink: (
-                  <a href={indexPatternUrl}>
+                  <a href={dataViewManagementUrl}>
                     <FormattedMessage
                       id="xpack.graph.noDataSourceNotificationMessageText.managementDataViewLinkText"
                       defaultMessage="Management &gt; Data views"

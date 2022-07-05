@@ -1,0 +1,7 @@
+summary: A list of three users that opened cases
+value: 
+  [
+    {"username":"elastic","full_name":null,"email":null},
+    {"username":"user1","full_name":"User 1","email":"user1@elastic.co"},
+    {"username":"user2","full_name":"User 2","email":"user2@elastic.co"}
+  ]
