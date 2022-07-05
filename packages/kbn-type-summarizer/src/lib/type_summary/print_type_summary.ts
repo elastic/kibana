@@ -18,7 +18,15 @@ import { printImports } from './print_imports';
 import { printLocals } from './print_locals';
 
 /**
- * Produces a `SourceNode` which includes the code and source maps for the type summary.
+ * Produces a `SourceNode` which includes the code and source maps for the type summary. To deal
+ * with naming conflicts a `TypeSummaryNamer` instance is created which will allow the printing
+ * functions to resolve a `rootSymbol` to a specific name. If a name is not already defines for
+ * this `rootSymbol` then one is generated for it (generated names are optionally influenced by
+ * a `hint`).
+ *
+ * The result of this function is a `SourceNode` which has functions necessary to produce the
+ * resulting source code (a .d.ts file) and source map which maps the structurs in the .d.ts file
+ * to their original source locations in the repository.
  */
 export function printTypeSummary(
   sourceMaps: SourceMapper,

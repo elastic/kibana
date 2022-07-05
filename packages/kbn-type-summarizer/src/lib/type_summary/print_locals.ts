@@ -19,8 +19,25 @@ import { exportSomeName } from './export_some_name';
 
 /**
  * Reads `locals` and adds necessary `SourceNode`s to `source` to reproduce the declarations
- * of each local, along with the source maps pointing to the original location of all idenitfier
- * snippets which are mapped by the source maps produced by tsc
+ * of each local.
+ *
+ * Local printing is primarily done using the `DtsSnipper` which reads the original definition
+ * of the given declaration from the .d.ts files produced by tsc, then breaks them up into
+ * "snippets" (more details in the DtsSnipper class). These snippets are then itterated to either
+ * produce SourceNodes or text for the resulting definition.
+ *
+ * The exception is NamespaceDec locals, which must synthesize an imported namespace either
+ * for local usage or for exporting. When a namespace import is used a structure similar to
+ * the following will be added to the type summary:
+ *
+ *   declare namespace NamespaceName {
+ *       export {
+ *           foo,
+ *           bar,
+ *           baz,
+ *       }
+ *   }
+ *   export { NamespaceName }
  */
 export function printLocals(
   locals: LocalDecs[],
@@ -43,24 +60,7 @@ export function printLocals(
           local.exported?.type === 'named' ? local.exported.name : 'ns'
         );
 
-        /**
-         * synthesize the namespace that represents the namespace import
-         * Should end up looking like:
-         *
-         * declare namespace Path {
-         *     export {
-         *         cwdRelative,
-         *         relative,
-         *         join,
-         *         dirname,
-         *         resolve,
-         *         isAbsolute,
-         *         toNormal
-         *     }
-         * }
-         * export { Path }
-         *
-         */
+        // synthesize the namespace that represents the namespace import
         source.add([
           `declare namespace `,
           new SourceNode(1, 0, sourceMaps.getOriginalSourcePath(local.sourceFile), name),
