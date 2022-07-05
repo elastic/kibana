@@ -8,8 +8,15 @@ Object {
     },
   },
   "metric_1": Object {
-    "avg": Object {
-      "field": "host.network.ingress.bytes",
+    "derivative": Object {
+      "buckets_path": "metric_1_max",
+      "gap_policy": "skip",
+      "unit": "1s",
+    },
+  },
+  "metric_1_max": Object {
+    "max": Object {
+      "field": "system.network.in.bytes",
     },
   },
 }

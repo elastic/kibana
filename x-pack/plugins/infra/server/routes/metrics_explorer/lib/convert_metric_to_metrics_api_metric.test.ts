@@ -34,13 +34,32 @@ describe('convertMetricToMetricsAPIMetric(metric, index)', () => {
   runTestForBasic('cardinality');
 
   runTest(
-    { aggregation: 'avg', field: 'host.network.ingress.bytes' },
+    { aggregation: 'rate', field: 'system.network.in.bytes' },
     {
       id: 'metric_1',
       aggregations: {
+        metric_1_max: {
+          max: {
+            field: 'system.network.in.bytes',
+          },
+        },
+        metric_1_deriv: {
+          derivative: {
+            buckets_path: 'metric_1_max',
+            gap_policy: 'skip',
+            unit: '1s',
+          },
+        },
         metric_1: {
-          avg: {
-            field: 'host.network.ingress.bytes',
+          bucket_script: {
+            buckets_path: {
+              value: 'metric_1_deriv[normalized_value]',
+            },
+            gap_policy: 'skip',
+            script: {
+              lang: 'painless',
+              source: 'params.value > 0.0 ? params.value : 0.0',
+            },
           },
         },
       },
