@@ -10,6 +10,7 @@ import { CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
 import { EndpointStatusActionResult } from './status_action';
+import { GetProcessesActionResult } from './get_processes_action';
 
 export const getEndpointResponseActionsConsoleCommands = (
   endpointAgentId: string
@@ -63,6 +64,26 @@ export const getEndpointResponseActionsConsoleCommands = (
       RenderComponent: EndpointStatusActionResult,
       meta: {
         endpointId: endpointAgentId,
+      },
+    },
+    {
+      name: 'processes',
+      about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.processes.about', {
+        defaultMessage: 'Display the processes on the endpoint',
+      }),
+      RenderComponent: GetProcessesActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+      },
+      args: {
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.processes.arg.comment',
+            { defaultMessage: 'A comment to go along with the action' }
+          ),
+        },
       },
     },
   ];

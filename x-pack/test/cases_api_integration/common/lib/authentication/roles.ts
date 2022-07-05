@@ -95,6 +95,54 @@ export const securitySolutionOnlyAll: Role = {
   },
 };
 
+export const securitySolutionOnlyDelete: Role = {
+  name: 'sec_only_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['cases_delete'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyNoDelete: Role = {
+  name: 'sec_only_no_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const securitySolutionOnlyRead: Role = {
   name: 'sec_only_read',
   privileges: {
@@ -172,6 +220,8 @@ export const roles = [
   globalRead,
   securitySolutionOnlyAll,
   securitySolutionOnlyRead,
+  securitySolutionOnlyDelete,
+  securitySolutionOnlyNoDelete,
   observabilityOnlyAll,
   observabilityOnlyRead,
   testDisabledPluginAll,
