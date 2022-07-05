@@ -43,11 +43,11 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
   }, [version, onChange]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const options =
+  const agentJavaVersions =
     !isLoading && data?.versions
-      ? data.versions.map((aVersion) => ({ label: aVersion }))
+      ? data.versions.map((label) => ({ label }))
       : [];
-  const hasOptions = !!options.length;
+  const hasOptions = !!agentJavaVersions.length;
   const selectedOption = [{ label: version || '' }];
 
   const comboProps = !hasOptions
@@ -55,9 +55,7 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
         // Leaving the onCreateOption out disables custom option
         // so only enables it when no options was returned from the API
         onCreateOption: (nextVersion: string) => {
-          if (!hasOptions) {
-            onChange(nextVersion);
-          }
+          onChange(nextVersion);
         },
       }
     : {};
@@ -103,7 +101,7 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
           isLoading={isLoading}
           noSuggestions={!hasOptions}
           isClearable={!hasOptions}
-          options={options}
+          options={agentJavaVersions}
           selectedOptions={selectedOption}
           onChange={(selectedOptions) => {
             const nextVersion = selectedOptions[0]?.label;
