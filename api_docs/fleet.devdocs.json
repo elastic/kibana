@@ -15299,6 +15299,19 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.install_format_schema_version",
+            "type": "string",
+            "tags": [],
+            "label": "install_format_schema_version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -22340,6 +22353,20 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.PostBulkUpdateAgentTagsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "PostBulkUpdateAgentTagsResponse",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { success: boolean; error?: string | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE",
         "type": "string",
         "tags": [],
@@ -22872,6 +22899,16 @@
             "type": "string",
             "tags": [],
             "label": "UPDATE_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.BULK_UPDATE_AGENT_TAGS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UPDATE_AGENT_TAGS_PATTERN",
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false
