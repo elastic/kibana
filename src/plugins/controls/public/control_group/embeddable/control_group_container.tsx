@@ -11,7 +11,7 @@ import { uniqBy } from 'lodash';
 import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
-import { EMPTY, merge, Observable, pipe, Subject, Subscription } from 'rxjs';
+import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import {
   distinctUntilChanged,
@@ -29,7 +29,7 @@ import {
   ReduxEmbeddableWrapperPropsWithChildren,
   SolutionToolbarPopover,
 } from '@kbn/presentation-util-plugin/public';
-import { CoreTheme, OverlayRef } from '@kbn/core/public';
+import { OverlayRef } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
@@ -355,13 +355,13 @@ export class ControlGroupContainer extends Container<
     this.domNode = dom;
     const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
-      <ControlsServicesProvider>
-        <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+        <ControlsServicesProvider>
           <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
             <ControlGroup />
           </ControlGroupReduxWrapper>
-        </KibanaThemeProvider>
-      </ControlsServicesProvider>,
+        </ControlsServicesProvider>
+      </KibanaThemeProvider>,
       dom
     );
   }

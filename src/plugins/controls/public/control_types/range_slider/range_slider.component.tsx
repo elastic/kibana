@@ -11,14 +11,12 @@ import { BehaviorSubject } from 'rxjs';
 
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { RangeSliderPopover } from './range_slider_popover';
 import { rangeSliderReducers } from './range_slider_reducers';
 import { RangeSliderEmbeddableInput, RangeValue } from './types';
 
 import './range_slider.scss';
-import { pluginServices } from '../../services';
 
 interface Props {
   componentStateSubject: BehaviorSubject<RangeSliderComponentState>;
@@ -35,8 +33,6 @@ export interface RangeSliderComponentState {
 }
 
 export const RangeSliderComponent: FC<Props> = ({ componentStateSubject, ignoreValidation }) => {
-  const { theme } = pluginServices.getServices();
-
   // Redux embeddable Context to get state from Embeddable input
   const {
     useEmbeddableDispatch,
@@ -62,18 +58,16 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject, ignoreV
   );
 
   return (
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <RangeSliderPopover
-        id={id}
-        isLoading={loading}
-        min={min}
-        max={max}
-        title={title}
-        value={value ?? ['', '']}
-        onChange={onChangeComplete}
-        fieldFormatter={fieldFormatter}
-        isInvalid={!ignoreValidation && isInvalid}
-      />
-    </KibanaThemeProvider>
+    <RangeSliderPopover
+      id={id}
+      isLoading={loading}
+      min={min}
+      max={max}
+      title={title}
+      value={value ?? ['', '']}
+      onChange={onChangeComplete}
+      fieldFormatter={fieldFormatter}
+      isInvalid={!ignoreValidation && isInvalid}
+    />
   );
 };
