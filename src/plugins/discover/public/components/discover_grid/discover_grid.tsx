@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import classnames from 'classnames';
+import { uniq, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
@@ -261,9 +262,10 @@ export const DiscoverGrid = ({
   /**
    * Pagination
    */
+  const currentPageSize = rowsPerPageState ?? DEFAULT_ROWS_PER_PAGE;
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: rowsPerPageState ?? DEFAULT_ROWS_PER_PAGE,
+    pageSize: currentPageSize,
   });
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
   const pageCount = useMemo(
@@ -274,7 +276,6 @@ export const DiscoverGrid = ({
 
   const paginationObj = useMemo(() => {
     const onChangeItemsPerPage = (pageSize: number) => {
-      setPagination((paginationData) => ({ ...paginationData, pageSize }));
       onUpdateRowsPerPage?.(pageSize);
     };
 
@@ -287,10 +288,18 @@ export const DiscoverGrid = ({
           onChangePage,
           pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
           pageSize: pagination.pageSize,
-          pageSizeOptions: pageSizeArr,
+          pageSizeOptions: sortBy(uniq([...pageSizeArr, pagination.pageSize])),
         }
       : undefined;
   }, [pagination, pageCount, isPaginationEnabled, onUpdateRowsPerPage]);
+
+  useEffect(() => {
+    setPagination((paginationData) =>
+      paginationData.pageSize === currentPageSize
+        ? paginationData
+        : { ...paginationData, pageSize: currentPageSize }
+    );
+  }, [currentPageSize, setPagination]);
 
   /**
    * Sorting
