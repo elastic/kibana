@@ -26,7 +26,7 @@ import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 
 import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { CspRuleType } from '../../../common/schemas';
+import type { CspRule } from '../../../common/schemas';
 
 import {
   ElasticsearchClient,
@@ -129,7 +129,7 @@ describe('Update rules configuration API', () => {
   });
 
   it('create csp rules config based on activated csp rules', async () => {
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRuleType>> = {
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
@@ -163,14 +163,14 @@ describe('Update rules configuration API', () => {
         },
       ],
     };
-    const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRuleType>);
+    const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRule>);
     expect(cspConfig).toMatchObject({
       data_yaml: { activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } },
     });
   });
 
   it('create empty csp rules config when all rules are disabled', async () => {
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRuleType>> = {
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
@@ -204,7 +204,7 @@ describe('Update rules configuration API', () => {
         },
       ],
     };
-    const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRuleType>);
+    const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRule>);
     expect(cspConfig).toMatchObject({ data_yaml: { activated_rules: { cis_k8s: [] } } });
   });
 
@@ -242,7 +242,7 @@ describe('Update rules configuration API', () => {
       }
     );
 
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRuleType>> = {
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
@@ -276,7 +276,7 @@ describe('Update rules configuration API', () => {
         },
       ],
     };
-    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRuleType>);
+    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
 
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.vars = { dataYaml: { type: 'foo' } };
@@ -304,7 +304,7 @@ describe('Update rules configuration API', () => {
     mockSoClient = savedObjectsClientMock.create();
     const mockPackagePolicyService = createPackagePolicyServiceMock();
 
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRuleType>> = {
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
@@ -338,7 +338,7 @@ describe('Update rules configuration API', () => {
         },
       ],
     };
-    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRuleType>);
+    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
 
     const mockPackagePolicy = createPackagePolicyMock();
     const packagePolicyId1 = chance.guid();
@@ -378,7 +378,7 @@ describe('Update rules configuration API', () => {
     const mockPackagePolicy = createPackagePolicyMock();
     const user = mockAuthenticatedUser();
 
-    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRuleType>> = {
+    const cspRules: DeepPartial<SavedObjectsFindResponse<CspRule>> = {
       page: 1,
       per_page: 1000,
       total: 2,
@@ -394,7 +394,7 @@ describe('Update rules configuration API', () => {
         },
       ],
     };
-    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRuleType>);
+    mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
 
     mockPackagePolicy.vars = { dataYaml: { type: 'yaml' } };
 

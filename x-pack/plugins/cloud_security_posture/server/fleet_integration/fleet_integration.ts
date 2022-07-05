@@ -18,7 +18,7 @@ import {
   CSP_RULE_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import type { CspRuleType, CspRuleTemplateType } from '../../common/schemas';
+import type { CspRule, CspRuleTemplate } from '../../common/schemas';
 
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
   infer ElementType
@@ -35,7 +35,7 @@ export const onPackagePolicyPostCreateCallback = async (
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
   // Create csp-rules from the generic asset
-  const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplateType> =
+  const existingRuleTemplates: SavedObjectsFindResponse<CspRuleTemplate> =
     await savedObjectsClient.find({
       type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
       perPage: 10000,
@@ -69,7 +69,7 @@ export const removeCspRulesInstancesCallback = async (
   logger: Logger
 ): Promise<void> => {
   try {
-    const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleType> = await soClient.find({
+    const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRule> = await soClient.find({
       type: CSP_RULE_SAVED_OBJECT_TYPE,
       filter: createCspRuleSearchFilterByPackagePolicy({
         packagePolicyId: deletedPackagePolicy.id,
@@ -90,7 +90,7 @@ export const isCspPackageInstalled = async (
 ): Promise<boolean> => {
   // TODO: check if CSP package installed via the Fleet API
   try {
-    const { saved_objects: postDeleteRules }: SavedObjectsFindResponse<CspRuleType> =
+    const { saved_objects: postDeleteRules }: SavedObjectsFindResponse<CspRule> =
       await soClient.find({
         type: CSP_RULE_SAVED_OBJECT_TYPE,
       });
@@ -108,8 +108,8 @@ export const isCspPackageInstalled = async (
 const generateRulesFromTemplates = (
   packagePolicyId: string,
   policyId: string,
-  cspRuleTemplates: Array<SavedObjectsFindResult<CspRuleTemplateType>>
-): Array<SavedObjectsBulkCreateObject<CspRuleType>> =>
+  cspRuleTemplates: Array<SavedObjectsFindResult<CspRuleTemplate>>
+): Array<SavedObjectsBulkCreateObject<CspRule>> =>
   cspRuleTemplates.map((template) => ({
     type: CSP_RULE_SAVED_OBJECT_TYPE,
     attributes: {

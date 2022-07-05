@@ -15,4 +15,4 @@ export const cspRulesConfigSchema = rt.object({
   }),
 });
 
-export type CspRulesConfigSchema = TypeOf<typeof cspRulesConfigSchema>;
+export type CspRulesConfiguration = TypeOf<typeof cspRulesConfigSchema>;

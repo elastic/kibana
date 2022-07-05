@@ -14,8 +14,8 @@ import {
   cspRuleSchemaV840,
   cspRuleTemplateSchemaV830,
   cspRuleTemplateSchemaV840,
-  CspRuleTemplateType,
-  CspRuleType,
+  CspRuleTemplate,
+  CspRule,
 } from '../../common/schemas';
 
 import {
@@ -24,7 +24,7 @@ import {
 } from '../../common/constants';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
-  savedObjects.registerType<CspRuleType>({
+  savedObjects.registerType<CspRule>({
     name: CSP_RULE_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
@@ -45,7 +45,7 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
     migrations: cspRuleMigrations,
     mappings: cspRuleSavedObjectMapping,
   });
-  savedObjects.registerType<CspRuleTemplateType>({
+  savedObjects.registerType<CspRuleTemplate>({
     name: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'agnostic',
