@@ -64,7 +64,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     hits?: DataTableRecord[];
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
-    onUpdateRowHeight?: (rowHeight?: number) => void;
+    onUpdateRowHeight?: (rowHeight?: number) => void; // TODO: extend here too
   };
 
 interface SearchEmbeddableConfig {

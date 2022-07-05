@@ -50,6 +50,7 @@ export function getSavedSearchObjectType(
         grid: { type: 'object', enabled: false },
         version: { type: 'integer' },
         rowHeight: { type: 'text' },
+        rowsPerPage: { type: 'integer' }, // TODO: options?
       },
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
