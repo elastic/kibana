@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { ProfilingPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,
@@ -15,4 +15,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new ProfilingPlugin(initializerContext);
 }
 
-export { ProfilingPluginSetup, ProfilingPluginStart } from './types';
+export type { ProfilingPluginSetup, ProfilingPluginStart } from './types';
