@@ -221,12 +221,12 @@ export const buildExceptionFilter = async ({
   // Exceptions that contain large value list exceptions and will be processed later on in rule execution
   const unprocessedExceptions: ExceptionItem[] = [];
 
-  filterOutLargeValueLists(valueListExceptions, listClient).then(
-    ({ filteredExceptions, largeValueListExceptions }) => {
-      exceptionsWithoutLargeValueLists.push(...filteredExceptions);
-      unprocessedExceptions.push(...largeValueListExceptions);
-    }
+  const { filteredExceptions, largeValueListExceptions } = await filterOutLargeValueLists(
+    valueListExceptions,
+    listClient
   );
+  exceptionsWithoutLargeValueLists.push(...filteredExceptions);
+  unprocessedExceptions.push(...largeValueListExceptions);
 
   const exceptionFilter: Filter = {
     meta: {
@@ -403,7 +403,7 @@ export const buildListClause = async (
   const list = await listClient.findListItem({
     listId: entry.list.id,
     perPage: MAXIMUM_VALUE_LIST_SIZE_FOR_EXCEPTIONS,
-    page: 0,
+    page: 1,
     filter: '',
     currentIndexPosition: 0,
   });
