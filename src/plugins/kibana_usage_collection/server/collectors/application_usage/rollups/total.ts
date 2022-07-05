@@ -16,6 +16,7 @@ import {
   SAVED_OBJECTS_TOTAL_TYPE,
 } from '../saved_objects_types';
 import { serializeKey } from './utils';
+import { fetchAllSavedObjects } from '../fetch_all_saved_objects';
 
 /**
  * Moves all the daily documents into aggregated "total" documents as we don't care about any granularity after 90 days
@@ -28,19 +29,13 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
   }
 
   try {
-    const [
-      { saved_objects: rawApplicationUsageTotals },
-      { saved_objects: rawApplicationUsageDaily },
-    ] = await Promise.all([
-      savedObjectsClient.find<ApplicationUsageTotal>({
-        perPage: 10000,
-        type: SAVED_OBJECTS_TOTAL_TYPE,
-      }),
-      savedObjectsClient.find<ApplicationUsageDaily>({
-        perPage: 10000,
-        type: SAVED_OBJECTS_DAILY_TYPE,
-        filter: `${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < now-90d`,
-      }),
+    const [rawApplicationUsageTotals, rawApplicationUsageDaily] = await Promise.all([
+      fetchAllSavedObjects<ApplicationUsageTotal>(savedObjectsClient, SAVED_OBJECTS_TOTAL_TYPE),
+      fetchAllSavedObjects<ApplicationUsageDaily>(
+        savedObjectsClient,
+        SAVED_OBJECTS_DAILY_TYPE,
+        `${SAVED_OBJECTS_DAILY_TYPE}.attributes.timestamp < now-90d`
+      ),
     ]);
 
     const existingTotals = rawApplicationUsageTotals.reduce(

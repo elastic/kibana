@@ -8,17 +8,12 @@
 
 import moment from 'moment';
 import { type Observable, takeUntil, timer } from 'rxjs';
-import {
-  ISavedObjectsRepository,
-  Logger,
-  SavedObjectsFindResult,
-  SavedObjectsServiceSetup,
-} from '@kbn/core/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
 import {
-  ApplicationUsageDaily,
-  ApplicationUsageTotal,
+  type ApplicationUsageDaily,
+  type ApplicationUsageTotal,
   registerMappings,
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,
@@ -26,7 +21,8 @@ import {
 import { applicationUsageSchema } from './schema';
 import { rollTotals, serializeKey } from './rollups';
 import { ROLL_TOTAL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
-import { ApplicationUsageTelemetryReport, ApplicationUsageViews } from './types';
+import type { ApplicationUsageTelemetryReport, ApplicationUsageViews } from './types';
+import { fetchAllSavedObjects } from './fetch_all_saved_objects';
 
 export const transformByApplicationViews = (
   report: ApplicationUsageViews
@@ -48,21 +44,6 @@ export const transformByApplicationViews = (
     return acc;
   }, {} as ApplicationUsageTelemetryReport);
 };
-
-async function fetchAllSavedObjects<T>(
-  soRepository: ISavedObjectsRepository,
-  soType: string
-): Promise<Array<SavedObjectsFindResult<T>>> {
-  const finder = soRepository.createPointInTimeFinder<T>({ type: soType, perPage: 100 });
-
-  const allSavedObjects: Array<SavedObjectsFindResult<T>> = [];
-
-  for await (const { saved_objects: savedObjects } of finder.find()) {
-    allSavedObjects.push(...savedObjects);
-  }
-
-  return allSavedObjects;
-}
 
 export function registerApplicationUsageCollector(
   logger: Logger,
