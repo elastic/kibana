@@ -311,6 +311,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       closePopover={onClosePopover}
       button={buttonWithToolTip}
       anchorPosition="rightCenter"
+      panelStyle={{ maxHeight: '100vh', overflowY: 'auto' }}
     >
       <SnoozePanel
         snoozeRule={onApplySnooze}
