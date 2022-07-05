@@ -78,7 +78,7 @@ const convertBucketsToRows = (
       const valueObject = get(bucket, [id]);
       return { ...acc, [id]: ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null };
     }, {} as Record<string, number | null | object[]>);
-    return { timestamp: bucket.key as number, ...metrics };
+    return { timestamp: bucket.from as number, ...metrics };
   });
 };
 

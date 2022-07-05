@@ -10,20 +10,34 @@ import { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
 import { calculateDateHistogramOffset } from './calculate_date_histogram_offset';
 import { createMetricsAggregations } from './create_metrics_aggregations';
 import { calculateBucketSize } from './calculate_bucket_size';
+import { createDateRangeAggregation } from '../../../utils/create_date_range_aggregation';
 
 export const createAggregations = (options: MetricsAPIRequest) => {
   const { intervalString } = calculateBucketSize(options.timerange);
+
+  const dateHistogram = {
+    date_histogram: {
+      field: TIMESTAMP_FIELD,
+      fixed_interval: intervalString,
+      offset: options.alignDataToEnd ? calculateDateHistogramOffset(options.timerange) : '0s',
+      extended_bounds: {
+        min: options.timerange.from,
+        max: options.timerange.to,
+      },
+    },
+    aggregations: createMetricsAggregations(options),
+  };
+
+  const dateRange = createDateRangeAggregation({
+    timerange: options.timerange,
+    field: TIMESTAMP_FIELD,
+    targetRangeSize: intervalString,
+    partialRangeSetting: options.alignDataToEnd ? 'start' : 'end',
+  });
+
   const histogramAggregation = {
     histogram: {
-      date_histogram: {
-        field: TIMESTAMP_FIELD,
-        fixed_interval: intervalString,
-        offset: options.alignDataToEnd ? calculateDateHistogramOffset(options.timerange) : '0s',
-        extended_bounds: {
-          min: options.timerange.from,
-          max: options.timerange.to,
-        },
-      },
+      ...dateRange,
       aggregations: createMetricsAggregations(options),
     },
     metricsets: {
