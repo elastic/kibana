@@ -64,7 +64,8 @@ export type SearchProps = Partial<DiscoverGridProps> &
     hits?: DataTableRecord[];
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
-    onUpdateRowHeight?: (rowHeight?: number) => void; // TODO: extend here too
+    onUpdateRowHeight?: (rowHeight?: number) => void;
+    onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
   };
 
 interface SearchEmbeddableConfig {
@@ -311,6 +312,10 @@ export class SavedSearchEmbeddable
       rowHeightState: this.input.rowHeight || this.savedSearch.rowHeight,
       onUpdateRowHeight: (rowHeight) => {
         this.updateInput({ rowHeight });
+      },
+      rowsPerPageState: this.input.rowsPerPage || this.savedSearch.rowsPerPage,
+      onUpdateRowsPerPage: (rowsPerPage) => {
+        this.updateInput({ rowsPerPage });
       },
     };
 
