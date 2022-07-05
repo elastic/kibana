@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConsoleCodeBlock, ConsoleCodeBlockBold } from '../../console_code_block';
+import { ConsoleCodeBlock } from '../../console_code_block';
 import { handleInputAreaState } from './handle_input_area_state';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
 import {
@@ -157,9 +157,9 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         defaultMessage="This command supports only one of the following arguments: {argNames}"
         values={{
           argNames: (
-            <ConsoleCodeBlockBold>
+            <ConsoleCodeBlock bold inline>
               {exclusiveOrArgs.map(toCliArgumentOption).join(', ')}
-            </ConsoleCodeBlockBold>
+            </ConsoleCodeBlock>
           ),
         }}
       />
@@ -208,11 +208,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not supported by this command: {unknownArgs}"
                 values={{
                   countOfInvalidArgs: unknownInputArgs.length,
-                  command: <ConsoleCodeBlockBold>{parsedInput.name}</ConsoleCodeBlockBold>,
+                  command: <ConsoleCodeBlock bold inline>{parsedInput.name}</ConsoleCodeBlock>,
                   unknownArgs: (
-                    <ConsoleCodeBlockBold>
+                    <ConsoleCodeBlock bold inline>
                       {unknownInputArgs.map(toCliArgumentOption).join(', ')}
-                    </ConsoleCodeBlockBold>
+                    </ConsoleCodeBlock>
                   ),
                 }}
               />

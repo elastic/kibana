@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConsoleCodeBlock, ConsoleCodeBlockBold } from './console_code_block';
+import { ConsoleCodeBlock } from './console_code_block';
 import { getArgumentsForCommand } from '../service/parsed_command_input';
 import { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -100,7 +100,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
     }>(
       (acc, curr) => {
         const item = {
-          title: <ConsoleCodeBlockBold>{`--${curr[0]}`}</ConsoleCodeBlockBold>,
+          title: <ConsoleCodeBlock bold>{`--${curr[0]}`}</ConsoleCodeBlock>,
           description: <ConsoleCodeBlock>{curr[1].about}</ConsoleCodeBlock>,
         };
         if (curr[1].required) {

@@ -5,41 +5,37 @@
  * 2.0.
  */
 
-import { EuiCode, EuiText, EuiTextColor } from '@elastic/eui';
+import React, { memo, ReactNode } from 'react';
+import { EuiText, EuiTextColor } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-export const ConsoleCodeBlock = euiStyled(EuiText).attrs({
-  transparentBackground: true,
-  paddingSize: 'none',
-  size: 's'
-})`{
-      color: ${(props) => props.theme.eui.euiColorDarkestShade} !important;
-      font-weight: 400;
-      font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
-      padding: 0;
-     }
-  `;
+ export const ConsoleCodeBlock = memo<{children: ReactNode; inline?: boolean; textColor?: "default" | "error" | "success"; bold?: boolean}>(
+  ({ children, inline = false, textColor = "default", bold = false}) => {
 
-export const ConsoleCodeBlockError = euiStyled(EuiTextColor).attrs({
-  transparentBackground: true,
-  paddingSize: 'none',
-  size: 's'
-})`{
-    color: ${(props) => props.theme.eui.euiColorDanger} !important;
-    font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
-    font-weight: 400;
-    padding: 0;
-    }
-`;
+    const baseStyledComponent = inline ? EuiTextColor : EuiText;
 
-export const ConsoleCodeBlockBold = euiStyled(EuiTextColor).attrs({
-  transparentBackground: true,
-  paddingSize: 'none',
-  size: 's'
-})`{
-      color: ${(props) => props.theme.eui.euiColorDarkestShade} !important;
-      font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
-      font-weight: 700;
-      padding: 0;
-     }
-  `;
+    const CodeBlock = euiStyled(baseStyledComponent).attrs({
+      transparentBackground: true,
+      size: 's'
+    })`{
+          color: ${(props) => { 
+            if (textColor === "error") {
+              return props.theme.eui.euiColorDanger;
+            } else if (textColor === "success") {
+              return props.theme.eui.euiColorSuccessText;
+            } else {
+              return props.theme.eui.euiColorDarkestShade;
+            }
+          }} !important;
+          font-weight: ${(props) => {
+            return bold ? props.theme.eui.euiFontWeightBold : props.theme.eui.euiFontWeightRegular;
+          }};
+          font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+          padding: 0;
+         }
+      `;
+
+    return  <CodeBlock>{children}</CodeBlock>
+  }
+);
+ConsoleCodeBlock.displayName = 'ConsoleCodeBlock';

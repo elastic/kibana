@@ -16,8 +16,6 @@ import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import {
   ConsoleCodeBlock,
-  ConsoleCodeBlockBold,
-  ConsoleCodeBlockError,
 } from './console_code_block';
 
 export type BadArgumentProps = PropsWithChildren<{
@@ -40,12 +38,12 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
     return (
       <UnsupportedMessageCallout
         header={
-          <ConsoleCodeBlockError>
+          <ConsoleCodeBlock textColor="error">
             <FormattedMessage
               id="xpack.securitySolution.console.badArgument.title"
               defaultMessage="Unsupported argument"
             />
-          </ConsoleCodeBlockError>
+          </ConsoleCodeBlock>
         }
         data-test-subj={getTestId('badArgument')}
       >
@@ -62,7 +60,7 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
                 defaultMessage="Enter {helpCmd} for further assistance."
                 values={{
                   helpCmd: (
-                    <ConsoleCodeBlockBold>{`${command.commandDefinition.name} --help`}</ConsoleCodeBlockBold>
+                    <ConsoleCodeBlock bold inline>{`${command.commandDefinition.name} --help`}</ConsoleCodeBlock>
                   ),
                 }}
               />

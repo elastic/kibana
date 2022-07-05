@@ -14,8 +14,6 @@ import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import {
   ConsoleCodeBlock,
-  ConsoleCodeBlockBold,
-  ConsoleCodeBlockError,
 } from './console_code_block';
 
 export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, setStatus }) => {
@@ -28,9 +26,9 @@ export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, s
           id="xpack.securitySolution.console.unknownCommand.helpMessage"
           defaultMessage="The text you entered {userInput} is unsupported! Click {helpIcon} or type {helpCmd} for assistance."
           values={{
-            userInput: <ConsoleCodeBlockBold>{command.input}</ConsoleCodeBlockBold>,
+            userInput: <ConsoleCodeBlock bold>{command.input}</ConsoleCodeBlock>,
             helpIcon: <EuiIcon type="help" />,
-            helpCmd: <ConsoleCodeBlockBold>{'help'}</ConsoleCodeBlockBold>,
+            helpCmd: <ConsoleCodeBlock bold>{'help'}</ConsoleCodeBlock>,
           }}
         />
       </ConsoleCodeBlock>
@@ -44,12 +42,12 @@ export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, s
   return (
     <UnsupportedMessageCallout
       header={
-        <ConsoleCodeBlockError>
+        <ConsoleCodeBlock textColor="error">
           <FormattedMessage
             id="xpack.securitySolution.console.unknownCommand.title"
             defaultMessage="Unsupported text/command"
           />
-        </ConsoleCodeBlockError>
+        </ConsoleCodeBlock>
       }
       data-test-subj={getTestId('unknownCommandError')}
     >
