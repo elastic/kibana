@@ -377,6 +377,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         };
       });
     }
+    if (!xAxisColumn) {
+      // required for tooltip
+      chartData = chartData.map((row) => {
+        return {
+          ...row,
+          unifiedX: '',
+        };
+      });
+    }
     const { min, max } = minMaxByColumnId[valueAccessor!];
     // formatters
     const dateHistogramMeta = xAxisColumn
@@ -588,7 +597,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               }}
               timeZone={timeZone}
               data={chartData}
-              xAccessor={xAccessor}
+              xAccessor={xAccessor || 'unifiedX'}
               yAccessor={yAccessor || 'unifiedY'}
               valueAccessor={valueAccessor}
               valueFormatter={valueFormatter}
