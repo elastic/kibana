@@ -102,6 +102,10 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
           ? item.config.dest.index[0]
           : item.config.dest.index,
       },
+      {
+        title: 'authorization',
+        description: item.config.authorization ? JSON.stringify(item.config.authorization) : '',
+      },
     ];
     if (isDefined(item.config.settings?.num_failure_retries)) {
       configs.push({
