@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { osqueryActionTypeBase } from '../../common/actions/osquery_type';
-import { OsqueryActionParams } from './osquery_connector_form';
+import { OsqueryActionParams } from './osquery_action_params_form';
 
 export const getActionType = (): ActionTypeModel => ({
   ...osqueryActionTypeBase,
@@ -32,6 +32,6 @@ export const getActionType = (): ActionTypeModel => ({
 
     return validationResult;
   },
-  actionConnectorFields: null,
-  actionParamsFields: lazy(() => import('./osquery_connector_form')),
+  actionConnectorFields: lazy(() => import('./osquery_connector_form')),
+  actionParamsFields: lazy(() => import('./osquery_action_params_form')),
 });

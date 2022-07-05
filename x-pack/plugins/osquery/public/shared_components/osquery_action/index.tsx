@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { CoreStart } from '@kbn/core/public';
 import {
   AGENT_STATUS_ERROR,
   EMPTY_PROMPT,
+  MISSING_KIBANA_PRIVILLEGES,
   NOT_AVAILABLE,
   PERMISSION_DENIED,
   SHORT_EMPTY_TITLE,
@@ -67,12 +68,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
         icon={<OsqueryIcon />}
         title={<h2>{PERMISSION_DENIED}</h2>}
         titleSize="xs"
-        body={
-          <p>
-            To access this page, ask your administrator for <EuiCode>osquery</EuiCode> Kibana
-            privileges.
-          </p>
-        }
+        body={MISSING_KIBANA_PRIVILLEGES}
       />
     );
   }

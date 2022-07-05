@@ -12,7 +12,7 @@ import { FIELD_TYPES } from '../shared_imports';
 import { queryFieldValidation } from '../common/validations';
 import { fieldValidators } from '../shared_imports';
 
-export const osqueryConnectorFormSchema = {
+export const osqueryActionParamsFormSchema = {
   savedQueryId: {
     type: FIELD_TYPES.TEXT,
     validations: [],
