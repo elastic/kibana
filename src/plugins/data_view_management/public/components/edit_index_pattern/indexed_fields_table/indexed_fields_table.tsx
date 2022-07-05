@@ -24,7 +24,7 @@ interface IndexedFieldsTableProps {
     deleteField: (fieldName: string) => void;
     getFieldInfo: (indexPattern: DataView, field: DataViewField) => string[];
   };
-  fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
+  fieldWildcardMatcher: (filters: string[] | undefined) => (val: string) => boolean;
   userEditPermission: boolean;
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
@@ -57,8 +57,7 @@ export class IndexedFieldsTable extends Component<
   mapFields(fields: DataViewField[]): IndexedFieldItem[] {
     const { indexPattern, fieldWildcardMatcher, helpers, userEditPermission } = this.props;
     const sourceFilters =
-      indexPattern.sourceFilters &&
-      indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
+      indexPattern.sourceFilters && indexPattern.sourceFilters.map((f) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
     return (

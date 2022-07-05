@@ -21,5 +21,5 @@ export { PercentFormatEditor, percentFormatEditorFactory } from './percent';
 export { StaticLookupFormatEditor, staticLookupFormatEditorFactory } from './static_lookup';
 export { StringFormatEditor, stringFormatEditorFactory } from './string';
 export { TruncateFormatEditor, truncateFormatEditorFactory } from './truncate';
-export { UrlFormatEditor, urlFormatEditorFactory } from './url';
+export { UrlFormatEditor, urlFormatEditorFactory, UrlFormatEditorFormatParams } from './url';
 export { HistogramFormatEditor, histogramFormatEditorFactory } from './histogram';

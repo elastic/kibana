@@ -73,7 +73,7 @@ export interface TableProps {
   items: SourceFiltersTableFilter[];
   deleteFilter: Function;
   fieldWildcardMatcher: Function;
-  saveFilter: (filter: SourceFiltersTableFilter) => any;
+  saveFilter: (filter: SourceFiltersTableFilter) => void;
   isSaving: boolean;
 }
 
@@ -150,7 +150,7 @@ export class Table extends Component<TableProps, TableState> {
           ]);
           const matches = indexPattern
             .getNonScriptedFields()
-            .map((currentFilter: any) => currentFilter.name)
+            .map((currentFilter) => currentFilter.name)
             .filter(wildcardMatcher)
             .sort();
 

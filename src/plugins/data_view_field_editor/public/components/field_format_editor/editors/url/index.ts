@@ -8,7 +8,7 @@
 import { formatId } from './constants';
 import { FieldFormatEditorFactory } from '../types';
 
-export type { UrlFormatEditor } from './url';
+export type { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
 
 export const urlFormatEditorFactory: FieldFormatEditorFactory = () =>
   import('./url').then((m) => m.UrlFormatEditor);
