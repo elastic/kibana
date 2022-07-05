@@ -297,8 +297,8 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
 
 const rewriteCustomFrequency = (customFreq: CustomFrequencyState) => {
   const result: RecurrenceSchedule = { ...customFreq };
-  if (result.byweekday!.length === 0) delete result.byweekday;
-  if (result.bymonth!.length === 0) delete result.bymonth;
-  if (result.bymonthday!.length === 0) delete result.bymonthday;
+  if (result.byweekday?.length === 0) delete result.byweekday;
+  if (result.bymonth?.length === 0) delete result.bymonth;
+  if (result.bymonthday?.length === 0) delete result.bymonthday;
   return result;
 };
