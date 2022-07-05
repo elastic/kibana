@@ -13,6 +13,7 @@ import {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import { ListClient } from '@kbn/lists-plugin/server';
 import type { SignalSourceHit } from '../types';
 import { buildThreatMappingFilter } from '../threat_mapping/build_threat_mapping_filter';
 import { getAllThreatListHits } from '../threat_mapping/get_threat_list';
@@ -34,6 +35,7 @@ export const createThreatEnrichments = async ({
   buildRuleMessage,
   threatIndicatorPath,
   events,
+  listClient,
 }: {
   threatIndex: ThreatIndex;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -41,6 +43,7 @@ export const createThreatEnrichments = async ({
   buildRuleMessage: BuildRuleMessage;
   threatIndicatorPath: string;
   events: SignalSourceHit[];
+  listClient: ListClient;
 }) => {
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
@@ -83,6 +86,7 @@ export const createThreatEnrichments = async ({
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
       runtimeMappings: undefined,
+      listClient,
     });
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);
