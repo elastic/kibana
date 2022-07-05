@@ -28,11 +28,11 @@ export interface CreateShareArgs {
    */
   name?: string;
   /**
-   * Optionally set an expiration date for this file share instance
+   * Optionally set an expiration date as unix timestamp for this file share instance
    *
    * @note If not specified the file share will expire after 30 days
    */
-  validUntil?: string;
+  validUntil?: number;
 
   file: File;
 }
@@ -85,9 +85,7 @@ export class InternalFileShareService implements FileShareServiceStart {
       {
         created_at: new Date().toISOString(),
         name,
-        valid_until: validUntil
-          ? moment(validUntil).toISOString()
-          : moment().add(30, 'days').toISOString(),
+        valid_until: validUntil ? validUntil : moment().add(30, 'days').unix(),
       },
       {
         id: generateShareToken(),

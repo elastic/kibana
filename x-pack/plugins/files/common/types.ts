@@ -94,7 +94,7 @@ export type FileShareSavedObjectAttributes = {
    * TODO: in future we could add a special value like "forever", but this should
    * not be the default.
    */
-  valid_until?: string;
+  valid_until?: number;
 };
 
 /**

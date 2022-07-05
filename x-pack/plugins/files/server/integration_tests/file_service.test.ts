@@ -189,7 +189,7 @@ describe('FileService', () => {
         expect.objectContaining({
           id: expect.any(String),
           name: 'test name',
-          valid_until: expect.any(String),
+          valid_until: expect.any(Number),
           created_at: expect.any(String),
         })
       );
@@ -205,7 +205,7 @@ describe('FileService', () => {
         expect.objectContaining({
           id: expect.any(String),
           name: 'my file share',
-          valid_until: expect.any(String),
+          valid_until: expect.any(Number),
           created_at: expect.any(String),
         })
       );
@@ -222,7 +222,7 @@ describe('FileService', () => {
         expect.objectContaining({
           id: expect.any(String),
           name: 'my file share 2',
-          valid_until: expect.any(String),
+          valid_until: expect.any(Number),
           created_at: expect.any(String),
         })
       );

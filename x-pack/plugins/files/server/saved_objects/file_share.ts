@@ -23,7 +23,7 @@ const properties: Properties = {
     type: 'date',
   },
   valid_until: {
-    type: 'date',
+    type: 'long',
   },
   name: {
     type: 'keyword',
