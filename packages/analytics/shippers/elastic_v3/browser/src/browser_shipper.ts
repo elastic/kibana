@@ -125,10 +125,6 @@ export class ElasticV3BrowserShipper implements IShipper {
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
-    if (events.length === 0) {
-      return '0'; // Nothing to send.
-    }
-
     const response = await fetch(this.url, {
       method: 'POST',
       body: eventsToNDJSON(events),
