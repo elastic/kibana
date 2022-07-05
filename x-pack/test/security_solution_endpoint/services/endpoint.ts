@@ -23,8 +23,8 @@ import { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_sc
 import { catchAndWrapError } from '@kbn/security-solution-plugin/server/endpoint/utils';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
+import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import { FtrService } from '../../functional/ftr_provider_context';
-import { STARTED_TRANSFORM_STATES } from '../../../plugins/security_solution/common/constants';
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
