@@ -46,6 +46,9 @@ Changing these settings may disable features of the APM App.
 `xpack.apm.maxServiceEnvironments` {ess-icon}::
 Maximum number of unique service environments recognized by the UI. Defaults to `100`.
 
+`xpack.apm.maxSuggestions` {ess-icon}::
+Maximum number of suggestions fetched in autocomplete selection boxes. Defaults to `100`.
+
 `xpack.apm.serviceMapFingerprintBucketSize` {ess-icon}::
 Maximum number of unique transaction combinations sampled for generating service map focused on a specific service. Defaults to `100`.
 
