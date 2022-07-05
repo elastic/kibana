@@ -65,7 +65,7 @@ describe('getAllPersistableAttachmentMigrations', () => {
   });
 
   /**
-   * Only attachments with migration functions of 8.4
+   * Only attachments with migration functions of 8.3
    * should run the migration function and migrate
    * the state
    */
@@ -112,7 +112,7 @@ describe('getAllPersistableAttachmentMigrations', () => {
   );
 
   /**
-   * Only attachments with migration functions of 8.3
+   * Only attachments with migration functions of 8.4
    * should run the migration function and migrate
    * the state
    */

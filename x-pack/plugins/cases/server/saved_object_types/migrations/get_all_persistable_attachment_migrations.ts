@@ -13,7 +13,7 @@ const getMigrateFunction = (
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ) => {
   const migrateFn = (state: PersistableStateAttachmentState, version: string) => {
-    let output = state;
+    let output = { ...state };
 
     if (!persistableStateAttachmentTypeRegistry.has(state.persistableStateAttachmentTypeId)) {
       return output;

@@ -35,14 +35,14 @@ export function extractPersistableStateReferences(
     persistableStateAttachmentTypeId
   );
 
-  const { state: persistableState, references: persistableStateReferences } = attachment.extract({
+  const { state: extractedState, references: extractedReferences } = attachment.extract({
     persistableStateAttachmentState,
     persistableStateAttachmentTypeId,
   });
 
   return {
-    state: { ...state, ...persistableState, persistableStateAttachmentTypeId },
-    references: persistableStateReferences,
+    state: { ...state, ...extractedState, persistableStateAttachmentTypeId },
+    references: extractedReferences,
   };
 }
 
