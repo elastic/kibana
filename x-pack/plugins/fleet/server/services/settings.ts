@@ -41,7 +41,7 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
     const settings = await getSettings(soClient);
     const defaultSettings = createDefaultSettings();
 
-    const fleetServerHostsIsPreconfigured = defaultSettings.fleet_server_hosts.length > 0;
+    const fleetServerHostsIsPreconfigured = getConfigFleetServerHosts()?.length ?? 0 > 0;
 
     const fleetServerHostsShouldBeUpdated =
       !settings.fleet_server_hosts ||
@@ -50,11 +50,9 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
         !isEqual(settings.fleet_server_hosts, defaultSettings.fleet_server_hosts));
 
     // Migration for < 7.13 Kibana
-    if (fleetServerHostsIsPreconfigured && fleetServerHostsShouldBeUpdated) {
+    if (defaultSettings.fleet_server_hosts.length > 0 && fleetServerHostsShouldBeUpdated) {
       return saveSettings(soClient, {
-        fleet_server_hosts: fleetServerHostsIsPreconfigured
-          ? defaultSettings.fleet_server_hosts
-          : settings.fleet_server_hosts,
+        fleet_server_hosts: defaultSettings.fleet_server_hosts,
       });
     }
   } catch (e) {
@@ -115,7 +113,10 @@ export async function saveSettings(
 }
 
 function getConfigFleetServerHosts() {
-  return appContextService.getConfig()?.agents?.fleet_server?.hosts;
+  const config = appContextService.getConfig();
+  return config?.agents?.fleet_server?.hosts && config.agents.fleet_server.hosts.length > 0
+    ? config?.agents?.fleet_server?.hosts
+    : undefined;
 }
 
 export function createDefaultSettings(): BaseSettings {
