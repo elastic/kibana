@@ -67,7 +67,7 @@ describe('indexExports()', () => {
         Object {
           "ambientRefs": Array [],
           "imports": Array [
-            ImportedDecs {
+            Object {
               "details": Object {
                 "node": ts.ExportSpecifier (libFn) @ dist_dts/index.d.ts:6:10,
                 "req": "lib",
@@ -84,10 +84,11 @@ describe('indexExports()', () => {
               ],
               "localUsageCount": 1,
               "rootSymbol": Symbol(ts.FunctionDeclaration (libFn) @ dist_dts/node_modules/lib/index.d.ts:1:1),
+              "type": "imported decs",
             },
           ],
           "locals": Array [
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.ClassDeclaration (Foo) @ dist_dts/foo.d.ts:1:1,
               ],
@@ -97,9 +98,9 @@ describe('indexExports()', () => {
                 "typeOnly": false,
               },
               "rootSymbol": Symbol(ts.ClassDeclaration (Foo) @ dist_dts/foo.d.ts:1:1),
-              "size": 1,
+              "type": "copied decs",
             },
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.ClassDeclaration (Bar) @ dist_dts/bar.d.ts:2:1,
               ],
@@ -109,17 +110,17 @@ describe('indexExports()', () => {
                 "typeOnly": false,
               },
               "rootSymbol": Symbol(ts.ClassDeclaration (Bar) @ dist_dts/bar.d.ts:2:1),
-              "size": 1,
+              "type": "copied decs",
             },
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.VariableDeclaration (a) @ dist_dts/a.d.ts:1:22,
               ],
               "exported": undefined,
               "rootSymbol": Symbol(ts.VariableDeclaration (a) @ dist_dts/a.d.ts:1:22),
-              "size": 1,
+              "type": "copied decs",
             },
-            NamespaceDec {
+            Object {
               "exported": Object {
                 "name": "A",
                 "type": "named",
@@ -129,10 +130,10 @@ describe('indexExports()', () => {
                 "a" => Symbol(ts.VariableDeclaration (a) @ dist_dts/a.d.ts:1:22),
               },
               "rootSymbol": Symbol(ts.SourceFile @ dist_dts/a.d.ts:1:1),
-              "size": 1,
               "sourceFile": ts.SourceFile @ dist_dts/a.d.ts:1:1,
+              "type": "namespace dec",
             },
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.TypeAliasDeclaration (B) @ dist_dts/index.d.ts:9:1,
               ],
@@ -142,7 +143,7 @@ describe('indexExports()', () => {
                 "typeOnly": false,
               },
               "rootSymbol": Symbol(ts.TypeAliasDeclaration (B) @ dist_dts/index.d.ts:9:1),
-              "size": 1,
+              "type": "copied decs",
             },
           ],
         }
@@ -175,15 +176,15 @@ describe('indexExports()', () => {
           "ambientRefs": Array [],
           "imports": Array [],
           "locals": Array [
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.ClassDeclaration (Class) @ dist_dts/foo.d.ts:1:1,
               ],
               "exported": undefined,
               "rootSymbol": Symbol(ts.ClassDeclaration (Class) @ dist_dts/foo.d.ts:1:1),
-              "size": 1,
+              "type": "copied decs",
             },
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.FunctionDeclaration (name) @ dist_dts/index.d.ts:2:1,
               ],
@@ -193,7 +194,7 @@ describe('indexExports()', () => {
                 "typeOnly": false,
               },
               "rootSymbol": Symbol(ts.FunctionDeclaration (name) @ dist_dts/index.d.ts:2:1),
-              "size": 1,
+              "type": "copied decs",
             },
           ],
         }
@@ -235,30 +236,31 @@ describe('indexExports()', () => {
       expect(index).toMatchInlineSnapshot(`
         Object {
           "ambientRefs": Array [
-            AmbientRef {
+            Object {
               "name": "Promise",
               "rootSymbol": Symbol(ts.InterfaceDeclaration (Promise) @ ../../../node_modules/typescript/lib/lib.es5.d.ts:1495:1),
+              "type": "ambient ref",
             },
           ],
           "imports": Array [],
           "locals": Array [
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.InterfaceDeclaration (SomeGlobal) @ dist_dts/globals.d.ts:1:1,
               ],
               "exported": undefined,
               "rootSymbol": Symbol(ts.InterfaceDeclaration (SomeGlobal) @ dist_dts/globals.d.ts:1:1),
-              "size": 1,
+              "type": "copied decs",
             },
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.InterfaceDeclaration (FakeImport) @ dist_dts/fakemodule.d.ts:2:3,
               ],
               "exported": undefined,
               "rootSymbol": Symbol(ts.InterfaceDeclaration (FakeImport) @ dist_dts/fakemodule.d.ts:2:3),
-              "size": 1,
+              "type": "copied decs",
             },
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.FunctionDeclaration (x) @ dist_dts/index.d.ts:4:1,
               ],
@@ -268,7 +270,7 @@ describe('indexExports()', () => {
                 "typeOnly": false,
               },
               "rootSymbol": Symbol(ts.FunctionDeclaration (x) @ dist_dts/index.d.ts:4:1),
-              "size": 1,
+              "type": "copied decs",
             },
           ],
         }
@@ -299,7 +301,7 @@ describe('indexExports()', () => {
           "ambientRefs": Array [],
           "imports": Array [],
           "locals": Array [
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.ClassDeclaration (Class) @ dist_dts/foo.d.ts:1:1,
               ],
@@ -309,7 +311,7 @@ describe('indexExports()', () => {
                 "typeOnly": true,
               },
               "rootSymbol": Symbol(ts.ClassDeclaration (Class) @ dist_dts/foo.d.ts:1:1),
-              "size": 1,
+              "type": "copied decs",
             },
           ],
         }
@@ -346,7 +348,7 @@ describe('indexExports()', () => {
           "ambientRefs": Array [],
           "imports": Array [],
           "locals": Array [
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.ClassDeclaration (Class) @ dist_dts/class.d.ts:1:1,
               ],
@@ -356,7 +358,7 @@ describe('indexExports()', () => {
                 "typeOnly": false,
               },
               "rootSymbol": Symbol(ts.ClassDeclaration (Class) @ dist_dts/class.d.ts:1:1),
-              "size": 1,
+              "type": "copied decs",
             },
           ],
         }
@@ -391,15 +393,15 @@ describe('indexExports()', () => {
           "ambientRefs": Array [],
           "imports": Array [],
           "locals": Array [
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.ClassDeclaration (A) @ dist_dts/foo.d.ts:1:1,
               ],
               "exported": undefined,
               "rootSymbol": Symbol(ts.ClassDeclaration (A) @ dist_dts/foo.d.ts:1:1),
-              "size": 1,
+              "type": "copied decs",
             },
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.FunctionDeclaration (name) @ dist_dts/index.d.ts:1:1,
               ],
@@ -409,7 +411,7 @@ describe('indexExports()', () => {
                 "typeOnly": false,
               },
               "rootSymbol": Symbol(ts.FunctionDeclaration (name) @ dist_dts/index.d.ts:1:1),
-              "size": 1,
+              "type": "copied decs",
             },
           ],
         }
@@ -449,23 +451,23 @@ describe('indexExports()', () => {
           "ambientRefs": Array [],
           "imports": Array [],
           "locals": Array [
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.ClassDeclaration (A) @ dist_dts/foo.d.ts:1:1,
               ],
               "exported": undefined,
               "rootSymbol": Symbol(ts.ClassDeclaration (A) @ dist_dts/foo.d.ts:1:1),
-              "size": 1,
+              "type": "copied decs",
             },
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.ClassDeclaration (B) @ dist_dts/foo.d.ts:4:1,
               ],
               "exported": undefined,
               "rootSymbol": Symbol(ts.ClassDeclaration (B) @ dist_dts/foo.d.ts:4:1),
-              "size": 1,
+              "type": "copied decs",
             },
-            CopiedDecs {
+            Object {
               "decs": Array [
                 ts.FunctionDeclaration (name) @ dist_dts/index.d.ts:1:1,
               ],
@@ -475,7 +477,7 @@ describe('indexExports()', () => {
                 "typeOnly": false,
               },
               "rootSymbol": Symbol(ts.FunctionDeclaration (name) @ dist_dts/index.d.ts:1:1),
-              "size": 1,
+              "type": "copied decs",
             },
           ],
         }

@@ -148,7 +148,7 @@ describe('summarizePackage()', () => {
                  symbols.toRootSymbol()x23
                  traverse.findReferencedIdentifiers()x8
                  symbols.getForIdentifier()x6
-                 indexSymbolx12
+                 indexSymbol()x12
         debg loaded sourcemaps for [
                'packages/kbn-type-summarizer/__tmp__/dist_dts/bar.d.ts',
                'packages/kbn-type-summarizer/__tmp__/dist_dts/baz.d.ts',
