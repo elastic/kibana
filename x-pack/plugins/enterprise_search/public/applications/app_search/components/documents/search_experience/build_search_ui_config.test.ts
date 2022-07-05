@@ -46,10 +46,6 @@ describe('buildSearchUIConfig', () => {
         result_fields: {
           bar: {
             raw: {},
-            snippet: {
-              fallback: true,
-              size: 300,
-            },
           },
           foo: {
             raw: {},
