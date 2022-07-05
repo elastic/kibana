@@ -37,7 +37,7 @@ export const usePreviewHistogram = ({
     config: getEsQueryConfig(uiSettings),
     indexPattern: {
       fields: [],
-      title: index.join(),
+      title: index == null ? '' : index.join(),
     },
     queries: [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
     filters: [],

@@ -31,6 +31,17 @@
 import { AwaitedProperties } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
+import { appendersSchema } from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsServicePreboot,
+} from '@kbn/core-analytics-server';
+import type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from '@kbn/core-execution-context-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -42,7 +53,6 @@ import { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
-import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
 import {
@@ -56,7 +66,6 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
-import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
@@ -83,14 +92,8 @@ export type {
   ConfigUsageData,
 };
 
-import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
-import type {
-  AnalyticsServicePreboot,
-  AnalyticsServiceSetup,
-  AnalyticsServiceStart,
-} from './analytics';
-
-export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
+export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
 
 export { bootstrap } from './bootstrap';
 export type {
@@ -119,9 +122,6 @@ export type {
 } from './context';
 export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { CspConfig } from './csp';
-export type { ICspConfig } from './csp';
-
 export { ElasticsearchConfig, pollEsNodesVersion } from './elasticsearch';
 export type {
   ElasticsearchServicePreboot,
@@ -143,7 +143,6 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
-  ElasticsearchErrorDetails,
   PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
@@ -152,10 +151,8 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
-  UnauthorizedError,
 } from './elasticsearch';
 
-export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
 export type {
   AuthenticationHandler,
   AuthHeaders,
@@ -230,9 +227,13 @@ export type {
   SessionStorageFactory,
   DestructiveRouteMethod,
   SafeRouteMethod,
+  KibanaRequest,
+  ICspConfig,
+  IExternalUrlConfig,
+  IExternalUrlPolicy,
 } from './http';
 
-export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
+export { kibanaResponseFactory, validBodyOutput, CoreKibanaRequest, CspConfig } from './http';
 
 export type {
   HttpResourcesRenderOptions,
@@ -247,7 +248,7 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   AppenderConfigType,
-} from './logging';
+} from '@kbn/core-logging-server';
 export type {
   Logger,
   LoggerFactory,
@@ -260,6 +261,8 @@ export type {
   LogRecord,
   LogLevel,
 } from '@kbn/logging';
+
+export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
 export { PluginType } from '@kbn/core-base-common';
 
@@ -452,9 +455,6 @@ export type {
 export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
 export type {
-  AnalyticsServiceSetup,
-  AnalyticsServicePreboot,
-  AnalyticsServiceStart,
   AnalyticsClient,
   Event,
   EventContext,
@@ -465,8 +465,13 @@ export type {
   OptInConfig,
   ShipperClassConstructor,
   TelemetryCounter,
-} from './analytics';
-export { TelemetryCounterType } from './analytics';
+  TelemetryCounterType,
+} from '@kbn/analytics-client';
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServicePreboot,
+  AnalyticsServiceStart,
+} from '@kbn/core-analytics-server';
 
 /** @public **/
 export interface RequestHandlerContextBase {
@@ -561,8 +566,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   analytics: AnalyticsServiceSetup;
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
-  /** {@link ContextSetup} */
-  context: ContextSetup;
   /** {@link DocLinksServiceSetup} */
   docLinks: DocLinksServiceSetup;
   /** {@link ElasticsearchServiceSetup} */
@@ -638,7 +641,6 @@ export interface CoreStart {
 export type {
   CapabilitiesSetup,
   CapabilitiesStart,
-  ContextSetup,
   ExecutionContextSetup,
   ExecutionContextStart,
   HttpResources,

@@ -10,7 +10,7 @@ import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { MONITORS_ROUTE } from '../../../../../../common/constants';
 import { PLUGIN } from '../../../../../../common/constants/plugin';
 
-export const useMonitorListBreadcrumbs = () => {
+export const useMonitorListBreadcrumbs = (extraCrumbs?: Array<{ text: string; href?: string }>) => {
   const kibana = useKibana();
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? '';
 
@@ -19,6 +19,7 @@ export const useMonitorListBreadcrumbs = () => {
       text: MONITOR_MANAGEMENT_CRUMB,
       href: `${appPath}/${MONITORS_ROUTE}`,
     },
+    ...(extraCrumbs ?? []),
   ]);
 };
 

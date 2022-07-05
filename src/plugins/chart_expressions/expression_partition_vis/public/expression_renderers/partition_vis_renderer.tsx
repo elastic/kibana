@@ -64,7 +64,7 @@ export const getPartitionVisRenderer: (
               visParams={visConfig}
               visData={visData}
               visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-              renderComplete={handlers.done}
+              renderComplete={() => handlers.done()}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               services={{ data: services.data, fieldFormats: services.fieldFormats }}
@@ -73,10 +73,7 @@ export const getPartitionVisRenderer: (
           </div>
         </KibanaThemeProvider>
       </I18nProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });

@@ -90,6 +90,9 @@ export default async function ({ readConfigFile }) {
       integrations: {
         pathname: '/app/integrations',
       },
+      kibana_overview: {
+        pathname: '/app/kibana_overview',
+      },
     },
     junit: {
       reportName: 'Chrome UI Functional Tests',

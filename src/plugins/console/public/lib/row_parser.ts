@@ -40,7 +40,7 @@ export default class RowParser {
       return MODE.IN_REQUEST;
     }
     let line = (this.editor.getLineValue(lineNumber) || '').trim();
-    if (!line || line[0] === '#') {
+    if (!line || line.startsWith('#') || line.startsWith('//') || line.startsWith('/*')) {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start
 

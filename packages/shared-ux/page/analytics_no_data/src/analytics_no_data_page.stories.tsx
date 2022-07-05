@@ -16,7 +16,7 @@ import mdx from '../README.mdx';
 import { Params, getStoryArgTypes, getStoryServices } from './mocks';
 
 export default {
-  title: 'No Data/Analytics',
+  title: 'No Data/Analytics Page',
   description: 'An Analytics-specific version of KibanaNoDataPage.',
   parameters: {
     docs: {

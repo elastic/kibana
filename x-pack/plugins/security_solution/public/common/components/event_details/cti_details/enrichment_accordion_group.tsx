@@ -36,10 +36,10 @@ import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__triggerWrapper {
     background: ${({ theme }) => theme.eui.euiColorLightestShade};
-    border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
-    height: ${({ theme }) => theme.eui.paddingSizes.xl};
-    margin-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
-    padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
+    border-radius: ${({ theme }) => theme.eui.euiSizeXS};
+    height: ${({ theme }) => theme.eui.euiSizeXL};
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+    padding-left: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 

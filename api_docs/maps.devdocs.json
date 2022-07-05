@@ -616,6 +616,94 @@
           },
           {
             "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable._getIsMovementSynchronized",
+            "type": "Function",
+            "tags": [],
+            "label": "_getIsMovementSynchronized",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable._gotoSynchronizedLocation",
+            "type": "Function",
+            "tags": [],
+            "label": "_gotoSynchronizedLocation",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable._propogateMapMovement",
+            "type": "Function",
+            "tags": [],
+            "label": "_propogateMapMovement",
+            "description": [],
+            "signature": [
+              "(lat: number, lon: number, zoom: number) => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable._propogateMapMovement.$1",
+                "type": "number",
+                "tags": [],
+                "label": "lat",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable._propogateMapMovement.$2",
+                "type": "number",
+                "tags": [],
+                "label": "lon",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable._propogateMapMovement.$3",
+                "type": "number",
+                "tags": [],
+                "label": "zoom",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable._getFilters",
             "type": "Function",
             "tags": [],
@@ -1046,6 +1134,64 @@
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.MapEmbeddable._mapSyncHandler",
+            "type": "Function",
+            "tags": [],
+            "label": "_mapSyncHandler",
+            "description": [],
+            "signature": [
+              "(lat: number, lon: number, zoom: number) => void"
+            ],
+            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable._mapSyncHandler.$1",
+                "type": "number",
+                "tags": [],
+                "label": "lat",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable._mapSyncHandler.$2",
+                "type": "number",
+                "tags": [],
+                "label": "lon",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.MapEmbeddable._mapSyncHandler.$3",
+                "type": "number",
+                "tags": [],
+                "label": "zoom",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {

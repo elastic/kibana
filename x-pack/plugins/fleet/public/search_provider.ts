@@ -10,18 +10,17 @@ import type { Observable } from 'rxjs';
 import { from, of, combineLatest } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 
-import { ICON_TYPES } from '@elastic/eui';
-
 import type {
   GlobalSearchResultProvider,
   GlobalSearchProviderResult,
 } from '@kbn/global-search-plugin/public';
 
-import { epmRouteService, INTEGRATIONS_PLUGIN_ID } from '../common';
+import { INTEGRATIONS_PLUGIN_ID } from '../common';
 
 import { sendGetPackages } from './hooks';
 import type { GetPackagesResponse, PackageListItem } from './types';
 import { pagePathGetters } from './constants';
+import { getEuiIconType } from './services/icons';
 
 const packageType = 'integration';
 
@@ -35,18 +34,6 @@ const createPackages$ = () =>
     }),
     shareReplay(1)
   );
-
-const getEuiIconType = (pkg: PackageListItem, basePath: IBasePath): string | undefined => {
-  const pkgIcon = pkg.icons?.find((icon) => icon.type === 'image/svg+xml');
-  if (!pkgIcon) {
-    // If no valid SVG is available, attempt to fallback to built-in EUI icons
-    return ICON_TYPES.find((key) => key.toLowerCase() === `logo${pkg.name}`);
-  }
-
-  return basePath.prepend(
-    epmRouteService.getFilePath(`/package/${pkg.name}/${pkg.version}${pkgIcon.src}`)
-  );
-};
 
 /** Exported for testing only @internal */
 export const toSearchResult = (

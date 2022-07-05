@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { EuiPanelStyled } from './solution_grouped_nav_panel.styles';
-import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
 
@@ -34,6 +33,7 @@ export interface SolutionNavPanelProps {
   title: string;
   items: DefaultSideNavItem[];
   categories?: LinkCategories;
+  bottomOffset?: string;
 }
 export interface SolutionNavPanelCategoriesProps {
   categories: LinkCategories;
@@ -58,11 +58,13 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
   title,
   categories,
   items,
+  bottomOffset,
 }) => {
-  const [hasTimelineBar] = useShowTimeline();
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
-  const isTimelineVisible = hasTimelineBar && isLargerBreakpoint;
   const panelClasses = classNames('eui-yScroll');
+
+  // Only larger breakpoint needs to add bottom offset, other sizes should have full height
+  const bottomOffsetLargerBreakpoint = isLargerBreakpoint ? bottomOffset : undefined;
 
   // ESC key closes PanelNav
   const onKeyDown = useCallback(
@@ -82,8 +84,8 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
             <EuiPanelStyled
               className={panelClasses}
-              hasShadow={!isTimelineVisible}
-              $hasBottomBar={isTimelineVisible}
+              hasShadow={!bottomOffsetLargerBreakpoint}
+              $bottomOffset={bottomOffsetLargerBreakpoint}
               borderRadius="none"
               paddingSize="l"
               data-test-subj="groupedNavPanel"

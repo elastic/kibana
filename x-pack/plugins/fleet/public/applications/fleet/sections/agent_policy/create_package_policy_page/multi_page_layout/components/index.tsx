@@ -12,3 +12,4 @@ export * from './horizontal_page_steps';
 export * from './page_steps';
 export * from './standalone_mode_warning_callout';
 export * from './confirm_incoming_data_with_preview';
+export * from './confirming_incoming_data_standalone';

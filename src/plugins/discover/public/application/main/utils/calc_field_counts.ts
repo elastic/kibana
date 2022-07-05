@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 import { DataView } from '@kbn/data-views-plugin/public';
-import { flattenHit } from '@kbn/data-plugin/public';
-import { ElasticSearchHit } from '../../../types';
+import { DataTableRecord } from '../../../types';
 
 /**
  * This function is calculating stats of the available fields, for usage in sidebar and sharing
  * Note that this values aren't displayed, but used for internal calculations
  */
-export function calcFieldCounts(rows?: ElasticSearchHit[], indexPattern?: DataView) {
+export function calcFieldCounts(rows?: DataTableRecord[], indexPattern?: DataView) {
   const counts: Record<string, number> = {};
   if (!rows || !indexPattern) {
     return {};
   }
   for (const hit of rows) {
-    const fields = Object.keys(flattenHit(hit, indexPattern, { includeIgnoredValues: true }));
+    const fields = Object.keys(hit.flattened);
     for (const fieldName of fields) {
       counts[fieldName] = (counts[fieldName] || 0) + 1;
     }

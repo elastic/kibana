@@ -12,7 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Query } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SearchBar } from '.';
