@@ -51,6 +51,16 @@ export const getPartitionVisRenderer: (
       unmountComponentAtNode(domNode);
     });
 
+    const renderComplete = () => {
+      if (context?.originatingApp) {
+        handlers.logRenderTelemetry({
+          visGroup: context.originatingApp,
+          visType,
+        });
+      }
+      handlers.done();
+    };
+
     const services = await getStartDeps();
     const palettesRegistry = await palettes.getPalettes();
 
@@ -64,18 +74,7 @@ export const getPartitionVisRenderer: (
               visParams={visConfig}
               visData={visData}
               visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
-              renderComplete={() =>
-                handlers.done(
-                  context?.originatingApp
-                    ? {
-                        renderTelemetry: {
-                          visGroup: context.originatingApp,
-                          visType,
-                        },
-                      }
-                    : undefined
-                )
-              }
+              renderComplete={renderComplete}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               services={{ data: services.data, fieldFormats: services.fieldFormats }}

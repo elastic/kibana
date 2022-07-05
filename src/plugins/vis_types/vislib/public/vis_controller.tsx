@@ -28,6 +28,14 @@ const legendClassName = {
 
 export type VislibVisController = InstanceType<ReturnType<typeof createVislibVisController>>;
 
+const renderComplete = (
+  visParams: BasicVislibParams | PieVisParams,
+  handlers: IInterpreterRenderHandlers
+) => {
+  handlers.logRenderTelemetry({ visGroup: 'agg_based', visType: visParams.type });
+  handlers.done();
+};
+
 export const createVislibVisController = (
   core: VisTypeVislibCoreSetup,
   charts: ChartsPluginSetup
@@ -75,7 +83,7 @@ export const createVislibVisController = (
       this.chartEl.dataset.vislibChartType = visParams.type;
 
       if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
-        handlers.done({ renderTelemetry: { visGroup: 'agg_based', visType: visParams.type } });
+        renderComplete(visParams, handlers);
         return;
       }
 
@@ -86,9 +94,7 @@ export const createVislibVisController = (
       this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
       this.vislibVis.on('brush', fireEvent);
       this.vislibVis.on('click', fireEvent);
-      this.vislibVis.on('renderComplete', () =>
-        handlers.done({ renderTelemetry: { visGroup: 'agg_based', visType: visParams.type } })
-      );
+      this.vislibVis.on('renderComplete', () => renderComplete(visParams, handlers));
       this.removeListeners = () => {
         this.vislibVis.off('brush', fireEvent);
         this.vislibVis.off('click', fireEvent);

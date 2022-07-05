@@ -51,6 +51,11 @@ export const getTimelionVisRenderer: (
       });
     };
 
+    const renderComplete = () => {
+      handlers.logRenderTelemetry({ visType: 'timelion', visGroup: 'agg_based' });
+      handlers.done();
+    };
+
     render(
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
         <KibanaThemeProvider theme$={deps.theme.theme$}>
@@ -60,9 +65,7 @@ export const getTimelionVisRenderer: (
                 interval={visParams.interval}
                 ariaLabel={visParams.ariaLabel}
                 seriesList={seriesList}
-                renderComplete={() =>
-                  handlers.done({ renderTelemetry: { visType: 'timelion', visGroup: 'agg_based' } })
-                }
+                renderComplete={renderComplete}
                 onBrushEvent={onBrushEvent}
                 syncTooltips={syncTooltips}
               />

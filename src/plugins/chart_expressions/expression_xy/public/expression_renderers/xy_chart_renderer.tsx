@@ -65,19 +65,17 @@ const extractRenderTelemetryContext = (originatingApp: string, layers: CommonXYL
     );
 
     return {
-      renderTelemetry: {
-        visGroup: originatingApp,
-        extra: [
-          type,
-          isPercentageOrStacked
-            ? `${type}_${isPercentageOrStacked.filter(Boolean).join('_')}`
-            : undefined,
-          byTypes[LayerTypes.REFERENCELINE] ? 'reference_layer' : undefined,
-          byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
-          byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
-        ],
-        onlyExtra: true,
-      },
+      visGroup: originatingApp,
+      extra: [
+        type,
+        isPercentageOrStacked
+          ? `${type}_${isPercentageOrStacked.filter(Boolean).join('_')}`
+          : undefined,
+        byTypes[LayerTypes.REFERENCELINE] ? 'reference_layer' : undefined,
+        byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
+        byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
+      ],
+      onlyExtra: true,
     };
   }
 };
@@ -100,6 +98,18 @@ export const getXyChartRenderer = ({
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
+
+    const renderComplete = () => {
+      const { originatingApp } = config.context ?? {};
+      if (originatingApp) {
+        const context = extractRenderTelemetryContext(originatingApp, config.args.layers);
+        if (context) {
+          handlers.logRenderTelemetry(context);
+        }
+      }
+      handlers.done();
+    };
+
     const deps = await getStartDeps();
 
     const [{ XYChartReportable }, { calculateMinInterval }] = await Promise.all([
@@ -131,16 +141,7 @@ export const getXyChartRenderer = ({
               renderMode={handlers.getRenderMode()}
               syncColors={handlers.isSyncColorsEnabled()}
               syncTooltips={handlers.isSyncTooltipsEnabled()}
-              renderComplete={() => {
-                handlers.done(
-                  config.context?.originatingApp
-                    ? extractRenderTelemetryContext(
-                        config.context?.originatingApp,
-                        config.args.layers
-                      )
-                    : undefined
-                );
-              }}
+              renderComplete={renderComplete}
             />
           </div>{' '}
         </I18nProvider>

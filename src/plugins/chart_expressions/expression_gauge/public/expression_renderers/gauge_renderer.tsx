@@ -32,6 +32,29 @@ export const gaugeRenderer: (
       unmountComponentAtNode(domNode);
     });
 
+    const renderComplete = () => {
+      let type: string;
+      switch (config.args.shape) {
+        case GaugeShapes.HORIZONTAL_BULLET:
+          type = `${EXPRESSION_GAUGE_NAME}_horizontal`;
+          break;
+        case GaugeShapes.VERTICAL_BULLET:
+          type = `${EXPRESSION_GAUGE_NAME}_vertical`;
+          break;
+        default:
+          type = EXPRESSION_GAUGE_NAME;
+      }
+
+      if (config.context?.originatingApp) {
+        handlers.logRenderTelemetry({
+          visGroup: config.context.originatingApp,
+          visType: type,
+        });
+      }
+
+      handlers.done();
+    };
+
     const { GaugeComponent } = await import('../components/gauge_component');
     render(
       <KibanaThemeProvider theme$={theme.theme$}>
@@ -41,30 +64,7 @@ export const gaugeRenderer: (
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
-            renderComplete={() => {
-              let type: string;
-              switch (config.args.shape) {
-                case GaugeShapes.HORIZONTAL_BULLET:
-                  type = `${EXPRESSION_GAUGE_NAME}_horizontal`;
-                  break;
-                case GaugeShapes.VERTICAL_BULLET:
-                  type = `${EXPRESSION_GAUGE_NAME}_vertical`;
-                  break;
-                default:
-                  type = EXPRESSION_GAUGE_NAME;
-              }
-
-              handlers.done(
-                config.context?.originatingApp
-                  ? {
-                      renderTelemetry: {
-                        visGroup: config.context.originatingApp,
-                        visType: type,
-                      },
-                    }
-                  : undefined
-              );
-            }}
+            renderComplete={renderComplete}
             uiState={handlers.uiState as PersistedState}
           />
         </div>

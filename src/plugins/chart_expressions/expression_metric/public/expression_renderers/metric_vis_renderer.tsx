@@ -65,6 +65,16 @@ export const getMetricVisRenderer = (
         unmountComponentAtNode(domNode);
       });
 
+      const renderComplete = () => {
+        if (context?.originatingApp) {
+          handlers.logRenderTelemetry({
+            visGroup: context.originatingApp,
+            visType: 'metric',
+          });
+        }
+        handlers.done();
+      };
+
       const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
 
       render(
@@ -78,18 +88,7 @@ export const getMetricVisRenderer = (
             <MetricVisComponent
               visData={visData}
               visParams={visConfig}
-              renderComplete={() =>
-                handlers.done(
-                  context?.originatingApp
-                    ? {
-                        renderTelemetry: {
-                          visGroup: context.originatingApp,
-                          visType: 'metric',
-                        },
-                      }
-                    : undefined
-                )
-              }
+              renderComplete={renderComplete}
               fireEvent={handlers.event}
               filterable={filterable}
             />

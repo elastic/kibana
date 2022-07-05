@@ -41,6 +41,19 @@ export const getXYVisRenderer: (deps: {
   render: async (domNode, { visData, visConfig, visType, syncColors, syncTooltips }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
 
+    const renderComplete = () => {
+      // Renaming according to business requirements
+      const visTypeTelemetryMap: Record<string, string> = {
+        histogram: 'vertical_bar',
+      };
+
+      handlers.logRenderTelemetry({
+        visType: visTypeTelemetryMap[visType] ?? visType,
+        visGroup: 'agg_based',
+      });
+      handlers.done();
+    };
+
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
 
     render(
@@ -50,19 +63,7 @@ export const getXYVisRenderer: (deps: {
             <VisComponent
               visParams={visConfig}
               visData={visData}
-              renderComplete={() => {
-                // Renaming according to business requirements
-                const visTypeTelemetryMap: Record<string, string> = {
-                  histogram: 'vertical_bar',
-                };
-
-                handlers.done({
-                  renderTelemetry: {
-                    visType: visTypeTelemetryMap[visType] ?? visType,
-                    visGroup: 'agg_based',
-                  },
-                });
-              }}
+              renderComplete={renderComplete}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
               syncColors={syncColors}

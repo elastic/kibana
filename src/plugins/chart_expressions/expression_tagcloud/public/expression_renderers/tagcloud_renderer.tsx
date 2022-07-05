@@ -46,6 +46,17 @@ export const tagcloudRenderer: (
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
+
+    const renderComplete = () => {
+      if (config.context?.originatingApp) {
+        handlers.logRenderTelemetry({
+          visGroup: config.context.originatingApp,
+          visType: EXPRESSION_NAME,
+        });
+      }
+      handlers.done();
+    };
+
     const palettesRegistry = await palettes.getPalettes();
 
     const showNoResult = config.visData.rows.length === 0;
@@ -65,18 +76,7 @@ export const tagcloudRenderer: (
                 <TagCloudChart
                   {...config}
                   palettesRegistry={palettesRegistry}
-                  renderComplete={() =>
-                    handlers.done(
-                      config.context?.originatingApp
-                        ? {
-                            renderTelemetry: {
-                              visGroup: config.context.originatingApp,
-                              visType: EXPRESSION_NAME,
-                            },
-                          }
-                        : undefined
-                    )
-                  }
+                  renderComplete={renderComplete}
                   fireEvent={handlers.event}
                   syncColors={config.syncColors}
                 />

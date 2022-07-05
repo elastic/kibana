@@ -50,6 +50,17 @@ export const heatmapRenderer: (
       handlers.event({ name: 'brush', data });
     };
 
+    const renderComplete = () => {
+      if (config.context?.originatingApp) {
+        handlers.logRenderTelemetry({
+          visGroup: config.context.originatingApp,
+          visType: EXPRESSION_HEATMAP_NAME,
+        });
+      }
+
+      handlers.done();
+    };
+
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;
@@ -65,18 +76,7 @@ export const heatmapRenderer: (
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
-            renderComplete={() =>
-              handlers.done(
-                config.context?.originatingApp
-                  ? {
-                      renderTelemetry: {
-                        visGroup: config.context.originatingApp,
-                        visType: EXPRESSION_HEATMAP_NAME,
-                      },
-                    }
-                  : undefined
-              )
-            }
+            renderComplete={renderComplete}
             uiState={handlers.uiState as PersistedState}
             interactive={isInteractive()}
           />

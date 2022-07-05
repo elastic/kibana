@@ -13,7 +13,6 @@ import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { IInterpreterRenderHandlersDoneContext } from '../common/expression_renderers';
 import {
   ExpressionRenderError,
   RenderErrorHandlerFnType,
@@ -37,35 +36,6 @@ export interface ExpressionRenderHandlerParams {
 }
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
-
-const doRenderTelemetry = (context?: IInterpreterRenderHandlersDoneContext) => {
-  if (context?.renderTelemetry) {
-    const { visGroup, visType, extra } = context.renderTelemetry;
-    const usageCollection = getUsageCollection();
-    const toEvent = (item: string | undefined) =>
-      ['render', visGroup, visType, item].filter(Boolean).join('_');
-
-    let uiCounterEvents: string | string[];
-
-    if (!extra || typeof extra === 'string') {
-      uiCounterEvents = toEvent(extra);
-    } else {
-      uiCounterEvents = extra.filter(Boolean).map((item) => toEvent(item));
-
-      if (!context.renderTelemetry.onlyExtra) {
-        uiCounterEvents.push(toEvent(undefined));
-      }
-    }
-
-    if (usageCollection && (context.renderTelemetry.visGroup || context.renderTelemetry.visType)) {
-      usageCollection.reportUiCounter(
-        (context.renderTelemetry.visGroup ?? context.renderTelemetry.visType)!,
-        METRIC_TYPE.COUNT,
-        uiCounterEvents
-      );
-    }
-  }
-};
 
 export class ExpressionRenderHandler {
   render$: Observable<number>;
@@ -109,14 +79,37 @@ export class ExpressionRenderHandler {
       onDestroy: (fn: Function) => {
         this.destroyFn = fn;
       },
-      done: (context) => {
+      done: () => {
         this.renderCount++;
         this.renderSubject.next(this.renderCount);
-
-        doRenderTelemetry(context);
       },
       reload: () => {
         this.updateSubject.next(null);
+      },
+      logRenderTelemetry({ visGroup, visType, extra, onlyExtra }) {
+        const usageCollection = getUsageCollection();
+        const toEvent = (item: string | undefined) =>
+          ['render', visGroup, visType, item].filter(Boolean).join('_');
+
+        let uiCounterEvents: string | string[];
+
+        if (!extra || typeof extra === 'string') {
+          uiCounterEvents = toEvent(extra);
+        } else {
+          uiCounterEvents = extra.filter(Boolean).map((item) => toEvent(item));
+
+          if (!onlyExtra) {
+            uiCounterEvents.push(toEvent(undefined));
+          }
+        }
+
+        if (usageCollection && (visGroup || visType)) {
+          usageCollection.reportUiCounter(
+            (visGroup ?? visType)!,
+            METRIC_TYPE.COUNT,
+            uiCounterEvents
+          );
+        }
       },
       update: (params: UpdateValue) => {
         this.updateSubject.next(params);

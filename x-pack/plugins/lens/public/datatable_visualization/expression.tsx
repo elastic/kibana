@@ -42,6 +42,11 @@ export const getDatatableRenderer = (dependencies: {
     const resolvedGetType = await dependencies.getType;
     const { hasCompatibleActions, isInteractive } = handlers;
 
+    const renderComplete = () => {
+      handlers.logRenderTelemetry({ visGroup: 'lens', visType: 'table' });
+      handlers.done();
+    };
+
     // An entry for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.
     let rowHasRowClickTriggerActions: boolean[] = [];
@@ -81,9 +86,7 @@ export const getDatatableRenderer = (dependencies: {
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
-            renderComplete={() =>
-              handlers.done({ renderTelemetry: { visGroup: 'lens', visType: 'table' } })
-            }
+            renderComplete={renderComplete}
           />
         </I18nProvider>
       </KibanaThemeProvider>,

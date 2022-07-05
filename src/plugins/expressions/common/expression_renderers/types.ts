@@ -73,20 +73,18 @@ export interface IInterpreterRenderEvent<Context = unknown> {
   data?: Context;
 }
 
-export interface IInterpreterRenderHandlersDoneContext {
-  renderTelemetry?: {
-    visType?: string;
-    visGroup?: string;
-    extra?: string | Array<string | undefined>;
-    onlyExtra?: boolean;
-  };
+export interface IInterpreterRenderTelemetry {
+  visGroup?: string;
+  visType?: string;
+  extra?: string | Array<string | undefined>;
+  onlyExtra?: boolean;
 }
 
 export interface IInterpreterRenderHandlers {
   /**
    * Done increments the number of rendering successes
    */
-  done(context?: IInterpreterRenderHandlersDoneContext): void;
+  done(): void;
   onDestroy(fn: () => void): void;
   reload(): void;
   update(params: IInterpreterRenderUpdateParams): void;
@@ -108,4 +106,6 @@ export interface IInterpreterRenderHandlers {
    * Downstream consumers of the uiState handler will need to cast for now.
    */
   uiState?: unknown;
+
+  logRenderTelemetry(renderTelemetry: IInterpreterRenderTelemetry): void;
 }
