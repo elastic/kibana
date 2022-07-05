@@ -8,15 +8,19 @@
 import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { sendPutAgentTagsUpdate, useStartServices } from '../../../../hooks';
+import {
+  sendPostBulkAgentTagsUpdate,
+  sendPutAgentTagsUpdate,
+  useStartServices,
+} from '../../../../hooks';
 
 export const useUpdateTags = () => {
   const { notifications } = useStartServices();
 
-  const updateTags = useCallback(
-    async (agentId: string, newTags: string[], onSuccess: () => void) => {
+  const wrapRequest = useCallback(
+    async (requestFn: () => Promise<any>, onSuccess: () => void) => {
       try {
-        const res = await sendPutAgentTagsUpdate(agentId, { tags: newTags });
+        const res = await requestFn();
 
         if (res.error) {
           throw res.error;
@@ -40,5 +44,30 @@ export const useUpdateTags = () => {
     [notifications.toasts]
   );
 
-  return { updateTags };
+  const updateTags = useCallback(
+    async (agentId: string, newTags: string[], onSuccess: () => void) => {
+      await wrapRequest(
+        async () => await sendPutAgentTagsUpdate(agentId, { tags: newTags }),
+        onSuccess
+      );
+    },
+    [wrapRequest]
+  );
+
+  const bulkUpdateTags = useCallback(
+    async (
+      agents: string[] | string,
+      tagsToAdd: string[],
+      tagsToRemove: string[],
+      onSuccess: () => void
+    ) => {
+      await wrapRequest(
+        async () => await sendPostBulkAgentTagsUpdate({ agents, tagsToAdd, tagsToRemove }),
+        onSuccess
+      );
+    },
+    [wrapRequest]
+  );
+
+  return { updateTags, bulkUpdateTags };
 };

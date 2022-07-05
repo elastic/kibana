@@ -122,9 +122,6 @@ export type {
 } from './context';
 export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { CspConfig } from './csp';
-export type { ICspConfig } from './csp';
-
 export { ElasticsearchConfig, pollEsNodesVersion } from './elasticsearch';
 export type {
   ElasticsearchServicePreboot,
@@ -146,7 +143,6 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
-  ElasticsearchErrorDetails,
   PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
@@ -155,10 +151,8 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
-  UnauthorizedError,
 } from './elasticsearch';
 
-export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
 export type {
   AuthenticationHandler,
   AuthHeaders,
@@ -233,9 +227,13 @@ export type {
   SessionStorageFactory,
   DestructiveRouteMethod,
   SafeRouteMethod,
+  KibanaRequest,
+  ICspConfig,
+  IExternalUrlConfig,
+  IExternalUrlPolicy,
 } from './http';
 
-export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
+export { kibanaResponseFactory, validBodyOutput, CoreKibanaRequest, CspConfig } from './http';
 
 export type {
   HttpResourcesRenderOptions,
@@ -467,8 +465,8 @@ export type {
   OptInConfig,
   ShipperClassConstructor,
   TelemetryCounter,
+  TelemetryCounterType,
 } from '@kbn/analytics-client';
-export { TelemetryCounterType } from '@kbn/analytics-client';
 export type {
   AnalyticsServiceSetup,
   AnalyticsServicePreboot,

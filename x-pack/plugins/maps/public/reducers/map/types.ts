@@ -34,7 +34,6 @@ export type MapViewContext = MapExtentState & {
 };
 
 export type MapContext = Partial<MapViewContext> & {
-  scrollZoom: boolean;
   mouseCoordinates?: {
     lat: number;
     lon: number;
@@ -67,6 +66,7 @@ export type MapSettings = {
   browserLocation: {
     zoom: number;
   };
+  keydownScrollZoom: boolean;
   maxZoom: number;
   minZoom: number;
   showScaleControl: boolean;
