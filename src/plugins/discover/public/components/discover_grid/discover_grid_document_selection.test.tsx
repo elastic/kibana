@@ -8,13 +8,10 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import {
-  DiscoverGridDocumentToolbarBtn,
-  getDocId,
-  SelectButton,
-} from './discover_grid_document_selection';
+import { DiscoverGridDocumentToolbarBtn, SelectButton } from './discover_grid_document_selection';
 import { discoverGridContextMock } from '../../__mocks__/grid_context';
 import { DiscoverGridContext } from './discover_grid_context';
+import { getDocId } from '../../utils/get_doc_id';
 
 describe('document selection', () => {
   describe('getDocId', () => {

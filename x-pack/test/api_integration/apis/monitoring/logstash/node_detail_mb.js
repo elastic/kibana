@@ -25,7 +25,7 @@ export default function ({ getService }) {
     });
 
     after('unload archive', () => {
-      // return esArchiver.unload(archive);
+      return esArchiver.unload(archive);
     });
 
     it('should summarize the Logstash node with non-advanced chart data metrics', async () => {

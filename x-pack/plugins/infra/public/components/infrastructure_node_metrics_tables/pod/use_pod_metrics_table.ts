@@ -71,11 +71,7 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
     [filterClauseDsl]
   );
 
-  const {
-    isLoading,
-    nodes: pods,
-    pageCount,
-  } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
+  const { data, isLoading } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
     metricsExplorerOptions: podMetricsOptions,
     timerange,
     transform: seriesToPodNodeMetricsRow,
@@ -84,14 +80,13 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
   });
 
   return {
-    timerange,
-    isLoading,
-    pods,
-    pageCount,
     currentPageIndex,
+    data,
+    isLoading,
     setCurrentPageIndex,
-    sortState,
     setSortState,
+    sortState,
+    timerange,
   };
 }
 

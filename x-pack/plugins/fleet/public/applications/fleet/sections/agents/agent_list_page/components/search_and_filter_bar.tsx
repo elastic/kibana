@@ -65,7 +65,7 @@ const statusFilters = [
 ];
 
 const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
-  padding: ${(props) => props.theme.eui.paddingSizes.s};
+  padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 export const SearchAndFilterBar: React.FunctionComponent<{
@@ -89,6 +89,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   selectedAgents: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
+  visibleAgents: Agent[];
 }> = ({
   agentPolicies,
   draftKuery,
@@ -110,6 +111,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   selectedAgents,
   refreshAgents,
   onClickAddAgent,
+  visibleAgents,
 }) => {
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
@@ -336,7 +338,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                 selectionMode={selectionMode}
                 currentQuery={currentQuery}
                 selectedAgents={selectedAgents}
+                visibleAgents={visibleAgents}
                 refreshAgents={refreshAgents}
+                allTags={tags}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

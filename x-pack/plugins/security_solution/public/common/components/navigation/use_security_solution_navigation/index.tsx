@@ -76,7 +76,6 @@ export const useSecuritySolutionNavigation = () => {
     filters: urlState.filters,
     navTabs: enabledNavTabs,
     pageName,
-    sourcerer: urlState.sourcerer,
     savedQuery: urlState.savedQuery,
     tabName,
     timeline: urlState.timeline,

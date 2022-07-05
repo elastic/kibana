@@ -10,7 +10,7 @@ import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import {
   counterRate,
   formatColumn,
-  renameColumns,
+  mapToColumns,
   getTimeScale,
   getDatatable,
 } from '../../common/expressions';
@@ -25,7 +25,7 @@ export const setupExpressions = (
   [
     counterRate,
     formatColumn,
-    renameColumns,
+    mapToColumns,
     getDatatable(getFormatFactory(core)),
     getTimeScale(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));

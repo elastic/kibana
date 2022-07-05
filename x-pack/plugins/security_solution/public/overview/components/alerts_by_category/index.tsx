@@ -39,7 +39,7 @@ const DEFAULT_STACK_BY = 'event.module';
 const StyledLinkButton = styled(EuiButton)`
   margin-left: 0;
   @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
-    margin-left: ${({ theme }) => theme.eui.paddingSizes.l};
+    margin-left: ${({ theme }) => theme.eui.euiSizeL};
   }
 `;
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
