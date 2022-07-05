@@ -1,0 +1,13 @@
+.appSearchAccordion--bordered {
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeM;
+}
+
+.appSearchAccordion--bordered, .appSearchAccordion {
+  .euiBasicTable {
+    .euiTableRow > .euiTableRowCell {
+      border-bottom: none;
+    }
+  }
+}

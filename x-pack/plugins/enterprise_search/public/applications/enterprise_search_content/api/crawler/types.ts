@@ -164,3 +164,39 @@ export interface DomainConfig {
   seedUrls: string[];
   sitemapUrls: string[];
 }
+
+export interface CrawlRequestStats {
+  status: {
+    avgResponseTimeMSec?: number;
+    crawlDurationMSec?: number;
+    pagesVisited?: number;
+    urlsAllowed?: number;
+    statusCodes?: {
+      [code: string]: number;
+    };
+  };
+}
+
+export interface CrawlRequestStatsFromServer {
+  status: {
+    avg_response_time_msec?: number;
+    crawl_duration_msec?: number;
+    pages_visited?: number;
+    urls_allowed?: number;
+    status_codes?: {
+      [code: string]: number;
+    };
+  };
+}
+
+export type CrawlRequestWithDetailsFromServer = CrawlRequestFromServer & {
+  type: CrawlType;
+  crawl_config: CrawlConfigFromServer;
+  stats: CrawlRequestStatsFromServer;
+};
+
+export type CrawlRequestWithDetails = CrawlRequest & {
+  type: CrawlType;
+  crawlConfig: CrawlConfig;
+  stats: CrawlRequestStats | null;
+};

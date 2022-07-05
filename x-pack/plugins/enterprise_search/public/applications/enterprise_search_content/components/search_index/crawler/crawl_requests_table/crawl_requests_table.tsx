@@ -7,7 +7,9 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
+import { useParams } from 'react-router-dom';
+
+import { useActions, useValues } from 'kea';
 
 import {
   EuiBadge,
@@ -21,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { CrawlEvent } from '../../../../api/crawler/types';
+import { CrawlDetailLogic } from '../crawl_details_flyout/crawl_detail_logic';
 import { CrawlerLogic } from '../crawler_logic';
 import { CustomFormattedTimestamp } from '../custom_formatted_timestamp';
 
@@ -28,7 +31,14 @@ import { readableCrawlerStatuses } from './constants';
 import { CrawlEventTypeBadge } from './crawl_event_type_badge';
 
 export const CrawlRequestsTable: React.FC = () => {
+  const { indexName } = useParams<{
+    indexName: string;
+  }>();
+
+  const crawlDetailLogic = CrawlDetailLogic({ indexName });
+
   const { events } = useValues(CrawlerLogic);
+  const { fetchCrawlRequest } = useActions(crawlDetailLogic);
 
   const columns: Array<
     EuiTableFieldDataColumnType<CrawlEvent> | EuiTableComputedColumnType<CrawlEvent>
@@ -46,7 +56,7 @@ export const CrawlRequestsTable: React.FC = () => {
           return (
             <EuiLink
               onClick={() => {
-                // fetchCrawlRequest(id);
+                fetchCrawlRequest(id);
                 // openFlyout();
               }}
             >

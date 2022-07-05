@@ -83,6 +83,21 @@ export function registerCrawlerRoutes({
 
   router.get(
     {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/crawl_requests/{crawlRequestId}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+          crawlRequestId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_requests/:crawlRequestId',
+    })
+  );
+
+  router.get(
+    {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains',
       validate: {
         params: schema.object({

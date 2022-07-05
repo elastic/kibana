@@ -18,6 +18,10 @@ import {
   CrawlEventFromServer,
   CrawlRequest,
   CrawlRequestFromServer,
+  CrawlRequestStats,
+  CrawlRequestStatsFromServer,
+  CrawlRequestWithDetails,
+  CrawlRequestWithDetailsFromServer,
   DomainConfig,
   DomainConfigFromServer,
 } from './types';
@@ -124,6 +128,56 @@ export function crawlEventServerToClient(event: CrawlEventFromServer): CrawlEven
     completedAt,
     type,
     crawlConfig: crawlConfigServerToClient(crawlConfig),
+  };
+}
+
+export function crawlRequestStatsServerToClient(
+  crawlStats: CrawlRequestStatsFromServer
+): CrawlRequestStats {
+  const {
+    status: {
+      avg_response_time_msec: avgResponseTimeMSec,
+      crawl_duration_msec: crawlDurationMSec,
+      pages_visited: pagesVisited,
+      urls_allowed: urlsAllowed,
+      status_codes: statusCodes,
+    },
+  } = crawlStats;
+
+  return {
+    status: {
+      urlsAllowed,
+      pagesVisited,
+      avgResponseTimeMSec,
+      crawlDurationMSec,
+      statusCodes,
+    },
+  };
+}
+
+export function crawlRequestWithDetailsServerToClient(
+  event: CrawlRequestWithDetailsFromServer
+): CrawlRequestWithDetails {
+  const {
+    began_at: beganAt,
+    completed_at: completedAt,
+    crawl_config: crawlConfig,
+    created_at: createdAt,
+    id,
+    stats: crawlStats,
+    status,
+    type,
+  } = event;
+
+  return {
+    beganAt,
+    completedAt,
+    crawlConfig: crawlConfigServerToClient(crawlConfig),
+    createdAt,
+    id,
+    stats: crawlStats && crawlRequestStatsServerToClient(crawlStats),
+    status,
+    type,
   };
 }
 
