@@ -8,7 +8,6 @@
 
 import { firstValueFrom, Subject, take, toArray } from 'rxjs';
 import type { Event, TelemetryCounter } from '@kbn/analytics-client';
-import { TelemetryCounterType } from '@kbn/analytics-client';
 import { createTelemetryCounterHelper } from './report_telemetry_counters';
 
 describe('reportTelemetryCounters', () => {
@@ -83,7 +82,7 @@ describe('reportTelemetryCounters', () => {
     const counters = firstValueFrom(telemetryCounter$);
 
     reportTelemetryCounters(events, {
-      type: TelemetryCounterType.dropped,
+      type: 'dropped',
       code: 'my_code',
     });
 
