@@ -29,6 +29,7 @@ describe('NavControlPopover', () => {
         anchorPosition={'downRight'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
+        navigateToUrl={jest.fn()}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -62,6 +63,7 @@ describe('NavControlPopover', () => {
         anchorPosition={'rightCenter'}
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
+        navigateToUrl={jest.fn()}
       />
     );
 
