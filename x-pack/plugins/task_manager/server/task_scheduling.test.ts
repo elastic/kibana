@@ -10,7 +10,6 @@ import moment from 'moment';
 
 import { asTaskRunEvent, TaskPersistence } from './task_events';
 import { TaskLifecycleEvent } from './polling_lifecycle';
-import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskScheduling } from './task_scheduling';
 import { asErr, asOk } from './lib/result_type';
 import { ConcreteTaskInstance, TaskStatus } from './task';
@@ -35,11 +34,9 @@ jest.mock('elastic-apm-node', () => ({
 
 describe('TaskScheduling', () => {
   const mockTaskStore = taskStoreMock.create({});
-  const mockTaskManager = taskPollingLifecycleMock.create({});
   const definitions = new TaskTypeDictionary(mockLogger());
   const taskSchedulingOpts = {
     taskStore: mockTaskStore,
-    taskPollingLifecycle: mockTaskManager,
     logger: mockLogger(),
     middleware: createInitialMiddleware(),
     definitions,
@@ -474,6 +471,28 @@ describe('TaskScheduling', () => {
 
       expect(result).rejects.toMatchInlineSnapshot(
         `[Error: Ephemeral Task of type foo was rejected]`
+      );
+    });
+
+    test('rejects ephemeral task if ephemeralTaskLifecycle is not defined', async () => {
+      const ephemeralTask = mockTask({
+        state: {
+          foo: 'bar',
+        },
+      });
+      const middleware = createInitialMiddleware();
+      middleware.beforeSave = jest.fn().mockImplementation(async () => {
+        return { taskInstance: ephemeralTask };
+      });
+      const taskScheduling = new TaskScheduling({
+        ...taskSchedulingOpts,
+        middleware,
+        ephemeralTaskLifecycle: undefined,
+      });
+
+      const result = taskScheduling.ephemeralRunNow(ephemeralTask);
+      expect(result).rejects.toMatchInlineSnapshot(
+        `[Error: Ephemeral Task of type foo was rejected because ephemeral tasks are not supported]`
       );
     });
   });
