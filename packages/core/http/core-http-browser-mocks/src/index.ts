@@ -8,3 +8,4 @@
 
 export type { HttpSetupMock } from './http_service.mock';
 export { httpServiceMock } from './http_service.mock';
+export { createHttpFetchError } from './fetch_error.mock';

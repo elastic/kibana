@@ -17,6 +17,7 @@ import {
   injectReferences,
 } from './loader';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
@@ -1157,8 +1158,7 @@ describe('loader', () => {
       const setState = jest.fn();
       const fetchJson = jest.fn((path: string) => {
         return new Promise((resolve, reject) => {
-          // mock HttpFetchError's properties
-          const error = Object.assign({}, new Error('timeout'), { res: { status: 408 } });
+          const error = createHttpFetchError('timeout', 'error', {}, { status: 408 });
           reject(error);
         });
       }) as unknown as HttpHandler;
