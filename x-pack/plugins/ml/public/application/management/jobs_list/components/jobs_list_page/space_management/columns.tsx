@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTableColumn } from '@elastic/eui';
+import { TrainedModelLink } from '../../../../../trained_models/models_management';
 import type { MlSavedObjectType } from '../../../../../../../common/types/saved_objects';
 import type {
   AnalyticsManagementItems,
@@ -146,6 +147,7 @@ const trainedModelColumns: Array<EuiBasicTableColumn<TrainedModelsManagementItem
     truncateText: true,
     'data-test-subj': 'mlSpaceManagementTableColumnId',
     scope: 'row',
+    render: (id: string) => <TrainedModelLink id={id} />,
   },
   {
     field: 'description',
