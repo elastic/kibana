@@ -20,17 +20,18 @@ export interface TopNSamples {
   TopN: TopNSample[];
 }
 
+export interface TopNSamplesHistogramResponse {
+  buckets: Array<{
+    key: string;
+    doc_count: number;
+    group_by: {
+      buckets: Array<{ doc_count: number; key: string; count: { value: number } }>;
+    };
+  }>;
+}
+
 export function createTopNSamples(
-  histogram:
-    | {
-        buckets: Array<{
-          key: string;
-          group_by: {
-            buckets: Array<{ key: string; count: { value: number | null } }>;
-          };
-        }>;
-      }
-    | undefined
+  histogram: TopNSamplesHistogramResponse | undefined
 ): TopNSample[] {
   const bucketsByTimestamp = new Map();
   const uniqueCategories = new Set<string>();

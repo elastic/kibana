@@ -8,9 +8,6 @@
 
 import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
-import agent, { Span } from 'elastic-apm-node';
-import LRUCache from 'lru-cache';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport } from './create_transport';
@@ -34,45 +31,12 @@ export const configureClient = (
   const clientOptions = parseClientOptions(config, scoped);
   const KibanaTransport = createTransport({ getExecutionContext });
 
-  const cache = new LRUCache<any, Span | undefined | null>({
-    max: 100,
-  });
-
   const client = new Client({
     ...clientOptions,
     Transport: KibanaTransport,
     Connection: HttpConnection,
     // using ClusterConnectionPool until https://github.com/elastic/elasticsearch-js/issues/1714 is addressed
     ConnectionPool: ClusterConnectionPool,
-  });
-
-  function startSpan(name: string) {
-    const span = agent.startSpan(name, 'db', 'elasticsearch', { exitSpan: true });
-    return span;
-  }
-
-  client.diagnostic.on('serialization', (err, result) => {
-    if (!err) {
-      cache.set(result?.meta.request.id, startSpan('serialization'));
-    }
-  });
-
-  client.diagnostic.on('request', (err, result) => {
-    cache.get(result?.meta.request.id)?.end();
-    if (!err) {
-      cache.set(result?.meta.request.id, startSpan('request'));
-    }
-  });
-
-  client.diagnostic.on('deserialization', (err, result) => {
-    cache.get(result?.requestId)?.end();
-    if (!err) {
-      cache.set(result?.requestId, startSpan('deserialization'));
-    }
-  });
-
-  client.diagnostic.on('response', (err, result) => {
-    cache.get(result?.meta.request.id)?.end();
   });
 
   instrumentEsQueryAndDeprecationLogger({ logger, client, type });

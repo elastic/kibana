@@ -7,15 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
-import {
-  AggregationsHistogramAggregate,
-  AggregationsHistogramBucket,
-  AggregationsStringTermsBucket,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { fromMapToRecord, getRoutePaths } from '../../common';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
-import { createTopNSamples } from '../../common/topn';
+import { createTopNSamples, TopNSamplesHistogramResponse } from '../../common/topn';
 import { findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './query';
@@ -68,7 +63,9 @@ export async function topNElasticSearchQuery(
     }
   );
 
-  const histogram = getAggs(resEvents)?.histogram as AggregationsHistogramAggregate;
+  const histogram = getAggs(resEvents)?.histogram as unknown as
+    | TopNSamplesHistogramResponse
+    | undefined;
   const topN = createTopNSamples(histogram);
 
   if (searchField !== 'StackTraceID') {
@@ -81,17 +78,15 @@ export async function topNElasticSearchQuery(
   let totalCount = 0;
   const stackTraceEvents = new Map<StackTraceID, number>();
 
-  const histogramBuckets = (histogram?.buckets as AggregationsHistogramBucket[]) ?? [];
+  const histogramBuckets = histogram?.buckets ?? [];
   for (let i = 0; i < histogramBuckets.length; i++) {
     totalDocCount += histogramBuckets[i].doc_count;
-    histogramBuckets[i].group_by.buckets.forEach(
-      (stackTraceItem: AggregationsStringTermsBucket) => {
-        const count = stackTraceItem.count.value;
-        const oldCount = stackTraceEvents.get(stackTraceItem.key);
-        totalCount += count + (oldCount ?? 0);
-        stackTraceEvents.set(stackTraceItem.key, count + (oldCount ?? 0));
-      }
-    );
+    histogramBuckets[i].group_by.buckets.forEach((stackTraceItem) => {
+      const count = stackTraceItem.count.value;
+      const oldCount = stackTraceEvents.get(stackTraceItem.key);
+      totalCount += count + (oldCount ?? 0);
+      stackTraceEvents.set(stackTraceItem.key, count + (oldCount ?? 0));
+    });
   }
 
   logger.info('events total count: ' + totalCount + ' (' + totalDocCount + ' docs)');
