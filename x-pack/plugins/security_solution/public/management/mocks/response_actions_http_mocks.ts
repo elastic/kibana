@@ -14,6 +14,7 @@ import {
   ENDPOINTS_ACTION_LIST_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
+  KILL_PROCESS_ROUTE,
 } from '../../../common/endpoint/constants';
 import {
   httpHandlerMockFactory,
@@ -32,6 +33,8 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   isolateHost: () => HostIsolationResponse;
 
   releaseHost: () => HostIsolationResponse;
+
+  killProcess: () => ActionDetailsApiResponse;
 
   actionDetails: (options: HttpFetchOptionsWithPath) => ActionDetailsApiResponse;
 
@@ -57,6 +60,16 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     method: 'post',
     handler: (): HostIsolationResponse => {
       return { action: '3-2-1' };
+    },
+  },
+  {
+    id: 'killProcess',
+    path: KILL_PROCESS_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails() as ActionDetails;
+      return { data: response };
     },
   },
   {

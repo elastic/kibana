@@ -47,16 +47,17 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
           <div className="eui-displayInlineBlock">
             <CommandInputUsage commandDef={command.commandDefinition} />
           </div>
-          {'. '}
-          <EuiText size="s" className="eui-displayInlineBlock">
-            <FormattedMessage
-              id="xpack.securitySolution.console.badArgument.helpMessage"
-              defaultMessage="Enter {helpCmd} for further assistance."
-              values={{
-                helpCmd: <EuiCode>{`${command.commandDefinition.name} --help`}</EuiCode>,
-              }}
-            />
-          </EuiText>
+          <div>
+            <EuiText size="s" className="eui-displayInlineBlock">
+              <FormattedMessage
+                id="xpack.securitySolution.console.badArgument.helpMessage"
+                defaultMessage="Enter {helpCmd} for further assistance."
+                values={{
+                  helpCmd: <EuiCode>{`${command.commandDefinition.name} --help`}</EuiCode>,
+                }}
+              />
+            </EuiText>
+          </div>
         </>
       </UnsupportedMessageCallout>
     );
