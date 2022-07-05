@@ -25,7 +25,7 @@ const InferenceInfo: FC<Props> = ({ taskLabel, info }) => {
   return (
     <>
       <EuiCallOut
-        title={i18n.translate('xpack.ml.editModelSnapshotFlyout.calloutTitle', {
+        title={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.calloutTitle', {
           defaultMessage: 'Task: {taskLabel}',
           values: { taskLabel },
         })}
