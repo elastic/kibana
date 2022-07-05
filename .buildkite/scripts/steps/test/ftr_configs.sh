@@ -4,9 +4,9 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-
+BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-0}
 FTR_CONFIG_GROUP_KEY=${FTR_CONFIG_GROUP_KEY:-}
-if [ "$FTR_CONFIG_GROUP_KEY" == "" ]; then
+if [ "$FTR_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; then
   echo "Missing FTR_CONFIG_GROUP_KEY env var"
   exit 1
 fi
@@ -30,10 +30,15 @@ if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
   fi
 fi
 
-if [[ "$configs" == "" ]]; then
+if [ "$configs" == "" ] && [ "$FTR_CONFIG_GROUP_KEY" != "" ]; then
   echo "--- downloading ftr test run order"
   buildkite-agent artifact download ftr_run_order.json .
   configs=$(jq -r '.[env.FTR_CONFIG_GROUP_KEY].names[]' ftr_run_order.json)
+fi
+
+if [ "$configs" == "" ]; then
+  echo "unable to determine configs to run"
+  exit 1
 fi
 
 failedConfigs=""
