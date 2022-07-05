@@ -6,11 +6,13 @@
  */
 
 import { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 
 export interface ProfilingPluginSetupDeps {
   data: PluginSetup;
   observability: ObservabilityPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface ProfilingPluginStartDeps {

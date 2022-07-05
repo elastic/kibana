@@ -14,7 +14,8 @@
     "data",
     "kibanaUtils",
     "share",
-    "observability"
+    "observability",
+    "features"
   ],
   "optionalPlugins": []
 }
