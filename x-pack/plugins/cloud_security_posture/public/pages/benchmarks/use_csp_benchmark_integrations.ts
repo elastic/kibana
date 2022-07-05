@@ -8,7 +8,7 @@
 import { useQuery } from 'react-query';
 import type { ListResult } from '@kbn/fleet-plugin/common';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
-import type { GetBenchmarksQueryParams } from '../../../common/schemas/benchmark';
+import type { BenchmarksQueryParams } from '../../../common/schemas/benchmark';
 import { useKibana } from '../../common/hooks/use_kibana';
 import type { Benchmark } from '../../../common/types';
 
@@ -18,8 +18,8 @@ export interface UseCspBenchmarkIntegrationsProps {
   name: string;
   page: number;
   perPage: number;
-  sortField: GetBenchmarksQueryParams['sort_field'];
-  sortOrder: GetBenchmarksQueryParams['sort_order'];
+  sortField: BenchmarksQueryParams['sort_field'];
+  sortOrder: BenchmarksQueryParams['sort_order'];
 }
 
 export const useCspBenchmarkIntegrations = ({
@@ -30,7 +30,7 @@ export const useCspBenchmarkIntegrations = ({
   sortOrder,
 }: UseCspBenchmarkIntegrationsProps) => {
   const { http } = useKibana().services;
-  const query: GetBenchmarksQueryParams = {
+  const query: BenchmarksQueryParams = {
     benchmark_name: name,
     per_page: perPage,
     page,

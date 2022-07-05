@@ -26,8 +26,8 @@ import {
 } from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
-  getBenchmarksQueryParamsSchema,
-  GetBenchmarksQueryParams,
+  benchmarksQueryParamsSchema,
+  BenchmarksQueryParams,
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus } from '../../../common/types';
@@ -53,7 +53,7 @@ export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
-  queryParams: Partial<GetBenchmarksQueryParams>
+  queryParams: Partial<BenchmarksQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {
   if (!packagePolicyService) {
     throw new Error('packagePolicyService is undefined');
@@ -200,7 +200,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
   router.get(
     {
       path: BENCHMARKS_ROUTE_PATH,
-      validate: { query: getBenchmarksQueryParamsSchema },
+      validate: { query: benchmarksQueryParamsSchema },
       options: {
         tags: ['access:cloud-security-posture-read'],
       },
