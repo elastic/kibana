@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
-import { sendGetFleetStatus, useStartServices } from '../../../hooks';
+import { useFleetStatus, useStartServices } from '../../../hooks';
 
 const REFRESH_INTERVAL = 10000;
 
@@ -17,8 +17,11 @@ const REFRESH_INTERVAL = 10000;
  * in the `missing_requirements` list.
  */
 export const useWaitForFleetServer = () => {
-  const [isFleetServerReady, setIsFleetServerReady] = useState(false);
+  const fleetStatus = useFleetStatus();
   const { notifications } = useStartServices();
+
+  const isFleetServerReady =
+    fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server');
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -26,17 +29,13 @@ export const useWaitForFleetServer = () => {
     if (!isFleetServerReady) {
       interval = setInterval(async () => {
         try {
-          const res = await sendGetFleetStatus();
-
-          if (res.error) {
-            throw res.error;
-          }
-          if (res.data?.isReady && !res.data?.missing_requirements?.includes('fleet_server')) {
-            setIsFleetServerReady(true);
-
+          if (isFleetServerReady) {
             if (interval) {
               clearInterval(interval);
             }
+          } else {
+            fleetStatus.setForceDisplayInstructions(true);
+            fleetStatus.refresh();
           }
         } catch (err) {
           notifications.toasts.addError(err, {
@@ -55,7 +54,7 @@ export const useWaitForFleetServer = () => {
     };
 
     return cleanup;
-  }, [notifications.toasts, isFleetServerReady]);
+  }, [notifications.toasts, isFleetServerReady, fleetStatus]);
 
   return { isFleetServerReady };
 };
