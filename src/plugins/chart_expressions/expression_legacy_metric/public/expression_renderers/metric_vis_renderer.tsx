@@ -78,7 +78,7 @@ export const getMetricVisRenderer = (
             <MetricVisComponent
               visData={visData}
               visParams={visConfig}
-              renderComplete={handlers.done}
+              renderComplete={() => handlers.done()}
               fireEvent={handlers.event}
               filterable={filterable}
             />
