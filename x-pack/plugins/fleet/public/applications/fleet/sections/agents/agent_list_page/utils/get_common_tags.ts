@@ -9,7 +9,7 @@ import { intersection } from 'lodash';
 
 import type { Agent } from '../../../../types';
 
-export const getCommonTags = (agents: string | Agent[], allAgents?: Agent[]): string[] => {
+export const getCommonTags = (agents: string | Agent[], visibleAgents?: Agent[]): string[] => {
   const commonSelectedTags = (agentList: Agent[]) =>
     agentList.reduce(
       (acc: string[], curr: Agent) =>
@@ -20,11 +20,11 @@ export const getCommonTags = (agents: string | Agent[], allAgents?: Agent[]): st
   if (!Array.isArray(agents)) {
     // in query mode, returning common tags of all agents in current page
     // this is a simplification to avoid querying all agents from backend to determine common tags
-    return commonSelectedTags(allAgents ?? []);
+    return commonSelectedTags(visibleAgents ?? []);
   }
   // taking latest tags from freshly loaded agents data, as selected agents array does not contain the latest tags of agents
   const freshSelectedAgentsData =
-    allAgents?.filter((newAgent) =>
+    visibleAgents?.filter((newAgent) =>
       agents.find((existingAgent) => existingAgent.id === newAgent.id)
     ) ?? agents;
 

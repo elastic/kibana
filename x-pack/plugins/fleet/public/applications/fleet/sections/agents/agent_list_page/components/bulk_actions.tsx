@@ -41,7 +41,7 @@ export interface Props {
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
-  allAgents: Agent[];
+  visibleAgents: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   allTags: string[];
 }
@@ -52,7 +52,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   selectionMode,
   currentQuery,
   selectedAgents,
-  allAgents,
+  visibleAgents,
   refreshAgents,
   allTags,
 }) => {
@@ -173,8 +173,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   ];
 
   const getSelectedTagsFromAgents = useMemo(
-    () => getCommonTags(agents, allAgents),
-    [agents, allAgents]
+    () => getCommonTags(agents, visibleAgents),
+    [agents, visibleAgents]
   );
 
   return (
