@@ -13,7 +13,6 @@ import uuid from 'uuid';
 import {
   EuiDatePicker,
   EuiDatePickerRange,
-  EuiPanel,
   EuiComboBox,
   EuiFormRow,
   EuiHorizontalRule,
@@ -244,7 +243,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   }, [initialSchedule, onCancelSchedules]);
 
   return (
-    <EuiPanel paddingSize="s" hasShadow={false}>
+    <>
       <EuiFlexGroup gutterSize="xs" alignItems="center" direction="column">
         <EuiFlexItem>
           <EuiDatePickerRange
@@ -358,6 +357,6 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           </EuiFlexGroup>
         </EuiPopoverFooter>
       )}
-    </EuiPanel>
+    </>
   );
 };
