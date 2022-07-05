@@ -7,19 +7,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { config } from './config';
+import { cspConfig } from './config';
 
-const origSchema = config.schema;
+const origSchema = cspConfig.schema;
 
 export const mockConfig = {
   create(defaultDisableUnsafeEval: boolean) {
     // @ts-expect-error: Property 'extends' does not exist on type??
-    config.schema = config.schema.extends({
+    cspConfig.schema = cspConfig.schema.extends({
       disableUnsafeEval: schema.boolean({ defaultValue: defaultDisableUnsafeEval }),
     });
-    return config;
+    return cspConfig;
   },
   reset() {
-    config.schema = origSchema;
+    cspConfig.schema = origSchema;
   },
 };
