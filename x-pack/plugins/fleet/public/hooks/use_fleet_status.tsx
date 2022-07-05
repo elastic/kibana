@@ -23,6 +23,10 @@ interface FleetStatusState {
 
 interface FleetStatus extends FleetStatusState {
   refresh: () => Promise<void>;
+
+  // This flag allows us to opt into displaying the Fleet Server enrollment instructions even if
+  // a healthy Fleet Server has been detected, so we can delay removing the enrollment UI until
+  // some user action like clicking a "continue" button
   forceDisplayInstructions: boolean;
   setForceDisplayInstructions: React.Dispatch<boolean>;
 }
