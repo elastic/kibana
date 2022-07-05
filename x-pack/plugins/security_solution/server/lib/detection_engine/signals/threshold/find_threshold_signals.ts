@@ -17,7 +17,6 @@ import { Logger } from '@kbn/core/server';
 
 import {
   ThresholdNormalized,
-  ThresholdWithCardinality,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { BuildRuleMessage } from '../rule_messages';
@@ -25,13 +24,13 @@ import { singleSearchAfter } from '../single_search_after';
 import {
   buildThresholdMultiBucketAggregation,
   buildThresholdSingleBucketAggregation,
-  // buildThresholdSingleBucketAggregation,
 } from './build_threshold_aggregation';
 import {
   ThresholdMultiBucketAggregationResult,
   ThresholdBucket,
   ThresholdSingleBucketAggregationResult,
 } from './types';
+import { shouldFilterByCardinality } from './utils';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -48,11 +47,6 @@ interface FindThresholdSignalsParams {
 }
 
 const hasThresholdFields = (threshold: ThresholdNormalized) => !!threshold.field.length;
-
-// TODO: this is a dupe
-const shouldFilterByCardinality = (
-  threshold: ThresholdNormalized
-): threshold is ThresholdWithCardinality => !!threshold.cardinality?.length;
 
 interface SearchAfterResults {
   searchDurations: string[];

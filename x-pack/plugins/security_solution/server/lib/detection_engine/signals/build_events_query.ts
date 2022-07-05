@@ -132,9 +132,7 @@ export const buildEventsSearchQuery = ({
     },
   });
 
-  // const thresholdTerms = (aggregations ?? {}).thresholdTerms;
   const searchQuery = {
-    // pre_filter_shard_size: thresholdTerms ? 1 : 128,
     allow_no_indices: true,
     runtime_mappings: runtimeMappings,
     index,

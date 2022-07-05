@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  ThresholdNormalized,
-  ThresholdWithCardinality,
-} from '../../../../../common/detection_engine/schemas/common';
-
-const shouldFilterByCardinality = (
-  threshold: ThresholdNormalized
-): threshold is ThresholdWithCardinality => !!threshold.cardinality?.length;
+import { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common';
+import { shouldFilterByCardinality } from './utils';
 
 export const buildThresholdMultiBucketAggregation = ({
   threshold,

@@ -62,7 +62,7 @@ const getTransformedHits = (
   ruleId: string
 ) =>
   buckets.map((bucket, i) => {
-    // In case of `terms` aggregation, `bucket.key` will be an empty string. Note that `Object.values('')` is `[]`,
+    // In case of absent threshold fields, `bucket.key` will be an empty string. Note that `Object.values('')` is `[]`,
     // so the below logic works in either case (whether `terms` or `composite`).
     const thresholdTerms = getThresholdTerms(bucket);
     return {
