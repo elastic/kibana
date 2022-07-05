@@ -164,6 +164,10 @@ describe('LayerPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+      });
       expect(cb).toHaveBeenCalled();
     });
   });
