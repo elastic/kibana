@@ -7,12 +7,12 @@
 
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const k8sContainerCpuUsage: TSVBMetricModelCreator = (
+export const containerK8sCpuUsage: TSVBMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): TSVBMetricModel => ({
-  id: 'k8sContainerCpuUsage',
+  id: 'containerK8sCpuUsage',
   requires: ['kubernetes.container'],
   index_pattern: indexPattern,
   interval,

@@ -66,12 +66,12 @@ export const containerOverview: TSVBMetricModelCreator = (
   ],
 });
 
-export const k8sContainerOverview: TSVBMetricModelCreator = (
+export const containerK8sOverview: TSVBMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): TSVBMetricModel => ({
-  id: 'k8sContainerOverview',
+  id: 'containerK8sOverview',
   requires: ['kubernetes.container'],
   index_pattern: indexPattern,
   interval,

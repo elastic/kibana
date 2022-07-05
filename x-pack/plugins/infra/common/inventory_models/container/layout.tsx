@@ -43,7 +43,7 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
         metrics={metrics}
         onChangeRangeTime={onChangeRangeTime}
       >
-        <SubSection id="k8sContainerOverview">
+        <SubSection id="containerK8sOverview">
           <GaugesSectionVis
             seriesOverrides={{
               cpu: {
@@ -123,7 +123,7 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
           />
         </SubSection>
         <SubSection
-          id="k8sContainerCpuUsage"
+          id="containerK8sCpuUsage"
           label={i18n.translate(
             'xpack.infra.metricDetailPage.containerMetricsLayout.cpuUsageSection.sectionLabel',
             {

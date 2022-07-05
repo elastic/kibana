@@ -37,8 +37,9 @@ export const container: InventoryModel = {
     'containerNetworkTraffic',
     'containerDiskIOBytes',
     'containerDiskIOOps',
-    'k8sContainerCpuUsage',
-    'k8sContainerOverview',
+    'containerK8sOverview',
+    'containerK8sCpuUsage',
+    'containerK8sMemoryUsage',
   ],
   tooltipMetrics: ['cpu', 'memory', 'rx', 'tx'],
 };
