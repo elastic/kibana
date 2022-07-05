@@ -137,6 +137,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
               totalDuration={duration}
               isSelected={item.id === waterfallItemId}
               errorCount={errorCount}
+              marginLeftLevel={marginLeftLevel}
               onClick={() => {
                 onClickWaterfallItem(item);
               }}
