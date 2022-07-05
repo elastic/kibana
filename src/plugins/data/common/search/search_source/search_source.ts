@@ -885,7 +885,7 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.id;
+      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toSpec();
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;

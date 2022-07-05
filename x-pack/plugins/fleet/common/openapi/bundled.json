@@ -1191,6 +1191,29 @@
           }
         },
         "operationId": "get-agents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/kuery"
+          },
+          {
+            "$ref": "#/components/parameters/show_inactive"
+          },
+          {
+            "$ref": "#/components/parameters/show_upgradeable"
+          },
+          {
+            "$ref": "#/components/parameters/sort_field"
+          },
+          {
+            "$ref": "#/components/parameters/sort_order"
+          }
+        ],
         "security": [
           {
             "basicAuth": []
@@ -1808,6 +1831,88 @@
                         }
                       }
                     ]
+                  }
+                },
+                "required": [
+                  "agents"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/bulk_update_agent_tags": {
+      "post": {
+        "summary": "Agents - Bulk update tags",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean"
+                      },
+                      "error": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "success"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-update-agent-tags",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "agents": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "description": "KQL query string, can be empty"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "description": "list of agent IDs"
+                      }
+                    ]
+                  },
+                  "tagsToAdd": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "tagsToRemove": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "batchSize": {
+                    "type": "number"
                   }
                 },
                 "required": [
@@ -3042,6 +3147,213 @@
         ]
       }
     },
+    "/agent_download_sources": {
+      "get": {
+        "summary": "Agent Download Sources",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/download_sources"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-download-sources"
+      },
+      "post": {
+        "summary": "Agent Download Sources",
+        "description": "Create a new agent download source",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/download_sources"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "host",
+                  "is_default"
+                ]
+              }
+            }
+          }
+        },
+        "operationId": "post-download-sources"
+      }
+    },
+    "/agent_download_sources/{sourceId}": {
+      "get": {
+        "summary": "Agent Download Sources - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/download_sources"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-one-download-source"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "sourceId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "delete": {
+        "summary": "Agent Download Sources - Delete",
+        "operationId": "delete-download-source",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Agent Download Sources - Update",
+        "operationId": "update-download-source",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "is_default",
+                  "host"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/download_sources"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
     "/logstash_api_keys": {
       "post": {
         "summary": "Generate Logstash API key",
@@ -3107,7 +3419,7 @@
         "required": false,
         "schema": {
           "type": "integer",
-          "default": 50
+          "default": 20
         }
       },
       "page_index": {
@@ -3125,6 +3437,42 @@
         "required": false,
         "schema": {
           "type": "string"
+        }
+      },
+      "show_inactive": {
+        "name": "showInactive",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "show_upgradeable": {
+        "name": "showUpgradeable",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "sort_field": {
+        "name": "sortField",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "sort_order": {
+        "name": "sortOrder",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ]
         }
       }
     },
@@ -4571,6 +4919,30 @@
           "is_default",
           "name",
           "type"
+        ]
+      },
+      "download_sources": {
+        "title": "Download Source",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "is_default",
+          "name",
+          "host"
         ]
       }
     }

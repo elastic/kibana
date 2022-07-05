@@ -13,13 +13,12 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
+import { getFailedAndUnrecognizedTasksPerDay } from './lib/get_telemetry_from_task_manager';
+import { getTotalCountAggregations, getTotalCountInUse } from './lib/get_telemetry_from_kibana';
 import {
-  getTotalCountAggregations,
-  getTotalCountInUse,
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
-  getFailedAndUnrecognizedTasksPerDay,
-} from './alerting_telemetry';
+} from './lib/get_telemetry_from_event_log';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 
@@ -98,11 +97,11 @@ export function telemetryTaskRunner(
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCountAggregations(esClient, kibanaIndex, logger),
-          getTotalCountInUse(esClient, kibanaIndex, logger),
-          getExecutionsPerDayCount(esClient, eventLogIndex, logger),
-          getExecutionTimeoutsPerDayCount(esClient, eventLogIndex, logger),
-          getFailedAndUnrecognizedTasksPerDay(esClient, taskManagerIndex, logger),
+          getTotalCountAggregations({ esClient, kibanaIndex, logger }),
+          getTotalCountInUse({ esClient, kibanaIndex, logger }),
+          getExecutionsPerDayCount({ esClient, eventLogIndex, logger }),
+          getExecutionTimeoutsPerDayCount({ esClient, eventLogIndex, logger }),
+          getFailedAndUnrecognizedTasksPerDay({ esClient, taskManagerIndex, logger }),
         ])
           .then(
             ([
@@ -120,22 +119,25 @@ export function telemetryTaskRunner(
                   count_active_total: totalInUse.countTotal,
                   count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
                   count_rules_namespaces: totalInUse.countNamespaces,
-                  count_rules_executions_per_day: dailyExecutionCounts.countTotal,
-                  count_rules_executions_by_type_per_day: dailyExecutionCounts.countByType,
-                  count_rules_executions_failured_per_day: dailyExecutionCounts.countTotalFailures,
+                  count_rules_executions_per_day: dailyExecutionCounts.countTotalRuleExecutions,
+                  count_rules_executions_by_type_per_day:
+                    dailyExecutionCounts.countRuleExecutionsByType,
+                  count_rules_executions_failured_per_day:
+                    dailyExecutionCounts.countTotalFailedExecutions,
                   count_rules_executions_failured_by_reason_per_day:
-                    dailyExecutionCounts.countFailuresByReason,
+                    dailyExecutionCounts.countFailedExecutionsByReason,
                   count_rules_executions_failured_by_reason_by_type_per_day:
-                    dailyExecutionCounts.countFailuresByReasonByType,
-                  count_rules_executions_timeouts_per_day: dailyExecutionTimeoutCounts.countTotal,
+                    dailyExecutionCounts.countFailedExecutionsByReasonByType,
+                  count_rules_executions_timeouts_per_day:
+                    dailyExecutionTimeoutCounts.countExecutionTimeouts,
                   count_rules_executions_timeouts_by_type_per_day:
-                    dailyExecutionTimeoutCounts.countByType,
+                    dailyExecutionTimeoutCounts.countExecutionTimeoutsByType,
                   count_failed_and_unrecognized_rule_tasks_per_day:
-                    dailyFailedAndUnrecognizedTasks.countTotal,
+                    dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasks,
                   count_failed_and_unrecognized_rule_tasks_by_status_per_day:
-                    dailyFailedAndUnrecognizedTasks.countByStatus,
+                    dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatus,
                   count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day:
-                    dailyFailedAndUnrecognizedTasks.countByStatusByRuleType,
+                    dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatusByType,
                   avg_execution_time_per_day: dailyExecutionCounts.avgExecutionTime,
                   avg_execution_time_by_type_per_day: dailyExecutionCounts.avgExecutionTimeByType,
                   avg_es_search_duration_per_day: dailyExecutionCounts.avgEsSearchDuration,

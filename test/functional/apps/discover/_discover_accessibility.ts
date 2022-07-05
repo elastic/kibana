@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 
+import { WebElementWrapper } from '../../services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -17,10 +18,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+  };
+
+  const hasFocus = async (testSubject: string) => {
+    const targetElement = await testSubjects.find(testSubject);
+    const activeElement = await find.activeElement();
+    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
   };
 
   describe('discover accessibility', () => {
@@ -38,20 +46,76 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should give focus to the saved search title h1 on navigate', async () => {
-      const titleElement = await testSubjects.find('discoverSavedSearchTitle');
-      const activeElement = await find.activeElement();
-      expect(await titleElement.getAttribute('data-test-subj')).to.eql(
-        await activeElement.getAttribute('data-test-subj')
-      );
+      expect(await hasFocus('discoverSavedSearchTitle')).to.be(true);
     });
 
     it('should give focus to the data view switch link when Tab is pressed', async () => {
       await browser.pressKeys(browser.keys.TAB);
-      const dataViewSwitchLink = await testSubjects.find('discover-dataView-switch-link');
-      const activeElement = await find.activeElement();
-      expect(await dataViewSwitchLink.getAttribute('data-test-subj')).to.eql(
-        await activeElement.getAttribute('data-test-subj')
-      );
+      expect(await hasFocus('discover-dataView-switch-link')).to.be(true);
+    });
+
+    // FLAKY: https://github.com/elastic/kibana/issues/135305
+    describe.skip('top nav menu buttons', () => {
+      const focusAndPressButton = async (buttonTestSubject: string | WebElementWrapper) => {
+        const button =
+          typeof buttonTestSubject === 'string'
+            ? await testSubjects.find(buttonTestSubject)
+            : buttonTestSubject;
+        await button.focus();
+        await browser.pressKeys(browser.keys.ENTER);
+      };
+
+      const expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed = async (
+        menuButtonTestSubject: string
+      ) => {
+        await focusAndPressButton(menuButtonTestSubject);
+        expect(await hasFocus(menuButtonTestSubject)).to.be(false);
+        await browser.pressKeys(browser.keys.ESCAPE);
+        expect(await hasFocus(menuButtonTestSubject)).to.be(true);
+      };
+
+      it('should return focus to the options button when dismissing the options popover', () =>
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOptionsButton'));
+
+      it('should return focus to the open button when dismissing the open search flyout', () =>
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));
+
+      it('should return focus to the alerts button when dismissing the alerts popover', () =>
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverAlertsButton'));
+
+      it('should return focus to the alerts button when dismissing the create rule flyout', async () => {
+        await focusAndPressButton('discoverAlertsButton');
+        expect(await hasFocus('discoverAlertsButton')).to.be(false);
+        await focusAndPressButton('discoverCreateAlertButton');
+        await retry.waitFor(
+          'Create Rule flyout is visible',
+          async () => await testSubjects.exists('addRuleFlyoutTitle')
+        );
+        expect(await hasFocus('discoverCreateAlertButton')).to.be(false);
+        await retry.try(async () => {
+          await browser.pressKeys(browser.keys.ESCAPE);
+          // A bug exists with the create rule flyout where sometimes the confirm modal
+          // shows even though the form hasn't been touched, so this works around it
+          if (await testSubjects.exists('confirmRuleCloseModal', { timeout: 0 })) {
+            await focusAndPressButton(
+              await testSubjects.findDescendant(
+                'confirmModalConfirmButton',
+                await testSubjects.find('confirmRuleCloseModal')
+              )
+            );
+          }
+          expect(await hasFocus('discoverAlertsButton')).to.be(true);
+        });
+      });
+
+      it('should return focus to the share button when dismissing the share popover', () =>
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton'));
+
+      it('should return focus to the inspect button when dismissing the inspector flyout', () =>
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('openInspectorButton'));
+
+      it('should return focus to the save button when dismissing the save modal', () =>
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverSaveButton'));
     });
   });
 }
