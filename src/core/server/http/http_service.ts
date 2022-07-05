@@ -18,7 +18,7 @@ import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-
 
 import type { RequestHandlerContext } from '..';
 import { InternalContextSetup, InternalContextPreboot } from '../context';
-import { CspConfigType, config as cspConfig } from '../csp';
+import { CspConfigType, cspConfig } from './csp';
 
 import { Router } from './router';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
@@ -34,11 +34,7 @@ import {
 } from './types';
 
 import { registerCoreHandlers } from './lifecycle_handlers';
-import {
-  ExternalUrlConfigType,
-  config as externalUrlConfig,
-  ExternalUrlConfig,
-} from '../external_url';
+import { ExternalUrlConfigType, externalUrlConfig, ExternalUrlConfig } from './external_url';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
