@@ -7,12 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../../plugin';
 
-export function registerCrawlerRoutes({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
+import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
+import { registerCrawlerEntryPointRoutes } from './crawler_entry_points';
+import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
+
+export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
+  const { router, enterpriseSearchRequestHandler } = routeDependencies;
+
   router.post(
     {
       path: '/internal/enterprise_search/crawler',
@@ -175,4 +178,8 @@ export function registerCrawlerRoutes({
       path: '/api/ent/v1/internal/indices/:indexName/crawler2/domain_configs',
     })
   );
+
+  registerCrawlerCrawlRulesRoutes(routeDependencies);
+  registerCrawlerEntryPointRoutes(routeDependencies);
+  registerCrawlerSitemapRoutes(routeDependencies);
 }
