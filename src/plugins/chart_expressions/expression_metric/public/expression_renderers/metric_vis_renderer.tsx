@@ -39,7 +39,7 @@ export const getMetricVisRenderer = (
             showNoResult={!visData.rows.length}
             handlers={handlers}
           >
-            <MetricVis data={visData} config={visConfig} renderComplete={handlers.done} />
+            <MetricVis data={visData} config={visConfig} renderComplete={() => handlers.done()} />
           </VisualizationContainer>
         </KibanaThemeProvider>,
         domNode
