@@ -90,7 +90,7 @@ export const fetchChangePointPValues = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema,
   fieldNames: string[]
-) => {
+): Promise<ChangePoint[]> => {
   const result: ChangePoint[] = [];
 
   for (const fieldName of fieldNames) {
@@ -119,7 +119,5 @@ export const fetchChangePointPValues = async (
     }
   }
 
-  return {
-    changePoints: uniqBy(result, (d) => `${d.fieldName},${d.fieldValue}`),
-  };
+  return uniqBy(result, (d) => `${d.fieldName},${d.fieldValue}`);
 };

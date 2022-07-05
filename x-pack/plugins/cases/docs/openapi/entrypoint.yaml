@@ -29,8 +29,8 @@ paths:
     $ref: paths/api@cases@configure@{configurationid}.yaml
   '/api/cases/configure/connectors/_find':
     $ref: paths/api@cases@configure@connectors@_find.yaml
-#  '/api/cases/reporters':
-#    $ref: 'paths/api@cases@reporters.yaml'
+  '/api/cases/reporters':
+    $ref: 'paths/api@cases@reporters.yaml'
 #  '/api/cases/status':
 #    $ref: 'paths/api@cases@status.yaml'
 #  '/api/cases/tags':
@@ -60,8 +60,8 @@ paths:
     $ref: paths/s@{spaceid}@api@cases@configure@{configurationid}.yaml
   '/s/{spaceId}/api/cases/configure/connectors/_find':
     $ref: paths/s@{spaceid}@api@cases@configure@connectors@_find.yaml
- # '/s/{spaceId}/api/cases/reporters':
- #   $ref: 'paths/s@{spaceid}@api@cases@reporters.yaml'
+  '/s/{spaceId}/api/cases/reporters':
+    $ref: 'paths/s@{spaceid}@api@cases@reporters.yaml'
  # '/s/{spaceId}/api/cases/status':
  #   $ref: 'paths/s@{spaceid}@api@cases@status.yaml'
  # '/s/{spaceId}/api/cases/tags':
