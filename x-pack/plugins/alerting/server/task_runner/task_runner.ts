@@ -488,7 +488,7 @@ export class TaskRunner<
 
     const ruleIsSnoozed = isRuleSnoozed(rule);
     if (ruleIsSnoozed) {
-      this.markRuleAsSnoozed(rule.id);
+      await this.markRuleAsSnoozed(rule.id);
     }
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
