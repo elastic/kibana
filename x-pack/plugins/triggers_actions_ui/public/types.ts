@@ -413,6 +413,7 @@ export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
@@ -423,6 +424,10 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
+  useActionsColumn?: () => {
+    renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
+    width?: number;
+  };
 }
 
 export interface AlertsTableFlyoutBaseProps {
