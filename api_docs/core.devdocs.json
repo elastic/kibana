@@ -1345,13 +1345,7 @@
               "{@link ExecutionContextSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -1514,13 +1508,7 @@
               "{@link ExecutionContextStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/public/index.ts",
             "deprecated": false
@@ -2343,9 +2331,9 @@
         "tags": [],
         "label": "ExecutionContextSetup",
         "description": [
-          "\nKibana execution context.\nUsed to provide execution context to Elasticsearch, reporting, performance monitoring, etc."
+          "\r\nKibana execution context.\r\nUsed to provide execution context to Elasticsearch, reporting, performance monitoring, etc."
         ],
-        "path": "src/core/public/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -2355,7 +2343,7 @@
             "tags": [],
             "label": "context$",
             "description": [
-              "\nThe current context observable"
+              "\r\nThe current context observable"
             ],
             "signature": [
               "Observable",
@@ -2363,7 +2351,7 @@
               "KibanaExecutionContext",
               ">"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false
           },
           {
@@ -2373,14 +2361,14 @@
             "tags": [],
             "label": "set",
             "description": [
-              "\nSet the current top level context"
+              "\r\nSet the current top level context"
             ],
             "signature": [
               "(c$: ",
               "KibanaExecutionContext",
               ") => void"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -2393,7 +2381,7 @@
                 "signature": [
                   "KibanaExecutionContext"
                 ],
-                "path": "src/core/public/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2407,13 +2395,13 @@
             "tags": [],
             "label": "get",
             "description": [
-              "\nGet the current top level context"
+              "\r\nGet the current top level context"
             ],
             "signature": [
               "() => ",
               "KibanaExecutionContext"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2425,12 +2413,12 @@
             "tags": [],
             "label": "clear",
             "description": [
-              "\nclears the context"
+              "\r\nclears the context"
             ],
             "signature": [
               "() => void"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2442,13 +2430,12 @@
             "tags": [],
             "label": "getAsLabels",
             "description": [
-              "\nreturns apm labels"
+              "\r\nreturns apm labels"
             ],
             "signature": [
-              "() => ",
-              "Labels"
+              "() => Labels"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -2460,7 +2447,7 @@
             "tags": [],
             "label": "withGlobalContext",
             "description": [
-              "\nmerges the current top level context with the specific event context"
+              "\r\nmerges the current top level context with the specific event context"
             ],
             "signature": [
               "(context?: ",
@@ -2468,7 +2455,7 @@
               " | undefined) => ",
               "KibanaExecutionContext"
             ],
-            "path": "src/core/public/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -2482,7 +2469,7 @@
                   "KibanaExecutionContext",
                   " | undefined"
                 ],
-                "path": "src/core/public/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               }
@@ -7001,14 +6988,14 @@
           {
             "parentPluginId": "core",
             "id": "def-public.TelemetryCounter.type",
-            "type": "Enum",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [
-              "\r\nIndicates if the event contains data about succeeded, failed or dropped events."
+              "\r\n{@link TelemetryCounterType}"
             ],
             "signature": [
-              "TelemetryCounterType"
+              "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -7478,21 +7465,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "core",
-        "id": "def-public.TelemetryCounterType",
-        "type": "Enum",
-        "tags": [],
-        "label": "TelemetryCounterType",
-        "description": [
-          "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
-        ],
-        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "core",
@@ -7587,18 +7560,12 @@
         "tags": [],
         "label": "ExecutionContextStart",
         "description": [
-          "\nSee {@link ExecutionContextSetup}."
+          "\r\nSee {@link ExecutionContextSetup}."
         ],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          }
+          "ExecutionContextSetup"
         ],
-        "path": "src/core/public/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-browser/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -7792,7 +7759,7 @@
           "KibanaExecutionContext",
           " | undefined; }"
         ],
-        "path": "src/core/types/execution_context.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8049,6 +8016,22 @@
         "deprecated": false,
         "returnComment": [],
         "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.TelemetryCounterType",
+        "type": "Type",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\r\nIndicates if the event contains data about succeeded, failed or dropped events:\r\n- enqueued: The event was accepted and will be sent to the shippers when they become available (and opt-in === true).\r\n- sent_to_shipper: The event was sent to at least one shipper.\r\n- succeeded: The event was successfully sent by the shipper.\r\n- failed: There was an error when processing/shipping the event. Refer to the Telemetry Counter's code for the reason.\r\n- dropped: The event was dropped from the queue. Refer to the Telemetry Counter's code for the reason."
+        ],
+        "signature": [
+          "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
+        ],
+        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -10545,45 +10528,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.ContextSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "ContextSetup",
-        "description": [
-          "\n{@inheritdoc IContextContainer}\n"
-        ],
-        "path": "src/core/server/context/context_service.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ContextSetup.createContextContainer",
-            "type": "Function",
-            "tags": [],
-            "label": "createContextContainer",
-            "description": [
-              "\nCreates a new {@link IContextContainer} for a service owner."
-            ],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IContextContainer",
-                "text": "IContextContainer"
-              }
-            ],
-            "path": "src/core/server/context/context_service.ts",
-            "deprecated": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.CorePreboot",
         "type": "Interface",
         "tags": [],
@@ -10922,27 +10866,6 @@
           },
           {
             "parentPluginId": "core",
-            "id": "def-server.CoreSetup.context",
-            "type": "Object",
-            "tags": [],
-            "label": "context",
-            "description": [
-              "{@link ContextSetup}"
-            ],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ContextSetup",
-                "text": "ContextSetup"
-              }
-            ],
-            "path": "src/core/server/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
             "id": "def-server.CoreSetup.docLinks",
             "type": "Object",
             "tags": [],
@@ -10987,13 +10910,7 @@
               "{@link ExecutionContextSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -11297,13 +11214,7 @@
               "{@link ExecutionContextStart}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              }
+              "ExecutionContextSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -11933,32 +11844,6 @@
               "\nIndicates whether Elasticsearch configuration includes credentials (`username`, `password` or `serviceAccountToken`)."
             ],
             "path": "src/core/server/elasticsearch/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.ElasticsearchErrorDetails",
-        "type": "Interface",
-        "tags": [],
-        "label": "ElasticsearchErrorDetails",
-        "description": [],
-        "path": "src/core/server/elasticsearch/client/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchErrorDetails.error",
-            "type": "Object",
-            "tags": [],
-            "label": "error",
-            "description": [],
-            "signature": [
-              "{ type: string; reason?: string | undefined; } | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
             "deprecated": false
           }
         ],
@@ -12667,7 +12552,7 @@
         "tags": [],
         "label": "ExecutionContextSetup",
         "description": [],
-        "path": "src/core/server/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -12677,14 +12562,14 @@
             "tags": [],
             "label": "withContext",
             "description": [
-              "\nKeeps track of execution context while the passed function is executed.\nData are carried over all async operations spawned by the passed function.\nThe nested calls stack the registered context on top of each other."
+              "\r\nKeeps track of execution context while the passed function is executed.\r\nData are carried over all async operations spawned by the passed function.\r\nThe nested calls stack the registered context on top of each other."
             ],
             "signature": [
               "<R>(context: ",
               "KibanaExecutionContext",
               " | undefined, fn: (...args: any[]) => R) => R"
             ],
-            "path": "src/core/server/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [
               {
@@ -12698,7 +12583,7 @@
                   "KibanaExecutionContext",
                   " | undefined"
                 ],
-                "path": "src/core/server/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": false
               },
@@ -12712,7 +12597,7 @@
                 "signature": [
                   "(...args: any[]) => R"
                 ],
-                "path": "src/core/server/execution_context/execution_context_service.ts",
+                "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -12730,7 +12615,7 @@
               "() => ",
               "Labels"
             ],
-            "path": "src/core/server/execution_context/execution_context_service.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -15876,7 +15761,7 @@
         "tags": [],
         "label": "IExecutionContextContainer",
         "description": [],
-        "path": "src/core/server/execution_context/execution_context_container.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -15889,7 +15774,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/core/server/execution_context/execution_context_container.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -15906,7 +15791,7 @@
               "KibanaExecutionContext",
               ">"
             ],
-            "path": "src/core/server/execution_context/execution_context_container.ts",
+            "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -19649,6 +19534,75 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.NodeInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeInfo",
+        "description": [
+          "\r\nContains information about how this Kibana process has been configured.\r\n"
+        ],
+        "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.NodeInfo.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "A list of roles this node has been configured with."
+            ],
+            "signature": [
+              "NodeRoles"
+            ],
+            "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.NodeRoles",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeRoles",
+        "description": [
+          "\r\nThe Kibana process can be run in dedicated \"modes\" via `node.roles`.\r\nThis configuration is then exposed to plugins via `NodeRoles`,\r\nwhich is available on the `PluginInitializerContext`.\r\n\r\nThe node roles can be used by plugins to adjust their behavior based\r\non the way the Kibana process has been configured.\r\n"
+        ],
+        "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.NodeRoles.backgroundTasks",
+            "type": "boolean",
+            "tags": [],
+            "label": "backgroundTasks",
+            "description": [
+              "\r\nThe backgroundTasks role includes operations which don't involve\r\nresponding to incoming http traffic from the UI."
+            ],
+            "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.NodeRoles.ui",
+            "type": "boolean",
+            "tags": [],
+            "label": "ui",
+            "description": [
+              "\r\nThe ui role covers any operations that need to occur in order\r\nto handle http traffic from the browser."
+            ],
+            "path": "node_modules/@types/kbn__core-node-server/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.NodesVersionCompatibility",
         "type": "Interface",
         "tags": [],
@@ -20585,6 +20539,21 @@
               "; packageInfo: Readonly<",
               "PackageInfo",
               ">; instanceUuid: string; configs: readonly string[]; }"
+            ],
+            "path": "src/core/server/plugins/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PluginInitializerContext.node",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "\nAccess the configuration for this particular Kibana node.\nCan be used to determine which `roles` the current process was started with.\n"
+            ],
+            "signature": [
+              "NodeInfo"
             ],
             "path": "src/core/server/plugins/types.ts",
             "deprecated": false
@@ -23370,14 +23339,14 @@
           {
             "parentPluginId": "core",
             "id": "def-server.TelemetryCounter.type",
-            "type": "Enum",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [
-              "\r\nIndicates if the event contains data about succeeded, failed or dropped events."
+              "\r\n{@link TelemetryCounterType}"
             ],
             "signature": [
-              "TelemetryCounterType"
+              "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -24087,19 +24056,6 @@
         "label": "PluginType",
         "description": [],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.TelemetryCounterType",
-        "type": "Enum",
-        "tags": [],
-        "label": "TelemetryCounterType",
-        "description": [
-          "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
-        ],
-        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -25887,15 +25843,9 @@
         "label": "ExecutionContextStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          }
+          "ExecutionContextSetup"
         ],
-        "path": "src/core/server/execution_context/execution_context_service.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-server/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -26772,7 +26722,7 @@
           "KibanaExecutionContext",
           " | undefined; }"
         ],
-        "path": "src/core/types/execution_context.ts",
+        "path": "node_modules/@types/kbn__core-execution-context-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -27108,6 +27058,22 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.TelemetryCounterType",
+        "type": "Type",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\r\nIndicates if the event contains data about succeeded, failed or dropped events:\r\n- enqueued: The event was accepted and will be sent to the shippers when they become available (and opt-in === true).\r\n- sent_to_shipper: The event was sent to at least one shipper.\r\n- succeeded: The event was successfully sent by the shipper.\r\n- failed: There was an error when processing/shipping the event. Refer to the Telemetry Counter's code for the reason.\r\n- dropped: The event was dropped from the queue. Refer to the Telemetry Counter's code for the reason."
+        ],
+        "signature": [
+          "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
+        ],
+        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.UiSettingsType",
         "type": "Type",
         "tags": [],
@@ -27119,21 +27085,6 @@
           "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"json\" | \"markdown\" | \"select\" | \"array\""
         ],
         "path": "src/core/types/ui_settings.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.UnauthorizedError",
-        "type": "Type",
-        "tags": [],
-        "label": "UnauthorizedError",
-        "description": [],
-        "signature": [
-          "ResponseError",
-          " & { statusCode: 401; }"
-        ],
-        "path": "src/core/server/elasticsearch/client/errors.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

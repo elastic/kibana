@@ -13,13 +13,9 @@ import {
   fromQuery,
   RECORDS_FIELD,
   toQuery,
+  useTheme,
 } from '@kbn/observability-plugin/public';
 import { useHistory } from 'react-router-dom';
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-} from '@elastic/eui/dist/eui_charts_theme';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { BreakdownItem, UxUIFilters } from '../../../../../typings/ui_filters';
@@ -44,11 +40,7 @@ export function PageViewsChart({ breakdown, uiFilters }: Props) {
   const { ExploratoryViewEmbeddable } = kibana.observability;
   const { start, end } = urlParams;
 
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
-  const euiChartTheme = darkMode
-    ? EUI_CHARTS_THEME_DARK
-    : EUI_CHARTS_THEME_LIGHT;
+  const theme = useTheme();
 
   const allSeries: AllSeries = [
     {
@@ -70,7 +62,7 @@ export function PageViewsChart({ breakdown, uiFilters }: Props) {
           : [ALL_VALUES_SELECTED],
       },
       breakdown: breakdown?.fieldName,
-      color: euiChartTheme.theme.colors?.vizColors?.[1],
+      color: theme.eui.euiColorVis1,
     },
   ];
   const onBrushEnd = ({ range }: { range: number[] }) => {
