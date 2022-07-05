@@ -92,7 +92,7 @@ export const ContainerNameWidget = ({
     const result: FilterButtons = {
       filterForButtons:
         data &&
-        data?.pages
+        (data?.pages
           ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
               return getFilterForValueButton({
@@ -105,14 +105,13 @@ export const ContainerNameWidget = ({
                 showTooltip: true,
                 value: aggData.key as string,
               });
-              // here below
             });
           })
-          .flat(),
+          .flat() as ReactNode[]),
 
       filterOutButtons:
         data &&
-        data?.pages
+        (data?.pages
           ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
               return getFilterOutValueButton({
@@ -125,10 +124,9 @@ export const ContainerNameWidget = ({
                 showTooltip: true,
                 value: aggData.key as string,
               });
-              // here below
             });
           })
-          .flat(),
+          .flat() as ReactNode[]),
     };
     // return true
     return result;
@@ -147,7 +145,7 @@ export const ContainerNameWidget = ({
           ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
               return {
-                name: aggData.key,
+                name: aggData.key as string,
                 count: aggData.count_by_aggs.value,
               };
             });
