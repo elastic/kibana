@@ -10,33 +10,33 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   RunningProcessesRequestBody,
   ResponseActionApiResponse,
-  RunningProcessesEntry,
+  ProcessesEntry,
 } from '../../../../common/endpoint/types/actions';
-import { GET_RUNNING_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
+import { GET_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 /**
  * Get running processes
  * @param customOptions
  */
-export const useSendGetEndpointRunningProcessesRequest = (
+export const useSendGetEndpointProcessesRequest = (
   customOptions?: UseMutationOptions<
-    ResponseActionApiResponse<RunningProcessesEntry>,
+    ResponseActionApiResponse<ProcessesEntry>,
     IHttpFetchError,
     RunningProcessesRequestBody
   >
 ): UseMutationResult<
-  ResponseActionApiResponse<RunningProcessesEntry>,
+  ResponseActionApiResponse<ProcessesEntry>,
   IHttpFetchError,
   RunningProcessesRequestBody
 > => {
   return useMutation<
-    ResponseActionApiResponse<RunningProcessesEntry>,
+    ResponseActionApiResponse<ProcessesEntry>,
     IHttpFetchError,
     RunningProcessesRequestBody
   >((getRunningProcessesData: RunningProcessesRequestBody) => {
-    return KibanaServices.get().http.post<ResponseActionApiResponse<RunningProcessesEntry>>(
-      GET_RUNNING_PROCESSES_ROUTE,
+    return KibanaServices.get().http.post<ResponseActionApiResponse<ProcessesEntry>>(
+      GET_PROCESSES_ROUTE,
       {
         body: JSON.stringify(getRunningProcessesData),
       }
