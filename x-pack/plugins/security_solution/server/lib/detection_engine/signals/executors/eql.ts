@@ -26,7 +26,7 @@ import {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
 } from '../types';
-import { createSearchAfterReturnType, getTimestampOverrideFields, makeFloatString } from '../utils';
+import { createSearchAfterReturnType, makeFloatString } from '../utils';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
 import { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
@@ -49,6 +49,8 @@ export const eqlExecutor = async ({
   bulkCreate,
   wrapHits,
   wrapSequences,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -62,12 +64,10 @@ export const eqlExecutor = async ({
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
-  const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
-    ruleParams.timestampOverride,
-    ruleParams.disableTimestampFallback
-  );
 
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();

@@ -70,6 +70,8 @@ export const createEqlAlertType = (
           tuple,
           wrapHits,
           wrapSequences,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
@@ -88,6 +90,8 @@ export const createEqlAlertType = (
         version,
         wrapHits,
         wrapSequences,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

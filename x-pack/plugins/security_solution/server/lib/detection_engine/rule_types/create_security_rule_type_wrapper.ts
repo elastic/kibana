@@ -18,7 +18,6 @@ import {
   checkPrivilegesFromEsClient,
   getExceptions,
   getRuleRangeTuples,
-  getTimestampOverrideFields,
   hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
@@ -153,10 +152,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             id: alertId,
           };
 
-          const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
-            timestampOverride,
-            disableTimestampFallback
-          );
+          const primaryTimestamp = timestampOverride ?? '@timestamp';
+          const secondaryTimestamp =
+            primaryTimestamp !== '@timestamp' && !disableTimestampFallback
+              ? '@timestamp'
+              : undefined;
 
           /**
            * Data Views Logic
@@ -323,6 +323,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   wrapHits,
                   wrapSequences,
                   ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
+                  primaryTimestamp,
+                  secondaryTimestamp,
                 },
               });
 

@@ -76,6 +76,8 @@ export const createSavedQueryAlertType = (
           searchAfterSize,
           tuple,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
@@ -97,6 +99,8 @@ export const createSavedQueryAlertType = (
         tuple,
         version,
         wrapHits,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

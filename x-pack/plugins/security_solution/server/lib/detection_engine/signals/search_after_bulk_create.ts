@@ -18,7 +18,6 @@ import {
   mergeReturns,
   mergeSearchResults,
   getSafeSortIds,
-  getTimestampOverrideFields,
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -43,6 +42,8 @@ export const searchAfterAndBulkCreate = async ({
   tuple,
   wrapHits,
   runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     const ruleParams = completeRule.ruleParams;
@@ -63,11 +64,6 @@ export const searchAfterAndBulkCreate = async ({
         errors: ['malformed date tuple'],
       });
     }
-
-    const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
-      ruleParams.timestampOverride,
-      ruleParams.disableTimestampFallback
-    );
 
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {

@@ -44,7 +44,6 @@ import {
   getTotalHitsValue,
   isDetectionAlert,
   getField,
-  getTimestampOverrideFields,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -1645,44 +1644,6 @@ describe('utils', () => {
       const doc = sampleAlertDocAADNoSortIdWithTimestamp();
       const value = getField(doc, `${ALERT_RULE_PARAMETERS}.description`);
       expect(value).toEqual('Descriptive description');
-    });
-  });
-
-  describe('getTimestampOverrideFields', () => {
-    test('returns `@timestamp` as a primary timestamp if timestampOverride is `undefined`', () => {
-      const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
-        undefined,
-        undefined
-      );
-      expect(primaryTimestamp).toEqual('@timestamp');
-      expect(secondaryTimestamp).toEqual(undefined);
-    });
-
-    test('returns `@timestamp` as a primary timestamp if timestampOverride is `@timestamp`', () => {
-      const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
-        '@timestamp',
-        undefined
-      );
-      expect(primaryTimestamp).toEqual('@timestamp');
-      expect(secondaryTimestamp).toEqual(undefined);
-    });
-
-    test('returns `event.ingest` as a primary and `@timestamp` as a secondary timestamps', () => {
-      const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
-        'event.ingest',
-        undefined
-      );
-      expect(primaryTimestamp).toEqual('event.ingest');
-      expect(secondaryTimestamp).toEqual('@timestamp');
-    });
-
-    test('returns `event.ingest` as a primary and `undefined` as a secondary timestamps', () => {
-      const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
-        'event.ingest',
-        true
-      );
-      expect(primaryTimestamp).toEqual('event.ingest');
-      expect(secondaryTimestamp).toEqual(undefined);
     });
   });
 });

@@ -193,16 +193,6 @@ export const hasTimestampFields = async (args: {
   return false;
 };
 
-export const getTimestampOverrideFields = (
-  timestampOverride: TimestampOverrideOrUndefined,
-  disableTimestampFallback: DisableTimestampFallbackOrUndefined
-) => {
-  const primaryTimestamp = timestampOverride ?? '@timestamp';
-  const secondaryTimestamp =
-    primaryTimestamp !== '@timestamp' && !disableTimestampFallback ? '@timestamp' : undefined;
-  return { primaryTimestamp, secondaryTimestamp };
-};
-
 export const checkPrivileges = async (
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]

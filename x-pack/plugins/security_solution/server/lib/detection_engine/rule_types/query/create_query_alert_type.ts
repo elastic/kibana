@@ -72,6 +72,8 @@ export const createQueryAlertType = (
           searchAfterSize,
           tuple,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
@@ -93,6 +95,8 @@ export const createQueryAlertType = (
         wrapHits,
         inputIndex,
         runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

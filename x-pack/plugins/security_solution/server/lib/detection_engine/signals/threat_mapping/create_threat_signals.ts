@@ -22,7 +22,6 @@ import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
-import { getTimestampOverrideFields } from '../utils';
 
 export const createThreatSignals = async ({
   alertId,
@@ -53,6 +52,8 @@ export const createThreatSignals = async ({
   type,
   wrapHits,
   runtimeMappings,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
@@ -76,11 +77,6 @@ export const createThreatSignals = async ({
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
   const allEventFilters = [...filters, eventMappingFilter];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter];
-
-  const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
-    params.timestampOverride,
-    params.disableTimestampFallback
-  );
 
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
