@@ -18,7 +18,6 @@ import { createThreatEnrichments } from './threat_indicators';
 import type { SignalSourceHit } from '../types';
 import { BuildRuleMessage } from '../rule_messages';
 
-
 export const enrichEvents = async ({
   services,
   logger,
