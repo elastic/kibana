@@ -70,7 +70,7 @@
   },
   "engines": {
     "node": "16.14.2",
-    "yarn": "^1.21.1"
+    "yarn": "^1.22.19"
   },
   "resolutions": {
     "**/@babel/runtime": "^7.17.9",
@@ -92,7 +92,6 @@
     "**/refractor/prismjs": "~1.27.0",
     "**/trim": "1.0.1",
     "**/typescript": "4.6.3",
-    "**/underscore": "^1.13.1",
     "globby/fast-glob": "3.2.7",
     "puppeteer/node-fetch": "^2.6.7"
   },
