@@ -11,7 +11,7 @@
         "label": "LazyLogStreamWrapper",
         "description": [],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "infra",
             "scope": "public",
@@ -19,7 +19,7 @@
             "section": "def-public.LogStreamProps",
             "text": "LogStreamProps"
           },
-          ">) => JSX.Element"
+          ") => JSX.Element"
         ],
         "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
         "deprecated": false,
@@ -27,20 +27,18 @@
           {
             "parentPluginId": "infra",
             "id": "def-public.LazyLogStreamWrapper.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "infra",
                 "scope": "public",
                 "docId": "kibInfraPluginApi",
                 "section": "def-public.LogStreamProps",
                 "text": "LogStreamProps"
-              },
-              ">"
+              }
             ],
             "path": "x-pack/plugins/infra/public/components/log_stream/lazy_log_stream_wrapper.tsx",
             "deprecated": false,

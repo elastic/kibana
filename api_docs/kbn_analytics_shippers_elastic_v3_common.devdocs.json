@@ -227,7 +227,7 @@
           "TelemetryCounter",
           ">, source: string) => (events: ",
           "Event",
-          "[], { type, code, error }?: { type?: ",
+          "[], { type, code, error, }?: { type?: ",
           "TelemetryCounterType",
           " | undefined; code?: string | undefined; error?: Error | undefined; }) => void"
         ],
