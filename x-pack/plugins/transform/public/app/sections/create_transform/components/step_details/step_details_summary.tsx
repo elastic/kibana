@@ -154,7 +154,7 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
         >
           <span>{transformSettingsMaxPageSearchSize}</span>
         </EuiFormRow>
-        {transformSettingsNumFailureRetries ? (
+        {typeof transformSettingsNumFailureRetries === 'number' ? (
           <EuiFormRow
             data-test-subj={'transformWizardAdvancedSettingsNumFailureRetriesLabel'}
             label={i18n.translate('xpack.transform.stepDetailsSummary.numFailureRetriesLabel', {

@@ -100,6 +100,10 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
         ? item.config.dest.index[0]
         : item.config.dest.index,
     },
+    {
+      title: 'num_failure_retries',
+      description: item.config.settings?.num_failure_retries,
+    },
   ];
 
   const general: SectionConfig = {

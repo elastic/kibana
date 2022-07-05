@@ -856,6 +856,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               />
             </EuiFormRow>
             <EuiFormRow
+              data-test-subj="transformNumFailureRetriesFormRow"
               label={i18n.translate(
                 'xpack.transform.stepDetailsForm.transformNumFailureRetriesLabel',
                 {
