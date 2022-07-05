@@ -353,6 +353,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectedAgents.length > 0 && differenceBy(selectedAgents, agents, 'id').length === 0;
       if (areSelectedAgentsStillVisible) {
         setSelectionMode('manual');
+      } else {
+        // force selecting all agents on current page if staying in query mode
+        if (tableRef?.current) {
+          tableRef.current.setSelection(agents);
+        }
       }
     }
   };
@@ -627,6 +632,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
         }
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
+        visibleAgents={agents}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
