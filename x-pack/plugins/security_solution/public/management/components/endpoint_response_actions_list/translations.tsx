@@ -73,7 +73,7 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
     defaultMessage: 'Time',
   }),
   command: i18n.translate('xpack.securitySolution.responseActionsList.list.command', {
-    defaultMessage: 'Command/action',
+    defaultMessage: 'Command',
   }),
   user: i18n.translate('xpack.securitySolution.responseActionsList.list.user', {
     defaultMessage: 'User',

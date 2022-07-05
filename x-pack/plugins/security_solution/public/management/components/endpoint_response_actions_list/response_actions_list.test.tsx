@@ -9,12 +9,11 @@ import uuid from 'uuid';
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ResponseActionsList } from './response_actions_list';
-import { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import { createUseUiSetting$Mock } from '../../../common/lib/kibana/kibana_react.mock';
-import { DEFAULT_TIMEPICKER_QUICK_RANGES, MANAGEMENT_PATH } from '../../../../common/constants';
+import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 let mockUseGetEndpointActionList: {
@@ -32,60 +31,79 @@ jest.mock('../../hooks/endpoint/use_get_endpoint_action_list', () => {
   };
 });
 
-const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
-const timepickerRanges = [
-  {
-    from: 'now/d',
-    to: 'now/d',
-    display: 'Today',
-  },
-  {
-    from: 'now/w',
-    to: 'now/w',
-    display: 'This week',
-  },
-  {
-    from: 'now-15m',
-    to: 'now',
-    display: 'Last 15 minutes',
-  },
-  {
-    from: 'now-30m',
-    to: 'now',
-    display: 'Last 30 minutes',
-  },
-  {
-    from: 'now-1h',
-    to: 'now',
-    display: 'Last 1 hour',
-  },
-  {
-    from: 'now-24h',
-    to: 'now',
-    display: 'Last 24 hours',
-  },
-  {
-    from: 'now-7d',
-    to: 'now',
-    display: 'Last 7 days',
-  },
-  {
-    from: 'now-30d',
-    to: 'now',
-    display: 'Last 30 days',
-  },
-  {
-    from: 'now-90d',
-    to: 'now',
-    display: 'Last 90 days',
-  },
-  {
-    from: 'now-1y',
-    to: 'now',
-    display: 'Last 1 year',
-  },
-];
-jest.mock('../../../common/lib/kibana');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        uiSettings: {
+          get: jest.fn().mockImplementation((key) => {
+            const get = (k: 'dateFormat' | 'timepicker:quickRanges') => {
+              const x = {
+                dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+                'timepicker:quickRanges': [
+                  {
+                    from: 'now/d',
+                    to: 'now/d',
+                    display: 'Today',
+                  },
+                  {
+                    from: 'now/w',
+                    to: 'now/w',
+                    display: 'This week',
+                  },
+                  {
+                    from: 'now-15m',
+                    to: 'now',
+                    display: 'Last 15 minutes',
+                  },
+                  {
+                    from: 'now-30m',
+                    to: 'now',
+                    display: 'Last 30 minutes',
+                  },
+                  {
+                    from: 'now-1h',
+                    to: 'now',
+                    display: 'Last 1 hour',
+                  },
+                  {
+                    from: 'now-24h',
+                    to: 'now',
+                    display: 'Last 24 hours',
+                  },
+                  {
+                    from: 'now-7d',
+                    to: 'now',
+                    display: 'Last 7 days',
+                  },
+                  {
+                    from: 'now-30d',
+                    to: 'now',
+                    display: 'Last 30 days',
+                  },
+                  {
+                    from: 'now-90d',
+                    to: 'now',
+                    display: 'Last 90 days',
+                  },
+                  {
+                    from: 'now-1y',
+                    to: 'now',
+                    display: 'Last 1 year',
+                  },
+                ],
+              };
+              return x[k];
+            };
+            return get(key);
+          }),
+        },
+      },
+    }),
+  };
+});
 
 describe('Response Actions List', () => {
   const testPrefix = 'response-actions-list';
@@ -113,14 +131,6 @@ describe('Response Actions List', () => {
     reactTestingLibrary.act(() => {
       history.push(`${MANAGEMENT_PATH}/response_actions`);
     });
-    (useKibana as jest.Mock).mockReturnValue({ services: mockedContext.startServices });
-    mockUseUiSetting$.mockImplementation((key, defaultValue) => {
-      const useUiSetting$Mock = createUseUiSetting$Mock();
-
-      return key === DEFAULT_TIMEPICKER_QUICK_RANGES
-        ? [timepickerRanges, jest.fn()]
-        : useUiSetting$Mock(key, defaultValue);
-    });
 
     mockUseGetEndpointActionList = {
       ...baseMockedActionList,
@@ -132,16 +142,13 @@ describe('Response Actions List', () => {
     mockUseGetEndpointActionList = {
       ...baseMockedActionList,
     };
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('Without agentIds filter', () => {
+  describe('Without data', () => {
     it('should show date filters', () => {
       render();
-      expect(renderResult.getByTestId('actionListSuperDatePicker')).toBeTruthy();
+      expect(renderResult.getByTestId(`${testPrefix}-super-date-picker`)).toBeTruthy();
     });
 
     it('should show empty state when there is no data', async () => {
@@ -152,7 +159,9 @@ describe('Response Actions List', () => {
       render();
       expect(renderResult.getByTestId(`${testPrefix}-empty-prompt`)).toBeTruthy();
     });
+  });
 
+  describe('With Data', () => {
     it('should show table when there is data', async () => {
       render();
 
@@ -171,7 +180,7 @@ describe('Response Actions List', () => {
         )
           .slice(0, 6)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command/action', 'User', 'Host', 'Comments', 'Status']);
+      ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
     });
 
     it('should paginate table when there is data', async () => {
@@ -253,8 +262,8 @@ describe('Response Actions List', () => {
     it('should refresh data when autoRefresh is toggled on', async () => {
       render();
 
-      const quickMenu = renderResult.getByTestId('superDatePickerToggleQuickMenuButton');
-      userEvent.click(quickMenu);
+      const quickMenuButton = renderResult.getByTestId('superDatePickerToggleQuickMenuButton');
+      userEvent.click(quickMenuButton);
 
       const toggle = renderResult.getByTestId('superDatePickerToggleRefreshButton');
       const intervalInput = renderResult.getByTestId('superDatePickerRefreshIntervalInput');
@@ -265,6 +274,30 @@ describe('Response Actions List', () => {
       await reactTestingLibrary.waitFor(() => {
         expect(refetchFunction).toHaveBeenCalledTimes(3);
       });
+    });
+
+    it('should refresh data when super date picker refresh button is clicked', async () => {
+      render();
+
+      const superRefreshButton = renderResult.getByTestId(
+        `${testPrefix}-super-date-picker-refresh-button`
+      );
+      userEvent.click(superRefreshButton);
+      expect(refetchFunction).toHaveBeenCalledTimes(1);
+    });
+
+    it('should set date picker with relative dates', async () => {
+      render();
+      const quickMenuButton = renderResult.getByTestId('superDatePickerToggleQuickMenuButton');
+      const startDatePopoverButton = renderResult.getByTestId(`superDatePickerShowDatesButton`);
+
+      // shows 24 hours at first
+      expect(startDatePopoverButton).toHaveTextContent('Last 24 hours');
+
+      // pick another relative date
+      userEvent.click(quickMenuButton);
+      userEvent.click(renderResult.getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
+      expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
     });
   });
 
@@ -357,7 +390,7 @@ describe('Response Actions List', () => {
         )
           .slice(0, 5)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command/action', 'User', 'Comments', 'Status']);
+      ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status']);
     });
 
     it('should show a host column when multiple agentIds', async () => {
@@ -374,7 +407,7 @@ describe('Response Actions List', () => {
         )
           .slice(0, 6)
           .map((col) => col.textContent)
-      ).toEqual(['Time', 'Command/action', 'User', 'Host', 'Comments', 'Status']);
+      ).toEqual(['Time', 'Command', 'User', 'Host', 'Comments', 'Status']);
     });
   });
 });

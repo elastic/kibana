@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
 import { useCallback, useState } from 'react';
 import type {
   DurationRange,
@@ -18,7 +17,7 @@ const defaultDateRangeOptions = Object.freeze({
     enabled: false,
     duration: 10000,
   },
-  startDate: 'now-1d',
+  startDate: 'now-24h/h',
   endDate: 'now',
   recentlyUsedDateRanges: [],
 });
@@ -31,8 +30,8 @@ export const useDateRangePicker = () => {
     ({ start, end }) => {
       setDateRangePickerState((prevState) => ({
         ...prevState,
-        startDate: dateMath.parse(start)?.toISOString(),
-        endDate: dateMath.parse(end)?.toISOString(),
+        startDate: start,
+        endDate: end,
       }));
     },
     [setDateRangePickerState]
@@ -62,6 +61,10 @@ export const useDateRangePicker = () => {
   // handle manual time change on date picker
   const onTimeChange = useCallback(
     ({ start: newStart, end: newEnd }: DurationRange) => {
+      // update date ranges
+      updateActionListDateRanges({ start: newStart, end: newEnd });
+
+      // update recently used date ranges
       const newRecentlyUsedDateRanges = [
         { start: newStart, end: newEnd },
         ...dateRangePickerState.recentlyUsedDateRanges
@@ -71,10 +74,6 @@ export const useDateRangePicker = () => {
           )
           .slice(0, 9),
       ];
-
-      // update date ranges
-      updateActionListDateRanges({ start: newStart, end: newEnd });
-      // update recently used date ranges
       updateActionListRecentlyUsedDateRanges(newRecentlyUsedDateRanges);
     },
     [
