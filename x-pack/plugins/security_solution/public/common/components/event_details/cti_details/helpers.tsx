@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
+import { groupBy, isArray } from 'lodash';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
@@ -24,7 +24,6 @@ import type {
 } from '../../../../../common/search_strategy/security_solution/cti';
 import { isValidEventField } from '../../../../../common/search_strategy/security_solution/cti';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
-import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 
 export const isInvestigationTimeEnrichment = (type: string | undefined) =>
   type === ENRICHMENT_TYPES.InvestigationTime;
@@ -33,10 +32,38 @@ export const parseExistingEnrichments = (
   data: TimelineEventsDetailsItem[]
 ): TimelineEventsDetailsItem[][] => {
   const threatIndicatorFields = data.filter(
-    ({ field, originalValue }) => field.startsWith(ENRICHMENT_DESTINATION_PATH) && originalValue
+    ({ field, originalValue }) =>
+      field.startsWith(`${ENRICHMENT_DESTINATION_PATH}.`) && originalValue
   );
+  if (threatIndicatorFields.length === 0) {
+    return [];
+  }
 
-  return threatIndicatorFields;
+  return threatIndicatorFields.reduce<TimelineEventsDetailsItem[][]>(
+    (enrichments, enrichmentData) => {
+      try {
+        if (isArray(enrichmentData.values)) {
+          for (let i = 0; i < enrichmentData.values.length; i++) {
+            if (!isArray(enrichments[i])) {
+              enrichments[i] = [];
+            }
+            enrichments[i].push({
+              ...enrichmentData,
+              isObjectArray: false,
+              field: enrichmentData.field.replace(`${ENRICHMENT_DESTINATION_PATH}.`, ''),
+              category: enrichmentData.field.split('.')[2],
+              values: [enrichmentData.values[i]],
+              originalValue: [enrichmentData.originalValue[i]],
+            });
+          }
+        }
+      } catch (e) {
+        // omit failed parse
+      }
+      return enrichments;
+    },
+    []
+  );
 };
 
 export const timelineDataToEnrichment = (data: TimelineEventsDetailsItem[]): CtiEnrichment =>
