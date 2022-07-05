@@ -57,6 +57,17 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
                 formatter: 'percent',
                 gaugeMax: 1,
               },
+              memory: {
+                name: i18n.translate(
+                  'xpack.infra.metricDetailPage.containerMetricsLayout.overviewSection.memoryUsageSeriesLabel',
+                  {
+                    defaultMessage: 'Memory Usage',
+                  }
+                ),
+                color: theme.eui.euiColorFullShade,
+                formatter: 'percent',
+                gaugeMax: 1,
+              },
             }}
           />
         </SubSection>
@@ -126,6 +137,24 @@ export const Layout = withTheme(({ metrics, onChangeRangeTime, theme }: LayoutPr
             formatter="percent"
             seriesOverrides={{
               cpu: { color: theme.eui.euiColorVis1 },
+            }}
+          />
+        </SubSection>
+        <SubSection
+          id="containerK8sMemoryUsage"
+          label={i18n.translate(
+            'xpack.infra.metricDetailPage.containerMetricsLayout.memoryUsageSection.sectionLabel',
+            {
+              defaultMessage: 'Memory Usage',
+            }
+          )}
+        >
+          <ChartSectionVis
+            stacked={true}
+            type="area"
+            formatter="percent"
+            seriesOverrides={{
+              memory: { color: theme.eui.euiColorVis1 },
             }}
           />
         </SubSection>

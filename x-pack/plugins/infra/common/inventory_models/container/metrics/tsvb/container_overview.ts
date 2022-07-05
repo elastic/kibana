@@ -89,5 +89,16 @@ export const k8sContainerOverview: TSVBMetricModelCreator = (
         },
       ],
     },
+    {
+      id: 'memory',
+      split_mode: 'everything',
+      metrics: [
+        {
+          field: 'kubernetes.container.memory.usage.node.pct',
+          id: 'avg-memory-total',
+          type: 'avg',
+        },
+      ],
+    },
   ],
 });
