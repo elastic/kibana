@@ -128,8 +128,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { indicesExist, indexPattern, selectedPatterns, loading } =
-    useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, loading } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
