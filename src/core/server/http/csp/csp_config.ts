@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { config, CspConfigType } from './config';
+import { cspConfig, CspConfigType } from './config';
 import { CspDirectives } from './csp_directives';
 
-const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
+const DEFAULT_CONFIG = Object.freeze(cspConfig.schema.validate({}));
 
 /**
  * CSP configuration for use in Kibana.

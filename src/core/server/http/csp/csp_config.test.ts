@@ -7,7 +7,7 @@
  */
 
 import { CspConfig } from './csp_config';
-import { config as cspConfig, CspConfigType } from './config';
+import { cspConfig, CspConfigType } from './config';
 import { mockConfig } from './csp_config.test.mocks';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or

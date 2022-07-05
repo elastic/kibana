@@ -7,7 +7,7 @@
  */
 
 import { CspDirectives } from './csp_directives';
-import { config as cspConfig } from './config';
+import { cspConfig } from './config';
 
 describe('CspDirectives', () => {
   describe('#addDirectiveValue', () => {

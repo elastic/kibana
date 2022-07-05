@@ -19,8 +19,8 @@ import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';
 import { contextServiceMock } from '../context/context_service.mock';
-import { config as cspConfig } from '../csp';
-import { config as externalUrlConfig, ExternalUrlConfig } from '../external_url';
+import { cspConfig } from './csp';
+import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 import { Router } from './router';
 
 const logger = loggingSystemMock.create();

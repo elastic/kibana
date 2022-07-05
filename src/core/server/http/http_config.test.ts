@@ -8,8 +8,8 @@
 
 import uuid from 'uuid';
 import { config, HttpConfig } from './http_config';
-import { config as cspConfig } from '../csp';
-import { ExternalUrlConfig } from '../external_url';
+import { cspConfig } from './csp';
+import { ExternalUrlConfig } from './external_url';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
 const invalidHostnames = ['asdf$%^', '0'];

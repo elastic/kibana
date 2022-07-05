@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { config } from './config';
+import { externalUrlConfig } from './config';
 
 describe('externalUrl config', () => {
   it('provides a default policy allowing all external urls', () => {
-    expect(config.schema.validate({})).toMatchInlineSnapshot(`
+    expect(externalUrlConfig.schema.validate({})).toMatchInlineSnapshot(`
       Object {
         "policy": Array [
           Object {
@@ -22,7 +22,7 @@ describe('externalUrl config', () => {
   });
 
   it('allows an empty policy', () => {
-    expect(config.schema.validate({ policy: [] })).toMatchInlineSnapshot(`
+    expect(externalUrlConfig.schema.validate({ policy: [] })).toMatchInlineSnapshot(`
       Object {
         "policy": Array [],
       }
@@ -31,7 +31,7 @@ describe('externalUrl config', () => {
 
   it('allows a policy with just a protocol', () => {
     expect(
-      config.schema.validate({
+      externalUrlConfig.schema.validate({
         policy: [
           {
             allow: true,
@@ -53,7 +53,7 @@ describe('externalUrl config', () => {
 
   it('allows a policy with just a host', () => {
     expect(
-      config.schema.validate({
+      externalUrlConfig.schema.validate({
         policy: [
           {
             allow: true,
@@ -75,7 +75,7 @@ describe('externalUrl config', () => {
 
   it('allows a policy with both host and protocol', () => {
     expect(
-      config.schema.validate({
+      externalUrlConfig.schema.validate({
         policy: [
           {
             allow: true,
@@ -99,7 +99,7 @@ describe('externalUrl config', () => {
 
   it('allows a policy without a host or protocol', () => {
     expect(
-      config.schema.validate({
+      externalUrlConfig.schema.validate({
         policy: [
           {
             allow: true,
@@ -120,7 +120,7 @@ describe('externalUrl config', () => {
   describe('protocols', () => {
     ['http', 'https', 'ftp', 'ftps', 'custom-protocol+123.bar'].forEach((protocol) => {
       it(`allows a protocol of "${protocol}"`, () => {
-        config.schema.validate({
+        externalUrlConfig.schema.validate({
           policy: [
             {
               allow: true,
@@ -134,7 +134,7 @@ describe('externalUrl config', () => {
     ['1http', '', 'custom-protocol()', 'https://'].forEach((protocol) => {
       it(`disallows a protocol of "${protocol}"`, () => {
         expect(() =>
-          config.schema.validate({
+          externalUrlConfig.schema.validate({
             policy: [
               {
                 allow: true,

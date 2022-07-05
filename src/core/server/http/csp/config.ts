@@ -114,7 +114,7 @@ const configSchema = schema.object(
  */
 export type CspConfigType = TypeOf<typeof configSchema>;
 
-export const config: ServiceConfigDescriptor<CspConfigType> = {
+export const cspConfig: ServiceConfigDescriptor<CspConfigType> = {
   // TODO: Move this to server.csp using config deprecations
   // ? https://github.com/elastic/kibana/pull/52251
   path: 'csp',

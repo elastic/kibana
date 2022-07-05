@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { config } from './config';
+import { cspConfig } from './config';
 
 describe('config.validate()', () => {
   it(`does not allow "disableEmbedding" to be set to true`, () => {
     // This is intentionally not editable in the raw CSP config.
     // Users should set `server.securityResponseHeaders.disableEmbedding` to control this config property.
-    expect(() => config.schema.validate({ disableEmbedding: true })).toThrowError(
+    expect(() => cspConfig.schema.validate({ disableEmbedding: true })).toThrowError(
       '[disableEmbedding]: expected value to equal [false]'
     );
   });
@@ -20,7 +20,7 @@ describe('config.validate()', () => {
   describe(`"script_src"`, () => {
     it(`throws if containing 'unsafe-inline' when 'strict' is true`, () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           strict: true,
           warnLegacyBrowsers: false,
           script_src: [`'self'`, `unsafe-inline`],
@@ -30,7 +30,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           strict: true,
           warnLegacyBrowsers: false,
           script_src: [`'self'`, `'unsafe-inline'`],
@@ -42,7 +42,7 @@ describe('config.validate()', () => {
 
     it(`throws if containing 'unsafe-inline' when 'warnLegacyBrowsers' is true`, () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           strict: false,
           warnLegacyBrowsers: true,
           script_src: [`'self'`, `unsafe-inline`],
@@ -52,7 +52,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           strict: false,
           warnLegacyBrowsers: true,
           script_src: [`'self'`, `'unsafe-inline'`],
@@ -64,7 +64,7 @@ describe('config.validate()', () => {
 
     it(`does not throw if containing 'unsafe-inline' when 'strict' and 'warnLegacyBrowsers' are false`, () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           strict: false,
           warnLegacyBrowsers: false,
           script_src: [`'self'`, `unsafe-inline`],
@@ -72,7 +72,7 @@ describe('config.validate()', () => {
       ).not.toThrow();
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           strict: false,
           warnLegacyBrowsers: false,
           script_src: [`'self'`, `'unsafe-inline'`],
@@ -82,7 +82,7 @@ describe('config.validate()', () => {
 
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           script_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -92,7 +92,7 @@ describe('config.validate()', () => {
 
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           script_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -100,7 +100,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           script_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -112,7 +112,7 @@ describe('config.validate()', () => {
   describe(`"worker_src"`, () => {
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           worker_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -122,7 +122,7 @@ describe('config.validate()', () => {
 
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           worker_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -130,7 +130,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           worker_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -142,7 +142,7 @@ describe('config.validate()', () => {
   describe(`"style_src"`, () => {
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           style_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -152,7 +152,7 @@ describe('config.validate()', () => {
 
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           style_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -160,7 +160,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           style_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -172,7 +172,7 @@ describe('config.validate()', () => {
   describe(`"connect_src"`, () => {
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           connect_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -182,7 +182,7 @@ describe('config.validate()', () => {
 
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           connect_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -190,7 +190,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           connect_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -202,7 +202,7 @@ describe('config.validate()', () => {
   describe(`"default_src"`, () => {
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           default_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -212,7 +212,7 @@ describe('config.validate()', () => {
 
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           default_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -220,7 +220,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           default_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -232,7 +232,7 @@ describe('config.validate()', () => {
   describe(`"font_src"`, () => {
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           font_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -242,7 +242,7 @@ describe('config.validate()', () => {
 
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           font_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -250,7 +250,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           font_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -262,7 +262,7 @@ describe('config.validate()', () => {
   describe(`"frame_src"`, () => {
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           frame_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -272,7 +272,7 @@ describe('config.validate()', () => {
 
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           frame_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -280,7 +280,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           frame_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -292,7 +292,7 @@ describe('config.validate()', () => {
   describe(`"img_src"`, () => {
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           img_src: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -302,7 +302,7 @@ describe('config.validate()', () => {
 
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           img_src: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -310,7 +310,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           img_src: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -322,7 +322,7 @@ describe('config.validate()', () => {
   describe(`"frame_ancestors"`, () => {
     it('throws if using an `nonce-*` value', () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           frame_ancestors: [`hello`, `nonce-foo`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -332,7 +332,7 @@ describe('config.validate()', () => {
 
     it("throws if using `none` or `'none'`", () => {
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           frame_ancestors: [`hello`, `none`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -340,7 +340,7 @@ describe('config.validate()', () => {
       );
 
       expect(() =>
-        config.schema.validate({
+        cspConfig.schema.validate({
           frame_ancestors: [`hello`, `'none'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
