@@ -7,13 +7,16 @@
 
 import React, { useCallback, memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
+import type { IDataPluginServices } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DurationRange, OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
+import type {
+  DurationRange,
+  OnRefreshChangeProps,
+} from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { useGetEndpointActionList } from '../../../hooks';
+import type { useGetEndpointActionList } from '../../../hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export interface DateRangePickerValues {

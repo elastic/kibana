@@ -9,9 +9,10 @@ import uuid from 'uuid';
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ResponseActionsList } from './response_actions_list';
-import { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
