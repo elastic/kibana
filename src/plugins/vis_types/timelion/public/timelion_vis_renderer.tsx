@@ -52,7 +52,7 @@ export const getTimelionVisRenderer: (
     };
 
     const renderComplete = () => {
-      handlers.logRenderTelemetry({ visType: 'timelion', originatingApp: 'agg_based' });
+      handlers.logRenderTelemetry({ counterEvents: 'timelion', originatingApp: 'agg_based' });
       handlers.done();
     };
 

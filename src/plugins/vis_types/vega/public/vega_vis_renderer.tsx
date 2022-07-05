@@ -31,7 +31,11 @@ export const getVegaVisRenderer: (
     const renderComplete = () => {
       handlers.logRenderTelemetry({
         originatingApp: 'vega',
-        extra: [visData.useMap ? 'map' : undefined, visData.isVegaLite ? 'lite' : 'normal'],
+        counterEvents: [
+          '',
+          visData.useMap ? 'map' : undefined,
+          visData.isVegaLite ? 'lite' : 'normal',
+        ],
       });
       handlers.done();
     };

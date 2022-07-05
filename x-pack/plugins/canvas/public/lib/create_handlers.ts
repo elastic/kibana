@@ -29,6 +29,7 @@ export const createBaseHandlers = (): IInterpreterRenderHandlers => ({
   isSyncColorsEnabled: () => false,
   isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
+  logRenderTelemetry() {},
 });
 
 export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHandlers => ({

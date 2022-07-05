@@ -18,8 +18,9 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
-import type { CommonXYLayerConfig, DataLayerArgs, XYChartProps } from '../../common';
+import type { CommonXYLayerConfig, XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent } from '../types';
 
 export type GetStartDepsFn = () => Promise<{
@@ -39,8 +40,7 @@ interface XyChartRendererDeps {
 }
 
 const extractRenderTelemetryContext = (originatingApp: string, layers: CommonXYLayerConfig[]) => {
-  const dataLayer = layers.find((l) => l.layerType === LayerTypes.DATA) as DataLayerArgs;
-
+  const dataLayer = layers.find(isDataLayer);
   if (dataLayer) {
     const type =
       dataLayer.seriesType === SeriesTypes.BAR
@@ -50,7 +50,7 @@ const extractRenderTelemetryContext = (originatingApp: string, layers: CommonXYL
     const isPercentageOrStacked = [
       dataLayer.isPercentage ? 'percentage' : undefined,
       dataLayer.isStacked ? 'stacked' : undefined,
-    ];
+    ].filter(Boolean);
 
     const byTypes = layers.reduce(
       (acc, item) => {
@@ -66,16 +66,13 @@ const extractRenderTelemetryContext = (originatingApp: string, layers: CommonXYL
 
     return {
       originatingApp,
-      extra: [
+      counterEvents: [
         type,
-        isPercentageOrStacked
-          ? `${type}_${isPercentageOrStacked.filter(Boolean).join('_')}`
-          : undefined,
+        isPercentageOrStacked.length ? `${type}_${isPercentageOrStacked.join('_')}` : undefined,
         byTypes[LayerTypes.REFERENCELINE] ? 'reference_layer' : undefined,
         byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
         byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
       ],
-      onlyExtra: true,
     };
   }
 };

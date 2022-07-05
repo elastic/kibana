@@ -54,15 +54,17 @@ export const getTimeseriesVisRenderer: (deps: {
     const canNavigateToLens = await triggerTSVBtoLensConfiguration(model);
 
     const initialRender = () => {
+      const withVisType = (item?: string) => [model.type, item].filter(Boolean).join('_');
       handlers.logRenderTelemetry({
         originatingApp: 'tsvb',
-        extra: [
+        counterEvents: [
           model.type,
-          model.use_kibana_indexes === false ? 'index_pattern_string' : undefined,
-          model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE ? 'last_value' : undefined,
-          canNavigateToLens ? 'convertable' : undefined,
+          withVisType(model.use_kibana_indexes === false ? 'index_pattern_string' : undefined),
+          withVisType(
+            model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE ? 'last_value' : undefined
+          ),
+          withVisType(canNavigateToLens ? 'convertable' : undefined),
         ],
-        onlyExtra: true,
       });
 
       handlers.done();

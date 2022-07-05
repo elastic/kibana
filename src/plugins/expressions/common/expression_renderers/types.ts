@@ -74,10 +74,8 @@ export interface IInterpreterRenderEvent<Context = unknown> {
 }
 
 export interface IInterpreterRenderTelemetry {
-  originatingApp?: string;
-  visType?: string;
-  extra?: string | Array<string | undefined>;
-  onlyExtra?: boolean;
+  originatingApp: string;
+  counterEvents: string | Array<string | undefined>;
 }
 
 export interface IInterpreterRenderHandlers {

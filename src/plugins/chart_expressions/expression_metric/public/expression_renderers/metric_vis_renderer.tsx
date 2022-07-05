@@ -69,7 +69,7 @@ export const getMetricVisRenderer = (
         if (context?.originatingApp) {
           handlers.logRenderTelemetry({
             originatingApp: context.originatingApp,
-            visType: 'metric',
+            counterEvents: 'metric',
           });
         }
         handlers.done();

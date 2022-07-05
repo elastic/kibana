@@ -32,7 +32,7 @@ const renderComplete = (
   visParams: BasicVislibParams | PieVisParams,
   handlers: IInterpreterRenderHandlers
 ) => {
-  handlers.logRenderTelemetry({ originatingApp: 'agg_based', visType: visParams.type });
+  handlers.logRenderTelemetry({ originatingApp: 'agg_based', counterEvents: visParams.type });
   handlers.done();
 };
 

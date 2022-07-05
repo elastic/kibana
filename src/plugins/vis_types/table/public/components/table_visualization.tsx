@@ -37,8 +37,7 @@ const TableVisualizationComponent = ({
     setTimeout(() => {
       handlers.logRenderTelemetry({
         originatingApp: 'agg_based',
-        visType: 'table',
-        extra: [!table ? 'split' : undefined],
+        counterEvents: ['table', !table ? 'table_split' : undefined],
       });
       handlers.done();
     }, 300);

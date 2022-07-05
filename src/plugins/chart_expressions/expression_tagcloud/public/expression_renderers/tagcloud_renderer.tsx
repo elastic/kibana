@@ -51,7 +51,7 @@ export const tagcloudRenderer: (
       if (config.context?.originatingApp) {
         handlers.logRenderTelemetry({
           originatingApp: config.context.originatingApp,
-          visType: EXPRESSION_NAME,
+          counterEvents: EXPRESSION_NAME,
         });
       }
       handlers.done();

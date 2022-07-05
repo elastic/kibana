@@ -54,7 +54,7 @@ export const heatmapRenderer: (
       if (config.context?.originatingApp) {
         handlers.logRenderTelemetry({
           originatingApp: config.context.originatingApp,
-          visType: EXPRESSION_HEATMAP_NAME,
+          counterEvents: EXPRESSION_HEATMAP_NAME,
         });
       }
 

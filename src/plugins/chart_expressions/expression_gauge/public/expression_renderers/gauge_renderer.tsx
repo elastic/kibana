@@ -48,7 +48,7 @@ export const gaugeRenderer: (
       if (config.context?.originatingApp) {
         handlers.logRenderTelemetry({
           originatingApp: config.context.originatingApp,
-          visType: type,
+          counterEvents: type,
         });
       }
 

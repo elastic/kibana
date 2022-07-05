@@ -55,7 +55,7 @@ export const getPartitionVisRenderer: (
       if (context?.originatingApp) {
         handlers.logRenderTelemetry({
           originatingApp: context.originatingApp,
-          visType,
+          counterEvents: visType,
         });
       }
       handlers.done();
