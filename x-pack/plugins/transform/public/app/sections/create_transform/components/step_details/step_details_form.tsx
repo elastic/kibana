@@ -308,7 +308,6 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState<
       string | number | undefined
     >(defaults.transformSettingsNumFailureRetries);
-
     const isTransformSettingsNumFailureRetriesValid =
       transformSettingsNumFailureRetries === undefined ||
       transformSettingsNumFailureRetries === '-' ||
@@ -347,9 +346,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         transformSettingsMaxPageSearchSize,
         transformSettingsDocsPerSecond,
         transformSettingsNumFailureRetries:
-          typeof transformSettingsNumFailureRetries === 'number'
+          transformSettingsNumFailureRetries === undefined ||
+          transformSettingsNumFailureRetries === ''
+            ? undefined
+            : typeof transformSettingsNumFailureRetries === 'number'
             ? transformSettingsNumFailureRetries
-            : parseInt(transformSettingsNumFailureRetries ?? '', 10),
+            : parseInt(transformSettingsNumFailureRetries, 10),
         destinationIndex,
         destinationIngestPipeline,
         touched: true,
