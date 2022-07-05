@@ -57,13 +57,13 @@ export const getTimeseriesVisRenderer: (deps: {
       handlers.done({
         renderTelemetry: {
           visType: 'tsvb',
-          events: [
+          extra: [
             model.type,
             model.use_kibana_indexes === false ? 'index_pattern_string' : undefined,
             model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE ? 'last_value' : undefined,
             canNavigateToLens ? 'convertable' : undefined,
           ],
-          onlyEvents: true,
+          onlyExtra: true,
         },
       });
     };

@@ -81,7 +81,9 @@ export const getDatatableRenderer = (dependencies: {
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
-            renderComplete={() => handlers.done()}
+            renderComplete={() =>
+              handlers.done({ renderTelemetry: { visGroup: 'lens', visType: 'table' } })
+            }
           />
         </I18nProvider>
       </KibanaThemeProvider>,

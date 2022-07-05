@@ -37,8 +37,8 @@ export const getVegaVisRenderer: (
             renderComplete={() =>
               handlers.done({
                 renderTelemetry: {
-                  visType: 'vega',
-                  events: [
+                  visGroup: 'vega',
+                  extra: [
                     visData.useMap ? 'map' : undefined,
                     visData.isVegaLite ? 'lite' : 'normal',
                   ],

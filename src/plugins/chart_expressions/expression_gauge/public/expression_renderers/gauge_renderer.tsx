@@ -12,7 +12,7 @@ import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps } from '../../common';
+import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
 import { getFormatService, getPaletteService, getThemeService } from '../services';
 
 interface ExpressionGaugeRendererDependencies {
@@ -41,18 +41,30 @@ export const gaugeRenderer: (
             formatFactory={getFormatService().deserialize}
             chartsThemeService={getThemeService()}
             paletteService={getPaletteService()}
-            renderComplete={() =>
+            renderComplete={() => {
+              let type: string;
+              switch (config.args.shape) {
+                case GaugeShapes.HORIZONTAL_BULLET:
+                  type = `${EXPRESSION_GAUGE_NAME}_horizontal`;
+                  break;
+                case GaugeShapes.VERTICAL_BULLET:
+                  type = `${EXPRESSION_GAUGE_NAME}_vertical`;
+                  break;
+                default:
+                  type = EXPRESSION_GAUGE_NAME;
+              }
+
               handlers.done(
                 config.context?.originatingApp
                   ? {
                       renderTelemetry: {
                         visGroup: config.context.originatingApp,
-                        visType: EXPRESSION_GAUGE_NAME,
+                        visType: type,
                       },
                     }
                   : undefined
-              )
-            }
+              );
+            }}
             uiState={handlers.uiState as PersistedState}
           />
         </div>

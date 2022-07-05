@@ -18,7 +18,8 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { XYChartProps } from '../../common';
+import { LayerTypes, SeriesTypes } from '../../common/constants';
+import type { CommonXYLayerConfig, DataLayerArgs, XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent } from '../types';
 
 export type GetStartDepsFn = () => Promise<{
@@ -36,6 +37,50 @@ export type GetStartDepsFn = () => Promise<{
 interface XyChartRendererDeps {
   getStartDeps: GetStartDepsFn;
 }
+
+const extractRenderTelemetryContext = (originatingApp: string, layers: CommonXYLayerConfig[]) => {
+  const dataLayer = layers.find((l) => l.layerType === LayerTypes.DATA) as DataLayerArgs;
+
+  if (dataLayer) {
+    const type =
+      dataLayer.seriesType === SeriesTypes.BAR
+        ? `${dataLayer.isHorizontal ? 'horizontal_bar' : 'vertical_bar'}`
+        : dataLayer.seriesType;
+
+    const isPercentageOrStacked = [
+      dataLayer.isPercentage ? 'percentage' : undefined,
+      dataLayer.isStacked ? 'stacked' : undefined,
+    ];
+
+    const byTypes = layers.reduce(
+      (acc, item) => {
+        acc[item.layerType] += 1;
+        return acc;
+      },
+      {
+        [LayerTypes.REFERENCELINE]: 0,
+        [LayerTypes.ANNOTATIONS]: 0,
+        [LayerTypes.DATA]: 0,
+      }
+    );
+
+    return {
+      renderTelemetry: {
+        visGroup: originatingApp,
+        extra: [
+          type,
+          isPercentageOrStacked
+            ? `${type}_${isPercentageOrStacked.filter(Boolean).join('_')}`
+            : undefined,
+          byTypes[LayerTypes.REFERENCELINE] ? 'reference_layer' : undefined,
+          byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
+          byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
+        ],
+        onlyExtra: true,
+      },
+    };
+  }
+};
 
 export const getXyChartRenderer = ({
   getStartDeps,
@@ -86,18 +131,16 @@ export const getXyChartRenderer = ({
               renderMode={handlers.getRenderMode()}
               syncColors={handlers.isSyncColorsEnabled()}
               syncTooltips={handlers.isSyncTooltipsEnabled()}
-              renderComplete={() =>
+              renderComplete={() => {
                 handlers.done(
                   config.context?.originatingApp
-                    ? {
-                        renderTelemetry: {
-                          visGroup: config.context.originatingApp,
-                          visType: 'xyVis',
-                        },
-                      }
+                    ? extractRenderTelemetryContext(
+                        config.context?.originatingApp,
+                        config.args.layers
+                      )
                     : undefined
-                )
-              }
+                );
+              }}
             />
           </div>{' '}
         </I18nProvider>

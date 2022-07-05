@@ -793,6 +793,9 @@ export const VisualizationWrapper = ({
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
         inspectorAdapters={lensInspector.adapters}
+        executionContext={{
+          type: 'lens',
+        }}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error);

@@ -39,7 +39,7 @@ const TableVisualizationComponent = ({
         renderTelemetry: {
           visType: 'table',
           visGroup: 'agg_based',
-          events: [!table ? 'split' : undefined],
+          extra: [!table ? 'split' : undefined],
         },
       });
     }, 300);

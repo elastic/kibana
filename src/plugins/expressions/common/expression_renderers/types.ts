@@ -75,10 +75,10 @@ export interface IInterpreterRenderEvent<Context = unknown> {
 
 export interface IInterpreterRenderHandlersDoneContext {
   renderTelemetry?: {
-    visType: string;
+    visType?: string;
     visGroup?: string;
-    events?: string | Array<string | undefined>;
-    onlyEvents?: boolean;
+    extra?: string | Array<string | undefined>;
+    onlyExtra?: boolean;
   };
 }
 

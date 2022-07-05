@@ -40,26 +40,26 @@ type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
 
 const doRenderTelemetry = (context?: IInterpreterRenderHandlersDoneContext) => {
   if (context?.renderTelemetry) {
-    const { visGroup, visType, events } = context.renderTelemetry;
+    const { visGroup, visType, extra } = context.renderTelemetry;
     const usageCollection = getUsageCollection();
     const toEvent = (item: string | undefined) =>
       ['render', visGroup, visType, item].filter(Boolean).join('_');
 
     let uiCounterEvents: string | string[];
 
-    if (!events || typeof events === 'string') {
-      uiCounterEvents = toEvent(events);
+    if (!extra || typeof extra === 'string') {
+      uiCounterEvents = toEvent(extra);
     } else {
-      uiCounterEvents = events.filter(Boolean).map((item) => toEvent(item));
+      uiCounterEvents = extra.filter(Boolean).map((item) => toEvent(item));
 
-      if (!context.renderTelemetry.onlyEvents) {
+      if (!context.renderTelemetry.onlyExtra) {
         uiCounterEvents.push(toEvent(undefined));
       }
     }
 
-    if (usageCollection) {
+    if (usageCollection && (context.renderTelemetry.visGroup || context.renderTelemetry.visType)) {
       usageCollection.reportUiCounter(
-        context.renderTelemetry.visGroup ?? context.renderTelemetry.visType,
+        (context.renderTelemetry.visGroup ?? context.renderTelemetry.visType)!,
         METRIC_TYPE.COUNT,
         uiCounterEvents
       );
