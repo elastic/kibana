@@ -32,4 +32,3 @@ export const containerK8sMemoryUsage: TSVBMetricModelCreator = (
     },
   ],
 });
-
