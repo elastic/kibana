@@ -53,6 +53,8 @@ describe('AgentBulkActions', () => {
       currentQuery: '',
       selectedAgents,
       refreshAgents: () => undefined,
+      visibleAgents: [],
+      allTags: [],
     };
     const testBed = registerTestBed(TestComponent)(props);
     const { exists } = testBed;
@@ -80,6 +82,8 @@ describe('AgentBulkActions', () => {
       currentQuery: '',
       selectedAgents,
       refreshAgents: () => undefined,
+      visibleAgents: [],
+      allTags: [],
     };
     const testBed = registerTestBed(TestComponent)(props);
     const { exists } = testBed;
