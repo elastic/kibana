@@ -71,6 +71,8 @@ paths:
     $ref: 'paths/agents@bulk_reassign.yaml'
   '/agents/bulk_unenroll':
     $ref: 'paths/agents@bulk_unenroll.yaml'
+  '/agents/bulk_update_agent_tags':
+    $ref: 'paths/agents@bulk_update_tags.yaml'
   #  Agent policies endpoints
   /agent_policies:
     $ref: paths/agent_policies.yaml

@@ -78,8 +78,8 @@ CardCompressedHeader.displayName = 'CardCompressedHeader';
 const ButtonIconPlaceHolder = styled.div`
   display: inline-block;
   // Sizes below should match that of the Eui's Button Icon, so that it holds the same space.
-  width: ${({ theme }) => theme.eui.euiFormControlIconSizes.large};
-  height: ${({ theme }) => theme.eui.euiFormControlIconSizes.large};
+  width: ${({ theme }) => theme.eui.euiSizeL};
+  height: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
