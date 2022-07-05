@@ -26,6 +26,7 @@ import {
   EuiPopoverFooter,
   EuiIcon,
   EuiLink,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
@@ -275,13 +276,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel
-            paddingSize="none"
-            hasShadow={false}
-            hasBorder={true}
-            style={{ width: '400px' }}
-          >
-            <EuiPanel paddingSize="s" hasShadow={false}>
+          <EuiSplitPanel.Outer hasShadow={false} hasBorder={true} style={{ width: '400px' }}>
+            <EuiSplitPanel.Inner paddingSize="s">
               <EuiDatePicker
                 inline
                 showTimeSelect
@@ -293,9 +289,9 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
                 minDate={minDate}
                 adjustDateOnChange={false}
               />
-            </EuiPanel>
+            </EuiSplitPanel.Inner>
             <EuiHorizontalRule margin="none" />
-            <EuiPanel paddingSize="m" hasShadow={false}>
+            <EuiSplitPanel.Inner paddingSize="m">
               <EuiFormRow
                 display="columnCompressed"
                 style={{ alignItems: 'center' }}
@@ -313,8 +309,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
                   isClearable={false}
                 />
               </EuiFormRow>
-            </EuiPanel>
-          </EuiPanel>
+            </EuiSplitPanel.Inner>
+          </EuiSplitPanel.Outer>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

@@ -12,8 +12,8 @@ import {
   EuiFormControlLayout,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiPanel,
   EuiSelect,
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -187,8 +187,8 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   }, [compiledRecurrenceSchedule, onChange]);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder={true} paddingSize="none">
-      <div style={{ padding: '16px', backgroundColor: '#f8fafd' }}>
+    <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
+      <EuiSplitPanel.Inner color="subdued">
         <EuiFormRow
           display="columnCompressed"
           style={{ alignItems: 'center' }}
@@ -277,14 +277,14 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             </EuiFormControlLayout>
           </EuiFormRow>
         )}
-      </div>
+      </EuiSplitPanel.Inner>
       <EuiHorizontalRule margin="none" />
-      <div style={{ padding: '16px' }}>
+      <EuiSplitPanel.Inner style={{ maxWidth: '400px' }}>
         {i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.repeatsSummary', {
           defaultMessage: 'Repeats {summary}',
           values: { summary: recurrenceSummary(compiledRecurrenceSchedule) },
         })}
-      </div>
-    </EuiPanel>
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };
