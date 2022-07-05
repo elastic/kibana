@@ -58,7 +58,7 @@
         "label": "PackagePolicyEditorDatastreamMappings",
         "description": [],
         "signature": [
-          "({ dataStream, packageInfo }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -76,7 +76,7 @@
             "id": "def-public.PackagePolicyEditorDatastreamMappings.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ dataStream, packageInfo }",
+            "label": "{ packageInputStream, packageInfo }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -105,7 +105,7 @@
         "label": "PackagePolicyEditorDatastreamPipelines",
         "description": [],
         "signature": [
-          "({ dataStream, packageInfo }: React.PropsWithChildren<",
+          "({ packageInputStream, packageInfo }: React.PropsWithChildren<",
           {
             "pluginId": "fleet",
             "scope": "public",
@@ -123,7 +123,7 @@
             "id": "def-public.PackagePolicyEditorDatastreamPipelines.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ dataStream, packageInfo }",
+            "label": "{ packageInputStream, packageInfo }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1451,13 +1451,13 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-public.PackagePolicyEditorDatastreamMappingsProps.dataStream",
+            "id": "def-public.PackagePolicyEditorDatastreamMappingsProps.packageInputStream",
             "type": "Object",
             "tags": [],
-            "label": "dataStream",
+            "label": "packageInputStream",
             "description": [],
             "signature": [
-              "{ dataset: string; type: string; }"
+              "{ id?: string | undefined; data_stream: { dataset: string; type: string; }; }"
             ],
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_mappings.tsx",
             "deprecated": false
@@ -1537,13 +1537,13 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-public.PackagePolicyEditorDatastreamPipelinesProps.dataStream",
+            "id": "def-public.PackagePolicyEditorDatastreamPipelinesProps.packageInputStream",
             "type": "Object",
             "tags": [],
-            "label": "dataStream",
+            "label": "packageInputStream",
             "description": [],
             "signature": [
-              "{ dataset: string; type: string; }"
+              "{ id?: string | undefined; data_stream: { dataset: string; type: string; }; }"
             ],
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines.tsx",
             "deprecated": false
@@ -15299,6 +15299,19 @@
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.install_format_schema_version",
+            "type": "string",
+            "tags": [],
+            "label": "install_format_schema_version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -16463,6 +16476,19 @@
         "children": [
           {
             "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicyInput.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.NewPackagePolicyInput.type",
             "type": "string",
             "tags": [],
@@ -16580,6 +16606,19 @@
         "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicyInputStream.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "fleet",
             "id": "def-common.NewPackagePolicyInputStream.enabled",
@@ -19319,7 +19358,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ user_provided_metadata: Record<string, any>; }"
+              "{ user_provided_metadata?: Record<string, any> | undefined; tags?: string[] | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
             "deprecated": false
@@ -22314,6 +22353,20 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.PostBulkUpdateAgentTagsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "PostBulkUpdateAgentTagsResponse",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { success: boolean; error?: string | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE",
         "type": "string",
         "tags": [],
@@ -22846,6 +22899,16 @@
             "type": "string",
             "tags": [],
             "label": "UPDATE_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.BULK_UPDATE_AGENT_TAGS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UPDATE_AGENT_TAGS_PATTERN",
             "description": [],
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false

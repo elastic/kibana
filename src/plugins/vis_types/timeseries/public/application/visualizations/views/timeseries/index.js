@@ -78,6 +78,7 @@ export const TimeSeries = ({
   isLastBucketDropped,
   useLegacyTimeAxis,
   ignoreDaylightTime,
+  initialRender,
 }) => {
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
@@ -94,6 +95,15 @@ export const TimeSeries = ({
   const hasVisibleAnnotations = useMemo(
     () => (annotations ?? []).some((annotation) => Boolean(annotation.data?.length)),
     [annotations]
+  );
+
+  const onRenderChange = useCallback(
+    (isRendered) => {
+      if (isRendered) {
+        initialRender();
+      }
+    },
+    [initialRender]
   );
 
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
@@ -163,6 +173,7 @@ export const TimeSeries = ({
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
         showLegendExtra={true}
+        onRenderChange={onRenderChange}
         allowBrushingLastHistogramBin={true}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}

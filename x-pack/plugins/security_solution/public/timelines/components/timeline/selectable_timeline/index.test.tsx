@@ -25,7 +25,7 @@ jest.mock('../../../containers/all', () => {
 describe('SelectableTimeline', () => {
   const props = {
     hideUntitled: false,
-    getSelectableOptions: jest.fn(),
+    getSelectableOptions: jest.fn().mockReturnValue([]),
     onClosePopover: jest.fn(),
     onTimelineChange: jest.fn(),
     timelineType: TimelineType.default,
