@@ -19,6 +19,7 @@ export const Pagination: React.FC<{ 'aria-label': string }> = ({ 'aria-label': a
     className="documentsSearchExperience__pagingInfo"
   >
     <EuiFlexItem>
+      {/* @ts-ignore */}
       <Paging view={PagingView} aria-label={ariaLabel} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
