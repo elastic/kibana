@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { useMemo } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+
+import { installationStatuses } from '../../../../../../../common/constants';
 
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
@@ -20,6 +22,10 @@ import { ExperimentalFeaturesService } from '../../../../services';
 import type { PackageListItem } from '../../../../types';
 
 import type { Installation, IntegrationCardItem } from '../../../../../../../common/types/models';
+
+import { useGetPackages } from '../../../../hooks';
+
+import type { Section } from '../../..';
 
 import type { CategoryFacet } from './category_facets';
 import { InstalledPackages } from './installed_packages';
@@ -117,19 +123,39 @@ export const mapToCard = ({
   };
 };
 
-export const EPMHomePage: React.FC = memo(() => {
+export const EPMHomePage: React.FC = () => {
+  const { data: allPackages, isLoading } = useGetPackages({
+    experimental: true,
+  });
+
+  const installedPackages = useMemo(
+    () =>
+      (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
+    [allPackages?.response]
+  );
+
+  const atLeastOneUnverifiedPackageInstalled = useMemo(
+    () =>
+      installedPackages.some(
+        (pkg) =>
+          'savedObject' in pkg && pkg.savedObject.attributes.verification_status === 'unverified'
+      ),
+    [installedPackages]
+  );
+
+  const sectionsWithWarning = (atLeastOneUnverifiedPackageInstalled ? ['manage'] : []) as Section[];
   return (
     <Switch>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
-        <DefaultLayout section="manage">
-          <InstalledPackages />
+        <DefaultLayout section="manage" sectionsWithWarning={sectionsWithWarning}>
+          <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
         </DefaultLayout>
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
-        <DefaultLayout section="browse">
-          <AvailablePackages />
+        <DefaultLayout section="browse" sectionsWithWarning={sectionsWithWarning}>
+          <AvailablePackages allPackages={allPackages} isLoading={isLoading} />
         </DefaultLayout>
       </Route>
     </Switch>
   );
-});
+};
