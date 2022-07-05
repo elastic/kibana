@@ -158,6 +158,12 @@ export const ResponseActionsList = memo<
           parameters,
         } = item;
 
+        const parametersList = parameters
+          ? Object.entries(parameters).map(([key, value]) => {
+              return `${key}:${value}`;
+            })
+          : undefined;
+
         const command = getCommand(_command);
         const descriptionListLeft = [
           {
@@ -177,7 +183,7 @@ export const ResponseActionsList = memo<
           },
           {
             title: OUTPUT_MESSAGES.expandSection.parameters,
-            description: parameters ? parameters : emptyValue,
+            description: parametersList ? parametersList : emptyValue,
           },
         ];
 
