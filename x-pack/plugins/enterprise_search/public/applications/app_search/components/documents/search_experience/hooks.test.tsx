@@ -9,8 +9,8 @@ const mockAction = jest.fn();
 
 let mockSubcription: (state: object) => void;
 const mockDriver = {
-  state: { foo: 'foo' },
-  actions: { bar: mockAction },
+  state: { searchTerm: 'foo' },
+  actions: { setSearchTerm: mockAction },
   subscribeToStateChanges: jest.fn().mockImplementation((fn) => {
     mockSubcription = fn;
   }),
@@ -49,7 +49,7 @@ describe('hooks', () => {
 
     it('subscribes to state changes', () => {
       act(() => {
-        mockSubcription({ foo: 'bar' });
+        mockSubcription({ searchTerm: 'bar' });
       });
 
       expect(wrapper.text()).toEqual('bar');
