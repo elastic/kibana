@@ -29,7 +29,6 @@ import type {
   IShipper,
   TelemetryCounter,
 } from '@kbn/analytics-client';
-import { TelemetryCounterType } from '@kbn/analytics-client';
 import type { ElasticV3ShipperOptions } from '@kbn/analytics-shippers-elastic-v3-common';
 import {
   buildHeaders,
@@ -142,7 +141,7 @@ export class ElasticV3ServerShipper implements IShipper {
       const toDrop = events.length - freeSpace;
       const droppedEvents = events.splice(-toDrop, toDrop);
       this.reportTelemetryCounters(droppedEvents, {
-        type: TelemetryCounterType.dropped,
+        type: 'dropped',
         code: 'queue_full',
       });
     }
