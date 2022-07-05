@@ -776,7 +776,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               }
               helpText={i18n.translate('xpack.transform.stepDetailsForm.frequencyHelpText', {
                 defaultMessage:
-                  'The interval between checks for changes in the source indices when the transform is running continuously. Also determines the retry interval in the event of transient failures while the transform is searching or indexing. The minimum value is 1s and the maximum is 1h.',
+                  'The interval between checks for changes in the source indices when the transform is running continuously.',
               })}
             >
               <EuiFieldText
@@ -814,7 +814,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 'xpack.transform.stepDetailsForm.maxPageSearchSizeHelpText',
                 {
                   defaultMessage:
-                    'Defines the initial page size to use for the composite aggregation for each checkpoint.',
+                    'The initial page size for the composite aggregation for each checkpoint.',
                 }
               )}
             >
