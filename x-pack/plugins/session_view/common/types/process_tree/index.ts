@@ -167,7 +167,7 @@ export interface Process {
   orphans: Process[]; // currently, orphans are rendered inline with the entry session leaders children
   parent: Process | undefined;
   autoExpand: boolean;
-  searchMatched: string | null; // either false, or set to searchQuery
+  searchMatched: number[] | null; // either false, or set to searchQuery
   addEvent(event: ProcessEvent): void;
   addAlert(alert: ProcessEvent): void;
   addChild(child: Process): void;
