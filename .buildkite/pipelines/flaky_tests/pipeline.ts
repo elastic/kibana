@@ -133,7 +133,7 @@ for (const testSuite of testSuites) {
       env: {
         FTR_CONFIG: testSuite.ftrConfig,
       },
-      label: `FTR Config: ${testSuite.ftrConfig}`,
+      label: `${testSuite.ftrConfig}`,
       parallelism: testSuite.count,
       concurrency,
       concurrency_group: process.env.UUID,
