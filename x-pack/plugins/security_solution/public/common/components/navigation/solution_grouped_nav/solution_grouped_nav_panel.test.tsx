@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LinkCategories } from '../../../links';
+import type { LinkCategories } from '../../../links';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
