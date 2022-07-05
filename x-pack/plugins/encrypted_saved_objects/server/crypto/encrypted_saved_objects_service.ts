@@ -283,6 +283,7 @@ export class EncryptedSavedObjectsService {
           encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
         }
         try {
+
           encryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
         } catch (err) {
           this.options.logger.error(
@@ -341,6 +342,9 @@ export class EncryptedSavedObjectsService {
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
+      this.options.logger.info(
+        `Encrypting attribute for SO "${descriptor.namespace}/${descriptor.type}/${descriptor.id}". Attribute value: "${attributeValue}". AAD: "${encryptionAAD}"`
+      );
       // We check this inside of the iterator to throw only if we do need to encrypt anything.
       if (this.options.primaryCrypto) {
         try {
@@ -377,6 +381,9 @@ export class EncryptedSavedObjectsService {
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
+      this.options.logger.info(
+        `Encrypting attribute for SO "${descriptor.namespace}/${descriptor.type}/${descriptor.id}". Attribute value: "${attributeValue}". AAD: "${encryptionAAD}"`
+      );
       // We check this inside of the iterator to throw only if we do need to encrypt anything.
       if (this.options.primaryCrypto) {
         try {
@@ -415,6 +422,9 @@ export class EncryptedSavedObjectsService {
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAADs] = iteratorResult.value;
+      this.options.logger.info(
+        `Decrypting attribute for SO "${descriptor.namespace}/${descriptor.type}/${descriptor.id}". Attribute value: "${attributeValue}". AADs: "${encryptionAADs}"`
+      );
 
       // We check this inside of the iterator to throw only if we do need to decrypt anything.
       let decryptionError =
@@ -438,6 +448,9 @@ export class EncryptedSavedObjectsService {
       }
 
       if (decryptionError) {
+        this.options.logger.info(
+          `Decrypting for SO "${descriptor.namespace}/${descriptor.type}/${descriptor.id}" failed: ${decryptionError}`
+        );
         iterator.throw!(decryptionError);
       }
     }
@@ -466,6 +479,9 @@ export class EncryptedSavedObjectsService {
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAADs] = iteratorResult.value;
+      this.options.logger.info(
+        `Decrypting attribute for SO "${descriptor.namespace}/${descriptor.type}/${descriptor.id}". Attribute value: "${attributeValue}". AADs: "${encryptionAADs}"`
+      );
 
       // We check this inside of the iterator to throw only if we do need to decrypt anything.
       let decryptionError =
@@ -489,6 +505,9 @@ export class EncryptedSavedObjectsService {
       }
 
       if (decryptionError) {
+        this.options.logger.info(
+          `Decrypting for SO "${descriptor.namespace}/${descriptor.type}/${descriptor.id}" failed: ${decryptionError}`
+        );
         iterator.throw!(decryptionError);
       }
     }

@@ -65,6 +65,13 @@ export class EncryptedSavedObjectsPlugin
       );
     }
 
+    this.logger.info(`Using "${config.encryptionKey}" as the encryption key`);
+    if (config.keyRotation.decryptionOnlyKeys.length) {
+      this.logger.info(
+        `Using "${JSON.stringify(config.keyRotation.decryptionOnlyKeys)}" as decrypt only keys.`
+      );
+    }
+
     const primaryCrypto = config.encryptionKey
       ? nodeCrypto({ encryptionKey: config.encryptionKey })
       : undefined;
