@@ -32,37 +32,41 @@ export async function getServiceAnnotations({
   start: number;
   end: number;
 }) {
-  // start fetching derived annotations (based on transactions), but don't wait on it
-  // it will likely be significantly slower than the stored annotations
-  const derivedAnnotationsPromise = getDerivedServiceAnnotations({
-    setup,
-    serviceName,
-    environment,
-    searchAggregatedTransactions,
-    start,
-    end,
-  });
-
-  const storedAnnotations = annotationsClient
-    ? await getStoredAnnotations({
-        serviceName,
-        environment,
-        annotationsClient,
-        client,
-        logger,
-        start,
-        end,
-      })
-    : [];
-
-  if (storedAnnotations.length) {
-    derivedAnnotationsPromise.catch(() => {
-      // handle error silently to prevent Kibana from crashing
+  try {
+    // start fetching derived annotations (based on transactions), but don't wait on it
+    // it will likely be significantly slower than the stored annotations
+    const derivedAnnotationsPromise = getDerivedServiceAnnotations({
+      setup,
+      serviceName,
+      environment,
+      searchAggregatedTransactions,
+      start,
+      end,
     });
-    return { annotations: storedAnnotations };
-  }
 
-  return {
-    annotations: await derivedAnnotationsPromise,
-  };
+    const storedAnnotations = annotationsClient
+      ? await getStoredAnnotations({
+          serviceName,
+          environment,
+          annotationsClient,
+          client,
+          logger,
+          start,
+          end,
+        })
+      : [];
+
+    if (storedAnnotations.length) {
+      derivedAnnotationsPromise.catch(() => {
+        // handle error silently to prevent Kibana from crashing
+      });
+      return { annotations: storedAnnotations };
+    }
+
+    return {
+      annotations: await derivedAnnotationsPromise,
+    };
+  } catch (e) {
+    return { annotations: [] };
+  }
 }
