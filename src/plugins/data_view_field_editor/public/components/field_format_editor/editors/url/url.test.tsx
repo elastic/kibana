@@ -9,7 +9,7 @@
 import React from 'react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { UrlFormatEditor } from './url';
+import { UrlFormatEditor, UrlFormatEditorFormatParams } from './url';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
@@ -28,13 +28,12 @@ const format = {
     ],
   },
 } as unknown as FieldFormat;
-const formatParams = {
+const formatParams: UrlFormatEditorFormatParams = {
   openLinkInCurrentTab: true,
   urlTemplate: '',
   labelTemplate: '',
   width: '',
   height: '',
-  type: 'a',
 };
 
 const onChange = jest.fn();

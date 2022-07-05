@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType } from 'react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { ComponentType } from 'react';
 import type { FormatSelectEditorProps } from '../field_format_editor';
+import { UrlFormatEditorFormatParams } from './url/url';
 
 /**
  * Props for received by {@link FieldFormatEditor}
@@ -18,7 +19,7 @@ export interface FormatEditorProps<P> {
   fieldType: string;
   format: FieldFormat;
   formatParams: { type?: string } & P;
-  onChange: (newParams: { [key: string]: any }) => void;
+  onChange: (newParams: UrlFormatEditorFormatParams) => void;
   onError: FormatSelectEditorProps['onError'];
 }
 

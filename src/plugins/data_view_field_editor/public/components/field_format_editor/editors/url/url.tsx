@@ -34,7 +34,7 @@ interface OnChangeParam {
   urlTemplate?: string;
 }
 
-interface UrlFormatEditorFormatParams {
+export interface UrlFormatEditorFormatParams {
   openLinkInCurrentTab: boolean;
   urlTemplate: string;
   labelTemplate: string;
