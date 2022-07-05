@@ -239,6 +239,8 @@ export const createThreatSignals = async ({
           type,
           wrapHits,
           runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
         }),
     });
   } else {
@@ -289,6 +291,8 @@ export const createThreatSignals = async ({
           type,
           wrapHits,
           runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
         }),
     });
   }
