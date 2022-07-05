@@ -39,6 +39,7 @@ export enum RUNNING_STATE {
 
 export abstract class InferenceBase<TInferResponse> {
   protected abstract inferenceType: InferenceType;
+  protected abstract inferenceTypeLabel: string;
   protected readonly inputField: string;
   public inputText$ = new BehaviorSubject<string>('');
   public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
@@ -73,6 +74,10 @@ export abstract class InferenceBase<TInferResponse> {
 
   public getInfoComponent(): JSX.Element {
     return getInferenceInfoComponent(this.inferenceType, this.info);
+  }
+
+  public label(): string {
+    return this.inferenceTypeLabel;
   }
 
   protected abstract getInputComponent(): JSX.Element;

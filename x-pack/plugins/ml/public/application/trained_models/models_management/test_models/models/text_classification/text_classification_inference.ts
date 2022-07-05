@@ -15,6 +15,10 @@ import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/t
 
 export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.textClassification.label',
+    { defaultMessage: 'Text classification' }
+  );
 
   public async infer() {
     try {

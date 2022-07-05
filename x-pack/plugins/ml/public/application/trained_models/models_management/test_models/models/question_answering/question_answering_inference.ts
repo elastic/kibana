@@ -44,6 +44,10 @@ export type QuestionAnsweringResponse = InferResponse<
 
 export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.questionAnswer.label',
+    { defaultMessage: 'Question answering' }
+  );
 
   public questionText$ = new BehaviorSubject<string>('');
 

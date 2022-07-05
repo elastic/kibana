@@ -28,6 +28,10 @@ export type TextEmbeddingResponse = InferResponse<
 
 export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.textEmbedding.label',
+    { defaultMessage: 'Text embedding' }
+  );
 
   public async infer() {
     try {
