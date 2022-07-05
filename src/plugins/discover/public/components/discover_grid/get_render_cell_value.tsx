@@ -24,10 +24,9 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
-import { EsHitRecord } from '../../application/types';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
-import { ElasticSearchHit, HitsFlattened } from '../../types';
+import { DataTableRecord, EsHitRecord } from '../../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 
@@ -36,8 +35,7 @@ const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 export const getRenderCellValueFn =
   (
     dataView: DataView,
-    rows: ElasticSearchHit[] | undefined,
-    rowsFlattened: HitsFlattened,
+    rows: DataTableRecord[] | undefined,
     useNewFieldsApi: boolean,
     fieldsToShow: string[],
     maxDocFieldsDisplayed: number,
@@ -49,24 +47,16 @@ export const getRenderCellValueFn =
     const maxEntries = useMemo(() => uiSettings.get(MAX_DOC_FIELDS_DISPLAYED), [uiSettings]);
 
     const row = rows ? rows[rowIndex] : undefined;
-    const rowFlattened = rowsFlattened
-      ? (rowsFlattened[rowIndex] as Record<string, unknown>)
-      : undefined;
 
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(DiscoverGridContext);
 
     useEffect(() => {
-      if ((row as EsHitRecord).isAnchor) {
+      if (row?.isAnchor) {
         setCellProps({
           className: 'dscDocsGrid__cell--highlight',
         });
-      } else if (
-        ctx.expanded &&
-        row &&
-        ctx.expanded._id === row._id &&
-        ctx.expanded._index === row._index
-      ) {
+      } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
         setCellProps({
           style: {
             backgroundColor: ctx.isDarkMode
@@ -79,7 +69,7 @@ export const getRenderCellValueFn =
       }
     }, [ctx, row, setCellProps]);
 
-    if (typeof row === 'undefined' || typeof rowFlattened === 'undefined') {
+    if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;
     }
 
@@ -90,14 +80,13 @@ export const getRenderCellValueFn =
     const useTopLevelObjectColumns = Boolean(
       useNewFieldsApi &&
         !field &&
-        row?.fields &&
-        !(row.fields as Record<string, unknown[]>)[columnId]
+        row?.raw.fields &&
+        !(row.raw.fields as Record<string, unknown[]>)[columnId]
     );
 
     if (isDetails) {
       return renderPopoverContent({
-        rowRaw: row,
-        rowFlattened,
+        row,
         field,
         columnId,
         dataView,
@@ -109,7 +98,7 @@ export const getRenderCellValueFn =
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
       const pairs = useTopLevelObjectColumns
-        ? getTopLevelObjectPairs(row, columnId, dataView, fieldsToShow).slice(
+        ? getTopLevelObjectPairs(row.raw, columnId, dataView, fieldsToShow).slice(
             0,
             maxDocFieldsDisplayed
           )
@@ -140,7 +129,7 @@ export const getRenderCellValueFn =
         // formatFieldValue guarantees sanitized values
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
-          __html: formatFieldValue(rowFlattened[columnId], row, fieldFormats, dataView, field),
+          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
         }}
       />
     );
@@ -158,10 +147,10 @@ function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {
   );
 }
 
-function getJSON(columnId: string, rowRaw: ElasticSearchHit, useTopLevelObjectColumns: boolean) {
+function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumns: boolean) {
   const json = useTopLevelObjectColumns
-    ? getInnerColumns(rowRaw.fields as Record<string, unknown[]>, columnId)
-    : rowRaw;
+    ? getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId)
+    : row.raw;
   return json as Record<string, unknown>;
 }
 
@@ -169,8 +158,7 @@ function getJSON(columnId: string, rowRaw: ElasticSearchHit, useTopLevelObjectCo
  * Helper function for the cell popover
  */
 function renderPopoverContent({
-  rowRaw,
-  rowFlattened,
+  row,
   field,
   columnId,
   dataView,
@@ -178,8 +166,7 @@ function renderPopoverContent({
   fieldFormats,
   closePopover,
 }: {
-  rowRaw: ElasticSearchHit;
-  rowFlattened: Record<string, unknown>;
+  row: DataTableRecord;
   field: DataViewField | undefined;
   columnId: string;
   dataView: DataView;
@@ -209,7 +196,7 @@ function renderPopoverContent({
         </EuiFlexItem>
         <EuiFlexItem>
           <JsonCodeEditor
-            json={getJSON(columnId, rowRaw, useTopLevelObjectColumns)}
+            json={getJSON(columnId, row, useTopLevelObjectColumns)}
             width={defaultMonacoEditorWidth}
             height={200}
           />
@@ -226,7 +213,13 @@ function renderPopoverContent({
           // formatFieldValue guarantees sanitized values
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
-            __html: formatFieldValue(rowFlattened[columnId], rowRaw, fieldFormats, dataView, field),
+            __html: formatFieldValue(
+              row.flattened[columnId],
+              row.raw,
+              fieldFormats,
+              dataView,
+              field
+            ),
           }}
         />
       </EuiFlexItem>
@@ -239,7 +232,7 @@ function renderPopoverContent({
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
 function getTopLevelObjectPairs(
-  row: ElasticSearchHit,
+  row: EsHitRecord,
   columnId: string,
   dataView: DataView,
   fieldsToShow: string[]

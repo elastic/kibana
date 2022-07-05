@@ -7,18 +7,15 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { FunctionKeys } from 'utility-types';
 import type { SavedObjectsFindOptions, SimpleSavedObject } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import {
   UPDATE_RULES_CONFIG_ROUTE_PATH,
-  cspRuleAssetSavedObjectType,
+  CSP_RULE_SAVED_OBJECT_TYPE,
 } from '../../../common/constants';
-import type { CspRuleSchema } from '../../../common/schemas/csp_rule';
+import type { CspRuleType } from '../../../common/schemas';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { UPDATE_FAILED } from './translations';
 
-export type RuleSavedObject = Omit<
-  SimpleSavedObject<CspRuleSchema>,
-  FunctionKeys<SimpleSavedObject>
->;
+export type RuleSavedObject = Omit<SimpleSavedObject<CspRuleType>, FunctionKeys<SimpleSavedObject>>;
 
 export type RulesQuery = Required<
   Pick<SavedObjectsFindOptions, 'search' | 'page' | 'perPage' | 'filter'>
@@ -28,19 +25,22 @@ export type RulesQueryResult = ReturnType<typeof useFindCspRules>;
 export const useFindCspRules = ({ search, page, perPage, filter }: RulesQuery) => {
   const { savedObjects } = useKibana().services;
 
-  return useQuery([cspRuleAssetSavedObjectType, { search, page, perPage }], () =>
-    savedObjects.client.find<CspRuleSchema>({
-      type: cspRuleAssetSavedObjectType,
-      search,
-      searchFields: ['name'],
+  return useQuery([CSP_RULE_SAVED_OBJECT_TYPE, { search, page, perPage }], () =>
+    savedObjects.client.find<CspRuleType>({
+      type: CSP_RULE_SAVED_OBJECT_TYPE,
+      search: search ? `"${search}"*` : '',
+      searchFields: ['metadata.name.text'],
       page: 1,
-      // NOTE: 'name.raw' is a field mapping we defined on 'name'
-      sortField: 'name.raw',
+      sortField: 'metadata.name',
       perPage,
       filter,
     })
   );
 };
+
+const UPDATE_FAILED_TEXT = i18n.translate('xpack.csp.rules.rulesErrorToast.updateFailedTitle', {
+  defaultMessage: 'Update failed',
+});
 
 export const useBulkUpdateCspRules = () => {
   const { savedObjects, notifications, http } = useKibana().services;
@@ -52,11 +52,11 @@ export const useBulkUpdateCspRules = () => {
       packagePolicyId,
     }: {
       savedObjectRules: RuleSavedObject[];
-      packagePolicyId: CspRuleSchema['package_policy_id'];
+      packagePolicyId: CspRuleType['package_policy_id'];
     }) => {
       await savedObjects.client.bulkUpdate<RuleSavedObject>(
         savedObjectRules.map((savedObjectRule) => ({
-          type: cspRuleAssetSavedObjectType,
+          type: CSP_RULE_SAVED_OBJECT_TYPE,
           id: savedObjectRule.id,
           attributes: savedObjectRule.attributes,
         }))
@@ -69,13 +69,13 @@ export const useBulkUpdateCspRules = () => {
     },
     {
       onError: (err) => {
-        if (err instanceof Error) notifications.toasts.addError(err, { title: UPDATE_FAILED });
-        else notifications.toasts.addDanger(UPDATE_FAILED);
+        if (err instanceof Error) notifications.toasts.addError(err, { title: UPDATE_FAILED_TEXT });
+        else notifications.toasts.addDanger(UPDATE_FAILED_TEXT);
       },
       onSettled: () =>
         // Invalidate all queries for simplicity
         queryClient.invalidateQueries({
-          queryKey: cspRuleAssetSavedObjectType,
+          queryKey: CSP_RULE_SAVED_OBJECT_TYPE,
           exact: false,
         }),
     }

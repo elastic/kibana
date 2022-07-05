@@ -292,8 +292,7 @@ describe('Field editor Preview panel', () => {
           subTitle: 'First doc - subTitle',
           title: 'First doc - title',
         },
-        documentId: '001',
-        index: 'testIndexPattern',
+        index: 'testIndex',
         script: {
           source: 'echo("hello")',
         },

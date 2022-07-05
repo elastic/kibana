@@ -7,7 +7,7 @@
  */
 
 import './table_visualization.scss';
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
 
 import { CoreStart } from '@kbn/core/public';
@@ -32,8 +32,11 @@ const TableVisualizationComponent = ({
   visData: { direction, table, tables },
   visConfig,
 }: TableVisualizationComponentProps) => {
-  useEffect(() => {
-    handlers.done();
+  useLayoutEffect(() => {
+    // Temporary solution: DataGrid should provide onRender callback
+    setTimeout(() => {
+      handlers.done();
+    }, 300);
   }, [handlers]);
 
   const uiStateProps = useUiState(handlers.uiState as PersistedState);

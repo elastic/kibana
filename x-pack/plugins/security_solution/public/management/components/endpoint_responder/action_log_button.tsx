@@ -6,9 +6,11 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
-import { EuiButton, EuiFlyout } from '@elastic/eui';
+import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EndpointResponderExtensionComponentProps } from './types';
+import { ResponseActionsList } from '../endpoint_response_actions_list/response_actions_list';
+import { UX_MESSAGES } from '../endpoint_response_actions_list/translations';
 
 export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((props) => {
   const [showActionLogFlyout, setShowActionLogFlyout] = useState<boolean>(false);
@@ -27,7 +29,16 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
         />
       </EuiButton>
       {showActionLogFlyout && (
-        <EuiFlyout onClose={toggleActionLog}>{'TODO: flyout content will go here'}</EuiFlyout>
+        <EuiFlyout onClose={toggleActionLog} size="m" paddingSize="l">
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h1>{UX_MESSAGES.flyoutTitle(props.meta.endpoint.host.hostname)}</h1>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <ResponseActionsList agentIds={props.meta.endpoint.agent.id} />
+          </EuiFlyoutBody>
+        </EuiFlyout>
       )}
     </>
   );
