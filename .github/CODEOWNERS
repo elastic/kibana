@@ -290,6 +290,7 @@
 /packages/kbn-logging/ @elastic/kibana-core
 /packages/kbn-logging-mocks/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
+/packages/kbn-es-errors/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
@@ -640,16 +641,25 @@ x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 
 # Application Experience
 
-## Shared UX
+## Shared UX Team
 /src/plugins/shared_ux/ @elastic/shared-ux
 /packages/shared-ux/ @elastic/shared-ux
 /packages/shared-ux-*/ @elastic/shared-ux
+
+### Kibana React (to be deprecated)
 /src/plugins/kibana_react/ @elastic/shared-ux
 /src/plugins/kibana_react/public/code_editor @elastic/shared-ux @elastic/kibana-presentation
+
+### Home Plugin and Packages
+/packages/home/ @elastic/shared-ux
 /src/plugins/home/public @elastic/shared-ux
 /src/plugins/home/server/*.ts @elastic/shared-ux
 /src/plugins/home/server/services/ @elastic/shared-ux
+
+### Overview Plugin and Packages
+/src/plugins/kibana_overview/ @elastic/shared-ux
+
+### Code Coverage
 #CC# /src/plugins/home/public @elastic/shared-ux
 #CC# /src/plugins/home/server/services/ @elastic/shared-ux
 #CC# /src/plugins/home/ @elastic/shared-ux
-/src/plugins/kibana_overview/ @elastic/shared-ux
