@@ -105,7 +105,6 @@ const NodeEventsListItem = memo(function ({
 }) {
   const timestamp = eventModel.eventTimestamp(event);
   const eventID = eventModel.eventID(event);
-
   const winlogRecordID = eventModel.winlogRecordID(event);
   const date =
     useFormattedDate(timestamp) ||
