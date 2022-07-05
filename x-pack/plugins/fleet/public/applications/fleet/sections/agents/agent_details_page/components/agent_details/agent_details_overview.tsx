@@ -142,7 +142,8 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
             title: i18n.translate('xpack.fleet.agentDetails.monitorLogsLabel', {
               defaultMessage: 'Monitor logs',
             }),
-            description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+            description:
+              Array.isArray(agentPolicy?.monitoring_enabled) &&
               agentPolicy?.monitoring_enabled?.includes('logs') ? (
                 <FormattedMessage
                   id="xpack.fleet.agentList.monitorLogsEnabledText"
@@ -153,14 +154,14 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   id="xpack.fleet.agentList.monitorLogsDisabledText"
                   defaultMessage="Disabled"
                 />
-              )
-            ) : null,
+              ),
           },
           {
             title: i18n.translate('xpack.fleet.agentDetails.monitorMetricsLabel', {
               defaultMessage: 'Monitor metrics',
             }),
-            description: Array.isArray(agentPolicy?.monitoring_enabled) ? (
+            description:
+              Array.isArray(agentPolicy?.monitoring_enabled) &&
               agentPolicy?.monitoring_enabled?.includes('metrics') ? (
                 <FormattedMessage
                   id="xpack.fleet.agentList.monitorMetricsEnabledText"
@@ -171,8 +172,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   id="xpack.fleet.agentList.monitorMetricsDisabledText"
                   defaultMessage="Disabled"
                 />
-              )
-            ) : null,
+              ),
           },
         ].map(({ title, description }) => {
           return (
