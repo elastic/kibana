@@ -13,6 +13,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -39,7 +40,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@storybook/addon-actions",
   "@npm//react-use",
   "@npm//react",
   "@npm//rxjs",
@@ -57,7 +57,6 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@storybook/addon-actions",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",

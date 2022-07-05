@@ -15,6 +15,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -61,7 +62,6 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@storybook/addon-actions",
   "@npm//@types/classnames",
   "@npm//@types/enzyme",
   "@npm//@types/jest",

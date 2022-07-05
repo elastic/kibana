@@ -79,7 +79,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         isHidden={isHidden}
         data-test-subj="consolePageOverlay"
         onHide={onHide}
-        paddingSize="xl"
+        paddingSize="l"
         enableScrolling={false}
       >
         <PageLayout {...layoutProps}>
