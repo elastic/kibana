@@ -6,17 +6,9 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiDescriptionList, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConsoleCodeBlock } from './console_code_block';
+import { ConsoleCodeBlock, ConsoleCodeBlockBold } from './console_code_block';
 import { getArgumentsForCommand } from '../service/parsed_command_input';
 import { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -27,42 +19,45 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
     return getArgumentsForCommand(commandDef).map((usage) => {
       return (
         <EuiText size="s">
-          <EuiBadge>{commandDef.name}</EuiBadge>
-          <ConsoleCodeBlock>{usage}</ConsoleCodeBlock>
+          <ConsoleCodeBlock>{`${commandDef.name} ${usage}`}</ConsoleCodeBlock>
         </EuiText>
       );
     });
   }, [commandDef]);
 
+  const additionalProps = useMemo(
+    () => ({
+      className: 'euiTruncateText',
+    }),
+    []
+  );
+
   return (
     <>
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.console.commandUsage.inputUsage"
-              defaultMessage="Usage:"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <code>{usageHelp}</code>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiDescriptionList
+        compressed
+        type="column"
+        className="descriptionList-20_80"
+        listItems={[
+          { title: <ConsoleCodeBlock>{'Usage'}</ConsoleCodeBlock>, description: usageHelp },
+        ]}
+        descriptionProps={additionalProps}
+        titleProps={additionalProps}
+      />
       {commandDef.exampleUsage && (
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <FormattedMessage
-                id="xpack.securitySolution.console.commandUsage.exampleUsage"
-                defaultMessage="Example:"
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <ConsoleCodeBlock>{commandDef.exampleUsage}</ConsoleCodeBlock>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiDescriptionList
+          compressed
+          type="column"
+          className="descriptionList-20_80"
+          listItems={[
+            {
+              title: <ConsoleCodeBlock>{'Example'}</ConsoleCodeBlock>,
+              description: <ConsoleCodeBlock>{commandDef.exampleUsage}</ConsoleCodeBlock>,
+            },
+          ]}
+          descriptionProps={additionalProps}
+          titleProps={additionalProps}
+        />
       )}
     </>
   );
@@ -77,9 +72,16 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const hasArgs = useMemo(() => Object.keys(commandDef.args ?? []).length > 0, [commandDef.args]);
 
+  const additionalProps = useMemo(
+    () => ({
+      className: 'euiTruncateText',
+    }),
+    []
+  );
+
   type CommandDetails = Array<{
-    title: string;
-    description: string;
+    title: React.ReactFragment;
+    description: React.ReactFragment;
   }>;
 
   const commandOptions = useMemo(() => {
@@ -98,8 +100,8 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
     }>(
       (acc, curr) => {
         const item = {
-          title: `--${curr[0]}`,
-          description: curr[1].about,
+          title: <ConsoleCodeBlockBold>{`--${curr[0]}`}</ConsoleCodeBlockBold>,
+          description: <ConsoleCodeBlock>{curr[1].about}</ConsoleCodeBlock>,
         };
         if (curr[1].required) {
           acc.required.push(item);
@@ -120,34 +122,40 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
     return enteredCommands;
   }, [commandDef.args, hasArgs]);
 
-  const additionalProps = useMemo(
-    () => ({
-      className: 'euiTruncateText',
-    }),
-    []
-  );
-
   return (
     <EuiPanel color="transparent" data-test-subj={getTestId('commandUsage')}>
-      <EuiText>{commandDef.about}</EuiText>
+      <EuiDescriptionList
+        compressed
+        type="column"
+        className="descriptionList-20_80"
+        listItems={[
+          {
+            title: <ConsoleCodeBlock>{'About'}</ConsoleCodeBlock>,
+            description: <ConsoleCodeBlock>{commandDef.about}</ConsoleCodeBlock>,
+          },
+        ]}
+        descriptionProps={additionalProps}
+        titleProps={additionalProps}
+        data-test-subj={getTestId('commandUsage-options')}
+      />
       <CommandInputUsage commandDef={commandDef} />
       {commandOptions.required && commandOptions.required.length > 0 && (
         <>
           <EuiSpacer />
-          <EuiText>
+          <ConsoleCodeBlock>
             <FormattedMessage
               id="xpack.securitySolution.console.commandUsage.requiredLabel"
               defaultMessage="Required parameters:"
             />
             {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
-              <EuiText size="s" color="subdued">
+              <ConsoleCodeBlock>
                 <FormattedMessage
                   id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
                   defaultMessage="Note: at least one option must be used"
                 />
-              </EuiText>
+              </ConsoleCodeBlock>
             )}
-          </EuiText>
+          </ConsoleCodeBlock>
           {commandDef.args && (
             <EuiDescriptionList
               compressed
@@ -164,12 +172,12 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
       {commandOptions.exclusiveOr && commandOptions.exclusiveOr.length > 0 && (
         <>
           <EuiSpacer />
-          <EuiText>
+          <ConsoleCodeBlock>
             <FormattedMessage
               id="xpack.securitySolution.console.commandUsage.exclusiveOr"
               defaultMessage="Include only one of the following required parameters:"
             />
-          </EuiText>
+          </ConsoleCodeBlock>
           {commandDef.args && (
             <EuiDescriptionList
               compressed
@@ -186,12 +194,12 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
       {commandOptions.optional && commandOptions.optional.length > 0 && (
         <>
           <EuiSpacer />
-          <EuiText>
+          <ConsoleCodeBlock>
             <FormattedMessage
               id="xpack.securitySolution.console.commandUsage.optionalLabel"
               defaultMessage="Optional parameters:"
             />
-          </EuiText>
+          </ConsoleCodeBlock>
           {commandDef.args && (
             <EuiDescriptionList
               compressed

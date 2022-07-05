@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ConsoleCodeBlock } from '../../console_code_block';
+import { ConsoleCodeBlock, ConsoleCodeBlockBold } from '../../console_code_block';
 import { handleInputAreaState } from './handle_input_area_state';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
 import {
@@ -151,15 +151,19 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
 
   const exclusiveOrErrorMessage = (
-    <FormattedMessage
-      id="xpack.securitySolution.console.commandValidation.exlcusiveOr"
-      defaultMessage="This command supports only one of the following arguments: {argNames}"
-      values={{
-        argNames: (
-          <ConsoleCodeBlock>{exclusiveOrArgs.map(toCliArgumentOption).join(', ')}</ConsoleCodeBlock>
-        ),
-      }}
-    />
+    <ConsoleCodeBlock>
+      <FormattedMessage
+        id="xpack.securitySolution.console.commandValidation.exlcusiveOr"
+        defaultMessage="This command supports only one of the following arguments: {argNames}"
+        values={{
+          argNames: (
+            <ConsoleCodeBlockBold>
+              {exclusiveOrArgs.map(toCliArgumentOption).join(', ')}
+            </ConsoleCodeBlockBold>
+          ),
+        }}
+      />
+    </ConsoleCodeBlock>
   );
 
   // If args were entered, then validate them
@@ -198,19 +202,21 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
         state: createCommandExecutionState({
           errorMessage: (
-            <FormattedMessage
-              id="xpack.securitySolution.console.commandValidation.unknownArgument"
-              defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not support by this command: {unknownArgs}"
-              values={{
-                countOfInvalidArgs: unknownInputArgs.length,
-                command: <ConsoleCodeBlock>{parsedInput.name}</ConsoleCodeBlock>,
-                unknownArgs: (
-                  <ConsoleCodeBlock>
-                    {unknownInputArgs.map(toCliArgumentOption).join(', ')}
-                  </ConsoleCodeBlock>
-                ),
-              }}
-            />
+            <ConsoleCodeBlock>
+              <FormattedMessage
+                id="xpack.securitySolution.console.commandValidation.unknownArgument"
+                defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not supported by this command: {unknownArgs}"
+                values={{
+                  countOfInvalidArgs: unknownInputArgs.length,
+                  command: <ConsoleCodeBlockBold>{parsedInput.name}</ConsoleCodeBlockBold>,
+                  unknownArgs: (
+                    <ConsoleCodeBlockBold>
+                      {unknownInputArgs.map(toCliArgumentOption).join(', ')}
+                    </ConsoleCodeBlockBold>
+                  ),
+                }}
+              />
+            </ConsoleCodeBlock>
           ),
         }),
       });

@@ -8,4 +8,32 @@
 import { EuiCode } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-export const ConsoleCodeBlock = euiStyled(EuiCode).attrs({ transparentBackground: true })``;
+export const ConsoleCodeBlock = euiStyled(EuiCode).attrs({
+  transparentBackground: true,
+  paddingSize: 'none',
+})`{
+      color: ${(props) => props.theme.eui.euiColorDarkestShade} !important;
+      font-weight: 400;
+      padding: 0;
+     }
+  `;
+
+export const ConsoleCodeBlockError = euiStyled(EuiCode).attrs({
+  transparentBackground: true,
+  paddingSize: 'none',
+})`{
+    color: ${(props) => props.theme.eui.euiColorDanger} !important;
+    font-weight: 400;
+    padding: 0;
+    }
+`;
+
+export const ConsoleCodeBlockBold = euiStyled(EuiCode).attrs({
+  transparentBackground: true,
+  paddingSize: 'none',
+})`{
+      color: ${(props) => props.theme.eui.euiColorDarkestShade} !important;
+      font-weight: 700;
+      padding: 0;
+     }
+  `;
