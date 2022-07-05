@@ -17,6 +17,7 @@ import { KibanaLogic } from '../../../../../../shared/kibana';
 import { CrawlerDomain, CrawlerDomainFromServer } from '../../../../../api/crawler/types';
 import { crawlerDomainServerToClient } from '../../../../../api/crawler/utils';
 import { SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH } from '../../../../../routes';
+import { CrawlerLogic } from '../../crawler_logic';
 import { DomainManagementLogic } from '../domain_management_logic';
 
 import {
@@ -251,6 +252,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
           indexName,
         })
       );
+      CrawlerLogic.actions.fetchCrawlerData();
     },
     performDomainValidationStep: async ({ stepName, checks }) => {
       const { http } = HttpLogic.values;

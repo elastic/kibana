@@ -150,6 +150,33 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     })
   );
 
+  router.put(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+          domainId: schema.string(),
+        }),
+        body: schema.object({
+          crawl_rules: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                order: schema.number(),
+                id: schema.string(),
+              })
+            )
+          ),
+          deduplication_enabled: schema.maybe(schema.boolean()),
+          deduplication_fields: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/domains/:domainId',
+    })
+  );
+
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/crawler/domains/{domainId}',
@@ -176,6 +203,23 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/ent/v1/internal/indices/:indexName/crawler2/domain_configs',
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/process_crawls',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+        body: schema.object({
+          domains: schema.maybe(schema.arrayOf(schema.string())),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/ent/v1/internal/indices/:indexName/crawler2/process_crawls',
     })
   );
 

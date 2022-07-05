@@ -7,8 +7,10 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { i18n } from '@kbn/i18n';
+
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { flashAPIErrors } from '../../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../shared/http';
 import { GetCrawlerApiLogic, GetCrawlerArgs } from '../../../api/crawler/get_crawler_api_logic';
 import {
@@ -57,6 +59,7 @@ export type CrawlerActions = Pick<
   createNewTimeoutForCrawlerData(duration: number): { duration: number };
   fetchCrawlerData(): void;
   onCreateNewTimeout(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
+  reApplyCrawlRules(domain?: CrawlerDomain): { domain?: CrawlerDomain };
   startCrawl(overrides?: CrawlRequestOverrides): { overrides?: CrawlRequestOverrides };
   stopCrawl(): void;
 };
@@ -72,6 +75,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions, Cra
     createNewTimeoutForCrawlerData: (duration) => ({ duration }),
     fetchCrawlerData: true,
     onCreateNewTimeout: (timeoutId) => ({ timeoutId }),
+    reApplyCrawlRules: (domain) => ({ domain }),
     startCrawl: (overrides) => ({ overrides }),
     stopCrawl: () => null,
   },
@@ -173,6 +177,34 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions, Cra
       }, duration);
 
       actions.onCreateNewTimeout(timeoutIdId);
+    },
+    reApplyCrawlRules: async ({ domain }) => {
+      const { indexName } = props;
+      const { http } = HttpLogic.values;
+      const requestBody: { domains?: string[] } = {};
+
+      if (domain) {
+        requestBody.domains = [domain.url];
+      }
+
+      try {
+        await http.post(`/internal/enterprise_search/indices/${indexName}/crawler/process_crawls`, {
+          body: JSON.stringify(requestBody),
+        });
+
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.appSearch.crawler.manageCrawlsPopover.reApplyCrawlRules.successMessage',
+            {
+              defaultMessage: 'Crawl rules are being re-applied in the background',
+            }
+          )
+        );
+
+        CrawlerLogic.actions.fetchCrawlerData();
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
   }),
   events: ({ actions, values }) => ({

@@ -23,6 +23,7 @@ import { updateMetaPageIndex } from '../../../../../shared/table_pagination';
 import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import { GetCrawlerDomainsApiLogic } from '../../../../api/crawler/get_crawler_domains_api_logic';
 import { CrawlerDomain, CrawlerDomains } from '../../../../api/crawler/types';
+import { CrawlerLogic } from '../crawler_logic';
 
 interface DomainManagementProps {
   indexName: string;
@@ -104,6 +105,7 @@ export const DomainManagementLogic = kea<
           }
         )
       );
+      CrawlerLogic.actions.fetchCrawlerData();
     },
     deleteDomain: ({ domain }) => {
       const { indexName } = props;

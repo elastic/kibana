@@ -107,6 +107,13 @@ export const SearchIndex: React.FC = () => {
         defaultMessage: 'Manage Domains',
       }),
     },
+    {
+      content: <></>,
+      id: SearchIndexTabId.SCHEDULING,
+      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
+        defaultMessage: 'Scheduling',
+      }),
+    },
   ];
 
   const tabs: EuiTabbedContentTab[] = [

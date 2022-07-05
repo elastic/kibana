@@ -27,7 +27,7 @@ export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }
   }>();
 
   const crawlCustomSettingsFlyoutLogic = CrawlCustomSettingsFlyoutLogic({ indexName });
-  const { startCrawl } = useActions(CrawlerLogic);
+  const { reApplyCrawlRules, startCrawl } = useActions(CrawlerLogic);
   const { showFlyout: showCrawlCustomSettingsFlyout } = useActions(crawlCustomSettingsFlyoutLogic);
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -79,9 +79,10 @@ export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }
             )}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
-            key="crawl with custom settings"
+            key="reaply crawl rules"
             onClick={() => {
               closePopover();
+              reApplyCrawlRules();
             }}
             icon="refresh"
           >
