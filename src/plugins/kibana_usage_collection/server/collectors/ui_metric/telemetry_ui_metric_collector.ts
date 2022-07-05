@@ -52,26 +52,28 @@ export function registerUiMetricUsageCollector(
         return;
       }
 
-      const { saved_objects: rawUiMetrics } = await savedObjectsClient.find<UIMetricsSavedObjects>({
+      const finder = savedObjectsClient.createPointInTimeFinder<UIMetricsSavedObjects>({
         type: 'ui-metric',
         fields: ['count'],
-        perPage: 10000,
+        perPage: 100,
       });
 
-      const uiMetricsByAppName = rawUiMetrics.reduce((accum, rawUiMetric) => {
-        const {
-          id,
-          attributes: { count },
-        } = rawUiMetric;
+      const uiMetricsByAppName: UIMetricUsage = {};
 
-        const [appName, ...metricType] = id.split(':');
+      for await (const { saved_objects: rawUiMetrics } of finder.find()) {
+        rawUiMetrics.forEach((rawUiMetric) => {
+          const {
+            id,
+            attributes: { count },
+          } = rawUiMetric;
 
-        const pair = { key: metricType.join(':'), value: count };
-        return {
-          ...accum,
-          [appName]: [...(accum[appName] || []), pair],
-        };
-      }, {} as UIMetricUsage);
+          const [appName, ...metricType] = id.split(':');
+
+          const pair = { key: metricType.join(':'), value: count };
+
+          uiMetricsByAppName[appName] = [...(uiMetricsByAppName[appName] || []), pair];
+        });
+      }
 
       return uiMetricsByAppName;
     },
