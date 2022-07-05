@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import type { APIConnector, SortDirection } from '@elastic/search-ui';
+
 import { Schema } from '../../../../shared/schema/types';
 
 import { Fields } from './types';
 
 export const buildSearchUIConfig = (
-  apiConnector: object,
+  apiConnector: APIConnector,
   schema: Schema,
   fields: Fields,
-  initialState = { sortDirection: 'desc', sortField: 'id' }
+  initialState = { sortDirection: 'desc' as SortDirection, sortField: 'id' }
 ) => {
-  const facets = fields.filterFields.reduce(
-    (facetsConfig, fieldName) => ({
+  const facets = fields.filterFields.reduce((facetsConfig, fieldName) => {
+    // Geolocation fields do not support value facets https://www.elastic.co/guide/en/app-search/current/facets.html
+    if (schema[fieldName] === 'geolocation') {
+      return facetsConfig;
+    }
+    return {
       ...facetsConfig,
       [fieldName]: { type: 'value', size: 30 },
-    }),
-    {}
-  );
+    };
+  }, {});
 
   return {
     alwaysSearchOnInitialLoad: true,
@@ -32,13 +37,20 @@ export const buildSearchUIConfig = (
       disjunctiveFacets: fields.filterFields,
       facets,
       result_fields: Object.keys(schema).reduce((acc: { [key: string]: object }, key: string) => {
-        acc[key] = {
-          snippet: {
-            size: 300,
-            fallback: true,
-          },
-          raw: {},
-        };
+        if (schema[key] === 'text') {
+          // Only text fields support snippets
+          acc[key] = {
+            snippet: {
+              size: 300,
+              fallback: true,
+            },
+            raw: {},
+          };
+        } else {
+          acc[key] = {
+            raw: {},
+          };
+        }
         return acc;
       }, {}),
     },
