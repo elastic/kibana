@@ -41,7 +41,7 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
     ];
   }, []);
 
-  const isEditDisabled = settings.preconfigured_fields.includes('fleet_server_hosts');
+  const isEditDisabled = settings.preconfigured_fields?.includes('fleet_server_hosts') ?? false;
   const BtnWrapper = useMemo((): React.FunctionComponent => {
     if (!isEditDisabled) {
       return ({ children }) => <>{children}</>;
@@ -96,7 +96,7 @@ export const SettingsSection: React.FunctionComponent<SettingsSectionProps> = ({
           iconType="pencil"
           href={getHref('settings_edit_fleet_server_hosts')}
           data-test-subj="editHostsBtn"
-          disabled={settings.preconfigured_fields.includes('fleet_server_hosts')}
+          disabled={isEditDisabled}
         >
           <FormattedMessage
             id="xpack.fleet.settings.fleetServerHostEditButtonLabel"

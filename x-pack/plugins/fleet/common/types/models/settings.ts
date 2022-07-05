@@ -15,7 +15,7 @@ export interface BaseSettings {
 
 export interface Settings extends BaseSettings {
   id: string;
-  preconfigured_fields: Array<'fleet_server_hosts'>;
+  preconfigured_fields?: Array<'fleet_server_hosts'>;
 }
 
 export interface SettingsSOAttributes extends BaseSettings, SavedObjectAttributes {}
