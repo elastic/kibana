@@ -6,11 +6,14 @@
  */
 import React, { useState } from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useActions } from 'kea';
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CrawlCustomSettingsFlyoutLogic } from '../crawl_custom_settings_flyout/crawl_custom_settings_flyout_logic';
 import { CrawlerLogic } from '../crawler_logic';
 
 interface Props {
@@ -19,7 +22,13 @@ interface Props {
 }
 
 export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }) => {
+  const { indexName } = useParams<{
+    indexName: string;
+  }>();
+
+  const crawlCustomSettingsFlyoutLogic = CrawlCustomSettingsFlyoutLogic({ indexName });
   const { startCrawl } = useActions(CrawlerLogic);
+  const { showFlyout: showCrawlCustomSettingsFlyout } = useActions(crawlCustomSettingsFlyoutLogic);
   const [isPopoverOpen, setPopover] = useState(false);
 
   const togglePopover = () => setPopover(!isPopoverOpen);
@@ -51,6 +60,35 @@ export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }
               'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlAllDomainsMenuLabel',
               {
                 defaultMessage: 'Crawl all domains on this engine',
+              }
+            )}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="crawl with custom settings"
+            onClick={() => {
+              closePopover();
+              showCrawlCustomSettingsFlyout();
+            }}
+            icon="gear"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.crawlCustomSettingsMenuLabel',
+              {
+                defaultMessage: 'Crawl with custom settings',
+              }
+            )}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            key="crawl with custom settings"
+            onClick={() => {
+              closePopover();
+            }}
+            icon="refresh"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.crawler.startCrawlContextMenu.reapplyCrawlRulesMenuLabel',
+              {
+                defaultMessage: 'Reapply crawl rules',
               }
             )}
           </EuiContextMenuItem>,

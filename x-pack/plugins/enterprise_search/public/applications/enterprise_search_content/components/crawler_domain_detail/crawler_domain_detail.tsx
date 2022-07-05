@@ -17,6 +17,7 @@ import { generateEncodedPath } from '../../../app_search/utils/encode_path_param
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { SEARCH_INDEX_TAB_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+import { CrawlCustomSettingsFlyout } from '../search_index/crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlerStatusIndicator } from '../search_index/crawler/crawler_status_indicator/crawler_status_indicator';
 import { CrawlerStatusBanner } from '../search_index/crawler/domain_management/crawler_status_banner';
 import { SearchIndexTabId } from '../search_index/search_index';
@@ -86,6 +87,7 @@ export const CrawlerDomainDetail: React.FC = () => {
           <DeduplicationPanel />
         </>
       )}
+      <CrawlCustomSettingsFlyout />
     </EnterpriseSearchContentPageTemplate>
   );
 };

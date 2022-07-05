@@ -150,3 +150,17 @@ export interface CrawlerDataFromServer {
   events: CrawlEventFromServer[];
   most_recent_crawl_request: CrawlRequestFromServer | null;
 }
+
+export interface DomainConfigFromServer {
+  id: string;
+  name: string;
+  seed_urls: string[];
+  sitemap_urls: string[];
+}
+
+export interface DomainConfig {
+  id: string;
+  name: string;
+  seedUrls: string[];
+  sitemapUrls: string[];
+}

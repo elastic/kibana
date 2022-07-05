@@ -18,6 +18,8 @@ import {
   CrawlEventFromServer,
   CrawlRequest,
   CrawlRequestFromServer,
+  DomainConfig,
+  DomainConfigFromServer,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -135,3 +137,12 @@ export function crawlerDataServerToClient(payload: CrawlerDataFromServer): Crawl
       mostRecentCrawlRequest && crawlRequestServerToClient(mostRecentCrawlRequest),
   };
 }
+
+export const domainConfigServerToClient = (
+  domainConfigFromServer: DomainConfigFromServer
+): DomainConfig => ({
+  id: domainConfigFromServer.id,
+  name: domainConfigFromServer.name,
+  seedUrls: domainConfigFromServer.seed_urls,
+  sitemapUrls: domainConfigFromServer.sitemap_urls,
+});

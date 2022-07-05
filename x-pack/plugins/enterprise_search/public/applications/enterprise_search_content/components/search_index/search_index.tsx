@@ -25,6 +25,7 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { ConnectorConfiguration } from './connector/connector_configuration';
+import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlerStatusIndicator } from './crawler/crawler_status_indicator/crawler_status_indicator';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { SearchIndexDocuments } from './documents';
@@ -139,6 +140,7 @@ export const SearchIndex: React.FC = () => {
       }}
     >
       <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+      {indexData?.crawler && <CrawlCustomSettingsFlyout />}
     </EnterpriseSearchContentPageTemplate>
   );
 };
