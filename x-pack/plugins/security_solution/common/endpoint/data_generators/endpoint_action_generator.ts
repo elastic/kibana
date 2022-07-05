@@ -19,14 +19,13 @@ import {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   RESPONSE_ACTION_COMMANDS,
+  RunningProcessesEntry,
 } from '../types';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
   generate(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    const timeStamp = overrides['@timestamp']
-      ? new Date(overrides['@timestamp'])
-      : new Date(this.randomPastDate());
+    const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
     return merge(
       {
@@ -76,6 +75,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   ): LogsEndpointActionResponse {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
 
+    const startedAtTimes: number[] = [];
+    [2, 3, 5, 8, 13, 21].forEach((n) => {
+      startedAtTimes.push(
+        timeStamp.setMinutes(-this.randomN(n)),
+        timeStamp.setSeconds(-this.randomN(n))
+      );
+    });
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
@@ -90,7 +97,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             comment: '',
             parameters: undefined,
           },
-          started_at: this.randomPastDate(),
+          // randomly before a few hours/minutes/seconds later
+          started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
+          output: undefined,
         },
         error: undefined,
       },
@@ -120,6 +129,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       comment: 'thisisacomment',
       createdBy: 'auserid',
       parameters: undefined,
+      outputs: {},
     };
 
     return merge(details, overrides);
@@ -176,6 +186,32 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomN(max: number): number {
     return super.randomN(max);
+  }
+
+  randomResponseActionRunningProcesses(n?: number): RunningProcessesEntry[] {
+    const numberOfEntries = n ?? this.randomChoice([20, 30, 40, 50]);
+    const entries = [];
+    for (let i = 0; i < numberOfEntries; i++) {
+      entries.push({
+        command: this.randomResponseActionRunningProcessesCommand(),
+        pid: this.randomN(1000).toString(),
+        entity_id: this.randomString(50),
+        user: this.randomUser(),
+      });
+    }
+
+    return entries;
+  }
+
+  protected randomResponseActionRunningProcessesCommand() {
+    const commands = [
+      '/opt/cmd1',
+      '/opt/cmd2',
+      '/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3',
+      '/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3',
+    ];
+
+    return this.randomChoice(commands);
   }
 
   protected randomResponseActionCommand() {

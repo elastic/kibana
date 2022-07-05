@@ -54,7 +54,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await hasFocus('discover-dataView-switch-link')).to.be(true);
     });
 
-    describe('top nav menu buttons', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/135305
+    describe.skip('top nav menu buttons', () => {
       const focusAndPressButton = async (buttonTestSubject: string | WebElementWrapper) => {
         const button =
           typeof buttonTestSubject === 'string'
@@ -86,6 +87,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await focusAndPressButton('discoverAlertsButton');
         expect(await hasFocus('discoverAlertsButton')).to.be(false);
         await focusAndPressButton('discoverCreateAlertButton');
+        await retry.waitFor(
+          'Create Rule flyout is visible',
+          async () => await testSubjects.exists('addRuleFlyoutTitle')
+        );
         expect(await hasFocus('discoverCreateAlertButton')).to.be(false);
         await retry.try(async () => {
           await browser.pressKeys(browser.keys.ESCAPE);

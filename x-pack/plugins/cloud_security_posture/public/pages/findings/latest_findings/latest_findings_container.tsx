@@ -7,6 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -16,6 +17,8 @@ import type { FindingsGroupByNoneQuery } from './use_latest_findings';
 import type { FindingsBaseURLQuery } from '../types';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import {
+  getFindingsPageSizeInfo,
+  addFilter,
   getPaginationQuery,
   getPaginationTableParams,
   useBaseEsQuery,
@@ -81,9 +84,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         {!error && (
           <>
             <FindingsGroupBySelector type="default" />
-            {findingsGroupByNone.isSuccess && (
+            {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
               <FindingsDistributionBar
                 {...{
+                  type: i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
+                    defaultMessage: 'Findings',
+                  }),
                   total: findingsGroupByNone.data.total,
                   passed: findingsGroupByNone.data.count.passed,
                   failed: findingsGroupByNone.data.count.failed,
@@ -114,6 +120,18 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                   pageSize: page.size,
                 })
               }
+              onAddFilter={(field, value, negate) =>
+                setUrlQuery({
+                  pageIndex: 0,
+                  filters: addFilter({
+                    filters: urlQuery.filters,
+                    dataView,
+                    field,
+                    value,
+                    negate,
+                  }),
+                })
+              }
             />
           </>
         )}
@@ -134,12 +152,3 @@ const LatestFindingsPageTitle = () => (
     />
   </PageTitle>
 );
-
-const getFindingsPageSizeInfo = ({
-  currentPageSize,
-  pageIndex,
-  pageSize,
-}: Record<'pageIndex' | 'pageSize' | 'currentPageSize', number>) => ({
-  pageStart: pageIndex * pageSize + 1,
-  pageEnd: pageIndex * pageSize + currentPageSize,
-});
