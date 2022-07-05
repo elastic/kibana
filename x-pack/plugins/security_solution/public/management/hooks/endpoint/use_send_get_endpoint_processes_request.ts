@@ -8,35 +8,35 @@
 import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
 import { HttpFetchError } from '@kbn/core/public';
 import {
-  RunningProcessesRequestBody,
+  ProcessesRequestBody,
   ResponseActionApiResponse,
-  RunningProcessesEntry,
+  ProcessesEntry,
 } from '../../../../common/endpoint/types/actions';
-import { GET_RUNNING_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
+import { GET_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 /**
  * Get running processes
  * @param customOptions
  */
-export const useSendGetEndpointRunningProcessesRequest = (
+export const useSendGetEndpointProcessesRequest = (
   customOptions?: UseMutationOptions<
-    ResponseActionApiResponse<RunningProcessesEntry>,
+    ResponseActionApiResponse<ProcessesEntry>,
     HttpFetchError,
-    RunningProcessesRequestBody
+    ProcessesRequestBody
   >
 ): UseMutationResult<
-  ResponseActionApiResponse<RunningProcessesEntry>,
+  ResponseActionApiResponse<ProcessesEntry>,
   HttpFetchError,
-  RunningProcessesRequestBody
+  ProcessesRequestBody
 > => {
   return useMutation<
-    ResponseActionApiResponse<RunningProcessesEntry>,
+    ResponseActionApiResponse<ProcessesEntry>,
     HttpFetchError,
-    RunningProcessesRequestBody
-  >((getRunningProcessesData: RunningProcessesRequestBody) => {
-    return KibanaServices.get().http.post<ResponseActionApiResponse<RunningProcessesEntry>>(
-      GET_RUNNING_PROCESSES_ROUTE,
+    ProcessesRequestBody
+  >((getRunningProcessesData: ProcessesRequestBody) => {
+    return KibanaServices.get().http.post<ResponseActionApiResponse<ProcessesEntry>>(
+      GET_PROCESSES_ROUTE,
       {
         body: JSON.stringify(getRunningProcessesData),
       }

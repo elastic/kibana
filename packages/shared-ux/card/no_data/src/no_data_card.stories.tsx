@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { action } from '@storybook/addon-actions';
 
 import { Params, getStoryArgTypes, getStoryServices } from './mocks';
 
@@ -30,7 +31,7 @@ const argTypes = getStoryArgTypes();
 
 export const NoDataCard = (params: Params) => {
   return (
-    <NoDataCardProvider {...getStoryServices(params)}>
+    <NoDataCardProvider {...getStoryServices(params, action)}>
       <ConnectedComponent {...params} />
     </NoDataCardProvider>
   );
