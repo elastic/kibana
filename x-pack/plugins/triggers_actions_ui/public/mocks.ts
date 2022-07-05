@@ -108,6 +108,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRuleDefinition: (props) => {
       return getRuleDefinitionLazy({ ...props, actionTypeRegistry, ruleTypeRegistry });
+    },
     getRuleStatusPanel: (props) => {
       return getRuleStatusPanelLazy(props);
     },
