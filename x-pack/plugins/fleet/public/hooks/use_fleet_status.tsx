@@ -23,17 +23,22 @@ interface FleetStatusState {
 
 interface FleetStatus extends FleetStatusState {
   refresh: () => Promise<void>;
+  forceDisplayInstructions: boolean;
+  setForceDisplayInstructions: React.Dispatch<boolean>;
 }
 
 const FleetStatusContext = React.createContext<FleetStatus | undefined>(undefined);
 
 export const FleetStatusProvider: React.FC = ({ children }) => {
   const config = useConfig();
+  const [forceDisplayInstructions, setForceDisplayInstructions] = useState(false);
+
   const [state, setState] = useState<FleetStatusState>({
     enabled: config.agents.enabled,
     isLoading: false,
     isReady: false,
   });
+
   const sendGetStatus = useCallback(
     async function sendGetStatus() {
       try {
@@ -64,7 +69,9 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
   const refresh = useCallback(() => sendGetStatus(), [sendGetStatus]);
 
   return (
-    <FleetStatusContext.Provider value={{ ...state, refresh }}>
+    <FleetStatusContext.Provider
+      value={{ ...state, refresh, forceDisplayInstructions, setForceDisplayInstructions }}
+    >
       {children}
     </FleetStatusContext.Provider>
   );

@@ -15,6 +15,8 @@ import { FleetServerRequirementPage } from '../../applications/fleet/sections/ag
 
 import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
 
+import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
+
 import { Loading } from '..';
 
 import { policyHasFleetServer } from '../../services';
@@ -40,16 +42,11 @@ export const Instructions = (props: InstructionProps) => {
     refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
-  const REFRESH_INTERVAL = 10 * 1000;
+  const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fleetStatus.refresh();
-      refreshAgentPolicies();
-    }, REFRESH_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, [fleetStatus, REFRESH_INTERVAL, refreshAgentPolicies]);
+    refreshAgentPolicies();
+  }, [refreshAgentPolicies]);
 
   const fleetServerAgentPolicies: string[] = useMemo(
     () => agentPolicies.filter((pol) => policyHasFleetServer(pol)).map((pol) => pol.id),
@@ -67,30 +64,27 @@ export const Instructions = (props: InstructionProps) => {
             .join(' or ')}`,
   });
 
-  const agentsWithFleetServers = agents?.items || [];
+  const fleetServers = agents?.items || [];
 
-  const hasFleetServerHosts = useMemo(() => {
-    return (settings?.fleet_server_hosts || []).length > 0;
+  const fleetServerHosts = useMemo(() => {
+    return settings?.fleet_server_hosts || [];
   }, [settings]);
 
-  const showAgentEnrollment = useMemo(
-    () => hasFleetServerHosts && fleetStatus.isReady && agentsWithFleetServers.length > 0,
-    [hasFleetServerHosts, fleetStatus.isReady, agentsWithFleetServers.length]
-  );
-
-  const showFleetServerEnrollment = useMemo(
-    () =>
-      !showAgentEnrollment ||
-      (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE),
-    [fleetStatus.missingRequirements, showAgentEnrollment]
-  );
-
-  const hasNoFleetServerHost = useMemo(
-    () => fleetStatus.isReady && (settings?.fleet_server_hosts || []).length === 0,
-    [fleetStatus.isReady, settings?.fleet_server_hosts]
-  );
-
   if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
+
+  const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
+
+  const showAgentEnrollment =
+    fleetStatus.isReady &&
+    !isFleetServerUnhealthy &&
+    fleetServers.length > 0 &&
+    fleetServerHosts.length > 0;
+
+  const showFleetServerEnrollment =
+    fleetServers.length === 0 ||
+    isFleetServerUnhealthy ||
+    (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE);
+
   if (!isIntegrationFlow && showAgentEnrollment) {
     setSelectionType('radio');
   } else {
