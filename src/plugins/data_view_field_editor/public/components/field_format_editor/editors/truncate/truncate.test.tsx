@@ -69,7 +69,7 @@ describe('TruncateFormatEditor', () => {
       },
     };
 
-    input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
+    await input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
 
     expect(onError).toBeCalledWith(changeEvent.target.validationMessage);
     expect(onChange).not.toBeCalled();
@@ -95,7 +95,7 @@ describe('TruncateFormatEditor', () => {
       },
     };
     onError.mockClear();
-    input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
+    await input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
     expect(onError).not.toBeCalled();
     expect(onChange).toBeCalledWith({ fieldLength: 123 });
   });

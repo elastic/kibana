@@ -29,7 +29,7 @@ interface IndexedColor extends Color {
   index: number;
 }
 
-interface ColorFormatEditorFormatParams {
+export interface ColorFormatEditorFormatParams {
   colors: Color[];
 }
 
