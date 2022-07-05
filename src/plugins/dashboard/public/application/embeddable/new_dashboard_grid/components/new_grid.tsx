@@ -63,7 +63,7 @@ export const TestReactGrid: FC<Props> = ({
       handleClass: HANDLE_CLASS,
       itemClass: `${PANEL_CLASS}`,
       column: columns,
-      cellHeight: `${GRID_CONFIG[columns].cellHeight}px`, // auto
+      cellHeight: `28px`, // auto
       margin: guttersize,
       minRow: columns / 3,
     }),
@@ -171,12 +171,12 @@ export const TestReactGrid: FC<Props> = ({
 
   return (
     <div>
-      <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>{' '}
+      {/* <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>{' '} */}
       {/* <EuiButton onClick={addNewPanelGroup}>Add Group</EuiButton> */}
-      <div>Count:{panels.length}</div>
+      {/* <div>Count:{panels.length}</div>
       <EuiAccordion id={`accordion`} buttonContent="Panel data">
         <div>{JSON.stringify(panels)}</div>
-      </EuiAccordion>
+      </EuiAccordion> */}
       {/* <EuiAccordion id={`accordion`} buttonContent="Serialized grid data">
         <div>{JSON.stringify(gridRef.current?.save(true, true))}</div>
       </EuiAccordion> */}

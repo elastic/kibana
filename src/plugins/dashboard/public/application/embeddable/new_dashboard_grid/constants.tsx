@@ -29,7 +29,7 @@ export const PANEL_CLASS = 'embPanel';
 export const NUM_COLUMNS = 48;
 export const DEFAULT_CELL_HEIGHT = 24;
 export const DEFAULT_GROUP_HEIGHT = NUM_COLUMNS / 6;
-export const DEFAULT_GUTTERSIZE = 4;
+export const DEFAULT_GUTTERSIZE = 3;
 
 type GridConfig = {
   [columns in ColumnOptions]: {

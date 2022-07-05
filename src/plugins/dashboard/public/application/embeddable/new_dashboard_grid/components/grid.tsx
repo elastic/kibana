@@ -139,7 +139,8 @@ export const Grid: FC<Props> = ({
       }
 
       if (wasPanelRemoved) {
-        originGrid?.removeWidget(previousElement as GridItemHTMLElement);
+        originGrid?.removeWidget(previousElement as GridItemHTMLElement, false, false);
+        // originGrid?.engine.removeNode(previousElement as GridItemHTMLElement, false, false);
         ReactDOM.unmountComponentAtNode(previousElement as Element);
         // previousElement?.parentNode?.removeChild(previousElement);
 
@@ -281,7 +282,7 @@ export const Grid: FC<Props> = ({
               }`}
             >
               {panel.subGrid ? (
-                <GridGroup group={panel} parentGridRef={gridRef} movePanel={movePanel} />
+                <GridGroup group={panel} movePanel={movePanel} />
               ) : (
                 <GridItem panel={panel} />
               )}
