@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { getPatchRulesSchemaMock } from './patch_rules_schema.mock';
-import { PatchRulesSchema } from './patch_rules_schema';
+import {
+  getPatchRulesSchemaMock,
+  getPatchThresholdRulesSchemaMock,
+} from './patch_rules_schema.mock';
+import { PatchRulesSchema, ThresholdPatchSchema } from './patch_rules_schema';
 import { patchRuleValidateTypeDependents } from './patch_rules_type_dependents';
 
 describe('patch_rules_type_dependents', () => {
@@ -71,35 +74,32 @@ describe('patch_rules_type_dependents', () => {
   });
 
   test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
-    const schema = {
-      ...getPatchRulesSchemaMock(),
-      type: 'threshold',
+    const schema: ThresholdPatchSchema = {
+      ...getPatchThresholdRulesSchemaMock(),
       threshold: {
         field: '',
         value: -1,
       },
     };
-    const errors = patchRuleValidateTypeDependents(schema as PatchRulesSchema);
+    const errors = patchRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
   });
 
   test('threshold.field should contain 3 items or less', () => {
-    const schema = {
-      ...getPatchRulesSchemaMock(),
-      type: 'threshold',
+    const schema: ThresholdPatchSchema = {
+      ...getPatchThresholdRulesSchemaMock(),
       threshold: {
         field: ['field-1', 'field-2', 'field-3', 'field-4'],
         value: 1,
       },
     };
-    const errors = patchRuleValidateTypeDependents(schema as PatchRulesSchema);
+    const errors = patchRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['Number of fields must be 3 or less']);
   });
 
   test('threshold.cardinality[0].field should not be in threshold.field', () => {
-    const schema = {
-      ...getPatchRulesSchemaMock(),
-      type: 'threshold',
+    const schema: ThresholdPatchSchema = {
+      ...getPatchThresholdRulesSchemaMock(),
       threshold: {
         field: ['field-1', 'field-2', 'field-3'],
         value: 1,
@@ -111,7 +111,7 @@ describe('patch_rules_type_dependents', () => {
         ],
       },
     };
-    const errors = patchRuleValidateTypeDependents(schema as PatchRulesSchema);
+    const errors = patchRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['Cardinality of a field that is being aggregated on is always 1']);
   });
 });

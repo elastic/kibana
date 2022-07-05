@@ -7,10 +7,37 @@
 
 import * as t from 'io-ts';
 
-import { patchTypeSpecific, sharedPatchSchema } from './rule_schemas';
+import {
+  patchTypeSpecific,
+  sharedPatchSchema,
+  eqlPatchParams,
+  threatMatchPatchParams,
+  queryPatchParams,
+  savedQueryPatchParams,
+  thresholdPatchParams,
+  machineLearningPatchParams,
+} from './rule_schemas';
 
 /**
  * All of the patch elements should default to undefined if not set
  */
 export const patchRulesSchema = t.intersection([patchTypeSpecific, sharedPatchSchema]);
 export type PatchRulesSchema = t.TypeOf<typeof patchRulesSchema>;
+
+const eqlPatchSchema = t.intersection([eqlPatchParams, sharedPatchSchema]);
+export type EqlPatchSchema = t.TypeOf<typeof eqlPatchSchema>;
+
+const threatMatchPatchSchema = t.intersection([threatMatchPatchParams, sharedPatchSchema]);
+export type ThreatMatchPatchSchema = t.TypeOf<typeof threatMatchPatchSchema>;
+
+const queryPatchSchema = t.intersection([queryPatchParams, sharedPatchSchema]);
+export type QueryPatchSchema = t.TypeOf<typeof queryPatchSchema>;
+
+const savedQueryPatchSchema = t.intersection([savedQueryPatchParams, sharedPatchSchema]);
+export type SavedQueryPatchSchema = t.TypeOf<typeof savedQueryPatchSchema>;
+
+const thresholdPatchSchema = t.intersection([thresholdPatchParams, sharedPatchSchema]);
+export type ThresholdPatchSchema = t.TypeOf<typeof thresholdPatchSchema>;
+
+const machineLearningPatchSchema = t.intersection([machineLearningPatchParams, sharedPatchSchema]);
+export type MachineLearningPatchSchema = t.TypeOf<typeof machineLearningPatchSchema>;
