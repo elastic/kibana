@@ -9,6 +9,7 @@ import './spaces_menu.scss';
 
 import { EuiAvatar, EuiPopoverFooter, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable';
+import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import React, { Component } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -38,7 +39,6 @@ interface Props {
 }
 
 interface State {
-  // selectedSpace: Space;
   searchTerm: string;
   allowSpacesListFocus: boolean;
 }
@@ -46,7 +46,6 @@ interface State {
 class SpacesMenuUI extends Component<Props, State> {
   // ToDo: removed unused state members
   public state = {
-    // selectedSpace: this.props.spaces[0],
     searchTerm: '',
     allowSpacesListFocus: false,
   };
@@ -122,45 +121,39 @@ class SpacesMenuUI extends Component<Props, State> {
   };
 
   private spaceSelectionChange = (
-    newOptions: EuiSelectableOption[]
-    // event: KeyboardEvent | MouseEvent this (EuiSelectableOnChangeEvent) is not available yet (added to EUI 22 days ago)...waiting on 133927
+    newOptions: EuiSelectableOption[],
+    event: EuiSelectableOnChangeEvent
+    // event: React.MouseEvent | React.KeyboardEvent
   ) => {
-    // newOptions.forEach((option) => {
-    //   console.log(`**** ${option.label}, Checked: ${option.checked}`);
-    // });
     const selectedSpaceItem = newOptions.filter((item) => item.checked === 'on')[0];
 
     if (!!selectedSpaceItem) {
-      // selectedSpaceItem.checked = undefined;
-      // const selectedSpace = spaces.filter((space) => selectedSpaceItem.label === space.name)[0];
-
-      // ToDo: handle options (middle click or cmd/ctrl (new tab), shift click (new window))
       const urlToSelectedSpace = addSpaceIdToPath(
         this.props.serverBasePath,
         selectedSpaceItem.key, // selectedSpace.id
         ENTER_SPACE_PATH
       );
 
-      // console.log(`**** Event: ${event.type}`);
+      // ToDo: handle options (middle click or cmd/ctrl (new tab), shift click (new window))
+      console.log(`**** Event Class: ${event.constructor.name}`);
 
-      // const mouseE = event as EuiSelectableOnChangeEvent;
-      // if (mouseE && mouseE.button === 1) {
-      //   console.log(`**** MIDDLE CLICK`);
-      // } else if (mouseE && mouseE.ctrlKey) {
-      //   console.log(`**** CTRL/CMD CLICK`);
-      // } else if (mouseE && mouseE.shiftKey) {
-      //   console.log(`**** SHIFT CLICK`);
-      // }
-
-      // const keyE = event as KeyboardEvent;
-      // if (keyE && keyE.ctrlKey === 1) {
-      //   console.log(`**** CTRL/CMD ENTER`);
-      // } else if (keyE && keyE.shiftKey) {
-      //   console.log(`**** SHIFT ENTER`);
-      // }
-      // Force full page reload (usually not a good idea, but we need to in order to change spaces)
-      // console.log(`**** URL: ${urlToSelectedSpace}`);
-      this.props.navigateToUrl(urlToSelectedSpace);
+      if (event.shiftKey) {
+        // Open in new window, shift is given priority over other modifiers
+        console.log(`**** SHIFT CLICK`);
+        window.open(urlToSelectedSpace);
+      } else if (
+        (event instanceof KeyboardEvent && event.ctrlKey) ||
+        (event instanceof MouseEvent && (event.button === 1 || event.ctrlKey))
+      ) {
+        // Open in new tab - either a ctrl click or middle mouse button
+        console.log(`**** CTRL/CMD CLICK`);
+        // window.open(urlToSelectedSpace); // ToDo: replace with new tab
+      } else {
+        // Force full page reload (usually not a good idea, but we need to in order to change spaces)
+        // console.log(`**** URL: ${urlToSelectedSpace}`);
+        console.log(`**** NORMAL CLICK`);
+        // this.props.navigateToUrl(urlToSelectedSpace);
+      }
     }
   };
 
