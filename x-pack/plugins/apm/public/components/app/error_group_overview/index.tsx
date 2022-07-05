@@ -20,7 +20,7 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useTablePagination } from '../../../hooks/use_table_pagination';
+import { useTableSortAndPaginationUrl } from '../../../hooks/table_sort_pagination/use_table_sort_pagination_url';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
@@ -98,7 +98,7 @@ export function ErrorGroupOverview() {
   const { errorGroups } = errorGroupListData;
 
   const { tableItems, tablePagination, tableSort, onTableChange, requestId } =
-    useTablePagination<typeof errorGroups>({
+    useTableSortAndPaginationUrl<typeof errorGroups>({
       items: errorGroups,
       initialPagination: {
         pageIndex: 0,
@@ -109,7 +109,6 @@ export function ErrorGroupOverview() {
         sort: { field: 'occurrences', direction: 'desc' },
         enableAllColumns: true,
       },
-      urlState: true,
     });
 
   const {

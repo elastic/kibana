@@ -11,30 +11,30 @@ import {
   Pagination,
 } from '@elastic/eui';
 import { orderBy } from 'lodash';
-import { useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useMemo } from 'react';
 import uuid from 'uuid';
-import { fromQuery, toQuery } from '../components/shared/links/url_helpers';
-import { useApmParams } from './use_apm_params';
+import { useApmParams } from '../use_apm_params';
 
-interface Initials<T extends any[]> {
+export interface TableSortPaginationProps<T extends any[]> {
+  items: T;
   // totalItemCount is not necessary here
   initialPagination: Omit<Pagination, 'totalItemCount'>;
   initialSort?: EuiTableSortingType<T[0]>;
 }
 
-type Props<T extends any[]> = {
-  items: T;
-  urlState?: boolean;
-} & Initials<T>;
+type Props<T extends any[]> = TableSortPaginationProps<T> & {
+  tableOptions: CriteriaWithPagination<T[0]>;
+  onTableChange: (criteriaWithPagination: CriteriaWithPagination<T[0]>) => void;
+};
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-export function useTablePagination<T extends any[]>({
+export function useTableSortAndPagination<T extends any[]>({
   items,
   initialPagination,
   initialSort = {},
-  urlState = false,
+  tableOptions,
+  onTableChange,
 }: Props<T>): {
   onTableChange: (criteriaWithPagination: CriteriaWithPagination<T[0]>) => void;
   tableSort?: EuiTableSortingType<T[0]>;
@@ -44,27 +44,6 @@ export function useTablePagination<T extends any[]>({
   requestId: string;
 } {
   const { query } = useApmParams('/*');
-
-  const { tableOptionsUrl, onTableChangeUrl } = useTablePaginationUrl({
-    initialPagination,
-    initialSort,
-  });
-
-  const [tableOptionsState, setTableOptionsState] = useState<
-    CriteriaWithPagination<T[0]>
-  >({
-    page: {
-      index: initialPagination.pageIndex,
-      size: initialPagination.pageSize,
-    },
-    sort: initialSort.sort,
-  });
-
-  const tableOptions = useMemo(
-    () => (urlState ? tableOptionsUrl : tableOptionsState),
-    [urlState, tableOptionsUrl, tableOptionsState]
-  );
-
   const offset = 'offset' in query ? query.offset : undefined;
   const comparisonEnabled =
     'comparisonEnabled' in query ? query.comparisonEnabled : undefined;
@@ -112,64 +91,10 @@ export function useTablePagination<T extends any[]>({
 
   return {
     requestId,
-    onTableChange: urlState ? onTableChangeUrl : setTableOptionsState,
+    onTableChange,
     tableSort,
     tablePagination,
     tableItems,
     totalItems: 0,
-  };
-}
-
-function useTablePaginationUrl<T extends any[]>({
-  initialPagination,
-  initialSort = {},
-}: Initials<T>) {
-  const history = useHistory();
-  const { query } = useApmParams('/*');
-  const pageUrl =
-    'page' in query && query.page ? query.page : initialPagination.pageIndex;
-  const pageSizeUrl =
-    'pageSize' in query && query.pageSize
-      ? query.pageSize
-      : initialPagination.pageSize;
-  const sortFieldUrl =
-    'sortField' in query
-      ? (query.sortField as keyof T[0])
-      : initialSort.sort?.field;
-  const sortDirectionUrl =
-    'sortDirection' in query
-      ? query.sortDirection
-      : initialSort.sort?.direction;
-
-  const tableOptionsUrl: CriteriaWithPagination<T[0]> = useMemo(
-    () => ({
-      page: {
-        index: pageUrl,
-        size: pageSizeUrl,
-      },
-      sort:
-        sortFieldUrl && sortDirectionUrl
-          ? { field: sortFieldUrl, direction: sortDirectionUrl }
-          : undefined,
-    }),
-    [pageUrl, pageSizeUrl, sortFieldUrl, sortDirectionUrl]
-  );
-
-  function onTableChangeUrl(newTableOptions: CriteriaWithPagination<T[0]>) {
-    history.push({
-      ...history.location,
-      search: fromQuery({
-        ...toQuery(history.location.search),
-        page: newTableOptions.page.index,
-        pageSize: newTableOptions.page.size,
-        sortField: newTableOptions.sort?.field,
-        sortDirection: newTableOptions.sort?.direction,
-      }),
-    });
-  }
-
-  return {
-    tableOptionsUrl,
-    onTableChangeUrl,
   };
 }

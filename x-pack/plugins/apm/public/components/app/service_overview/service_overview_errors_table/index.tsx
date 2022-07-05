@@ -21,7 +21,7 @@ import { OverviewTableContainer } from '../../../shared/overview_table_container
 import { getColumns } from '../../../shared/errors_table/get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { useTablePagination } from '../../../../hooks/use_table_pagination';
+import { useTableSortAndPaginationState } from '../../../../hooks/table_sort_pagination/use_table_sort_pagination_state';
 
 interface Props {
   serviceName: string;
@@ -78,7 +78,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     tablePagination,
     tableSort,
     totalItems,
-  } = useTablePagination<typeof data.errorGroups>({
+  } = useTableSortAndPaginationState<typeof data.errorGroups>({
     items: data.errorGroups,
     initialPagination: { pageIndex: 0, pageSize: 5 },
     initialSort: {
