@@ -45,6 +45,7 @@
     "xpack.monitoring": ["plugins/monitoring"],
     "xpack.osquery": ["plugins/osquery"],
     "xpack.painlessLab": "plugins/painless_lab",
+    "xpack.profiling": [ "plugins/profiling" ],
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting"],
     "xpack.rollupJobs": ["plugins/rollup"],
