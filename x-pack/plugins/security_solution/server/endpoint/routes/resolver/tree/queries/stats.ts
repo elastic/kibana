@@ -95,45 +95,87 @@ export class StatsQuery {
     };
   }
 
-  private alertStatsQuery(nodes: NodeID[], index: string): JsonObject {
-    return {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: this.timeRange.from,
-                  lte: this.timeRange.to,
-                  format: 'strict_date_optional_time',
+  private alertStatsQuery(
+    nodes: NodeID[],
+    index: string,
+    includeHits: boolean
+  ): { size: number; query: object; index: string; aggs: object; fields?: string[] } {
+    if (includeHits) {
+      return {
+        size: 5000,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: this.timeRange.from,
+                    lte: this.timeRange.to,
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
-            },
-            {
-              terms: { [this.schema.id]: nodes },
-            },
-          ],
+              {
+                terms: { [this.schema.id]: nodes },
+              },
+            ],
+          },
         },
-      },
-      //search_after: undefined,
-      index,
-      aggs: {
-        ids: {
-          terms: { field: this.schema.id },
+        fields: [
+          'kibana.alert.rule.id',
+          'kibana.alert.rule.uuid',
+          'kibana.alert.rule.rule_id',
+          'event.id',
+          'kibana.alert.rule.parameters.rule_id',
+          '_id',
+        ],
+        index,
+        aggs: {
+          ids: {
+            terms: { field: this.schema.id },
+          },
         },
-      },
-    };
+      };
+    } else {
+      return {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: this.timeRange.from,
+                    lte: this.timeRange.to,
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+              {
+                terms: { [this.schema.id]: nodes },
+              },
+            ],
+          },
+        },
+        index,
+        aggs: {
+          ids: {
+            terms: { field: this.schema.id },
+          },
+        },
+      };
+    }
   }
 
   private static getEventStats(catAgg: CategoriesAgg, alertsBody): EventStats {
-    console.log(catAgg, alertsBody);
     const eventId = catAgg.key;
-    const eventAlertCount = alertsBody.find(({ key }) => key === eventId).doc_count;
+    const eventAlertCount = alertsBody.find(
+      ({ key }: { key: string }) => key === eventId
+    ).doc_count;
     const total = catAgg.doc_count + eventAlertCount;
     if (!catAgg.categories?.buckets) {
       return {
-        total,
+        total: 0,
         byCategory: {},
       };
     }
@@ -163,7 +205,8 @@ export class StatsQuery {
   async search(
     client: IScopedClusterClient,
     nodes: NodeID[],
-    alertsClient: AlertsClient
+    alertsClient: AlertsClient,
+    includeHits: boolean
   ): Promise<Record<string, EventStats>> {
     if (nodes.length <= 0) {
       return {};
@@ -173,22 +216,35 @@ export class StatsQuery {
     const alertIndex =
       typeof this.indexPatterns === 'string' ? this.indexPatterns : this.indexPatterns.join(',');
 
-    // leaving unknown here because we don't actually need the hits part of the body
     const [body, alertsBody] = await Promise.all([
       await esClient.search({
         body: this.query(nodes),
         index: this.indexPatterns,
       }),
-      await alertsClient.find(this.alertStatsQuery(nodes, alertIndex)),
+      await alertsClient.find(this.alertStatsQuery(nodes, alertIndex, includeHits)),
     ]);
     const alertsAggs = alertsBody.aggregations?.ids.buckets;
+    console.log(alertsBody);
+    const eventAggs = body.aggregations?.ids?.buckets;
     // @ts-expect-error declare aggegations type explicitly
-    return body.aggregations?.ids?.buckets.reduce(
+    const formattedEventAggs = body.aggregations?.ids?.buckets.reduce(
       (cummulative: Record<string, number>, bucket: CategoriesAgg) => ({
         ...cummulative,
         [bucket.key]: StatsQuery.getEventStats(bucket, alertsAggs),
       }),
       {}
     );
+    // TODO Ugly
+    if (eventAggs.length === 0) {
+      if (alertsAggs.length > 0) {
+        return alertsAggs.reduce((response, bucket) => {
+          return {
+            ...response,
+            [bucket.key]: { total: bucket.doc_count, byCategory: { alerts: bucket.doc_count } },
+          };
+        }, {});
+      }
+    }
+    return formattedEventAggs;
   }
 }

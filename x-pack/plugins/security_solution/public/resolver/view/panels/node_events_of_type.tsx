@@ -46,7 +46,6 @@ export const NodeEventsInCategory = memo(function ({
   const node = useSelector((state: ResolverState) => selectors.graphNodeForID(state)(nodeID));
   const isLoading = useSelector(selectors.isLoadingNodeEventsInCategory);
   const hasError = useSelector(selectors.hadErrorLoadingNodeEventsInCategory);
-  console.log(eventCategory);
 
   return (
     <>
@@ -106,7 +105,7 @@ const NodeEventsListItem = memo(function ({
 }) {
   const timestamp = eventModel.eventTimestamp(event);
   const eventID = eventModel.eventID(event);
-  console.log({eventID, event});
+
   const winlogRecordID = eventModel.winlogRecordID(event);
   const date =
     useFormattedDate(timestamp) ||

@@ -79,24 +79,39 @@ export function dataAccessLayerFactory(
       timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverPaginatedEvents> {
-      return context.services.http.post('/api/endpoint/resolver/events', {
-        query: { afterEvent: after, limit: 25 },
-        body: JSON.stringify({
-          timeRange: {
-            from: timeRange.from,
-            to: timeRange.to,
-          },
-          indexPatterns,
-          filter: JSON.stringify({
-            bool: {
-              filter: [
-                { term: { 'process.entity_id': entityID } },
-                { term: { 'event.category': category } },
-              ],
+      if (category === 'alerts') {
+        return context.services.http.post('/api/endpoint/resolver/events', {
+          query: { afterEvent: after, limit: 25 },
+          body: JSON.stringify({
+            timeRange: {
+              from: timeRange.from,
+              to: timeRange.to,
             },
+            indexPatterns,
+            entityType: 'alerts',
+            eventID: entityID,
           }),
-        }),
-      });
+        });
+      } else {
+        return context.services.http.post('/api/endpoint/resolver/events', {
+          query: { afterEvent: after, limit: 25 },
+          body: JSON.stringify({
+            timeRange: {
+              from: timeRange.from,
+              to: timeRange.to,
+            },
+            indexPatterns,
+            filter: JSON.stringify({
+              bool: {
+                filter: [
+                  { term: { 'process.entity_id': entityID } },
+                  { term: { 'event.category': category } },
+                ],
+              },
+            }),
+          }),
+        });
+      }
     },
 
     /**
@@ -204,7 +219,7 @@ export function dataAccessLayerFactory(
                 from: timeRange.from,
                 to: timeRange.to,
               },
-              entityType: 'alert',
+              entityType: 'alertDetail',
               eventID,
             }),
           }

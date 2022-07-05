@@ -192,8 +192,8 @@ export function processNameSafeVersion(event: SafeResolverEvent): string | undef
 
 export function eventID(event: SafeResolverEvent): number | undefined | string {
   console.log(event);
-  if (typeof event.event?.id === 'string') {
-    return event.event.id;
+  if (event['event.id'] !== undefined) {
+    return event['event.id'];
   } else {
     if (isLegacyEventSafeVersion(event)) {
       return firstNonNullValue(event.endgame.serial_event_id);

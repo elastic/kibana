@@ -55,6 +55,18 @@ export function DescriptiveName({ event }: { event: SafeResolverEvent }) {
     );
   }
 
+  if (event['kibana.alert.rule.name']) {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.resolver.eventDescription.alertEventNameLabel"
+        defaultMessage="{ ruleName }"
+        values={{
+          ruleName: String(event['kibana.alert.rule.name']),
+        }}
+      />
+    );
+  }
+
   if (event.file?.path) {
     return (
       <FormattedMessage

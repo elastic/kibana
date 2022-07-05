@@ -50,7 +50,7 @@ export function handleEvents(
       indexPatterns: body.indexPatterns,
       timeRange: body.timeRange,
     });
-    const results = await eventsQuery.search(eventsClient, body.filter, alertsClient);
+    const results = await eventsQuery.search(eventsClient, body, alertsClient);
     return res.ok({
       body: createEvents(results, PaginationBuilder.buildCursorRequestLimit(limit, results)),
     });

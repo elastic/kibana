@@ -37,6 +37,7 @@ export interface TreeOptions {
   schema: ResolverSchema;
   nodes: NodeID[];
   indexPatterns: string[];
+  includeHits: boolean;
 }
 
 /**
@@ -90,7 +91,12 @@ export class Fetcher {
       isInternalRequest,
     });
 
-    const eventStats = await query.search(this.client, statsIDs, this.alertsClient);
+    const eventStats = await query.search(
+      this.client,
+      statsIDs,
+      this.alertsClient,
+      options.includeHits
+    );
     const statsNodes: ResolverNode[] = [];
     for (const node of treeNodes) {
       const id = getIDField(node, options.schema);

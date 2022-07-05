@@ -6,10 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type {
-  AlertsClient,
-  RuleRegistryPluginStartContract,
-} from '@kbn/rule-registry-plugin/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
@@ -66,13 +63,38 @@ export class EventsQuery {
     };
   }
 
-  private alertsQuery(id: JsonValue): { query: object } {
+  private alertDetailQuery(id: JsonValue): { query: object; index: string } {
     return {
       query: {
         bool: {
           filter: [
             {
-              // TODO use schema.
+              term: { 'event.id': id },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+          ],
+        },
+      },
+      index:
+        typeof this.indexPatterns === 'string' ? this.indexPatterns : this.indexPatterns.join(','),
+      ...this.pagination.buildQueryFields('event.id', 'desc'),
+    };
+  }
+
+  private alertsForProcessQuery(id: JsonValue): { query: object; index: string } {
+    return {
+      query: {
+        bool: {
+          filter: [
+            {
               term: { 'process.entity_id': id },
             },
             {
@@ -87,8 +109,8 @@ export class EventsQuery {
           ],
         },
       },
-      // index:
-      //   typeof this.indexPatterns === 'string' ? this.indexPatterns : this.indexPatterns.join(','),
+      index:
+        typeof this.indexPatterns === 'string' ? this.indexPatterns : this.indexPatterns.join(','),
       ...this.pagination.buildQueryFields('event.id', 'desc'),
     };
   }
@@ -108,58 +130,35 @@ export class EventsQuery {
     return [parseFilterQuery(filter)];
   }
 
-  private alertFilter(filters: JsonObject[]): JsonObject | undefined {
-    return filters.find((filter) => {
-      const termFilter = filter.term;
-      const category = termFilter ? termFilter['event.category'] : null;
-      return category === 'alerts';
-    });
-  }
-
-  private isAlertRequest(filters: JsonObject[]): boolean {
-    return this.alertFilter(filters) !== undefined;
-  }
-
-  private alertId(filters: JsonObject[]) {
-    // TODO reduce
-    return filters
-      .map((filter) => {
-        for (const [key, value] of Object.entries(filter.term)) {
-          if (key === 'process.entity_id') {
-            return value;
-          } else {
-            return null;
-          }
-        }
-        return null;
-      })
-      .filter((filter) => filter !== null);
-  }
-
   /**
-   * Searches ES for the specified events and format the response.
+   * Will search ES using a filter for normal events associated with a process, an e
    *
    * @param client a client for searching ES
    * @param filter an optional string representation of a raw Elasticsearch clause for filtering the results
    */
   async search(
     client: IScopedClusterClient,
-    filter: string | undefined,
+    body: { filter: string } | { eventID?: string; entityType: string },
     alertsClient: AlertsClient
   ): Promise<SafeResolverEvent[]> {
-    const parsedFilters = EventsQuery.buildFilters(filter);
-    const [eventType] = parsedFilters;
-    const eventFilter = eventType.bool?.filter;
-    if (this.isAlertRequest(eventFilter)) {
-      const [processId] = this.alertId(eventFilter);
-      const response = await alertsClient.find(this.alertsQuery(processId));
-      return response.hits.hits.map((hit) => hit._source);
-    } else {
+    if (body.filter) {
+      const parsedFilters = EventsQuery.buildFilters(body.filter);
       const response = await client.asCurrentUser.search<SafeResolverEvent>(
         this.buildSearch(parsedFilters)
       );
       // @ts-expect-error @elastic/elasticsearch _source is optional
       return response.hits.hits.map((hit) => hit._source);
+    } else {
+      const { eventID, entityType } = body;
+      if (entityType === 'alertDetail') {
+        const response = await alertsClient.find(this.alertDetailQuery(eventID));
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        return response.hits.hits.map((hit) => hit._source);
+      } else {
+        const response = await alertsClient.find(this.alertsForProcessQuery(eventID));
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        return response.hits.hits.map((hit) => hit._source);
+      }
     }
   }
 }
