@@ -11,19 +11,51 @@ export default function enterSpaceFunctonalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
+  // const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
+  const spacesService = getService('spaces');
+  const id = 'another-space';
+  const settings = {
+    buildNum: 8467,
+    'dateFormat:tz': 'UTC',
+  };
 
   describe('Enter Space', function () {
     this.tags('includeFirefox');
-    before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/spaces/enter_space'
-      );
-      await PageObjects.security.forceLogout();
-    });
+    before(
+      'update ui settings for default space, add new space, update ui settings for new space, load kbn archive',
+      async () => {
+        // await esArchiver.load('x-pack/test/functional/es_archives/spaces/enter_space');
+        await kibanaServer.uiSettings.replace({
+          // defaultRoute: '/app/evil',
+          defaultRoute: '/app/doesnotexist',
+          ...settings,
+        });
+
+        await spacesService.create({
+          id,
+          name: 'Another Space',
+          disabledFeatures: [],
+        });
+        await kibanaServer.uiSettings.replace(
+          {
+            defaultRoute: '/app/canvas',
+            ...settings,
+          },
+          { space: id }
+        );
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/spaces/enter_space',
+          { space: id }
+        );
+
+        await PageObjects.security.forceLogout();
+      }
+    );
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      // await esArchiver.unload('x-pack/test/functional/es_archives/spaces/enter_space')
+      await spacesService.delete(id);
     });
 
     afterEach(async () => {
