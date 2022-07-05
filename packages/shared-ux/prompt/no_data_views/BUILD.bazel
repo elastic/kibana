@@ -14,6 +14,7 @@ SOURCE_FILES = glob(
   ],
   exclude = [
     "**/*.test.*",
+    "**/*.stories.*",
   ],
 )
 
@@ -42,7 +43,6 @@ RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@emotion/css",
   "@npm//@emotion/react",
-  "@npm//@storybook/addon-actions",
   "@npm//enzyme",
   "@npm//react",
   "//packages/kbn-i18n-react",
@@ -64,7 +64,6 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "@npm//@emotion/css",
   "@npm//@emotion/react",
-  "@npm//@storybook/addon-actions",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
   "@npm//@types/node",
