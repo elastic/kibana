@@ -31,6 +31,7 @@ import { AlertsOverview } from '../../app/alerts_overview';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { toSortDirectionRt } from '../../../../common/sort_direction_rt';
 
 function page({
   title,
@@ -122,7 +123,7 @@ export const serviceDetail = {
             page: toNumberRt,
             pageSize: toNumberRt,
             sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            sortDirection: toSortDirectionRt,
           }),
         }),
       },
@@ -143,7 +144,7 @@ export const serviceDetail = {
             page: toNumberRt,
             pageSize: toNumberRt,
             sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            sortDirection: toSortDirectionRt,
           }),
         }),
         children: {
@@ -194,7 +195,7 @@ export const serviceDetail = {
             page: toNumberRt,
             pageSize: toNumberRt,
             sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            sortDirection: toSortDirectionRt,
           }),
         }),
         children: {
@@ -242,7 +243,7 @@ export const serviceDetail = {
                 page: toNumberRt,
                 pageSize: toNumberRt,
                 sortField: t.string,
-                sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+                sortDirection: toSortDirectionRt,
               }),
             }),
           },

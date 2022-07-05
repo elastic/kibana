@@ -27,6 +27,17 @@ import { ApmMainTemplate } from '../templates/apm_main_template';
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { dependencies } from './dependencies';
 import { legacyBackends } from './legacy_backends';
+import { ServiceGroupsRedirect } from '../service_groups_redirect';
+import { RedirectTo } from '../redirect_to';
+import { offsetRt } from '../../../../common/comparison_rt';
+import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
+import { BackendDetailOperations } from '../../app/backend_detail_operations';
+import { BackendDetailView } from '../../app/backend_detail_view';
+import { RedirectPathBackendDetailView } from './redirect_path_backend_detail_view';
+import { RedirectBackendsToBackendDetailOverview } from './redirect_backends_to_backend_detail_view';
+import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { toSortDirectionRt } from '../../../../common/sort_direction_rt';
 
 export function page<
   TPath extends string,
@@ -160,7 +171,7 @@ export const home = {
           page: toNumberRt,
           pageSize: toNumberRt,
           sortField: t.string,
-          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+          sortDirection: toSortDirectionRt,
         }),
         offsetRt,
       ]),

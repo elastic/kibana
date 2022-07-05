@@ -95,6 +95,6 @@ export function useTableSortAndPagination<T extends any[]>({
     tableSort,
     tablePagination,
     tableItems,
-    totalItems: 0,
+    totalItems: items.length,
   };
 }

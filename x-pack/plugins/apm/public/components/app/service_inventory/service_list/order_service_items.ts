@@ -10,6 +10,7 @@ import {
   ServiceListItem,
   ServiceInventoryFieldName,
 } from '../../../../../common/service_inventory';
+import { SortDirection } from '../../../../../common/sort_direction_rt';
 
 type SortValueGetter = (item: ServiceListItem) => string | number;
 
@@ -37,7 +38,7 @@ const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
     item.transactionErrorRate ?? -1,
 };
 
-function reverseSortDirection(sortDirection: 'asc' | 'desc') {
+function reverseSortDirection(sortDirection: SortDirection) {
   return sortDirection === 'asc' ? 'desc' : 'asc';
 }
 
@@ -50,7 +51,7 @@ export function orderServiceItems({
   items: ServiceListItem[];
   primarySortField: ServiceInventoryFieldName;
   tiebreakerField: ServiceInventoryFieldName;
-  sortDirection: 'asc' | 'desc';
+  sortDirection: SortDirection;
 }): ServiceListItem[] {
   // For healthStatus, sort items by healthStatus first, then by tie-breaker
 

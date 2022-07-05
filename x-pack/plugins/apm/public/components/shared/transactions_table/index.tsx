@@ -31,6 +31,7 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
+import { SortDirection } from '../../../../common/sort_direction_rt';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -53,7 +54,6 @@ const INITIAL_STATE: InitialState = {
 };
 
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
-type SortDirection = 'asc' | 'desc';
 const DEFAULT_SORT = {
   direction: 'desc' as const,
   field: 'impact' as const,

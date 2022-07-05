@@ -52,7 +52,6 @@ export type SortField =
   | 'cpuUsage'
   | 'memoryUsage';
 
-export type SortDirection = 'asc' | 'desc';
 export const PAGE_SIZE = 5;
 const DEFAULT_SORT = {
   direction: 'desc' as const,

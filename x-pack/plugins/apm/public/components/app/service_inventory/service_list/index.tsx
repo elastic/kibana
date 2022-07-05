@@ -48,6 +48,7 @@ import {
   ServiceInventoryFieldName,
   ServiceListItem,
 } from '../../../../../common/service_inventory';
+import { SortDirection } from '../../../../../common/sort_direction_rt';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -243,11 +244,11 @@ interface Props {
   isFailure?: boolean;
   displayHealthStatus: boolean;
   initialSortField: ServiceInventoryFieldName;
-  initialSortDirection: 'asc' | 'desc';
+  initialSortDirection: SortDirection;
   sortFn: (
     sortItems: ServiceListItem[],
     sortField: ServiceInventoryFieldName,
-    sortDirection: 'asc' | 'desc'
+    sortDirection: SortDirection
   ) => ServiceListItem[];
 }
 

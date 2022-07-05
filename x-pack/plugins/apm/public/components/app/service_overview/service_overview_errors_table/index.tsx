@@ -40,6 +40,11 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
   previousPeriod: {},
 };
 
+const PAGE_INDEX = 0;
+const PAGE_SIZE = 5;
+const SORT_FIELD = 'occurrences';
+const SORT_DIRECTION = 'desc';
+
 export function ServiceOverviewErrorsTable({ serviceName }: Props) {
   const { query } = useApmParams('/services/{serviceName}/overview');
 
@@ -80,9 +85,9 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     totalItems,
   } = useTableSortAndPaginationState<typeof data.errorGroups>({
     items: data.errorGroups,
-    initialPagination: { pageIndex: 0, pageSize: 5 },
+    initialPagination: { pageIndex: PAGE_INDEX, pageSize: PAGE_SIZE },
     initialSort: {
-      sort: { field: 'occurrences', direction: 'desc' },
+      sort: { field: SORT_FIELD, direction: SORT_DIRECTION },
       enableAllColumns: true,
     },
   });
@@ -111,7 +116,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               },
               body: {
                 groupIds: JSON.stringify(
-                  tableItems.map(({ groupId: groupId }) => groupId).sort()
+                  tableItems.map(({ groupId: groupId }) => groupId)
                 ),
               },
             },

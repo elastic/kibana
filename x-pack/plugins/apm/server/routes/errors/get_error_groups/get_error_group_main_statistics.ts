@@ -23,6 +23,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { SortDirection } from '../../../../common/sort_direction_rt';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -45,7 +46,7 @@ export async function getErrorGroupMainStatistics({
   setup: Setup;
   environment: string;
   sortField?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: SortDirection;
   start: number;
   end: number;
   maxNumberOfErrorGroups?: number;

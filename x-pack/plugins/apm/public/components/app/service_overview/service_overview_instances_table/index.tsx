@@ -18,7 +18,6 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import {
   PAGE_SIZE,
-  SortDirection,
   SortField,
 } from '../service_overview_instances_chart_and_table';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
@@ -27,6 +26,7 @@ import { InstanceDetails } from './intance_details';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { SortDirection } from '../../../../../common/sort_direction_rt';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;

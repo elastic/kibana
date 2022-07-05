@@ -19,6 +19,7 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { SortDirection } from '../../../../../common/sort_direction_rt';
 
 type ServiceListAPIResponse =
   APIReturnType<'GET /internal/apm/service-group/services'>;
@@ -31,22 +32,21 @@ interface Props {
 }
 
 const DEFAULT_SORT_FIELD = 'serviceName';
-const DEFAULT_SORT_DIRECTION = 'asc';
-type DIRECTION = 'asc' | 'desc';
+const DEFAULT_SORT_DIRECTION: SortDirection = 'asc';
 type SORT_FIELD = 'serviceName' | 'environments' | 'agentName';
 
 export function ServiceListPreview({ items, isLoading }: Props) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
-  const [sortDirection, setSortDirection] = useState<DIRECTION>(
+  const [sortDirection, setSortDirection] = useState<SortDirection>(
     DEFAULT_SORT_DIRECTION
   );
 
   const onTableChange = useCallback(
     (options: {
       page: { index: number; size: number };
-      sort?: { field: SORT_FIELD; direction: DIRECTION };
+      sort?: { field: SORT_FIELD; direction: SortDirection };
     }) => {
       setPageIndex(options.page.index);
       setPageSize(options.page.size);

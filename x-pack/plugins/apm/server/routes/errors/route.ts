@@ -16,6 +16,7 @@ import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detaile
 import { getErrorGroupSample } from './get_error_groups/get_error_group_sample';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
+import { toSortDirectionRt } from '../../../common/sort_direction_rt';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -27,7 +28,7 @@ const errorsMainStatisticsRoute = createApmServerRoute({
     query: t.intersection([
       t.partial({
         sortField: t.string,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+        sortDirection: toSortDirectionRt,
       }),
       environmentRt,
       kueryRt,
