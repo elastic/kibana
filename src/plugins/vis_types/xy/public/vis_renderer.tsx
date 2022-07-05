@@ -49,7 +49,7 @@ export const getXYVisRenderer: (deps: {
 
       handlers.logRenderTelemetry({
         visType: visTypeTelemetryMap[visType] ?? visType,
-        visGroup: 'agg_based',
+        originatingApp: 'agg_based',
       });
       handlers.done();
     };

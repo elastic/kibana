@@ -74,7 +74,7 @@ export interface IInterpreterRenderEvent<Context = unknown> {
 }
 
 export interface IInterpreterRenderTelemetry {
-  visGroup?: string;
+  originatingApp?: string;
   visType?: string;
   extra?: string | Array<string | undefined>;
   onlyExtra?: boolean;

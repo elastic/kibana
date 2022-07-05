@@ -55,7 +55,7 @@ export const getTimeseriesVisRenderer: (deps: {
 
     const initialRender = () => {
       handlers.logRenderTelemetry({
-        visType: 'tsvb',
+        originatingApp: 'tsvb',
         extra: [
           model.type,
           model.use_kibana_indexes === false ? 'index_pattern_string' : undefined,

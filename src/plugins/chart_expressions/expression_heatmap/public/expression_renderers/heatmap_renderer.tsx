@@ -53,7 +53,7 @@ export const heatmapRenderer: (
     const renderComplete = () => {
       if (config.context?.originatingApp) {
         handlers.logRenderTelemetry({
-          visGroup: config.context.originatingApp,
+          originatingApp: config.context.originatingApp,
           visType: EXPRESSION_HEATMAP_NAME,
         });
       }

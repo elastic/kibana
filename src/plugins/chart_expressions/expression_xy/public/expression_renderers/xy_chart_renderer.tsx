@@ -65,7 +65,7 @@ const extractRenderTelemetryContext = (originatingApp: string, layers: CommonXYL
     );
 
     return {
-      visGroup: originatingApp,
+      originatingApp,
       extra: [
         type,
         isPercentageOrStacked

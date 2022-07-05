@@ -86,26 +86,21 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
-      logRenderTelemetry({ visGroup, visType, extra, onlyExtra }) {
+      logRenderTelemetry({ originatingApp, visType, extra, onlyExtra = false }) {
         const usageCollection = getUsageCollection();
-        const toEvent = (item: string | undefined) =>
-          ['render', visGroup, visType, item].filter(Boolean).join('_');
+        const toEvent = (item?: string) =>
+          ['render', originatingApp, visType, item].filter(Boolean).join('_');
 
-        let uiCounterEvents: string | string[];
+        let uiCounterEvents = onlyExtra ? [] : [toEvent()];
+        const normalizedExtra = (Array.isArray(extra) ? extra : [extra]).filter(Boolean);
 
-        if (!extra || typeof extra === 'string') {
-          uiCounterEvents = toEvent(extra);
-        } else {
-          uiCounterEvents = extra.filter(Boolean).map((item) => toEvent(item));
-
-          if (!onlyExtra) {
-            uiCounterEvents.push(toEvent(undefined));
-          }
+        if (normalizedExtra) {
+          uiCounterEvents = [...uiCounterEvents, ...normalizedExtra.map((item) => toEvent(item))];
         }
 
-        if (usageCollection && (visGroup || visType)) {
+        if (usageCollection && uiCounterEvents?.length) {
           usageCollection.reportUiCounter(
-            (visGroup ?? visType)!,
+            (originatingApp ?? visType)!,
             METRIC_TYPE.COUNT,
             uiCounterEvents
           );

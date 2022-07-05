@@ -43,7 +43,7 @@ export const getDatatableRenderer = (dependencies: {
     const { hasCompatibleActions, isInteractive } = handlers;
 
     const renderComplete = () => {
-      handlers.logRenderTelemetry({ visGroup: 'lens', visType: 'table' });
+      handlers.logRenderTelemetry({ originatingApp: 'lens', visType: 'table' });
       handlers.done();
     };
 

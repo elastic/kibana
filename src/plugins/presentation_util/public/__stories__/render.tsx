@@ -15,6 +15,7 @@ export const defaultHandlers: IInterpreterRenderHandlers = {
   isSyncColorsEnabled: () => false,
   isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
+  logRenderTelemetry: action('logRenderTelemetry'),
   done: action('done'),
   onDestroy: action('onDestroy'),
   reload: action('reload'),

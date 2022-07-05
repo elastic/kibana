@@ -68,7 +68,7 @@ export const getMetricVisRenderer = (
       const renderComplete = () => {
         if (context?.originatingApp) {
           handlers.logRenderTelemetry({
-            visGroup: context.originatingApp,
+            originatingApp: context.originatingApp,
             visType: 'metric',
           });
         }

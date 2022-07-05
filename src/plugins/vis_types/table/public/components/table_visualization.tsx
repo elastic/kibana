@@ -36,8 +36,8 @@ const TableVisualizationComponent = ({
     // Temporary solution: DataGrid should provide onRender callback
     setTimeout(() => {
       handlers.logRenderTelemetry({
+        originatingApp: 'agg_based',
         visType: 'table',
-        visGroup: 'agg_based',
         extra: [!table ? 'split' : undefined],
       });
       handlers.done();
