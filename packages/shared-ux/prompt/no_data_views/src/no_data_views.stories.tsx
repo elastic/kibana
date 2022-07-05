@@ -29,7 +29,7 @@ export default {
 
 export const NoDataViews = (params: Params) => {
   return (
-    <NoDataViewsPromptProvider {...getStoryServices(params)}>
+    <NoDataViewsPromptProvider {...getStoryServices(params, action)}>
       <NoDataViewsPrompt onDataViewCreated={action('onDataViewCreated')} />
     </NoDataViewsPromptProvider>
   );
