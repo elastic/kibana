@@ -11,8 +11,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import { string } from 'io-ts';
+import { i18n } from '@kbn/i18n';
 import type { CspNavigationItem } from './types';
-import { CLOUD_POSTURE } from './translations';
 
 const getClickableBreadcrumb = (
   routeMatch: RouteProps['path'],
@@ -53,7 +53,9 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
 
     const nextBreadcrumbs = [
       {
-        text: CLOUD_POSTURE,
+        text: i18n.translate('xpack.csp.navigation.cloudPostureBreadcrumbLabel', {
+          defaultMessage: 'Cloud Posture',
+        }),
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
           history.push(`/`);

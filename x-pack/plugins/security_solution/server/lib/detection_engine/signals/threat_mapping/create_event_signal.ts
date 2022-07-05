@@ -82,6 +82,7 @@ export const createEventSignal = async ({
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
       runtimeMappings,
+      listClient,
     });
     logger.debug(buildRuleMessage(`create event list get threat lsit finish`));
 

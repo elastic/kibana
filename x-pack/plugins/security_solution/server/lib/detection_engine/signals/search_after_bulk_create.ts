@@ -154,6 +154,7 @@ export const searchAfterAndBulkCreate = async ({
             services,
             logger,
             buildRuleMessage,
+            listClient,
           });
           const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
 
