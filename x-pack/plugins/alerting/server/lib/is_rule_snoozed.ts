@@ -50,7 +50,7 @@ export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
             if (now < lastOccurrenceEndTime)
               return { snoozeEndTime: new Date(lastOccurrenceEndTime), id };
           } catch (e) {
-            throw new Error(`Failed to process RRule ${rRule}: ${e}`);
+            throw new Error(`Failed to process RRule ${JSON.stringify(rRule)}: ${e}`);
           }
         }
         return null;

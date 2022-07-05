@@ -12,6 +12,7 @@ import { verifyAccessAndContext } from './lib';
 import { SnoozeOptions } from '../rules_client';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { validateSnoozeStartDate, validateSnoozeEndDate } from '../lib/validate_snooze_date';
+import { createValidateRruleBy } from '../lib/validate_rrule_by';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -30,9 +31,21 @@ const bodySchema = schema.object({
       interval: schema.maybe(schema.number()),
       until: schema.maybe(schema.string({ validate: validateSnoozeEndDate })),
       count: schema.maybe(schema.number()),
-      byweekday: schema.maybe(schema.arrayOf(schema.string())),
-      bymonthday: schema.maybe(schema.arrayOf(schema.number())),
-      bymonth: schema.maybe(schema.arrayOf(schema.number())),
+      byweekday: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          validate: createValidateRruleBy('byweekday'),
+        })
+      ),
+      bymonthday: schema.maybe(
+        schema.arrayOf(schema.number(), {
+          validate: createValidateRruleBy('bymonthday'),
+        })
+      ),
+      bymonth: schema.maybe(
+        schema.arrayOf(schema.number(), {
+          validate: createValidateRruleBy('bymonth'),
+        })
+      ),
     }),
   }),
 });

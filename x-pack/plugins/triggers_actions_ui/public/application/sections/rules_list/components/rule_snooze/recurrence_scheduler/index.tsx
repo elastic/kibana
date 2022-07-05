@@ -173,7 +173,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
           }
         : {};
     if (frequency === 'CUSTOM') {
-      return { ...customFrequency, ...recurrenceEndProps };
+      return { ...rewriteCustomFrequency(customFrequency), ...recurrenceEndProps };
     }
     return {
       freq: frequency,
@@ -287,4 +287,12 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
       </div>
     </EuiPanel>
   );
+};
+
+const rewriteCustomFrequency = (customFreq: CustomFrequencyState) => {
+  const result: RecurrenceSchedule = { ...customFreq };
+  if (result.byweekday!.length === 0) delete result.byweekday;
+  if (result.bymonth!.length === 0) delete result.bymonth;
+  if (result.bymonthday!.length === 0) delete result.bymonthday;
+  return result;
 };
