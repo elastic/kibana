@@ -54,9 +54,6 @@ export async function persistSavedSearch(
   if (typeof state.rowHeight !== 'undefined') {
     savedSearch.rowHeight = state.rowHeight;
   }
-  if (state.rowsPerPage) {
-    savedSearch.rowsPerPage = state.rowsPerPage;
-  }
 
   if (state.viewMode) {
     savedSearch.viewMode = state.viewMode;

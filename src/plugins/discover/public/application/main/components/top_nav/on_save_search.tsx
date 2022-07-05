@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '../../../../services/saved_searches';
 import { DiscoverServices } from '../../../../build_services';
@@ -82,6 +84,15 @@ async function saveDataSource({
   });
 }
 
+interface SaveSearchModal {
+  indexPattern: DataView;
+  navigateTo: (path: string) => void;
+  savedSearch: SavedSearch;
+  services: DiscoverServices;
+  state: GetStateReturn;
+  onClose?: () => void;
+}
+
 export async function onSaveSearch({
   indexPattern,
   navigateTo,
@@ -89,30 +100,26 @@ export async function onSaveSearch({
   services,
   state,
   onClose,
-}: {
-  indexPattern: DataView;
-  navigateTo: (path: string) => void;
-  savedSearch: SavedSearch;
-  services: DiscoverServices;
-  state: GetStateReturn;
-  onClose?: () => void;
-}) {
+}: SaveSearchModal) {
   const onSave = async ({
     newTitle,
     newCopyOnSave,
     newDescription,
+    newRowsPerPage,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }: {
     newTitle: string;
     newCopyOnSave: boolean;
     newDescription: string;
+    newRowsPerPage?: number;
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
     const currentTitle = savedSearch.title;
     savedSearch.title = newTitle;
     savedSearch.description = newDescription;
+    savedSearch.rowsPerPage = newRowsPerPage;
     const saveOptions: SaveSavedSearchOptions = {
       onTitleDuplicate,
       copyOnSave: newCopyOnSave,
@@ -136,17 +143,69 @@ export async function onSaveSearch({
   };
 
   const saveModal = (
-    <SavedObjectSaveModal
+    <SaveSearchObjectModal
       onSave={onSave}
       onClose={onClose ?? (() => {})}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}
-      objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
-        defaultMessage: 'search',
-      })}
-      showDescription={true}
+      rowsPerPageState={state.appStateContainer.getState().rowsPerPage}
     />
   );
   showSaveModal(saveModal, services.core.i18n.Context);
 }
+
+const SaveSearchObjectModal: React.FC<{
+  title: string;
+  showCopyOnSave: boolean;
+  description?: string;
+  rowsPerPageState?: number;
+  onSave: (props: OnSaveProps & { newRowsPerPage?: number }) => void;
+  onClose: () => void;
+}> = ({ title, description, showCopyOnSave, rowsPerPageState, onSave, onClose }) => {
+  const [newRowsPerPage, setNewRowsPerPage] = useState(rowsPerPageState);
+
+  const renderAdditionalSearchForm = () => {
+    return (
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="discover.topNav.saveModal.rowsPerPageFormRowLabel"
+            defaultMessage="Rows per page"
+          />
+        }
+      >
+        <EuiFieldNumber
+          value={newRowsPerPage}
+          min={1}
+          max={1000}
+          onChange={(event) => {
+            const value = parseInt(event.target.value, 10);
+            if (value) {
+              setNewRowsPerPage(value);
+            }
+          }}
+        />
+      </EuiFormRow>
+    );
+  };
+
+  const onModalSave = (params: OnSaveProps) => {
+    onSave({ ...params, newRowsPerPage });
+  };
+
+  return (
+    <SavedObjectSaveModal
+      onSave={onModalSave}
+      onClose={onClose}
+      title={title}
+      showCopyOnSave={showCopyOnSave}
+      description={description}
+      objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
+        defaultMessage: 'search',
+      })}
+      showDescription={true}
+      options={renderAdditionalSearchForm}
+    />
+  );
+};
