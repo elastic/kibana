@@ -10,6 +10,10 @@ import * as ts from 'typescript';
 import { Path } from '@kbn/type-summarizer-core';
 import isPathInside from 'is-path-inside';
 
+/**
+ * Wrapper class around helpers for determining information
+ * about source files.
+ */
 export class SourceFileMapper {
   constructor(private readonly dtsDir: string) {}
 

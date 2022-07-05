@@ -9,8 +9,13 @@
 import ts from 'typescript';
 
 import { Logger, isAliasSymbol, CliError, describeNode } from '@kbn/type-summarizer-core';
-import { DecSymbol, isDecSymbol, getImportDetails } from './ts_nodes';
+import { DecSymbol, isDecSymbol } from './ts_nodes';
+import { getImportDetails } from './import_details';
 
+/**
+ * Wrapper class around utilities for resolving symbols and producing meaningful errors when those
+ * symbols can't be resolved properly.
+ */
 export class SymbolResolver {
   constructor(private readonly typeChecker: ts.TypeChecker, private readonly log: Logger) {}
 

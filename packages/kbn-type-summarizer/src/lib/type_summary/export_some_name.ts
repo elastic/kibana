@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { DecSymbol } from '../ts_nodes';
+import { NamedExportDetails } from '../export_details';
 
-export class AmbientRef {
-  constructor(public readonly rootSymbol: DecSymbol, public readonly name: string) {}
-}
+/**
+ * Create an export statement for some name already in scope
+ */
+export const exportSomeName = ({ name, typeOnly }: NamedExportDetails, localName: string) => {
+  return `export ${typeOnly ? `type ` : ''}{${
+    name === localName ? name : `${localName} as ${name}`
+  }}\n`;
+};

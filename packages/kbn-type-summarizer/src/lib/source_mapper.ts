@@ -15,6 +15,11 @@ import { SourceFileMapper } from './source_file_mapper';
 
 type SourceMapConsumerEntry = [ts.SourceFile, BasicSourceMapConsumer | undefined];
 
+/**
+ * Wrapper class for utilities that deal with reading the source maps produced by
+ * tsc along with the .d.ts, as well as creating the SourceNode instances we use to
+ * create our type summary along with source maps.
+ */
 export class SourceMapper {
   static async forSourceFiles(
     log: Logger,
@@ -80,8 +85,34 @@ export class SourceMapper {
    * the absolute version of the `repoRelativePackageDir` to the absolute version of the `source`, which should give
    * us the path to the source, relative to the `repoRelativePackageDir`.
    */
-  fixSourcePath(source: string) {
+  private fixSourcePath(source: string) {
     return Path.relative(this.sourceFixDir, Path.join('/', source));
+  }
+
+  private findOriginalPosition(node: ts.Node) {
+    const dtsSource = node.getSourceFile();
+
+    if (!this.consumers.has(dtsSource)) {
+      throw new Error(`sourceFile for [${dtsSource.fileName}] didn't have sourcemaps loaded`);
+    }
+
+    const consumer = this.consumers.get(dtsSource);
+    if (!consumer) {
+      return;
+    }
+
+    const posInDts = dtsSource.getLineAndCharacterOfPosition(node.getStart());
+    const pos = consumer.originalPositionFor({
+      /* ts line column numbers are 0 based, source map column numbers are also 0 based */
+      column: posInDts.character,
+      /* ts line numbers are 0 based, source map line numbers are 1 based */
+      line: posInDts.line + 1,
+    });
+
+    return {
+      ...pos,
+      source: pos.source ? this.fixSourcePath(pos.source) : null,
+    };
   }
 
   getOriginalSourcePath(sourceFile: ts.SourceFile) {
@@ -107,32 +138,6 @@ export class SourceMapper {
     if (pos && pos.line && pos.column && pos.source) {
       return new SourceNode(pos.line, pos.column, pos.source, code, pos.name ?? undefined);
     }
-  }
-
-  findOriginalPosition(node: ts.Node) {
-    const dtsSource = node.getSourceFile();
-
-    if (!this.consumers.has(dtsSource)) {
-      throw new Error(`sourceFile for [${dtsSource.fileName}] didn't have sourcemaps loaded`);
-    }
-
-    const consumer = this.consumers.get(dtsSource);
-    if (!consumer) {
-      return;
-    }
-
-    const posInDts = dtsSource.getLineAndCharacterOfPosition(node.getStart());
-    const pos = consumer.originalPositionFor({
-      /* ts line column numbers are 0 based, source map column numbers are also 0 based */
-      column: posInDts.character,
-      /* ts line numbers are 0 based, source map line numbers are 1 based */
-      line: posInDts.line + 1,
-    });
-
-    return {
-      ...pos,
-      source: pos.source ? this.fixSourcePath(pos.source) : null,
-    };
   }
 
   close() {

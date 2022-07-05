@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { DecSymbol, ExportableDec } from '../ts_nodes';
-import { ExportDetails } from './export_details';
-
-export class CopiedDecs {
-  public readonly size: number;
-  public exported: ExportDetails | undefined;
-
-  constructor(public readonly rootSymbol: DecSymbol, public readonly decs: ExportableDec[]) {
-    this.size = this.decs.length;
-  }
-}
+export { printTypeSummary } from './print_type_summary';

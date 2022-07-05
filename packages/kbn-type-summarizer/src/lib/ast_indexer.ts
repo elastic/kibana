@@ -11,33 +11,35 @@ import ts from 'typescript';
 import { Logger, isAliasSymbol, describeSymbol, SetMap } from '@kbn/type-summarizer-core';
 
 import {
+  AstIndex,
+  AmbientRef,
+  CopiedDecs,
+  ImportedDecs,
+  LocalDecs,
+  NamespaceDec,
+} from './ast_index';
+
+import {
   toExportableDec,
   assertDecSymbol,
   DecSymbol,
   toDecSymbol,
   getSymbolDeclarations,
-  getImportDetails,
-  ImportDetails,
-} from '../ts_nodes';
-import { AmbientRef } from './ambient_ref';
-import { CounterMap } from '../counter_map';
-import { SourceFileMapper } from '../source_file_mapper';
-import { SymbolResolver } from '../symbol_resolver';
-import { AstTraverser } from '../ast_traverser';
-
+} from './ts_nodes';
+import { CounterMap } from './counter_map';
+import { SourceFileMapper } from './source_file_mapper';
+import { SymbolResolver } from './symbol_resolver';
+import { AstTraverser } from './ast_traverser';
+import { ImportDetails, getImportDetails } from './import_details';
 import { ExportDetails, getExportDetails } from './export_details';
-import { CopiedDecs } from './copied_decs';
-import { NamespaceDec } from './namespace_dec';
-import { ImportedDecs } from './imported_decs';
 
-export type LocalDecs = CopiedDecs | NamespaceDec;
-
-export interface AstIndex {
-  imports: ImportedDecs[];
-  locals: LocalDecs[];
-  ambientRefs: AmbientRef[];
-}
-
+/**
+ * The `AstIndexer` is responsible for collecting all the relevant information about the exports of
+ * a sourceFile from it's AST representation.
+ *
+ * The #indexExports method is the primary/only interface to use the AstIndexer and where the
+ * most useful documentation can be found.
+ */
 export class AstIndexer {
   constructor(
     private readonly typeChecker: ts.TypeChecker,
@@ -64,7 +66,12 @@ export class AstIndexer {
     });
 
     if (decs.length) {
-      return new CopiedDecs(rootSymbol, decs);
+      return {
+        type: 'copied decs',
+        decs,
+        rootSymbol,
+        exported: undefined,
+      };
     }
 
     return null;
@@ -101,7 +108,11 @@ export class AstIndexer {
     });
 
     if (!imports.length) {
-      return new AmbientRef(externalRootSymbol, aliases[0].getName());
+      return {
+        type: 'ambient ref',
+        rootSymbol: externalRootSymbol,
+        name: aliases[0].getName(),
+      };
     }
 
     const mergedImports: ImportDetails[] = [];
@@ -125,7 +136,13 @@ export class AstIndexer {
     }
 
     return mergedImports.map(
-      (id) => new ImportedDecs(externalRootSymbol, id, exports, localUsageCount)
+      (id): ImportedDecs => ({
+        type: 'imported decs',
+        rootSymbol: externalRootSymbol,
+        details: id,
+        exports: exports || [],
+        localUsageCount,
+      })
     );
   }
 
@@ -137,9 +154,59 @@ export class AstIndexer {
 
   /**
    * This method determines all the relevant metadata about the exports of
-   * a specific sourcefile. It indexes all the local declarations, imported
+   * a specific `sourceFile` AST node. It indexes all the local declarations, imported
    * declarations, and ambient refs that should end up in the public type
    * summary file.
+   *
+   * To do this we use "symbols" from the `TypeChecker` provided by TypeScript. A
+   * symbol in the `TypeChecker` is not related to `Symbol`s in JS. They describe
+   * a specific sourceFile/Type/Value in the source code, and allow us to traverse
+   * the source code from the AST. For instance, we can ask the `TypeChecker` for
+   * the symbol of an `Identifier` node in the AST (the node representing most named
+   * "keywords"; `a` and `foo` in `a(foo)` are both `Identifiers`). Every identifier
+   * in the source code should map to a specific symbol in the type system, which would
+   * be returned by the `TypeChecker`. These symbols then list the "declarations" which
+   * define/declare this symbol. This is often a `class {}` or `interface {}` declaration
+   * but there are many types of declarations that could have defined this symbol.
+   * Additionally, if function overloads or interface extensions are used the symbol may
+   * have multiple declarations.
+   *
+   * Symbols can be "alias" symbols, indicating that they are declared in the source code
+   * but actually point to another declaration, either by variable assignment or via
+   * imports. When a type/value is imported from another file, the references to that
+   * type/value use alias symbols, which are declared by the import itself but point
+   * elsewhere. Thankfully, the `TypeChecker` has an API to traverse up the alias chain
+   * to the "root symbol". While indexing exports we regularly use the `SymbolResolver`
+   * to convert a symbol to it's `rootSymbol`, so that we can compare two references and
+   * determine if they are pointing to the same value.
+   *
+   * To determine the full index of exports for a source file we start by asking the
+   * TypeChecker for the list of exported symbols of some sourceFile, then we traverse
+   * from those symbols to their declarations. If the symbol has declarations that are
+   * in node_modules, then either an `ImportedDecs` or `AmbientRef` object is added to
+   * the index, depending on wether the symbol is ever found to be imported.
+   *
+   *    `ImportedDecs` describe how to import the declarations for that exported
+   *        symbol in the type summary file.
+   *    `AmbientRef` objects describe names that are expected to be declared ambiently,
+   *        and therefore should be considered reserved in the type summary file.
+   *
+   * If any declarations for an exported symbol are local to the source code then they will
+   * result in a `LocalDecs` object being added to the index. Before adding a `LocalDecs`
+   * object to the index the AST of each local declaration is traversed to find
+   * references to other symbols. These references cause additional `ImportedDecs`,
+   * `AmbientRef`, or `LocalDecs` objects to be added to the index before the exported
+   * `LocalDecs`, ensuring that referenced declarations come first in the resulting type
+   * summary file and that all code referenced by the decalarations is includes in the type
+   * symmary file.
+   *
+   * Once all referenced declarations are found and added to the index the exported
+   * `LocalDecs` object is added to the index.
+   *
+   * To ensure that we don't end up with duplicate declarations all `LocalDecs`, `ImportedDecs`
+   * and `AmbientRef` objects track the "root symbol" that they represent and any time we
+   * encounter a new symbol which might need to be added to the index it is first resolved
+   * to it's root symbol to ensure we haven't already handled it.
    */
   indexExports(sourceFile: ts.SourceFile): AstIndex {
     return this.log.step('indexExports()', sourceFile.fileName, () => {
@@ -225,13 +292,15 @@ export class AstIndexer {
               !this.sources.isExternal(firstDec)
             ) {
               const exports = this.typeChecker.getExportsOfModule(rootSymbol);
-              const ns = new NamespaceDec(
+              const ns: NamespaceDec = {
+                type: 'namespace dec',
                 rootSymbol,
-                firstDec,
-                new Map<string, DecSymbol>(
+                exported: undefined,
+                members: new Map<string, DecSymbol>(
                   exports.map((s) => [s.name, this.symbols.toRootSymbol(s)])
-                )
-              );
+                ),
+                sourceFile: firstDec,
+              };
               localDecsBySymbol.set(rootSymbol, ns);
 
               for (const s of exports) {

@@ -9,7 +9,7 @@
 import * as ts from 'typescript';
 
 import { describeNode, isAliasSymbol } from '@kbn/type-summarizer-core';
-import { isExportableDec, getSymbolDeclarations } from '../ts_nodes';
+import { isExportableDec, getSymbolDeclarations } from './ts_nodes';
 
 export type ExportDetails = NamedExportDetails | DefaultExportDetails;
 
@@ -23,7 +23,10 @@ export interface NamedExportDetails {
   name: string;
 }
 
-export function getExportName(node: ts.Node): string {
+/**
+ * Determine the export name of an export symbol
+ */
+function getExportName(node: ts.Node): string {
   if (ts.isExportSpecifier(node) || isExportableDec(node)) {
     return node.name.text;
   }
@@ -31,7 +34,12 @@ export function getExportName(node: ts.Node): string {
   throw new Error(`unsure how to get export name from ${describeNode(node)}`);
 }
 
-export function isTypeOnlyExported(typeChecker: ts.TypeChecker, exportSymbol: ts.Symbol) {
+/**
+ * Determine if an export symbol was type-only exported. This would be true if the top-level export
+ * statement is type only, or if there are other export statements up the alias chain where the
+ * parent symbol was type-only exported.
+ */
+function isTypeOnlyExported(typeChecker: ts.TypeChecker, exportSymbol: ts.Symbol) {
   if (getSymbolDeclarations(exportSymbol).some((e) => ts.isTypeOnlyImportOrExportDeclaration(e))) {
     return true;
   }
@@ -45,6 +53,11 @@ export function isTypeOnlyExported(typeChecker: ts.TypeChecker, exportSymbol: ts
   return false;
 }
 
+/**
+ * Given an exported symbol, determine details about the export from the symbols declarations
+ * including if it was a type-only export, a default export, or a named export and the name
+ * it was exported with
+ */
 export function getExportDetails(
   typeChecker: ts.TypeChecker,
   exportSymbol: ts.Symbol

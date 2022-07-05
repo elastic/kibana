@@ -15,7 +15,7 @@ import { AstIndexer } from './lib/ast_indexer';
 import { SourceFileMapper } from './lib/source_file_mapper';
 import { SymbolResolver } from './lib/symbol_resolver';
 import { AstTraverser } from './lib/ast_traverser';
-import { TypeSummary } from './lib/type_summary';
+import { printTypeSummary } from './lib/type_summary';
 import { DtsSnipper } from './lib/dts_snipper';
 
 /**
@@ -82,7 +82,7 @@ export async function summarizePackage(log: Logger, options: SummarizePacakgeOpt
   );
 
   const snipper = new DtsSnipper(traverse, symbols, log);
-  const summary = new TypeSummary(sourceMaps, snipper, log, index).getSourceNode();
+  const summary = printTypeSummary(sourceMaps, snipper, log, index);
 
   sourceMaps.close();
 

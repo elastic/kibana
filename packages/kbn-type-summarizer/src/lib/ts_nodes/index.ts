@@ -11,4 +11,3 @@ export * from './export_from';
 export * from './exportable_node';
 export * from './imports';
 export * from './syntax_kind';
-export * from './import_details';

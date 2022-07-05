@@ -16,30 +16,49 @@ interface BaseImportDetails<T extends ts.Node> {
   node: T;
 }
 
+/**
+ * Indicates that the import was using `import * as X from 'y'` syntax
+ */
 export interface NamespaceImportDetails
   extends BaseImportDetails<ts.NamespaceImport | ts.NamespaceExport> {
   type: 'namespace';
 }
 
+/**
+ * Indicates that the import was using `import X from 'y'` syntax
+ */
 export interface DefaultImportDetails extends BaseImportDetails<ts.ImportClause> {
   type: 'default';
 }
 
+/**
+ * Indicates that the import was using `import { X } from 'y'` syntax, along
+ * with the name of the imported value from the source module.
+ */
 export interface NamedImportDetails
   extends BaseImportDetails<ts.ImportSpecifier | ts.ExportSpecifier> {
   type: 'named';
   sourceName: string;
 }
 
+/**
+ * The different types of ImportDetails that can be returned from `getImportDetails()`
+ */
 export type ImportDetails = NamespaceImportDetails | DefaultImportDetails | NamedImportDetails;
 
+/**
+ * Type guard for nodes which have a module specifier
+ */
 function hasModuleSpecifier<T extends ts.ImportDeclaration | ts.ExportDeclaration>(
   node: T
 ): node is T & { moduleSpecifier: ts.StringLiteral } {
   return !!(node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier));
 }
 
-function getModuleSpecifier(node: ts.ImportDeclaration | ts.ExportDeclaration) {
+/**
+ * Determine the module request from a node which might have one, otherwise throw
+ */
+function getReq(node: ts.ImportDeclaration | ts.ExportDeclaration) {
   if (hasModuleSpecifier(node)) {
     return node.moduleSpecifier.text;
   }
@@ -49,6 +68,13 @@ function getModuleSpecifier(node: ts.ImportDeclaration | ts.ExportDeclaration) {
   );
 }
 
+/**
+ * Given any node, determine if it represents a node that is related to an import statement
+ * and determine the details about that import, including type, req, source name (for named imports)
+ * and if the import is type-only.
+ *
+ * This also works to get the "import" details from `export ... from '...'` statements.
+ */
 export function getImportDetails(node: ts.Node): ImportDetails | undefined {
   // import { bar } from './bar'
   if (ts.isImportSpecifier(node)) {
@@ -56,13 +82,14 @@ export function getImportDetails(node: ts.Node): ImportDetails | undefined {
       type: 'named',
       typesOnly: ts.isTypeOnlyImportOrExportDeclaration(node),
       sourceName: node.propertyName?.text ?? node.name.text,
-      req: getModuleSpecifier(node.parent.parent.parent),
+      req: getReq(node.parent.parent.parent),
       node,
     };
   }
 
   // `export { bar } from './bar'` or `export { x }`
   if (ts.isExportSpecifier(node)) {
+    // if there isn't a related module specifier then this export isn't a type of "import"
     if (!node.parent.parent.moduleSpecifier) {
       return;
     }
@@ -71,7 +98,7 @@ export function getImportDetails(node: ts.Node): ImportDetails | undefined {
       type: 'named',
       typesOnly: ts.isTypeOnlyImportOrExportDeclaration(node),
       sourceName: node.propertyName?.text ?? node.name.text,
-      req: getModuleSpecifier(node.parent.parent),
+      req: getReq(node.parent.parent),
       node,
     };
   }
@@ -81,7 +108,7 @@ export function getImportDetails(node: ts.Node): ImportDetails | undefined {
     return {
       type: 'default',
       typesOnly: ts.isTypeOnlyImportOrExportDeclaration(node),
-      req: getModuleSpecifier(node.parent),
+      req: getReq(node.parent),
       node,
     };
   }
@@ -91,7 +118,7 @@ export function getImportDetails(node: ts.Node): ImportDetails | undefined {
     return {
       type: 'namespace',
       typesOnly: ts.isTypeOnlyImportOrExportDeclaration(node),
-      req: getModuleSpecifier(node.parent.parent),
+      req: getReq(node.parent.parent),
       node,
     };
   }
@@ -101,7 +128,7 @@ export function getImportDetails(node: ts.Node): ImportDetails | undefined {
     return {
       type: 'namespace',
       typesOnly: ts.isTypeOnlyImportOrExportDeclaration(node),
-      req: getModuleSpecifier(node.parent),
+      req: getReq(node.parent),
       node,
     };
   }

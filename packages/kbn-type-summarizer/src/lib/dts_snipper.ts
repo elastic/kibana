@@ -15,16 +15,34 @@ import { SymbolResolver } from './symbol_resolver';
 
 const COMMENT_TRIM = /^(\s+)(\/\*|\*|\/\/)/;
 
+/**
+ * A Snippet which represents an arbitrary bit of source code. The `value`
+ * of these snippets will be included verbatim in the type summary output
+ */
 export interface SourceSnippet {
   type: 'source';
   value: string;
 }
 
+/**
+ * A Snippet which represents an existing `export` modifier, or the location where
+ * one should exist if it needs to exist. When printing the `Snippet`s to
+ * the type summary file we will determine if the structure bring printed
+ * should be inline-exported, and if so replace this snippet with the
+ * relevant export/export-type keyword(s). If the structure shouldn't be
+ * exported inline then we will simply ignore this snippet.
+ */
 export interface ExportSnippet {
   type: 'export';
   noExportRequiresDeclare: boolean;
 }
 
+/**
+ * A Snippet which represents an identifier in the source. These snippets will
+ * be replaced with `SourceNode` objects in the type summary output so that
+ * the `.map` file can be generated which maps the identifiers to their original
+ * source location.
+ */
 export interface IdentifierSnippet {
   type: 'indentifier';
   rootSymbol: DecSymbol;
@@ -35,6 +53,14 @@ export interface IdentifierSnippet {
 
 export type Snippet = SourceSnippet | ExportSnippet | IdentifierSnippet;
 
+/**
+ * The DtsSnipper is responsible for taking the source text of an AST node
+ * and converting it into an array of `Snippet` objects, which allow us to
+ * reuse the code structure from `.d.ts` produced by TS but replace specific
+ * snippets of that text with different values or `SourceNode`s from the
+ * `source-map` library which allows is how we produce source-maps for our
+ * type summary.
+ */
 export class DtsSnipper {
   constructor(
     private readonly traverse: AstTraverser,
@@ -108,12 +134,7 @@ export class DtsSnipper {
   }
 
   /**
-   * Converts an AST node to a list of Snippet objects which are one of several types:
-   *  a) SourceSnippet: a bit or source code text
-   *  b) ExportSnippet: a placeholder for either where an existing export modifier was found
-   *      or where an export modifier should be injected if the node should be exported "inline"
-   *  c) IdentifierSnippet: a snippet describing an identifier in the source, which might need
-   *      to be renamed based on the names determined for the final public type summary file.
+   * Converts an AST node to a list of `Snippet` objects
    */
   toSnippets(root: ts.Node): Snippet[] {
     return this.log.verboseStep('snipper.toSnippets()', root, () => {

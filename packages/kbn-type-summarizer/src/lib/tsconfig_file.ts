@@ -10,7 +10,10 @@ import * as ts from 'typescript';
 
 import { CliError, Path } from '@kbn/type-summarizer-core';
 
-export function readTsConfigFile(path: string) {
+/**
+ * Read TS's special variable of JSON from a file into a plain object
+ */
+function readTsConfigFile(path: string) {
   const json = ts.readConfigFile(path, ts.sys.readFile);
 
   if (json.error) {
@@ -20,6 +23,9 @@ export function readTsConfigFile(path: string) {
   return json.config;
 }
 
+/**
+ * Read a tsconfig.json file from dist and parse it using utilities from the typscript package.
+ */
 export function loadTsConfigFile(path: string) {
   return ts.parseJsonConfigFileContent(readTsConfigFile(path) ?? {}, ts.sys, Path.dirname(path));
 }

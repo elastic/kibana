@@ -13,6 +13,10 @@ import { isExportableDec } from './ts_nodes';
 import { SymbolResolver } from './symbol_resolver';
 import { SourceFileMapper } from './source_file_mapper';
 
+/**
+ * This object is responsible for exposing utilities for traversing the AST nodes
+ * to find relevant identifiers within.
+ */
 export class AstTraverser {
   constructor(
     private readonly symbols: SymbolResolver,
@@ -31,6 +35,15 @@ export class AstTraverser {
     return false;
   }
 
+  /**
+   * Traverses through the children of `root` deeply to find all identifiers which are
+   * references. Ignores idenfiers which are names of structres (like names of properties,
+   * arguments, function declarations, etc) as well as a few other identifiers which we
+   * are pretty sure never could point to a reference outside of this node.
+   *
+   * The goal here is to find all identifiers which we can then convert into symbols to
+   * find all the types/values that are referenced by the passed `root` AST node.
+   */
   findReferencedIdentifiers(root: ts.Node): Set<ts.Identifier> {
     return this.log.verboseStep('traverse.findReferencedIdentifiers()', root, () => {
       const queue = new Set([root]);
@@ -113,6 +126,12 @@ export class AstTraverser {
     });
   }
 
+  /**
+   * Returns "structural" identifiers for a `root` node, which includes the name of the `root` and
+   * the name of any "members", like the names of properties in an interface or class, the name of
+   * options in an enum, all so we can identify their posistions later on and make sure they reference
+   * their source location in the source maps.
+   */
   findStructuralIdentifiers(root: ts.Node): Set<ts.Identifier> {
     return this.log.verboseStep('traverse.findStructuralIdentifiers()', root, () => {
       const queue = new Set([root]);

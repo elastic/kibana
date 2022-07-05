@@ -8,6 +8,9 @@
 
 import * as ts from 'typescript';
 
+/**
+ * Parse a tsconfig file and list of input files into a TypeScript Program object.
+ */
 export function createTsProject(tsConfig: ts.ParsedCommandLine, rootNames: string[]) {
   return ts.createProgram({
     rootNames,

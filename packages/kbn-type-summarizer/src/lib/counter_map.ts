@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/**
+ * A simple Map wrapper which counts the number of times a value `K` is
+ * passed to `incr()`.
+ */
 export class CounterMap<K> {
   private counters = new Map<K, number>();
 
