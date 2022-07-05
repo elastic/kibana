@@ -159,19 +159,23 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
     }
   }
 
+  const buildArgumentText = ({required, exclusive, optional}: {required?: string; exclusive?: string; optional?: string}) => {
+    return `${required ? required : ''} ${exclusive ? exclusive : ''} ${
+      optional && optional.length > 0 ? `[${optional}]` : ''
+    }`.trim();
+  }
+
   return exclusiveOrArgs.length > 0
     ? exclusiveOrArgs.map((exclusiveArg) => {
-        return `${requiredArgs} ${exclusiveArg} ${
-          optionalArgs.length > 0 ? `[${optionalArgs}]` : ''
-        }`.trim();
+        return buildArgumentText({required: requiredArgs, exclusive: exclusiveArg, optional: optionalArgs});
       })
-    : [`${requiredArgs} ${optionalArgs.length > 0 ? `[${optionalArgs}]` : ''}`.trim()];
+    : [buildArgumentText({required: requiredArgs, optional: optionalArgs})];
 };
 
 export const parsedPidOrEntityIdParameter = (parameters: {
   pid?: ParsedArgData;
   entityId?: ParsedArgData;
-}): EndpointActionDataParameterTypes | undefined => {
+}): EndpointActionDataParameterTypes => {
   if (parameters.pid) {
     return { pid: Number(parameters.pid[0]) };
   } else if (parameters.entityId) {

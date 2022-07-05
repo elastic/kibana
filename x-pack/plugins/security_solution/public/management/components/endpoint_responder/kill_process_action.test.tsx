@@ -88,7 +88,7 @@ describe('When using the kill-process action from response actions console', () 
     enterConsoleCommand(renderResult, 'kill-process --pid 123 --entityId 123wer');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports one and only one of the following arguments: --pid, --entityId'
+      'This command supports only one of the following arguments: --pid, --entityId'
     );
   });
 
@@ -97,11 +97,11 @@ describe('When using the kill-process action from response actions console', () 
     enterConsoleCommand(renderResult, 'kill-process');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command supports one and only one of the following arguments: --pid, --entityId'
+      'This command supports only one of the following arguments: --pid, --entityId'
     );
   });
 
-  it('should check the pid has a passed value', async () => {
+  it('should check the pid has a given value', async () => {
     await render();
     enterConsoleCommand(renderResult, 'kill-process --pid');
 
@@ -119,7 +119,7 @@ describe('When using the kill-process action from response actions console', () 
     );
   });
 
-  it('should check the entity id has a passed value', async () => {
+  it('should check the entityId has a given value', async () => {
     await render();
     enterConsoleCommand(renderResult, 'kill-process --entityId');
 

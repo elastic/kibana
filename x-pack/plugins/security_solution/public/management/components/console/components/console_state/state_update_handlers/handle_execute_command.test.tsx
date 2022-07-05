@@ -228,7 +228,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'This command supports one and only one of the following arguments: --foo, --bar'
+        'This command supports only one of the following arguments: --foo, --bar'
       );
     });
   });
@@ -239,7 +239,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'This command supports one and only one of the following arguments: --foo, --bar'
+        'This command supports only one of the following arguments: --foo, --bar'
       );
     });
   });
