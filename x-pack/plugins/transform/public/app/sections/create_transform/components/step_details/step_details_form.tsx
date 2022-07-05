@@ -875,7 +875,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 'xpack.transform.stepDetailsForm.transformNumRetriesHelpText',
                 {
                   defaultMessage:
-                    'Defines the number of retries on a recoverable failure before the transform task is marked as failed. If not set, the cluster setting `xpack.transform.num_transform_failure_retries` or a default of 10 will be used.',
+                    'The number of retries on a recoverable failure before the transform task is marked as failed. Set it to -1 for infinite retries.',
                 }
               )}
             >
