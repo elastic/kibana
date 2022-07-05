@@ -19,6 +19,7 @@ import {
   takeUntil,
   tap,
   shareReplay,
+  map,
 } from 'rxjs';
 
 import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
@@ -155,6 +156,19 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       channelName: 'kibana-server',
       version: currentKibanaVersion,
       sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
+    });
+
+    analytics.registerContextProvider({
+      name: 'telemetry labels',
+      context$: this.config$.pipe(map(({ labels }) => ({ labels }))),
+      schema: {
+        labels: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+          },
+        },
+      },
     });
 
     const config$ = this.config$;

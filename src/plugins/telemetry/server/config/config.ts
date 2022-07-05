@@ -32,6 +32,8 @@ const configSchema = schema.object({
   sendUsageFrom: schema.oneOf([schema.literal('server'), schema.literal('browser')], {
     defaultValue: 'server',
   }),
+  // Used for extra enrichment of telemetry
+  labels: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
 export type TelemetryConfigType = TypeOf<typeof configSchema>;
@@ -45,6 +47,7 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
     sendUsageFrom: true,
     sendUsageTo: true,
     hidePrivacyStatement: true,
+    labels: true,
   },
   deprecations: () => [
     (cfg) => {
