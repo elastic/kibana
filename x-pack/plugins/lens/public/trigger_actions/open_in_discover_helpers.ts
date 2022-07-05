@@ -28,7 +28,14 @@ export function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embedda
 
 export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {
   if (!hasDiscoverAccess) return false;
-  return isLensEmbeddable(embeddable) && (await embeddable.canViewUnderlyingData());
+  try {
+    return isLensEmbeddable(embeddable) && (await embeddable.canViewUnderlyingData());
+  } catch (e) {
+    // Fetching underlying data failed, log the error and behave as if the action is not compatible
+    // eslint-disable-next-line no-console
+    console.error(e);
+    return false;
+  }
 }
 
 export async function execute({

@@ -285,6 +285,7 @@ export class LensPlugin {
         inspector: plugins.inspector,
         spaces: plugins.spaces,
         theme: core.theme,
+        uiSettings: core.uiSettings,
       };
     };
 

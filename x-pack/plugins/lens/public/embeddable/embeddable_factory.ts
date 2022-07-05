@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Capabilities, HttpSetup, ThemeServiceStart } from '@kbn/core/public';
+import type {
+  Capabilities,
+  HttpSetup,
+  IUiSettingsClient,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter';
@@ -44,6 +49,7 @@ export interface LensEmbeddableStartServices {
   datasourceMap: DatasourceMap;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -102,6 +108,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       theme,
       inspector,
       spaces,
+      uiSettings,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../async_services');
@@ -130,6 +137,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         usageCollection,
         theme,
         spaces,
+        uiSettings,
       },
       input,
       parent

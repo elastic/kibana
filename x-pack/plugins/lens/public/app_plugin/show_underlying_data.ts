@@ -13,6 +13,7 @@ import {
   buildEsQuery,
   FilterStateStore,
   TimeRange,
+  EsQueryConfig,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -156,7 +157,8 @@ export function combineQueryAndFilters(
   query: Query | Query[] | undefined,
   filters: Filter[],
   meta: LayerMetaInfo,
-  dataViews: DataViewBase[] | undefined
+  dataViews: DataViewBase[] | undefined,
+  esQueryConfig: EsQueryConfig
 ) {
   const queries: {
     kuery: Query[];
@@ -203,7 +205,12 @@ export function combineQueryAndFilters(
     newFilters.push(
       buildCustomFilter(
         meta.id!,
-        buildEsQuery(dataView, { language: filtersLanguage, query: queryExpression }, []),
+        buildEsQuery(
+          dataView,
+          { language: filtersLanguage, query: queryExpression },
+          [],
+          esQueryConfig
+        ),
         false,
         false,
         i18n.translate('xpack.lens.app.lensContext', {
@@ -227,7 +234,7 @@ export function combineQueryAndFilters(
       newFilters.push(
         buildCustomFilter(
           meta.id!,
-          buildEsQuery(dataView, disabledQuery, []),
+          buildEsQuery(dataView, disabledQuery, [], esQueryConfig),
           true,
           false,
           label,

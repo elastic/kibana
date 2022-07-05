@@ -12,7 +12,7 @@ import { useStore } from 'react-redux';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { exporters } from '@kbn/data-plugin/public';
+import { exporters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -499,7 +499,8 @@ export const LensTopNavMenu = ({
             query,
             filters,
             meta,
-            indexPatterns
+            indexPatterns,
+            getEsQueryConfig(uiSettings)
           );
 
           return discover.locator!.getRedirectUrl({
