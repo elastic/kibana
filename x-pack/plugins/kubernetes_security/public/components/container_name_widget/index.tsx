@@ -81,8 +81,8 @@ export const ContainerNameWidget = ({
 
   const sorting: EuiTableSortingType<ContainerNameArrayDataValue> = {
     sort: {
-      field: sortField,
-      direction: sortDirection,
+      field: sortField as keyof ContainerNameArrayDataValue,
+      direction: sortDirection as 'desc' | 'asc',
     },
     enableAllColumns: true,
   };
@@ -103,7 +103,7 @@ export const ContainerNameWidget = ({
                 onFilterAdded: () => {},
                 ownFocus: false,
                 showTooltip: true,
-                value: aggData.key,
+                value: aggData.key as string,
               });
               // here below
             });
@@ -123,7 +123,7 @@ export const ContainerNameWidget = ({
                 onFilterAdded: () => {},
                 ownFocus: false,
                 showTooltip: true,
-                value: aggData.key,
+                value: aggData.key as string,
               });
               // here below
             });
