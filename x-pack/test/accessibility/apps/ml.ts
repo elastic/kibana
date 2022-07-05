@@ -10,11 +10,13 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
+  const kibanaServer = getService('kibanaServer');
 
   describe('ml Accessibility', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
     });
@@ -22,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('for user with full ML access', function () {
