@@ -18,7 +18,97 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-browser-mocks",
+        "id": "def-common.createHttpFetchError",
+        "type": "Function",
+        "tags": [],
+        "label": "createHttpFetchError",
+        "description": [],
+        "signature": [
+          "(message: string, name: string, request: Request, response: Response | undefined, body: TResponseBody | undefined) => ",
+          "IHttpFetchError",
+          "<unknown>"
+        ],
+        "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "Request"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Response | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser-mocks",
+            "id": "def-common.createHttpFetchError.$5",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "TResponseBody | undefined"
+            ],
+            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [

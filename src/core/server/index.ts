@@ -466,8 +466,8 @@ export type {
   OptInConfig,
   ShipperClassConstructor,
   TelemetryCounter,
+  TelemetryCounterType,
 } from '@kbn/analytics-client';
-export { TelemetryCounterType } from '@kbn/analytics-client';
 export type {
   AnalyticsServiceSetup,
   AnalyticsServicePreboot,

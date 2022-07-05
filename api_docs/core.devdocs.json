@@ -4230,14 +4230,6 @@
                 "path": "x-pack/plugins/ml/common/util/errors/errors.test.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/state/effects/fetch_effect.test.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/state/effects/fetch_effect.test.ts"
-              },
-              {
                 "plugin": "@kbn/core-http-browser-internal",
                 "path": "packages/core/http/core-http-browser-internal/src/http_fetch_error.ts"
               },
