@@ -355,7 +355,7 @@ export const lastValueOperation: OperationDefinition<
               'xpack.lens.indexPattern.lastValue.showArrayValuesWithTopValuesWarning',
               {
                 defaultMessage:
-                  'When you show array values, you are unable to use this field to rank Top values.',
+                  'When you show array values, you are unable to use this field to rank top values.',
               }
             )}
             isInvalid={currentColumn.params.showArrayValues && usingTopValues}

@@ -1012,10 +1012,10 @@ function getLabelForRankFunctions(operationType: string) {
           defaultMessage: 'Sort rank by',
         }),
       ];
-    case 'percentile':
+    case 'percentile_rank':
       return [
         i18n.translate('xpack.lens.indexPattern.terms.percentile.', {
-          defaultMessage: 'Rank percentile',
+          defaultMessage: 'Percentile ranks',
         }),
       ];
     default:
