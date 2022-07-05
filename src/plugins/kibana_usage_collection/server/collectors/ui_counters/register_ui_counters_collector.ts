@@ -57,29 +57,29 @@ export function transformRawUsageCounterObject(
 }
 
 export async function fetchUiCounters({ soClient }: CollectorFetchContext) {
-  const { saved_objects: rawUsageCounters } =
-    await soClient.find<UsageCountersSavedObjectAttributes>({
-      type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-      fields: ['count', 'counterName', 'counterType', 'domainId'],
-      filter: `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
-      perPage: 10000,
-    });
+  const finder = soClient.createPointInTimeFinder<UsageCountersSavedObjectAttributes>({
+    type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+    fields: ['count', 'counterName', 'counterType', 'domainId'],
+    filter: `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
+    perPage: 100,
+  });
 
-  return {
-    dailyEvents: Object.values(
-      rawUsageCounters.reduce((acc, raw) => {
-        try {
-          const event = transformRawUsageCounterObject(raw);
-          if (event) {
-            acc[raw.id] = event;
-          }
-        } catch (_) {
-          // swallow error; allows sending successfully transformed objects.
+  const dailyEvents: UiCounterEvent[] = [];
+
+  for await (const { saved_objects: rawUsageCounters } of finder.find()) {
+    rawUsageCounters.forEach((raw) => {
+      try {
+        const event = transformRawUsageCounterObject(raw);
+        if (event) {
+          dailyEvents.push(event);
         }
-        return acc;
-      }, {} as Record<string, UiCounterEvent>)
-    ),
-  };
+      } catch (_) {
+        // swallow error; allows sending successfully transformed objects.
+      }
+    });
+  }
+
+  return { dailyEvents };
 }
 
 export function registerUiCountersUsageCollector(usageCollection: UsageCollectionSetup) {

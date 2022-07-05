@@ -8,7 +8,12 @@
 
 import moment from 'moment';
 import { type Observable, takeUntil, timer } from 'rxjs';
-import { ISavedObjectsRepository, Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
+import {
+  ISavedObjectsRepository,
+  Logger,
+  SavedObjectsFindResult,
+  SavedObjectsServiceSetup,
+} from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
 import {
@@ -44,6 +49,21 @@ export const transformByApplicationViews = (
   }, {} as ApplicationUsageTelemetryReport);
 };
 
+async function fetchAllSavedObjects<T>(
+  soRepository: ISavedObjectsRepository,
+  soType: string
+): Promise<Array<SavedObjectsFindResult<T>>> {
+  const finder = soRepository.createPointInTimeFinder<T>({ type: soType, perPage: 100 });
+
+  const allSavedObjects: Array<SavedObjectsFindResult<T>> = [];
+
+  for await (const { saved_objects: savedObjects } of finder.find()) {
+    allSavedObjects.push(...savedObjects);
+  }
+
+  return allSavedObjects;
+}
+
 export function registerApplicationUsageCollector(
   logger: Logger,
   usageCollection: UsageCollectionSetup,
@@ -67,18 +87,9 @@ export function registerApplicationUsageCollector(
         if (typeof savedObjectsClient === 'undefined') {
           return;
         }
-        const [
-          { saved_objects: rawApplicationUsageTotals },
-          { saved_objects: rawApplicationUsageDaily },
-        ] = await Promise.all([
-          savedObjectsClient.find<ApplicationUsageTotal>({
-            type: SAVED_OBJECTS_TOTAL_TYPE,
-            perPage: 10000, // We only have 44 apps for now. This limit is OK.
-          }),
-          savedObjectsClient.find<ApplicationUsageDaily>({
-            type: SAVED_OBJECTS_DAILY_TYPE,
-            perPage: 10000, // We can have up to 44 apps * 91 days = 4004 docs. This limit is OK
-          }),
+        const [rawApplicationUsageTotals, rawApplicationUsageDaily] = await Promise.all([
+          fetchAllSavedObjects<ApplicationUsageTotal>(savedObjectsClient, SAVED_OBJECTS_TOTAL_TYPE),
+          fetchAllSavedObjects<ApplicationUsageDaily>(savedObjectsClient, SAVED_OBJECTS_DAILY_TYPE),
         ]);
 
         const applicationUsageFromTotals = rawApplicationUsageTotals.reduce(
