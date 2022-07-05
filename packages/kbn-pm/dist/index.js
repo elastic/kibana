@@ -8910,9 +8910,11 @@ const BootstrapCommand = {
     const kibanaProjectPath = ((_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path) || '';
     const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true;
     const reporter = _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_1__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"]);
-    const timings = []; // Force install is set in case a flag is passed into yarn kbn bootstrap
+    const timings = []; // Force install is set in case a flag is passed into yarn kbn bootstrap or
+    // our custom logic have determined there is a chance node_modules have been manually deleted and as such bazel
+    // tracking mechanism is no longer valid
 
-    const forceInstall = !!options && options['force-install'] === true; // Install bazel machinery tools if needed
+    const forceInstall = !!options && options['force-install'] === true || (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["haveNodeModulesBeenManuallyDeleted"])(kibanaProjectPath)); // Install bazel machinery tools if needed
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath); // Setup remote cache settings in .bazelrc.cache if needed
 
@@ -54857,8 +54859,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "runIBazel", function() { return _run__WEBPACK_IMPORTED_MODULE_2__["runIBazel"]; });
 
-/* harmony import */ var _yarn_integrity__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(547);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "removeYarnIntegrityFileIfExists", function() { return _yarn_integrity__WEBPACK_IMPORTED_MODULE_3__["removeYarnIntegrityFileIfExists"]; });
+/* harmony import */ var _yarn__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(547);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "removeYarnIntegrityFileIfExists", function() { return _yarn__WEBPACK_IMPORTED_MODULE_3__["removeYarnIntegrityFileIfExists"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "haveNodeModulesBeenManuallyDeleted", function() { return _yarn__WEBPACK_IMPORTED_MODULE_3__["haveNodeModulesBeenManuallyDeleted"]; });
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -61285,6 +61289,7 @@ function observeReadable(readable) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeYarnIntegrityFileIfExists", function() { return removeYarnIntegrityFileIfExists; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "haveNodeModulesBeenManuallyDeleted", function() { return haveNodeModulesBeenManuallyDeleted; });
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(252);
@@ -61296,6 +61301,7 @@ __webpack_require__.r(__webpack_exports__);
  * Side Public License, v 1.
  */
 
+ // yarn integrity file checker
 
 async function removeYarnIntegrityFileIfExists(nodeModulesPath) {
   try {
@@ -61307,6 +61313,26 @@ async function removeYarnIntegrityFileIfExists(nodeModulesPath) {
     }
   } catch {// no-op
   }
+} // yarn and bazel integration checkers
+
+async function areNodeModulesPresent(kbnRootPath) {
+  try {
+    return await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["isDirectory"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'node_modules'));
+  } catch {
+    return false;
+  }
+}
+
+async function haveBazelFoldersBeenCreatedBefore(kbnRootPath) {
+  try {
+    return (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["isDirectory"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-bin', 'packages'))) || (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["isDirectory"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-kibana', 'packages'))) || (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["isDirectory"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-out', 'host')));
+  } catch {
+    return false;
+  }
+}
+
+async function haveNodeModulesBeenManuallyDeleted(kbnRootPath) {
+  return !(await areNodeModulesPresent(kbnRootPath)) && (await haveBazelFoldersBeenCreatedBefore(kbnRootPath));
 }
 
 /***/ }),

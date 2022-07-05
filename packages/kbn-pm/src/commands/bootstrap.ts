@@ -17,7 +17,12 @@ import { ICommand } from './';
 import { readYarnLock } from '../utils/yarn_lock';
 import { sortPackageJson } from '../utils/sort_package_json';
 import { validateDependencies } from '../utils/validate_dependencies';
-import { installBazelTools, removeYarnIntegrityFileIfExists, runBazel } from '../utils/bazel';
+import {
+  installBazelTools,
+  haveNodeModulesBeenManuallyDeleted,
+  removeYarnIntegrityFileIfExists,
+  runBazel,
+} from '../utils/bazel';
 import { setupRemoteCache } from '../utils/bazel/setup_remote_cache';
 
 export const BootstrapCommand: ICommand = {
@@ -37,8 +42,12 @@ export const BootstrapCommand: ICommand = {
     const reporter = CiStatsReporter.fromEnv(log);
     const timings = [];
 
-    // Force install is set in case a flag is passed into yarn kbn bootstrap
-    const forceInstall = !!options && options['force-install'] === true;
+    // Force install is set in case a flag is passed into yarn kbn bootstrap or
+    // our custom logic have determined there is a chance node_modules have been manually deleted and as such bazel
+    // tracking mechanism is no longer valid
+    const forceInstall =
+      (!!options && options['force-install'] === true) ||
+      (await haveNodeModulesBeenManuallyDeleted(kibanaProjectPath));
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
