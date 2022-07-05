@@ -12,24 +12,18 @@ import { createPromiseFromStreams } from '@kbn/utils';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { ImportQuerySchemaDecoded, importQuerySchema } from '@kbn/securitysolution-io-ts-types';
+import type { ImportQuerySchemaDecoded } from '@kbn/securitysolution-io-ts-types';
+import { importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
-import {
-  ImportRulesSchema as ImportRulesResponseSchema,
-  importRulesSchema as importRulesResponseSchema,
-} from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
+import type { ImportRulesSchema as ImportRulesResponseSchema } from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
+import { importRulesSchema as importRulesResponseSchema } from '../../../../../common/detection_engine/schemas/response/import_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { ConfigType } from '../../../../config';
-import { SetupPlugins } from '../../../../plugin';
+import type { ConfigType } from '../../../../config';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import {
-  ImportRuleResponse,
-  BulkError,
-  isBulkError,
-  isImportRegular,
-  buildSiemResponse,
-} from '../utils';
+import type { ImportRuleResponse, BulkError } from '../utils';
+import { isBulkError, isImportRegular, buildSiemResponse } from '../utils';
 
 import {
   getTupleDuplicateErrorsAndUniqueRules,
@@ -38,14 +32,12 @@ import {
 } from './utils';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { HapiReadableStream } from '../../rules/types';
-import {
-  importRules as importRulesHelper,
-  RuleExceptionsPromiseFromStreams,
-} from './utils/import_rules_utils';
+import type { HapiReadableStream } from '../../rules/types';
+import type { RuleExceptionsPromiseFromStreams } from './utils/import_rules_utils';
+import { importRules as importRulesHelper } from './utils/import_rules_utils';
 import { getReferencedExceptionLists } from './utils/gather_referenced_exceptions';
 import { importRuleExceptions } from './utils/import_rule_exceptions';
-import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
+import type { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 

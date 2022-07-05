@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../../../mocks';
 import type { ConsoleTestSetup } from '../../../mocks';
 import { waitFor } from '@testing-library/react';
-import { ConsoleProps } from '../../../types';
+import type { ConsoleProps } from '../../../types';
 
 describe('When a Console command is entered by the user', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;

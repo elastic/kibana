@@ -7,13 +7,14 @@
 
 /* eslint-disable complexity */
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { PartialRule } from '@kbn/alerting-plugin/server';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 
-import { UpdateRulesOptions } from './types';
+import type { UpdateRulesOptions } from './types';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
-import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
+import type { RuleParams } from '../schemas/rule_schemas';
+import { internalRuleUpdate } from '../schemas/rule_schemas';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 class UpdateError extends Error {

@@ -7,12 +7,10 @@
 
 import moment from 'moment';
 
-import { entriesNested, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  getEntryValue,
-  getExceptionOperatorSelect,
-  BuilderEntry,
-} from '@kbn/securitysolution-list-utils';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { entriesNested } from '@kbn/securitysolution-io-ts-list-types';
+import type { BuilderEntry } from '@kbn/securitysolution-list-utils';
+import { getEntryValue, getExceptionOperatorSelect } from '@kbn/securitysolution-list-utils';
 
 import React from 'react';
 import { EuiDescriptionListDescription, EuiText, EuiToolTip } from '@elastic/eui';

@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiContextMenu,
-  EuiContextMenuPanel,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiContextMenuPanelDescriptor,
-} from '@elastic/eui';
+import type { EuiSwitchEvent, EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanel, EuiSwitch } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import {

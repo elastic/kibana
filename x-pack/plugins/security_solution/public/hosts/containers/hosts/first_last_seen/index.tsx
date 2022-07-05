@@ -12,14 +12,14 @@ import { Subscription } from 'rxjs';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  HostsQueries,
+import type {
   HostFirstLastSeenStrategyResponse,
   HostFirstLastSeenRequestOptions,
 } from '../../../../../common/search_strategy/security_solution';
+import { HostsQueries } from '../../../../../common/search_strategy/security_solution';
 
 import * as i18n from './translations';
-import { Direction, DocValueFields } from '../../../../../common/search_strategy';
+import type { Direction, DocValueFields } from '../../../../../common/search_strategy';
 
 const ID = 'firstLastSeenHostQuery';
 

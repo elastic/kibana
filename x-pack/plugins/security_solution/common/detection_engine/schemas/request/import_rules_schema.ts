@@ -7,8 +7,16 @@
 
 import * as t from 'io-ts';
 
-import {
+import type {
   Actions,
+  From,
+  RiskScoreMapping,
+  Threats,
+  SeverityMapping,
+  ThrottleOrNull,
+  MaxSignals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import {
   DefaultActionsArray,
   DefaultFromString,
   DefaultIntervalString,
@@ -18,10 +26,8 @@ import {
   DefaultThreatArray,
   DefaultThrottleNull,
   DefaultToString,
-  From,
   machine_learning_job_id,
   risk_score,
-  RiskScoreMapping,
   threat_index,
   items_per_search,
   concurrent_searches,
@@ -30,28 +36,34 @@ import {
   threat_mapping,
   threat_language,
   threat_indicator_path,
-  Threats,
   type,
   language,
   severity,
-  SeverityMapping,
-  ThrottleOrNull,
-  MaxSignals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import type { Version } from '@kbn/securitysolution-io-ts-types';
 import {
   DefaultVersionNumber,
-  Version,
   DefaultStringArray,
   DefaultBooleanTrue,
   OnlyFalseAllowed,
 } from '@kbn/securitysolution-io-ts-types';
-import { DefaultListArray, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { DefaultListArray } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  RuleId,
+  Tags,
+  To,
+  References,
+  Enabled,
+  FalsePositives,
+  Interval,
+  Author,
+} from '../common';
 import {
   description,
   anomaly_threshold,
   filters,
-  RuleId,
   index,
   data_view_id,
   output_index,
@@ -60,14 +72,8 @@ import {
   timeline_title,
   meta,
   name,
-  Tags,
-  To,
   threshold,
   note,
-  References,
-  Enabled,
-  FalsePositives,
-  Interval,
   query,
   rule_id,
   id,
@@ -79,7 +85,6 @@ import {
   license,
   rule_name_override,
   timestamp_override,
-  Author,
   timestamp_field,
   event_category_override,
   tiebreaker_field,

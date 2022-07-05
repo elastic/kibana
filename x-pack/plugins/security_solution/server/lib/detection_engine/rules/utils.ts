@@ -28,10 +28,10 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-import { SavedObjectReference } from '@kbn/core/server';
-import { RuleAction, RuleNotifyWhenType, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import {
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { RuleAction, RuleNotifyWhenType, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type {
   DescriptionOrUndefined,
   AnomalyThresholdOrUndefined,
   QueryOrUndefined,
@@ -63,23 +63,23 @@ import {
   RequiredFieldArray,
   SetupGuide,
 } from '../../../../common/detection_engine/schemas/common';
-import { PartialFilter } from '../types';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { PartialFilter } from '../types';
+import type { RuleParams } from '../schemas/rule_schemas';
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
-import {
+import type {
   LegacyIRuleActionsAttributes,
   LegacyRuleActions,
   LegacyRuleAlertSavedObjectAction,
 } from '../rule_actions/legacy_types';
-import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from '../rule_actions/legacy_saved_object_mappings';
-import { LegacyMigrateParams } from './types';
+import type { LegacyMigrateParams } from './types';
 
 export const calculateInterval = (
   interval: string | undefined,

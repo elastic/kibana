@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateRulesOptions } from './types';
+import type { CreateRulesOptions } from './types';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
 export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({

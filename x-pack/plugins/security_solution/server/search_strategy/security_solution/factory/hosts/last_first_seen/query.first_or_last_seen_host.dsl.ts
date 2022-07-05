@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostFirstLastSeenRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
+import type { HostFirstLastSeenRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 export const buildFirstOrLastSeenHostQuery = ({
   hostName,

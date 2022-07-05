@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   From,
   MachineLearningJobIdOrUndefined,
   RiskScore,
@@ -24,12 +24,12 @@ import {
   SeverityMappingOrUndefined,
   MaxSignals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Version } from '@kbn/securitysolution-io-ts-types';
+import type { Version } from '@kbn/securitysolution-io-ts-types';
 
 import type { ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter } from '@kbn/es-query';
-import { RuleTypeParams as AlertingRuleTypeParams } from '@kbn/alerting-plugin/common';
-import {
+import type { RuleTypeParams as AlertingRuleTypeParams } from '@kbn/alerting-plugin/common';
+import type {
   AnomalyThresholdOrUndefined,
   Description,
   NoteOrUndefined,

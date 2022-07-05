@@ -12,7 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { NetworkDetailsLink } from '../../../../common/components/links';
 import { IpOverview } from '../../../../network/components/details';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';

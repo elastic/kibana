@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  Direction,
-  HostFirstLastSeenRequestOptions,
-  HostsQueries,
-} from '../../../../../../../common/search_strategy';
+import type { HostFirstLastSeenRequestOptions } from '../../../../../../../common/search_strategy';
+import { Direction, HostsQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: HostFirstLastSeenRequestOptions = {
   defaultIndex: [

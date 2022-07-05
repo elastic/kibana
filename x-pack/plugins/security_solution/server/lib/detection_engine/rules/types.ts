@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -42,11 +42,11 @@ import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-ty
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import {
+import type { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
+import type { RuleAlertAction } from '../../../../common/detection_engine/types';
+import type {
   FalsePositives,
   RuleId,
   Immutable,
@@ -101,9 +101,9 @@ import {
   SetupGuide,
 } from '../../../../common/detection_engine/schemas/common';
 
-import { PartialFilter } from '../types';
-import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
+import type { PartialFilter } from '../types';
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { IRuleExecutionLogForRoutes } from '../rule_execution_log';
 
 export type RuleAlertType = SanitizedRule<RuleParams>;
 

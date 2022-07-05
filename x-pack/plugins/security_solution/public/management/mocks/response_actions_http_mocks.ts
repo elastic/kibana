@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   ACTION_DETAILS_ROUTE,
@@ -16,11 +16,9 @@ import {
   UNISOLATE_HOST_ROUTE,
   KILL_PROCESS_ROUTE,
 } from '../../../common/endpoint/constants';
-import {
-  httpHandlerMockFactory,
-  ResponseProvidersInterface,
-} from '../../common/mock/endpoint/http_handler_mock_factory';
-import {
+import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
+import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
+import type {
   ActionDetailsApiResponse,
   ActionListApiResponse,
   HostIsolationResponse,

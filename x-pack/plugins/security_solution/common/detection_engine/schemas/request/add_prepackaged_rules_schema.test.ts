@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
-  addPrepackagedRulesSchema,
+import type {
   AddPrepackagedRulesSchemaDecoded,
   AddPrepackagedRulesSchema,
 } from './add_prepackaged_rules_schema';
+import { addPrepackagedRulesSchema } from './add_prepackaged_rules_schema';
 
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';

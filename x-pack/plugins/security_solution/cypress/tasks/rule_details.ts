@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Exception } from '../objects/exception';
+import type { Exception } from '../objects/exception';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN,

@@ -6,9 +6,9 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { Inspect, Maybe, Direction } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
-import { HostsFields } from '../common';
+import type { Inspect, Maybe, Direction } from '../../../common';
+import type { RequestOptionsPaginated } from '../..';
+import type { HostsFields } from '../common';
 
 export interface HostFirstLastSeenRequestOptions
   extends Partial<RequestOptionsPaginated<HostsFields>> {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { initActionRoutes } from './action';
-import { OsqueryAppContext } from '../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { initSavedQueryRoutes } from './saved_query';
 import { initStatusRoutes } from './status';
 import { initFleetWrapperRoutes } from './fleet_wrapper';

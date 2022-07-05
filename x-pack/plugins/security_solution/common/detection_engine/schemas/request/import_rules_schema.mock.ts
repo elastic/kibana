@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ImportRulesSchema, ImportRulesSchemaDecoded } from './import_rules_schema';
+import type { ImportRulesSchema, ImportRulesSchemaDecoded } from './import_rules_schema';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 
 export const getImportRulesSchemaMock = (ruleId = 'rule-1'): ImportRulesSchema => ({

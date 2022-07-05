@@ -11,7 +11,7 @@ import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
-import { LensAttributes } from './types';
+import type { LensAttributes } from './types';
 
 const owner = APP_ID;
 

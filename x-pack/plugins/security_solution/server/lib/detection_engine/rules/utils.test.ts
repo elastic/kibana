@@ -16,15 +16,15 @@ import {
   legacyMigrate,
   getUpdatedActionsParams,
 } from './utils';
-import { RuleAction, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RuleParams } from '../schemas/rule_schemas';
+import type { RuleAction, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleParams } from '../schemas/rule_schemas';
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../common/constants';
-import { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRuleActions } from '../rule_actions/legacy_types';
+import type { LegacyRuleActions } from '../rule_actions/legacy_types';
 import {
   getEmptyFindResult,
   legacyGetSiemNotificationRuleActionsSOResultWithSingleHit,

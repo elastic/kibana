@@ -9,7 +9,7 @@ import { getRulesToInstall } from './get_rules_to_install';
 import { getRuleMock } from '../routes/__mocks__/request_responses';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
-import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request';
+import type { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request';
 
 describe('get_rules_to_install', () => {
   test('should return empty array if both rule sets are empty', () => {

@@ -9,26 +9,26 @@ import uuid from 'uuid';
 
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
-import {
+import type {
   InternalRuleCreate,
   RuleParams,
   TypeSpecificRuleParams,
   BaseRuleParams,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
-import { RuleExecutionSummary } from '../../../../common/detection_engine/schemas/common';
-import {
+import type { RuleExecutionSummary } from '../../../../common/detection_engine/schemas/common';
+import type {
   CreateRulesSchema,
   CreateTypeSpecific,
   FullResponseSchema,
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
-import { AppClient } from '../../../types';
+import type { AppClient } from '../../../types';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import {
@@ -38,7 +38,7 @@ import {
   transformActions,
 } from '../rules/utils';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRuleActions } from '../rule_actions/legacy_types';
+import type { LegacyRuleActions } from '../rule_actions/legacy_types';
 import { mergeRuleExecutionSummary } from '../rule_execution_log';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema

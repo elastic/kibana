@@ -8,14 +8,14 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   HostFirstLastSeenStrategyResponse,
   HostsQueries,
   HostFirstLastSeenRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildFirstOrLastSeenHostQuery } from './query.first_or_last_seen_host.dsl';
 
 export const firstOrLastSeenHost: SecuritySolutionFactory<HostsQueries.firstOrLastSeen> = {

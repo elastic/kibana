@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 export interface IQueryPayload {
   attributes?: {

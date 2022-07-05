@@ -6,17 +6,15 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { Logger } from '@kbn/core/server';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import {
-  patchRulesBulkSchema,
-  PatchRulesBulkSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/patch_rules_bulk_schema';
+import type { Logger } from '@kbn/core/server';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import type { PatchRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/patch_rules_bulk_schema';
+import { patchRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_bulk_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../utils';
@@ -24,7 +22,7 @@ import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { readRules } from '../../rules/read_rules';
-import { PartialFilter } from '../../types';
+import type { PartialFilter } from '../../types';
 import { legacyMigrate } from '../../rules/utils';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
 

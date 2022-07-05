@@ -8,7 +8,7 @@
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
 
-import { RulesSchema } from './rules_schema';
+import type { RulesSchema } from './rules_schema';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 

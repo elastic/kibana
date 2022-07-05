@@ -7,14 +7,15 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { defaults } from 'lodash/fp';
-import { PartialRule } from '@kbn/alerting-plugin/server';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
-import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
-import { PatchRulesOptions } from './types';
+import type { RuleParams } from '../schemas/rule_schemas';
+import { internalRuleUpdate } from '../schemas/rule_schemas';
+import type { PatchRulesOptions } from './types';
 import {
   calculateInterval,
   calculateName,

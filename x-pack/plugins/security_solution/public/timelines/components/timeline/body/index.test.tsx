@@ -25,14 +25,16 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
-import { StatefulBody, Props } from '.';
-import { Sort } from './sort';
+import type { Props } from '.';
+import { StatefulBody } from '.';
+import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
-import { createStore, State } from '../../../../common/store';
+import type { State } from '../../../../common/store';
+import { createStore } from '../../../../common/store';
 
 jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');

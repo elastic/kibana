@@ -10,14 +10,10 @@ import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import {
-  buildHostNamesFilter,
-  DocValueFields,
-  HostItem,
-  RiskSeverity,
-} from '../../../../common/search_strategy';
+import type { DocValueFields, HostItem, RiskSeverity } from '../../../../common/search_strategy';
+import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
-import { DescriptionList } from '../../../../common/utility_types';
+import type { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import {
@@ -30,7 +26,7 @@ import { NetworkDetailsLink } from '../../../common/components/links';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
-import { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
+import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
 import {
   FirstLastSeenHost,

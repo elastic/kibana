@@ -11,11 +11,11 @@ import { render } from '@testing-library/react';
 import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
 import { HeaderActions } from './header_actions';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
-import {
+import type {
   ColumnHeaderOptions,
   HeaderActionProps,
-  TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions } from '../../../../store/timeline';
 import { getColumnHeader } from '../column_headers/helpers';
 

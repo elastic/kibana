@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PatchRulesSchema, PatchRulesSchemaDecoded } from './patch_rules_schema';
+import type { PatchRulesSchema, PatchRulesSchemaDecoded } from './patch_rules_schema';
 
 export const getPatchRulesSchemaMock = (): PatchRulesSchema => ({
   description: 'some description',

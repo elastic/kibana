@@ -18,7 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConsoleCodeBlock } from './console_code_block';
 import { getArgumentsForCommand } from '../service/parsed_command_input';
-import { CommandDefinition } from '../types';
+import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 

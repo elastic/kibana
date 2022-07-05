@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiIconTip,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButton,
-  EuiTableFieldDataColumnType,
   EuiHideFor,
   EuiBadge,
   EuiBadgeGroup,
@@ -24,7 +24,7 @@ import { transparentize } from 'polished';
 import { AndOrBadge } from '../../../and_or_badge';
 import { getEmptyValue } from '../../../empty_value';
 import * as i18n from '../../translations';
-import { FormattedEntry } from '../../types';
+import type { FormattedEntry } from '../../types';
 
 const MyEntriesDetails = styled(EuiFlexItem)`
   ${({ theme }) => css`

@@ -14,7 +14,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { HostItem } from '../../../../../common/search_strategy';
+import type { HostItem } from '../../../../../common/search_strategy';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';

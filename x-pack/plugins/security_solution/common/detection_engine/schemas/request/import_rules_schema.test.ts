@@ -8,13 +8,12 @@
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import {
-  importRulesPayloadSchema,
+import type {
   ImportRulesPayloadSchema,
   ImportRulesSchema,
-  importRulesSchema,
   ImportRulesSchemaDecoded,
 } from './import_rules_schema';
+import { importRulesPayloadSchema, importRulesSchema } from './import_rules_schema';
 import {
   getImportRulesSchemaMock,
   getImportRulesSchemaDecodedMock,

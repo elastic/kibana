@@ -6,16 +6,14 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import {
-  PatchRulesSchemaDecoded,
-  patchRulesSchema,
-} from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import type { PatchRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import { patchRulesSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
@@ -25,7 +23,7 @@ import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
-import { PartialFilter } from '../../types';
+import type { PartialFilter } from '../../types';
 
 export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.patch(

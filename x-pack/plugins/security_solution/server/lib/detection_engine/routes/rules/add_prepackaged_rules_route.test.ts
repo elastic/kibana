@@ -13,10 +13,10 @@ import {
   getBasicEmptySearchResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../__mocks__';
-import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
 import { addPrepackedRulesRoute, createPrepackagedRules } from './add_prepackaged_rules_route';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';

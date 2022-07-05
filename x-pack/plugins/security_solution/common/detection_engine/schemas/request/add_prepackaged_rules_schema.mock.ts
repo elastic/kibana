@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AddPrepackagedRulesSchema,
   AddPrepackagedRulesSchemaDecoded,
 } from './add_prepackaged_rules_schema';

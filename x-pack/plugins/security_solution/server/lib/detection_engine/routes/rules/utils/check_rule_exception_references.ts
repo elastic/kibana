@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ListArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { BulkError, createBulkErrorObject } from '../../utils';
+import type { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { BulkError } from '../../utils';
+import { createBulkErrorObject } from '../../utils';
 
 /**
  * Helper to check if all the exception lists referenced on a

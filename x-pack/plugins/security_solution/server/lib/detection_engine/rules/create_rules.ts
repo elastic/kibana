@@ -7,7 +7,7 @@
 
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
@@ -18,8 +18,8 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   SERVER_APP_ID,
 } from '../../../../common/constants';
-import { CreateRulesOptions } from './types';
-import { PartialFilter } from '../types';
+import type { CreateRulesOptions } from './types';
+import type { PartialFilter } from '../types';
 import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 export const createRules = async ({

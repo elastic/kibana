@@ -9,8 +9,9 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
-import { SolutionNavPanel, SolutionNavPanelProps } from './solution_grouped_nav_panel';
-import { DefaultSideNavItem } from './types';
+import type { SolutionNavPanelProps } from './solution_grouped_nav_panel';
+import { SolutionNavPanel } from './solution_grouped_nav_panel';
+import type { DefaultSideNavItem } from './types';
 import { bottomNavOffset } from '../../../lib/helpers';
 
 const mockUseIsWithinBreakpoints = jest.fn(() => true);

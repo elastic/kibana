@@ -11,7 +11,8 @@ import React, { useMemo } from 'react';
 import { useFirstLastSeenHost } from '../../containers/hosts/first_last_seen';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { Direction, DocValueFields } from '../../../../common/search_strategy';
+import type { DocValueFields } from '../../../../common/search_strategy';
+import { Direction } from '../../../../common/search_strategy';
 
 export enum FirstLastSeenHostType {
   FIRST_SEEN = 'first-seen',

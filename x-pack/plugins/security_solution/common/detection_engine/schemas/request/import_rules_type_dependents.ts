@@ -7,7 +7,7 @@
 
 import { isMlRule } from '../../../machine_learning/helpers';
 import { isThresholdRule } from '../../utils';
-import { ImportRulesSchema } from './import_rules_schema';
+import type { ImportRulesSchema } from './import_rules_schema';
 
 export const validateAnomalyThreshold = (rule: ImportRulesSchema): string[] => {
   if (isMlRule(rule.type)) {

@@ -23,7 +23,7 @@ import { useTimelineEvents } from '../../../timelines/containers';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
-import { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
+import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 
 jest.mock('../../lib/kibana');
 

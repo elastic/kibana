@@ -32,7 +32,7 @@ import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
@@ -47,7 +47,7 @@ import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
-import { LandingPages } from './landing_pages';
+import type { LandingPages } from './landing_pages';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;

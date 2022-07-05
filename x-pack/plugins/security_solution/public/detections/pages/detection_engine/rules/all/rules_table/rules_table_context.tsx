@@ -9,7 +9,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../../common/constants';
 import { invariant } from '../../../../../../../common/utils/invariant';
 import { useKibana, useUiSetting$ } from '../../../../../../common/lib/kibana';
-import {
+import type {
   FilterOptions,
   PaginationOptions,
   Rule,

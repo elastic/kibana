@@ -6,7 +6,7 @@
  */
 
 import { isMlRule } from '../../../machine_learning/helpers';
-import { PatchRulesSchema } from './patch_rules_schema';
+import type { PatchRulesSchema } from './patch_rules_schema';
 
 export const validateQuery = (rule: PatchRulesSchema): string[] => {
   if (isMlRule(rule.type)) {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import type { RulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 
 import { patchRules } from './patch_rules';
 import { getPatchRulesOptionsMock, getPatchMlRulesOptionsMock } from './patch_rules.mock';
-import { PatchRulesOptions } from './types';
+import type { PatchRulesOptions } from './types';
 import { getRuleMock } from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 

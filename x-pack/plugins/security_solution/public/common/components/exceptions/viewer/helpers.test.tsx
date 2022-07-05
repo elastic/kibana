@@ -8,7 +8,7 @@
 import moment from 'moment-timezone';
 
 import { getFormattedEntries, formatEntry, getDescriptionListContent } from './helpers';
-import { FormattedEntry } from '../types';
+import type { FormattedEntry } from '../types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getEntriesArrayMock } from '@kbn/lists-plugin/common/schemas/types/entries.mock';
 import { getEntryMatchMock } from '@kbn/lists-plugin/common/schemas/types/entry_match.mock';

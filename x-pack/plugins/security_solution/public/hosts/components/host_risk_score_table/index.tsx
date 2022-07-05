@@ -9,12 +9,8 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import {
-  Columns,
-  Criteria,
-  ItemsPerRow,
-  PaginatedTable,
-} from '../../../common/components/paginated_table';
+import type { Columns, Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostRiskScoreColumns } from './columns';
@@ -23,9 +19,9 @@ import type {
   RiskScoreItem,
   RiskScoreSortField,
   RiskSeverity,
+  RiskScoreFields,
 } from '../../../../common/search_strategy';
-import { RiskScoreFields } from '../../../../common/search_strategy';
-import { State } from '../../../common/store';
+import type { State } from '../../../common/store';
 import * as i18n from '../hosts_table/translations';
 import * as i18nHosts from './translations';
 
@@ -33,7 +29,7 @@ import { SeverityBadges } from '../../../common/components/severity/severity_bad
 import { SeverityBar } from '../../../common/components/severity/severity_bar';
 import { SeverityFilterGroup } from '../../../common/components/severity/severity_filter_group';
 
-import { SeverityCount } from '../../../common/components/severity/types';
+import type { SeverityCount } from '../../../common/components/severity/types';
 
 export const rowItems: ItemsPerRow[] = [
   {
