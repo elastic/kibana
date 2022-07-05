@@ -128,7 +128,7 @@ describe('SearchBar', () => {
   const FILTER_BAR = '[data-test-subj="unifiedFilterBar"]';
   const QUERY_BAR = '.kbnQueryBar';
   const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
-  const EDITOR = '[data-test-subj="unifiedTextLandEditor"]';
+  const EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
     jest.clearAllMocks();
