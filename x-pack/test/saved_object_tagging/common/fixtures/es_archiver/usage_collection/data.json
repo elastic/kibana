@@ -87,17 +87,13 @@
   "type": "visualization",
   "attributes": {
     "title": "Vis with ref to tag-1 and tag-3",
+    "visState": "{}",
+    "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
     "description": "",
-    "hits": 0,
+    "version": 1,
     "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
-    },
-    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-    "panelsJSON": "[]",
-    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
-    "timeRestore": true,
-    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
-    "version": 1
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+    }
   },
   "references": [
     {
@@ -120,17 +116,13 @@
   "type": "visualization",
   "attributes": {
     "title": "Vis with ref to tag-3",
+    "visState": "{}",
+    "uiStateJSON": "{\"spy\":{\"mode\":{\"name\":null,\"fill\":false}}}",
     "description": "",
-    "hits": 0,
+    "version": 1,
     "kibanaSavedObjectMeta": {
-      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
-    },
-    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
-    "panelsJSON": "[]",
-    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
-    "timeRestore": true,
-    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
-    "version": 1
+      "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+    }
   },
   "references": [
     {
