@@ -45,6 +45,7 @@ export interface BaseSnoozePanelProps {
   navigateToScheduler: (sched?: SnoozeSchedule) => void;
   isLoading: boolean;
   onRemoveAllSchedules: (ids: string[]) => void;
+  inPopover?: boolean;
 }
 
 export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
@@ -57,6 +58,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   navigateToScheduler,
   onRemoveAllSchedules,
   hasTitle,
+  inPopover = false,
 }) => {
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
@@ -354,22 +356,26 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
         </>
       )}
       {showCancel && (
-        <EuiPopoverFooter>
-          <EuiFlexGroup>
-            <EuiFlexItem grow>
-              <EuiButton
-                isLoading={isLoading}
-                color="danger"
-                onClick={onCancelSnooze}
-                data-test-subj="ruleSnoozeCancel"
-              >
-                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
-                  defaultMessage: 'Cancel snooze',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
+        <>
+          {!inPopover && <EuiSpacer size="s" />}
+          <EuiPopoverFooter>
+            {!inPopover && <EuiSpacer size="s" />}
+            <EuiFlexGroup>
+              <EuiFlexItem grow>
+                <EuiButton
+                  isLoading={isLoading}
+                  color="danger"
+                  onClick={onCancelSnooze}
+                  data-test-subj="ruleSnoozeCancel"
+                >
+                  {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
+                    defaultMessage: 'Cancel snooze',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        </>
       )}
       <EuiSpacer size="s" />
       {isRemoveAllModalVisible && (

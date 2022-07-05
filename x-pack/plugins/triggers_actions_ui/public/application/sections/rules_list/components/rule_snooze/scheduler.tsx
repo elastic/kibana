@@ -37,6 +37,7 @@ interface PanelOpts {
   onCancelSchedules: (ids: string[]) => void;
   initialSchedule: SnoozeSchedule | null;
   isLoading: boolean;
+  inPopover?: boolean;
 }
 
 export interface ComponentOpts extends PanelOpts {
@@ -94,6 +95,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   initialSchedule,
   isLoading,
   onCancelSchedules,
+  inPopover = false,
 }) => {
   // These two states form a state machine for whether or not the user's clicks on the datepicker apply to the start/end date or start/end time
   // - State A: After the user clicks a start date:
@@ -345,17 +347,21 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         })}
       </EuiButton>
       {initialSchedule && (
-        <EuiPopoverFooter>
-          <EuiFlexGroup>
-            <EuiFlexItem grow>
-              <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
-                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
-                  defaultMessage: 'Delete schedule',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
+        <>
+          {!inPopover && <EuiSpacer size="s" />}
+          <EuiPopoverFooter>
+            {!inPopover && <EuiSpacer size="s" />}
+            <EuiFlexGroup>
+              <EuiFlexItem grow>
+                <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
+                  {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
+                    defaultMessage: 'Delete schedule',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        </>
       )}
     </>
   );
