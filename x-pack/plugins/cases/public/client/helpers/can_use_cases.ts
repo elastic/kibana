@@ -31,6 +31,7 @@ export const canUseCases =
   ): CasesPermissions => {
     const aggregatedPermissions = owners.reduce<CasesPermissions>(
       (acc, owner) => {
+        // TODO: this won't work for general cases, I think we need 'general' there instead of 'cases'
         const userCapabilitiesForOwner = getUICapabilities(capabilities[`${owner}Cases`]);
 
         acc.create = acc.create || userCapabilitiesForOwner.create;
