@@ -20,7 +20,7 @@ import {
   EndpointActionResponse,
   LogsEndpointActionResponse,
   ActionResponseOutput,
-  RunningProcessesEntry,
+  ProcessesEntry,
 } from '../../../common/endpoint/types';
 import { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -126,9 +126,9 @@ const getOutputDataIfNeeded = (
         output: {
           type: 'json',
           content: {
-            entries: endpointActionGenerator.randomResponseActionRunningProcesses(100),
+            entries: endpointActionGenerator.randomResponseActionProcesses(100),
           },
         },
-      } as { output: ActionResponseOutput<RunningProcessesEntry> })
+      } as { output: ActionResponseOutput<ProcessesEntry> })
     : {};
 };
