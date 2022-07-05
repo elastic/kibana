@@ -6,7 +6,15 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiDescriptionList, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConsoleCodeBlock, ConsoleCodeBlockBold } from './console_code_block';
 import { getArgumentsForCommand } from '../service/parsed_command_input';
@@ -38,27 +46,19 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
         compressed
         type="column"
         className="descriptionList-20_80"
-        listItems={[
-          { title: <ConsoleCodeBlock>{'Usage'}</ConsoleCodeBlock>, description: usageHelp },
-        ]}
+        listItems={[ {title: <ConsoleCodeBlock>{"Usage"}</ConsoleCodeBlock>, description: usageHelp}] }
         descriptionProps={additionalProps}
         titleProps={additionalProps}
-      />
-      {commandDef.exampleUsage && (
-        <EuiDescriptionList
-          compressed
-          type="column"
-          className="descriptionList-20_80"
-          listItems={[
-            {
-              title: <ConsoleCodeBlock>{'Example'}</ConsoleCodeBlock>,
-              description: <ConsoleCodeBlock>{commandDef.exampleUsage}</ConsoleCodeBlock>,
-            },
-          ]}
-          descriptionProps={additionalProps}
-          titleProps={additionalProps}
         />
-      )}
+        <EuiSpacer size="s"></EuiSpacer>
+        {commandDef.exampleUsage && ( <EuiDescriptionList
+        compressed
+        type="column"
+        className="descriptionList-20_80"
+        listItems={[ {title: <ConsoleCodeBlock>{"Example"}</ConsoleCodeBlock>, description: <ConsoleCodeBlock>{commandDef.exampleUsage}</ConsoleCodeBlock>}] }
+        descriptionProps={additionalProps}
+        titleProps={additionalProps}
+        />)}
     </>
   );
 });
@@ -123,21 +123,17 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
   }, [commandDef.args, hasArgs]);
 
   return (
-    <EuiPanel color="transparent" data-test-subj={getTestId('commandUsage')}>
+    <EuiPanel paddingSize='none' color="transparent" data-test-subj={getTestId('commandUsage')}>
       <EuiDescriptionList
         compressed
         type="column"
         className="descriptionList-20_80"
-        listItems={[
-          {
-            title: <ConsoleCodeBlock>{'About'}</ConsoleCodeBlock>,
-            description: <ConsoleCodeBlock>{commandDef.about}</ConsoleCodeBlock>,
-          },
-        ]}
+        listItems={[{title: <ConsoleCodeBlock>{"About"}</ConsoleCodeBlock>, description: <ConsoleCodeBlock>{commandDef.about}</ConsoleCodeBlock> }]}
         descriptionProps={additionalProps}
         titleProps={additionalProps}
         data-test-subj={getTestId('commandUsage-options')}
       />
+      <EuiSpacer size="s"></EuiSpacer>
       <CommandInputUsage commandDef={commandDef} />
       {commandOptions.required && commandOptions.required.length > 0 && (
         <>

@@ -14,6 +14,7 @@ import type { EndpointCommandDefinitionMeta } from './types';
 import { useSendKillProcessRequest } from '../../hooks/endpoint/use_send_kill_process_endpoint_request';
 import type { CommandExecutionComponentProps } from '../console/types';
 import { parsedPidOrEntityIdParameter } from '../console/service/parsed_command_input';
+import { EuiSpacer } from '@elastic/eui';
 
 export const KillProcessActionResult = memo<
   CommandExecutionComponentProps<
@@ -104,13 +105,24 @@ export const KillProcessActionResult = memo<
         )}
         data-test-subj="killProcessErrorCallout"
       >
+        <div>
         <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.killProcess.errorMessage"
-          defaultMessage="The following errors were encountered: {errors}"
+          id="xpack.securitySolution.endpointResponseActions.getProcesses.errorMessage"
+          defaultMessage="The following errors were encountered:"
           values={{ errors: completedActionDetails.errors.join(' | ') }}
         />
+        </div>
+        <EuiSpacer size="s"></EuiSpacer>
+        <div>
+        <FormattedMessage
+          id="xpack.securitySolution.endpointResponseActions.getProcesses.errorList"
+          defaultMessage="{errors}"
+          values={{ errors: completedActionDetails.errors.join(' | ') }}
+        />
+        </div>
       </ResultComponent>
     );
+
   }
 
   // Show Success
