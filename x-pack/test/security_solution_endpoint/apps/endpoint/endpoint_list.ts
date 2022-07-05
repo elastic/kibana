@@ -20,7 +20,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
 
   const expectedData = [
     [
@@ -72,8 +71,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return tableData;
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/114249
-  describe.skip('endpoint list', function () {
+  describe('endpoint list', function () {
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
@@ -90,8 +88,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('when there is data,', () => {
       before(async () => {
-        const endpointPackage = await policyTestResources.getEndpointPackage();
-        await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
         indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 3, 90000);
