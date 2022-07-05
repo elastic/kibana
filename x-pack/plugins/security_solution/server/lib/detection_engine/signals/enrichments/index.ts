@@ -11,22 +11,26 @@ import {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { Logger } from '@kbn/core/server';
+import { ListClient } from '@kbn/lists-plugin/server';
 import { mergeWith, isArray } from 'lodash';
 
 import { createThreatEnrichments } from './threat_indicators';
 import type { SignalSourceHit } from '../types';
 import { BuildRuleMessage } from '../rule_messages';
 
+
 export const enrichEvents = async ({
   services,
   logger,
   buildRuleMessage,
   events,
+  listClient,
 }: {
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
   events: SignalSourceHit[];
+  listClient: ListClient;
 }) => {
   const allEventsWithEnrichments = await Promise.all([
     // createThreatEnrichments({
@@ -44,6 +48,7 @@ export const enrichEvents = async ({
       events,
       threatIndex: ['threat-indicator'],
       threatIndicatorPath: 'threat.indicator',
+      listClient,
     }),
   ]);
 
