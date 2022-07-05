@@ -15,7 +15,7 @@ export default function enterSpaceFunctionalTests({
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
   const spacesService = getService('spaces');
 
-  describe.only('Enter Space', function () {
+  describe('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.importExport.load(
