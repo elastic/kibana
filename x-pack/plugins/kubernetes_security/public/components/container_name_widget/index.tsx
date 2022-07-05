@@ -92,7 +92,7 @@ export const ContainerNameWidget = ({
     const result: FilterButtons = {
       filterForButtons:
         data &&
-        (data?.pages
+        data?.pages
           ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
               return getFilterForValueButton({
@@ -107,11 +107,11 @@ export const ContainerNameWidget = ({
               });
             });
           })
-          .flat() as ReactNode[]),
+          .flat()!,
 
       filterOutButtons:
         data &&
-        (data?.pages
+        data?.pages
           ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
               return getFilterOutValueButton({
@@ -126,7 +126,7 @@ export const ContainerNameWidget = ({
               });
             });
           })
-          .flat() as ReactNode[]),
+          .flat()!,
     };
     // return true
     return result;
