@@ -283,7 +283,6 @@ export class EncryptedSavedObjectsService {
           encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
         }
         try {
-
           encryptedAttributes[attributeName] = (yield [attributeValue, encryptionAAD])!;
         } catch (err) {
           this.options.logger.error(
