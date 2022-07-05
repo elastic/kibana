@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-0}
+BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 FTR_CONFIG_GROUP_KEY=${FTR_CONFIG_GROUP_KEY:-}
 if [ "$FTR_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; then
   echo "Missing FTR_CONFIG_GROUP_KEY env var"
