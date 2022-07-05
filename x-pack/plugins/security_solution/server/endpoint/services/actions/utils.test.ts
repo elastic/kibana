@@ -153,7 +153,7 @@ describe('When using Actions service utilities', () => {
     });
 
     it('should return action outputs (if any) per agent id', () => {
-      const runningProcesses = endpointActionGenerator.randomResponseActionRunningProcesses(3);
+      const runningProcesses = endpointActionGenerator.randomResponseActionProcesses(3);
       const endpointResponse = endpointActionGenerator.generateActivityLogActionResponse({
         item: {
           data: {
