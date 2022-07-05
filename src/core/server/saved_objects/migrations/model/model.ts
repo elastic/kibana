@@ -83,7 +83,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else if (Either.isRight(res)) {
       // cluster routing allocation is enabled and we can continue with the migration as normal
       const indices = res.right;
-      const aliases = getAliases(indices);
+      const aliasesRes = getAliases(indices);
+
+      if (Either.isLeft(aliasesRes)) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `The ${
+            aliasesRes.left.alias
+          } alias is pointing to multiple indices: ${aliasesRes.left.indices.join(',')}.`,
+        };
+      }
+
+      const aliases = aliasesRes.right;
 
       if (
         // `.kibana` and the version specific aliases both exists and
@@ -1069,7 +1081,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       const indices = res.right;
-      const aliases = getAliases(indices);
+      const aliasesRes = getAliases(indices);
+
+      if (Either.isLeft(aliasesRes)) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `The ${
+            aliasesRes.left.alias
+          } alias is pointing to multiple indices: ${aliasesRes.left.indices.join(',')}.`,
+        };
+      }
+
+      const aliases = aliasesRes.right;
       if (
         aliases[stateP.currentAlias] != null &&
         aliases[stateP.versionAlias] != null &&
