@@ -30,7 +30,6 @@ export interface DateRangePickerValues {
 }
 
 const DatePickerWrapper = euiStyled.div`
-  width: ${(props) => props.theme.eui.fractions.fourths.percentage};
   padding-bottom: ${(props) => `${props.theme.eui.euiCodeBlockPaddingModifiers.paddingLarge}`};
 `;
 
