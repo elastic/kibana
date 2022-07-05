@@ -159,17 +159,29 @@ export const getArgumentsForCommand = (command: CommandDefinition): string[] => 
     }
   }
 
-  const buildArgumentText = ({required, exclusive, optional}: {required?: string; exclusive?: string; optional?: string}) => {
+  const buildArgumentText = ({
+    required,
+    exclusive,
+    optional,
+  }: {
+    required?: string;
+    exclusive?: string;
+    optional?: string;
+  }) => {
     return `${required ? required : ''} ${exclusive ? exclusive : ''} ${
       optional && optional.length > 0 ? `[${optional}]` : ''
     }`.trim();
-  }
+  };
 
   return exclusiveOrArgs.length > 0
     ? exclusiveOrArgs.map((exclusiveArg) => {
-        return buildArgumentText({required: requiredArgs, exclusive: exclusiveArg, optional: optionalArgs});
+        return buildArgumentText({
+          required: requiredArgs,
+          exclusive: exclusiveArg,
+          optional: optionalArgs,
+        });
       })
-    : [buildArgumentText({required: requiredArgs, optional: optionalArgs})];
+    : [buildArgumentText({ required: requiredArgs, optional: optionalArgs })];
 };
 
 export const parsedPidOrEntityIdParameter = (parameters: {
