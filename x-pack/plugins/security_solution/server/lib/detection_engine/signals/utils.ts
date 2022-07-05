@@ -37,7 +37,6 @@ import {
   TimestampOverrideOrUndefined,
   Privilege,
   RuleExecutionStatus,
-  DisableTimestampFallbackOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import type {
   BulkResponseErrorAggregation,

@@ -177,7 +177,7 @@ describe('create_signals', () => {
     });
   });
 
-  test('it builds a filter without @timestamp fallback if disableTimestampFallback is true', () => {
+  test('it builds a filter without @timestamp fallback if `secondaryTimestamp` is undefined', () => {
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
       from: 'now-5m',
