@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiButton,
   EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
@@ -111,7 +112,9 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   const [selectingEndDate, setSelectingEndDate] = useState(false);
   const [selectingEndTime, setSelectingEndTime] = useState(false);
   const minDate = useMemo(
-    () => moment(initialSchedule?.rRule.dtstart ?? undefined),
+    // If the initial schedule is earlier than now, set minDate to it
+    // Set minDate to now if the initial schedule is in the future
+    () => moment.min(moment(), moment(initialSchedule?.rRule.dtstart ?? undefined)),
     [initialSchedule]
   );
 
@@ -347,8 +350,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         })}
       </EuiButton>
       {initialSchedule && (
-        <>
-          <EuiHorizontalRule margin="s" />
+        <EuiPopoverFooter>
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
@@ -358,7 +360,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
+        </EuiPopoverFooter>
       )}
     </EuiPanel>
   );
