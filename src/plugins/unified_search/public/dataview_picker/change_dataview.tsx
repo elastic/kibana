@@ -280,7 +280,6 @@ export function ChangeDataView({
             margin-bottom: 0;
           `}
         >
-          ,
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <h5>

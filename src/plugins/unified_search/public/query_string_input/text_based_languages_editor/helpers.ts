@@ -64,25 +64,26 @@ export const parseErrors = (errors: Error[], code: string) => {
         let indexWithError = 1;
         let lineWithError = '';
         linesText.forEach((line, index) => {
-          if (line.includes('FROM')) {
+          if (line.includes('FROM') || line.includes('from')) {
             indexWithError = index + 1;
             lineWithError = line;
           }
         });
+        const lineWithErrorUpperCase = lineWithError.toUpperCase();
         return {
           message: error.message,
-          startColumn: lineWithError.indexOf('FROM') + 1,
+          startColumn: lineWithErrorUpperCase.indexOf('FROM') + 1,
           startLineNumber: indexWithError,
-          endColumn: lineWithError.indexOf('FROM') + 1 + errorLength,
+          endColumn: lineWithErrorUpperCase.indexOf('FROM') + 1 + errorLength,
           endLineNumber: indexWithError,
           severity: monaco.MarkerSeverity.Error,
         };
       } else {
         return {
           message: error.message,
-          startColumn: code.indexOf('FROM') + 1,
+          startColumn: code.toUpperCase().indexOf('FROM') + 1,
           startLineNumber: 1,
-          endColumn: code.indexOf('FROM') + 1 + errorLength,
+          endColumn: code.toUpperCase().indexOf('FROM') + 1 + errorLength,
           endLineNumber: 1,
           severity: monaco.MarkerSeverity.Error,
         };

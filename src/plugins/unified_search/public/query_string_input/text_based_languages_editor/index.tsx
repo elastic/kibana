@@ -36,7 +36,7 @@ import { MemoizedDocumentation, DocumentationSections } from './documentation';
 import { useDebounceWithOptions, parseErrors, getDocumentationSections } from './helpers';
 import { EditorFooter } from './editor_footer';
 
-interface TextBasedLanguagesEditorProps {
+export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
   onTextLangQueryChange: (query: AggregateQuery) => void;
   onTextLangQuerySubmit: () => void;
@@ -312,6 +312,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
               display={!isWordWrapped ? 'fill' : undefined}
               color="text"
+              data-test-subj="unifiedTextLangEditor-toggleWordWrap"
               aria-label={
                 isWordWrapped
                   ? i18n.translate(
@@ -348,6 +349,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       defaultMessage: 'Minimize editor',
                     }
                   )}
+                  data-test-subj="unifiedTextLangEditor-minimize"
                   onClick={() => {
                     expandCodeEditor(false);
                     updateLinesFromModel = false;
@@ -365,6 +367,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     <EuiButtonIcon
                       iconType="documentation"
                       color="text"
+                      data-test-subj="unifiedTextLangEditor-documentation"
                       aria-label={i18n.translate(
                         'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
                         {
@@ -391,10 +394,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               }}
             >
               <div ref={resizeRef} css={styles.resizableContainer}>
-                <EuiFlexItem data-test-subj="unifiedTextLandEditor">
+                <EuiFlexItem data-test-subj="unifiedTextLangEditor">
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
-                      <EuiBadge color="default" css={styles.linesBadge}>
+                      <EuiBadge
+                        color="default"
+                        css={styles.linesBadge}
+                        data-test-subj="unifiedTextLangEditor-inline-lines-badge"
+                      >
                         {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
                           defaultMessage: '{count} {count, plural, one {line} other {lines}}',
                           values: { count: lines },
@@ -407,6 +414,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         css={styles.errorsBadge}
                         iconType="crossInACircleFilled"
                         iconSide="left"
+                        data-test-subj="unifiedTextLangEditor-inline-errors-badge"
                       >
                         {errors.length}
                       </EuiBadge>
@@ -451,6 +459,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   size="m"
                   aria-label="Expand"
                   onClick={() => expandCodeEditor(true)}
+                  data-test-subj="unifiedTextLangEditor-expand"
                   css={{ borderRadius: 0 }}
                 />
               </EuiFlexItem>
@@ -467,6 +476,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       iconType="documentation"
                       size="m"
                       aria-label="Documentation"
+                      data-test-subj="unifiedTextLangEditor-inline-documentation"
                       onClick={() => setIsHelpOpen(true)}
                       css={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                     />
@@ -489,6 +499,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               color="primary"
               iconType="grab"
               aria-label="Resize editor"
+              data-test-subj="unifiedTextLangEditor-resize"
               css={styles.dragResizeButton}
             />
           )}
