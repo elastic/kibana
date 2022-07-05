@@ -78,23 +78,22 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             </h4>
           </EuiText>
         )}
-      <div className="euiText explorer-charts">
-        {showCharts && (
-          <ExplorerChartsContainer
-            {...{
-              ...chartsData,
-              severity: severity.val,
-              mlLocator,
-              timeBuckets,
-              timefilter,
-              onSelectEntity,
-              tooManyBucketsCalloutMsg,
-              showSelectedInterval,
-              chartsService,
-            }}
-          />
-        )}
-      </div>
+
+      {showCharts && (
+        <ExplorerChartsContainer
+          {...{
+            ...chartsData,
+            severity: severity.val,
+            mlLocator,
+            timeBuckets,
+            timefilter,
+            onSelectEntity,
+            tooManyBucketsCalloutMsg,
+            showSelectedInterval,
+            chartsService,
+          }}
+        />
+      )}
     </>
   );
 };

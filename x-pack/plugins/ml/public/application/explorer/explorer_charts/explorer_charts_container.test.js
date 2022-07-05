@@ -100,7 +100,7 @@ describe('ExplorerChartsContainer', () => {
     );
 
     expect(wrapper.html()).toBe(
-      '<div class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--wrap euiFlexGrid--responsive" data-test-subj="mlExplorerChartsContainer"></div>'
+      '<div class="euiFlexGrid euiFlexGrid--gutterMedium euiFlexGrid--wrap euiFlexGrid--responsive" data-test-subj="mlExplorerChartsContainer"></div>'
     );
   });
 
