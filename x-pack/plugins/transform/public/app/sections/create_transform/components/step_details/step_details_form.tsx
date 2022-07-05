@@ -814,7 +814,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 'xpack.transform.stepDetailsForm.maxPageSearchSizeHelpText',
                 {
                   defaultMessage:
-                    'The initial page size for the composite aggregation for each checkpoint.',
+                    'The initial page size to use for the composite aggregation for each checkpoint.',
                 }
               )}
             >
