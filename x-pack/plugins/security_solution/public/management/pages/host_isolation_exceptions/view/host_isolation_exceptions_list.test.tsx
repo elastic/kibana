@@ -21,7 +21,8 @@ import { getFirstCard } from '../../../components/artifact_list_page/mocks';
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-describe('When on the host isolation exceptions page', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/135587
+describe.skip('When on the host isolation exceptions page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
