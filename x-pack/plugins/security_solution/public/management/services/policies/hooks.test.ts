@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useGetEndpointSecurityPackage } from './hooks';
+import type { UseQueryOptions } from 'react-query';
 import type { IHttpFetchError, HttpSetup } from '@kbn/core-http-browser';
+import type { GetPackagesResponse } from '@kbn/fleet-plugin/common';
+import { useGetEndpointSecurityPackage } from './hooks';
 import { getFakeHttpService, renderQuery } from '../../hooks/test_utils';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { UseQueryOptions } from 'react-query';
-import { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 
 jest.mock('../../../common/lib/kibana');

@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory, MemoryHistory } from 'history';
 
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { createRenderer } from './utils';
 import { ApplicationService } from '../application_service';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { MockLifecycle } from '../test_types';
+import type { MockLifecycle } from '../test_types';
 import { overlayServiceMock } from '../../overlays/overlay_service.mock';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { AppMountParameters, AppUpdater } from '../types';
-import { Observable } from 'rxjs';
-import { MountPoint } from '../..';
+import type { AppMountParameters, AppUpdater } from '../types';
+import type { MountPoint } from '../..';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 

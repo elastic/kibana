@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { FormattedError } from './formatted_error';
 import React from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { FormattedError } from './formatted_error';
 
 describe('When using the `FormattedError` component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

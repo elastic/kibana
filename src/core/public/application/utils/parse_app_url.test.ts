@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { App } from '../types';
 import { BasePath } from '@kbn/core-http-browser-internal';
+import type { App } from '../types';
 import { parseAppUrl } from './parse_app_url';
 
 describe('parseAppUrl', () => {
