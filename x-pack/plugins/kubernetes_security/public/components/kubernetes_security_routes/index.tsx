@@ -42,8 +42,8 @@ const KubernetesSecurityRoutesComponent = ({
   const styles = useStyles();
 
   const onReduceInteractiveAggs = useCallback(
-    (result: AggregateResult[]): Record<string, number> =>
-      result.reduce((groupedByKeyValue, aggregate) => {
+    (result: AggregateResult): Record<string, number> =>
+      result.buckets.reduce((groupedByKeyValue, aggregate) => {
         groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
           aggregate.count_by_aggs.value;
         return groupedByKeyValue;
@@ -52,9 +52,9 @@ const KubernetesSecurityRoutesComponent = ({
   );
 
   const onReduceRootAggs = useCallback(
-    (result: AggregateResult[]): Record<string, number> =>
-      result.reduce((groupedByKeyValue, aggregate) => {
-        if (aggregate.key === '0') {
+    (result: AggregateResult): Record<string, number> =>
+      result.buckets.reduce((groupedByKeyValue, aggregate) => {
+        if (aggregate.key.toString() === '0') {
           groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs.value;
         } else {
           groupedByKeyValue.nonRoot =

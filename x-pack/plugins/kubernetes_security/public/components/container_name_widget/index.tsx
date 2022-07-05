@@ -91,7 +91,6 @@ export const ContainerNameWidget = ({
   const filterButtons = useMemo((): FilterButtons => {
     const result: FilterButtons = {
       filterForButtons:
-        data &&
         data?.pages
           ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
@@ -107,10 +106,9 @@ export const ContainerNameWidget = ({
               });
             });
           })
-          .flat()!,
+          .flat() || [],
 
       filterOutButtons:
-        data &&
         data?.pages
           ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
@@ -126,7 +124,7 @@ export const ContainerNameWidget = ({
               });
             });
           })
-          .flat()!,
+          .flat() || [],
     };
     // return true
     return result;
