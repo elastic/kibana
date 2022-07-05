@@ -11,9 +11,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { SampleDataCards } from '@kbn/home-sample-data-cards';
+
 import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
-import { SampleDataSetCards } from './sample_data_set_cards';
 import { getServices } from '../kibana_services';
 import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { getTutorials } from '../load_tutorials';
@@ -37,7 +38,7 @@ class TutorialDirectoryUi extends React.Component {
           id: 'home.tutorial.tabs.sampleDataTitle',
           defaultMessage: 'Sample data',
         }),
-        content: <SampleDataSetCards addBasePath={this.props.addBasePath} />,
+        content: <SampleDataCards />,
       },
       ...extraTabs.map(({ id, name, component: Component }) => ({
         id,

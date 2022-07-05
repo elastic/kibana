@@ -136,7 +136,9 @@
           "\nOverload to set up a string based response stream with support\nfor gzip compression depending on provided request headers.\n"
         ],
         "signature": [
-          "(headers: Headers) => StreamFactoryReturnType<T>"
+          "(headers: Headers, logger: ",
+          "Logger",
+          ") => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
         "deprecated": false,
@@ -152,6 +154,20 @@
             ],
             "signature": [
               "Headers"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
             "deprecated": false,
@@ -173,7 +189,9 @@
           "\nSets up a response stream with support for gzip compression depending on provided\nrequest headers. Any non-string data pushed to the stream will be stream as NDJSON.\n"
         ],
         "signature": [
-          "(headers: Headers) => StreamFactoryReturnType<T>"
+          "(headers: Headers, logger: ",
+          "Logger",
+          ") => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
         "deprecated": false,
@@ -189,6 +207,20 @@
             ],
             "signature": [
               "Headers"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/lib/stream_factory.ts",
             "deprecated": false,
