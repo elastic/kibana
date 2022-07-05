@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
@@ -91,6 +91,7 @@ interface IWaterfallItemProps {
   color: string;
   isSelected: boolean;
   errorCount: number;
+  marginLeftLevel: number;
   onClick: () => unknown;
 }
 
@@ -191,14 +192,29 @@ export function WaterfallItem({
   color,
   isSelected,
   errorCount,
+  marginLeftLevel,
   onClick,
 }: IWaterfallItemProps) {
+  const [widthFactor, setWidthFactor] = useState(1);
+  const waterfallItemRef: React.RefObject<any> = useRef(null);
+  useEffect(() => {
+    if (waterfallItemRef?.current && marginLeftLevel) {
+      setWidthFactor(
+        1 + marginLeftLevel / waterfallItemRef.current.offsetWidth
+      );
+    }
+  }, [marginLeftLevel]);
+
   if (!totalDuration) {
     return null;
   }
 
-  const width = (item.duration / totalDuration) * 100;
-  const left = ((item.offset + item.skew) / totalDuration) * 100;
+  const width = (item.duration / totalDuration) * widthFactor * 100;
+  const left =
+    (((item.offset + item.skew) / totalDuration) * widthFactor -
+      widthFactor +
+      1) *
+    100;
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
   const itemBarStyle = getItemBarStyle(item, color, width, left);
@@ -207,6 +223,7 @@ export function WaterfallItem({
 
   return (
     <Container
+      ref={waterfallItemRef}
       type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
