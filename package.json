@@ -92,7 +92,6 @@
     "**/refractor/prismjs": "~1.27.0",
     "**/trim": "1.0.1",
     "**/typescript": "4.6.3",
-    "**/underscore": "^1.13.1",
     "globby/fast-glob": "3.2.7",
     "puppeteer/node-fetch": "^2.6.7"
   },
