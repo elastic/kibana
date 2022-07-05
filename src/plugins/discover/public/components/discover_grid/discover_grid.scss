@@ -7,6 +7,8 @@
   .euiDataGrid__controls {
     border: none;
     border-bottom: $euiBorderThin;
+    border-top-left-radius: $euiBorderRadius;
+    border-top-right-radius: $euiBorderRadius;
   }
 
   .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
@@ -22,8 +24,8 @@
     border-right: none;
   }
 
-  .euiDataGridRowCell:first-of-type,
-  .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
+  .dscDiscoverGrid__documentsMode .euiDataGridRowCell:first-of-type,
+  .dscDiscoverGrid__documentsMode .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
     border-left: none;
     border-right: none;
   }
