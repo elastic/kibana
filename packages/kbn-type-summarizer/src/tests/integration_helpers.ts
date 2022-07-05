@@ -19,6 +19,9 @@ import { createTsProject } from '../lib/ts_project';
 import { summarizePackage } from '../summarize_package';
 import { SourceFileMapper } from '../lib/source_file_mapper';
 import { AstIndexer } from '../lib/ast_indexer';
+import { SymbolResolver } from '../lib/symbol_resolver';
+import { AstTraverser } from '../lib/ast_traverser';
+import { DtsSnipper } from '../lib/dts_snipper';
 import { SourceMapReader } from './source_map_reader';
 
 type DiagFilter = (msg: string) => boolean;
@@ -219,7 +222,10 @@ export class TestProject<FileName extends string> {
     const program = createTsProject(tsConfig, [this.inputPath]);
     const typeChecker = program.getTypeChecker();
     const sources = new SourceFileMapper(this.dtsOutputDir);
-    const indexer = new AstIndexer(typeChecker, sources, this.log);
+    const symbols = new SymbolResolver(typeChecker, this.log);
+    const traverse = new AstTraverser(symbols, sources, this.log);
+    const indexer = new AstIndexer(typeChecker, sources, symbols, traverse, this.log);
+    const snipper = new DtsSnipper(traverse, symbols, this.log);
 
     const sourceFiles = Object.fromEntries(
       Array.from(this.fileRels()).map((rel) => [
@@ -228,7 +234,7 @@ export class TestProject<FileName extends string> {
       ])
     ) as Record<FileName, ts.SourceFile>;
 
-    return { program, typeChecker, indexer, sourceFiles };
+    return { program, typeChecker, indexer, sourceFiles, snipper };
   }
 
   private getDtsRel(rel: string) {

@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type {
-  ExportSnippet,
-  IdentifierSnippet,
-  SourceSnippet,
-  Snippet,
-  LocalDecs,
-} from './ast_indexer';
+export type { AstIndex, LocalDecs } from './ast_indexer';
 export { AstIndexer } from './ast_indexer';
 export type { ExportDetails, NamedExportDetails, DefaultExportDetails } from './export_details';
 export { getExportDetails } from './export_details';

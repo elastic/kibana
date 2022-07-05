@@ -145,7 +145,9 @@ describe('summarizePackage()', () => {
         debg > create type checker
         debg > indexExports() -- packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts
             debg verbose steps:
-                 resolveSymbol()x23
+                 symbols.toRootSymbol()x23
+                 traverse.findReferencedIdentifiers()x8
+                 symbols.getForIdentifier()x6
                  indexSymbolx12
         debg loaded sourcemaps for [
                'packages/kbn-type-summarizer/__tmp__/dist_dts/bar.d.ts',
@@ -157,7 +159,11 @@ describe('summarizePackage()', () => {
         debg > printImports() -- 0 imports
         debg > printLocals() -- 9 decs
             debg verbose steps:
-                 resolveSymbol()x18
+                 traverse.findStructuralIdentifiers()x8
+                 traverse.findReferencedIdentifiers()x8
+                 symbols.getForIdentifier()x18
+                 symbols.toRootSymbol()x18
+                 snipper.toSnippets()x8
         "
       `);
     });

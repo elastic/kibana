@@ -10,14 +10,8 @@ import ts from 'typescript';
 import { SourceNode } from 'source-map';
 
 import { Logger } from '@kbn/type-summarizer-core';
-import {
-  ImportedDecs,
-  LocalDecs,
-  AstIndexer,
-  NamespaceDec,
-  NamedExportDetails,
-  AmbientRef,
-} from './ast_indexer';
+import { AstIndex, NamespaceDec, NamedExportDetails } from './ast_indexer';
+import { DtsSnipper } from './dts_snipper';
 import { isTypeDeclaration } from './ts_nodes';
 import { SourceMapper } from './source_mapper';
 
@@ -46,19 +40,17 @@ export class TypeSummary {
   private readonly namesBySymbol = new Map<ts.Symbol, string>();
 
   constructor(
-    private readonly indexer: AstIndexer,
     private readonly sourceMaps: SourceMapper,
+    private readonly snipper: DtsSnipper,
     private readonly log: Logger,
-    private readonly locals: LocalDecs[],
-    private readonly imports: ImportedDecs[],
-    ambientRefs: AmbientRef[]
+    private readonly index: AstIndex
   ) {
-    for (const ref of ambientRefs) {
+    for (const ref of index.ambientRefs) {
       this.usedNames.add(ref.name);
       this.namesBySymbol.set(ref.rootSymbol, ref.name);
     }
 
-    for (const l of locals) {
+    for (const l of index.locals) {
       this.rootDecsSymbols.add(l.rootSymbol);
       if (l.exported?.type === 'named') {
         // assign export name to this root symbol, if possible
@@ -70,7 +62,7 @@ export class TypeSummary {
         this.namesBySymbol.set(l.rootSymbol, l.exported.name);
       }
     }
-    for (const i of imports) {
+    for (const i of index.imports) {
       this.rootDecsSymbols.add(i.rootSymbol);
     }
   }
@@ -97,8 +89,8 @@ export class TypeSummary {
   }
 
   private printImports(source: SourceNode) {
-    this.log.step('printImports()', `${this.imports.length} imports`, () => {
-      for (const i of this.imports) {
+    this.log.step('printImports()', `${this.index.imports.length} imports`, () => {
+      for (const i of this.index.imports) {
         const name = this.getName(
           i.rootSymbol,
           // if we don't use it locally, don't try to re-use its name
@@ -166,13 +158,13 @@ export class TypeSummary {
   printLocals(source: SourceNode) {
     this.log.step(
       'printLocals()',
-      `${this.locals.reduce((acc, l) => acc + l.size, 0)} decs`,
+      `${this.index.locals.reduce((acc, l) => acc + l.size, 0)} decs`,
       () => {
-        for (const local of this.locals) {
+        for (const local of this.index.locals) {
           this.rootDecsSymbols.add(local.rootSymbol);
         }
 
-        for (const local of this.locals) {
+        for (const local of this.index.locals) {
           if (local instanceof NamespaceDec) {
             const name = this.getName(
               local.rootSymbol,
@@ -234,7 +226,7 @@ export class TypeSummary {
             this.getName(local.rootSymbol, local.exported.name) === local.exported.name;
 
           for (const dec of local.decs) {
-            for (const s of this.indexer.toSnippets(dec)) {
+            for (const s of this.snipper.toSnippets(dec)) {
               if (s.type === 'source') {
                 source.add(s.value);
                 continue;

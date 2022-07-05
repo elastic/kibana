@@ -13,7 +13,10 @@ import { loadTsConfigFile } from './lib/tsconfig_file';
 import { SourceMapper } from './lib/source_mapper';
 import { AstIndexer } from './lib/ast_indexer';
 import { SourceFileMapper } from './lib/source_file_mapper';
+import { SymbolResolver } from './lib/symbol_resolver';
+import { AstTraverser } from './lib/ast_traverser';
 import { TypeSummary } from './lib/type_summary';
+import { DtsSnipper } from './lib/dts_snipper';
 
 /**
  * Options used to customize the summarizePackage function
@@ -61,7 +64,9 @@ export async function summarizePackage(log: Logger, options: SummarizePacakgeOpt
   const typeChecker = log.step('create type checker', null, () => program.getTypeChecker());
 
   const sources = new SourceFileMapper(options.dtsDir);
-  const indexer = new AstIndexer(typeChecker, sources, log);
+  const symbols = new SymbolResolver(typeChecker, log);
+  const traverse = new AstTraverser(symbols, sources, log);
+  const indexer = new AstIndexer(typeChecker, sources, symbols, traverse, log);
 
   const sourceFile = program.getSourceFile(options.inputPath);
   if (!sourceFile) {
@@ -76,14 +81,8 @@ export async function summarizePackage(log: Logger, options: SummarizePacakgeOpt
     program
   );
 
-  const summary = new TypeSummary(
-    indexer,
-    sourceMaps,
-    log,
-    index.locals,
-    index.imports,
-    index.ambientRefs
-  ).getSourceNode();
+  const snipper = new DtsSnipper(traverse, symbols, log);
+  const summary = new TypeSummary(sourceMaps, snipper, log, index).getSourceNode();
 
   sourceMaps.close();
 
