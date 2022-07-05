@@ -12,6 +12,9 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'maps', 'timePicker']);
   const security = getService('security');
 
+  const from = 'Sep 22, 2015 @ 00:00:00.000';
+  const to = 'Sep 22, 2015 @ 04:00:00.000';
+
   describe('discover visualize button', () => {
     beforeEach(async () => {
       await security.testUser.setRoles([
@@ -21,11 +24,13 @@ export default function ({ getService, getPageObjects }) {
         'global_discover_read',
         'global_visualize_read',
       ]);
+      await PageObjects.common.setTime({ from, to });
       await PageObjects.common.navigateToApp('discover');
     });
 
     after(async () => {
       await security.testUser.restoreDefaults();
+      await PageObjects.common.unsetTime();
     });
 
     it('should link geo_shape fields to Maps application', async () => {
@@ -42,10 +47,6 @@ export default function ({ getService, getPageObjects }) {
 
     it('should link geo_point fields to Maps application with time and query context', async () => {
       await PageObjects.discover.selectIndexPattern('logstash-*');
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Sep 22, 2015 @ 00:00:00.000',
-        'Sep 22, 2015 @ 04:00:00.000'
-      );
       await queryBar.setQuery('machine.os.raw : "ios"');
       await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
