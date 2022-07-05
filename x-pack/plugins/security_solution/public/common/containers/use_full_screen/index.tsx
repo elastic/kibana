@@ -47,10 +47,10 @@ export const useGlobalFullScreen = (): GlobalFullScreen => {
       const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
       if (fullScreen) {
         document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
-        //resetScroll();
+        // resetScroll();
       } else if (isDataGridFullScreen === false || fullScreen === false) {
         document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
-        //resetScroll();
+        // resetScroll();
       }
 
       dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen }));
