@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 
 import type { AgentPolicy } from '../types';
 import { SO_SEARCH_LIMIT } from '../constants';
+import { policyHasFleetServer } from '../services';
 
 import { useGetAgentPolicies } from './use_request';
 
@@ -33,7 +34,7 @@ export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
 
   const agentPolicies = useMemo(() => {
     if (!isLoadingAgentPolicies) {
-      return agentPoliciesData?.items ?? [];
+      return (agentPoliciesData?.items ?? []).filter((policy) => !policyHasFleetServer(policy));
     }
     return [];
   }, [isLoadingAgentPolicies, agentPoliciesData?.items]);

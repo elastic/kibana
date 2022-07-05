@@ -89,6 +89,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   selectedAgents: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
   onClickAddAgent: () => void;
+  onClickAddFleetServer: () => void;
   visibleAgents: Agent[];
 }> = ({
   agentPolicies,
@@ -111,6 +112,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   selectedAgents,
   refreshAgents,
   onClickAddAgent,
+  onClickAddFleetServer,
   visibleAgents,
 }) => {
   // Policies state for filtering
@@ -322,14 +324,38 @@ export const SearchAndFilterBar: React.FunctionComponent<{
               </EuiFilterGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton
-                fill
-                iconType="plusInCircle"
-                onClick={() => onClickAddAgent()}
-                data-test-subj="addAgentButton"
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                    defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+                  />
+                }
               >
-                <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
-              </EuiButton>
+                <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addFleetServerButton"
+                    defaultMessage="Add Fleet Server"
+                  />
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addAgentButton.tooltip"
+                    defaultMessage="Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack"
+                  />
+                }
+              >
+                <EuiButton fill onClick={onClickAddAgent} data-test-subj="addAgentButton">
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addButton"
+                    defaultMessage="Add agent"
+                  />
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AgentBulkActions
