@@ -57,6 +57,7 @@ export const enrichEvents = async ({
       events,
       threatIndex: ['threat-indicator'],
       threatIndicatorPath: 'threat.indicator',
+      listClient,
     }),
     createThreatEnrichments({
       services,
@@ -65,6 +66,7 @@ export const enrichEvents = async ({
       events,
       threatIndex: ['threat-indicator'],
       threatIndicatorPath: 'threat.indicator',
+      listClient,
     }),
     createThreatEnrichments({
       services,
@@ -73,6 +75,7 @@ export const enrichEvents = async ({
       events,
       threatIndex: ['threat-indicator'],
       threatIndicatorPath: 'threat.indicator',
+      listClient,
     }),
     createThreatEnrichments({
       services,
@@ -81,6 +84,7 @@ export const enrichEvents = async ({
       events,
       threatIndex: ['threat-indicator'],
       threatIndicatorPath: 'threat.indicator',
+      listClient,
     }),
   ]);
 
