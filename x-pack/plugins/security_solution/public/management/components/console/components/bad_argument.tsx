@@ -14,9 +14,7 @@ import { CommandDefinition, CommandExecutionComponentProps } from '../types';
 import { CommandInputUsage } from './command_usage';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import {
-  ConsoleCodeBlock,
-} from './console_code_block';
+import { ConsoleCodeBlock } from './console_code_block';
 
 export type BadArgumentProps = PropsWithChildren<{
   parsedInput: ParsedCommandInterface;
@@ -60,7 +58,10 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
                 defaultMessage="Enter {helpCmd} for further assistance."
                 values={{
                   helpCmd: (
-                    <ConsoleCodeBlock bold inline>{`${command.commandDefinition.name} --help`}</ConsoleCodeBlock>
+                    <ConsoleCodeBlock
+                      bold
+                      inline
+                    >{`${command.commandDefinition.name} --help`}</ConsoleCodeBlock>
                   ),
                 }}
               />

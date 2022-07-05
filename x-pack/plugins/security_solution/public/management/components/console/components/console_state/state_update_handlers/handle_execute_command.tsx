@@ -208,7 +208,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not supported by this command: {unknownArgs}"
                 values={{
                   countOfInvalidArgs: unknownInputArgs.length,
-                  command: <ConsoleCodeBlock bold inline>{parsedInput.name}</ConsoleCodeBlock>,
+                  command: (
+                    <ConsoleCodeBlock bold inline>
+                      {parsedInput.name}
+                    </ConsoleCodeBlock>
+                  ),
                   unknownArgs: (
                     <ConsoleCodeBlock bold inline>
                       {unknownInputArgs.map(toCliArgumentOption).join(', ')}
