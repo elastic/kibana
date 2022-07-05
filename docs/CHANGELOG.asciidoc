@@ -69,7 +69,7 @@ Fleet::
 Keep all agents selected in query selection mode {kibana-pull}135530[#135530]
 
 Machine Learning::
-* Fixes put job endpoint when payload contains datafeed {kibana-pull}134986[#134986]
+* Fixes put anomaly detection job endpoint when payload contains datafeed {kibana-pull}134986[#134986]
 * Fixes trained model map associating wrong model to job {kibana-pull}134849[#134849]
 * Use time range when validating datafeed preview {kibana-pull}134073[#134073]
 
