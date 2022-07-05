@@ -38,7 +38,6 @@ import {
   replaceLayerList,
   setMapSettings,
   setQuery,
-  disableScrollZoom,
   setReadOnly,
   updateLayerById,
   setGotoWithCenter,
@@ -183,9 +182,9 @@ export class MapEmbeddable
     const store = this._savedMap.getStore();
 
     store.dispatch(setReadOnly(true));
-    store.dispatch(disableScrollZoom());
     store.dispatch(
       setMapSettings({
+        keydownScrollZoom: true,
         showTimesliderToggleButton: false,
       })
     );

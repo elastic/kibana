@@ -49,7 +49,6 @@ import {
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
-  SET_SCROLL_ZOOM,
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
@@ -264,10 +263,6 @@ export function setMouseCoordinates({ lat, lon }: { lat: number; lon: number }) 
 
 export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
-}
-
-export function disableScrollZoom() {
-  return { type: SET_SCROLL_ZOOM, scrollZoom: false };
 }
 
 export function setGotoWithCenter({ lat, lon, zoom }: MapCenterAndZoom) {
