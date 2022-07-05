@@ -183,7 +183,10 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(services.triggersActionsUi ? [alerts] : []),
+    ...(services.triggersActionsUi &&
+    services.capabilities.management?.insightsAndAlerting?.triggersActions
+      ? [alerts]
+      : []),
     shareSearch,
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
