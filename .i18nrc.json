@@ -41,6 +41,7 @@
     "fieldFormats": "src/plugins/field_formats",
     "flot": "packages/kbn-flot-charts/lib",
     "home": "src/plugins/home",
+    "homePackages": "packages/home",
     "indexPatternEditor": "src/plugins/data_view_editor",
     "indexPatternFieldEditor": "src/plugins/data_view_field_editor",
     "indexPatternManagement": "src/plugins/data_view_management",

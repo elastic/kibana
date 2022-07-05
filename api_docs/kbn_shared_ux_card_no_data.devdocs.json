@@ -92,7 +92,7 @@
         "signature": [
           "(params: ",
           "Params",
-          ") => ",
+          ", action?: ActionFn) => ",
           {
             "pluginId": "@kbn/shared-ux-card-no-data",
             "scope": "common",
@@ -113,6 +113,20 @@
             "description": [],
             "signature": [
               "Params"
+            ],
+            "path": "packages/shared-ux/card/no_data/src/mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-card-no-data",
+            "id": "def-common.getStoryServices.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "ActionFn"
             ],
             "path": "packages/shared-ux/card/no_data/src/mocks.ts",
             "deprecated": false,
