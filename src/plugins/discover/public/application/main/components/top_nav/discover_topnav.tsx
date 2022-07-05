@@ -17,7 +17,6 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
-import { useDiscoverLayoutContext } from '../../hooks/use_discover_layout_context';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -34,6 +33,7 @@ export type DiscoverTopNavProps = Pick<
   resetSavedSearch: () => void;
   onChangeIndexPattern: (indexPattern: string) => void;
   onEditRuntimeField: () => void;
+  isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
 };
 
@@ -50,10 +50,10 @@ export const DiscoverTopNav = ({
   resetSavedSearch,
   onChangeIndexPattern,
   onEditRuntimeField,
+  isPlainRecord,
   textBasedLanguageModeErrors,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
-  const { isPlainRecord, setIsPlainRecord } = useDiscoverLayoutContext();
 
   const showDatePicker = useMemo(
     () => !isPlainRecord && indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
@@ -134,11 +134,6 @@ export const DiscoverTopNav = ({
     [canEditDataView, dataViewEditor, onChangeIndexPattern]
   );
 
-  const onUpdateIsTextQueryLangSelected = useCallback(
-    (isTextLangSelected: boolean) => setIsPlainRecord(isTextLangSelected),
-    [setIsPlainRecord]
-  );
-
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
@@ -196,7 +191,6 @@ export const DiscoverTopNav = ({
     onAddField: addField,
     onDataViewCreated: createNewDataView,
     onChangeDataView: onChangeIndexPattern,
-    onUpdateIsTextQueryLangSelected,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 

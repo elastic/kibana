@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -29,7 +29,6 @@ import { PLUGIN_ID } from '../../../common';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverTourContext, DiscoverTourContextProps } from './discover_tour_context';
 import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
-import { useDiscoverLayoutContext } from '../../application/main/hooks/use_discover_layout_context';
 
 const MAX_WIDTH = 350;
 
@@ -199,9 +198,14 @@ const tourConfig: EuiTourState = {
   tourSubtitle: '',
 };
 
-export const DiscoverTourProvider: React.FC = ({ children }) => {
+export const DiscoverTourProvider = ({
+  children,
+  isPlainRecord,
+}: {
+  children: ReactElement;
+  isPlainRecord: boolean;
+}) => {
   const services = useDiscoverServices();
-  const { isPlainRecord } = useDiscoverLayoutContext();
   const prependToBasePath = services.core.http.basePath.prepend;
   const getAssetPath = useCallback(
     (imageName: string) => {

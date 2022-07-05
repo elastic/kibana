@@ -54,7 +54,6 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
-import { useDiscoverLayoutContext } from '../../application/main/hooks/use_discover_layout_context';
 
 interface SortObj {
   id: string;
@@ -167,6 +166,10 @@ export interface DiscoverGridProps {
    * Update row height state
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
+  /**
+   * Is text base lang mode enabled
+   */
+  isPlainRecord?: boolean;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -200,6 +203,7 @@ export const DiscoverGrid = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  isPlainRecord = false,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
@@ -207,7 +211,6 @@ export const DiscoverGrid = ({
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
-  const { isPlainRecord } = useDiscoverLayoutContext();
   const usedSelectedDocs = useMemo(() => {
     if (!selectedDocs.length || !rows?.length) {
       return [];
@@ -485,7 +488,7 @@ export const DiscoverGrid = ({
           className={classnames(
             className,
             'dscDiscoverGrid__table',
-            isPlainRecord ? 'dscDiscoverGrid__textLanguageMode' : ''
+            isPlainRecord ? 'dscDiscoverGrid__textLanguageMode' : 'dscDiscoverGrid__documentsMode'
           )}
         >
           <EuiDataGridMemoized

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useContext } from 'react';
-import { DiscoverLayoutContext } from '../components/layout/discover_layout_context';
+import { RecordRawType } from '../hooks/use_saved_search';
 
-export const useDiscoverLayoutContext = () => useContext(DiscoverLayoutContext);
+export const isPlainRecordType = (recordRawType?: RecordRawType) =>
+  recordRawType === RecordRawType.PLAIN;

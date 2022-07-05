@@ -166,10 +166,11 @@ interface MultiFieldsProps {
   multiFields: NonNullable<DiscoverFieldProps['multiFields']>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
+  isPlainRecord: boolean;
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ multiFields, toggleDisplay, alwaysShowActionButton }) => (
+  ({ multiFields, toggleDisplay, alwaysShowActionButton, isPlainRecord }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
@@ -185,7 +186,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
           className="dscSidebarItem dscSidebarItem--multi"
           isActive={false}
           dataTestSubj={`field-${entry.field.name}-showDetails`}
-          fieldIcon={<DiscoverFieldTypeIcon field={entry.field} />}
+          fieldIcon={isPlainRecord && <DiscoverFieldTypeIcon field={entry.field} />}
           fieldAction={
             <ActionButton
               field={entry.field}
@@ -279,6 +280,7 @@ function DiscoverFieldComponent({
   showFieldStats,
 }: DiscoverFieldProps) {
   const [infoIsOpen, setOpen] = useState(false);
+  const isPlainRecord = !!onAddFilter;
 
   const toggleDisplay = useCallback(
     (f: DataViewField) => {
@@ -303,7 +305,7 @@ function DiscoverFieldComponent({
         size="s"
         className="dscSidebarItem"
         dataTestSubj={`field-${field.name}-showDetails`}
-        fieldIcon={<DiscoverFieldTypeIcon field={field} />}
+        fieldIcon={isPlainRecord && <DiscoverFieldTypeIcon field={field} />}
         fieldAction={
           <ActionButton
             field={field}
@@ -376,7 +378,7 @@ function DiscoverFieldComponent({
       isActive={infoIsOpen}
       onClick={togglePopover}
       dataTestSubj={`field-${field.name}-showDetails`}
-      fieldIcon={<DiscoverFieldTypeIcon field={field} />}
+      fieldIcon={isPlainRecord && <DiscoverFieldTypeIcon field={field} />}
       fieldAction={
         <ActionButton
           field={field}
@@ -389,7 +391,7 @@ function DiscoverFieldComponent({
       fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
     />
   );
-  if (!onAddFilter) {
+  if (!isPlainRecord) {
     return button;
   }
 
@@ -422,6 +424,7 @@ function DiscoverFieldComponent({
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
+              isPlainRecord={isPlainRecord}
             />
           </>
         )}

@@ -75,17 +75,13 @@ export interface DataViewPickerProps {
 
 export interface DataViewPickerPropsExtended extends DataViewPickerProps {
   /**
-   * Text based language that is currently selected; depends on the query
-   */
-  textBasedLanguage?: string;
-  /**
    * Callback that is called when the user clicks the submit button
    */
   onTextLangQuerySubmit?: (query?: AggregateQuery) => void;
   /**
-   * Callback that is called when the user toggle between text lang and data views
+   * Text based language that is currently selected; depends on the query
    */
-  onUpdateIsTextQueryLangSelected?: (isTextLangSelected: boolean) => void;
+  textBasedLanguage?: string;
 }
 
 export const DataViewPicker = ({
@@ -100,7 +96,6 @@ export const DataViewPicker = ({
   textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
-  onUpdateIsTextQueryLangSelected,
   textBasedLanguage,
 }: DataViewPickerPropsExtended) => {
   return (
@@ -116,7 +111,6 @@ export const DataViewPicker = ({
       textBasedLanguages={textBasedLanguages}
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}
       onTextLangQuerySubmit={onTextLangQuerySubmit}
-      onUpdateIsTextQueryLangSelected={onUpdateIsTextQueryLangSelected}
       textBasedLanguage={textBasedLanguage}
     />
   );

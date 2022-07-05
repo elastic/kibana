@@ -91,7 +91,6 @@ export function ChangeDataView({
   textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
-  onUpdateIsTextQueryLangSelected,
   textBasedLanguage,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
@@ -101,13 +100,9 @@ export function ChangeDataView({
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
     Boolean(textBasedLanguage)
   );
-  const updateIsTextQueryLangSelected = useCallback(
-    (isTextLangSelected: boolean) => {
-      setIsTextBasedLangSelected(isTextLangSelected);
-      onUpdateIsTextQueryLangSelected?.(isTextLangSelected);
-    },
-    [onUpdateIsTextQueryLangSelected]
-  );
+  const updateIsTextQueryLangSelected = useCallback((isTextLangSelected: boolean) => {
+    setIsTextBasedLangSelected(isTextLangSelected);
+  }, []);
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
 
   const kibana = useKibana<IDataPluginServices>();

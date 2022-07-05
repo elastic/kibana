@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useContext, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -37,7 +37,7 @@ import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { DataTableRecord } from '../../../../types';
-import { DiscoverLayoutContext } from './discover_layout_context';
+import { isPlainRecordType } from '../../utils/is_plain_record';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -70,7 +70,7 @@ function DiscoverDocumentsComponent({
 
   const documentState: DataDocumentsMsg = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
-  const { isPlainRecord } = useContext(DiscoverLayoutContext);
+  const isPlainRecord = isPlainRecordType(documentState.recordRawType);
 
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
@@ -165,7 +165,7 @@ function DiscoverDocumentsComponent({
       {!isLegacy && (
         <>
           {!hideAnnouncements && (
-            <DiscoverTourProvider>
+            <DiscoverTourProvider isPlainRecord={isPlainRecord}>
               <DocumentExplorerUpdateCallout />
             </DiscoverTourProvider>
           )}
@@ -194,6 +194,7 @@ function DiscoverDocumentsComponent({
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
               isSortEnabled={!isPlainRecord}
+              isPlainRecord={isPlainRecord}
             />
           </div>
         </>

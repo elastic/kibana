@@ -33,7 +33,7 @@ import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { useDiscoverLayoutContext } from '../../hooks/use_discover_layout_context';
+import { isPlainRecordType } from '../../utils/is_plain_record';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -116,7 +116,7 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const { isPlainRecord } = useDiscoverLayoutContext();
+  const isPlainRecord = isPlainRecordType(props.documents$.getValue().recordRawType);
   const { selectedIndexPattern, onEditRuntimeField, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);

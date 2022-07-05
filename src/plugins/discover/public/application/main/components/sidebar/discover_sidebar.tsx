@@ -125,6 +125,7 @@ export function DiscoverSidebarComponent({
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
+  const isPlainRecord = !!onAddFilter;
 
   useEffect(() => {
     if (documents) {
@@ -335,18 +336,17 @@ export function DiscoverSidebarComponent({
             }}
           />
         )}
-        {onAddFilter && (
-          <EuiFlexItem grow={false}>
-            <form>
-              <DiscoverFieldSearch
-                onChange={onChangeFieldSearch}
-                value={fieldFilter.name}
-                types={fieldTypes}
-                presentFieldTypes={presentFieldTypes}
-              />
-            </form>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <form>
+            <DiscoverFieldSearch
+              onChange={onChangeFieldSearch}
+              value={fieldFilter.name}
+              types={fieldTypes}
+              presentFieldTypes={presentFieldTypes}
+              isPlainRecord={isPlainRecord}
+            />
+          </form>
+        </EuiFlexItem>
         <EuiFlexItem className="eui-yScroll">
           <div
             ref={(el) => {
@@ -435,7 +435,7 @@ export function DiscoverSidebarComponent({
                   }
                 >
                   <EuiSpacer size="s" />
-                  {popularFields.length > 0 && (
+                  {isPlainRecord && popularFields.length > 0 && (
                     <>
                       <EuiTitle size="xxxs" className="dscFieldListHeader">
                         <h4 id="available_fields_popular">
