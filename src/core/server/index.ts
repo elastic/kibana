@@ -146,7 +146,6 @@ export type {
   GetResponse,
   DeleteDocumentResponse,
   ElasticsearchConfigPreboot,
-  ElasticsearchErrorDetails,
   PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
@@ -155,7 +154,6 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
-  UnauthorizedError,
 } from './elasticsearch';
 
 export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
@@ -235,7 +233,8 @@ export type {
   SafeRouteMethod,
 } from './http';
 
-export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
+export { kibanaResponseFactory, validBodyOutput, CoreKibanaRequest } from './http';
+export type { KibanaRequest } from './http';
 
 export type {
   HttpResourcesRenderOptions,
@@ -467,8 +466,8 @@ export type {
   OptInConfig,
   ShipperClassConstructor,
   TelemetryCounter,
+  TelemetryCounterType,
 } from '@kbn/analytics-client';
-export { TelemetryCounterType } from '@kbn/analytics-client';
 export type {
   AnalyticsServiceSetup,
   AnalyticsServicePreboot,

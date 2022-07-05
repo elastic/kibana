@@ -21,6 +21,7 @@ import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
+import { filter, firstValueFrom } from 'rxjs';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { HttpService } from './http';
@@ -303,14 +304,11 @@ export class CoreSystem {
       });
 
       // Wait for the first app navigation to report Kibana Loaded
-      const appSub = application.currentAppId$.subscribe((appId) => {
-        if (appId === undefined) return;
-
+      firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
         performance.mark(KBN_LOAD_MARKS, {
           detail: 'first_app_nav',
         });
         this.reportKibanaLoadedEvent(analytics);
-        appSub.unsubscribe();
       });
 
       return {
