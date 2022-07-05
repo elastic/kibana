@@ -28,9 +28,21 @@ const bodySchema = schema.object({
       freq: schema.maybe(
         schema.oneOf([schema.literal(0), schema.literal(1), schema.literal(2), schema.literal(3)])
       ),
-      interval: schema.maybe(schema.number()),
+      interval: schema.maybe(
+        schema.number({
+          validate: (interval: number) => {
+            if (interval < 1) return 'rRule interval must be > 0';
+          },
+        })
+      ),
       until: schema.maybe(schema.string({ validate: validateSnoozeEndDate })),
-      count: schema.maybe(schema.number()),
+      count: schema.maybe(
+        schema.number({
+          validate: (count: number) => {
+            if (count < 1) return 'rRule count must be > 0';
+          },
+        })
+      ),
       byweekday: schema.maybe(
         schema.arrayOf(schema.string(), {
           validate: createValidateRruleBy('byweekday'),

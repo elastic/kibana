@@ -56,7 +56,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   const [recurrenceEnds, setRecurrenceEnds] = useState('never');
 
   const [customFrequency, setCustomFrequency] = useState<CustomFrequencyState>({
-    freq: RRuleFrequency.DAILY,
+    freq: RRuleFrequency.WEEKLY,
     interval: 1,
     byweekday: [],
     bymonthday: [],
@@ -66,14 +66,19 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   const [recurrenceEndDate, setRecurrenceEndDate] = useState(endDate);
   const [occurrences, setOccurrrences] = useState(1);
 
-  const disableDailyOption = useMemo(() => {
-    if (!startDate || !endDate) return false;
-    return Math.abs(startDate.diff(endDate, 'hours')) >= 24;
+  const snoozeDurationInDays = useMemo(() => {
+    if (!startDate || !endDate) return 0;
+    return Math.abs(startDate.diff(endDate, 'days'));
   }, [startDate, endDate]);
 
+  const disableDailyOption = useMemo(() => {
+    return snoozeDurationInDays > 0;
+  }, [snoozeDurationInDays]);
+
   useEffect(() => {
-    if (disableDailyOption && frequency === RRuleFrequency.DAILY)
+    if (disableDailyOption && frequency === RRuleFrequency.DAILY) {
       setFrequency(RRuleFrequency.WEEKLY);
+    }
   }, [disableDailyOption, frequency]);
 
   useEffect(() => {
@@ -211,6 +216,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             startDate={startDate}
             onChange={setCustomFrequency}
             initialState={customFrequency}
+            minimumRecurrenceDays={snoozeDurationInDays + 1}
           />
         )}
         <EuiFormRow
