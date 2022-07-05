@@ -46,7 +46,7 @@ export interface AppState {
   sort?: string[][];
 }
 
-interface GlobalState {
+export interface GlobalState {
   /**
    * Array of filters
    */

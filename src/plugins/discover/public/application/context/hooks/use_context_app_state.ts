@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
-import { AppState, getState } from '../services/context_state';
+import { AppState, getState, GlobalState } from '../services/context_state';
 
 export function useContextAppState({ services }: { services: DiscoverServices }) {
   const { uiSettings: config, history, core, filterManager } = services;
@@ -25,7 +25,10 @@ export function useContextAppState({ services }: { services: DiscoverServices })
     });
   }, [config, history, core.notifications.toasts]);
 
-  const [appState, setState] = useState<AppState>(stateContainer.appState.getState());
+  const [appState, setAppState] = useState<AppState>(stateContainer.appState.getState());
+  const [globalState, setGlobalState] = useState<GlobalState>(
+    stateContainer.globalState.getState()
+  );
 
   /**
    * Sync with app state container
@@ -38,20 +41,26 @@ export function useContextAppState({ services }: { services: DiscoverServices })
 
   useEffect(() => {
     const unsubscribeAppState = stateContainer.appState.subscribe((newState) => {
-      setState((prevState) => ({ ...prevState, ...newState }));
+      setAppState((prevState) => ({ ...prevState, ...newState }));
+      filterManager.setFilters(cloneDeep(newState.filters));
     });
 
-    return () => unsubscribeAppState();
-  }, [stateContainer, setState]);
+    const unsubscribeGlobalState = stateContainer.globalState.subscribe((newState) => {
+      setGlobalState((prevState) => ({ ...prevState, ...newState }));
+      filterManager.setFilters(cloneDeep(newState.filters));
+    });
+
+    return () => {
+      unsubscribeAppState();
+      unsubscribeGlobalState();
+    };
+  }, [stateContainer, setAppState, filterManager]);
 
   /**
    * Take care of filters
    */
   useEffect(() => {
-    const filters = stateContainer.appState.getState().filters;
-    if (filters) {
-      filterManager.setAppFilters(cloneDeep(filters));
-    }
+    filterManager.setFilters(cloneDeep(stateContainer.getFilters()));
 
     const { setFilters } = stateContainer;
     const filterObservable = filterManager.getUpdates$().subscribe(() => {
@@ -63,6 +72,7 @@ export function useContextAppState({ services }: { services: DiscoverServices })
 
   return {
     appState,
+    globalState,
     stateContainer,
     setAppState: stateContainer.setAppState,
   };
