@@ -12536,16 +12536,17 @@ d3-scale@^1.0.5:
     d3-time "1"
     d3-time-format "2"
 
-d3-scale@^3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-3.3.0.tgz#28c600b29f47e5b9cd2df9749c206727966203f3"
-  integrity sha512-1JGp44NQCt5d1g+Yy+GeOnZP7xHo0ii8zsQp6PGzd+C1/dl0KGsp9A7Mxwp+1D1o4unbTTxVdU/ZOIEBoeZPbQ==
+d3-scale@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-2.2.2.tgz#4e880e0b2745acaaddd3ede26a9e908a9e17b81f"
+  integrity sha512-LbeEvGgIb8UMcAa0EATLNX0lelKWGYDQiPdHj+gLblGVhGLyNbaCn3EvrJf0A3Y/uOOU5aD6MTh5ZFCdEwGiCw==
   dependencies:
-    d3-array "^2.3.0"
-    d3-format "1 - 2"
-    d3-interpolate "1.2.0 - 2"
-    d3-time "^2.1.1"
-    d3-time-format "2 - 3"
+    d3-array "^1.2.0"
+    d3-collection "1"
+    d3-format "1"
+    d3-interpolate "1"
+    d3-time "1"
+    d3-time-format "2"
 
 d3-scale@^3.3.0:
   version "3.3.0"
@@ -14615,7 +14616,7 @@ eventemitter2@^6.4.3:
   resolved "https://registry.yarnpkg.com/eventemitter2/-/eventemitter2-6.4.3.tgz#35c563619b13f3681e7eb05cbdaf50f56ba58820"
   integrity sha512-t0A2msp6BzOf+QAcI6z9XMktLj52OjGQg+8SJH6v5+3uxNpWYRR3wQmfA+6xtMU9kOC59qk9licus5dYcrYkMQ==
 
-eventemitter3@^4.0.0, eventemitter3@^4.0.4:
+eventemitter3@^4.0.0:
   version "4.0.7"
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
@@ -22977,13 +22978,6 @@ pixelmatch@^4.0.2:
   integrity sha1-j0fc7FARtHe2fbA8JDvB8wheiFQ=
   dependencies:
     pngjs "^3.0.0"
-
-pixelmatch@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/pixelmatch/-/pixelmatch-5.1.0.tgz#b640f0e5a03a09f235a4b818ef3b9b98d9d0b911"
-  integrity sha512-HqtgvuWN12tBzKJf7jYsc38Ha28Q2NYpmBL9WostEGgDHJqbTLkjydZXL1ZHM02ZnB+Dkwlxo87HBY38kMiD6A==
-  dependencies:
-    pngjs "^3.4.0"
 
 pkg-dir@4.2.0, pkg-dir@^4.1.0, pkg-dir@^4.2.0:
   version "4.2.0"
