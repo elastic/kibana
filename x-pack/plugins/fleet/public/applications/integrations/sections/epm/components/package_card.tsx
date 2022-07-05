@@ -7,9 +7,11 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiCard, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
@@ -38,6 +40,7 @@ export function PackageCard({
   release,
   id,
   fromIntegrations,
+  isUnverified,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -47,6 +50,19 @@ export function PackageCard({
         <EuiSpacer size="xs" />
         <span>
           <CardReleaseBadge release={release} />
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  if (isUnverified) {
+    releaseBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="warning">
+            <FormattedMessage id="packageCard.unverifiedLabel" defaultMessage="Unverified" />
+          </EuiBadge>
         </span>
       </EuiFlexItem>
     );

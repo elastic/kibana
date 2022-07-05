@@ -15,10 +15,11 @@ import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import type { DynamicPage, DynamicPagePathValues, StaticPage } from '../../../../constants';
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
-import type { IntegrationCardItem } from '../../../../../../../common/types/models';
+import type { Installation, IntegrationCardItem } from '../../../../../../../common/types/models';
 
 import type { CategoryFacet } from './category_facets';
 import { InstalledPackages } from './installed_packages';
@@ -43,21 +44,46 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
   return categories.some((c) => c.id === category);
 };
 
-export const mapToCard = (
-  getAbsolutePath: (p: string) => string,
-  getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string,
-  item: CustomIntegration | PackageListItem,
-  selectedCategory?: string
-): IntegrationCardItem => {
+function showPackageUnverified(
+  installation: Installation,
+  packageVerificationKeyId?: string
+): boolean {
+  const verificationStatus = installation.verification_status;
+  const verificationKeyId = installation.verification_key_id;
+
+  const { packageVerification: isPackageVerificationEnabled } = ExperimentalFeaturesService.get();
+  const isStatusUnverified = verificationStatus === 'unverified';
+  const isKeyOutdated =
+    verificationStatus === 'verified' &&
+    !!verificationKeyId &&
+    verificationKeyId !== packageVerificationKeyId;
+  return isPackageVerificationEnabled && (isStatusUnverified || isKeyOutdated);
+}
+
+export const mapToCard = ({
+  getAbsolutePath,
+  getHref,
+  item,
+  packageVerificationKeyId,
+  selectedCategory,
+}: {
+  getAbsolutePath: (p: string) => string;
+  getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
+  item: CustomIntegration | PackageListItem;
+  packageVerificationKeyId?: string;
+  selectedCategory?: string;
+}): IntegrationCardItem => {
   let uiInternalPathUrl;
 
+  let isUnverified = false;
   if (item.type === 'ui_link') {
     uiInternalPathUrl = item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
-
     if ('savedObject' in item) {
       urlVersion = item.savedObject.attributes.version || item.version;
+
+      isUnverified = showPackageUnverified(item.savedObject.attributes, packageVerificationKeyId);
     }
 
     const url = getHref('integration_details_overview', {
@@ -87,6 +113,7 @@ export const mapToCard = (
     version: 'version' in item ? item.version || '' : '',
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),
+    isUnverified,
   };
 };
 

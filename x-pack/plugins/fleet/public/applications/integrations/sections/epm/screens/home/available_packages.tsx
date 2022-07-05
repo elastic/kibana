@@ -238,7 +238,7 @@ export const AvailablePackages: React.FC = memo(() => {
   ];
 
   const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
-    return mapToCard(getAbsolutePath, getHref, item);
+    return mapToCard({ getAbsolutePath, getHref, item });
   });
 
   cards.sort((a, b) => {

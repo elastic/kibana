@@ -15,7 +15,13 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 import { pagePathGetters } from '../../../../constants';
-import { useGetPackages, useBreadcrumbs, useLink, useStartServices } from '../../../../hooks';
+import {
+  useGetPackages,
+  useBreadcrumbs,
+  useLink,
+  useStartServices,
+  useFleetStatus,
+} from '../../../../hooks';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { CategoryFacet } from './category_facets';
@@ -37,7 +43,7 @@ const AnnouncementLink = () => {
   );
 };
 
-const Callout = () => (
+const InstalledIntegrationsInfoCallout = () => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
       defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
@@ -56,6 +62,24 @@ const Callout = () => (
   </EuiCallOut>
 );
 
+const VerificationWarningCallout = () => (
+  <EuiCallOut
+    title={i18n.translate('xpack.fleet.epmList.verificationWarningCalloutTitle', {
+      defaultMessage: 'Some installed integrations are not verified',
+    })}
+    iconType="alert"
+    color="warning"
+  >
+    <p>
+      <FormattedMessage
+        id="xpack.fleet.epmList.verificationWarningCalloutIntroText"
+        defaultMessage="One or more of the installed integrations contains an unsigned package with unknown authenticity."
+        // TODO: add documentation link
+      />
+    </p>
+  </EuiCallOut>
+);
+
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const InstalledPackages: React.FC = memo(() => {
@@ -64,6 +88,8 @@ export const InstalledPackages: React.FC = memo(() => {
   const { data: allPackages, isLoading } = useGetPackages({
     experimental: true,
   });
+
+  const { packageVerificationKeyId } = useFleetStatus();
 
   const { getHref, getAbsolutePath } = useLink();
 
@@ -143,9 +169,20 @@ export const InstalledPackages: React.FC = memo(() => {
 
   const cards = (
     selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages
-  ).map((item) => mapToCard(getAbsolutePath, getHref, item, selectedCategory || 'installed'));
+  ).map((item) =>
+    mapToCard({
+      getAbsolutePath,
+      getHref,
+      item,
+      selectedCategory: selectedCategory || 'installed',
+      packageVerificationKeyId,
+    })
+  );
 
-  const callout = selectedCategory === 'updates_available' ? null : <Callout />;
+  const CalloutComponent = cards.some((c) => c.isUnverified)
+    ? VerificationWarningCallout
+    : InstalledIntegrationsInfoCallout;
+  const callout = selectedCategory === 'updates_available' ? null : <CalloutComponent />;
 
   return (
     <PackageListGrid
