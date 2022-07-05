@@ -39,6 +39,7 @@ import { EditConnectorFlyoutProps } from './application/sections/action_connecto
 import { getActionFormLazy } from './common/get_action_form';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
+import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -107,6 +108,8 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRuleDefinition: (props) => {
       return getRuleDefinitionLazy({ ...props, actionTypeRegistry, ruleTypeRegistry });
+    getRuleStatusPanel: (props) => {
+      return getRuleStatusPanelLazy(props);
     },
   };
 }
