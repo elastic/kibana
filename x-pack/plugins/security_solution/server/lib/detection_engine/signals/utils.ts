@@ -37,6 +37,7 @@ import {
   TimestampOverrideOrUndefined,
   Privilege,
   RuleExecutionStatus,
+  DisableTimestampFallbackOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 import type {
   BulkResponseErrorAggregation,
@@ -190,6 +191,16 @@ export const hasTimestampFields = async (args: {
     return true;
   }
   return false;
+};
+
+export const getTimestampOverrideFields = (
+  timestampOverride: TimestampOverrideOrUndefined,
+  disableTimestampFallback: DisableTimestampFallbackOrUndefined
+) => {
+  const primaryTimestamp = timestampOverride ?? '@timestamp';
+  const secondaryTimestamp =
+    primaryTimestamp !== '@timestamp' && !disableTimestampFallback ? '@timestamp' : undefined;
+  return { primaryTimestamp, secondaryTimestamp };
 };
 
 export const checkPrivileges = async (

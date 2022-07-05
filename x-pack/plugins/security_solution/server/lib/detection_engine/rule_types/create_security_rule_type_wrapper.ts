@@ -18,6 +18,7 @@ import {
   checkPrivilegesFromEsClient,
   getExceptions,
   getRuleRangeTuples,
+  getTimestampOverrideFields,
   hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
@@ -152,6 +153,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             id: alertId,
           };
 
+          const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
+            timestampOverride,
+            disableTimestampFallback
+          );
+
           /**
            * Data Views Logic
            * Use of data views is supported for all rules other than ML.
@@ -190,8 +196,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // so that we can use it in create rules route, bulk, etc.
           try {
             if (!isMachineLearningParams(params)) {
-              const hasTimestampOverride = !!timestampOverride;
-
               const privileges = await checkPrivilegesFromEsClient(esClient, inputIndex);
 
               wroteWarningStatus = await hasReadIndexPrivileges({
@@ -207,9 +211,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   services.scopedClusterClient.asCurrentUser.fieldCaps(
                     {
                       index: inputIndex,
-                      fields: hasTimestampOverride
-                        ? [timestampOverride, ...(disableTimestampFallback ? [] : ['@timestamp'])]
-                        : ['@timestamp'],
+                      fields: secondaryTimestamp
+                        ? [primaryTimestamp, secondaryTimestamp]
+                        : [primaryTimestamp],
                       include_unmapped: true,
                       runtime_mappings: runtimeMappings,
                     },
@@ -218,7 +222,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 );
 
                 wroteWarningStatus = await hasTimestampFields({
-                  timestampField: hasTimestampOverride ? timestampOverride : '@timestamp',
+                  timestampField: primaryTimestamp,
                   timestampFieldCapsResponse: timestampFieldCaps,
                   inputIndices: inputIndex,
                   ruleExecutionLogger,

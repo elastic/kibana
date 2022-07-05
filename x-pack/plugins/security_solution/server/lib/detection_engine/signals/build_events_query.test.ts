@@ -26,8 +26,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: undefined,
-      timestampOverride: undefined,
-      disableTimestampFallback: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -85,8 +85,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: undefined,
-      timestampOverride: 'event.ingested',
-      disableTimestampFallback: undefined,
+      primaryTimestamp: 'event.ingested',
+      secondaryTimestamp: '@timestamp',
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -185,8 +185,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: undefined,
-      timestampOverride: 'event.ingested',
-      disableTimestampFallback: true,
+      primaryTimestamp: 'event.ingested',
+      secondaryTimestamp: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -200,19 +200,12 @@ describe('create_signals', () => {
             filter: [
               {},
               {
-                bool: {
-                  should: [
-                    {
-                      range: {
-                        'event.ingested': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
+                range: {
+                  'event.ingested': {
+                    gte: 'now-5m',
+                    lte: 'today',
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
               {
@@ -238,12 +231,6 @@ describe('create_signals', () => {
               unmapped_type: 'date',
             },
           },
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
         ],
       },
     });
@@ -258,8 +245,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: [fakeSortId],
-      timestampOverride: undefined,
-      disableTimestampFallback: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -318,8 +305,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: [fakeSortIdNumber],
-      timestampOverride: undefined,
-      disableTimestampFallback: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -377,8 +364,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: undefined,
-      timestampOverride: undefined,
-      disableTimestampFallback: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -443,8 +430,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: undefined,
-      timestampOverride: undefined,
-      disableTimestampFallback: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       runtimeMappings: undefined,
     });
     expect(query).toEqual({
@@ -509,8 +496,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: undefined,
-      timestampOverride: undefined,
-      disableTimestampFallback: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       trackTotalHits: false,
       runtimeMappings: undefined,
     });
@@ -525,8 +512,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: undefined,
-      timestampOverride: undefined,
-      disableTimestampFallback: undefined,
+      primaryTimestamp: '@timestamp',
+      secondaryTimestamp: undefined,
       sortOrder: 'desc',
       trackTotalHits: false,
       runtimeMappings: undefined,
@@ -547,8 +534,8 @@ describe('create_signals', () => {
       filter: {},
       size: 100,
       searchAfterSortIds: undefined,
-      timestampOverride: 'event.ingested',
-      disableTimestampFallback: undefined,
+      primaryTimestamp: 'event.ingested',
+      secondaryTimestamp: '@timestamp',
       sortOrder: 'desc',
       runtimeMappings: undefined,
     });
@@ -575,8 +562,8 @@ describe('create_signals', () => {
         to: 'now',
         size: 100,
         filters: undefined,
-        timestampOverride: undefined,
-        disableTimestampFallback: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
         exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
@@ -626,8 +613,8 @@ describe('create_signals', () => {
         to: 'now',
         size: 100,
         filters: undefined,
-        timestampOverride: 'event.ingested',
-        disableTimestampFallback: undefined,
+        primaryTimestamp: 'event.ingested',
+        secondaryTimestamp: '@timestamp',
         exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
@@ -706,7 +693,7 @@ describe('create_signals', () => {
       });
     });
 
-    test('should build a request without @timestamp fallback if disableTimestampFallback is true', () => {
+    test('should build a request without @timestamp fallback if secondaryTimestamp is not specified', () => {
       const request = buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
@@ -714,8 +701,8 @@ describe('create_signals', () => {
         to: 'now',
         size: 100,
         filters: undefined,
-        timestampOverride: 'event.ingested',
-        disableTimestampFallback: true,
+        primaryTimestamp: 'event.ingested',
+        secondaryTimestamp: undefined,
         exceptionLists: [],
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
@@ -733,19 +720,12 @@ describe('create_signals', () => {
             bool: {
               filter: [
                 {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      {
-                        range: {
-                          'event.ingested': {
-                            lte: 'now',
-                            gte: 'now-5m',
-                            format: 'strict_date_optional_time',
-                          },
-                        },
-                      },
-                    ],
+                  range: {
+                    'event.ingested': {
+                      lte: 'now',
+                      gte: 'now-5m',
+                      format: 'strict_date_optional_time',
+                    },
                   },
                 },
                 emptyFilter,
@@ -774,8 +754,8 @@ describe('create_signals', () => {
         to: 'now',
         size: 100,
         filters: undefined,
-        timestampOverride: undefined,
-        disableTimestampFallback: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
         exceptionLists: [getExceptionListItemSchemaMock()],
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
@@ -909,8 +889,8 @@ describe('create_signals', () => {
         to: 'now',
         size: 100,
         filters,
-        timestampOverride: undefined,
-        disableTimestampFallback: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
         exceptionLists: [],
         runtimeMappings: undefined,
       });

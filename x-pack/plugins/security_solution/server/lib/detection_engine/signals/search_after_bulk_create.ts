@@ -18,6 +18,7 @@ import {
   mergeReturns,
   mergeSearchResults,
   getSafeSortIds,
+  getTimestampOverrideFields,
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -63,6 +64,11 @@ export const searchAfterAndBulkCreate = async ({
       });
     }
 
+    const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
+      ruleParams.timestampOverride,
+      ruleParams.disableTimestampFallback
+    );
+
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
@@ -80,8 +86,8 @@ export const searchAfterAndBulkCreate = async ({
             logger,
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
-            timestampOverride: ruleParams.timestampOverride,
-            disableTimestampFallback: ruleParams.disableTimestampFallback,
+            primaryTimestamp,
+            secondaryTimestamp,
             trackTotalHits,
             sortOrder,
           });

@@ -22,6 +22,7 @@ import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
+import { getTimestampOverrideFields } from '../utils';
 
 export const createThreatSignals = async ({
   alertId,
@@ -76,6 +77,11 @@ export const createThreatSignals = async ({
   const allEventFilters = [...filters, eventMappingFilter];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter];
 
+  const { primaryTimestamp, secondaryTimestamp } = getTimestampOverrideFields(
+    params.timestampOverride,
+    params.disableTimestampFallback
+  );
+
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
@@ -84,6 +90,8 @@ export const createThreatSignals = async ({
     query,
     language,
     filters: allEventFilters,
+    primaryTimestamp,
+    secondaryTimestamp,
   });
 
   logger.debug(`Total event count: ${eventCount}`);
@@ -198,6 +206,8 @@ export const createThreatSignals = async ({
           perPage,
           tuple,
           runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
         }),
 
       createSignal: (slicedChunk) =>

@@ -24,6 +24,7 @@ describe('getEventCount', () => {
       exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
+      primaryTimestamp: '@timestamp',
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -60,7 +61,8 @@ describe('getEventCount', () => {
       exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
-      timestampOverride: 'event.ingested',
+      primaryTimestamp: 'event.ingested',
+      secondaryTimestamp: '@timestamp',
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -120,8 +122,7 @@ describe('getEventCount', () => {
       exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
-      timestampOverride: 'event.ingested',
-      disableTimestampFallback: true,
+      primaryTimestamp: 'event.ingested',
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -131,19 +132,12 @@ describe('getEventCount', () => {
             filter: [
               { bool: { must: [], filter: [], should: [], must_not: [] } },
               {
-                bool: {
-                  should: [
-                    {
-                      range: {
-                        'event.ingested': {
-                          lte: '2022-01-14T05:00:00.000Z',
-                          gte: '2022-01-13T05:00:00.000Z',
-                          format: 'strict_date_optional_time',
-                        },
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
+                range: {
+                  'event.ingested': {
+                    lte: '2022-01-14T05:00:00.000Z',
+                    gte: '2022-01-13T05:00:00.000Z',
+                    format: 'strict_date_optional_time',
+                  },
                 },
               },
               { match_all: {} },

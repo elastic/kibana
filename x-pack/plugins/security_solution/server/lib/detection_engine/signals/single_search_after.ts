@@ -17,7 +17,7 @@ import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
 import {
-  DisableTimestampFallbackOrUndefined,
+  TimestampOverride,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -33,8 +33,8 @@ interface SingleSearchAfterParams {
   pageSize: number;
   sortOrder?: estypes.SortOrder;
   filter: estypes.QueryDslQueryContainer;
-  timestampOverride: TimestampOverrideOrUndefined;
-  disableTimestampFallback: DisableTimestampFallbackOrUndefined;
+  primaryTimestamp: TimestampOverride;
+  secondaryTimestamp: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
   trackTotalHits?: boolean;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -53,8 +53,8 @@ export const singleSearchAfter = async ({
   logger,
   pageSize,
   sortOrder,
-  timestampOverride,
-  disableTimestampFallback,
+  primaryTimestamp,
+  secondaryTimestamp,
   buildRuleMessage,
   trackTotalHits,
 }: SingleSearchAfterParams): Promise<{
@@ -74,8 +74,8 @@ export const singleSearchAfter = async ({
         size: pageSize,
         sortOrder,
         searchAfterSortIds,
-        timestampOverride,
-        disableTimestampFallback,
+        primaryTimestamp,
+        secondaryTimestamp,
         trackTotalHits,
       });
 
@@ -99,8 +99,9 @@ export const singleSearchAfter = async ({
     } catch (exc) {
       logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
       if (
-        exc.message.includes('No mapping found for [@timestamp] in order to sort on') ||
-        exc.message.includes(`No mapping found for [${timestampOverride}] in order to sort on`)
+        exc.message.includes(`No mapping found for [${primaryTimestamp}] in order to sort on`) ||
+        (secondaryTimestamp &&
+          exc.message.includes(`No mapping found for [${secondaryTimestamp}] in order to sort on`))
       ) {
         logger.error(buildRuleMessage(`[-] failure reason: ${exc.message}`));
 
