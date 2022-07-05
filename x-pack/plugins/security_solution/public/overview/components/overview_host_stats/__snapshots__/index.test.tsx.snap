@@ -7,7 +7,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
   <EuiHorizontalRule
     margin="xs"
   />
-  <WithEuiTheme(EuiAccordionClass)
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         gutterSize="s"
@@ -251,11 +251,11 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </WithEuiTheme(EuiAccordionClass)>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <WithEuiTheme(EuiAccordionClass)
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         gutterSize="s"
@@ -534,11 +534,11 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </WithEuiTheme(EuiAccordionClass)>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <WithEuiTheme(EuiAccordionClass)
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         gutterSize="s"
@@ -607,11 +607,11 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </WithEuiTheme(EuiAccordionClass)>
+  </EuiAccordionClass>
   <EuiHorizontalRule
     margin="xs"
   />
-  <WithEuiTheme(EuiAccordionClass)
+  <EuiAccordionClass
     buttonContent={
       <EuiFlexGroup
         gutterSize="s"
@@ -715,6 +715,6 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         </Styled(EuiFlexItem)>
       </EuiFlexGroup>
     </styled.div>
-  </WithEuiTheme(EuiAccordionClass)>
+  </EuiAccordionClass>
 </styled.div>
 `;

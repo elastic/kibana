@@ -19,6 +19,8 @@ import {
   EndpointActionData,
   EndpointActionResponse,
   LogsEndpointActionResponse,
+  ActionResponseOutput,
+  ProcessesEntry,
 } from '../../../common/endpoint/types';
 import { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -95,6 +97,7 @@ export const sendEndpointActionResponse = async (
         command: action.command as EndpointActionData['command'],
         comment: '',
       },
+      ...getOutputDataIfNeeded(action.command as EndpointActionData['command']),
       started_at: action.startedAt,
     },
   });
@@ -113,4 +116,19 @@ export const sendEndpointActionResponse = async (
   });
 
   return endpointResponse;
+};
+
+const getOutputDataIfNeeded = (
+  command: EndpointActionData['command']
+): { output?: ActionResponseOutput } => {
+  return command === 'running-processes'
+    ? ({
+        output: {
+          type: 'json',
+          content: {
+            entries: endpointActionGenerator.randomResponseActionProcesses(100),
+          },
+        },
+      } as { output: ActionResponseOutput<ProcessesEntry> })
+    : {};
 };
