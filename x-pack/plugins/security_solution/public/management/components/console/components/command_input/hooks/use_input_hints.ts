@@ -16,13 +16,13 @@ import { useWithCommandList } from '../../../hooks/state_selectors/use_with_comm
 
 const UNKNOWN_COMMAND_HINT = (commandName: string) =>
   i18n.translate('xpack.securitySolution.useInputHints.unknownCommand', {
-    defaultMessage: 'Hint: unknown command {commandName}',
+    defaultMessage: 'Unknown command {commandName}',
     values: { commandName },
   });
 
 const COMMAND_USAGE_HINT = (usage: string) =>
   i18n.translate('xpack.securitySolution.useInputHints.commandUsage', {
-    defaultMessage: 'Hint: {usage}',
+    defaultMessage: '{usage}',
     values: {
       usage,
     },
@@ -51,9 +51,14 @@ export const useInputHints = () => {
         dispatch({
           type: 'updateFooterContent',
           payload: {
-            value: COMMAND_USAGE_HINT(
-              `${commandEnteredDefinition.name} ${getArgumentsForCommand(commandEnteredDefinition)}`
-            ),
+            value:
+              commandEnteredDefinition.exampleUsage && commandEnteredDefinition.exampleInstruction
+                ? `${commandEnteredDefinition.exampleInstruction} Ex: [${commandEnteredDefinition.exampleUsage}]`
+                : COMMAND_USAGE_HINT(
+                    `${commandEnteredDefinition.name} ${getArgumentsForCommand(
+                      commandEnteredDefinition
+                    )}`
+                  ),
           },
         });
       } else {

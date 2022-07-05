@@ -162,6 +162,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
           </PresentationUtilProvider>
         ),
         {
+          'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),
           outsideClickCloses: false,
           onClose: (flyout) => {
             onCancel(flyout);
