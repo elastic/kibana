@@ -15,6 +15,7 @@ import classNames from 'classnames';
 import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupInput } from '../types';
 import { ControlFrame, ControlFrameProps } from './control_frame_component';
+import { ControlGroupStrings } from '../control_group_strings';
 
 interface DragInfo {
   isOver?: boolean;
@@ -71,9 +72,15 @@ const SortableControlInner = forwardRef<
 
     const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
+    const title = panels[embeddableId].explicitInput.title;
 
     const dragHandle = (
-      <button ref={dragHandleRef} {...dragHandleProps} className="controlFrame__dragHandle">
+      <button
+        ref={dragHandleRef}
+        {...dragHandleProps}
+        aria-label={`${ControlGroupStrings.ariaActions.getMoveControlButtonAction(title)}`}
+        className="controlFrame__dragHandle"
+      >
         <EuiIcon type="grabHorizontal" />
       </button>
     );
