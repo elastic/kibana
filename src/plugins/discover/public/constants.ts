@@ -7,3 +7,4 @@
  */
 
 export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
+export const DEFAULT_ROWS_PER_PAGE = 100;

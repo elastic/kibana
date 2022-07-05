@@ -16,6 +16,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
+import { DEFAULT_ROWS_PER_PAGE } from '../../../constants';
 import { SavedSearch } from '../../../services/saved_searches';
 
 import { AppState } from '../services/discover_state';
@@ -51,7 +52,7 @@ export function getStateDefaults({
   const columns = getDefaultColumns(savedSearch, config);
   const chartHidden = storage.get(CHART_HIDDEN_KEY);
 
-  const defaultState = {
+  const defaultState: AppState = {
     query,
     sort: !sort.length
       ? getDefaultSort(
@@ -63,13 +64,14 @@ export function getStateDefaults({
     columns,
     index: indexPattern?.id,
     interval: 'auto',
-    filters: cloneDeep(searchSource.getOwnField('filter')),
+    filters: cloneDeep(searchSource.getOwnField('filter')) as AppState['filters'],
     hideChart: typeof chartHidden === 'boolean' ? chartHidden : undefined,
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
     rowHeight: undefined,
-  } as AppState;
+    rowsPerPage: DEFAULT_ROWS_PER_PAGE,
+  };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }
@@ -82,9 +84,11 @@ export function getStateDefaults({
   if (savedSearch.viewMode) {
     defaultState.viewMode = savedSearch.viewMode;
   }
-
   if (savedSearch.hideAggregatedPreview) {
     defaultState.hideAggregatedPreview = savedSearch.hideAggregatedPreview;
+  }
+  if (savedSearch.rowsPerPage) {
+    defaultState.rowsPerPage = savedSearch.rowsPerPage;
   }
 
   return defaultState;

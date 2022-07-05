@@ -53,4 +53,5 @@ export interface SavedSearch {
   viewMode?: VIEW_MODE;
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
+  rowsPerPage?: number;
 }

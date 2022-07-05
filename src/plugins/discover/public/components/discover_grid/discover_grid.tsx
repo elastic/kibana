@@ -35,7 +35,6 @@ import {
   getVisibleColumns,
 } from './discover_grid_columns';
 import {
-  defaultPageSize,
   GRID_STYLE,
   pageSizeArr,
   toolbarVisibility as toolbarVisibilityDefaults,
@@ -47,6 +46,7 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '../../../common';
+import { DEFAULT_ROWS_PER_PAGE } from '../../constants';
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/utils/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
@@ -166,6 +166,14 @@ export interface DiscoverGridProps {
    * Update row height state
    */
   onUpdateRowHeight?: (rowHeight: number) => void;
+  /**
+   * Current state value for rowsPerPage
+   */
+  rowsPerPageState?: number;
+  /**
+   * Update rows per page state
+   */
+  onUpdateRowsPerPage?: (rowsPerPage: number) => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -199,6 +207,8 @@ export const DiscoverGrid = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  rowsPerPageState,
+  onUpdateRowsPerPage,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
@@ -251,7 +261,10 @@ export const DiscoverGrid = ({
   /**
    * Pagination
    */
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: rowsPerPageState ?? DEFAULT_ROWS_PER_PAGE,
+  });
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
   const pageCount = useMemo(
     () => Math.ceil(rowCount / pagination.pageSize),
@@ -260,8 +273,10 @@ export const DiscoverGrid = ({
   const isOnLastPage = pagination.pageIndex === pageCount - 1;
 
   const paginationObj = useMemo(() => {
-    const onChangeItemsPerPage = (pageSize: number) =>
+    const onChangeItemsPerPage = (pageSize: number) => {
       setPagination((paginationData) => ({ ...paginationData, pageSize }));
+      onUpdateRowsPerPage?.(pageSize);
+    };
 
     const onChangePage = (pageIndex: number) =>
       setPagination((paginationData) => ({ ...paginationData, pageIndex }));
@@ -275,7 +290,7 @@ export const DiscoverGrid = ({
           pageSizeOptions: pageSizeArr,
         }
       : undefined;
-  }, [pagination, pageCount, isPaginationEnabled]);
+  }, [pagination, pageCount, isPaginationEnabled, onUpdateRowsPerPage]);
 
   /**
    * Sorting
