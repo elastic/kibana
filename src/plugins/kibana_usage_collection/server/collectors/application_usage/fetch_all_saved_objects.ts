@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectsRepository, SavedObjectsFindResult } from '@kbn/core/server';
+import type {
+  ISavedObjectsRepository,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 
 export async function fetchAllSavedObjects<T>(
   soRepository: ISavedObjectsRepository,
-  soType: string,
-  filter?: string
+  findOptions: SavedObjectsCreatePointInTimeFinderOptions
 ): Promise<Array<SavedObjectsFindResult<T>>> {
-  const finder = soRepository.createPointInTimeFinder<T>({ type: soType, perPage: 100, filter });
+  const finder = soRepository.createPointInTimeFinder<T>({ ...findOptions, perPage: 100 });
 
   const allSavedObjects: Array<SavedObjectsFindResult<T>> = [];
 
