@@ -11,7 +11,8 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
-import type { AggFunctionsMapping, Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { queryFilterToAst } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { updateColumnParam } from '../../layer_helpers';

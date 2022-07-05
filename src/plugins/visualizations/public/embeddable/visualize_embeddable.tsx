@@ -10,12 +10,13 @@ import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
-import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
+import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
+import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Query, TimefilterContract, TimeRange } from '@kbn/data-plugin/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   Adapters,
@@ -53,8 +54,6 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
-
-const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
@@ -221,15 +220,13 @@ export class VisualizeEmbeddable
         // Turn this off or the uiStateChangeHandler will fire for every modification.
         this.vis.uiState.off('change', this.uiStateChangeHandler);
         this.vis.uiState.clearAllKeys();
-        if (visCustomizations.vis) {
-          this.vis.uiState.set('vis', visCustomizations.vis);
-          getKeys(visCustomizations).forEach((key) => {
-            this.vis.uiState.set(key, visCustomizations[key]);
-          });
-        }
-        if (visCustomizations.table) {
-          this.vis.uiState.set('table', visCustomizations.table);
-        }
+
+        Object.entries(visCustomizations).forEach(([key, value]) => {
+          if (value) {
+            this.vis.uiState.set(key, value);
+          }
+        });
+
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
     } else if (this.parent) {
@@ -397,29 +394,33 @@ export class VisualizeEmbeddable
         const { error } = this.getOutput();
 
         if (error) {
-          if (isFallbackDataView(this.vis.data.indexPattern)) {
-            render(
-              <VisualizationMissedSavedObjectError
-                viewMode={this.input.viewMode ?? ViewMode.VIEW}
-                renderMode={this.input.renderMode ?? 'view'}
-                savedObjectMeta={{
-                  savedObjectId: this.vis.data.indexPattern.id,
-                  savedObjectType: this.vis.data.savedSearchId
-                    ? 'search'
-                    : DATA_VIEW_SAVED_OBJECT_TYPE,
-                }}
-                application={getApplication()}
-              />,
-              this.domNode
-            );
-          } else {
-            render(<VisualizationError error={error} />, this.domNode);
-          }
+          this.renderError(this.domNode, error);
         }
       })
     );
 
     await this.updateHandler();
+  }
+
+  public renderError(domNode: HTMLElement, error: ErrorLike | string) {
+    if (isFallbackDataView(this.vis.data.indexPattern)) {
+      render(
+        <VisualizationMissedSavedObjectError
+          viewMode={this.input.viewMode ?? ViewMode.VIEW}
+          renderMode={this.input.renderMode ?? 'view'}
+          savedObjectMeta={{
+            savedObjectId: this.vis.data.indexPattern.id,
+            savedObjectType: this.vis.data.savedSearchId ? 'search' : DATA_VIEW_SAVED_OBJECT_TYPE,
+          }}
+          application={getApplication()}
+        />,
+        domNode
+      );
+    } else {
+      render(<VisualizationError error={error} />, domNode);
+    }
+
+    return () => unmountComponentAtNode(domNode);
   }
 
   public destroy() {

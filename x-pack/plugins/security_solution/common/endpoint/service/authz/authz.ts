@@ -24,14 +24,18 @@ export const calculateEndpointAuthz = (
   userRoles: MaybeImmutable<string[]>
 ): EndpointAuthz => {
   const isPlatinumPlusLicense = licenseService.isPlatinumPlus();
-  const hasAllAccessToFleet = userRoles.includes('superuser');
+  const hasEndpointManagementAccess = userRoles.includes('superuser');
 
   return {
-    canAccessFleet: hasAllAccessToFleet,
-    canAccessEndpointManagement: hasAllAccessToFleet,
-    canCreateArtifactsByPolicy: hasAllAccessToFleet && isPlatinumPlusLicense,
-    canIsolateHost: isPlatinumPlusLicense && hasAllAccessToFleet,
-    canUnIsolateHost: hasAllAccessToFleet,
+    canAccessFleet: fleetAuthz?.fleet.all ?? userRoles.includes('superuser'),
+    canAccessEndpointManagement: hasEndpointManagementAccess,
+    canCreateArtifactsByPolicy: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canIsolateHost: isPlatinumPlusLicense && hasEndpointManagementAccess,
+    canUnIsolateHost: hasEndpointManagementAccess,
+    canKillProcess: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canSuspendProcess: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canGetRunningProcesses: hasEndpointManagementAccess && isPlatinumPlusLicense,
+    canAccessResponseConsole: hasEndpointManagementAccess && isPlatinumPlusLicense,
   };
 };
 
@@ -42,5 +46,9 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canCreateArtifactsByPolicy: false,
     canIsolateHost: false,
     canUnIsolateHost: true,
+    canKillProcess: false,
+    canSuspendProcess: false,
+    canGetRunningProcesses: false,
+    canAccessResponseConsole: false,
   };
 };

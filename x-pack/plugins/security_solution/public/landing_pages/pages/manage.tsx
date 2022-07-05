@@ -26,8 +26,8 @@ export const ManageLandingPage = () => (
 );
 
 const StyledEuiHorizontalRule = styled(EuiHorizontalRule)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
-  margin-bottom: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeM};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 type ManagementCategories = Array<{ label: string; links: NavLinkItem[] }>;

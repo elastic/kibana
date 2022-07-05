@@ -57,6 +57,8 @@ export interface CiStatsMetric {
   meta?: CiStatsMetadata;
 }
 
+export type PerformanceMetrics = Record<string, number>;
+
 /** A ci-stats timing event */
 export interface CiStatsTiming {
   /** Top-level categorization for the timing, e.g. "scripts/foo", process type, etc. */
@@ -304,6 +306,24 @@ export class CiStatsReporter {
     if (bufferBytes) {
       await flushBuffer();
     }
+  }
+
+  async reportPerformanceMetrics(metrics: PerformanceMetrics) {
+    if (!this.hasBuildConfig()) {
+      return;
+    }
+
+    const buildId = this.config?.buildId;
+    if (!buildId) {
+      throw new Error(`Performance metrics can't be reported without a buildId`);
+    }
+
+    return !!(await this.req({
+      auth: true,
+      path: `/v1/performance_metrics_report?buildId=${buildId}`,
+      body: { metrics },
+      bodyDesc: `performance metrics: ${metrics}`,
+    }));
   }
 
   /**

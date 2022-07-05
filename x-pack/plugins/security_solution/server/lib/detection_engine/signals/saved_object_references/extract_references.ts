@@ -7,8 +7,13 @@
 
 import { Logger } from '@kbn/core/server';
 import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
+
 import { RuleParams } from '../../schemas/rule_schemas';
+
+import { isEqlParams, isQueryParams, isThresholdParams, isThreatParams } from '../utils';
+
 import { extractExceptionsList } from './extract_exceptions_list';
+import { extractDataView } from './extract_data_view';
 
 /**
  * Extracts references and returns the saved object references.
@@ -42,8 +47,23 @@ export const extractReferences = <TParams extends RuleParams>({
     logger,
     exceptionsList: params.exceptionsList,
   });
-  const returnReferences = [...exceptionReferences];
+  let returnReferences = [...exceptionReferences];
 
+  // if statement is needed here because dataViewId is not on the base rule params
+  // much like how the index property is not on the base rule params either
+  if (
+    isEqlParams(params) ||
+    isQueryParams(params) ||
+    isThresholdParams(params) ||
+    isThreatParams(params)
+  ) {
+    returnReferences = [
+      ...returnReferences,
+      ...extractDataView({
+        dataViewId: params.dataViewId,
+      }),
+    ];
+  }
   // Modify params if you want to remove any elements separately here. For exceptionLists, we do not remove the id and instead
   // keep it to both fail safe guard against manually removed saved object references or if there are migration issues and the saved object
   // references are removed. Also keeping it we can detect and log out a warning if the reference between it and the saved_object reference

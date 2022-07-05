@@ -1806,6 +1806,29 @@ class CiStatsReporter {
       await flushBuffer();
     }
   }
+
+  async reportPerformanceMetrics(metrics) {
+    var _this$config9;
+
+    if (!this.hasBuildConfig()) {
+      return;
+    }
+
+    const buildId = (_this$config9 = this.config) === null || _this$config9 === void 0 ? void 0 : _this$config9.buildId;
+
+    if (!buildId) {
+      throw new Error(`Performance metrics can't be reported without a buildId`);
+    }
+
+    return !!(await this.req({
+      auth: true,
+      path: `/v1/performance_metrics_report?buildId=${buildId}`,
+      body: {
+        metrics
+      },
+      bodyDesc: `performance metrics: ${metrics}`
+    }));
+  }
   /**
    * In order to allow this code to run before @kbn/utils is built, @kbn/pm will pass
    * in the upstreamBranch when calling the timings() method. Outside of @kbn/pm
@@ -2145,7 +2168,7 @@ function getPluginSearchPaths({
   examples,
   testPlugins
 }) {
-  return [(0, _path.resolve)(rootDir, 'src', 'plugins'), ...(oss ? [] : [(0, _path.resolve)(rootDir, 'x-pack', 'plugins')]), (0, _path.resolve)(rootDir, 'plugins'), ...(examples ? [(0, _path.resolve)(rootDir, 'examples')] : []), ...(examples && !oss ? [(0, _path.resolve)(rootDir, 'x-pack', 'examples')] : []), (0, _path.resolve)(rootDir, '..', 'kibana-extra'), ...(testPlugins ? [(0, _path.resolve)(rootDir, 'test/analytics/__fixtures__/plugins'), (0, _path.resolve)(rootDir, 'test/plugin_functional/plugins'), (0, _path.resolve)(rootDir, 'test/interpreter_functional/plugins'), (0, _path.resolve)(rootDir, 'test/common/fixtures/plugins')] : []), ...(testPlugins && !oss ? [(0, _path.resolve)(rootDir, 'x-pack/test/plugin_functional/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/functional_with_es_ssl/fixtures/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/alerting_api_integration/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/plugin_api_integration/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/plugin_api_perf/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/licensing_plugin/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/usage_collection/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/security_functional/fixtures/common')] : [])];
+  return [(0, _path.resolve)(rootDir, 'src', 'plugins'), ...(oss ? [] : [(0, _path.resolve)(rootDir, 'x-pack', 'plugins')]), (0, _path.resolve)(rootDir, 'plugins'), ...(examples ? [(0, _path.resolve)(rootDir, 'examples')] : []), ...(examples && !oss ? [(0, _path.resolve)(rootDir, 'x-pack', 'examples')] : []), (0, _path.resolve)(rootDir, '..', 'kibana-extra'), ...(testPlugins ? [(0, _path.resolve)(rootDir, 'test/analytics/fixtures/plugins'), (0, _path.resolve)(rootDir, 'test/plugin_functional/plugins'), (0, _path.resolve)(rootDir, 'test/interpreter_functional/plugins'), (0, _path.resolve)(rootDir, 'test/common/fixtures/plugins')] : []), ...(testPlugins && !oss ? [(0, _path.resolve)(rootDir, 'x-pack/test/plugin_functional/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/functional_with_es_ssl/fixtures/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/alerting_api_integration/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/plugin_api_integration/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/plugin_api_perf/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/licensing_plugin/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/usage_collection/plugins'), (0, _path.resolve)(rootDir, 'x-pack/test/security_functional/fixtures/common')] : [])];
 }
 
 /***/ }),
@@ -61948,12 +61971,14 @@ const BootstrapCommand = {
           ms: Date.now() - start
         });
       }
-    }; // Force install is set in case a flag is passed into yarn kbn bootstrap
+    }; // Force install is set in case a flag is passed into yarn kbn bootstrap or
+    // our custom logic have determined there is a chance node_modules have been manually deleted and as such bazel
+    // tracking mechanism is no longer valid
 
 
-    const forceInstall = !!options && options['force-install'] === true; // Install bazel machinery tools if needed
+    const forceInstall = !!options && options['force-install'] === true || (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_8__[/* haveNodeModulesBeenManuallyDeleted */ "c"])(kibanaProjectPath)); // Install bazel machinery tools if needed
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_8__[/* installBazelTools */ "c"])(rootPath); // Setup remote cache settings in .bazelrc.cache if needed
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_8__[/* installBazelTools */ "d"])(rootPath); // Setup remote cache settings in .bazelrc.cache if needed
 
     await Object(_utils_bazel_setup_remote_cache__WEBPACK_IMPORTED_MODULE_9__[/* setupRemoteCache */ "a"])(rootPath); // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
@@ -61967,7 +61992,7 @@ const BootstrapCommand = {
 
     if (forceInstall) {
       await time('force install dependencies', async () => {
-        await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_8__[/* removeYarnIntegrityFileIfExists */ "e"])(path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(kibanaProjectPath, 'node_modules'));
+        await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_8__[/* removeYarnIntegrityFileIfExists */ "f"])(path__WEBPACK_IMPORTED_MODULE_0___default.a.resolve(kibanaProjectPath, 'node_modules'));
         await Object(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_2__["runBazel"])({
           bazelArgs: ['clean', '--expunge'],
           log: _utils_log__WEBPACK_IMPORTED_MODULE_3__[/* log */ "a"]
@@ -62148,7 +62173,7 @@ const CleanCommand = {
     } // Runs Bazel soft clean
 
 
-    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_5__[/* isBazelBinAvailable */ "d"])(kbn.getAbsolute())) {
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_5__[/* isBazelBinAvailable */ "e"])(kbn.getAbsolute())) {
       await Object(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4__["runBazel"])({
         bazelArgs: ['clean'],
         log: _utils_log__WEBPACK_IMPORTED_MODULE_7__[/* log */ "a"]
@@ -62308,7 +62333,7 @@ const ResetCommand = {
     } // Runs Bazel hard clean and deletes Bazel Cache Folders
 
 
-    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_5__[/* isBazelBinAvailable */ "d"])(kbn.getAbsolute())) {
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_5__[/* isBazelBinAvailable */ "e"])(kbn.getAbsolute())) {
       // Hard cleaning bazel
       await Object(_kbn_bazel_runner__WEBPACK_IMPORTED_MODULE_4__["runBazel"])({
         bazelArgs: ['clean', '--expunge'],
@@ -62776,12 +62801,14 @@ async function getBazelRepositoryCacheFolder() {
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "b", function() { return _get_cache_folders__WEBPACK_IMPORTED_MODULE_0__["b"]; });
 
 /* harmony import */ var _install_tools__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/bazel/install_tools.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "c", function() { return _install_tools__WEBPACK_IMPORTED_MODULE_1__["a"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "d", function() { return _install_tools__WEBPACK_IMPORTED_MODULE_1__["a"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "d", function() { return _install_tools__WEBPACK_IMPORTED_MODULE_1__["b"]; });
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "e", function() { return _install_tools__WEBPACK_IMPORTED_MODULE_1__["b"]; });
 
-/* harmony import */ var _yarn_integrity__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/bazel/yarn_integrity.ts");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "e", function() { return _yarn_integrity__WEBPACK_IMPORTED_MODULE_2__["a"]; });
+/* harmony import */ var _yarn__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/bazel/yarn.ts");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "c", function() { return _yarn__WEBPACK_IMPORTED_MODULE_2__["a"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "f", function() { return _yarn__WEBPACK_IMPORTED_MODULE_2__["b"]; });
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -62984,11 +63011,12 @@ async function setupRemoteCache(repoRootPath) {
 
 /***/ }),
 
-/***/ "./src/utils/bazel/yarn_integrity.ts":
+/***/ "./src/utils/bazel/yarn.ts":
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return removeYarnIntegrityFileIfExists; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return removeYarnIntegrityFileIfExists; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return haveNodeModulesBeenManuallyDeleted; });
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("path");
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/fs.ts");
@@ -63000,6 +63028,7 @@ async function setupRemoteCache(repoRootPath) {
  * Side Public License, v 1.
  */
 
+ // yarn integrity file checker
 
 async function removeYarnIntegrityFileIfExists(nodeModulesPath) {
   try {
@@ -63011,6 +63040,26 @@ async function removeYarnIntegrityFileIfExists(nodeModulesPath) {
     }
   } catch {// no-op
   }
+} // yarn and bazel integration checkers
+
+async function areNodeModulesPresent(kbnRootPath) {
+  try {
+    return await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'node_modules'));
+  } catch {
+    return false;
+  }
+}
+
+async function haveBazelFoldersBeenCreatedBefore(kbnRootPath) {
+  try {
+    return (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-bin', 'packages'))) || (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-kibana', 'packages'))) || (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__[/* isDirectory */ "c"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kbnRootPath, 'bazel-out', 'host')));
+  } catch {
+    return false;
+  }
+}
+
+async function haveNodeModulesBeenManuallyDeleted(kbnRootPath) {
+  return !(await areNodeModulesPresent(kbnRootPath)) && (await haveBazelFoldersBeenCreatedBefore(kbnRootPath));
 }
 
 /***/ }),

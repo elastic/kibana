@@ -18,7 +18,7 @@ import type {
   PreconfiguredAgentPolicy,
   RegistrySearchResult,
 } from '../../common/types';
-import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
+import type { AgentPolicy, NewPackagePolicy, Output, DownloadSource } from '../types';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -54,6 +54,12 @@ const mockDefaultOutput: Output = {
   // @ts-ignore
   type: 'elasticsearch',
   hosts: ['http://127.0.0.1:9201'],
+};
+const mockDefaultDownloadService: DownloadSource = {
+  id: 'ds-test-id',
+  is_default: true,
+  name: 'default download source host',
+  host: 'http://127.0.0.1:9201',
 };
 
 function getPutPreconfiguredPackagesMock() {
@@ -296,6 +302,7 @@ describe('policy preconfiguration', () => {
         [],
         [],
         mockDefaultOutput,
+        mockDefaultDownloadService,
         DEFAULT_SPACE_ID
       );
 
@@ -314,6 +321,7 @@ describe('policy preconfiguration', () => {
         [],
         [{ name: 'test_package', version: '3.0.0' }],
         mockDefaultOutput,
+        mockDefaultDownloadService,
         DEFAULT_SPACE_ID
       );
 
@@ -344,6 +352,7 @@ describe('policy preconfiguration', () => {
         ] as PreconfiguredAgentPolicy[],
         [{ name: 'test_package', version: '3.0.0' }],
         mockDefaultOutput,
+        mockDefaultDownloadService,
         DEFAULT_SPACE_ID
       );
 
@@ -396,6 +405,7 @@ describe('policy preconfiguration', () => {
         ] as PreconfiguredAgentPolicy[],
         [{ name: 'test_package', version: '3.0.0' }],
         mockDefaultOutput,
+        mockDefaultDownloadService,
         DEFAULT_SPACE_ID
       );
 
@@ -446,6 +456,7 @@ describe('policy preconfiguration', () => {
         ] as PreconfiguredAgentPolicy[],
         [{ name: 'test_package', version: '3.0.0' }],
         mockDefaultOutput,
+        mockDefaultDownloadService,
         DEFAULT_SPACE_ID
       );
 
@@ -503,6 +514,7 @@ describe('policy preconfiguration', () => {
         ] as PreconfiguredAgentPolicy[],
         [{ name: 'test_package', version: '3.0.0' }],
         mockDefaultOutput,
+        mockDefaultDownloadService,
         DEFAULT_SPACE_ID
       );
 
@@ -523,6 +535,7 @@ describe('policy preconfiguration', () => {
             { name: 'test_package', version: '2.0.0' },
           ],
           mockDefaultOutput,
+          mockDefaultDownloadService,
           DEFAULT_SPACE_ID
         )
       ).rejects.toThrow(
@@ -555,6 +568,7 @@ describe('policy preconfiguration', () => {
           policies,
           [{ name: 'test_package', version: '3.0.0' }],
           mockDefaultOutput,
+          mockDefaultDownloadService,
           DEFAULT_SPACE_ID
         )
       ).rejects.toThrow(
@@ -587,6 +601,7 @@ describe('policy preconfiguration', () => {
           policies,
           [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
           mockDefaultOutput,
+          mockDefaultDownloadService,
           DEFAULT_SPACE_ID
         )
       ).rejects.toThrow(
@@ -612,6 +627,7 @@ describe('policy preconfiguration', () => {
           ] as PreconfiguredAgentPolicy[],
           [],
           mockDefaultOutput,
+          mockDefaultDownloadService,
           DEFAULT_SPACE_ID
         );
 
@@ -638,6 +654,7 @@ describe('policy preconfiguration', () => {
           ] as PreconfiguredAgentPolicy[],
           [],
           mockDefaultOutput,
+          mockDefaultDownloadService,
           DEFAULT_SPACE_ID
         );
 
@@ -678,6 +695,7 @@ describe('policy preconfiguration', () => {
           ] as PreconfiguredAgentPolicy[],
           [],
           mockDefaultOutput,
+          mockDefaultDownloadService,
           DEFAULT_SPACE_ID
         );
       expect(spyAgentPolicyServiceUpdate).toBeCalled();
@@ -718,6 +736,7 @@ describe('policy preconfiguration', () => {
           [policy],
           [],
           mockDefaultOutput,
+          mockDefaultDownloadService,
           DEFAULT_SPACE_ID
         );
       expect(spyAgentPolicyServiceUpdate).not.toBeCalled();
@@ -766,6 +785,7 @@ describe('policy preconfiguration', () => {
           },
         ],
         mockDefaultOutput,
+        mockDefaultDownloadService,
         DEFAULT_SPACE_ID
       );
 
@@ -803,6 +823,7 @@ describe('policy preconfiguration', () => {
                 },
               ],
               mockDefaultOutput,
+              mockDefaultDownloadService,
               DEFAULT_SPACE_ID
             );
 
@@ -848,6 +869,7 @@ describe('policy preconfiguration', () => {
                 },
               ],
               mockDefaultOutput,
+              mockDefaultDownloadService,
               DEFAULT_SPACE_ID
             );
 

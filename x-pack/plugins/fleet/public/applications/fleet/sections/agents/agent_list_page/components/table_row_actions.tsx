@@ -20,7 +20,17 @@ export const TableRowActions: React.FunctionComponent<{
   onReassignClick: () => void;
   onUnenrollClick: () => void;
   onUpgradeClick: () => void;
-}> = ({ agent, agentPolicy, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
+  onAddRemoveTagsClick: (button: HTMLElement) => void;
+  allTags: string[];
+}> = ({
+  agent,
+  agentPolicy,
+  onReassignClick,
+  onUnenrollClick,
+  onUpgradeClick,
+  onAddRemoveTagsClick,
+  allTags,
+}) => {
   const { getHref } = useLink();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
 
@@ -39,6 +49,18 @@ export const TableRowActions: React.FunctionComponent<{
 
   if (agentPolicy?.is_managed === false) {
     menuItems.push(
+      <EuiContextMenuItem
+        icon="tag"
+        onClick={(event) => {
+          onAddRemoveTagsClick((event.target as Element).closest('button')!);
+        }}
+        key="addRemoveTags"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.addRemoveTagsActionText"
+          defaultMessage="Add / remove tags"
+        />
+      </EuiContextMenuItem>,
       <EuiContextMenuItem
         icon="pencil"
         onClick={() => {

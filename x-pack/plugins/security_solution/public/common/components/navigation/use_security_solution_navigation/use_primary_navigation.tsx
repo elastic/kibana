@@ -25,7 +25,6 @@ export const usePrimaryNavigation = ({
   navTabs,
   pageName,
   savedQuery,
-  sourcerer,
   tabName,
   timeline,
   timerange,
@@ -56,7 +55,6 @@ export const usePrimaryNavigation = ({
     filters,
     query,
     savedQuery,
-    sourcerer,
     timeline,
     timerange,
   });

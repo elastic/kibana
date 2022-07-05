@@ -10,7 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import { SessionsComponentsProps } from './types';
 import { ESBoolQuery } from '../../../../common/typed_json';
 import { StatefulEventsViewer } from '../events_viewer';
-import { sessionsDefaultModel } from './default_headers';
+import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
@@ -48,6 +48,8 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   pageFilters,
   startDate,
   filterQuery,
+  columns = sessionsHeaders,
+  defaultColumns = sessionsHeaders,
 }) => {
   const parsedFilterQuery: ESBoolQuery = useMemo(() => {
     if (filterQuery && filterQuery !== '') {
@@ -83,7 +85,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     <div data-test-subj={TEST_ID}>
       <StatefulEventsViewer
         pageFilters={sessionsFilter}
-        defaultModel={sessionsDefaultModel}
+        defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}
         entityType={entityType}
         id={timelineId}

@@ -75,7 +75,7 @@ const defaultProps = {
 
 test('should render entity by expression with aggregatable field options for entity', async () => {
   const component = mount(<EntityByExpression {...defaultProps} />);
-  expect(component).toMatchSnapshot();
+  expect(component.render()).toMatchSnapshot();
 });
 //
 

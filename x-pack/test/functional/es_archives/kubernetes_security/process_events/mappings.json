@@ -20,6 +20,10 @@
         "container.image.name": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "process.entry_leader.entity_id": {
+          "type": "keyword",
+          "ignore_above": 256
         }
       }
     }

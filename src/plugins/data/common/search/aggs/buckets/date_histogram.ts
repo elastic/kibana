@@ -9,15 +9,9 @@
 import { get, noop, find, every, omitBy, isNil } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase, TimeRange } from '@kbn/es-query';
 
-import {
-  AggTypesDependencies,
-  KBN_FIELD_TYPES,
-  TimeRange,
-  TimeRangeBounds,
-  UI_SETTINGS,
-} from '../../..';
+import { AggTypesDependencies, KBN_FIELD_TYPES, TimeRangeBounds, UI_SETTINGS } from '../../..';
 
 import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';

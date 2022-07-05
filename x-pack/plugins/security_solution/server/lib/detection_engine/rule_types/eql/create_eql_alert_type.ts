@@ -61,12 +61,23 @@ export const createEqlAlertType = (
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
-        runOpts: { bulkCreate, exceptionItems, completeRule, tuple, wrapHits, wrapSequences },
+        runOpts: {
+          inputIndex,
+          runtimeMappings,
+          bulkCreate,
+          exceptionItems,
+          completeRule,
+          tuple,
+          wrapHits,
+          wrapSequences,
+        },
         services,
         state,
       } = execOptions;
 
       const result = await eqlExecutor({
+        inputIndex,
+        runtimeMappings,
         bulkCreate,
         exceptionItems,
         experimentalFeatures,

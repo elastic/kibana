@@ -1781,7 +1781,7 @@
           },
           "<",
           "ActionTypeConfig",
-          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"client\" | \"jwt\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; }>; }>, configurationUtilities: ",
+          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"client\" | \"jwt\"; options: Readonly<{} & { config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; tokenUrl: string; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { scope: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; tokenUrl: string; secrets: Readonly<{} & { clientSecret: string; }>; }>; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
           ") => Promise<{ accessToken: string | null; }>; enqueueExecution: (options: ",
           "ExecuteOptions",
@@ -3245,6 +3245,27 @@
           "\"actions\""
         ],
         "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ActionTypeExecutorRawResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionTypeExecutorRawResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.ActionTypeExecutorResult",
+            "text": "ActionTypeExecutorResult"
+          },
+          "<Data> & { error?: Error | undefined; }"
+        ],
+        "path": "x-pack/plugins/actions/common/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

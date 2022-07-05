@@ -58,8 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Feature flag', () => {
-      // Related to the config inside x-pack/test/observability_functional/with_rac_write.config.ts
-      it('Link point to O11y Rules pages by default or when "xpack.observability.unsafe.rules.enabled: true"', async () => {
+      it('Link point to O11y Rules pages by default', async () => {
         const manageRulesPageHref = await observability.alerts.rulesPage.getManageRulesPageHref();
         expect(new URL(manageRulesPageHref).pathname).equal('/app/observability/alerts/rules');
       });

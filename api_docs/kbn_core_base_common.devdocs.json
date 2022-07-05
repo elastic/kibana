@@ -152,6 +152,20 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-base-common",
+        "id": "def-server.EUI_STYLES_GLOBAL",
+        "type": "string",
+        "tags": [],
+        "label": "EUI_STYLES_GLOBAL",
+        "description": [],
+        "signature": [
+          "\"eui-global\""
+        ],
+        "path": "packages/core/base/core-base-common/src/eui.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-base-common",
         "id": "def-server.PluginName",
         "type": "Type",
         "tags": [],

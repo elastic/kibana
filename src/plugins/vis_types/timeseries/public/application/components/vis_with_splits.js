@@ -14,6 +14,8 @@ import { getValueOrEmpty } from '../../../common/empty_label';
 import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
 import { SERIES_SEPARATOR } from '../../../common/constants';
 
+import './_vis_with_splits.scss';
+
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
     const { model, visData, syncColors, palettesService, fieldFormatMap } = props;
@@ -113,6 +115,7 @@ export function visWithSplits(WrappedComponent) {
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}
             fieldFormatMap={props.fieldFormatMap}
+            initialRender={props.initialRender}
           />
         </div>
       );

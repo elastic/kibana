@@ -31,7 +31,7 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
 === {api-request-body-title}
 
 `config`::
-(Required, object) The configuration for the connector. Configuration properties
+(Required^*^, object) The configuration for the connector. Configuration properties
 vary depending on the connector type. For example:
 +
 --
@@ -68,12 +68,15 @@ For more information, refer to
 {kibana-ref}/jira-action-type.html[{jira} connector and action].
 ====
 
+This object is not required for server log connectors.
+
 For more configuration properties, refer to <<action-types>>.
 // end::connector-config[]  
 --
 
 `connector_type_id`::
-(Required, string) The connector type ID for the connector.
+(Required, string) The connector type ID for the connector. For example,
+`.index`, `.jira`, or `.server-log`.
 
 `name`::
 (Required, string) The display name for the connector.
@@ -99,6 +102,8 @@ authentication.
 `email`::
 (Required, string) The account email for HTTP Basic authentication.
 ====
+
+This object is not required for index or server log connectors.
 // end::connector-secrets[]  
 --
 
