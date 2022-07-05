@@ -25,7 +25,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure'));
     // sub privileges are only available with a license above basic
     loadTestFile(require.resolve('./delete_sub_privilege'));
-    loadTestFile(require.resolve('./privileges'));
 
     // Common
     loadTestFile(require.resolve('../common'));

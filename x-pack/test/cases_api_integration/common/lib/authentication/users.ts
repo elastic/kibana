@@ -19,9 +19,6 @@ import {
   testDisabledPluginAll,
   securitySolutionOnlyDelete,
   securitySolutionOnlyNoDelete,
-  casesOnlyDelete,
-  casesNoDelete,
-  casesAll,
 } from './roles';
 import { User } from './types';
 
@@ -97,24 +94,6 @@ export const noKibanaPrivileges: User = {
   roles: [noKibanaPrivilegesRole.name],
 };
 
-export const casesOnlyDeleteUser: User = {
-  username: 'cases_only_delete_user',
-  password: 'password',
-  roles: [casesOnlyDelete.name],
-};
-
-export const casesNoDeleteUser: User = {
-  username: 'cases_no_delete_user',
-  password: 'password',
-  roles: [casesNoDelete.name],
-};
-
-export const casesAllUser: User = {
-  username: 'cases_all_user',
-  password: 'password',
-  roles: [casesAll.name],
-};
-
 export const users = [
   superUser,
   secOnly,
@@ -128,9 +107,6 @@ export const users = [
   globalRead,
   noKibanaPrivileges,
   testDisabled,
-  casesOnlyDeleteUser,
-  casesNoDeleteUser,
-  casesAllUser,
 ];
 
 /**
