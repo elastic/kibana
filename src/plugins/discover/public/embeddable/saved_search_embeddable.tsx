@@ -140,7 +140,12 @@ export class SavedSearchEmbeddable
       if (titleChanged) {
         this.panelTitle = this.output.title || '';
       }
-      if (this.searchProps && (titleChanged || this.isFetchRequired(this.searchProps))) {
+      if (
+        this.searchProps &&
+        (titleChanged ||
+          this.isFetchRequired(this.searchProps) ||
+          this.isInputChangedAndRerenderRequired(this.searchProps))
+      ) {
         this.pushContainerStateParamsToProps(this.searchProps);
       }
     });
@@ -352,6 +357,13 @@ export class SavedSearchEmbeddable
     );
   }
 
+  private isInputChangedAndRerenderRequired(searchProps?: SearchProps) {
+    if (!searchProps) {
+      return false;
+    }
+    return this.input.rowsPerPage !== searchProps.rowsPerPageState;
+  }
+
   private async pushContainerStateParamsToProps(
     searchProps: SearchProps,
     { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
@@ -372,6 +384,7 @@ export class SavedSearchEmbeddable
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
     searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
+    searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
