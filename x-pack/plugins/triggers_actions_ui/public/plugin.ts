@@ -63,6 +63,7 @@ import type {
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
   ConnectorServices,
+  RuleDefinitionProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
@@ -70,6 +71,7 @@ import { PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
@@ -110,6 +112,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRulesListNotifyBadge: (
     props: RulesListNotifyBadgeProps
   ) => ReactElement<RulesListNotifyBadgeProps>;
+  getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
 }
 
@@ -325,6 +328,15 @@ export class Plugin
         return getRulesListLazy({
           connectorServices: this.connectorServices!,
           rulesListProps: props,
+        });
+      },
+      getRuleDefinition: (
+        props: Omit<RuleDefinitionProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+      ) => {
+        return getRuleDefinitionLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          ruleTypeRegistry: this.ruleTypeRegistry,
         });
       },
       getRuleStatusPanel: (props: RuleStatusPanelProps) => {
