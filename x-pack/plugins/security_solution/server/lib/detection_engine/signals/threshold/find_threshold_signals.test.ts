@@ -11,6 +11,7 @@ import { mockLogger } from '../__mocks__/es_results';
 import { buildRuleMessageFactory } from '../rule_messages';
 import * as single_search_after from '../single_search_after';
 import { findThresholdSignals } from './find_threshold_signals';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -44,8 +45,9 @@ describe('findThresholdSignals', () => {
         value: 100,
       },
       buildRuleMessage,
-      timestampOverride: undefined,
       runtimeMappings: undefined,
+      primaryTimestamp: TIMESTAMP,
+      secondaryTimestamp: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -89,8 +91,9 @@ describe('findThresholdSignals', () => {
         value: 100,
       },
       buildRuleMessage,
-      timestampOverride: undefined,
       runtimeMappings: undefined,
+      primaryTimestamp: TIMESTAMP,
+      secondaryTimestamp: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -133,8 +136,9 @@ describe('findThresholdSignals', () => {
         cardinality: [],
       },
       buildRuleMessage,
-      timestampOverride: undefined,
       runtimeMappings: undefined,
+      primaryTimestamp: TIMESTAMP,
+      secondaryTimestamp: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -191,8 +195,9 @@ describe('findThresholdSignals', () => {
         ],
       },
       buildRuleMessage,
-      timestampOverride: undefined,
       runtimeMappings: undefined,
+      primaryTimestamp: TIMESTAMP,
+      secondaryTimestamp: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -263,8 +268,9 @@ describe('findThresholdSignals', () => {
         value: 200,
       },
       buildRuleMessage,
-      timestampOverride: undefined,
       runtimeMappings: undefined,
+      primaryTimestamp: TIMESTAMP,
+      secondaryTimestamp: undefined,
     });
     expect(mockSingleSearchAfter).toHaveBeenCalledWith(
       expect.objectContaining({

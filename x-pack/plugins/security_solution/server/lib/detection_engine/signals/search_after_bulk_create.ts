@@ -46,7 +46,6 @@ export const searchAfterAndBulkCreate = async ({
   secondaryTimestamp,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
-    const ruleParams = completeRule.ruleParams;
     let toReturn = createSearchAfterReturnType();
 
     // sortId tells us where to start our next consecutive search_after query
@@ -92,7 +91,7 @@ export const searchAfterAndBulkCreate = async ({
             toReturn,
             createSearchAfterReturnTypeFromResponse({
               searchResult: mergedSearchResults,
-              timestampOverride: ruleParams.timestampOverride,
+              primaryTimestamp,
             }),
             createSearchAfterReturnType({
               searchAfterTimes: [searchDuration],
