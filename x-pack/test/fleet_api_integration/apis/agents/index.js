@@ -16,5 +16,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./reassign'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./update_agent_tags'));
   });
 }

@@ -38,6 +38,7 @@ import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import { getRulesListLazy } from './common/get_rules_list';
 import { getActionFormLazy } from './common/get_action_form';
+import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -61,6 +62,7 @@ import type {
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
   ConnectorServices,
+  RuleDefinitionProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
@@ -68,6 +70,8 @@ import { PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import { getRuleDefinitionLazy } from './common/get_rule_definition';
+import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -107,6 +111,8 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: RulesListNotifyBadgeProps
   ) => ReactElement<RulesListNotifyBadgeProps>;
   getRulesList: () => ReactElement;
+  getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
+  getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
 }
 
 interface PluginsSetup {
@@ -319,6 +325,18 @@ export class Plugin
       },
       getRulesList: () => {
         return getRulesListLazy({ connectorServices: this.connectorServices! });
+      },
+      getRuleDefinition: (
+        props: Omit<RuleDefinitionProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+      ) => {
+        return getRuleDefinitionLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          ruleTypeRegistry: this.ruleTypeRegistry,
+        });
+      },
+      getRuleStatusPanel: (props: RuleStatusPanelProps) => {
+        return getRuleStatusPanelLazy(props);
       },
     };
   }
