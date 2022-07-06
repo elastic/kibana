@@ -11,13 +11,14 @@ import {
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
 import { CspRuleV830, CspRuleV840 } from '../../../common/schemas/csp_rule';
+import { CIS_INTEGRATION_INPUTS_MAP } from '../../../common/constants';
 
 function migrateCspRuleMetadata(
   doc: SavedObjectUnsanitizedDoc<CspRuleV830>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleV840> {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { enabled, muted, package_policy_id, policy_id, ...metadata } = doc.attributes;
+  const { enabled, muted, package_policy_id, policy_id, benchmark, ...metadata } = doc.attributes;
 
   return {
     ...doc,
@@ -28,6 +29,7 @@ function migrateCspRuleMetadata(
       policy_id,
       metadata: {
         ...metadata,
+        benchmark: { ...benchmark, id: CIS_INTEGRATION_INPUTS_MAP['cloudbeat/vanilla'] },
         impact: metadata.impact || undefined,
         default_value: metadata.default_value || undefined,
         references: metadata.references || undefined,

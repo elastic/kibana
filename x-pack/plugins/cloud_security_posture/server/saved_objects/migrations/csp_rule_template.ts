@@ -10,6 +10,7 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
+import { CIS_INTEGRATION_INPUTS_MAP } from '../../../common/constants';
 import {
   CspRuleTemplateV830,
   CspRuleTemplateV840,
@@ -19,7 +20,7 @@ function migrateCspRuleMetadata(
   doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV830>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateV840> {
-  const { enabled, muted, ...metadata } = doc.attributes;
+  const { enabled, muted, benchmark, ...metadata } = doc.attributes;
   return {
     ...doc,
     attributes: {
@@ -27,6 +28,7 @@ function migrateCspRuleMetadata(
       muted,
       metadata: {
         ...metadata,
+        benchmark: { ...benchmark, id: CIS_INTEGRATION_INPUTS_MAP['cloudbeat/vanilla'] },
         impact: metadata.impact || undefined,
         default_value: metadata.default_value || undefined,
         references: metadata.references || undefined,
