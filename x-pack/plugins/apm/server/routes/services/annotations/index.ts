@@ -6,7 +6,11 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import {
+  ScopedAnnotationsClient,
+  WrappedElasticsearchClientError,
+} from '@kbn/observability-plugin/server';
+import { errors } from '@elastic/elasticsearch';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getStoredAnnotations } from './get_stored_annotations';
@@ -41,9 +45,14 @@ export async function getServiceAnnotations({
     searchAggregatedTransactions,
     start,
     end,
-  }).catch(() => {
-    // handle error silently to prevent Kibana from crashing
-    return [];
+  }).catch((error) => {
+    if (
+      error instanceof WrappedElasticsearchClientError &&
+      error.originalError instanceof errors.RequestAbortedError
+    ) {
+      return [];
+    }
+    throw error;
   });
 
   const storedAnnotations = annotationsClient
@@ -59,6 +68,9 @@ export async function getServiceAnnotations({
     : [];
 
   if (storedAnnotations.length) {
+    derivedAnnotationsPromise.catch(() => {
+      // handle error silently to prevent Kibana from crashing
+    });
     return { annotations: storedAnnotations };
   }
 
