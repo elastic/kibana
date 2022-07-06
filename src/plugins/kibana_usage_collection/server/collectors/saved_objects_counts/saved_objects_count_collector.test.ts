@@ -10,15 +10,19 @@ import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
+import { getSavedObjectsCountsMock } from './saved_objects_count.test.mocks';
 import { registerSavedObjectsCountUsageCollector } from './saved_objects_count_collector';
 
 describe('saved_objects_count_collector', () => {
   const usageCollectionMock = createUsageCollectionSetupMock();
+  const fetchContextMock = createCollectorFetchContextMock();
 
   const kibanaIndex = '.kibana-tests';
 
   beforeAll(() => registerSavedObjectsCountUsageCollector(usageCollectionMock, kibanaIndex));
   afterAll(() => jest.clearAllTimers());
+
+  afterEach(() => getSavedObjectsCountsMock.mockReset());
 
   test('registered collector is set', () => {
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalled();
@@ -29,14 +33,16 @@ describe('saved_objects_count_collector', () => {
   });
 
   test('should return an empty array when no results are returned', async () => {
+    getSavedObjectsCountsMock.mockResolvedValueOnce({ total: 0, others: 0, per_type: [] });
     const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
-    expect(await collector.fetch(createCollectorFetchContextMock())).toStrictEqual({
+    expect(await collector.fetch(fetchContextMock)).toStrictEqual({
       by_type: [],
+      total: 0,
+      others: 0,
     });
   });
 
   test('should return some values when the aggregations return something', async () => {
-    const fetchContextMock = createCollectorFetchContextMock();
     fetchContextMock.esClient.search = jest.fn().mockImplementation(() => ({
       aggregations: {
         types: {
@@ -50,6 +56,17 @@ describe('saved_objects_count_collector', () => {
       },
     }));
 
+    getSavedObjectsCountsMock.mockResolvedValueOnce({
+      total: 4,
+      per_type: [
+        { key: 'type_one', doc_count: 20 },
+        { key: 'type_two', doc_count: 45 },
+        { key: 'type-three', doc_count: 66 },
+        { key: 'type-four', doc_count: 0 },
+      ],
+      others: 10,
+    });
+
     const collector = usageCollectionMock.makeUsageCollector.mock.results[0].value;
     expect(await collector.fetch(fetchContextMock)).toStrictEqual({
       by_type: [
@@ -58,6 +75,8 @@ describe('saved_objects_count_collector', () => {
         { type: 'type-three', count: 66 },
         { type: 'type-four', count: 0 },
       ],
+      total: 4,
+      others: 10,
     });
   });
 });

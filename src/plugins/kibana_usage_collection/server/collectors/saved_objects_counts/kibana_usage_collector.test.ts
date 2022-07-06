@@ -12,6 +12,7 @@ import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
+import { getSavedObjectsCountsMock } from './saved_objects_count.test.mocks';
 import { getKibanaSavedObjectCounts, registerKibanaUsageCollector } from './kibana_usage_collector';
 
 const logger = loggingSystemMock.createLogger();
@@ -27,17 +28,10 @@ describe('kibana_usage', () => {
 
   const kibanaIndex = '.kibana-tests';
 
-  const getMockFetchClients = (hits?: unknown[]) => {
-    const fetchParamsMock = createCollectorFetchContextMock();
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    // @ts-expect-error for the sake of the tests, we only require `hits`
-    esClient.search.mockResponse({ hits: { hits } });
-    fetchParamsMock.esClient = esClient;
-    return fetchParamsMock;
-  };
-
   beforeAll(() => registerKibanaUsageCollector(usageCollectionMock, kibanaIndex));
   afterAll(() => jest.clearAllTimers());
+
+  afterEach(() => getSavedObjectsCountsMock.mockReset());
 
   test('registered collector is set', () => {
     expect(collector).not.toBeUndefined();
@@ -45,7 +39,8 @@ describe('kibana_usage', () => {
   });
 
   test('fetch', async () => {
-    expect(await collector.fetch(getMockFetchClients())).toStrictEqual({
+    getSavedObjectsCountsMock.mockResolvedValueOnce({ per_type: [] });
+    expect(await collector.fetch(createCollectorFetchContextMock())).toStrictEqual({
       index: '.kibana-tests',
       dashboard: { total: 0 },
       visualization: { total: 0 },
@@ -56,19 +51,11 @@ describe('kibana_usage', () => {
   });
 });
 
-function mockGetSavedObjectsCounts<TBody>(params: TBody) {
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.search.mockResponse(
-    // @ts-expect-error we only care about the response body
-    { ...params }
-  );
-  return esClient;
-}
-
 describe('getKibanaSavedObjectCounts', () => {
-  test('Get all the saved objects equal to 0 because no results were found', async () => {
-    const esClient = mockGetSavedObjectsCounts({});
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
+  test('Get all the saved objects equal to 0 because no results were found', async () => {
+    getSavedObjectsCountsMock.mockResolvedValueOnce({ per_type: [] });
     const results = await getKibanaSavedObjectCounts(esClient, '.kibana');
     expect(results).toStrictEqual({
       dashboard: { total: 0 },
@@ -80,16 +67,14 @@ describe('getKibanaSavedObjectCounts', () => {
   });
 
   test('Merge the zeros with the results', async () => {
-    const esClient = mockGetSavedObjectsCounts({
-      aggregations: {
-        types: {
-          buckets: [
-            { key: 'dashboard', doc_count: 1 },
-            { key: 'index-pattern', value: 2 }, // Malformed on purpose
-            { key: 'graph_workspace', doc_count: 3 }, // already snake_cased
-          ],
-        },
-      },
+    getSavedObjectsCountsMock.mockResolvedValueOnce({
+      total: 3,
+      others: 0,
+      per_type: [
+        { key: 'dashboard', doc_count: 1 },
+        { key: 'index-pattern', value: 2 }, // Malformed on purpose
+        { key: 'graph_workspace', doc_count: 3 }, // already snake_cased
+      ],
     });
 
     const results = await getKibanaSavedObjectCounts(esClient, '.kibana');

@@ -15,6 +15,8 @@ interface SavedObjectsCountUsageByType {
 }
 
 interface SavedObjectsCountUsage {
+  total: number;
+  others: number;
   by_type: SavedObjectsCountUsageByType[];
 }
 
@@ -27,6 +29,18 @@ export function registerSavedObjectsCountUsageCollector(
       type: 'saved_objects_counts',
       isReady: () => true,
       schema: {
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'Total number of saved objects in the cluster',
+          },
+        },
+        others: {
+          type: 'long',
+          _meta: {
+            description: 'Total number of saved objects that are not Kibana built-in SO types',
+          },
+        },
         by_type: {
           type: 'array',
           items: {
@@ -42,11 +56,17 @@ export function registerSavedObjectsCountUsageCollector(
         },
       },
       async fetch({ esClient }) {
-        const buckets = await getSavedObjectsCounts(esClient, kibanaIndex);
+        const {
+          total,
+          per_type: buckets,
+          others,
+        } = await getSavedObjectsCounts(esClient, kibanaIndex);
         return {
+          total,
           by_type: buckets.map(({ key: type, doc_count: count }) => {
             return { type, count };
           }),
+          others,
         };
       },
     })

@@ -8555,6 +8555,18 @@
     },
     "saved_objects_counts": {
       "properties": {
+        "total": {
+          "type": "long",
+          "_meta": {
+            "description": "Total number of saved objects in the cluster"
+          }
+        },
+        "others": {
+          "type": "long",
+          "_meta": {
+            "description": "Total number of saved objects that are not Kibana built-in SO types"
+          }
+        },
         "by_type": {
           "type": "array",
           "items": {
