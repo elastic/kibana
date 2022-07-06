@@ -19,7 +19,7 @@ import { sample } from './sample';
 import { formatId } from './constants';
 
 export interface TruncateFormatEditorFormatParams {
-  fieldLength: number;
+  fieldLength: number | null;
 }
 
 export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEditorFormatParams> {
@@ -46,13 +46,13 @@ export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEdit
           error={error}
         >
           <EuiFieldNumber
-            defaultValue={formatParams.fieldLength}
+            defaultValue={formatParams.fieldLength ?? undefined}
             min={1}
             data-test-subj={'truncateEditorLength'}
             onChange={(e) => {
               if (e.target.checkValidity()) {
                 this.onChange({
-                  fieldLength: e.target.value ? Number(e.target.value) : undefined,
+                  fieldLength: e.target.value ? Number(e.target.value) : null,
                 });
               } else {
                 onError(e.target.validationMessage);

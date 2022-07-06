@@ -34,7 +34,7 @@ interface OutputFormat {
 }
 
 export interface DurationFormatEditorFormatParams {
-  outputPrecision: number;
+  outputPrecision: number | null;
   inputFormat: string;
   outputFormat: string;
   showSuffix?: boolean;
@@ -60,9 +60,11 @@ export class DurationFormatEditor extends DefaultFormatEditor<
     const output = super.getDerivedStateFromProps(nextProps, state);
     let error = null;
 
+    const { outputPrecision } = nextProps.formatParams;
     if (
       !(nextProps.format as DurationFormat).isHuman() &&
-      nextProps.formatParams.outputPrecision > 20
+      outputPrecision != null &&
+      outputPrecision > 20
     ) {
       error = i18n.translate('indexPatternFieldEditor.durationErrorMessage', {
         defaultMessage: 'Decimal places must be between 0 and 20',
@@ -156,12 +158,12 @@ export class DurationFormatEditor extends DefaultFormatEditor<
               error={hasDecimalError ? error : null}
             >
               <EuiFieldNumber
-                value={formatParams.outputPrecision}
+                value={formatParams.outputPrecision ?? undefined}
                 min={0}
                 max={20}
                 onChange={(e) => {
                   this.onChange({
-                    outputPrecision: e.target.value ? Number(e.target.value) : undefined,
+                    outputPrecision: e.target.value ? Number(e.target.value) : null,
                   });
                 }}
                 isInvalid={!!error}
