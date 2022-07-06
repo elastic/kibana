@@ -26,7 +26,7 @@ export interface FormatSelectEditorProps {
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
-  onChange: (change?: FieldFormatParams) => void;
+  onChange: (change?: FieldFormatConfig) => void;
   onError: (error?: string) => void;
   value?: FieldFormatConfig;
 }
