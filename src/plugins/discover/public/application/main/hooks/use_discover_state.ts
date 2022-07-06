@@ -62,8 +62,17 @@ export function useDiscoverState({
         history,
         toasts: services.core.notifications.toasts,
         uiSettings: config,
+        embeddableStateTransfer: services.embeddable.getStateTransfer(),
       }),
-    [config, data, history, savedSearch, services.core.notifications.toasts, storage]
+    [
+      config,
+      data,
+      history,
+      savedSearch,
+      services.core.notifications.toasts,
+      services.embeddable,
+      storage,
+    ]
   );
 
   const { appStateContainer } = stateContainer;

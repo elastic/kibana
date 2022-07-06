@@ -200,16 +200,16 @@ export function DashboardTopNav({
         appId = 'visualize';
         path = '#/create?';
       }
-
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
           originatingApp: DashboardConstants.DASHBOARDS_ID,
           searchSessionId: data.search.session.getSessionId(),
         },
+        filters: dashboardAppState.getLatestDashboardState().filters,
       });
     },
-    [stateTransferService, data.search.session, trackUiMetric]
+    [stateTransferService, data.search.session, dashboardAppState, trackUiMetric]
   );
 
   const closeAllFlyouts = useCallback(() => {

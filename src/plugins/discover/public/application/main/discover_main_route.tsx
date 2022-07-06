@@ -55,6 +55,7 @@ export function DiscoverMainRoute(props: Props) {
     toastNotifications,
     http: { basePath },
     dataViewEditor,
+    embeddable,
   } = services;
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
@@ -95,8 +96,11 @@ export function DiscoverMainRoute(props: Props) {
           setShowNoDataPage(true);
           return;
         }
-
-        const { appStateContainer } = getState({ history, uiSettings: config });
+        const { appStateContainer } = getState({
+          history,
+          uiSettings: config,
+          embeddableStateTransfer: embeddable.getStateTransfer(),
+        });
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.dataViews, config);
 
@@ -110,7 +114,7 @@ export function DiscoverMainRoute(props: Props) {
         setError(e);
       }
     },
-    [config, data.dataViews, history, isDev, toastNotifications]
+    [config, data.dataViews, embeddable, history, isDev, toastNotifications]
   );
 
   const loadSavedSearch = useCallback(async () => {

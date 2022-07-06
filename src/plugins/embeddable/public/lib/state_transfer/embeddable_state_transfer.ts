@@ -9,6 +9,7 @@
 import { cloneDeep } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
+import { Filter } from '@kbn/es-query';
 import {
   EmbeddableEditorState,
   isEmbeddableEditorState,
@@ -120,6 +121,7 @@ export class EmbeddableStateTransfer {
       openInNewTab?: boolean;
       skipAppLeave?: boolean;
       state: EmbeddableEditorState;
+      filters?: Filter | Filter[];
     }
   ): Promise<void> {
     this.isTransferInProgress = true;
@@ -171,14 +173,19 @@ export class EmbeddableStateTransfer {
       state?: OutgoingStateType;
       openInNewTab?: boolean;
       skipAppLeave?: boolean;
+      filters?: Filter | Filter[];
     }
   ): Promise<void> {
     const existingAppState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key] || {};
+    const newAppState = options?.state ? options?.state : {};
+    if (options?.filters) {
+      newAppState.filters = options?.filters;
+    }
     const stateObject = {
       ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY),
       [key]: {
         ...existingAppState,
-        [appId]: options?.state,
+        [appId]: newAppState,
       },
     };
     this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateObject);

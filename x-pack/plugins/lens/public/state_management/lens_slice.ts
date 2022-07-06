@@ -7,7 +7,7 @@
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { mapValues } from 'lodash';
+import { mapValues, cloneDeep } from 'lodash';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -55,6 +55,13 @@ export const getPreloadedState = ({
       isLoading: true,
     };
   }
+  let filters;
+  if (embeddableEditorIncomingState?.filters) {
+    filters = embeddableEditorIncomingState.filters;
+    data.query.filterManager.setAppFilters(cloneDeep(filters));
+  } else if (initialContext) {
+    filters = data.query.filterManager.getAppFilters();
+  }
 
   const state = {
     ...initialState,
@@ -64,9 +71,7 @@ export const getPreloadedState = ({
     query: !initialContext
       ? data.query.queryString.getDefaultQuery()
       : data.query.queryString.getQuery(),
-    filters: !initialContext
-      ? data.query.filterManager.getGlobalFilters()
-      : data.query.filterManager.getFilters(),
+    filters: !filters ? data.query.filterManager.getGlobalFilters() : filters,
     searchSessionId: data.search.session.getSessionId(),
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(embeddableEditorIncomingState?.originatingApp),

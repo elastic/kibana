@@ -72,6 +72,5 @@ export function mapFilter(filter: Filter) {
   filter.meta.disabled = Boolean(filter.meta.disabled);
   filter.meta.negate = Boolean(filter.meta.negate);
   filter.meta.alias = filter.meta.alias || null;
-
   return filter;
 }

@@ -34,6 +34,7 @@ import {
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
@@ -124,6 +125,8 @@ interface GetStateParams {
    * core ui settings service
    */
   uiSettings: IUiSettingsClient;
+
+  embeddableStateTransfer?: EmbeddableStateTransfer;
 }
 
 export interface GetStateReturn {
@@ -192,6 +195,7 @@ export function getState({
   history,
   toasts,
   uiSettings,
+  embeddableStateTransfer,
 }: GetStateParams): GetStateReturn {
   const defaultAppState = getStateDefaults ? getStateDefaults() : {};
   const stateStorage = createKbnUrlStateStorage({
@@ -199,13 +203,19 @@ export function getState({
     history,
     ...(toasts && withNotifyOnErrors(toasts)),
   });
-
+  if (embeddableStateTransfer) {
+    const embeddableState = embeddableStateTransfer.getIncomingEditorState('discover');
+    if (embeddableState?.filters) {
+      defaultAppState.filters = embeddableState?.filters;
+    }
+  }
   const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
 
   let initialAppState = handleSourceColumnState(
     {
       ...defaultAppState,
       ...appStateFromUrl,
+      filters: defaultAppState.filters,
     },
     uiSettings
   );

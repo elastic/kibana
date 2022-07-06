@@ -53,11 +53,14 @@ export const visStateToEditorState = (
   const vis = visInstance.vis;
   const savedVisState = convertFromSerializedVis(vis.serialize());
   const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
+  const embeddableStateTransfer = services.embeddable.getStateTransfer();
+  const embeddableState = embeddableStateTransfer.getIncomingEditorState('visualize');
   return {
     uiState:
       savedVis && savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : vis.uiState.toJSON(),
     query: vis.data.searchSource?.getOwnField('query') || getDefaultQuery(services),
-    filters: (vis.data.searchSource?.getOwnField('filter') as Filter[]) || [],
+    filters:
+      embeddableState?.filters || (vis.data.searchSource?.getOwnField('filter') as Filter[]) || [],
     vis: { ...savedVisState.visState, title: vis.title },
     linked: savedVis && savedVis.id ? !!savedVis.savedSearchId : !!savedVisState.savedSearchId,
   };
