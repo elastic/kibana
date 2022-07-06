@@ -40,7 +40,7 @@ export type CountIndexPatternColumn = FieldBasedIndexPatternColumn & {
   };
 };
 
-export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field'> = {
+export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field', {}, true> = {
   type: 'count',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.count', {
@@ -52,6 +52,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
     ]),
+  allowAsReference: true,
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
@@ -112,7 +113,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     layer,
     columnId,
     currentColumn,
-    updateLayer,
+    paramEditorUpdater,
   }: ParamEditorProps<CountIndexPatternColumn>) => {
     return [
       {
@@ -130,7 +131,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
               }}
               checked={Boolean(currentColumn.params?.emptyAsNull)}
               onChange={() => {
-                updateLayer(
+                paramEditorUpdater(
                   updateColumnParam({
                     layer,
                     columnId,
