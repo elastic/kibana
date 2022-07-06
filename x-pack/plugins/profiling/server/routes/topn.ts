@@ -13,7 +13,7 @@ import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/
 import { createTopNSamples, TopNSamplesHistogramResponse } from '../../common/topn';
 import { findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
-import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './query';
+import { autoHistogramSumCountOnGroupByField, createProjectTimeQuery } from './query';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace';
 import { getClient, getAggs } from './compat';
 
@@ -28,7 +28,7 @@ export async function topNElasticSearchQuery(
   searchField: string,
   response: KibanaResponseFactory
 ) {
-  const filter = newProjectTimeQuery(projectID, timeFrom, timeTo);
+  const filter = createProjectTimeQuery(projectID, timeFrom, timeTo);
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
   const eventsIndex = await logExecutionLatency(
@@ -92,7 +92,6 @@ export async function topNElasticSearchQuery(
   logger.info('events total count: ' + totalCount + ' (' + totalDocCount + ' docs)');
   logger.info('unique stacktraces: ' + stackTraceEvents.size);
 
-  // profiling-stacktraces is configured with 16 shards
   const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces(
     logger,
     client,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRoutePaths } from '../../common';
-import { FlameGraph } from '../../common/flamegraph';
+import { createTopNFunctions } from '../../common/functions';
 import { logExecutionLatency } from './logger';
 import { createProjectTimeQuery, ProjectTimeQuery } from './query';
 import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
@@ -21,13 +21,15 @@ import {
 } from './stacktrace';
 import { getClient } from './compat';
 
-async function queryFlameGraph(
+async function queryTopNFunctions(
   logger: Logger,
   client: ElasticsearchClient,
   index: string,
   filter: ProjectTimeQuery,
+  startIndex: number,
+  endIndex: number,
   sampleSize: number
-): Promise<FlameGraph> {
+): Promise<any> {
   const eventsIndex = await logExecutionLatency(
     logger,
     'query to find downsampled index',
@@ -44,8 +46,8 @@ async function queryFlameGraph(
   );
 
   // Manual downsampling if totalCount exceeds sampleSize by 10%.
-  let downsampledTotalCount = totalCount;
   if (totalCount > sampleSize * 1.1) {
+    let downsampledTotalCount = totalCount;
     const p = sampleSize / totalCount;
     logger.info('downsampling events with p=' + p);
     await logExecutionLatency(logger, 'downsampling events', async () => {
@@ -65,54 +67,61 @@ async function queryFlameGraph(
     mgetStackFrames(logger, client, stackFrameDocIDs),
     mgetExecutables(logger, client, executableDocIDs),
   ]).then(([stackFrames, executables]) => {
-    return new FlameGraph(
-      eventsIndex.sampleRate,
-      downsampledTotalCount,
+    return createTopNFunctions(
       stackTraceEvents,
       stackTraces,
       stackFrames,
-      executables
+      executables,
+      startIndex,
+      endIndex
     );
   });
 }
 
-export function registerFlameChartElasticSearchRoute(
+const querySchema = schema.object({
+  index: schema.string(),
+  projectID: schema.string(),
+  timeFrom: schema.string(),
+  timeTo: schema.string(),
+  startIndex: schema.number(),
+  endIndex: schema.number(),
+});
+
+type QuerySchemaType = TypeOf<typeof querySchema>;
+
+export function registerTopNFunctionsSearchRoute(
   router: IRouter<DataRequestHandlerContext>,
   logger: Logger
 ) {
   const paths = getRoutePaths();
   router.get(
     {
-      path: paths.FlamechartElastic,
+      path: paths.TopNFunctions,
       validate: {
-        query: schema.object({
-          index: schema.maybe(schema.string()),
-          projectID: schema.maybe(schema.string()),
-          timeFrom: schema.maybe(schema.string()),
-          timeTo: schema.maybe(schema.string()),
-          n: schema.maybe(schema.number({ defaultValue: 200 })),
-        }),
+        query: querySchema,
       },
     },
     async (context, request, response) => {
-      const { index, projectID, timeFrom, timeTo } = request.query;
-      const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
-
       try {
+        const { index, projectID, timeFrom, timeTo, startIndex, endIndex }: QuerySchemaType =
+          request.query;
+        const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
-        const filter = createProjectTimeQuery(projectID!, timeFrom!, timeTo!);
+        const filter = createProjectTimeQuery(projectID, timeFrom, timeTo);
 
-        const flamegraph = await queryFlameGraph(
+        const topNFunctions = await queryTopNFunctions(
           logger,
           esClient,
-          index!,
+          index,
           filter,
+          startIndex,
+          endIndex,
           targetSampleSize
         );
         logger.info('returning payload response to client');
 
         return response.ok({
-          body: flamegraph.toElastic(),
+          body: topNFunctions,
         });
       } catch (e) {
         logger.error(e);

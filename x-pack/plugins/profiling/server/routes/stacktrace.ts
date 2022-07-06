@@ -16,8 +16,10 @@ import {
   StackTrace,
   StackTraceID,
 } from '../../common/profiling';
+import { getAggs, getDocs, getHitsItems } from './compat';
+import { DownsampledEventsIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
-import { getHitsItems, getDocs } from './compat';
+import { ProjectTimeQuery } from './query';
 
 const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
 const fileIDChunkToFileIDCache = new LRUCache<string, FileID>({ max: 100000 });
@@ -166,6 +168,79 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   } as StackTrace;
 }
 
+export async function searchEventsGroupByStackTrace(
+  logger: Logger,
+  client: ElasticsearchClient,
+  index: DownsampledEventsIndex,
+  filter: ProjectTimeQuery
+) {
+  const resEvents = await logExecutionLatency(
+    logger,
+    'query to fetch events from ' + index.name,
+    async () => {
+      return await client.search(
+        {
+          index: index.name,
+          track_total_hits: false,
+          query: filter,
+          aggs: {
+            group_by: {
+              terms: {
+                // 'size' should be max 100k, but might be slightly more. Better be on the safe side.
+                size: 150000,
+                field: 'StackTraceID',
+                // 'execution_hint: map' skips the slow building of ordinals that we don't need.
+                // Especially with high cardinality fields, this makes aggregations really slow.
+                // E.g. it reduces the latency from 70s to 0.7s on our 8.1. MVP cluster (as of 28.04.2022).
+                execution_hint: 'map',
+              },
+              aggs: {
+                count: {
+                  sum: {
+                    field: 'Count',
+                  },
+                },
+              },
+            },
+            total_count: {
+              sum: {
+                field: 'Count',
+              },
+            },
+          },
+        },
+        {
+          // Adrien and Dario found out this is a work-around for some bug in 8.1.
+          // It reduces the query time by avoiding unneeded searches.
+          querystring: {
+            pre_filter_shard_size: 1,
+            filter_path:
+              'aggregations.group_by.buckets.key,aggregations.group_by.buckets.count,aggregations.total_count,_shards.failures',
+          },
+        }
+      );
+    }
+  );
+
+  const totalCount: number =
+    (getAggs(resEvents) as { total_count: { value: number } } | undefined)?.total_count.value ?? 0;
+  const stackTraceEvents = new Map<StackTraceID, number>();
+
+  (
+    getAggs(resEvents) as
+      | { group_by: { buckets: Array<{ key: string; count: { value: number } }> } }
+      | undefined
+  )?.group_by.buckets.forEach((item: any) => {
+    const traceid: StackTraceID = item.key;
+    stackTraceEvents.set(traceid, item.count.value);
+  });
+
+  logger.info('events total count: ' + totalCount);
+  logger.info('unique stacktraces: ' + stackTraceEvents.size);
+
+  return { totalCount, stackTraceEvents };
+}
+
 export async function searchStackTraces(
   logger: Logger,
   client: ElasticsearchClient,
@@ -213,8 +288,8 @@ export async function searchStackTraces(
   );
 
   const stackTraces = new Map<StackTraceID, StackTrace>();
-  const stackFrameDocIDs = new Set<string>(); // Set of unique FrameIDs
-  const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
+  const stackFrameDocIDs = new Set<string>();
+  const executableDocIDs = new Set<string>();
 
   await logExecutionLatency(logger, 'processing data', async () => {
     const traces = stackResponses.flatMap((response) => getHitsItems(response));
@@ -273,8 +348,8 @@ export async function mgetStackTraces(
 
   let totalFrames = 0;
   const stackTraces = new Map<StackTraceID, StackTrace>();
-  const stackFrameDocIDs = new Set<string>(); // Set of unique FrameIDs
-  const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
+  const stackFrameDocIDs = new Set<string>();
+  const executableDocIDs = new Set<string>();
 
   await logExecutionLatency(logger, 'processing data', async () => {
     // flatMap() is significantly slower than an explicit for loop

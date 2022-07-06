@@ -6,8 +6,6 @@
  */
 
 import { DownsampledEventsIndex, getSampledTraceEventsIndex } from './downsampling';
-import { parallelMget } from './flamechart';
-import { ElasticsearchClient } from '@kbn/core/server';
 
 describe('Using down-sampled indexes', () => {
   test('getSampledTraceEventsIndex', () => {
@@ -61,39 +59,3 @@ describe('Using down-sampled indexes', () => {
     }
   });
 });
-
-describe('Calling mget from events to stacktraces', () => {
-  test('parallel queries to ES are resolved as promises', async () => {
-    const numberOfFrames = 4;
-    const mock = mockClient(numberOfFrames) as unknown as ElasticsearchClient;
-    const results = parallelMget(4, Array.from(['a', 'b', 'c', 'd']), 1, mock);
-    expect(mock.mget).toBeCalledTimes(4);
-    expect(results.length).toEqual(4);
-    Promise.all(results).then((all) => {
-      all.forEach((a) => {
-        expect(a.body.docs[0].found).toBe(true);
-        expect(a.body.docs[0]._source.FrameID.length).toEqual(numberOfFrames);
-      });
-    });
-  });
-});
-
-const mockClient = (frames: number) => {
-  const mockEsQueryMgetResult = (): Promise<any> => {
-    const framesArray = [...Array(frames).keys()].map((i) => i);
-    return new Promise((resolve) => {
-      return resolve({
-        body: {
-          docs: [{ found: true, _source: { FrameID: framesArray } }],
-          // testing
-          hits: {
-            hits: [{ fields: { FrameID: framesArray } }],
-          },
-        },
-      });
-    });
-  };
-  return {
-    mget: jest.fn().mockResolvedValue(mockEsQueryMgetResult()),
-  };
-};
