@@ -16,7 +16,7 @@ import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import { FillStyle, SeriesType, YAxisMode } from '@kbn/expression-xy-plugin/common';
+import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getSuggestions } from './xy_suggestions';
