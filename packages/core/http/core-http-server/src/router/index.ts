@@ -68,5 +68,3 @@ export type {
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from './response_factory';
-
-
