@@ -6,10 +6,13 @@
  */
 import React from 'react';
 import { EuiBadge, EuiBadgeGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { useTheme } from '@kbn/observability-plugin/public';
 import { useStatusByLocation } from '../hooks/use_status_by_location';
 
 export const LocationsStatus = () => {
   const { locations, loading } = useStatusByLocation();
+
+  const theme = useTheme();
 
   if (loading) {
     return <EuiLoadingSpinner />;
@@ -20,7 +23,11 @@ export const LocationsStatus = () => {
       {locations.map((loc) => (
         <EuiBadge
           iconType={() => (
-            <EuiIcon type="dot" color={(loc.summary?.down ?? 0) > 0 ? 'danger' : 'success'} />
+            <EuiIcon
+              size="s"
+              type="dot"
+              color={(loc.summary?.down ?? 0) > 0 ? theme.eui.euiColorVis9 : theme.eui.euiColorVis0}
+            />
           )}
           color="hollow"
         >

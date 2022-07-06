@@ -21,11 +21,14 @@ import { i18n } from '@kbn/i18n';
 import { Status } from '../../../../../common/types/api';
 import { AddConnectorPackageApiLogic } from '../../api/connector_package/add_connector_package_api_logic';
 
+import { AddConnectorPackageLogic } from '../../api/connector_package/add_connector_package_logic';
+
 import { NewSearchIndexTemplate } from './new_search_index_template';
 
 export const MethodConnector: React.FC = () => {
   const { makeRequest } = useActions(AddConnectorPackageApiLogic);
   const { status } = useValues(AddConnectorPackageApiLogic);
+  AddConnectorPackageLogic.mount();
   return (
     <NewSearchIndexTemplate
       title="Build a custom connector package"

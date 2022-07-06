@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
@@ -22,6 +22,7 @@ import { ColumnNameWithTooltip } from '../../../components/column_name_with_tool
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
+import { createColumnWithFilters, type OnAddFilter } from '../layout/findings_layout';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
@@ -31,20 +32,35 @@ interface Props {
   loading: boolean;
   pagination: Pagination;
   setTableOptions(options: CriteriaWithPagination<FindingsByResourcePage>): void;
+  onAddFilter: OnAddFilter;
 }
 
-export const getResourceId = (resource: FindingsByResourcePage) =>
-  [resource.resource_id, ...resource.cis_sections].join('/');
+export const getResourceId = (resource: FindingsByResourcePage) => {
+  return [resource.resource_id, ...resource['rule.section']].join('/');
+};
 
 const FindingsByResourceTableComponent = ({
   items,
   loading,
   pagination,
   setTableOptions,
+  onAddFilter,
 }: Props) => {
   const getRowProps = (row: FindingsByResourcePage) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
+
+  const columns = useMemo(
+    () => [
+      findingsByResourceColumns.resource_id,
+      createColumnWithFilters(findingsByResourceColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(findingsByResourceColumns['resource.name'], { onAddFilter }),
+      findingsByResourceColumns['rule.section'],
+      createColumnWithFilters(findingsByResourceColumns.cluster_id, { onAddFilter }),
+      findingsByResourceColumns.failed_findings,
+    ],
+    [onAddFilter]
+  );
 
   if (!loading && !items.length)
     return (
@@ -74,7 +90,7 @@ const FindingsByResourceTableComponent = ({
   );
 };
 
-const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
+const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
   {
     field: 'resource_id',
     name: (
@@ -96,7 +112,7 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     ),
   },
   {
-    field: 'resource_subtype',
+    field: 'resource.sub_type',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -106,7 +122,7 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     ),
   },
   {
-    field: 'resource_name',
+    field: 'resource.name',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -116,7 +132,7 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     ),
   },
   {
-    field: 'cis_sections',
+    field: 'rule.section',
     truncateText: true,
     name: (
       <FormattedMessage
@@ -176,5 +192,11 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     dataType: 'number',
   },
 ];
+
+type BaseFindingColumnName = typeof baseColumns[number]['field'];
+
+export const findingsByResourceColumns = Object.fromEntries(
+  baseColumns.map((column) => [column.field, column])
+) as Record<BaseFindingColumnName, typeof baseColumns[number]>;
 
 export const FindingsByResourceTable = React.memo(FindingsByResourceTableComponent);

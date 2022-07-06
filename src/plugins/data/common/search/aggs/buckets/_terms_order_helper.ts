@@ -12,6 +12,12 @@ import { IBucketAggConfig, BucketAggParam } from './bucket_agg_type';
 export const termsAggFilter = [
   '!top_hits',
   '!percentiles',
+  '!percentile_ranks',
+  '!filtered_metric',
+  '!percentile',
+  '!percentile_rank',
+  '!geo_bounds',
+  '!geo_centroid',
   '!std_dev',
   '!derivative',
   '!moving_avg',
