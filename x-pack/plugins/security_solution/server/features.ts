@@ -7,90 +7,92 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { PluginSetupContract as CasesPluginSetup } from '@kbn/cases-plugin/server';
 import { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { createUICapabilities } from '@kbn/cases-plugin/common';
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { savedObjectTypes } from './saved_objects';
 
-export const getCasesKibanaFeature = (
-  casesCapabilities: ReturnType<CasesPluginSetup['createUICapabilities']>
-): KibanaFeatureConfig => ({
-  id: CASES_FEATURE_ID,
-  name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle', {
-    defaultMessage: 'Cases',
-  }),
-  order: 1100,
-  category: DEFAULT_APP_CATEGORIES.security,
-  app: [CASES_FEATURE_ID, 'kibana'],
-  catalogue: [APP_ID],
-  cases: [APP_ID],
-  privileges: {
-    all: {
-      app: [CASES_FEATURE_ID, 'kibana'],
-      catalogue: [APP_ID],
-      cases: {
-        create: [APP_ID],
-        read: [APP_ID],
-        update: [APP_ID],
-        push: [APP_ID],
-      },
-      api: [],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: casesCapabilities.all,
-    },
-    read: {
-      app: [CASES_FEATURE_ID, 'kibana'],
-      catalogue: [APP_ID],
-      cases: {
-        read: [APP_ID],
-      },
-      api: [],
-      savedObject: {
-        all: [],
-        read: [],
-      },
-      ui: casesCapabilities.read,
-    },
-  },
-  subFeatures: [
-    {
-      name: i18n.translate('xpack.securitySolution.featureRegistry.deleteSubFeatureName', {
-        defaultMessage: 'Delete',
-      }),
-      privilegeGroups: [
-        {
-          groupType: 'independent',
-          privileges: [
-            {
-              api: [],
-              id: 'cases_delete',
-              name: i18n.translate(
-                'xpack.securitySolution.featureRegistry.deleteSubFeatureDetails',
-                {
-                  defaultMessage: 'Delete entities',
-                }
-              ),
-              includeIn: 'all',
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              cases: {
-                delete: [APP_ID],
-              },
-              ui: casesCapabilities.delete,
-            },
-          ],
+export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
+  const casesCapabilities = createUICapabilities();
+
+  return {
+    id: CASES_FEATURE_ID,
+    name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle', {
+      defaultMessage: 'Cases',
+    }),
+    order: 1100,
+    category: DEFAULT_APP_CATEGORIES.security,
+    app: [CASES_FEATURE_ID, 'kibana'],
+    catalogue: [APP_ID],
+    cases: [APP_ID],
+    privileges: {
+      all: {
+        app: [CASES_FEATURE_ID, 'kibana'],
+        catalogue: [APP_ID],
+        cases: {
+          create: [APP_ID],
+          read: [APP_ID],
+          update: [APP_ID],
+          push: [APP_ID],
         },
-      ],
+        api: [],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: casesCapabilities.all,
+      },
+      read: {
+        app: [CASES_FEATURE_ID, 'kibana'],
+        catalogue: [APP_ID],
+        cases: {
+          read: [APP_ID],
+        },
+        api: [],
+        savedObject: {
+          all: [],
+          read: [],
+        },
+        ui: casesCapabilities.read,
+      },
     },
-  ],
-});
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.securitySolution.featureRegistry.deleteSubFeatureName', {
+          defaultMessage: 'Delete',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                api: [],
+                id: 'cases_delete',
+                name: i18n.translate(
+                  'xpack.securitySolution.featureRegistry.deleteSubFeatureDetails',
+                  {
+                    defaultMessage: 'Delete entities',
+                  }
+                ),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  delete: [APP_ID],
+                },
+                ui: casesCapabilities.delete,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+};
 
 export const getAlertsSubFeature = (ruleTypes: string[]): SubFeatureConfig => ({
   name: i18n.translate('xpack.securitySolution.featureRegistry.manageAlertsName', {

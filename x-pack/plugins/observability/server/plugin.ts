@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
-import { PluginSetupContract as CasesPluginSetup } from '@kbn/cases-plugin/server';
+import { createUICapabilities } from '@kbn/cases-plugin/common';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -31,7 +31,6 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  cases: CasesPluginSetup;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -42,7 +41,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   public setup(core: CoreSetup, plugins: PluginSetup) {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
-    const casesCapabilities = plugins.cases.createUICapabilities();
+    const casesCapabilities = createUICapabilities();
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,

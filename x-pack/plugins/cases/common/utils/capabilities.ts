@@ -11,7 +11,7 @@ import {
   PUSH_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
-} from '../common/constants';
+} from '../constants';
 
 /**
  * Return the UI capabilities for each type of operation. These strings must match the values defined in the UI

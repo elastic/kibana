@@ -22,4 +22,4 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);
 
-export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { PluginStartContract } from './plugin';

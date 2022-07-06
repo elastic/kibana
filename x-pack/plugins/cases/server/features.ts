@@ -11,7 +11,7 @@ import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { APP_ID, FEATURE_ID } from '../common/constants';
-import { createUICapabilities } from './capabilities';
+import { createUICapabilities } from '../common';
 
 /**
  * The order of appearance in the feature privilege page
