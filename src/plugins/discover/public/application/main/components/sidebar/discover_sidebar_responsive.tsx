@@ -32,6 +32,7 @@ import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
+import { getTextBasedLanguageMode } from '../../../../utils/get_text_based_language_mode';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 
 export interface DiscoverSidebarResponsiveProps {
@@ -128,6 +129,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       selectedIndexPattern
     );
   }
+  const textBasedLanguageMode = props.state.query
+    ? getTextBasedLanguageMode(props.state.query)
+    : '';
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
   useEffect(() => {
@@ -210,7 +214,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const editField = useMemo(
     () =>
-      !documentState.textBasedLanguageMode && canEditDataView && selectedIndexPattern
+      !textBasedLanguageMode && canEditDataView && selectedIndexPattern
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
@@ -230,7 +234,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           }
         : undefined,
     [
-      documentState.textBasedLanguageMode,
+      textBasedLanguageMode,
       canEditDataView,
       selectedIndexPattern,
       dataViewFieldEditor,

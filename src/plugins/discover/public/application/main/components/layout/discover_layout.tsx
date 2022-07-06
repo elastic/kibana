@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { isOfQueryType } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
@@ -319,7 +320,7 @@ export function DiscoverLayout({
                   isTimeBased={isTimeBased}
                   data={data}
                   error={dataState.error}
-                  hasQuery={!!state.query?.query}
+                  hasQuery={isOfQueryType(state.query) && !!state.query?.query}
                   hasFilters={hasActiveFilter(state.filters)}
                   onDisableFilters={onDisableFilters}
                 />

@@ -16,6 +16,7 @@ import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
   Query,
+  AggregateQuery,
 } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
@@ -69,7 +70,7 @@ export interface AppState {
   /**
    * Lucence or KQL query
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * Array of the used sorting [[field,direction],...]
    */

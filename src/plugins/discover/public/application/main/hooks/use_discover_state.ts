@@ -14,7 +14,7 @@ import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
 import { loadIndexPattern } from '../utils/resolve_index_pattern';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
+import { useSavedSearch as useSavedSearchData, DataDocumentsMsg } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -22,10 +22,13 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
 import { useSearchSession } from './use_search_session';
+import { useDataState } from './use_data_state';
 import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
+
+const MAX_NUM_OF_COLUMNS = 50;
 
 export function useDiscoverState({
   services,
@@ -43,7 +46,6 @@ export function useDiscoverState({
   const { timefilter } = data.query.timefilter;
 
   const indexPattern = savedSearch.searchSource.getField('index')!;
-  // console.log(indexPattern);
 
   const searchSource = useMemo(() => {
     savedSearch.searchSource.setField('index', indexPattern);
@@ -100,6 +102,8 @@ export function useDiscoverState({
     stateContainer,
     useNewFieldsApi,
   });
+
+  const documentState: DataDocumentsMsg = useDataState(data$.documents$);
 
   /**
    * Reset to display loading spinner when savedSearch is changing
@@ -233,15 +237,19 @@ export function useDiscoverState({
       if (state.query && isOfAggregateQueryType(state.query)) {
         const indexPatternFROMQuery = getIndexPatternFromSQLQuery(state.query.sql);
         const idsTitles = await indexPatterns.getIdsWithTitle();
-        const dataView = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
-        if (dataView) {
-          stateContainer.setAppState({ index: dataView.id });
+        const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFROMQuery);
+        if (dataViewObj) {
+          let columns: string[] = [];
+          if (documentState.result?.length) {
+            const firstRow = documentState.result[0];
+            columns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
+          }
+          stateContainer.setAppState({ index: dataViewObj.id, columns });
         }
       }
     }
-
     fetchDataview();
-  }, [config, indexPatterns, savedSearch.searchSource, state.query, stateContainer]);
+  }, [config, documentState, indexPatterns, savedSearch.searchSource, state.query, stateContainer]);
 
   return {
     data$,

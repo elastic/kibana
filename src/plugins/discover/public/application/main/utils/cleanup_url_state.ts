@@ -14,10 +14,13 @@ import { AppState, AppStateUrl } from '../services/discover_state';
  * @param appStateFromUrl
  */
 export function cleanupUrlState(appStateFromUrl: AppStateUrl): AppState {
-  if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
-    if (!isOfAggregateQueryType(appStateFromUrl.query)) {
-      appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
-    }
+  if (
+    appStateFromUrl &&
+    appStateFromUrl.query &&
+    !isOfAggregateQueryType(appStateFromUrl.query) &&
+    !appStateFromUrl.query.language
+  ) {
+    appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
   }
 
   if (typeof appStateFromUrl?.sort?.[0] === 'string') {
