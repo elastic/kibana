@@ -6,21 +6,31 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { ActionConnector, loadAllActions } from '@kbn/triggers-actions-ui-plugin/public';
 import { intersectionBy } from 'lodash';
-import { FetchRuleActionConnectorsProps } from '../pages/rule_details/types';
-import { ACTIONS_LOAD_ERROR } from '../pages/rule_details/translations';
+import { i18n } from '@kbn/i18n';
+import { ActionConnector, loadAllActions } from '../..';
+import { useKibana } from '../../common/lib/kibana';
 
+const ACTIONS_LOAD_ERROR = (errorMessage: string) =>
+  i18n.translate('xpack.triggersActionsUI.ruleDetails.connectorsLoadError', {
+    defaultMessage: 'Unable to load rule actions connectors. Reason: {message}',
+    values: { message: errorMessage },
+  });
 interface FetchActionConnectors {
   isLoadingActionConnectors: boolean;
   actionConnectors: Array<ActionConnector<Record<string, unknown>>>;
   errorActionConnectors?: string;
 }
+interface FetchRuleActionConnectorsProps {
+  ruleActions: any[];
+}
 
-export function useFetchRuleActionConnectors({
-  http,
-  ruleActions,
-}: FetchRuleActionConnectorsProps) {
+export function useFetchRuleActionConnectors({ ruleActions }: FetchRuleActionConnectorsProps) {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+
   const [actionConnectors, setActionConnector] = useState<FetchActionConnectors>({
     isLoadingActionConnectors: true,
     actionConnectors: [] as Array<ActionConnector<Record<string, unknown>>>,
@@ -47,15 +57,17 @@ export function useFetchRuleActionConnectors({
         actionConnectors: actions,
       }));
     } catch (error) {
+      const errorMsg = ACTIONS_LOAD_ERROR(
+        error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+      );
       setActionConnector((oldState: FetchActionConnectors) => ({
         ...oldState,
         isLoadingActionConnectors: false,
-        errorActionConnectors: ACTIONS_LOAD_ERROR(
-          error instanceof Error ? error.message : typeof error === 'string' ? error : ''
-        ),
+        errorActionConnectors: errorMsg,
       }));
+      toasts.addDanger({ title: errorMsg });
     }
-  }, [http, ruleActions]);
+  }, [http, ruleActions, toasts]);
   useEffect(() => {
     fetchRuleActionConnectors();
   }, [fetchRuleActionConnectors]);
