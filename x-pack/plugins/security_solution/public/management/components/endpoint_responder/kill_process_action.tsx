@@ -107,14 +107,14 @@ export const KillProcessActionResult = memo<
       >
         <div>
           <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.getProcesses.errorMessage"
+            id="xpack.securitySolution.endpointResponseActions.killProcess.errorMessage"
             defaultMessage="The following errors were encountered:"
           />
         </div>
         <EuiSpacer size="s" />
         <div>
           <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.getProcesses.errorList"
+            id="xpack.securitySolution.endpointResponseActions.killProcess.errorList"
             defaultMessage="{errors}"
             values={{ errors: completedActionDetails.errors.join(' | ') }}
           />
