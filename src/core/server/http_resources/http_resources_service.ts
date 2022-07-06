@@ -63,7 +63,10 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
   stop() {}
 
-  private createRegistrar(deps: SetupDeps | PrebootDeps, router: IRouter): HttpResources {
+  private createRegistrar(
+    deps: SetupDeps | PrebootDeps,
+    router: IRouter<RequestHandlerContext>
+  ): HttpResources {
     return {
       register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(
         route: RouteConfig<P, Q, B, 'get'>,

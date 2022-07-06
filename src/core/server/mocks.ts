@@ -23,6 +23,7 @@ import type {
   CoreStart,
   StartServicesAccessor,
   CorePreboot,
+  RequestHandlerContext,
 } from '.';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -139,7 +140,7 @@ function createCorePrebootMock() {
   const mock: CorePrebootMockType = {
     analytics: analyticsServiceMock.createAnalyticsServicePreboot(),
     elasticsearch: elasticsearchServiceMock.createPreboot(),
-    http: httpServiceMock.createPrebootContract(),
+    http: httpServiceMock.createPrebootContract() as CorePrebootMockType['http'],
     preboot: prebootServiceMock.createPrebootContract(),
   };
 
@@ -159,7 +160,7 @@ function createCoreSetupMock({
   pluginStartContract?: any;
 } = {}) {
   const httpMock: jest.Mocked<CoreSetup['http']> = {
-    ...httpServiceMock.createSetupContract(),
+    ...httpServiceMock.createSetupContract<RequestHandlerContext>(),
     resources: httpResourcesMock.createRegistrar(),
   };
 

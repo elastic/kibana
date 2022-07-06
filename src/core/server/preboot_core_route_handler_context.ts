@@ -10,12 +10,34 @@
 import { InternalCorePreboot } from './internal_types';
 import { IUiSettingsClient } from './ui_settings';
 
-class PrebootCoreUiSettingsRouteHandlerContext {
+/**
+ * @public
+ */
+export interface PrebootUiSettingsRequestHandlerContext {
+  client: IUiSettingsClient;
+}
+
+/**
+ * Implementation of {@link PrebootUiSettingsRequestHandlerContext}
+ * @internal
+ */
+class PrebootCoreUiSettingsRouteHandlerContext implements PrebootUiSettingsRequestHandlerContext {
   constructor(public readonly client: IUiSettingsClient) {}
 }
 
-export class PrebootCoreRouteHandlerContext {
-  readonly uiSettings: PrebootCoreUiSettingsRouteHandlerContext;
+/**
+ * @public
+ */
+export interface PrebootCoreRequestHandlerContext {
+  uiSettings: PrebootUiSettingsRequestHandlerContext;
+}
+
+/**
+ * Implementation of {@link PrebootCoreRequestHandlerContext}.
+ * @internal
+ */
+export class PrebootCoreRouteHandlerContext implements PrebootCoreRequestHandlerContext {
+  readonly uiSettings: PrebootUiSettingsRequestHandlerContext;
 
   constructor(private readonly corePreboot: InternalCorePreboot) {
     this.uiSettings = new PrebootCoreUiSettingsRouteHandlerContext(

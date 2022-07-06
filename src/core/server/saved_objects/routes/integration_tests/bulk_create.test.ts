@@ -13,6 +13,7 @@ import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { setupServer } from '../test_utils';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -28,7 +29,8 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
 
-    const router = httpSetup.createRouter('/api/saved_objects/');
+    const router =
+      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsBulkCreate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);

@@ -38,6 +38,7 @@ import { coreUsageDataServiceMock } from '../../../../core_usage_data/core_usage
 import { registerLegacyImportRoute } from '../import';
 import { setupServer } from '../../test_utils';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../../internal_types';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
@@ -49,7 +50,7 @@ describe('POST /api/dashboards/import', () => {
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer());
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('');
 
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementLegacyDashboardsImport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail

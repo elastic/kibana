@@ -9,10 +9,10 @@
 import { Readable } from 'stream';
 import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { SavedObjectsImportError } from '../import';
+import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
 
 interface RouteDependencies {
@@ -27,7 +27,7 @@ interface FileStream extends Readable {
 }
 
 export const registerImportRoute = (
-  router: IRouter,
+  router: InternalSavedObjectRouter,
   { config, coreUsageData }: RouteDependencies
 ) => {
   const { maxImportPayloadBytes } = config;

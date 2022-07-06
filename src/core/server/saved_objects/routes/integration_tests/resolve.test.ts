@@ -17,6 +17,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { HttpService, InternalHttpServiceSetup } from '../../../http';
 import { createHttpServer, createCoreContext } from '../../../http/test_utils';
 import { contextServiceMock, coreMock } from '../../../mocks';
+import type { InternalSavedObjectsRequestHandlerContext } from '../../internal_types';
 
 const coreId = Symbol('core');
 
@@ -41,11 +42,16 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
     handlerContext = coreMock.createRequestHandlerContext();
     savedObjectsClient = handlerContext.savedObjects.client;
 
-    httpSetup.registerRouteHandlerContext(coreId, 'core', async (ctx, req, res) => {
-      return handlerContext;
-    });
+    httpSetup.registerRouteHandlerContext<InternalSavedObjectsRequestHandlerContext, 'core'>(
+      coreId,
+      'core',
+      (ctx, req, res) => {
+        return handlerContext;
+      }
+    );
 
-    const router = httpSetup.createRouter('/api/saved_objects/');
+    const router =
+      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsResolve.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);

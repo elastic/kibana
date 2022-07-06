@@ -24,7 +24,7 @@ import {
 } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
 import { HapiResponseAdapter } from './response_adapter';
-import { RequestHandlerContext } from '../..';
+import { RequestHandlerContextBase } from '../..';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
 
@@ -46,7 +46,7 @@ export interface RouterRoute {
  */
 export type RouteRegistrar<
   Method extends RouteMethod,
-  Context extends RequestHandlerContext = RequestHandlerContext
+  Context extends RequestHandlerContextBase = RequestHandlerContextBase
 > = <P, Q, B>(
   route: RouteConfig<P, Q, B, Method>,
   handler: RequestHandler<P, Q, B, Context, Method>
@@ -58,7 +58,7 @@ export type RouteRegistrar<
  *
  * @public
  */
-export interface IRouter<Context extends RequestHandlerContext = RequestHandlerContext> {
+export interface IRouter<Context extends RequestHandlerContextBase = RequestHandlerContextBase> {
   /**
    * Resulted path
    */
@@ -118,7 +118,7 @@ export type ContextEnhancer<
   Q,
   B,
   Method extends RouteMethod,
-  Context extends RequestHandlerContext
+  Context extends RequestHandlerContextBase
 > = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
 function getRouteFullPath(routerPath: string, routePath: string) {
@@ -202,7 +202,7 @@ function validOptions(
 /**
  * @internal
  */
-export class Router<Context extends RequestHandlerContext = RequestHandlerContext>
+export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
   implements IRouter<Context>
 {
   public routes: Array<Readonly<RouterRoute>> = [];
@@ -307,7 +307,7 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
   : never;
 
 type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadArgument<
-  RequestHandler<P, Q, B, RequestHandlerContext, Method>
+  RequestHandler<P, Q, B, RequestHandlerContextBase, Method>
 >;
 
 /**
@@ -350,7 +350,7 @@ export type RequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Context extends RequestHandlerContext = RequestHandlerContext,
+  Context extends RequestHandlerContextBase = RequestHandlerContextBase,
   Method extends RouteMethod = any,
   ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 > = (
@@ -376,7 +376,7 @@ export type RequestHandlerWrapper = <
   P,
   Q,
   B,
-  Context extends RequestHandlerContext = RequestHandlerContext,
+  Context extends RequestHandlerContextBase = RequestHandlerContextBase,
   Method extends RouteMethod = any,
   ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
 >(
