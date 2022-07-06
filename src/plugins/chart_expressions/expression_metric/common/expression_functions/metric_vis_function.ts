@@ -56,12 +56,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'Text to be shown above metric value. Overridden by secondaryMetric.',
       }),
     },
-    progressMin: {
-      types: ['number'],
-      help: i18n.translate('expressionMetricVis.function.progressMin.help', {
-        defaultMessage: 'The number at which the progress bar should be empty.',
-      }),
-    },
     progressMax: {
       types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.progressMax.help.', {
@@ -158,7 +152,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             subtitle: args.subtitle,
             extraText: args.extraText,
             palette: args.palette?.params,
-            progressMin: args.progressMin,
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,
             minTiles: args.minTiles,

@@ -147,12 +147,12 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
 
   let getProgressBarConfig = (_row: DatatableRow) => ({});
 
-  if (typeof config.metric.progressMin === 'number' && config.dimensions.progressMax) {
+  if (config.dimensions.progressMax) {
     const maxColId = getColumnByAccessor(config.dimensions.progressMax, data.columns)?.id;
     if (maxColId) {
       getProgressBarConfig = (_row: DatatableRow) => ({
         domain: {
-          min: config.metric.progressMin,
+          min: 0,
           max: _row[maxColId],
         },
         progressBarDirection: config.metric.progressDirection,

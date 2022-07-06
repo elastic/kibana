@@ -23,7 +23,6 @@ export interface MetricVisParam {
   subtitle?: string;
   extraText?: string;
   palette?: CustomPaletteState;
-  progressMin?: number;
   progressDirection: LayoutDirection;
   maxCols: number;
   minTiles?: number;

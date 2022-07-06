@@ -279,14 +279,13 @@ describe('MetricVisComponent', function () {
     });
 
     it('should display progress bar if min and max provided', () => {
-      const getConfig = (min?: number, max?: string, direction: LayoutDirection = 'vertical') =>
+      const getConfig = (max?: string, direction: LayoutDirection = 'vertical') =>
         shallow(
           <MetricVis
             config={{
               ...config,
               metric: {
                 ...config.metric,
-                progressMin: min,
                 progressDirection: direction,
               },
               dimensions: {
@@ -301,16 +300,13 @@ describe('MetricVisComponent', function () {
           .find(Metric)
           .props().data![0][0]!;
 
-      expect(getConfig(0, undefined)).not.toHaveProperty('domain');
-      expect(getConfig(0, undefined)).not.toHaveProperty('progressBarDirection');
+      expect(getConfig(undefined)).not.toHaveProperty('domain');
+      expect(getConfig(undefined)).not.toHaveProperty('progressBarDirection');
 
-      expect(getConfig(undefined, basePriceColumnId)).not.toHaveProperty('domain');
-      expect(getConfig(undefined, basePriceColumnId)).not.toHaveProperty('progressBarDirection');
+      expect(getConfig('foobar')).not.toHaveProperty('domain');
+      expect(getConfig('foobar')).not.toHaveProperty('progressBarDirection');
 
-      expect(getConfig(undefined, 'foobar')).not.toHaveProperty('domain');
-      expect(getConfig(undefined, 'foobar')).not.toHaveProperty('progressBarDirection');
-
-      const configWithProgress = getConfig(0, basePriceColumnId) as MetricWProgress;
+      const configWithProgress = getConfig(basePriceColumnId) as MetricWProgress;
 
       expect(configWithProgress.domain).toEqual({ min: 0, max: table.rows[0][basePriceColumnId] });
       expect(configWithProgress.progressBarDirection).toBe('vertical');
@@ -332,7 +328,7 @@ describe('MetricVisComponent', function () {
       `);
 
       expect(
-        (getConfig(0, basePriceColumnId, 'horizontal') as MetricWProgress).progressBarDirection
+        (getConfig(basePriceColumnId, 'horizontal') as MetricWProgress).progressBarDirection
       ).toBe('horizontal');
     });
     it('should fetch color from palette if provided', () => {
@@ -580,7 +576,7 @@ describe('MetricVisComponent', function () {
       `);
     });
 
-    it('should display progress bar if min and max provided', () => {
+    it('should display progress bar if max provided', () => {
       expect(
         shallow(
           <MetricVis
@@ -588,7 +584,6 @@ describe('MetricVisComponent', function () {
               ...config,
               metric: {
                 ...config.metric,
-                progressMin: 0,
               },
               dimensions: {
                 ...config.dimensions,
