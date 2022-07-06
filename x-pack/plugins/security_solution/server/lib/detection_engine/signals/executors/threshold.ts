@@ -59,6 +59,8 @@ export const thresholdExecutor = async ({
   bulkCreate,
   wrapHits,
   ruleDataReader,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -75,6 +77,8 @@ export const thresholdExecutor = async ({
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   ruleDataReader: IRuleDataReader;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   let result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -114,7 +118,7 @@ export const thresholdExecutor = async ({
     // Eliminate dupes
     const bucketFilters = await getThresholdBucketFilters({
       signalHistory,
-      timestampOverride: ruleParams.timestampOverride,
+      primaryTimestamp,
     });
 
     // Combine dupe filter with other filters
@@ -142,9 +146,10 @@ export const thresholdExecutor = async ({
       logger,
       filter: esFilter,
       threshold: ruleParams.threshold,
-      timestampOverride: ruleParams.timestampOverride,
       buildRuleMessage,
       runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
     });
 
     // Build and index new alerts
@@ -168,7 +173,7 @@ export const thresholdExecutor = async ({
       result,
       createSearchAfterReturnTypeFromResponse({
         searchResult: thresholdResults,
-        timestampOverride: ruleParams.timestampOverride,
+        primaryTimestamp,
       }),
       createSearchAfterReturnType({
         success,

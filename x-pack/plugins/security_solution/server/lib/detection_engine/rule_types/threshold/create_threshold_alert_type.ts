@@ -73,6 +73,8 @@ export const createThresholdAlertType = (
           ruleDataReader,
           inputIndex,
           runtimeMappings,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         startedAt,
@@ -95,6 +97,8 @@ export const createThresholdAlertType = (
         ruleDataReader,
         inputIndex,
         runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
 
       return result;

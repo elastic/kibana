@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import agent from 'elastic-apm-node';
 
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -152,11 +153,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             id: alertId,
           };
 
-          const primaryTimestamp = timestampOverride ?? '@timestamp';
+          const primaryTimestamp = timestampOverride ?? TIMESTAMP;
           const secondaryTimestamp =
-            primaryTimestamp !== '@timestamp' && !disableTimestampFallback
-              ? '@timestamp'
-              : undefined;
+            primaryTimestamp !== TIMESTAMP && !disableTimestampFallback ? TIMESTAMP : undefined;
 
           /**
            * Data Views Logic
