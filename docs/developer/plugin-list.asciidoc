@@ -504,7 +504,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]
-|Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
+|Lens is a visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/license_api_guard/README.md[licenseApiGuard]

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SessionService, ISessionService } from './session_service';
+import { ISessionService, SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import { take, toArray } from 'rxjs/operators';
 import { getSessionsClientMock } from './mocks';
@@ -15,9 +15,11 @@ import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
-import type { SearchSessionSavedObject, ISessionsClient } from './sessions_client';
+import type { ISessionsClient, SearchSessionSavedObject } from './sessions_client';
 import { SearchSessionStatus } from '../../../common';
 import { CoreStart } from '@kbn/core/public';
+import { SearchUsageCollector } from '../..';
+import { createSearchUsageCollectorMock } from '../collectors/mocks';
 
 const mockSavedObject: SearchSessionSavedObject = {
   id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
@@ -45,12 +47,13 @@ describe('Session service', () => {
   let currentAppId$: BehaviorSubject<string>;
   let toastService: jest.Mocked<CoreStart['notifications']['toasts']>;
   let sessionsClient: jest.Mocked<ISessionsClient>;
+  let usageCollector: jest.Mocked<SearchUsageCollector>;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext({
       search: {
         sessions: {
-          notTouchedTimeout: '5m',
+          notTouchedTimeout: 5 * 60 * 1000,
         },
       },
     });
@@ -65,6 +68,7 @@ describe('Session service', () => {
       id,
       attributes: { ...mockSavedObject.attributes, sessionId: id },
     }));
+    usageCollector = createSearchUsageCollectorMock();
     sessionService = new SessionService(
       initializerContext,
       () =>
@@ -88,7 +92,7 @@ describe('Session service', () => {
         ]),
       sessionsClient,
       nowProvider,
-      undefined,
+      usageCollector,
       { freezeState: false } // needed to use mocks inside state container
     );
     state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
@@ -404,5 +408,69 @@ describe('Session service', () => {
         title: expect.stringContaining('Failed to edit name of the search session'),
       })
     );
+  });
+
+  describe('disableSaveAfterSessionCompleteTimedOut$', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('disables save after session completes on timeout', async () => {
+      const emitResult: boolean[] = [];
+      sessionService.disableSaveAfterSessionCompleteTimedOut$.subscribe((result) => {
+        emitResult.push(result);
+      });
+
+      sessionService.start();
+      const complete = sessionService.trackSearch({
+        abort: () => {},
+        poll: async () => {},
+      }).complete;
+
+      complete();
+
+      expect(emitResult).toEqual([false]);
+
+      jest.advanceTimersByTime(2 * 60 * 1000); // 2 minutes
+
+      expect(emitResult).toEqual([false]);
+
+      jest.advanceTimersByTime(3 * 60 * 1000); // 3 minutes
+
+      expect(emitResult).toEqual([false, true]);
+
+      sessionService.start();
+
+      expect(emitResult).toEqual([false, true, false]);
+    });
+
+    test('emits usage once', async () => {
+      const emitResult: boolean[] = [];
+      sessionService.disableSaveAfterSessionCompleteTimedOut$.subscribe((result) => {
+        emitResult.push(result);
+      });
+      sessionService.disableSaveAfterSessionCompleteTimedOut$.subscribe(); // testing that source is shared
+
+      sessionService.start();
+      const complete = sessionService.trackSearch({
+        abort: () => {},
+        poll: async () => {},
+      }).complete;
+
+      expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(0);
+
+      complete();
+
+      jest.advanceTimersByTime(5 * 60 * 1000); // 5 minutes
+
+      expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
+
+      sessionService.start();
+
+      expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -28,9 +28,10 @@ import {
   failedFleetActionErrorCode,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-  GET_RUNNING_PROCESSES_ROUTE,
+  GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
+  ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointAction,
@@ -146,7 +147,7 @@ export function registerResponseActionRoutes(
 
   router.post(
     {
-      path: GET_RUNNING_PROCESSES_ROUTE,
+      path: GET_PROCESSES_ROUTE,
       validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
@@ -257,7 +258,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       try {
         logsEndpointActionsResult = await esClient.index<LogsEndpointAction>(
           {
-            index: `${ENDPOINT_ACTIONS_DS}-default`,
+            index: ENDPOINT_ACTIONS_INDEX,
             body: {
               ...doc,
             },

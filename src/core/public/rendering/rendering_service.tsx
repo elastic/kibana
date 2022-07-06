@@ -12,10 +12,10 @@ import { pairwise, startWith } from 'rxjs/operators';
 
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
+import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import type { InternalChromeStart } from '../chrome';
 import type { InternalApplicationStart } from '../application';
 import type { OverlayStart } from '../overlays';
-import { CoreContextProvider } from '../utils';
 import { AppWrapper } from './app_containers';
 
 export interface StartDeps {

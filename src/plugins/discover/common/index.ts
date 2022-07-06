@@ -26,3 +26,4 @@ export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
 export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
 export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';
+export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';

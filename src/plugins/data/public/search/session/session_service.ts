@@ -14,7 +14,7 @@ import {
   mapTo,
   mergeMap,
   repeat,
-  shareReplay,
+  share,
   startWith,
   switchMap,
   takeUntil,
@@ -206,7 +206,7 @@ export class SessionService {
       tap((value) => {
         if (value) this.usageCollector?.trackSessionIndicatorSaveDisabled();
       }),
-      shareReplay()
+      share()
     );
 
     this.subscription.add(
