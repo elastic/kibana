@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { mount } from 'enzyme';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
@@ -14,10 +15,11 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import { UserProfileAPIClient } from '..';
 import type { UserData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { UserAvatar } from '../../components';
 import { UserAPIClient } from '../../management';
 import { securityMock } from '../../mocks';
 import { Providers } from '../account_management_app';
-import { useUserProfileForm } from './user_profile';
+import { UserProfile, useUserProfileForm } from './user_profile';
 
 const user = mockAuthenticatedUser();
 const coreStart = coreMock.createStart();
@@ -180,5 +182,53 @@ describe('useUserProfileForm', () => {
     });
 
     expect(result.current.initialValues.user.full_name).toEqual('Another Name');
+  });
+
+  describe('User Avatar Form', () => {
+    it('should display if the User is not a cloud user', () => {
+      const data: UserData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      expect(testWrapper.exists(UserAvatar)).toBeTruthy();
+    });
+
+    it('should not display if the User is a cloud user', () => {
+      const data: UserData = {};
+
+      const cloudUser = mockAuthenticatedUser({ elastic_cloud_user: true });
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={cloudUser} data={data} />
+        </Providers>
+      );
+
+      expect(testWrapper.exists(UserAvatar)).toBeFalsy();
+    });
   });
 });
