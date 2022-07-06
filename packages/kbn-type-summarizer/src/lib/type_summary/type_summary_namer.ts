@@ -10,7 +10,7 @@ import ts from 'typescript';
 
 import { AstIndex } from '../ast_index';
 
-const INVALID_NAMES = ['default', 'import'];
+const INVALID_NAMES = ['default', 'import', 'export'];
 
 /**
  * Class which is reponsible for managing the list of used names and assigning
