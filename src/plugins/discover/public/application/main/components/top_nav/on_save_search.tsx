@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
@@ -17,6 +17,7 @@ import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { persistSavedSearch } from '../../utils/persist_saved_search';
+import { DOC_TABLE_LEGACY } from '../../../../../common';
 
 async function saveDataSource({
   indexPattern,
@@ -84,15 +85,6 @@ async function saveDataSource({
   });
 }
 
-interface SaveSearchModal {
-  indexPattern: DataView;
-  navigateTo: (path: string) => void;
-  savedSearch: SavedSearch;
-  services: DiscoverServices;
-  state: GetStateReturn;
-  onClose?: () => void;
-}
-
 export async function onSaveSearch({
   indexPattern,
   navigateTo,
@@ -100,7 +92,14 @@ export async function onSaveSearch({
   services,
   state,
   onClose,
-}: SaveSearchModal) {
+}: {
+  indexPattern: DataView;
+  navigateTo: (path: string) => void;
+  savedSearch: SavedSearch;
+  services: DiscoverServices;
+  state: GetStateReturn;
+  onClose?: () => void;
+}) {
   const onSave = async ({
     newTitle,
     newCopyOnSave,
@@ -144,28 +143,36 @@ export async function onSaveSearch({
 
   const saveModal = (
     <SaveSearchObjectModal
-      onSave={onSave}
-      onClose={onClose ?? (() => {})}
+      services={services}
       title={savedSearch.title ?? ''}
       showCopyOnSave={!!savedSearch.id}
       description={savedSearch.description}
       rowsPerPageState={state.appStateContainer.getState().rowsPerPage}
+      onSave={onSave}
+      onClose={onClose ?? (() => {})}
     />
   );
   showSaveModal(saveModal, services.core.i18n.Context);
 }
 
 const SaveSearchObjectModal: React.FC<{
+  services: DiscoverServices;
   title: string;
   showCopyOnSave: boolean;
   description?: string;
   rowsPerPageState?: number;
   onSave: (props: OnSaveProps & { newRowsPerPage?: number }) => void;
   onClose: () => void;
-}> = ({ title, description, showCopyOnSave, rowsPerPageState, onSave, onClose }) => {
+}> = ({ services, title, description, showCopyOnSave, rowsPerPageState, onSave, onClose }) => {
+  const { uiSettings } = services;
+  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const [newRowsPerPage, setNewRowsPerPage] = useState(rowsPerPageState);
 
   const renderAdditionalSearchForm = () => {
+    if (isLegacy) {
+      // skip setting a custom rowsPerPage for the legacy view as it does not support pagination
+      return undefined;
+    }
     return (
       <EuiFormRow
         label={
@@ -178,7 +185,6 @@ const SaveSearchObjectModal: React.FC<{
         <EuiFieldNumber
           value={newRowsPerPage}
           min={1}
-          max={1000}
           onChange={(event) => {
             const value = parseInt(event.target.value, 10);
             if (value) {
@@ -191,13 +197,14 @@ const SaveSearchObjectModal: React.FC<{
   };
 
   const onModalSave = (params: OnSaveProps) => {
-    onSave({ ...params, newRowsPerPage });
+    onSave({
+      ...params,
+      newRowsPerPage: isLegacy ? undefined : newRowsPerPage,
+    });
   };
 
   return (
     <SavedObjectSaveModal
-      onSave={onModalSave}
-      onClose={onClose}
       title={title}
       showCopyOnSave={showCopyOnSave}
       description={description}
@@ -206,6 +213,8 @@ const SaveSearchObjectModal: React.FC<{
       })}
       showDescription={true}
       options={renderAdditionalSearchForm}
+      onSave={onModalSave}
+      onClose={onClose}
     />
   );
 };
