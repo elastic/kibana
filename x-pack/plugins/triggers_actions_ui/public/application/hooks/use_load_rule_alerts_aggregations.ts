@@ -15,9 +15,9 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
+import { useKibana } from '../../common/lib/kibana';
 
 interface UseLoadRuleAlertsAggs {
-  http: HttpSetup;
   features: string;
   ruleId: string;
 }
@@ -35,7 +35,8 @@ interface IndexName {
   index: string;
 }
 
-export function useLoadRuleAlertsAggs({ http, features, ruleId }: UseLoadRuleAlertsAggs) {
+export function useLoadRuleAlertsAggs({ features, ruleId }: UseLoadRuleAlertsAggs) {
+  const { http } = useKibana().services;
   const [ruleAlertsAggs, setRuleAlertsAggs] = useState<LoadRuleAlertsAggs>({
     isLoadingRuleAlertsAggs: true,
     ruleAlertsAggs: { active: 0, recovered: 0 },

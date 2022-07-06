@@ -70,6 +70,7 @@ export function RuleDetailsPage() {
       actionTypeRegistry,
       getRuleEventLogList,
       getAlertsStateTable,
+      getRuleAlertsSummary,
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
@@ -414,7 +415,7 @@ export function RuleDetailsPage() {
         </EuiFlexItem>
 
         {/* Right side of Rule Summary */}
-
+        {getRuleAlertsSummary({ rule })}
         <EuiFlexItem data-test-subj="ruleSummaryRuleDefinition" grow={3}>
           <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
             <EuiFlexGroup justifyContent="spaceBetween">

@@ -68,6 +68,8 @@ import { PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/rule_alerts_summary';
+import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -107,6 +109,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: RulesListNotifyBadgeProps
   ) => ReactElement<RulesListNotifyBadgeProps>;
   getRulesList: () => ReactElement;
+  getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => ReactElement<RuleAlertsSummaryProps>;
 }
 
 interface PluginsSetup {
@@ -319,6 +322,9 @@ export class Plugin
       },
       getRulesList: () => {
         return getRulesListLazy({ connectorServices: this.connectorServices! });
+      },
+      getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => {
+        return getRuleAlertsSummaryLazy(props);
       },
     };
   }
