@@ -123,9 +123,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
   }, [onHide, restoreFocusTo]);
 
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const { dataViewId, defaultColumns } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId)
-  );
+  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
 
   const onResetColumns = useCallback(() => {
     onUpdateColumns(defaultColumns);
@@ -173,9 +171,7 @@ const FieldsBrowserComponent: React.FC<FieldsBrowserComponentProps> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {CreateFieldButton && dataViewId != null && dataViewId.length > 0 && (
-                <CreateFieldButton onHide={onHide} />
-              )}
+              {CreateFieldButton && <CreateFieldButton onHide={onHide} />}
             </EuiFlexItem>
           </EuiFlexGroup>
 
