@@ -218,7 +218,7 @@ export type HostIsolationRequestBody = TypeOf<typeof NoParametersRequestSchema.b
 
 export type ResponseActionRequestBody = TypeOf<typeof ResponseActionBodySchema>;
 
-export type KillProcessRequestBody = TypeOf<typeof KillOrSuspendProcessRequestSchema.body>;
+export type KillOrSuspendProcessRequestBody = TypeOf<typeof KillOrSuspendProcessRequestSchema.body>;
 
 export interface HostIsolationResponse {
   action: string;
