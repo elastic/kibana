@@ -7,7 +7,6 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 
-import { cloneDeep } from 'lodash';
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
 import { AppState, getState, GlobalState } from '../services/context_state';
@@ -22,8 +21,9 @@ export function useContextAppState({ services }: { services: DiscoverServices })
       history: history(),
       toasts: core.notifications.toasts,
       uiSettings: config,
+      data: services.data,
     });
-  }, [config, history, core.notifications.toasts]);
+  }, [config, history, core.notifications.toasts, services.data]);
 
   const [appState, setAppState] = useState<AppState>(stateContainer.appState.getState());
   const [globalState, setGlobalState] = useState<GlobalState>(
@@ -42,12 +42,10 @@ export function useContextAppState({ services }: { services: DiscoverServices })
   useEffect(() => {
     const unsubscribeAppState = stateContainer.appState.subscribe((newState) => {
       setAppState((prevState) => ({ ...prevState, ...newState }));
-      filterManager.setFilters(cloneDeep(newState.filters));
     });
 
     const unsubscribeGlobalState = stateContainer.globalState.subscribe((newState) => {
       setGlobalState((prevState) => ({ ...prevState, ...newState }));
-      filterManager.setFilters(cloneDeep(newState.filters));
     });
 
     return () => {
@@ -56,24 +54,9 @@ export function useContextAppState({ services }: { services: DiscoverServices })
     };
   }, [stateContainer, setAppState, filterManager]);
 
-  /**
-   * Take care of filters
-   */
-  useEffect(() => {
-    filterManager.setFilters(cloneDeep(stateContainer.getFilters()));
-
-    const { setFilters } = stateContainer;
-    const filterObservable = filterManager.getUpdates$().subscribe(() => {
-      setFilters(filterManager);
-    });
-
-    return () => filterObservable.unsubscribe();
-  }, [filterManager, stateContainer]);
-
   return {
     appState,
     globalState,
-    stateContainer,
     setAppState: stateContainer.setAppState,
   };
 }
