@@ -7,12 +7,12 @@
 
 import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
-export const containerK8sCpuUsage: TSVBMetricModelCreator = (
+export const containerK8sOverview: TSVBMetricModelCreator = (
   timeField,
   indexPattern,
   interval
 ): TSVBMetricModel => ({
-  id: 'containerK8sCpuUsage',
+  id: 'containerK8sOverview',
   requires: ['kubernetes.container'],
   index_pattern: indexPattern,
   interval,
@@ -25,7 +25,18 @@ export const containerK8sCpuUsage: TSVBMetricModelCreator = (
       metrics: [
         {
           field: 'kubernetes.container.cpu.usage.node.pct',
-          id: 'avg-cpu',
+          id: 'avg-cpu-total',
+          type: 'avg',
+        },
+      ],
+    },
+    {
+      id: 'memory',
+      split_mode: 'everything',
+      metrics: [
+        {
+          field: 'kubernetes.container.memory.usage.node.pct',
+          id: 'avg-memory-total',
           type: 'avg',
         },
       ],
