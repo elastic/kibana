@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../tsconfig.bazel.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
+    "rootDir": "src",
+    "stripInternal": false,
+    "types": [
+      "@types/d3-brush",
+      "@types/d3-scale",
+      "@types/d3-selection",
+      "@types/d3-transition",
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ]
+}
