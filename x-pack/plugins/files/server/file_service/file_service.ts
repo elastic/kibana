@@ -46,5 +46,13 @@ export interface FileServiceStart {
    */
   list<M>(args: ListFilesArgs): Promise<Array<File<M>>>;
 
-  getFileShareService(): FileShareServiceStart;
+  /**
+   * Get an instance of a share object
+   */
+  getShareObject: FileShareServiceStart['get'];
+
+  /**
+   * Update an instance of a share object
+   */
+  updateShareObject: FileShareServiceStart['update'];
 }

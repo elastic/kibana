@@ -198,9 +198,8 @@ describe('FileService', () => {
     it('retrieves a a file share object', async () => {
       const file = await createDisposableFile({ fileKind, name: 'test' });
       const { id } = await file.share({ name: 'my file share' });
-      const shareService = fileService.getFileShareService();
       // Check if a file share exists without using an {@link File} object
-      const result = await shareService.get({ tokenId: id });
+      const result = await fileService.getShareObject({ tokenId: id });
       expect(result).toEqual(
         expect.objectContaining({
           id: expect.any(String),
@@ -214,10 +213,9 @@ describe('FileService', () => {
     it('updates a file share object', async () => {
       const file = await createDisposableFile({ fileKind, name: 'test' });
       const { id } = await file.share({ name: 'my file share 1' });
-      const shareService = fileService.getFileShareService();
       // Check if a file share exists without using an {@link File} object
-      await shareService.update({ id, attributes: { name: 'my file share 2' } });
-      const result = await shareService.get({ tokenId: id });
+      await fileService.updateShareObject({ id, attributes: { name: 'my file share 2' } });
+      const result = await fileService.getShareObject({ tokenId: id });
       expect(result).toEqual(
         expect.objectContaining({
           id: expect.any(String),
@@ -245,8 +243,10 @@ describe('FileService', () => {
       ]);
 
       // Check whether updating file attributes interferes with SO references.
-      const shareService = fileService.getFileShareService();
-      await shareService.update({ id: share1.id, attributes: { name: 'my file share X' } });
+      await fileService.updateShareObject({
+        id: share1.id,
+        attributes: { name: 'my file share X' },
+      });
 
       const shares1 = await file.listShares();
       expect(shares1).toHaveLength(3);
