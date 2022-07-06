@@ -145,7 +145,7 @@ export async function fetchRuleAlertsAggByTimeRange({
           },
         },
         aggs: {
-          alert_status: {
+          alert_status_aggs: {
             terms: {
               field: 'kibana.alert.status',
               size: 2,
