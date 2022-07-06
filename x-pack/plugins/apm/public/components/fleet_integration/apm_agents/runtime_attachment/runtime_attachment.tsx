@@ -18,19 +18,14 @@ import {
   EuiDraggable,
   EuiIcon,
   DropResult,
-  EuiFormRow,
-  EuiFieldText,
-  EuiLink,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DiscoveryRule } from './discovery_rule';
 import { DefaultDiscoveryRule } from './default_discovery_rule';
 import { EditDiscoveryRule } from './edit_discovery_rule';
 import { IDiscoveryRuleList, Operation, RuntimeAttachmentSettings } from '.';
+import { JavaAgentVersionInput } from './java_agent_version_input';
 
 interface Props {
   isEnabled: boolean;
@@ -85,9 +80,6 @@ export function RuntimeAttachment({
   onChangeVersion,
   isValidVersion,
 }: Props) {
-  const {
-    services: { docLinks },
-  } = useKibana();
   return (
     <div>
       {showUnsavedWarning && (
@@ -123,50 +115,11 @@ export function RuntimeAttachment({
           </EuiText>
         </EuiFlexItem>
         {isEnabled && (
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version',
-                { defaultMessage: 'Version' }
-              )}
-              isInvalid={!isValidVersion}
-              error={i18n.translate(
-                'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.invalid',
-                { defaultMessage: 'Invalid version' }
-              )}
-              helpText={
-                <FormattedMessage
-                  id="xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.helpText"
-                  defaultMessage="Enter the {versionLink} of the Elastic APM Java agent that should be attached."
-                  values={{
-                    versionLink: (
-                      <EuiLink
-                        href={`${docLinks?.ELASTIC_WEBSITE_URL}/guide/en/apm/agent/java/current/release-notes.html`}
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.helpText.version',
-                          { defaultMessage: 'version' }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-            >
-              <EuiFieldText
-                value={version || ''}
-                onChange={(e) => {
-                  const nextVersion = e.target.value;
-                  onChangeVersion(isEmpty(nextVersion) ? null : nextVersion);
-                }}
-                placeholder={i18n.translate(
-                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.placeHolder',
-                  { defaultMessage: 'Add a version' }
-                )}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
+          <JavaAgentVersionInput
+            version={version}
+            onChange={onChangeVersion}
+            isValid={isValidVersion}
+          />
         )}
       </EuiFlexGroup>
       {isEnabled && (
