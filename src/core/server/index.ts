@@ -41,20 +41,20 @@ import type {
   ExecutionContextSetup,
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
-import type { RequestHandlerContextBase } from '@kbn/core-http-server';
+import type {
+  RequestHandlerContextBase,
+  IRouter,
+  RequestHandler,
+  KibanaResponseFactory,
+  RouteMethod,
+} from '@kbn/core-http-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
 } from './elasticsearch';
-import type {
-  HttpServicePreboot,
-  HttpServiceSetup,
-  HttpServiceStart,
-  IRouter,
-  RequestHandler,
-} from './http';
+import type { HttpServicePreboot, HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -79,7 +79,6 @@ import {
 import { PrebootServicePreboot } from './preboot';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
 import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
-import { KibanaResponseFactory, RouteMethod } from './http';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -113,13 +112,7 @@ export type {
   EnvironmentMode,
   PackageInfo,
 } from '@kbn/config';
-export type {
-  IContextContainer,
-  IContextProvider,
-  HandlerFunction,
-  HandlerContextType,
-  HandlerParameters,
-} from './context';
+
 export type { CoreId } from '@kbn/core-base-common-internal';
 
 export { ElasticsearchConfig, pollEsNodesVersion } from './elasticsearch';
@@ -168,25 +161,13 @@ export type {
   AuthNotHandled,
   BasePath,
   IBasePath,
-  CustomHttpResponseOptions,
   GetAuthHeaders,
   GetAuthState,
-  Headers,
   HttpAuth,
-  HttpResponseOptions,
-  HttpResponsePayload,
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
-  ErrorHttpResponseOptions,
-  IKibanaSocket,
   IsAuthenticated,
-  KibanaRequestEvents,
-  KibanaRequestRoute,
-  KibanaRequestRouteOptions,
-  IKibanaResponse,
-  LifecycleResponseFactory,
-  KnownHeaders,
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPreRoutingHandler,
@@ -198,10 +179,27 @@ export type {
   OnPreResponseRender,
   OnPreResponseExtensions,
   OnPreResponseInfo,
-  RedirectResponseOptions,
-  RequestHandlerWrapper,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
+  SessionStorage,
+  SessionStorageCookieOptions,
+  SessionCookieValidationResult,
+  SessionStorageFactory,
+  ICspConfig,
+  IExternalUrlConfig,
+  IExternalUrlPolicy,
+} from './http';
+
+export { kibanaResponseFactory, CoreKibanaRequest, CspConfig } from './http';
+
+export type {
+  IContextProvider,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
+  KibanaRequest,
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
@@ -219,19 +217,23 @@ export type {
   RouteValidatorFullConfig,
   RouteValidationResultFactory,
   RouteValidationError,
-  SessionStorage,
-  SessionStorageCookieOptions,
-  SessionCookieValidationResult,
-  SessionStorageFactory,
-  DestructiveRouteMethod,
-  SafeRouteMethod,
-  KibanaRequest,
-  ICspConfig,
-  IExternalUrlConfig,
-  IExternalUrlPolicy,
-} from './http';
+  RedirectResponseOptions,
+  RequestHandlerWrapper,
+  KibanaRequestEvents,
+  KibanaRequestRoute,
+  KibanaRequestRouteOptions,
+  IKibanaResponse,
+  LifecycleResponseFactory,
+  KnownHeaders,
+  ErrorHttpResponseOptions,
+  IKibanaSocket,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  Headers,
+  CustomHttpResponseOptions,
+} from '@kbn/core-http-server';
 
-export { kibanaResponseFactory, validBodyOutput, CoreKibanaRequest, CspConfig } from './http';
+export { validBodyOutput } from '@kbn/core-http-server';
 
 export type {
   HttpResourcesRenderOptions,
