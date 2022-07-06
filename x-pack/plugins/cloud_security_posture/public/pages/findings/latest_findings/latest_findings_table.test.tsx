@@ -13,6 +13,7 @@ import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import type { CspFinding } from '../types';
 import { TestProvider } from '../../../test/test_provider';
+import { CIS_INTEGRATION_INPUTS_MAP } from '../../../../common/constants';
 
 const chance = new Chance();
 
@@ -32,6 +33,7 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
     benchmark: {
       name: 'CIS Kubernetes',
       version: '1.6.0',
+      id: CIS_INTEGRATION_INPUTS_MAP['cloudbeat/vanilla'],
     },
     default_value: chance.sentence(),
     description: chance.paragraph(),
