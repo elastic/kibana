@@ -80,9 +80,9 @@ async function queryTopNFunctions(
 
 const querySchema = schema.object({
   index: schema.string(),
-  projectID: schema.number(),
-  timeFrom: schema.number(),
-  timeTo: schema.number(),
+  projectID: schema.string(),
+  timeFrom: schema.string(),
+  timeTo: schema.string(),
   startIndex: schema.number(),
   endIndex: schema.number(),
 });
