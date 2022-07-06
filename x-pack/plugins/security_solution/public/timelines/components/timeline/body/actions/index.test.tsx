@@ -32,32 +32,36 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(),
-        capabilities: {
-          siem: { crud_alerts: true, read_alerts: true },
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalKibanaLib = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract(),
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
         },
       },
-      cases: mockCasesContract(),
-      uiSettings: {
-        get: jest.fn(),
-      },
-      savedObjects: {
-        client: {},
-      },
-    },
-  }),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-  }),
-  useGetUserCasesPermissions: jest.fn(),
-}));
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+    useGetUserCasesPermissions: originalKibanaLib.useGetUserCasesPermissions,
+  };
+});
 
 const defaultProps = {
   ariaRowindex: 2,

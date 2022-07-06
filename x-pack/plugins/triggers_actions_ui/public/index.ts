@@ -41,6 +41,7 @@ export type {
   GetRenderCellValue,
   FieldBrowserOptions,
   FieldBrowserProps,
+  RuleDefinitionProps,
 } from './types';
 
 export {

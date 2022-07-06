@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
@@ -27,7 +27,10 @@ import {
 import { useLicense } from '../../../../hooks';
 import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common';
 
+import { getCommonTags } from '../utils';
+
 import type { SelectionMode } from './types';
+import { TagsAddRemove } from './tags_add_remove';
 
 const FlexItem = styled(EuiFlexItem)`
   height: ${(props) => props.theme.eui.euiSizeL};
@@ -38,7 +41,9 @@ export interface Props {
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
+  visibleAgents: Agent[];
   refreshAgents: (args?: { refreshTags?: boolean }) => void;
+  allTags: string[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -47,7 +52,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   selectionMode,
   currentQuery,
   selectedAgents,
+  visibleAgents,
   refreshAgents,
+  allTags,
 }) => {
   const licenseService = useLicense();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
@@ -61,6 +68,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
   const [updateModalState, setUpgradeModalState] = useState({ isOpen: false, isScheduled: false });
+  const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
@@ -70,11 +78,27 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const totalActiveAgents = totalAgents - totalInactiveAgents;
   const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
   const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
 
   const panels = [
     {
       id: 0,
       items: [
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentBulkActions.addRemoveTags"
+              data-test-subj="agentBulkActionsAddRemoveTags"
+              defaultMessage="Add / remove tags"
+            />
+          ),
+          icon: <EuiIcon type="tag" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected,
+          onClick: (event: any) => {
+            setTagsPopoverButton((event.target as Element).closest('button')!);
+            setIsTagAddVisible(!isTagAddVisible);
+          },
+        },
         {
           name: (
             <FormattedMessage
@@ -148,6 +172,11 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     },
   ];
 
+  const getSelectedTagsFromAgents = useMemo(
+    () => getCommonTags(agents, visibleAgents),
+    [agents, visibleAgents]
+  );
+
   return (
     <>
       {isReassignFlyoutOpen && (
@@ -185,6 +214,17 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             }}
           />
         </EuiPortal>
+      )}
+      {isTagAddVisible && (
+        <TagsAddRemove
+          agents={Array.isArray(agents) ? agents.map((agent) => agent.id) : agents}
+          allTags={allTags ?? []}
+          selectedTags={getSelectedTagsFromAgents}
+          button={tagsPopoverButton!}
+          onTagsUpdated={() => {
+            refreshAgents({ refreshTags: true });
+          }}
+        />
       )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
         {(selectionMode === 'manual' && selectedAgents.length) ||
