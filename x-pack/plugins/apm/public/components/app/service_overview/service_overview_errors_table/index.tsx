@@ -90,6 +90,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       sort: { field: SORT_FIELD, direction: SORT_DIRECTION },
       enableAllColumns: true,
     },
+    comparison: { offset, comparisonEnabled },
   });
 
   const {

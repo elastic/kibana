@@ -13,13 +13,17 @@ import {
 import { orderBy } from 'lodash';
 import { useMemo } from 'react';
 import uuid from 'uuid';
-import { useApmParams } from '../use_apm_params';
 
 export interface TableSortPaginationProps<T extends any[]> {
   items: T;
   // totalItemCount is not necessary here
   pagination: Omit<Pagination, 'totalItemCount'>;
   sorting?: EuiTableSortingType<T[0]>;
+  // Used to update the tableItems when the comparison values are changed
+  comparison?: {
+    offset?: string;
+    comparisonEnabled?: boolean;
+  };
 }
 
 type Props<T extends any[]> = TableSortPaginationProps<T> & {
@@ -35,6 +39,7 @@ export function useTableSortAndPagination<T extends any[]>({
   sorting,
   tableOptions,
   onTableChange,
+  comparison = {},
 }: Props<T>): {
   onTableChange: (criteriaWithPagination: CriteriaWithPagination<T[0]>) => void;
   tableSort?: EuiTableSortingType<T[0]>;
@@ -43,10 +48,7 @@ export function useTableSortAndPagination<T extends any[]>({
   totalItems: number;
   requestId: string;
 } {
-  const { query } = useApmParams('/*');
-  const offset = 'offset' in query ? query.offset : undefined;
-  const comparisonEnabled =
-    'comparisonEnabled' in query ? query.comparisonEnabled : undefined;
+  const { offset, comparisonEnabled } = comparison;
 
   const { tableItems, requestId } = useMemo(
     () => {

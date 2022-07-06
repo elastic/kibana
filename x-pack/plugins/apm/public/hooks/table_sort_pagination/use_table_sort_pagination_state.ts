@@ -16,6 +16,7 @@ export function useTableSortAndPaginationState<T extends any[]>({
   items,
   pagination,
   sorting,
+  ...rest
 }: TableSortPaginationProps<T>) {
   const [tableOptions, setTableOptions] = useState<
     CriteriaWithPagination<T[0]>
@@ -33,6 +34,7 @@ export function useTableSortAndPaginationState<T extends any[]>({
     sorting,
     tableOptions,
     onTableChange: setTableOptions,
+    ...rest,
   });
 
   return tableSortAndPagination;

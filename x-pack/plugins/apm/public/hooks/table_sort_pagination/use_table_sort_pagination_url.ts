@@ -18,6 +18,7 @@ export function useTableSortAndPaginationUrl<T extends any[]>({
   items,
   pagination,
   sorting,
+  ...rest
 }: TableSortPaginationProps<T>) {
   const history = useHistory();
 
@@ -51,6 +52,7 @@ export function useTableSortAndPaginationUrl<T extends any[]>({
     sorting,
     tableOptions,
     onTableChange,
+    ...rest,
   });
 
   return tableSortAndPagination;

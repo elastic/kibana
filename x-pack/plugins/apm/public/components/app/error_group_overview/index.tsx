@@ -121,6 +121,7 @@ export function ErrorGroupOverview() {
         },
         enableAllColumns: true,
       },
+      comparison: { offset, comparisonEnabled },
     });
 
   const {
