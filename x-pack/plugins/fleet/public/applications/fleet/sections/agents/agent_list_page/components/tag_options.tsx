@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, Fragment } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
@@ -31,6 +31,12 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
   const [tagOptionsVisible, setTagOptionsVisible] = useState<boolean>(false);
   const [tagOptionsButton, setTagOptionsButton] = useState<HTMLElement>();
 
+  const [tagMenuButtonVisible, setTagMenuButtonVisible] = useState<boolean>(isTagHovered);
+
+  useEffect(() => {
+    setTagMenuButtonVisible(isTagHovered || tagOptionsVisible);
+  }, [isTagHovered, tagOptionsVisible]);
+
   const [updatedName, setUpdatedName] = useState<string | undefined>(tagName);
 
   const closePopover = () => setTagOptionsVisible(false);
@@ -41,7 +47,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
 
   const debouncedSendRenameTag = useMemo(
     () =>
-      debounce((newName) => {
+      debounce((newName: string) => {
         const kuery = TAGS_QUERY.replace('{name}', tagName);
         updateTagsHook.bulkUpdateTags(kuery, [newName], [tagName], () => onTagsUpdated());
       }, 1000),
@@ -50,18 +56,19 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
 
   return (
     <>
-      <EuiButtonIcon
-        style={{ visibility: isTagHovered ? 'visible' : 'hidden' }}
-        iconType="boxesHorizontal"
-        aria-label={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
-          defaultMessage: 'Tag Options',
-        })}
-        color="text"
-        onClick={(event: any) => {
-          setTagOptionsButton(event.target);
-          setTagOptionsVisible(!tagOptionsVisible);
-        }}
-      />
+      {tagMenuButtonVisible && (
+        <EuiButtonIcon
+          iconType="boxesHorizontal"
+          aria-label={i18n.translate('xpack.fleet.tagOptions.tagOptionsToggleButtonLabel', {
+            defaultMessage: 'Tag Options',
+          })}
+          color="text"
+          onClick={(event: any) => {
+            setTagOptionsButton(event.target);
+            setTagOptionsVisible(!tagOptionsVisible);
+          }}
+        />
+      )}
       {tagOptionsVisible && (
         <EuiWrappingPopover
           isOpen={true}

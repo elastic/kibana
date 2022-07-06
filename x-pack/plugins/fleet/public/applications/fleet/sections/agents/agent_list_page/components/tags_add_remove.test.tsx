@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 
 import { useUpdateTags } from '../hooks';
 
@@ -30,6 +30,7 @@ describe('TagsAddRemove', () => {
   beforeEach(() => {
     onTagsUpdated.mockReset();
     mockUpdateTags.mockReset();
+    mockBulkUpdateTags.mockReset();
     allTags = ['tag1', 'tag2'];
     selectedTags = ['tag1'];
   });
@@ -48,21 +49,33 @@ describe('TagsAddRemove', () => {
   };
 
   it('should add selected tag when previously unselected', async () => {
+    mockUpdateTags.mockImplementation(() => {
+      selectedTags = ['tag1', 'tag2'];
+    });
     const result = renderComponent('agent1');
     const getTag = (name: string) => result.getByText(name);
 
     fireEvent.click(getTag('tag2'));
 
-    expect(mockUpdateTags).toHaveBeenCalledWith('agent1', ['tag1', 'tag2'], expect.anything());
+    waitFor(() => {
+      expect(getTag('tag2').getAttribute('aria-checked')).toEqual('true');
+      expect(mockUpdateTags).toHaveBeenCalledWith('agent1', ['tag1', 'tag2'], expect.anything());
+    });
   });
 
   it('should remove selected tag when previously selected', () => {
+    mockUpdateTags.mockImplementation(() => {
+      selectedTags = [];
+    });
     const result = renderComponent('agent1');
     const getTag = (name: string) => result.getByText(name);
 
     fireEvent.click(getTag('tag1'));
 
-    expect(mockUpdateTags).toHaveBeenCalledWith('agent1', [], expect.anything());
+    waitFor(() => {
+      expect(getTag('tag1').getAttribute('aria-checked')).toEqual('false');
+      expect(mockUpdateTags).toHaveBeenCalledWith('agent1', [], expect.anything());
+    });
   });
 
   it('should add new tag when not found in search and button clicked', () => {
@@ -79,26 +92,38 @@ describe('TagsAddRemove', () => {
   });
 
   it('should add selected tag when previously unselected - bulk selection', () => {
+    mockBulkUpdateTags.mockImplementation(() => {
+      selectedTags = ['tag1', 'tag2'];
+    });
     const result = renderComponent(undefined, '');
     const getTag = (name: string) => result.getByText(name);
 
     fireEvent.click(getTag('tag2'));
 
-    expect(mockBulkUpdateTags).toHaveBeenCalledWith('', ['tag2'], [], expect.anything());
+    waitFor(() => {
+      expect(getTag('tag2').getAttribute('aria-checked')).toEqual('true');
+      expect(mockBulkUpdateTags).toHaveBeenCalledWith('', ['tag2'], [], expect.anything());
+    });
   });
 
   it('should remove selected tag when previously selected - bulk selection', () => {
+    mockBulkUpdateTags.mockImplementation(() => {
+      selectedTags = [];
+    });
     const result = renderComponent(undefined, ['agent1', 'agent2']);
     const getTag = (name: string) => result.getByText(name);
 
     fireEvent.click(getTag('tag1'));
 
-    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
-      ['agent1', 'agent2'],
-      [],
-      ['tag1'],
-      expect.anything()
-    );
+    waitFor(() => {
+      expect(getTag('tag1').getAttribute('aria-checked')).toEqual('false');
+      expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+        ['agent1', 'agent2'],
+        [],
+        ['tag1'],
+        expect.anything()
+      );
+    });
   });
 
   it('should add new tag when not found in search and button clicked - bulk selection', () => {
