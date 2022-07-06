@@ -23,7 +23,7 @@ export interface FieldFormatEditorProps {
   fieldType: string;
   fieldFormat: FieldFormat;
   fieldFormatId: string;
-  fieldFormatParams: { type?: string | undefined } & FieldFormatParams;
+  fieldFormatParams: FieldFormatParams<{ type?: string }>;
   fieldFormatEditors: Context['fieldFormatEditors'];
   onChange: (change: FieldFormatParams) => void;
   onError: (error?: string) => void;

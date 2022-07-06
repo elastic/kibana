@@ -7,19 +7,19 @@
  */
 
 import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
+import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { memoize } from 'lodash';
-import React, { PureComponent, LazyExoticComponent } from 'react';
-import type { FieldFormat, FieldFormatConfig } from '@kbn/field-formats-plugin/common';
-import { FieldFormatEditorFactory, FieldFormatEditor } from './editors';
+import React, { LazyExoticComponent, PureComponent } from 'react';
 import { FieldFormatEditorStart } from '../../service/field_format_editors';
+import { FieldFormatEditor, FieldFormatEditorFactory } from './editors';
 
 export interface FormatEditorProps {
   fieldType: string;
   fieldFormat: FieldFormat;
   fieldFormatId: string;
-  fieldFormatParams: { [key: string]: unknown };
+  fieldFormatParams: FieldFormatParams;
   fieldFormatEditors: FieldFormatEditorStart;
-  onChange: (change: FieldFormatConfig['params']) => void;
+  onChange: (change: FieldFormatParams) => void;
   onError: (error?: string) => void;
 }
 

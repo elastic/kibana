@@ -128,10 +128,10 @@ export type FieldFormatInstanceType = (new (
  * Params provided when creating a formatter.
  * Params are vary per formatter
  *
- * TODO: support strict typing for params depending on format type
+ * TODO: support strict typing depending on P
  * https://github.com/elastic/kibana/issues/108158
  */
-export type FieldFormatParams = SerializableRecord;
+export type FieldFormatParams<P = {}> = SerializableRecord & P;
 
 /**
  * Params provided by the registry to every field formatter
@@ -156,9 +156,12 @@ export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'regis
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SerializedFieldFormat<TParams extends FieldFormatParams = FieldFormatParams> = {
+export type SerializedFieldFormat<
+  P = {},
+  TParams extends FieldFormatParams<P> = FieldFormatParams<P>
+> = {
   id?: string;
   params?: TParams;
 };
 
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
+export type FormatFactory = <P = {}>(mapping?: SerializedFieldFormat<P>) => IFieldFormat;
