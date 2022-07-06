@@ -54,17 +54,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const getRuleConditionsWording = () => {
     const numberOfConditions = rule?.params.criteria ? (rule?.params.criteria as any[]).length : 0;
-    return (
-      <>
-        {numberOfConditions}&nbsp;
-        {i18n.translate('xpack.triggersActionsUI.ruleDetails.conditions', {
-          defaultMessage: 'condition{s}',
-          values: {
-            s: numberOfConditions > 1 || numberOfConditions === 0 ? 's' : '',
-          },
-        })}
-      </>
-    );
+    return i18n.translate('xpack.triggersActionsUI.ruleDetails.conditions', {
+      defaultMessage: '{numberOfConditions, plural, one {# condition} other {# conditions}}',
+      values: { numberOfConditions },
+    });
   };
   const getNotifyText = () =>
     NOTIFY_WHEN_OPTIONS.find((options) => options.value === rule?.notifyWhen)?.inputDisplay ||
