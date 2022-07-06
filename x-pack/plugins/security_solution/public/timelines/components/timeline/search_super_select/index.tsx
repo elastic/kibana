@@ -80,7 +80,6 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   }, []);
 
   const handleOpenPopover = useCallback(() => {
-    console.log('>>>>>>');
     setIsPopoverOpen(true);
   }, []);
 
