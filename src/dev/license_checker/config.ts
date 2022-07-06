@@ -21,6 +21,7 @@ export const LICENSE_ALLOWED = [
   '(MIT AND Zlib)',
   '(MIT OR Apache-2.0)',
   '(MIT OR GPL-3.0)',
+  '(MIT OR GPL-3.0-or-later)',
   '(WTFPL OR MIT)',
   '(MIT OR WTFPL)',
   '(Unlicense OR Apache-2.0)',
@@ -72,6 +73,11 @@ export const LICENSE_ALLOWED = [
 // we wanna allow in packages only used as dev dependencies
 export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0'];
 
+// there are some licenses which should not be globally allowed
+// but can be brought in on a per-package basis
+export const PER_PACKAGE_ALLOWED_LICENSES = {
+  'openpgp@5.3.0': ['LGPL-3.0+'],
+};
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts

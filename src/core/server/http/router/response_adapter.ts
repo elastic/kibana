@@ -13,9 +13,10 @@ import {
 import typeDetect from 'type-detect';
 import Boom from '@hapi/boom';
 import * as stream from 'stream';
-
-import { isResponseError as isElasticsearchResponseError } from '../../elasticsearch/client/errors';
-import { ElasticsearchErrorDetails } from '../../elasticsearch';
+import {
+  ElasticsearchErrorDetails,
+  isResponseError as isElasticsearchResponseError,
+} from '@kbn/es-errors';
 
 import {
   HttpResponsePayload,

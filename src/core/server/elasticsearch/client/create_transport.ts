@@ -14,7 +14,7 @@ import type {
 } from '@elastic/transport';
 import type { TransportOptions } from '@elastic/transport/lib/Transport';
 import { Transport } from '@elastic/elasticsearch';
-import { isUnauthorizedError } from './errors';
+import { isUnauthorizedError } from '@kbn/es-errors';
 import { InternalUnauthorizedErrorHandler, isRetryResult } from './retry_unauthorized';
 
 type TransportClass = typeof Transport;
