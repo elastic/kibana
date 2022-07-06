@@ -39,6 +39,10 @@ export const FIRST_RULE = 0;
 
 export const FOURTH_RULE = 3;
 
+export const INTEGRATIONS_POPOVER = '[data-test-subj="IntegrationsDisplayPopover"]';
+
+export const INTEGRATIONS_POPOVER_TITLE = '[data-test-subj="IntegrationsPopoverTitle"]';
+
 export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 
 export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';

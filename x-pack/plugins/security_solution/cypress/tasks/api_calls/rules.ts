@@ -131,3 +131,24 @@ export const deleteCustomRule = (ruleId = '1') => {
     failOnStatusCode: false,
   });
 };
+
+export const importRule = (ndjsonPath: string) => {
+  cy.fixture(ndjsonPath)
+    .then((file) => Cypress.Blob.binaryStringToBlob(file))
+    .then((blob) => {
+      const formdata = new FormData();
+      formdata.append('file', blob, ndjsonPath);
+
+      cy.request({
+        url: 'api/detection_engine/rules/_import',
+        method: 'POST',
+        headers: {
+          'kbn-xsrf': 'cypress-creds',
+          'content-type': 'multipart/form-data',
+        },
+        body: formdata,
+      })
+        .its('status')
+        .should('be.equal', 200);
+    });
+};
