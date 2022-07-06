@@ -10,7 +10,7 @@ exposed via contract. For more information check out the example in `x-pack/exam
 When adding visualizations to a solution page, there are multiple ways to approach this with pros and cons:
 
 * #### **Use a dashboard**
-  If the app page you are planning to build strongly ressembles a regular dashboard, it might not even be necessary to write code - configuring a dashboard might be a better choice. The Presentation team is currently working on making it possible to embedd dashboard into the solution navigation, which allows you to offer visualization and filter functionality without writing custom code. If possible this option should be chosen because of the low maintenance and development effort as well as the high flexibility for a user to clone the preset dashboard and start customizing it in various ways.
+  If the app page you are planning to build strongly resembles a regular dashboard, it might not even be necessary to write code - configuring a dashboard might be a better choice. The Presentation team is currently working on making it possible to embed dashboard into the solution navigation, which allows you to offer visualization and filter functionality without writing custom code. If possible this option should be chosen because of the low maintenance and development effort as well as the high flexibility for a user to clone the preset dashboard and start customizing it in various ways.
 
   Pros:
    * No need to write and maintain custom code
