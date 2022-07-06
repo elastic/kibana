@@ -390,6 +390,11 @@ export const WARNING_TRANSFORM_STATES = new Set([
   TRANSFORM_STATES.STOPPING,
 ]);
 
+export const STARTED_TRANSFORM_STATES = new Set([
+  TRANSFORM_STATES.INDEXING,
+  TRANSFORM_STATES.STARTED,
+]);
+
 /**
  * How many rules to update at a time is set to 50 from errors coming from
  * the slow environments such as cloud when the rule updates are > 100 we were
