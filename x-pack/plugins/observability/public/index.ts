@@ -115,4 +115,9 @@ export {
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';
 
-export { getService, EntityService } from './entities/get_service';
+export {
+  getService,
+  getInfrastructureForService,
+  EntityService,
+  EntityServiceInfrastructure,
+} from './entities/get_service';
