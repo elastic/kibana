@@ -40,6 +40,7 @@ export interface UrlFormatEditorFormatParams {
   labelTemplate: string;
   width: string;
   height: string;
+  type?: string;
 }
 
 interface UrlFormatEditorFormatState {

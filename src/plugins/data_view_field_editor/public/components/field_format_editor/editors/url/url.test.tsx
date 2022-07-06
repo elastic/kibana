@@ -35,6 +35,7 @@ const formatParams: UrlFormatEditorFormatParams = {
   labelTemplate: '',
   width: '',
   height: '',
+  type: 'a',
 };
 
 const onChange = jest.fn();
