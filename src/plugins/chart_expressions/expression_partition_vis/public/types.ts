@@ -12,8 +12,8 @@ import {
   ExpressionsServiceStart,
 } from '@kbn/expressions-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { DataPublicPluginStart } from "@kbn/data-plugin/public";
-import { FieldFormatsStart } from "@kbn/field-formats-plugin/public";
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export type ExpressionPartitionVisPluginSetup = void;
 export type ExpressionPartitionVisPluginStart = void;

@@ -61,7 +61,7 @@ export class ExpressionRenderHandler {
       syncTooltips,
       interactive,
       hasCompatibleActions = async () => false,
-      executionContext
+      executionContext,
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
