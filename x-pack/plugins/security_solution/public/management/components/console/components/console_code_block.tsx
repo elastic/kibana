@@ -9,19 +9,22 @@ import React, { memo, ReactNode } from 'react';
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
- export const ConsoleCodeBlock = memo<{children: ReactNode; inline?: boolean; textColor?: "default" | "error" | "success"; bold?: boolean}>(
-  ({ children, inline = false, textColor = "default", bold = false}) => {
+export const ConsoleCodeBlock = memo<{
+  children: ReactNode;
+  inline?: boolean;
+  textColor?: 'default' | 'error' | 'success';
+  bold?: boolean;
+}>(({ children, inline = false, textColor = 'default', bold = false }) => {
+  const baseStyledComponent = inline ? EuiTextColor : EuiText;
 
-    const baseStyledComponent = inline ? EuiTextColor : EuiText;
-
-    const CodeBlock = euiStyled(baseStyledComponent).attrs({
-      transparentBackground: true,
-      size: 's'
-    })`{
-          color: ${(props) => { 
-            if (textColor === "error") {
+  const CodeBlock = euiStyled(baseStyledComponent).attrs({
+    transparentBackground: true,
+    size: 's',
+  })`{
+          color: ${(props) => {
+            if (textColor === 'error') {
               return props.theme.eui.euiColorDanger;
-            } else if (textColor === "success") {
+            } else if (textColor === 'success') {
               return props.theme.eui.euiColorSuccessText;
             } else {
               return props.theme.eui.euiColorDarkestShade;
@@ -35,7 +38,6 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
          }
       `;
 
-    return  <CodeBlock>{children}</CodeBlock>
-  }
-);
+  return <CodeBlock>{children}</CodeBlock>;
+});
 ConsoleCodeBlock.displayName = 'ConsoleCodeBlock';
