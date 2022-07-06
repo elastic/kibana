@@ -57,7 +57,7 @@ https://osquery.readthedocs.io/en/stable/deployment/extensions/[Osquery extensio
 Yes, you can set up 
 https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/[Osquery FIM] using 
 the Advanced configuration option for Osquery Manager (see <<osquery-custom-config>>).
-However, Elastic also provides a File Integrity Monitoring integration for Elastic Agent, which might prove
+However, Elastic also provides a https://docs.elastic.co/en/integrations/fim[File Integrity Monitoring] integration for Elastic Agent, which might prove
 to be easier to configure than the current options available for Osquery Manager.
 
 [float]
