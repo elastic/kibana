@@ -6,7 +6,6 @@
  */
 
 import {
-  CriteriaWithPagination,
   EuiAvatar,
   EuiBadge,
   EuiBasicTable,
@@ -27,12 +26,12 @@ import {
 } from '@elastic/eui';
 import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 
-import type { HorizontalAlignment } from '@elastic/eui';
+import type { HorizontalAlignment, CriteriaWithPagination } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { FormattedDate } from '../../../common/components/formatted_date';
-import { ActionDetails } from '../../../../common/endpoint/types';
+import type { ActionDetails } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
@@ -158,6 +157,12 @@ export const ResponseActionsList = memo<
           parameters,
         } = item;
 
+        const parametersList = parameters
+          ? Object.entries(parameters).map(([key, value]) => {
+              return `${key}:${value}`;
+            })
+          : undefined;
+
         const command = getCommand(_command);
         const descriptionListLeft = [
           {
@@ -177,7 +182,7 @@ export const ResponseActionsList = memo<
           },
           {
             title: OUTPUT_MESSAGES.expandSection.parameters,
-            description: parameters ? parameters : emptyValue,
+            description: parametersList ? parametersList : emptyValue,
           },
         ];
 
@@ -501,6 +506,7 @@ export const ResponseActionsList = memo<
       <ActionListDateRangePicker
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
+        onClick={reFetchEndpointActionList}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}
