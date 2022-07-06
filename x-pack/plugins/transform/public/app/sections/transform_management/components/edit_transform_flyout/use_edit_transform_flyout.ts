@@ -117,7 +117,7 @@ const numberAboveZeroNotValidErrorMessage = i18n.translate(
 const numberRangeMinus1To100NotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberGreaterThanOrEqualToNegativeOneNotValidErrorMessage',
   {
-    defaultMessage: 'Number of retries needs to be between 0 and 100, or -1 for infinite retries..',
+    defaultMessage: 'Number of retries needs to be between 0 and 100, or -1 for infinite retries.',
   }
 );
 
