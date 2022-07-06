@@ -9,11 +9,13 @@
 import { Socket } from 'net';
 import { DetailedPeerCertificate, PeerCertificate, TLSSocket } from 'tls';
 import { promisify } from 'util';
+import type { IKibanaSocket } from '@kbn/core-http-server';
 
 export class KibanaSocket implements IKibanaSocket {
   public get authorized() {
     return this.socket instanceof TLSSocket ? this.socket.authorized : undefined;
   }
+
   public get authorizationError() {
     return this.socket instanceof TLSSocket ? this.socket.authorizationError : undefined;
   }

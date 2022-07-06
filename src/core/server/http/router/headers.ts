@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IncomingHttpHeaders } from 'http';
+import type { Headers } from '@kbn/core-http-server';
 import { pick } from '@kbn/std';
 
 const normalizeHeaderField = (field: string) => field.trim().toLowerCase();

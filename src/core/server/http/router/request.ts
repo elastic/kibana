@@ -13,11 +13,23 @@ import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-
-import { Headers } from './headers';
-import { RouteMethod, validBodyOutput, isSafeMethod } from './route';
-import { KibanaSocket, IKibanaSocket } from './socket';
-import { RouteValidator, RouteValidatorFullConfig } from './validator';
+import {
+  KibanaRequest,
+  Headers,
+  RouteMethod,
+  validBodyOutput,
+  IKibanaSocket,
+  RouteValidatorFullConfig,
+  KibanaRequestRoute,
+  KibanaRequestEvents,
+  KibanaRequestAuth,
+  KibanaRequestState,
+  KibanaRouteOptions,
+  KibanaRequestRouteOptions,
+} from '@kbn/core-http-server';
+import { isSafeMethod } from './route';
+import { KibanaSocket } from './socket';
+import { RouteValidator } from './validator';
 
 const requestSymbol = Symbol('request');
 

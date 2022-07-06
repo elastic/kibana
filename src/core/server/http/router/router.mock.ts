@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from './router';
+import type { IRouter } from '@kbn/core-http-server';
 
 export type RouterMock = jest.Mocked<IRouter<any>>;
 
