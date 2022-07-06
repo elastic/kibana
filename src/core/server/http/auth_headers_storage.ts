@@ -7,7 +7,8 @@
  */
 
 import { Request } from '@hapi/hapi';
-import { KibanaRequest, ensureRawRequest } from './router';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { ensureRawRequest } from './router';
 import { AuthHeaders } from './lifecycle/auth';
 
 /**

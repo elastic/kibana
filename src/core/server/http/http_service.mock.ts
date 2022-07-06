@@ -9,6 +9,7 @@
 import { Server } from '@hapi/hapi';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { configMock } from '@kbn/config-mocks';
+import type { RequestHandlerContextBase } from '@kbn/core-http-server';
 
 import { CspConfig } from './csp';
 import { mockRouter, RouterMock } from './router/router.mock';
@@ -30,7 +31,6 @@ import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { ExternalUrlConfig } from './external_url';
 import type { IAuthHeadersStorage } from './auth_headers_storage';
-import type { RequestHandlerContextBase } from '..';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;

@@ -8,7 +8,8 @@
 
 import { modifyUrl } from '@kbn/std';
 import { Request } from '@hapi/hapi';
-import { ensureRawRequest, KibanaRequest } from './router';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { ensureRawRequest } from './router';
 
 /**
  * Access or manipulate the Kibana base path

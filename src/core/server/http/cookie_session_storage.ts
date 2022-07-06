@@ -9,7 +9,8 @@
 import { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
 
-import { KibanaRequest, ensureRawRequest } from './router';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
 import { Logger } from '..';
 

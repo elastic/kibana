@@ -24,20 +24,20 @@ import { take } from 'rxjs/operators';
 import apm from 'elastic-apm-node';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type {
+  IRouter,
+  RouteConfigOptions,
+  KibanaRouteOptions,
+  KibanaRequestState,
+  RouterRoute,
+} from '@kbn/core-http-server';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnRequest, OnPreRoutingHandler } from './lifecycle/on_pre_routing';
 import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
-import {
-  IRouter,
-  RouteConfigOptions,
-  KibanaRouteOptions,
-  KibanaRequestState,
-  isSafeMethod,
-  RouterRoute,
-} from './router';
+import { isSafeMethod } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,

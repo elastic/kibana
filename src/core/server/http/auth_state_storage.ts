@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import { Request } from '@hapi/hapi';
-import { ensureRawRequest, KibanaRequest } from './router';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { ensureRawRequest } from './router';
 
 /**
  * Status indicating an outcome of the authentication.

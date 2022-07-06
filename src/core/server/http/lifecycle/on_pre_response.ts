@@ -14,8 +14,8 @@ import {
 } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';
-
-import { HapiResponseAdapter, CoreKibanaRequest, KibanaRequest, ResponseHeaders } from '../router';
+import type { KibanaRequest, ResponseHeaders } from '@kbn/core-http-server';
+import { HapiResponseAdapter, CoreKibanaRequest } from '../router';
 
 enum ResultType {
   render = 'render',

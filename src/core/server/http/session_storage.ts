@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest } from './router';
+import type { KibanaRequest } from '@kbn/core-http-server';
 /**
  * Provides an interface to store and retrieve data across requests.
  * @public

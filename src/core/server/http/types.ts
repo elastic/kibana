@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from './csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { IAuthHeadersStorage } from './auth_headers_storage';
-import { IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
@@ -21,7 +22,6 @@ import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
 import { ExternalUrlConfig } from './external_url';
-import type { PluginOpaqueId, RequestHandlerContextBase } from '..';
 
 /**
  * An object that handles registration of http request context providers.

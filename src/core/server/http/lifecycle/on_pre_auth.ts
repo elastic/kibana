@@ -8,13 +8,12 @@
 
 import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest, LifecycleResponseFactory } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
-  KibanaRequest,
   CoreKibanaRequest,
   KibanaResponse,
   lifecycleResponseFactory,
-  LifecycleResponseFactory,
 } from '../router';
 
 enum ResultType {

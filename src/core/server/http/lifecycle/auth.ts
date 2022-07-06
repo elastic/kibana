@@ -8,15 +8,17 @@
 
 import { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
+import type {
+  KibanaRequest,
+  IKibanaResponse,
+  LifecycleResponseFactory,
+  ResponseHeaders,
+} from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
-  KibanaRequest,
   CoreKibanaRequest,
-  IKibanaResponse,
   lifecycleResponseFactory,
-  LifecycleResponseFactory,
   isKibanaResponse,
-  ResponseHeaders,
 } from '../router';
 
 /** @public */

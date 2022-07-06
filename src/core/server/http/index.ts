@@ -11,51 +11,7 @@ export type { HttpConfigType } from './http_config';
 export { HttpService } from './http_service';
 export type { GetAuthHeaders, SetAuthHeaders, IAuthHeadersStorage } from './auth_headers_storage';
 export type { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
-export {
-  isKibanaRequest,
-  isRealRequest,
-  CoreKibanaRequest,
-  kibanaResponseFactory,
-  validBodyOutput,
-} from './router';
-export type {
-  CustomHttpResponseOptions,
-  IKibanaSocket,
-  Headers,
-  HttpResponseOptions,
-  HttpResponsePayload,
-  ErrorHttpResponseOptions,
-  KibanaRequest,
-  KibanaRequestEvents,
-  KibanaRequestRoute,
-  KibanaRequestRouteOptions,
-  IKibanaResponse,
-  KnownHeaders,
-  LifecycleResponseFactory,
-  RedirectResponseOptions,
-  RequestHandler,
-  RequestHandlerWrapper,
-  ResponseError,
-  ResponseErrorAttributes,
-  ResponseHeaders,
-  KibanaResponseFactory,
-  RouteConfig,
-  IRouter,
-  RouteMethod,
-  RouteRegistrar,
-  RouteConfigOptions,
-  RouteConfigOptionsBody,
-  RouteContentType,
-  RouteValidatorConfig,
-  RouteValidationSpec,
-  RouteValidationFunction,
-  RouteValidatorOptions,
-  RouteValidationError,
-  RouteValidatorFullConfig,
-  RouteValidationResultFactory,
-  DestructiveRouteMethod,
-  SafeRouteMethod,
-} from './router';
+export { isKibanaRequest, isRealRequest, CoreKibanaRequest, kibanaResponseFactory } from './router';
 export type { OnPreRoutingHandler, OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 export type {
   AuthenticationHandler,
