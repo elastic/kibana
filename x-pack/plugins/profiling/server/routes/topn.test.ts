@@ -16,7 +16,7 @@ const index = 'test';
 const testAgg = { aggs: { test: {} } };
 
 jest.mock('./query', () => ({
-  newProjectTimeQuery: (proj: string, from: string, to: string) => {
+  createProjectTimeQuery: (proj: string, from: string, to: string) => {
     return anyQuery;
   },
   autoHistogramSumCountOnGroupByField: (searchField: string): AggregationsAggregationContainer => {

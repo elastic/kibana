@@ -10,6 +10,8 @@ import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import { registerFlameChartElasticSearchRoute } from './flamechart';
 
+import { registerTopNFunctionsSearchRoute } from './functions';
+
 import {
   registerTraceEventsTopNContainersSearchRoute,
   registerTraceEventsTopNDeploymentsSearchRoute,
@@ -20,6 +22,7 @@ import {
 
 export function registerRoutes(router: IRouter<DataRequestHandlerContext>, logger?: Logger) {
   registerFlameChartElasticSearchRoute(router, logger!);
+  registerTopNFunctionsSearchRoute(router, logger!);
   registerTraceEventsTopNContainersSearchRoute(router, logger!);
   registerTraceEventsTopNDeploymentsSearchRoute(router, logger!);
   registerTraceEventsTopNHostsSearchRoute(router, logger!);

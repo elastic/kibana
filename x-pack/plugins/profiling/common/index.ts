@@ -15,6 +15,7 @@ export function getRoutePaths() {
     TopN: `${BASE_ROUTE_PATH}/topn`,
     TopNContainers: `${BASE_ROUTE_PATH}/topn/containers`,
     TopNDeployments: `${BASE_ROUTE_PATH}/topn/deployments`,
+    TopNFunctions: `${BASE_ROUTE_PATH}/topn/functions`,
     TopNHosts: `${BASE_ROUTE_PATH}/topn/hosts`,
     TopNThreads: `${BASE_ROUTE_PATH}/topn/threads`,
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
