@@ -60,6 +60,8 @@ export function ErrorGroupOverview() {
     rangeTo,
     offset,
     comparisonEnabled,
+    page,
+    pageSize,
   } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -105,13 +107,18 @@ export function ErrorGroupOverview() {
   const { tableItems, tablePagination, tableSort, onTableChange, requestId } =
     useTableSortAndPaginationUrl<typeof errorGroups>({
       items: errorGroups,
-      initialPagination: {
-        pageIndex: PAGE_INDEX,
-        pageSize: PAGE_SIZE,
+      pagination: {
+        pageIndex: page || PAGE_INDEX,
+        pageSize: pageSize || PAGE_SIZE,
         showPerPageOptions: true,
       },
-      initialSort: {
-        sort: { field: SORT_FIELD, direction: SORT_DIRECTION },
+      sorting: {
+        sort: {
+          field: sortField
+            ? (sortField as keyof ErrorGroupMainStatistics['errorGroups'][0])
+            : SORT_FIELD,
+          direction: sortDirection || SORT_DIRECTION,
+        },
         enableAllColumns: true,
       },
     });

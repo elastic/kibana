@@ -18,8 +18,8 @@ import { useApmParams } from '../use_apm_params';
 export interface TableSortPaginationProps<T extends any[]> {
   items: T;
   // totalItemCount is not necessary here
-  initialPagination: Omit<Pagination, 'totalItemCount'>;
-  initialSort?: EuiTableSortingType<T[0]>;
+  pagination: Omit<Pagination, 'totalItemCount'>;
+  sorting?: EuiTableSortingType<T[0]>;
 }
 
 type Props<T extends any[]> = TableSortPaginationProps<T> & {
@@ -31,8 +31,8 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 export function useTableSortAndPagination<T extends any[]>({
   items,
-  initialPagination,
-  initialSort = {},
+  pagination,
+  sorting,
   tableOptions,
   onTableChange,
 }: Props<T>): {
@@ -79,15 +79,15 @@ export function useTableSortAndPagination<T extends any[]>({
       pageIndex: tableOptions.page.index,
       pageSize: tableOptions.page.size,
       totalItemCount: items.length,
-      pageSizeOptions: initialPagination.pageSizeOptions || PAGE_SIZE_OPTIONS,
-      showPerPageOptions: initialPagination.showPerPageOptions || false,
+      pageSizeOptions: pagination.pageSizeOptions || PAGE_SIZE_OPTIONS,
+      showPerPageOptions: pagination.showPerPageOptions || false,
     }),
-    [tableOptions, items, initialPagination]
+    [tableOptions, items, pagination]
   );
 
   const tableSort: EuiTableSortingType<T[0]> = useMemo(() => {
-    return { ...initialSort, sort: tableOptions.sort };
-  }, [tableOptions, initialSort]);
+    return { ...(sorting || {}), sort: tableOptions.sort };
+  }, [tableOptions, sorting]);
 
   return {
     requestId,

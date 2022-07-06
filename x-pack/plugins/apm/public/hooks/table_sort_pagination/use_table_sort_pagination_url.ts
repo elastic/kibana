@@ -9,7 +9,6 @@ import { CriteriaWithPagination } from '@elastic/eui';
 import { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '../../components/shared/links/url_helpers';
-import { useApmParams } from '../use_apm_params';
 import {
   TableSortPaginationProps,
   useTableSortAndPagination,
@@ -17,35 +16,20 @@ import {
 
 export function useTableSortAndPaginationUrl<T extends any[]>({
   items,
-  initialPagination,
-  initialSort = {},
+  pagination,
+  sorting,
 }: TableSortPaginationProps<T>) {
   const history = useHistory();
-  const { query } = useApmParams('/*');
-  const pageUrl =
-    'page' in query && query.page ? query.page : initialPagination.pageIndex;
-  const pageSizeUrl =
-    'pageSize' in query && query.pageSize
-      ? query.pageSize
-      : initialPagination.pageSize;
-  const sortFieldUrl =
-    'sortField' in query
-      ? (query.sortField as keyof T[0])
-      : initialSort.sort?.field;
-  const sortDirectionUrl =
-    'sortDirection' in query
-      ? query.sortDirection
-      : initialSort.sort?.direction;
+
+  const { pageIndex, pageSize } = pagination;
+  const { field, direction } = sorting?.sort || {};
 
   const tableOptions: CriteriaWithPagination<T[0]> = useMemo(
     () => ({
-      page: { index: pageUrl, size: pageSizeUrl },
-      sort:
-        sortFieldUrl && sortDirectionUrl
-          ? { field: sortFieldUrl, direction: sortDirectionUrl }
-          : undefined,
+      page: { index: pageIndex, size: pageSize },
+      sort: field && direction ? { field, direction } : undefined,
     }),
-    [pageUrl, pageSizeUrl, sortFieldUrl, sortDirectionUrl]
+    [pageIndex, pageSize, field, direction]
   );
 
   function onTableChange(newTableOptions: CriteriaWithPagination<T[0]>) {
@@ -63,8 +47,8 @@ export function useTableSortAndPaginationUrl<T extends any[]>({
 
   const tableSortAndPagination = useTableSortAndPagination({
     items,
-    initialPagination,
-    initialSort,
+    pagination,
+    sorting,
     tableOptions,
     onTableChange,
   });

@@ -14,23 +14,23 @@ import {
 
 export function useTableSortAndPaginationState<T extends any[]>({
   items,
-  initialPagination,
-  initialSort = {},
+  pagination,
+  sorting,
 }: TableSortPaginationProps<T>) {
   const [tableOptions, setTableOptions] = useState<
     CriteriaWithPagination<T[0]>
   >({
     page: {
-      index: initialPagination.pageIndex,
-      size: initialPagination.pageSize,
+      index: pagination.pageIndex,
+      size: pagination.pageSize,
     },
-    sort: initialSort.sort,
+    sort: sorting?.sort,
   });
 
   const tableSortAndPagination = useTableSortAndPagination({
     items,
-    initialPagination,
-    initialSort,
+    pagination,
+    sorting,
     tableOptions,
     onTableChange: setTableOptions,
   });

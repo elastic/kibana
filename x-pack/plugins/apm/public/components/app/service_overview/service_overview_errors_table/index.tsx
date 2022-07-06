@@ -85,8 +85,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     totalItems,
   } = useTableSortAndPaginationState<typeof data.errorGroups>({
     items: data.errorGroups,
-    initialPagination: { pageIndex: PAGE_INDEX, pageSize: PAGE_SIZE },
-    initialSort: {
+    pagination: { pageIndex: PAGE_INDEX, pageSize: PAGE_SIZE },
+    sorting: {
       sort: { field: SORT_FIELD, direction: SORT_DIRECTION },
       enableAllColumns: true,
     },
