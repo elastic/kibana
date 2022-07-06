@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
     'security',
@@ -20,11 +21,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('per-spaces banners', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/banners/multispace');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/banners/multispace'
+      );
+      await spacesService.create({
+        id: 'another-space',
+        name: 'Another Space',
+        disabledFeatures: [],
+      });
+      await kibanaServer.uiSettings.replace(
+        {
+          defaultRoute: '/app/canvas',
+          buildNum: 8467,
+          'dateFormat:tz': 'UTC',
+        },
+        { space: 'another-space' }
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/banners/multispace');
+      await spacesService.delete('another-space');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     before(async () => {
