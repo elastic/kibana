@@ -100,7 +100,7 @@ describe('buildEditFieldButton', () => {
         },
         "iconType": "pencil",
         "label": <FormattedMessage
-          defaultMessage="Edit field"
+          defaultMessage="Edit data view field"
           id="discover.grid.editFieldButton"
           values={Object {}}
         />,
