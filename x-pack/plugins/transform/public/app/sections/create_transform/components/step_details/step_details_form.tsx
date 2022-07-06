@@ -776,7 +776,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               }
               helpText={i18n.translate('xpack.transform.stepDetailsForm.frequencyHelpText', {
                 defaultMessage:
-                  'The interval between checks for changes in the source indices when the transform is running continuously.',
+                  'The interval to check for changes in source indices when the transformation runs continuously.',
               })}
             >
               <EuiFieldText
