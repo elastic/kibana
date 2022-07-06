@@ -5423,6 +5423,40 @@
           "deprecated": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleStatusPanel",
+          "type": "Function",
+          "tags": [],
+          "label": "getRuleStatusPanel",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "RuleStatusPanelProps",
+            ") => React.ReactElement<",
+            "RuleStatusPanelProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleStatusPanel.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "RuleStatusPanelProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

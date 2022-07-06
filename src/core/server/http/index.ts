@@ -97,3 +97,9 @@ export type {
 } from './types';
 export { BasePath } from './base_path_service';
 export type { IBasePath } from './base_path_service';
+
+export { cspConfig, CspConfig } from './csp';
+export type { ICspConfig } from './csp';
+
+export { externalUrlConfig, ExternalUrlConfig } from './external_url';
+export type { IExternalUrlConfig } from './external_url';
