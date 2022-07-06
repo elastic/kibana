@@ -43,17 +43,22 @@ export const parseExistingEnrichments = (
     (enrichments, enrichmentData) => {
       try {
         if (isArray(enrichmentData.values)) {
-          for (let i = 0; i < enrichmentData.values.length; i++) {
-            if (!isArray(enrichments[i])) {
-              enrichments[i] = [];
+          for (
+            let enrichmentIndex = 0;
+            enrichmentIndex < enrichmentData.values.length;
+            enrichmentIndex++
+          ) {
+            if (!isArray(enrichments[enrichmentIndex])) {
+              enrichments[enrichmentIndex] = [];
             }
-            enrichments[i].push({
+            const fieldParts = enrichmentData.field.split('.');
+            enrichments[enrichmentIndex].push({
               ...enrichmentData,
               isObjectArray: false,
               field: enrichmentData.field.replace(`${ENRICHMENT_DESTINATION_PATH}.`, ''),
-              category: enrichmentData.field.split('.')[2],
-              values: [enrichmentData.values[i]],
-              originalValue: [enrichmentData.originalValue[i]],
+              category: fieldParts.length > 3 ? fieldParts[2] : enrichmentData.category,
+              values: [enrichmentData.values[enrichmentIndex]],
+              originalValue: [enrichmentData.originalValue[enrichmentIndex]],
             });
           }
         }
