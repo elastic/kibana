@@ -50,6 +50,7 @@ const previouslyRegisteredTypes = [
   'exception-list',
   'exception-list-agnostic',
   'file',
+  'fileShare',
   'file-upload-telemetry',
   'file-upload-usage-collection-telemetry',
   'fleet-agent-actions',
