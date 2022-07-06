@@ -291,6 +291,21 @@ export const ESTopMetricsAggRT = rt.type({
   }),
 });
 
+export const ESMaxPeriodFilterExistsAggRT = rt.type({
+  filter: rt.type({
+    exists: rt.type({
+      field: rt.string,
+    }),
+  }),
+  aggs: rt.type({
+    period: rt.type({
+      max: rt.type({
+        field: rt.string,
+      }),
+    }),
+  }),
+});
+
 export interface SnapshotTermsWithAggregation {
   terms: { field: string };
   aggregations: MetricsUIAggregation;
@@ -315,6 +330,7 @@ export const ESAggregationRT = rt.union([
   ESTermsWithAggregationRT,
   ESCaridnalityAggRT,
   ESTopMetricsAggRT,
+  ESMaxPeriodFilterExistsAggRT,
 ]);
 
 export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
