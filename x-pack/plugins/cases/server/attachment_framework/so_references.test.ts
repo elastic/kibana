@@ -90,7 +90,7 @@ describe('Persistable state SO references', () => {
       });
     });
 
-    it('returns the same state if the attachment is not register in the registry', async () => {
+    it('returns the same state if the attachment is not registered in the registry', async () => {
       const res = injectPersistableReferences(
         {
           state: {

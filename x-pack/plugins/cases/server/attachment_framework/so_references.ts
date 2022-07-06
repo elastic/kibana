@@ -88,7 +88,7 @@ export const extractPersistableStateReferencesFromSO = <T extends CommentRequest
     attributes = { ...attributes, ...state };
   }
 
-  return { attributes: attributes as T, references };
+  return { attributes, references };
 };
 
 export const injectPersistableReferencesToSO = <T extends CommentRequest>(

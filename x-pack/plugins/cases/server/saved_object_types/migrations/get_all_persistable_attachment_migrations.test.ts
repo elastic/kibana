@@ -71,7 +71,7 @@ describe('getAllPersistableAttachmentMigrations', () => {
    */
   it.each([
     [
-      'attachment-1',
+      'attachment with id attachment-1 does not run a 8.3 migration and leaves the state as is',
       {
         persistableStateAttachmentTypeId: 'attachment-1',
         persistableStateAttachmentState: { foo: 'foo' },
@@ -82,7 +82,7 @@ describe('getAllPersistableAttachmentMigrations', () => {
       },
     ],
     [
-      'attachment-2',
+      'attachment with id attachment-2 run a 8.3 migration and changes the state',
       {
         persistableStateAttachmentTypeId: 'attachment-2',
         persistableStateAttachmentState: { foo: 'foo' },
@@ -93,7 +93,7 @@ describe('getAllPersistableAttachmentMigrations', () => {
       },
     ],
     [
-      'attachment-3',
+      'attachment with id attachment-3 run a 8.3 migration and changes the state',
       {
         persistableStateAttachmentTypeId: 'attachment-3',
         persistableStateAttachmentState: { foo: 'foo' },
@@ -103,13 +103,10 @@ describe('getAllPersistableAttachmentMigrations', () => {
         persistableStateAttachmentState: { three: 'three' },
       },
     ],
-  ])(
-    'construct the migration functions correctly for version 8.3 for %s',
-    (_, state, expectedState830) => {
-      const res = getAllPersistableAttachmentMigrations(persistableStateAttachmentTypeRegistry);
-      expect(res['8.3.0'](state)).toEqual(expectedState830);
-    }
-  );
+  ])('%s', (_, state, expectedState830) => {
+    const res = getAllPersistableAttachmentMigrations(persistableStateAttachmentTypeRegistry);
+    expect(res['8.3.0'](state)).toEqual(expectedState830);
+  });
 
   /**
    * Only attachments with migration functions of 8.4
@@ -118,7 +115,7 @@ describe('getAllPersistableAttachmentMigrations', () => {
    */
   it.each([
     [
-      'attachment-1',
+      'attachment with id attachment-1 run a 8.4 migration and changes the state',
       {
         persistableStateAttachmentTypeId: 'attachment-1',
         persistableStateAttachmentState: { foo: 'foo' },
@@ -129,7 +126,7 @@ describe('getAllPersistableAttachmentMigrations', () => {
       },
     ],
     [
-      'attachment-2',
+      'attachment with id attachment-2 does not run a 8.4 migration and leaves the state as is',
       {
         persistableStateAttachmentTypeId: 'attachment-2',
         persistableStateAttachmentState: { foo: 'foo' },
@@ -140,7 +137,7 @@ describe('getAllPersistableAttachmentMigrations', () => {
       },
     ],
     [
-      'attachment-3',
+      'attachment with id attachment-3 does not run a 8.4 migration and leaves the state as is',
       {
         persistableStateAttachmentTypeId: 'attachment-3',
         persistableStateAttachmentState: { foo: 'foo' },
@@ -150,11 +147,8 @@ describe('getAllPersistableAttachmentMigrations', () => {
         persistableStateAttachmentState: { foo: 'foo' },
       },
     ],
-  ])(
-    'construct the migration functions correctly for version 8.4 for %s',
-    (_, state, expectedState830) => {
-      const res = getAllPersistableAttachmentMigrations(persistableStateAttachmentTypeRegistry);
-      expect(res['8.4.0'](state)).toEqual(expectedState830);
-    }
-  );
+  ])('%s', (_, state, expectedState830) => {
+    const res = getAllPersistableAttachmentMigrations(persistableStateAttachmentTypeRegistry);
+    expect(res['8.4.0'](state)).toEqual(expectedState830);
+  });
 });
