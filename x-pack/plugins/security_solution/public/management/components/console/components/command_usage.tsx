@@ -193,7 +193,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
         commandOptions.required.length > 0 &&
         parametersDescriptionList(
           i18n.translate('xpack.securitySolution.console.commandUsage.requiredLabel', {
-            defaultMessage: 'Required',
+            defaultMessage: 'Required parameters',
           }),
           commandOptions.required
         )}
