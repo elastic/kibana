@@ -15,8 +15,8 @@ export class FieldFormatEditors {
     this.editors = defaultFieldEditors;
 
     return {
-      register: (editor: FieldFormatEditorFactory) => {
-        this.editors.push(editor);
+      register: <P>(editor: FieldFormatEditorFactory<P>) => {
+        this.editors.push(editor as FieldFormatEditorFactory<unknown>);
       },
     };
   }
@@ -24,8 +24,10 @@ export class FieldFormatEditors {
   public start() {
     return {
       getAll: () => [...this.editors],
-      getById: (id: string) => {
-        return this.editors.find((editor) => editor.formatId === id);
+      getById: <P>(id: string) => {
+        return this.editors.find((editor) => editor.formatId === id) as
+          | FieldFormatEditorFactory<P>
+          | undefined;
       },
     };
   }

@@ -82,10 +82,11 @@ export class IndexedFieldsTable extends Component<
 
   getFilteredFields = createSelector(
     (state: IndexedFieldsTableState) => state.fields,
-    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.fieldFilter,
-    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) =>
+    (_state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.fieldFilter,
+    (_state: IndexedFieldsTableState, props: IndexedFieldsTableProps) =>
       props.indexedFieldTypeFilter,
-    (state: IndexedFieldsTableState, props: IndexedFieldsTableProps) => props.schemaFieldTypeFilter,
+    (_state: IndexedFieldsTableState, props: IndexedFieldsTableProps) =>
+      props.schemaFieldTypeFilter,
     (fields, fieldFilter, indexedFieldTypeFilter, schemaFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();

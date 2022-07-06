@@ -259,7 +259,7 @@ export function Tabs({
   }, [closeFieldEditor]);
 
   const fieldWildcardMatcherDecorated = useCallback(
-    (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get(META_FIELDS)),
+    (filters: string[] | undefined) => fieldWildcardMatcher(filters, uiSettings.get(META_FIELDS)),
     [uiSettings]
   );
 

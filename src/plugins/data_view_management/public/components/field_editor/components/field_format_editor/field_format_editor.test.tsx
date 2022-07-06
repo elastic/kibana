@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 
 import { FieldFormatEditor } from './field_format_editor';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { IndexPatternManagmentContext } from '../../../../types';
+import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 
 class TestEditor extends PureComponent {
   render() {
@@ -21,12 +23,13 @@ class TestEditor extends PureComponent {
   }
 }
 
-const formatEditors = {
-  byFormatId: {
-    ip: TestEditor,
-    number: TestEditor,
-  },
-  getById: jest.fn(() => () => Promise.resolve(TestEditor)),
+type Context = KibanaReactContextValue<IndexPatternManagmentContext>['services'];
+
+const formatEditors: Context['fieldFormatEditors'] = {
+  getById: jest.fn(
+    () => () => Promise.resolve(TestEditor)
+  ) as unknown as Context['fieldFormatEditors']['getById'],
+  getAll: jest.fn(),
 };
 
 describe('FieldFormatEditor', () => {

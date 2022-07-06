@@ -11,8 +11,7 @@ import type {
   FieldFormatEditor as InnerFieldFormatEditor,
   FieldFormatEditorFactory,
 } from '@kbn/data-view-field-editor-plugin/public';
-import type { UrlFormatEditorFormatParams } from '@kbn/data-view-field-editor-plugin/public';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { memoize } from 'lodash';
 import React, { LazyExoticComponent, PureComponent } from 'react';
@@ -24,20 +23,20 @@ export interface FieldFormatEditorProps {
   fieldType: string;
   fieldFormat: FieldFormat;
   fieldFormatId: string;
-  fieldFormatParams: { [key: string]: unknown };
+  fieldFormatParams: { type?: string | undefined } & FieldFormatParams;
   fieldFormatEditors: Context['fieldFormatEditors'];
-  onChange: (change: UrlFormatEditorFormatParams) => void;
+  onChange: (change: FieldFormatParams) => void;
   onError: (error?: string) => void;
 }
 
 interface FieldFormatEditorState {
-  EditorComponent: LazyExoticComponent<InnerFieldFormatEditor> | null;
+  EditorComponent: LazyExoticComponent<InnerFieldFormatEditor<FieldFormatParams>> | null;
 }
 
 // use memoize to get stable reference
 const unwrapEditor = memoize(
   (
-    editorFactory: FieldFormatEditorFactory | undefined
+    editorFactory: FieldFormatEditorFactory<FieldFormatParams> | undefined
   ): FieldFormatEditorState['EditorComponent'] => {
     if (!editorFactory) return null;
     return React.lazy(() => editorFactory().then((editor) => ({ default: editor })));
