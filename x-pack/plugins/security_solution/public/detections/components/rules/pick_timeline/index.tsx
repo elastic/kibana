@@ -21,6 +21,7 @@ interface QueryBarDefineRuleProps {
   field: FieldHook;
   idAria: string;
   isDisabled: boolean;
+  placeholder?: string;
 }
 
 export const PickTimeline = ({
@@ -28,6 +29,7 @@ export const PickTimeline = ({
   field,
   idAria,
   isDisabled = false,
+  placeholder,
 }: QueryBarDefineRuleProps) => {
   const [timelineId, setTimelineId] = useState<string | null>(null);
   const [timelineTitle, setTimelineTitle] = useState<string | null>(null);
@@ -69,6 +71,7 @@ export const PickTimeline = ({
         timelineId={timelineId}
         timelineTitle={timelineTitle}
         onTimelineChange={handleOnTimelineChange}
+        placeholder={placeholder}
       />
     </EuiFormRow>
   );

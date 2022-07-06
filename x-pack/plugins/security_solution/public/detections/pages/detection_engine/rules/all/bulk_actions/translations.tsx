@@ -32,6 +32,13 @@ export const bulkApplyTimelineTemplate = {
     }
   ),
 
+  TEMPLATE_SELECTOR_PLACEHOLDER: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.templateSelectorPlaceholder',
+    {
+      defaultMessage: 'Search Timeline templates',
+    }
+  ),
+
   TEMPLATE_SELECTOR_DEFAULT_VALUE: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.templateSelectorDefaultValue',
     {

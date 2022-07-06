@@ -80,6 +80,7 @@ export interface SelectableTimelineProps {
     graphEventId?: string
   ) => void;
   timelineType: TimelineTypeLiteral;
+  placeholder?: string;
 }
 
 const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
@@ -88,6 +89,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   onClosePopover,
   onTimelineChange,
   timelineType,
+  placeholder,
 }) => {
   const [pageSize, setPageSize] = useState(ORIGINAL_PAGE_SIZE);
   const [heightTrigger, setHeightTrigger] = useState(0);
@@ -211,7 +213,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
     () => ({
       'data-test-subj': 'timeline-super-select-search-box',
-      placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType),
+      placeholder: placeholder ?? i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType),
       onSearch: onSearchTimeline,
       incremental: true,
       append: (
@@ -224,7 +226,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         </StyledEuiFilterButton>
       ),
     }),
-    [handleOnToggleOnlyFavorites, onSearchTimeline, onlyFavorites, timelineType]
+    [handleOnToggleOnlyFavorites, onSearchTimeline, onlyFavorites, timelineType, placeholder]
   );
 
   const listProps: EuiSelectableProps['listProps'] = useMemo(

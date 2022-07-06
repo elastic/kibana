@@ -92,6 +92,7 @@ const TimelineTemplateFormComponent = (props: TimelineTemplateFormProps) => {
         componentProps={{
           idAria: 'bulkEditRulesTimelineTemplateSelector',
           dataTestSubj: 'bulkEditRulesTimelineTemplateSelector',
+          placeholder: i18n.TEMPLATE_SELECTOR_PLACEHOLDER,
         }}
       />
     </BulkEditFormWrapper>

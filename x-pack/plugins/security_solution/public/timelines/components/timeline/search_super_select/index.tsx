@@ -25,11 +25,11 @@ const StyledEuiFieldText = styled(EuiFieldText)`
 
     // To match EuiFieldText focus state
     &:focus {
-      background-color: #fff;
+      background-color: ${({ theme }) => theme.eui.euiFormBackgroundColor};
       background-image: linear-gradient(
         to top,
-        #006bb4,
-        #006bb4 2px,
+        ${({ theme }) => theme.eui.euiFocusRingColor},
+        ${({ theme }) => theme.eui.euiFocusRingColor} 2px,
         transparent 2px,
         transparent 100%
       );
@@ -49,6 +49,7 @@ interface SearchTimelineSuperSelectProps {
   timelineId: string | null;
   timelineTitle: string | null;
   timelineType?: TimelineTypeLiteral;
+  placeholder?: string;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
 }
 
@@ -70,6 +71,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   timelineTitle,
   timelineType = TimelineType.template,
   onTimelineChange,
+  placeholder,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -78,6 +80,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   }, []);
 
   const handleOpenPopover = useCallback(() => {
+    console.log('>>>>>>');
     setIsPopoverOpen(true);
   }, []);
 
@@ -87,6 +90,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         readOnly
         disabled={isDisabled}
         onFocus={handleOpenPopover}
+        onClick={handleOpenPopover}
         value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
         icon="arrowDown"
       />
@@ -132,6 +136,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onClosePopover={handleClosePopover}
         onTimelineChange={onTimelineChange}
         timelineType={timelineType}
+        placeholder={placeholder}
       />
     </EuiInputPopover>
   );
