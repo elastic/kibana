@@ -52,7 +52,12 @@ const getSteps = (
   const footerAction = (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiButtonEmpty size="xs" color="text" onClick={() => skipTour()}>
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
+          onClick={() => skipTour()}
+          data-test-subj="onboarding--securityTourSkipButton"
+        >
           <FormattedMessage
             id="xpack.securitySolution.guided_onboarding.skipTour.buttonLabel"
             defaultMessage="Skip tour"
@@ -60,7 +65,12 @@ const getSteps = (
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton size="s" onClick={() => incrementStep()} color="success">
+        <EuiButton
+          size="s"
+          onClick={() => incrementStep()}
+          color="success"
+          data-test-subj="onboarding--securityTourNextStepButton"
+        >
           <FormattedMessage
             id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
             defaultMessage="Next"
@@ -70,7 +80,12 @@ const getSteps = (
     </EuiFlexGroup>
   );
   const lastStepFooter = (
-    <EuiButtonEmpty size="xs" color="text" onClick={() => skipTour()}>
+    <EuiButtonEmpty
+      size="xs"
+      color="text"
+      onClick={() => skipTour()}
+      data-test-subj="onboarding--securityTourEndButton"
+    >
       <FormattedMessage
         id="xpack.securitySolution.guided_onboarding.endTour.buttonLabel"
         defaultMessage="End tour"
