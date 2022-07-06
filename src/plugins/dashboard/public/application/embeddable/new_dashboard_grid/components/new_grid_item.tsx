@@ -21,7 +21,7 @@ export const TestGridItem = React.forwardRef<HTMLDivElement, Props>(({ panel }, 
         key={panel.id}
         hasShadow
         hasBorder
-        className={'grid-stack-item-content'}
+        className={'grid-stack-item-content embPanel embPanel--editing'}
         paddingSize="s"
       >
         {panel.render ? panel.render() : panel.content}

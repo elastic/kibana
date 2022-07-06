@@ -23,7 +23,7 @@ import {
 import SANKEY_CHART_GRAPH from '../images/sankey_chart.png';
 import REQUEST_MAP from '../images/total_requests_map.png';
 
-const COLUMN_COUNT = 12;
+const COLUMN_COUNT = 24;
 
 const sub = [
   { id: '4', x: 0, y: 0, w: 4, h: 3 },
@@ -36,7 +36,7 @@ const sub = [
 ];
 
 const subOptions = {
-  cellHeight: 28, // should be 50 - top/bottom
+  cellHeight: 32, // should be 50 - top/bottom
   column: COLUMN_COUNT,
   acceptWidgets: true, // will accept .grid-stack-item by default
   minRow: 2,
@@ -59,15 +59,15 @@ export const StyledSubgridDemo = () => {
       id: 'panel1',
       x: 0,
       y: 0,
-      w: 4,
+      w: 8,
       h: 6,
       render: () => <MarkdownGridPanel />,
     },
     {
       id: 'panel2',
-      x: 4,
+      x: 8,
       y: 0,
-      w: 8,
+      w: 16,
       h: 6,
       render: () => <ControlsPanel />,
     },
@@ -77,22 +77,22 @@ export const StyledSubgridDemo = () => {
       y: 7,
       w: COLUMN_COUNT,
       h: 12,
-      title: 'Error responses',
+      title: 'HTTP response codes',
       noResize: true,
       subGrid: {
         children: [
           {
             x: 0,
             y: 0,
-            w: 3,
+            w: 6,
             h: 8,
             id: 'panel3',
             render: () => <MetricsPanel value="4.4%" label="HTTP 4xx" fontSize="12px" />,
           },
           {
-            x: 3,
+            x: 6,
             y: 0,
-            w: 3,
+            w: 6,
             h: 8,
             id: 'panel4',
             render: () => <MetricsPanel value="3.4%" label="HTTP 5xx" fontSize="12px" />,
@@ -117,35 +117,49 @@ export const StyledSubgridDemo = () => {
       } as GridStackOptions,
     },
     {
+      id: 'group-3',
       x: 0,
       y: 31,
-      w: 3,
+      w: COLUMN_COUNT,
+      h: 1,
+      title: 'Collapsed group',
+      noResize: true,
+      subGrid: {
+        children: [],
+        ...subOptions,
+        minRow: 12,
+      } as GridStackOptions,
+    },
+    {
+      x: 0,
+      y: 32,
+      w: 6,
       h: 10,
       id: '11',
       render: () => <UniqueVisitorsPanel />,
     },
     {
-      x: 3,
-      y: 31,
-      w: 3,
+      x: 6,
+      y: 32,
+      w: 6,
       h: 10,
       id: '15',
       title: '[Logs] Response Codes Over Time + Annotations',
       render: () => <ResponseCodesPanel />,
     },
     {
-      x: 6,
-      y: 31,
-      w: 3,
+      x: 12,
+      y: 32,
+      w: 6,
       h: 10,
       id: '20',
       title: '[Logs] Total Requests and Bytes',
       render: () => <GraphPanel graph={REQUEST_MAP} />,
     },
     {
-      x: 9,
-      y: 31,
-      w: 3,
+      x: 18,
+      y: 32,
+      w: 6,
       h: 10,
       id: '14',
       title: '[Logs] Machine OS and Destination Sankey Chart',
@@ -175,7 +189,7 @@ export const StyledSubgridDemo = () => {
       GridStack.init({
         float: false,
         column: COLUMN_COUNT,
-        cellHeight: 28,
+        cellHeight: 36,
         margin: 5,
         minRow: 2, // don't collapse when empty
         acceptWidgets: true,
@@ -239,6 +253,7 @@ export const StyledSubgridDemo = () => {
                 className="grid-stack-item-content embPanel embPanel--editing"
                 paddingSize="none"
                 style={{ overflow: 'hidden' }}
+                hasShadow
               >
                 <figcaption className="embPanel__header">
                   <h2 className="embPanel__title embPanel__dragger">

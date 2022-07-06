@@ -23,6 +23,7 @@ export const GridItem: FC<Props> = ({ panel, children }) => {
       id={panel.id as string}
       className="grid-stack-item-content embPanel embPanel--editing"
       paddingSize="none"
+      hasShadow
       style={{ overflow: 'hidden' }}
     >
       <span data-test-subj="dashboardPanelTitle__wrapper">

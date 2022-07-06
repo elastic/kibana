@@ -156,6 +156,7 @@ export const SubgridDemo = () => {
                   key={`group-${item.id}`}
                   ref={subGridRefs.current[item.id!]}
                   className="grid-stack grid-stack-nested"
+                  style={{ background: '#e4e4c1' }}
                 >
                   {children.map((child) => {
                     return (
