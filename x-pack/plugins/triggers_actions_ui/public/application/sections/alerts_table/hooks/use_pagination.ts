@@ -6,9 +6,11 @@
  */
 import { useCallback, useState } from 'react';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { RowSelectionAction } from '../../../../types';
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  updateSelectionState: (action: RowSelectionAction) => void;
 };
 
 export type UsePagination = (props: PaginationProps) => {
@@ -21,7 +23,12 @@ export type UsePagination = (props: PaginationProps) => {
   setFlyoutAlertIndex: (alertIndex: number) => void;
 };
 
-export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationProps) {
+export function usePagination({
+  onPageChange,
+  pageIndex,
+  pageSize,
+  updateSelectionState,
+}: PaginationProps) {
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
     pageSize,
@@ -41,9 +48,10 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
   const onChangePageIndex = useCallback(
     (_pageIndex) => {
       setPagination((state) => ({ ...state, pageIndex: _pageIndex }));
+      updateSelectionState({ action: 'clear' });
       onPageChange({ pageIndex: _pageIndex, pageSize: pagination.pageSize });
     },
-    [setPagination, onPageChange, pagination.pageSize]
+    [updateSelectionState, onPageChange, pagination.pageSize]
   );
 
   const onPaginateFlyout = useCallback(

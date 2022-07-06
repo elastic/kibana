@@ -59,6 +59,24 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     sort: sortingFields,
   } = props.useFetchAlertsData();
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
+
+  const {
+    useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }),
+    useBulkActions = () => ({ render: undefined }),
+  } = props.alertsTableConfiguration;
+  const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
+    useActionsColumn();
+
+  const initialSelectionContextState = useReducer(selectedRowsReducer, {
+    rowSelection: new Set<number>(),
+    isAllSelected: false,
+    isPageSelected: false,
+  });
+
+  const [rowSelectionState, updateSelectionState] = initialSelectionContextState;
+  const { render: renderBulkActions } = useBulkActions();
+
+  const isBulkActionsColumnActive = Boolean(renderBulkActions);
   const {
     pagination,
     onChangePageSize,
@@ -70,11 +88,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     onPageChange,
     pageIndex: activePage,
     pageSize: props.pageSize,
+    updateSelectionState,
   });
-  const {
-    useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }),
-    useBulkActions = () => ({ render: undefined }),
-  } = props.alertsTableConfiguration;
 
   const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
 
@@ -88,20 +103,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [onColumnsChange, props.columns]
   );
-
-  const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
-    useActionsColumn();
-
-  const initialSelectionContextState = useReducer(selectedRowsReducer, {
-    rowSelection: new Set<number>(),
-    isAllSelected: false,
-    isPageSelected: false,
-  });
-
-  const [rowSelectionState] = initialSelectionContextState;
-  const { render: renderBulkActions } = useBulkActions();
-
-  const isBulkActionsColumnActive = Boolean(renderBulkActions);
 
   const leadingControlColumns = useMemo(() => {
     const isActionButtonsColumnActive =
@@ -155,7 +156,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
     if (isBulkActionsColumnActive) {
       controlColumns = [
-        getBulkActionsLeadingControlColumn({ rowsCount: pagination.pageSize }),
+        getBulkActionsLeadingControlColumn({ rowsCount: alerts.length }),
         ...controlColumns,
       ];
     }
@@ -165,7 +166,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     actionsColumnWidth,
     alerts,
     isBulkActionsColumnActive,
-    pagination,
     props.leadingControlColumns,
     props.showExpandToDetails,
     renderCustomActionsRow,

@@ -433,13 +433,13 @@ export interface AlertsTableConfigurationRegistry {
   };
 }
 
-export interface SelectedRowsAction {
+export interface RowSelectionAction {
   action: string;
   rowIndex?: string;
   rowsCount?: number;
 }
 
-export interface SelectedRowsState {
+export interface RowSelectionState {
   rowSelection: Set<number>;
   isAllSelected: boolean;
   isPageSelected: boolean;

@@ -35,21 +35,19 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, bulkActi
   const [showClearSelection, setShowClearSelectiong] = useState(false);
 
   useEffect(() => {
-    console.log('isAllSelected', isAllSelected);
     setShowClearSelectiong(isAllSelected);
   }, [isAllSelected]);
 
   const selectedCount = rowSelection.size;
-  console.log('selectedCount', selectedCount);
 
   const formattedTotalCount = useMemo(
     () => numeral(totalItems).format(defaultNumberFormat),
     [defaultNumberFormat, totalItems]
   );
-  const formattedSelectedEventsCount = useMemo(() => {
-    console.log('executing the memoized fn', selectedCount);
-    return numeral(selectedCount).format(defaultNumberFormat);
-  }, [defaultNumberFormat, selectedCount]);
+  const formattedSelectedEventsCount = useMemo(
+    () => numeral(selectedCount).format(defaultNumberFormat),
+    [defaultNumberFormat, selectedCount]
+  );
 
   const toggleIsActionOpen = useCallback(() => {
     setIsActionsPopoverOpen((currentIsOpen) => !currentIsOpen);
@@ -73,18 +71,19 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, bulkActi
     }
   }, [showClearSelection, updateSelectedRows]);
 
-  const selectedAlertsText = useMemo(() => {
-    console.log(formattedSelectedEventsCount, totalItems);
-    return showClearSelection
-      ? i18n.SELECTED_ALERTS(formattedTotalCount, totalItems)
-      : i18n.SELECTED_ALERTS(formattedSelectedEventsCount, selectedCount);
-  }, [
-    showClearSelection,
-    formattedTotalCount,
-    formattedSelectedEventsCount,
-    totalItems,
-    selectedCount,
-  ]);
+  const selectedAlertsText = useMemo(
+    () =>
+      showClearSelection
+        ? i18n.SELECTED_ALERTS(formattedTotalCount, totalItems)
+        : i18n.SELECTED_ALERTS(formattedSelectedEventsCount, selectedCount),
+    [
+      showClearSelection,
+      formattedTotalCount,
+      formattedSelectedEventsCount,
+      totalItems,
+      selectedCount,
+    ]
+  );
 
   const selectClearAllAlertsText = useMemo(
     () =>
@@ -99,6 +98,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, bulkActi
       style={{ display: 'inline-block', position: 'relative' }}
       onClick={closeIfPopoverIsOpen}
       data-test-subj="bulk-actions-button-container"
+      aria-hidden
     >
       <EuiPopover
         isOpen={isActionsPopoverOpen}
@@ -121,7 +121,6 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, bulkActi
       >
         <EuiContextMenuPanel size="s" items={bulkActionItems} />
       </EuiPopover>
-
       <EuiButtonEmpty
         size="xs"
         aria-label="selectAllAlerts"

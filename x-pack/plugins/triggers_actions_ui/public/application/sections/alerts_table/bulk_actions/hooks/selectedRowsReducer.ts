@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SelectedRowsAction, SelectedRowsState } from '../../../../../types';
+import { RowSelectionAction, RowSelectionState } from '../../../../../types';
 
 export const selectedRowsReducer = (
-  { rowSelection }: SelectedRowsState,
-  { action, rowIndex, rowsCount }: SelectedRowsAction
-): SelectedRowsState => {
+  { rowSelection }: RowSelectionState,
+  { action, rowIndex, rowsCount }: RowSelectionAction
+): RowSelectionState => {
   const nextState = { rowSelection, isAllSelected: false, isPageSelected: false };
   if (action === 'add' && rowIndex !== undefined) {
     const nextRowSelection = new Set(rowSelection);
