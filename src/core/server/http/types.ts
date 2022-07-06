@@ -15,8 +15,9 @@ import type {
   OnPreAuthHandler,
   OnPostAuthHandler,
   OnPreResponseHandler,
+  IContextProvider,
 } from '@kbn/core-http-server';
-import { IContextProvider, IContextContainer } from '../context';
+import { IContextContainer } from '../context';
 import { ICspConfig } from './csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { IAuthHeadersStorage } from './auth_headers_storage';

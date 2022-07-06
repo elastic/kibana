@@ -30,13 +30,18 @@ import type {
   KibanaRouteOptions,
   KibanaRequestState,
   RouterRoute,
+  AuthenticationHandler,
+  OnPreAuthHandler,
+  OnPostAuthHandler,
+  OnPreRoutingHandler,
+  OnPreResponseHandler,
 } from '@kbn/core-http-server';
 import { HttpConfig } from './http_config';
-import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
-import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
-import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
-import { adoptToHapiOnRequest, OnPreRoutingHandler } from './lifecycle/on_pre_routing';
-import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
+import { adoptToHapiAuthFormat } from './lifecycle/auth';
+import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
+import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
+import { adoptToHapiOnRequest } from './lifecycle/on_pre_routing';
+import { adoptToHapiOnPreResponseFormat } from './lifecycle/on_pre_response';
 import { isSafeMethod } from './router';
 import {
   SessionStorageCookieOptions,
