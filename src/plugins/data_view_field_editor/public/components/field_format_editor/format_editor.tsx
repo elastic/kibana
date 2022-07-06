@@ -11,13 +11,14 @@ import { memoize } from 'lodash';
 import React, { PureComponent, LazyExoticComponent } from 'react';
 import type { FieldFormat, FieldFormatConfig } from '@kbn/field-formats-plugin/common';
 import { FieldFormatEditorFactory, FieldFormatEditor } from './editors';
+import { FieldFormatEditorStart } from '../../service/field_format_editors';
 
 export interface FormatEditorProps {
   fieldType: string;
   fieldFormat: FieldFormat;
   fieldFormatId: string;
   fieldFormatParams: { [key: string]: unknown };
-  fieldFormatEditors: any;
+  fieldFormatEditors: FieldFormatEditorStart;
   onChange: (change: FieldFormatConfig['params']) => void;
   onError: (error?: string) => void;
 }
@@ -39,13 +40,15 @@ export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorS
   constructor(props: FormatEditorProps) {
     super(props);
     this.state = {
-      EditorComponent: unwrapEditor(props.fieldFormatEditors.getById(props.fieldFormatId)),
+      EditorComponent: unwrapEditor(props.fieldFormatEditors.getById(props.fieldFormatId) ?? null),
     };
   }
 
   static getDerivedStateFromProps(nextProps: FormatEditorProps) {
     return {
-      EditorComponent: unwrapEditor(nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId)),
+      EditorComponent: unwrapEditor(
+        nextProps.fieldFormatEditors.getById(nextProps.fieldFormatId) ?? null
+      ),
     };
   }
 

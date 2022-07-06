@@ -157,7 +157,10 @@ export function Tabs({
     savedObjectsManagement,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
-  const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
+  const [syncingStateFunc, setSyncingStateFunc] = useState<{
+    getCurrentTab: () => string;
+    setCurrentTab?: (newTab: string) => { tab: string };
+  }>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string[]>([]);
@@ -599,7 +602,7 @@ export function Tabs({
       selectedTab={euiTabs.find((tab) => tab.id === selectedTabId)}
       onTabClick={(tab) => {
         setSelectedTabId(tab.id);
-        syncingStateFunc.setCurrentTab(tab.id);
+        syncingStateFunc.setCurrentTab?.(tab.id);
       }}
     />
   );
