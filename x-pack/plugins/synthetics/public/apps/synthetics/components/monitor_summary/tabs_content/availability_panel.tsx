@@ -30,7 +30,7 @@ export const AvailabilityPanel = () => {
             name: 'Monitor availability',
             dataType: 'synthetics',
             selectedMetricField: 'monitor_availability',
-            reportDefinitions: { 'monitor.id': [monitorId] },
+            reportDefinitions: { config_id: [monitorId] },
           },
         ]}
       />

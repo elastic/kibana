@@ -247,7 +247,7 @@ const Wrapper = styled.div<{
       justify-content: ${(props) =>
         props.align === 'left' ? `flex-start;` : props.align === 'right' ? `flex-end;` : 'center;'};
       .mtrVis__container {
-        padding-top: 0;
+        padding-top: 4px;
         padding-left: ${(props) => (props.align === 'left' ? `0` : '16px;')};
         padding-right: ${(props) => (props.align === 'right' ? `0` : '16px;')};
       }
