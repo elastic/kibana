@@ -595,6 +595,7 @@ x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 
 # Cloud Security Posture
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+/x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design

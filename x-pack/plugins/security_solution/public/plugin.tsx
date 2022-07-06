@@ -323,6 +323,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
         landingPages: new subPluginClasses.LandingPages(),
+        cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
       };
     }
     return this._subPlugins;
@@ -350,6 +351,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
+      cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
     };
   }
   /**
