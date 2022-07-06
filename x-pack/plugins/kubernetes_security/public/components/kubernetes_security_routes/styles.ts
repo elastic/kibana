@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
@@ -16,9 +16,17 @@ export const useStyles = () => {
     const { size, font } = euiTheme;
 
     const titleSection: CSSObject = {
-      display: 'flex',
-      alignContent: 'center',
       marginBottom: size.l,
+    };
+
+    const titleActions: CSSObject = {
+      marginLeft: 'auto',
+      flexDirection: 'row',
+      alignItems: 'center',
+    };
+
+    const updatedAt: CSSObject = {
+      marginRight: size.m,
     };
 
     const widgetBadge: CSSObject = {
@@ -52,6 +60,8 @@ export const useStyles = () => {
 
     return {
       titleSection,
+      titleActions,
+      updatedAt,
       widgetBadge,
       treeViewContainer,
       percentageWidgets,

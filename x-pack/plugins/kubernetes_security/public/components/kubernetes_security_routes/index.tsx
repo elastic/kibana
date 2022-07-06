@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
@@ -18,9 +18,12 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { CoreStart } from '@kbn/core/public';
+import type { StartPlugins } from '../../types';
 import {
   KUBERNETES_PATH,
   KUBERNETES_TITLE,
@@ -48,6 +51,7 @@ const KubernetesSecurityRoutesComponent = ({
     false
   );
   const styles = useStyles();
+  const { timelines: timelinesUi } = useKibana<CoreStart & StartPlugins>().services;
 
   const onReduceInteractiveAggs = useCallback(
     (result: AggregateResult[]): Record<string, number> =>
@@ -77,19 +81,32 @@ const KubernetesSecurityRoutesComponent = ({
     setShouldHideWidgets(!shouldHideWidgets);
   }, [setShouldHideWidgets, shouldHideWidgets]);
 
+  // Only reset updated at on refresh or after globalFilter gets updated
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updatedAt = useMemo(() => Date.now(), [globalFilter]);
+
   return (
     <Switch>
       <Route strict exact path={KUBERNETES_PATH}>
         {filter}
-        <div css={styles.titleSection}>
-          <EuiTitle size="l">
-            <h1>{KUBERNETES_TITLE}</h1>
-          </EuiTitle>
-          <WidgetsToggle
-            shouldHideWidgets={shouldHideWidgets}
-            handleToggleHideWidgets={handleToggleHideWidgets}
-          />
-        </div>
+        <EuiFlexGroup gutterSize="none" css={styles.titleSection}>
+          <EuiFlexItem>
+            <EuiTitle size="l">
+              <h1>{KUBERNETES_TITLE}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={styles.titleActions}>
+            <div css={styles.updatedAt}>
+              {timelinesUi.getLastUpdated({
+                updatedAt: updatedAt || Date.now(),
+              })}
+            </div>
+            <WidgetsToggle
+              shouldHideWidgets={shouldHideWidgets}
+              handleToggleHideWidgets={handleToggleHideWidgets}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         {!shouldHideWidgets && (
           <>
             <EuiFlexGroup>
