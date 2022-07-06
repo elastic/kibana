@@ -9,10 +9,12 @@
 import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
-  KibanaRequest,
-  LifecycleResponseFactory,
-  IKibanaResponse,
+  OnPreAuthResult,
+  OnPreAuthNextResult,
+  OnPreAuthHandler,
+  OnPreAuthToolkit,
 } from '@kbn/core-http-server';
+import { OnPreAuthResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,
@@ -20,47 +22,18 @@ import {
   lifecycleResponseFactory,
 } from '../router';
 
-enum ResultType {
-  next = 'next',
-}
-
-interface Next {
-  type: ResultType.next;
-}
-
-type OnPreAuthResult = Next;
-
 const preAuthResult = {
   next(): OnPreAuthResult {
-    return { type: ResultType.next };
+    return { type: OnPreAuthResultType.next };
   },
-  isNext(result: OnPreAuthResult): result is Next {
-    return result && result.type === ResultType.next;
+  isNext(result: OnPreAuthResult): result is OnPreAuthNextResult {
+    return result && result.type === OnPreAuthResultType.next;
   },
 };
-
-/**
- * @public
- * A tool set defining an outcome of OnPreAuth interceptor for incoming request.
- */
-export interface OnPreAuthToolkit {
-  /** To pass request to the next handler */
-  next: () => OnPreAuthResult;
-}
 
 const toolkit: OnPreAuthToolkit = {
   next: preAuthResult.next,
 };
-
-/**
- * See {@link OnPreAuthToolkit}.
- * @public
- */
-export type OnPreAuthHandler = (
-  request: KibanaRequest,
-  response: LifecycleResponseFactory,
-  toolkit: OnPreAuthToolkit
-) => OnPreAuthResult | IKibanaResponse | Promise<OnPreAuthResult | IKibanaResponse>;
 
 /**
  * @public

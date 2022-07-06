@@ -9,10 +9,12 @@
 import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
-  KibanaRequest,
-  LifecycleResponseFactory,
-  IKibanaResponse,
+  OnPostAuthNextResult,
+  OnPostAuthToolkit,
+  OnPostAuthResult,
+  OnPostAuthHandler,
 } from '@kbn/core-http-server';
+import { OnPostAuthResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,
@@ -20,43 +22,14 @@ import {
   isKibanaResponse,
 } from '../router';
 
-enum ResultType {
-  next = 'next',
-}
-
-interface Next {
-  type: ResultType.next;
-}
-
-type OnPostAuthResult = Next;
-
 const postAuthResult = {
   next(): OnPostAuthResult {
-    return { type: ResultType.next };
+    return { type: OnPostAuthResultType.next };
   },
-  isNext(result: OnPostAuthResult): result is Next {
-    return result && result.type === ResultType.next;
+  isNext(result: OnPostAuthResult): result is OnPostAuthNextResult {
+    return result && result.type === OnPostAuthResultType.next;
   },
 };
-
-/**
- * @public
- * A tool set defining an outcome of OnPostAuth interceptor for incoming request.
- */
-export interface OnPostAuthToolkit {
-  /** To pass request to the next handler */
-  next: () => OnPostAuthResult;
-}
-
-/**
- * See {@link OnPostAuthToolkit}.
- * @public
- */
-export type OnPostAuthHandler = (
-  request: KibanaRequest,
-  response: LifecycleResponseFactory,
-  toolkit: OnPostAuthToolkit
-) => OnPostAuthResult | IKibanaResponse | Promise<OnPostAuthResult | IKibanaResponse>;
 
 const toolkit: OnPostAuthToolkit = {
   next: postAuthResult.next,

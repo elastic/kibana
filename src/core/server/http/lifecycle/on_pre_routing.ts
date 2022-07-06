@@ -9,11 +9,14 @@
 import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
-  KibanaRequest,
-  LifecycleResponseFactory,
   KibanaRequestState,
-  IKibanaResponse,
+  OnPreRoutingToolkit,
+  OnPreRoutingResultRewriteUrl,
+  OnPreRoutingResultNext,
+  OnPreRoutingResult,
+  OnPreRoutingHandler,
 } from '@kbn/core-http-server';
+import { OnPreRoutingResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,
@@ -21,62 +24,25 @@ import {
   lifecycleResponseFactory,
 } from '../router';
 
-enum ResultType {
-  next = 'next',
-  rewriteUrl = 'rewriteUrl',
-}
-
-interface Next {
-  type: ResultType.next;
-}
-
-interface RewriteUrl {
-  type: ResultType.rewriteUrl;
-  url: string;
-}
-
-type OnPreRoutingResult = Next | RewriteUrl;
-
 const preRoutingResult = {
   next(): OnPreRoutingResult {
-    return { type: ResultType.next };
+    return { type: OnPreRoutingResultType.next };
   },
   rewriteUrl(url: string): OnPreRoutingResult {
-    return { type: ResultType.rewriteUrl, url };
+    return { type: OnPreRoutingResultType.rewriteUrl, url };
   },
-  isNext(result: OnPreRoutingResult): result is Next {
-    return result && result.type === ResultType.next;
+  isNext(result: OnPreRoutingResult): result is OnPreRoutingResultNext {
+    return result && result.type === OnPreRoutingResultType.next;
   },
-  isRewriteUrl(result: OnPreRoutingResult): result is RewriteUrl {
-    return result && result.type === ResultType.rewriteUrl;
+  isRewriteUrl(result: OnPreRoutingResult): result is OnPreRoutingResultRewriteUrl {
+    return result && result.type === OnPreRoutingResultType.rewriteUrl;
   },
 };
-
-/**
- * @public
- * A tool set defining an outcome of OnPreRouting interceptor for incoming request.
- */
-export interface OnPreRoutingToolkit {
-  /** To pass request to the next handler */
-  next: () => OnPreRoutingResult;
-  /** Rewrite requested resources url before is was authenticated and routed to a handler */
-  rewriteUrl: (url: string) => OnPreRoutingResult;
-}
 
 const toolkit: OnPreRoutingToolkit = {
   next: preRoutingResult.next,
   rewriteUrl: preRoutingResult.rewriteUrl,
 };
-
-/**
- * See {@link OnPreRoutingToolkit}.
- * @public
- */
-export type OnPreRoutingHandler = (
-  request: KibanaRequest,
-  response: LifecycleResponseFactory,
-  toolkit: OnPreRoutingToolkit
-) => OnPreRoutingResult | IKibanaResponse | Promise<OnPreRoutingResult | IKibanaResponse>;
 
 /**
  * @public
