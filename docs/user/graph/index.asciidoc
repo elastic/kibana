@@ -179,6 +179,9 @@ in the graph toolbar to show the drilldown buttons for the selected vertices.
 To configure drilldowns, go to *Settings > Drilldowns*. See also
 <<disable-drill-down, Disabling drilldown configuration>>.
 
+
+NOTE: when creating custom drilldowns, make sure to enclose the referenced index pattern in single quotes (`'`) to avoid rison decoding errors.
+
 [float]
 [[graph-run-layout]]
 ==== Run and pause the layout
