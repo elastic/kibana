@@ -6,51 +6,60 @@
  */
 
 import { EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EntityService, getService } from '@kbn/observability-plugin/public';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { EmptyPrompt } from './empty_prompt';
-import { FailurePrompt } from './failure_prompt';
 import { useTabs } from './use_tabs';
-
-const INITIAL_STATE = {
-  containerIds: [],
-  hostNames: [],
-  podNames: [],
-};
+import { ApmPluginStartDeps } from '../../../../plugin';
 
 export function InfraTabs() {
   const { serviceName } = useApmServiceContext();
+  const kibana = useKibana<ApmPluginStartDeps>();
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/infrastructure');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const [service, updateService] = useState<EntityService | null>(null);
 
-  const { data = INITIAL_STATE, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/infrastructure_attributes',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-              },
-            },
-          }
-        );
-      }
-    },
-    [environment, kuery, serviceName, start, end]
-  );
+  useEffect(() => {
+    async function get() {
+      const startTime = new Date(start).getTime();
+      const endTime = new Date(end).getTime();
 
-  const { containerIds, podNames, hostNames } = data;
+      const retrievedService = await getService({
+        name: serviceName,
+        environment,
+        client: kibana.services.data,
+        start: startTime,
+        end: endTime,
+      });
+      updateService(retrievedService);
+    }
+    get();
+  }, [serviceName, environment, start, end, kibana.services.data]);
+
+  if (service === null) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <EuiLoadingSpinner size="xl" />
+      </div>
+    );
+  }
+
+  return <Tabs service={service} start={start} end={end} />;
+}
+
+interface TabsProps {
+  service: EntityService;
+  start: string;
+  end: string;
+}
+
+const Tabs: React.FC<TabsProps> = ({ service, start, end }) => {
+  const { containerIds, podNames, hostNames } = service.infrastructure;
 
   const tabs = useTabs({
     containerIds,
@@ -59,35 +68,6 @@ export function InfraTabs() {
     start,
     end,
   });
-
-  if (status === FETCH_STATUS.LOADING) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <EuiLoadingSpinner size="xl" />
-      </div>
-    );
-  }
-
-  if (status === FETCH_STATUS.FAILURE) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <FailurePrompt />
-      </div>
-    );
-  }
-
-  if (
-    status === FETCH_STATUS.SUCCESS &&
-    !containerIds.length &&
-    !podNames.length &&
-    !hostNames.length
-  ) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <EmptyPrompt />
-      </div>
-    );
-  }
 
   return (
     <>
@@ -98,4 +78,4 @@ export function InfraTabs() {
       />
     </>
   );
-}
+};

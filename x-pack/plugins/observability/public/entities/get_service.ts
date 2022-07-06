@@ -57,7 +57,7 @@ async function getServiceDetails({
   end,
 }: GetServiceOptions): Promise<EntityServiceDetails> {
   const request: IKibanaSearchRequest = {
-    id: 'get_service_infrastructure',
+    id: 'get_service_details',
     params: {
       index: HARD_CODED_APM_INDICES,
       size: 1,
@@ -89,6 +89,8 @@ async function getServiceDetails({
     },
   };
 
+  console.log('getServiceDetails', request);
+
   // TODO: use typed ES response
   const { rawResponse } = await lastValueFrom(client.search.search(request));
   const doc = rawResponse.hits?.hits[0]?._source ?? {};
@@ -96,7 +98,7 @@ async function getServiceDetails({
   return doc.service;
 }
 
-async function getInfrastructureForService({
+export async function getInfrastructureForService({
   name,
   environment,
   client,
@@ -160,6 +162,9 @@ async function getInfrastructureForService({
       },
     },
   };
+
+  console.log('getInfrastructureForService', request);
+
   // TODO: use typed ES response
   const { rawResponse } = await lastValueFrom(client.search.search(request));
 
