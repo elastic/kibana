@@ -64,6 +64,7 @@ import { DateRange, LayerType } from '../../../../common';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
+import { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
 
 export type {
   IncompleteColumn,
@@ -160,12 +161,14 @@ export { staticValueOperation } from './static_value';
 /**
  * Properties passed to the operation-specific part of the popover editor
  */
-export interface ParamEditorProps<C> {
+export interface ParamEditorProps<
+  C,
+  U = IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+> {
   currentColumn: C;
   layer: IndexPatternLayer;
-  updateLayer: (
-    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
-  ) => void;
+  paramEditorUpdater: (setter: U) => void;
+  ReferenceEditor?: (props: ReferenceEditorProps) => JSX.Element | null;
   toggleFullscreen: () => void;
   setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
@@ -183,6 +186,8 @@ export interface ParamEditorProps<C> {
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;
+  existingFields: Record<string, Record<string, boolean>>;
+  isReferenced?: boolean;
 }
 
 export interface FieldInputProps<C> {
@@ -227,7 +232,11 @@ export interface AdvancedOption {
   helpPopup?: string | null;
 }
 
-interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}> {
+interface BaseOperationDefinitionProps<
+  C extends BaseIndexPatternColumn,
+  AR extends boolean,
+  P = {}
+> {
   type: C['operationType'];
   /**
    * The priority of the operation. If multiple operations are possible in
@@ -258,7 +267,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
   /**
    * React component for operation specific settings shown in the flyout editor
    */
-  paramEditor?: React.ComponentType<ParamEditorProps<C>>;
+  allowAsReference?: AR;
+  paramEditor?: React.ComponentType<
+    AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C>
+  >;
   getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
@@ -498,7 +510,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
     indexPattern: IndexPattern,
     layer: IndexPatternLayer,
     uiSettings: IUiSettingsClient,
-    orderedColumnIds: string[]
+    orderedColumnIds: string[],
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) => ExpressionAstFunction;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
@@ -646,8 +659,9 @@ interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
 export type OperationDefinition<
   C extends BaseIndexPatternColumn,
   Input extends keyof OperationDefinitionMap<C>,
-  P = {}
-> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C, P>[Input];
+  P = {},
+  AR extends boolean = false
+> = BaseOperationDefinitionProps<C, AR> & OperationDefinitionMap<C, P>[Input];
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.

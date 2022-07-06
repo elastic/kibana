@@ -40,6 +40,14 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
 };
 
 describe('last_value', () => {
@@ -642,6 +650,13 @@ describe('last_value', () => {
         return this.showArrayValuesSwitch.prop('disabled');
       }
 
+      public get arrayValuesSwitchNotExisiting() {
+        return (
+          this._instance.find('[data-test-subj="lns-indexPattern-lastValue-showArrayValues"]')
+            .length === 0
+        );
+      }
+
       changeSortFieldOptions(options: Array<{ label: string; value: string }>) {
         this.sortField.find(EuiComboBox).prop('onChange')!([
           { label: 'datefield2', value: 'datefield2' },
@@ -659,7 +674,7 @@ describe('last_value', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
         />
@@ -676,7 +691,7 @@ describe('last_value', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
         />
@@ -685,16 +700,10 @@ describe('last_value', () => {
       new Harness(instance).changeSortFieldOptions([{ label: 'datefield2', value: 'datefield2' }]);
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
-        ...layer,
-        columns: {
-          ...layer.columns,
-          col2: {
-            ...layer.columns.col2,
-            params: {
-              ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
-              sortField: 'datefield2',
-            },
-          },
+        ...layer.columns.col2,
+        params: {
+          ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
+          sortField: 'datefield2',
         },
       });
     });
@@ -707,7 +716,7 @@ describe('last_value', () => {
           <InlineOptions
             {...defaultProps}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col2"
             currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
           />
@@ -718,27 +727,29 @@ describe('last_value', () => {
         harness.toggleShowArrayValues();
 
         expect(updateLayerSpy).toHaveBeenCalledWith({
-          ...layer,
-          columns: {
-            ...layer.columns,
-            col2: {
-              ...layer.columns.col2,
-              params: {
-                ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
-                showArrayValues: true,
-              },
-            },
+          ...layer.columns.col2,
+          params: {
+            ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
+            showArrayValues: true,
           },
         });
 
         // have to do this manually, but it happens automatically in the app
-        const newLayer = updateLayerSpy.mock.calls[0][0];
+        const newColumn = updateLayerSpy.mock.calls[0][0];
+        const newLayer = {
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col2: newColumn,
+          },
+        };
         instance.setProps({ layer: newLayer, currentColumn: newLayer.columns.col2 });
 
         expect(harness.showingTopValuesWarning).toBeTruthy();
       });
 
       it('should not warn user when top-values not in use', () => {
+        // todo: move to dimension editor
         const updateLayerSpy = jest.fn();
         const localLayer = {
           ...layer,
@@ -754,7 +765,7 @@ describe('last_value', () => {
           <InlineOptions
             {...defaultProps}
             layer={localLayer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col2"
             currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
           />
@@ -764,7 +775,15 @@ describe('last_value', () => {
         harness.toggleShowArrayValues();
 
         // have to do this manually, but it happens automatically in the app
-        const newLayer = updateLayerSpy.mock.calls[0][0];
+        const newColumn = updateLayerSpy.mock.calls[0][0];
+        const newLayer = {
+          ...localLayer,
+          columns: {
+            ...localLayer.columns,
+            col2: newColumn,
+          },
+        };
+
         instance.setProps({ layer: newLayer, currentColumn: newLayer.columns.col2 });
 
         expect(harness.showingTopValuesWarning).toBeFalsy();
@@ -778,13 +797,28 @@ describe('last_value', () => {
           <InlineOptions
             {...defaultProps}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col2"
             currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
           />
         );
 
         expect(new Harness(instance).showArrayValuesSwitchDisabled).toBeTruthy();
+      });
+      it('should not display an array for the last value if the column is referenced', () => {
+        const updateLayerSpy = jest.fn();
+        const instance = shallow(
+          <InlineOptions
+            {...defaultProps}
+            isReferenced={true}
+            layer={layer}
+            paramEditorUpdater={updateLayerSpy}
+            columnId="col1"
+            currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
+          />
+        );
+
+        expect(new Harness(instance).arrayValuesSwitchNotExisiting).toBeTruthy();
       });
     });
   });
@@ -829,6 +863,7 @@ describe('last_value', () => {
         'Field notExisting was not found',
       ]);
     });
+
     it('shows error message if the sortField does not exist in index pattern', () => {
       errorLayer = {
         ...errorLayer,

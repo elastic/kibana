@@ -50,6 +50,14 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
 };
 
 describe('percentile ranks', () => {
@@ -274,7 +282,7 @@ describe('percentile ranks', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
         />
@@ -291,7 +299,7 @@ describe('percentile ranks', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
         />
@@ -310,17 +318,11 @@ describe('percentile ranks', () => {
       instance.update();
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
-        ...layer,
-        columns: {
-          ...layer.columns,
-          col2: {
-            ...layer.columns.col2,
-            params: {
-              value: 103,
-            },
-            label: 'Percentile rank (103) of a',
-          },
+        ...layer.columns.col2,
+        params: {
+          value: 103,
         },
+        label: 'Percentile rank (103) of a',
       });
     });
 
@@ -330,7 +332,7 @@ describe('percentile ranks', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col2"
           currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
         />

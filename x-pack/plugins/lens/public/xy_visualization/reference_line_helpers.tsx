@@ -458,9 +458,11 @@ export const getReferenceConfiguration = ({
       enableDimensionEditor: true,
       supportStaticValue: true,
       paramEditorCustomProps: {
-        label: i18n.translate('xpack.lens.indexPattern.staticValue.label', {
-          defaultMessage: 'Reference line value',
-        }),
+        labels: [
+          i18n.translate('xpack.lens.indexPattern.staticValue.label', {
+            defaultMessage: 'Reference line value',
+          }),
+        ],
       },
       supportFieldFormat: false,
       dataTestSubj,

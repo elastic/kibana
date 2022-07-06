@@ -77,6 +77,7 @@ export const ValuesInput = ({
       }
     >
       <EuiFieldNumber
+        fullWidth
         min={minValue}
         max={maxValue}
         step={1}

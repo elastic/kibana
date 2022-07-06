@@ -110,6 +110,7 @@ export const CustomizablePalette = ({
       </EuiFormRow>
       {showRangeTypeSelector && (
         <EuiFormRow
+          fullWidth
           label={
             <>
               {i18n.translate('coloring.dynamicColoring.rangeType.label', {
@@ -131,6 +132,7 @@ export const CustomizablePalette = ({
           display="rowCompressed"
         >
           <EuiButtonGroup
+            isFullWidth
             legend={i18n.translate('coloring.dynamicColoring.rangeType.label', {
               defaultMessage: 'Value type',
             })}
@@ -169,7 +171,6 @@ export const CustomizablePalette = ({
                 payload: { rangeType: newRangeType, dataBounds, palettes },
               });
             }}
-            isFullWidth
           />
         </EuiFormRow>
       )}
