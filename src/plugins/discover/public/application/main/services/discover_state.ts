@@ -33,7 +33,7 @@ import {
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
-import { DataView, DataViewSpec} from '@kbn/data-views-plugin/public';
+import { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
