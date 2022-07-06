@@ -6,8 +6,9 @@
  */
 
 import { MiddlewareAPI } from '@reduxjs/toolkit';
-import { i18n } from '@kbn/i18n';
 import { History } from 'history';
+import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { setState, initEmpty, LensStoreDeps } from '..';
 import { disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
@@ -167,10 +168,13 @@ export function loadInitial(
             {}
           );
 
-          const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
+          const filters: Filter[] = data.query.filterManager.inject(
+            doc.state.filters,
+            doc.references
+          );
           // Don't overwrite any pinned filters
+          filters.push(data.query.filterManager.getAppFilters());
           data.query.filterManager.setAppFilters(filters);
-
           initializeDatasources(
             datasourceMap,
             docDatasourceStates,

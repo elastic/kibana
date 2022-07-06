@@ -111,7 +111,6 @@ export const selectSavedObjectFormat = createSelector(
       persistibleDatasourceStates[id] = persistableState;
       references.push(...savedObjectReferences);
     });
-
     const { state: persistableFilters, references: filterReferences } =
       extractFilterReferences(filters);
 
