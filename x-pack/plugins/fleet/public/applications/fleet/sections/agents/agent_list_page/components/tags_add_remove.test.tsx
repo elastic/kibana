@@ -30,6 +30,7 @@ describe('TagsAddRemove', () => {
   beforeEach(() => {
     onTagsUpdated.mockReset();
     mockUpdateTags.mockReset();
+    mockBulkUpdateTags.mockReset();
     allTags = ['tag1', 'tag2'];
     selectedTags = ['tag1'];
   });
@@ -47,23 +48,27 @@ describe('TagsAddRemove', () => {
     );
   };
 
-  it('should add selected tag when previously unselected', () => {
+  it('should add selected tag when previously unselected', async () => {
+    mockUpdateTags.mockImplementation(() => {
+      selectedTags = ['tag1', 'tag2'];
+    });
     const result = renderComponent('agent1');
-    const getTag = (name: string) => result.getByText(name).closest('li')!;
+    const getTag = (name: string) => result.getByText(name);
 
     fireEvent.click(getTag('tag2'));
 
-    expect(getTag('tag2').getAttribute('aria-checked')).toEqual('true');
     expect(mockUpdateTags).toHaveBeenCalledWith('agent1', ['tag1', 'tag2'], expect.anything());
   });
 
-  it('should remove selected tag when previously selected', () => {
+  it('should remove selected tag when previously selected', async () => {
+    mockUpdateTags.mockImplementation(() => {
+      selectedTags = [];
+    });
     const result = renderComponent('agent1');
-    const getTag = (name: string) => result.getByText(name).closest('li')!;
+    const getTag = (name: string) => result.getByText(name);
 
     fireEvent.click(getTag('tag1'));
 
-    expect(getTag('tag1').getAttribute('aria-checked')).toEqual('false');
     expect(mockUpdateTags).toHaveBeenCalledWith('agent1', [], expect.anything());
   });
 
@@ -80,23 +85,27 @@ describe('TagsAddRemove', () => {
     expect(mockUpdateTags).toHaveBeenCalledWith('agent1', ['tag1', 'newTag'], expect.anything());
   });
 
-  it('should add selected tag when previously unselected - bulk selection', () => {
+  it('should add selected tag when previously unselected - bulk selection', async () => {
+    mockBulkUpdateTags.mockImplementation(() => {
+      selectedTags = ['tag1', 'tag2'];
+    });
     const result = renderComponent(undefined, '');
-    const getTag = (name: string) => result.getByText(name).closest('li')!;
+    const getTag = (name: string) => result.getByText(name);
 
     fireEvent.click(getTag('tag2'));
 
-    expect(getTag('tag2').getAttribute('aria-checked')).toEqual('true');
     expect(mockBulkUpdateTags).toHaveBeenCalledWith('', ['tag2'], [], expect.anything());
   });
 
-  it('should remove selected tag when previously selected - bulk selection', () => {
+  it('should remove selected tag when previously selected - bulk selection', async () => {
+    mockBulkUpdateTags.mockImplementation(() => {
+      selectedTags = [];
+    });
     const result = renderComponent(undefined, ['agent1', 'agent2']);
-    const getTag = (name: string) => result.getByText(name).closest('li')!;
+    const getTag = (name: string) => result.getByText(name);
 
     fireEvent.click(getTag('tag1'));
 
-    expect(getTag('tag1').getAttribute('aria-checked')).toEqual('false');
     expect(mockBulkUpdateTags).toHaveBeenCalledWith(
       ['agent1', 'agent2'],
       [],
@@ -116,5 +125,17 @@ describe('TagsAddRemove', () => {
     fireEvent.click(result.getAllByText('Create a new tag "newTag"')[0].closest('button')!);
 
     expect(mockBulkUpdateTags).toHaveBeenCalledWith('query', ['newTag'], [], expect.anything());
+  });
+
+  it('should make tag options button visible on mouse enter', async () => {
+    const result = renderComponent('agent1');
+
+    fireEvent.mouseEnter(result.getByText('tag1').closest('.euiFlexGroup')!);
+
+    expect(result.getByRole('button').getAttribute('aria-label')).toEqual('Tag Options');
+
+    fireEvent.mouseLeave(result.getByText('tag1').closest('.euiFlexGroup')!);
+
+    expect(result.queryByRole('button')).not.toBeInTheDocument();
   });
 });
