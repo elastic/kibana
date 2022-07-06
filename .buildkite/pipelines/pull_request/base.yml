@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/steps/re-use.sh
+  - command: .buildkite/scripts/re-use.sh
     label: 'Test 1'
     agents:
       queue: n2-4-spot
@@ -10,7 +10,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/re-use.sh
+  - command: .buildkite/scripts/re-use.sh
     label: 'Test 2'
     agents:
       queue: n2-4-spot
@@ -22,7 +22,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/re-use.sh
+  - command: .buildkite/scripts/re-use.sh
     label: 'Test 3'
     agents:
       queue: n2-4-spot
