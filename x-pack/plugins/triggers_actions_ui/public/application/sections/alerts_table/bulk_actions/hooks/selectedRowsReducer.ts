@@ -11,6 +11,7 @@ export const selectedRowsReducer = (
   { rowSelection }: RowSelectionState,
   { action, rowIndex, rowsCount }: RowSelectionAction
 ): RowSelectionState => {
+  console.log('action', action);
   const nextState = { rowSelection, isAllSelected: false, isPageSelected: false };
   if (action === 'add' && rowIndex !== undefined) {
     const nextRowSelection = new Set(rowSelection);
@@ -23,12 +24,13 @@ export const selectedRowsReducer = (
   } else if (action === 'selectCurrentPage' && rowsCount) {
     nextState.rowSelection = new Set(Array.from(Array(rowsCount).keys()));
     nextState.isPageSelected = true;
+  } else if (action === 'selectAll') {
+    nextState.isAllSelected = true;
   } else if (action === 'clear') {
     nextState.rowSelection = new Set();
     nextState.isAllSelected = false;
     nextState.isPageSelected = false;
-  } else if (action === 'selectAll') {
-    nextState.isAllSelected = true;
   }
+  console.log(nextState);
   return nextState;
 };

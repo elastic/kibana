@@ -13,10 +13,12 @@ export const getToolbarVisibility = ({
   selectedRowsCount,
   alertsCount,
   bulkActionItems,
+  pageSize,
 }: {
   selectedRowsCount: number;
   alertsCount: number;
   bulkActionItems?: JSX.Element[];
+  pageSize: number;
 }): boolean | EuiDataGridToolBarVisibilityOptions => {
   if (selectedRowsCount === 0 || selectedRowsCount === undefined) return {};
 
@@ -30,6 +32,7 @@ export const getToolbarVisibility = ({
             selectedCount={selectedRowsCount}
             totalItems={alertsCount}
             bulkActionItems={bulkActionItems}
+            pageSize={pageSize}
           />
         ),
       },

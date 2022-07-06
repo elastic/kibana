@@ -263,6 +263,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               selectedRowsCount: rowSelectionState.rowSelection.size,
               bulkActionItems: renderBulkActions ? renderBulkActions() : undefined,
               alertsCount,
+              pageSize: pagination.pageSize,
             })}
             pagination={{
               ...pagination,

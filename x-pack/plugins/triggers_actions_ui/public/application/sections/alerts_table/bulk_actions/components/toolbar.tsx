@@ -17,18 +17,16 @@ interface BulkActionsProps {
   totalItems: number;
   selectedCount: number;
   bulkActionItems?: JSX.Element[];
+  pageSize: number;
 }
-
-// const BulkActionsContainer = styled.div`
-//   display: inline-block;
-//   position: relative;
-// `;
-
-// BulkActionsContainer.displayName = 'BulkActionsContainer';
 
 const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 
-const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, bulkActionItems }) => {
+const BulkActionsComponent: React.FC<BulkActionsProps> = ({
+  totalItems,
+  bulkActionItems,
+  pageSize,
+}) => {
   const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(SelectionContext);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -65,11 +63,12 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, bulkActi
 
   const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
+      updateSelectedRows({ action: 'selectCurrentPage', rowsCount: pageSize });
       updateSelectedRows({ action: 'selectAll' });
     } else {
       updateSelectedRows({ action: 'clear' });
     }
-  }, [showClearSelection, updateSelectedRows]);
+  }, [pageSize, showClearSelection, updateSelectedRows]);
 
   const selectedAlertsText = useMemo(
     () =>
