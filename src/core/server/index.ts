@@ -148,17 +148,6 @@ export type {
 } from './elasticsearch';
 
 export type {
-  AuthenticationHandler,
-  AuthHeaders,
-  AuthResultParams,
-  AuthStatus,
-  AuthToolkit,
-  AuthRedirected,
-  AuthRedirectedParams,
-  AuthResult,
-  AuthResultType,
-  Authenticated,
-  AuthNotHandled,
   BasePath,
   IBasePath,
   GetAuthHeaders,
@@ -168,17 +157,6 @@ export type {
   HttpServicePreboot,
   HttpServiceStart,
   IsAuthenticated,
-  OnPreAuthHandler,
-  OnPreAuthToolkit,
-  OnPreRoutingHandler,
-  OnPreRoutingToolkit,
-  OnPostAuthHandler,
-  OnPostAuthToolkit,
-  OnPreResponseHandler,
-  OnPreResponseToolkit,
-  OnPreResponseRender,
-  OnPreResponseExtensions,
-  OnPreResponseInfo,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
   SessionStorage,
@@ -188,11 +166,22 @@ export type {
   ICspConfig,
   IExternalUrlConfig,
   IExternalUrlPolicy,
+  AuthStatus,
 } from './http';
 
 export { kibanaResponseFactory, CoreKibanaRequest, CspConfig } from './http';
 
 export type {
+  AuthenticationHandler,
+  AuthHeaders,
+  AuthResultParams,
+  AuthToolkit,
+  AuthResultRedirected,
+  AuthRedirectedParams,
+  AuthResult,
+  AuthResultType,
+  AuthResultAuthenticated,
+  AuthResultNotHandled,
   IContextProvider,
   HandlerFunction,
   HandlerContextType,
@@ -231,6 +220,17 @@ export type {
   HttpResponsePayload,
   Headers,
   CustomHttpResponseOptions,
+  OnPreAuthHandler,
+  OnPreAuthToolkit,
+  OnPreRoutingHandler,
+  OnPreRoutingToolkit,
+  OnPostAuthHandler,
+  OnPostAuthToolkit,
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
+  OnPreResponseRender,
+  OnPreResponseExtensions,
+  OnPreResponseInfo,
 } from '@kbn/core-http-server';
 
 export { validBodyOutput } from '@kbn/core-http-server';

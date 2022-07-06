@@ -14,8 +14,7 @@ import { stringify } from 'query-string';
 
 import { schema } from '@kbn/config-schema';
 
-import {
-  CoreKibanaRequest,
+import type {
   LifecycleResponseFactory,
   RouteMethod,
   KibanaRequest,
@@ -23,10 +22,11 @@ import {
   RouteValidationSpec,
   KibanaRouteOptions,
   KibanaRequestState,
-} from './router';
-import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
-import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
-import { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
+  OnPreResponseToolkit,
+  OnPostAuthToolkit,
+  OnPreRoutingToolkit,
+} from '@kbn/core-http-server';
+import { CoreKibanaRequest } from './router';
 
 /**
  * @internal
