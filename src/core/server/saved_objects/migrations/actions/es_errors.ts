@@ -9,29 +9,26 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const isWriteBlockException = (errorCause?: estypes.ErrorCause): boolean => {
   return (
-    typeof errorCause !== 'undefined' &&
-    errorCause.type === 'cluster_block_exception' &&
-    errorCause.reason.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/.+ \(api\)\]/) !== null
+    errorCause?.type === 'cluster_block_exception' &&
+    errorCause?.reason.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/.+ \(api\)\]/) !== null
   );
 };
 
 export const isIncompatibleMappingException = (errorCause?: estypes.ErrorCause): boolean => {
   return (
-    typeof errorCause !== 'undefined' &&
-    (errorCause.type === 'strict_dynamic_mapping_exception' ||
-      errorCause.type === 'mapper_parsing_exception')
+    errorCause?.type === 'strict_dynamic_mapping_exception' ||
+    errorCause?.type === 'mapper_parsing_exception'
   );
 };
 
 export const isIndexNotFoundException = (errorCause?: estypes.ErrorCause): boolean => {
-  return typeof errorCause !== 'undefined' && errorCause.type === 'index_not_found_exception';
+  return errorCause?.type === 'index_not_found_exception';
 };
 
 export const isClusterShardLimitExceeded = (errorCause?: estypes.ErrorCause): boolean => {
   return (
-    typeof errorCause !== 'undefined' &&
-    errorCause.type === 'validation_exception' &&
-    errorCause.reason.match(
+    errorCause?.type === 'validation_exception' &&
+    errorCause?.reason.match(
       /this action would add .* shards, but this cluster currently has .* maximum normal shards open/
     ) !== null
   );
