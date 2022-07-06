@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, Fragment } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
