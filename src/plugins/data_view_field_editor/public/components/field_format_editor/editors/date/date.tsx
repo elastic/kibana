@@ -17,7 +17,7 @@ import { formatId } from './constants';
 
 import { FormatEditorSamples } from '../../samples';
 
-interface DateFormatEditorFormatParams {
+export interface DateFormatEditorFormatParams {
   pattern: string;
 }
 
@@ -69,7 +69,9 @@ export class DateFormatEditor extends DefaultFormatEditor<DateFormatEditorFormat
             value={formatParams.pattern}
             placeholder={defaultPattern}
             onChange={(e) => {
-              this.onChange({ pattern: e.target.value });
+              this.onChange({
+                pattern: e.target.value,
+              });
             }}
             isInvalid={!!error}
           />

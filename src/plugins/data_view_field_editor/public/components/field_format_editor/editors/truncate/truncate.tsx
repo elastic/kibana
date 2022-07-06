@@ -18,7 +18,7 @@ import { FormatEditorSamples } from '../../samples';
 import { sample } from './sample';
 import { formatId } from './constants';
 
-interface TruncateFormatEditorFormatParams {
+export interface TruncateFormatEditorFormatParams {
   fieldLength: number;
 }
 
@@ -52,7 +52,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEdit
             onChange={(e) => {
               if (e.target.checkValidity()) {
                 this.onChange({
-                  fieldLength: e.target.value ? Number(e.target.value) : null,
+                  fieldLength: e.target.value ? Number(e.target.value) : undefined,
                 });
               } else {
                 onError(e.target.validationMessage);

@@ -33,7 +33,7 @@ interface OutputFormat {
   text: string;
 }
 
-interface DurationFormatEditorFormatParams {
+export interface DurationFormatEditorFormatParams {
   outputPrecision: number;
   inputFormat: string;
   outputFormat: string;
@@ -161,7 +161,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
                 max={20}
                 onChange={(e) => {
                   this.onChange({
-                    outputPrecision: e.target.value ? Number(e.target.value) : null,
+                    outputPrecision: e.target.value ? Number(e.target.value) : undefined,
                   });
                 }}
                 isInvalid={!!error}

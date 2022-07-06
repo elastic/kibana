@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { GetFieldsOptions } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsContentType } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { PureComponent, ReactText } from 'react';
@@ -80,7 +79,7 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
     return output;
   }
 
-  onChange = (newParams = {} as GetFieldsOptions) => {
+  onChange = (newParams = {} as Partial<FormatEditorProps<P>['formatParams']>) => {
     const { onChange, formatParams } = this.props;
 
     onChange({

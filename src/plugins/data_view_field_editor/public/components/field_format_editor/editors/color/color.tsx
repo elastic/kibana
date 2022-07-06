@@ -33,13 +33,15 @@ export interface ColorFormatEditorFormatParams {
   colors: Color[];
 }
 
+type ColorFormatEditorProps = FormatEditorProps<ColorFormatEditorFormatParams>;
+
 export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorFormatParams> {
   static formatId = formatId;
-  constructor(props: FormatEditorProps<ColorFormatEditorFormatParams>) {
+  constructor(props: ColorFormatEditorProps) {
     super(props);
     this.onChange({
-      fieldType: props.fieldType,
-    });
+      fieldType: props.fieldType, // FIXME: should this key be `type` ?
+    } as unknown as ColorFormatEditorFormatParams);
   }
 
   onColorChange = (newColorParams: Partial<Color>, index: number) => {
