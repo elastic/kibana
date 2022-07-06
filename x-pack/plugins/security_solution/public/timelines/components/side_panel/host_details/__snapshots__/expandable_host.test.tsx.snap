@@ -329,7 +329,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
             data-test-subj="loading-spinner"
             role="progressbar"
           />
