@@ -8,7 +8,7 @@
 
 /* eslint react-hooks/exhaustive-deps: 2 */
 
-import React, { useReducer, useCallback, useEffect, useRef, ReactNode } from 'react';
+import React, { useReducer, useCallback, useEffect, useRef, useMemo, ReactNode } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
@@ -102,7 +102,7 @@ function TableListView<T>({
   headingId,
   rowHeader,
   tableCaption,
-  tableColumns,
+  tableColumns: tableColumnsProps,
   searchFilters,
   initialPageSize,
   listingLimit,
@@ -151,6 +151,49 @@ function TableListView<T>({
   } = state;
   const hasNoItems = !isFetchingItems && items.length === 0 && !filter;
   const pageDTS = `${entityName}LandingPage`;
+
+  const tableColumns = useMemo(() => {
+    let columns = tableColumnsProps.slice();
+
+    if (stateTableColumns) {
+      columns = columns.concat(stateTableColumns);
+    }
+
+    // Add "Actions" column
+    if (editItem) {
+      const actions: EuiTableActionsColumnType<T>['actions'] = [
+        {
+          name: (item) =>
+            i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
+              defaultMessage: 'Edit {itemDescription}',
+              values: {
+                itemDescription: get(item, rowHeader),
+              },
+            }),
+          description: i18n.translate(
+            'kibana-react.tableListView.listing.table.editActionDescription',
+            {
+              defaultMessage: 'Edit',
+            }
+          ),
+          icon: 'pencil',
+          type: 'icon',
+          enabled: (v) => !(v as unknown as { error: string })?.error,
+          onClick: editItem,
+        },
+      ];
+
+      columns.push({
+        name: i18n.translate('kibana-react.tableListView.listing.table.actionTitle', {
+          defaultMessage: 'Actions',
+        }),
+        width: '100px',
+        actions,
+      });
+    }
+
+    return columns;
+  }, [tableColumnsProps, stateTableColumns, editItem, rowHeader]);
 
   const fetchItems = useCallback(async () => {
     dispatch({ type: 'onFetchItems' });
@@ -217,49 +260,6 @@ function TableListView<T>({
     theme.theme$,
     toastNotifications,
   ]);
-
-  const getTableColumns = useCallback(() => {
-    let columns = tableColumns.slice();
-
-    if (stateTableColumns) {
-      columns = columns.concat(stateTableColumns);
-    }
-
-    // Add "Actions" column
-    if (editItem) {
-      const actions: EuiTableActionsColumnType<T>['actions'] = [
-        {
-          name: (item) =>
-            i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
-              defaultMessage: 'Edit {itemDescription}',
-              values: {
-                itemDescription: get(item, rowHeader),
-              },
-            }),
-          description: i18n.translate(
-            'kibana-react.tableListView.listing.table.editActionDescription',
-            {
-              defaultMessage: 'Edit',
-            }
-          ),
-          icon: 'pencil',
-          type: 'icon',
-          enabled: (v) => !(v as unknown as { error: string })?.error,
-          onClick: editItem,
-        },
-      ];
-
-      columns.push({
-        name: i18n.translate('kibana-react.tableListView.listing.table.actionTitle', {
-          defaultMessage: 'Actions',
-        }),
-        width: '100px',
-        actions,
-      });
-    }
-
-    return columns;
-  }, [editItem, stateTableColumns, rowHeader, tableColumns]);
 
   const renderCreateButton = useCallback(() => {
     if (createItem) {
@@ -506,7 +506,7 @@ function TableListView<T>({
       <EuiInMemoryTable
         itemId="id"
         items={items}
-        columns={getTableColumns()}
+        columns={tableColumns}
         pagination={pagination}
         loading={isFetchingItems}
         message={noItemsMessage}
@@ -525,7 +525,6 @@ function TableListView<T>({
     deleteItems,
     entityNamePlural,
     filter,
-    getTableColumns,
     isFetchingItems,
     items,
     pagination,
@@ -534,6 +533,7 @@ function TableListView<T>({
     searchFilters,
     tableCaption,
     tableSort,
+    tableColumns,
   ]);
 
   // ------------
