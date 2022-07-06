@@ -59,7 +59,7 @@ jest.doMock('./ui_settings/ui_settings_service', () => ({
 }));
 
 export const mockEnsureValidConfiguration = jest.fn();
-jest.doMock('./config/ensure_valid_configuration', () => ({
+jest.doMock('@kbn/core-config-server-internal', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
 
@@ -68,11 +68,18 @@ import { RenderingService, mockRenderingService } from './rendering/__mocks__/re
 export { mockRenderingService };
 jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
 
-import { environmentServiceMock } from './environment/environment_service.mock';
+import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 
 export const mockEnvironmentService = environmentServiceMock.create();
-jest.doMock('./environment/environment_service', () => ({
+jest.doMock('@kbn/core-environment-server-internal', () => ({
   EnvironmentService: jest.fn(() => mockEnvironmentService),
+}));
+
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+
+export const mockNodeService = nodeServiceMock.create();
+jest.doMock('@kbn/core-node-server-internal', () => ({
+  NodeService: jest.fn(() => mockNodeService),
 }));
 
 import { metricsServiceMock } from './metrics/metrics_service.mock';

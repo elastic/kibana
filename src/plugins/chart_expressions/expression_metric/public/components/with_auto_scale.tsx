@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef, useEffect, useState, ComponentType, useMemo, CSSProperties } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  ComponentType,
+  useMemo,
+  CSSProperties,
+} from 'react';
 import { throttle } from 'lodash';
 import { useResizeObserver } from '@elastic/eui';
 import { autoScaleWrapperStyle } from './with_auto_scale.styles';
@@ -18,6 +26,7 @@ interface AutoScaleParams {
 
 interface AutoScaleProps {
   autoScaleParams?: AutoScaleParams;
+  renderComplete?: () => void;
 }
 interface ClientDimensionable {
   clientWidth: number;
@@ -55,7 +64,7 @@ function hasAutoscaleProps<T>(props: T): props is T & AutoScaleProps {
 
 function getWrappedComponentProps<T>(props: T) {
   if (hasAutoscaleProps(props)) {
-    const { autoScaleParams, ...rest } = props;
+    const { autoScaleParams, renderComplete, ...rest } = props;
     return rest;
   }
 
@@ -64,12 +73,13 @@ function getWrappedComponentProps<T>(props: T) {
 
 export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
   return (props: T & AutoScaleProps) => {
+    const { autoScaleParams, renderComplete } = props;
+    const restProps = getWrappedComponentProps(props);
     // An initial scale of 0 means we always redraw
     // at least once, which is sub-optimal, but it
     // prevents an annoying flicker.
-    const { autoScaleParams } = props;
-    const restProps = getWrappedComponentProps(props);
     const [scale, setScale] = useState(0);
+    const [resized, setResized] = useState(false);
     const parentRef = useRef<HTMLDivElement>(null);
     const childrenRef = useRef<HTMLDivElement>(null);
     const parentDimensions = useResizeObserver(parentRef.current);
@@ -87,6 +97,9 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
           if (scale !== newScale) {
             setScale(newScale);
           }
+          if (parentDimensions.height && parentDimensions.width) {
+            setResized(true);
+          }
         }),
       [parentDimensions, setScale, scale, autoScaleParams]
     );
@@ -94,6 +107,12 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
     useEffect(() => {
       scaleFn();
     }, [scaleFn]);
+
+    useLayoutEffect(() => {
+      if (resized) {
+        renderComplete?.();
+      }
+    }, [renderComplete, resized]);
 
     return (
       <div ref={parentRef} style={autoScaleParams?.containerStyles} css={autoScaleWrapperStyle}>

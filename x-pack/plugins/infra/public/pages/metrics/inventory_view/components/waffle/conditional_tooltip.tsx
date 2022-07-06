@@ -59,8 +59,8 @@ export const ConditionalToolTip = withTheme(({ theme, node, nodeType, currentTim
       <div
         style={{
           borderBottom: `1px solid ${theme?.eui.euiColorMediumShade}`,
-          paddingBottom: theme?.eui.paddingSizes.xs,
-          marginBottom: theme?.eui.paddingSizes.xs,
+          paddingBottom: theme?.eui.euiSizeXS,
+          marginBottom: theme?.eui.euiSizeXS,
         }}
       >
         {node.name}

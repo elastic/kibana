@@ -21,6 +21,8 @@ import {
   RuleTypeModel,
   AlertsTableProps,
   AlertsTableConfigurationRegistry,
+  RuleTagBadgeOptions,
+  RuleTagBadgeProps,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -36,6 +38,7 @@ import { CreateConnectorFlyoutProps } from './application/sections/action_connec
 import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import { getActionFormLazy } from './common/get_action_form';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -90,8 +93,8 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRuleStatusFilter: (props) => {
       return getRuleStatusFilterLazy(props);
     },
-    getRuleTagBadge: (props) => {
-      return getRuleTagBadgeLazy(props);
+    getRuleTagBadge: <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
+      return getRuleTagBadgeLazy<T>(props);
     },
     getRuleEventLogList: (props) => {
       return getRuleEventLogListLazy(props);
@@ -101,6 +104,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getRulesList: () => {
       return getRulesListLazy({ connectorServices });
+    },
+    getRuleStatusPanel: (props) => {
+      return getRuleStatusPanelLazy(props);
     },
   };
 }

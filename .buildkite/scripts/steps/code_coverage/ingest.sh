@@ -17,14 +17,16 @@ export HOST_FROM_VAULT
 TIME_STAMP=$(date +"%Y-%m-%dT%H:%M:00Z")
 export TIME_STAMP
 
-echo "--- Download previous git sha"
-.buildkite/scripts/steps/code_coverage/reporting/downloadPrevSha.sh
-PREVIOUS_SHA=$(cat downloaded_previous.txt)
-
-echo "--- Upload new git sha"
-.buildkite/scripts/steps/code_coverage/reporting/uploadPrevSha.sh
-
 .buildkite/scripts/bootstrap.sh
+
+revolveBuildHashes() {
+  echo "--- Download previous git sha"
+  .buildkite/scripts/steps/code_coverage/reporting/downloadPrevSha.sh
+  PREVIOUS_SHA=$(cat downloaded_previous.txt)
+
+  echo "--- Upload new git sha"
+  .buildkite/scripts/steps/code_coverage/reporting/uploadPrevSha.sh
+}
 
 collectRan() {
   buildkite-agent artifact download target/ran_files/* .
@@ -59,9 +61,9 @@ archiveReports() {
   local xs=("$@")
   for x in "${xs[@]}"; do
     echo "### Collect and Upload for: ${x}"
-#    fileHeads "target/file-heads-archive-reports-for-${x}.txt" "target/kibana-coverage/${x}"
-#    dirListing "target/dir-listing-${x}-combined-during-archiveReports.txt" target/kibana-coverage/${x}-combined
-#    dirListing "target/dir-listing-${x}-during-archiveReports.txt" target/kibana-coverage/${x}
+    #    fileHeads "target/file-heads-archive-reports-for-${x}.txt" "target/kibana-coverage/${x}"
+    #    dirListing "target/dir-listing-${x}-combined-during-archiveReports.txt" target/kibana-coverage/${x}-combined
+    #    dirListing "target/dir-listing-${x}-during-archiveReports.txt" target/kibana-coverage/${x}
     collectAndUpload "target/kibana-coverage/${x}/kibana-${x}-coverage.tar.gz" "target/kibana-coverage/${x}-combined"
   done
 }
@@ -86,20 +88,49 @@ mergeAll() {
   done
 }
 
+annotateForStaticSite() {
+  local xs=("$@")
+  local markdownLinks=()
+
+  OLDIFS="${IFS}"
+  IFS=$'\n'
+
+  for x in "${xs[@]}"; do
+    markdownLinks+=(" - [$x](https://kibana-coverage.elastic.dev/${TIME_STAMP}/${x}-combined/index.html)")
+  done
+
+  content=$(
+    cat <<-EOF
+### Browse the Code Coverage Static Site
+
+_Links are pinned to the current build number._
+
+${markdownLinks[*]}
+EOF
+  )
+
+  IFS="${OLDIFS}"
+
+  buildkite-agent annotate --style "info" --context 'ctx-coverage-static-site' "${content}"
+}
+
 modularize() {
   collectRan
   if [ -d target/ran_files ]; then
+    revolveBuildHashes
     uniqueifyRanConfigs "${ran[@]}"
     fetchArtifacts "${uniqRanConfigs[@]}"
     mergeAll "${uniqRanConfigs[@]}"
     archiveReports "${uniqRanConfigs[@]}"
     .buildkite/scripts/steps/code_coverage/reporting/prokLinks.sh "${uniqRanConfigs[@]}"
     .buildkite/scripts/steps/code_coverage/reporting/uploadStaticSite.sh "${uniqRanConfigs[@]}"
+    annotateForStaticSite "${uniqRanConfigs[@]}"
     .buildkite/scripts/steps/code_coverage/reporting/collectVcsInfo.sh
     source .buildkite/scripts/steps/code_coverage/reporting/ingestData.sh 'elastic+kibana+code-coverage' \
       "${BUILDKITE_BUILD_NUMBER}" "${BUILDKITE_BUILD_URL}" "${PREVIOUS_SHA}" \
       'src/dev/code_coverage/ingest_coverage/team_assignment/team_assignments.txt'
     ingestModular "${uniqRanConfigs[@]}"
+    annotateForKibanaLinks
   else
     echo "--- Found zero configs that ran, cancelling ingestion."
     exit 11
@@ -107,4 +138,3 @@ modularize() {
 }
 
 modularize
-echo "### unique ran configs: ${uniqRanConfigs[*]}"

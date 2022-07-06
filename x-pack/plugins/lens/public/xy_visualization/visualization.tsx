@@ -16,12 +16,7 @@ import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import {
-  FillStyle,
-  SeriesType,
-  YAxisMode,
-  ExtendedYConfig,
-} from '@kbn/expression-xy-plugin/common';
+import { FillStyle, SeriesType, YAxisMode } from '@kbn/expression-xy-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getSuggestions } from './xy_suggestions';
@@ -29,7 +24,16 @@ import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
-import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConfig } from './types';
+import {
+  State,
+  visualizationTypes,
+  XYSuggestion,
+  XYLayerConfig,
+  XYDataLayerConfig,
+  YConfig,
+  YAxisMode,
+  SeriesType,
+} from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -46,6 +50,7 @@ import {
   getAnnotationsSupportedLayer,
   setAnnotationsDimension,
   getUniqueLabels,
+  onAnnotationDrop,
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
@@ -72,6 +77,7 @@ import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_pane
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
+import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 
 export const getXyVisualization = ({
   core,
@@ -308,6 +314,20 @@ export const getXyVisualization = ({
     return getFirstDataLayer(state.layers)?.palette;
   },
 
+  onDrop(props) {
+    const targetLayer: XYLayerConfig | undefined = props.prevState.layers.find(
+      (l) => l.layerId === props.target.layerId
+    );
+    if (!targetLayer) {
+      throw new Error('target layer should exist');
+    }
+
+    if (isAnnotationsLayer(targetLayer)) {
+      return onAnnotationDrop?.(props) || props.prevState;
+    }
+    return onDropForVisualization(props, this);
+  },
+
   setDimension(props) {
     const { prevState, layerId, columnId, groupId } = props;
 
@@ -342,14 +362,14 @@ export const getXyVisualization = ({
   },
 
   updateLayersConfigurationFromContext({ prevState, layerId, context }) {
-    const { chartType, axisPosition, palette, metrics } = context;
+    const { chartType, axisPosition, palette, metrics, collapseFn } = context;
     const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
     if (!foundLayer || !isDataLayer(foundLayer)) {
       return prevState;
     }
     const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
     const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map<ExtendedYConfig>((metric, idx) => {
+    const yConfig = metrics.map<YConfig>((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
@@ -361,6 +381,7 @@ export const getXyVisualization = ({
       ...foundLayer,
       ...(chartType && { seriesType: chartType as SeriesType }),
       ...(palette && { palette }),
+      collapseFn,
       yConfig,
       layerType: isReferenceLine ? layerTypes.REFERENCELINE : layerTypes.DATA,
     } as XYLayerConfig;

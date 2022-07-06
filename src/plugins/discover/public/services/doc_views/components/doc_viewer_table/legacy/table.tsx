@@ -9,7 +9,6 @@
 import '../table.scss';
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { getTypeForFieldIcon } from '../../../../../utils/get_type_for_field_icon';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { SHOW_MULTIFIELDS } from '../../../../../../common';
@@ -57,10 +56,9 @@ export const DocViewerLegacyTable = ({
     };
   }, []);
 
-  const flattened = flattenHit(hit, dataView, { source: true, includeIgnoredValues: true });
-  const fieldsToShow = getFieldsToShow(Object.keys(flattened), dataView, showMultiFields);
+  const fieldsToShow = getFieldsToShow(Object.keys(hit.flattened), dataView, showMultiFields);
 
-  const items: FieldRecordLegacy[] = Object.keys(flattened)
+  const items: FieldRecordLegacy[] = Object.keys(hit.flattened)
     .filter((fieldName) => {
       return fieldsToShow.includes(fieldName);
     })
@@ -79,13 +77,13 @@ export const DocViewerLegacyTable = ({
         : fieldMapping
         ? getTypeForFieldIcon(fieldMapping)
         : undefined;
-      const ignored = getIgnoredReason(fieldMapping ?? field, hit._ignored);
+      const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
       return {
         action: {
           onToggleColumn,
           onFilter: filter,
           isActive: !!columns?.includes(field),
-          flattenedField: flattened[field],
+          flattenedField: hit.flattened[field],
         },
         field: {
           field,
@@ -96,8 +94,8 @@ export const DocViewerLegacyTable = ({
         },
         value: {
           formattedValue: formatFieldValue(
-            flattened[field],
-            hit,
+            hit.flattened[field],
+            hit.raw,
             fieldFormats,
             dataView,
             fieldMapping

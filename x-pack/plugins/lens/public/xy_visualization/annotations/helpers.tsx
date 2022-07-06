@@ -118,6 +118,207 @@ export const getAnnotationsSupportedLayer = (
   };
 };
 
+const getDefaultAnnotationConfig = (id: string, timestamp: string): EventAnnotationConfig => ({
+  label: defaultAnnotationLabel,
+  key: {
+    type: 'point_in_time',
+    timestamp,
+  },
+  icon: 'triangle',
+  id,
+});
+
+const createCopiedAnnotation = (
+  newId: string,
+  timestamp: string,
+  source?: EventAnnotationConfig
+): EventAnnotationConfig => {
+  if (!source) {
+    return getDefaultAnnotationConfig(newId, timestamp);
+  }
+  return {
+    ...source,
+    id: newId,
+  };
+};
+
+export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
+  prevState,
+  frame,
+  source,
+  target,
+  dropType,
+}) => {
+  const targetLayer = prevState.layers.find((l) => l.layerId === target.layerId);
+  const sourceLayer = prevState.layers.find((l) => l.layerId === source.layerId);
+  if (
+    !targetLayer ||
+    !isAnnotationsLayer(targetLayer) ||
+    !sourceLayer ||
+    !isAnnotationsLayer(sourceLayer)
+  ) {
+    return prevState;
+  }
+  const targetAnnotation = targetLayer.annotations.find(({ id }) => id === target.columnId);
+  const sourceAnnotation = sourceLayer.annotations.find(({ id }) => id === source.columnId);
+  switch (dropType) {
+    case 'reorder':
+      if (!targetAnnotation || !sourceAnnotation || source.layerId !== target.layerId) {
+        return prevState;
+      }
+      const newAnnotations = targetLayer.annotations.filter((c) => c.id !== sourceAnnotation.id);
+      const targetPosition = newAnnotations.findIndex((c) => c.id === targetAnnotation.id);
+      const targetIndex = targetLayer.annotations.indexOf(sourceAnnotation);
+      const sourceIndex = targetLayer.annotations.indexOf(targetAnnotation);
+      newAnnotations.splice(
+        targetIndex < sourceIndex ? targetPosition + 1 : targetPosition,
+        0,
+        sourceAnnotation
+      );
+      return {
+        ...prevState,
+        layers: prevState.layers.map((l) =>
+          l.layerId === target.layerId ? { ...targetLayer, annotations: newAnnotations } : l
+        ),
+      };
+    case 'swap_compatible':
+      if (!targetAnnotation || !sourceAnnotation) {
+        return prevState;
+      }
+      return {
+        ...prevState,
+        layers: prevState.layers.map((l): XYLayerConfig => {
+          if (!isAnnotationsLayer(l) || !isAnnotationsLayer(targetLayer)) {
+            return l;
+          }
+          if (l.layerId === target.layerId) {
+            return {
+              ...targetLayer,
+              annotations: [
+                ...targetLayer.annotations.map(
+                  (a): EventAnnotationConfig => (a === targetAnnotation ? sourceAnnotation : a)
+                ),
+              ],
+            };
+          }
+          if (l.layerId === source.layerId) {
+            return {
+              ...sourceLayer,
+              annotations: [
+                ...sourceLayer.annotations.map(
+                  (a): EventAnnotationConfig => (a === sourceAnnotation ? targetAnnotation : a)
+                ),
+              ],
+            };
+          }
+          return l;
+        }),
+      };
+    case 'replace_compatible':
+      if (!targetAnnotation || !sourceAnnotation) {
+        return prevState;
+      }
+
+      return {
+        ...prevState,
+        layers: prevState.layers.map((l) => {
+          if (l.layerId === source.layerId) {
+            return {
+              ...sourceLayer,
+              annotations: sourceLayer.annotations.filter((a) => a !== sourceAnnotation),
+            };
+          }
+          if (l.layerId === target.layerId) {
+            return {
+              ...targetLayer,
+              annotations: [
+                ...targetLayer.annotations.map((a) =>
+                  a === targetAnnotation ? sourceAnnotation : a
+                ),
+              ],
+            };
+          }
+          return l;
+        }),
+      };
+    case 'duplicate_compatible':
+      if (targetAnnotation) {
+        return prevState;
+      }
+      return {
+        ...prevState,
+        layers: prevState.layers.map(
+          (l): XYLayerConfig =>
+            l.layerId === target.layerId
+              ? {
+                  ...targetLayer,
+                  annotations: [
+                    ...targetLayer.annotations,
+                    createCopiedAnnotation(
+                      target.columnId,
+                      getStaticDate(getDataLayers(prevState.layers), frame),
+                      sourceAnnotation
+                    ),
+                  ],
+                }
+              : l
+        ),
+      };
+    case 'replace_duplicate_compatible':
+      if (!targetAnnotation) {
+        return prevState;
+      }
+      return {
+        ...prevState,
+        layers: prevState.layers.map((l) => {
+          if (l.layerId === target.layerId) {
+            return {
+              ...targetLayer,
+              annotations: [
+                ...targetLayer.annotations.map((a) =>
+                  a === targetAnnotation
+                    ? createCopiedAnnotation(
+                        target.columnId,
+                        getStaticDate(getDataLayers(prevState.layers), frame),
+                        sourceAnnotation
+                      )
+                    : a
+                ),
+              ],
+            };
+          }
+          return l;
+        }),
+      };
+    case 'move_compatible':
+      if (targetAnnotation || !sourceAnnotation) {
+        return prevState;
+      }
+
+      return {
+        ...prevState,
+        layers: prevState.layers.map((l): XYLayerConfig => {
+          if (l.layerId === source.layerId) {
+            return {
+              ...sourceLayer,
+              annotations: sourceLayer.annotations.filter((a) => a !== sourceAnnotation),
+            };
+          }
+          if (l.layerId === target.layerId) {
+            return {
+              ...targetLayer,
+              annotations: [...targetLayer.annotations, sourceAnnotation],
+            };
+          }
+          return l;
+        }),
+      };
+    default:
+      return prevState;
+  }
+  return prevState;
+};
+
 export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = ({
   prevState,
   layerId,
@@ -125,47 +326,30 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   previousColumn,
   frame,
 }) => {
-  const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
-  if (!foundLayer || !isAnnotationsLayer(foundLayer)) {
+  const targetLayer = prevState.layers.find((l) => l.layerId === layerId);
+  if (!targetLayer || !isAnnotationsLayer(targetLayer)) {
     return prevState;
   }
-  const inputAnnotations = foundLayer.annotations as XYAnnotationLayerConfig['annotations'];
-  const currentConfig = inputAnnotations?.find(({ id }) => id === columnId);
-  const previousConfig = previousColumn
-    ? inputAnnotations?.find(({ id }) => id === previousColumn)
+  const sourceAnnotation = previousColumn
+    ? targetLayer.annotations?.find(({ id }) => id === previousColumn)
     : undefined;
-
-  let resultAnnotations = [...inputAnnotations] as XYAnnotationLayerConfig['annotations'];
-
-  if (!currentConfig) {
-    resultAnnotations.push({
-      type: 'manual',
-      label: defaultAnnotationLabel,
-      key: {
-        type: 'point_in_time',
-        timestamp: getStaticDate(getDataLayers(prevState.layers), frame),
-      },
-      icon: 'triangle',
-      ...previousConfig,
-      id: columnId,
-    });
-  } else if (currentConfig && previousConfig) {
-    // TODO: reordering should not live in setDimension, to be refactored
-    resultAnnotations = inputAnnotations.filter((c) => c.id !== previousConfig.id);
-    const targetPosition = resultAnnotations.findIndex((c) => c.id === currentConfig.id);
-    const targetIndex = inputAnnotations.indexOf(previousConfig);
-    const sourceIndex = inputAnnotations.indexOf(currentConfig);
-    resultAnnotations.splice(
-      targetIndex < sourceIndex ? targetPosition + 1 : targetPosition,
-      0,
-      previousConfig
-    );
-  }
 
   return {
     ...prevState,
     layers: prevState.layers.map((l) =>
-      l.layerId === layerId ? { ...foundLayer, annotations: resultAnnotations } : l
+      l.layerId === layerId
+        ? {
+            ...targetLayer,
+            annotations: [
+              ...targetLayer.annotations,
+              createCopiedAnnotation(
+                columnId,
+                getStaticDate(getDataLayers(prevState.layers), frame),
+                sourceAnnotation
+              ),
+            ],
+          }
+        : l
     ),
   };
 };
@@ -225,7 +409,6 @@ export const getAnnotationsConfiguration = ({
           defaultMessage: 'Annotations require a time based chart to work. Add a date histogram.',
         }),
         required: false,
-        requiresPreviousColumnOnDuplicate: true,
         supportsMoreColumns: true,
         supportFieldFormat: false,
         enableDimensionEditor: true,

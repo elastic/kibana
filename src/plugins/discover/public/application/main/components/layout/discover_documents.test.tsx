@@ -18,12 +18,13 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments } from './discover_documents';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { ElasticSearchHit } from '../../../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { EsHitRecord } from '../../../../types';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
+function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -31,7 +32,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
 
   const documents$ = new BehaviorSubject({
     fetchStatus,
-    result: hits,
+    result: hits.map((hit) => buildDataTableRecord(hit, indexPatternMock)),
   }) as DataDocuments$;
 
   const props = {
@@ -62,13 +63,13 @@ describe('Discover documents layout', () => {
   });
 
   test('render complete when loading but documents were already fetched', () => {
-    const component = mountComponent(FetchStatus.LOADING, esHits as ElasticSearchHit[]);
+    const component = mountComponent(FetchStatus.LOADING, esHits);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });
 
   test('render complete', () => {
-    const component = mountComponent(FetchStatus.COMPLETE, esHits as ElasticSearchHit[]);
+    const component = mountComponent(FetchStatus.COMPLETE, esHits);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });

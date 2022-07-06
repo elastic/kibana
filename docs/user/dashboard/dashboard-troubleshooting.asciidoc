@@ -1,14 +1,5 @@
 [[dashboard-troubleshooting]]
-== Dashboard and visualizations troubleshooting
-++++
-<titleabbrev>Troubleshooting</titleabbrev>
-++++
-
-Find solutions to common dashboard and visualization issues.
-
-[float]
-[[defer-loading-panels-below-the-fold]]
-=== Improve dashboard loading time
+== Improve dashboard loading time
 
 To improve the dashboard loading time, enable *Defer loading panels below the fold* *Lab*, which loads dashboard panels as they become visible on the dashboard.
 
@@ -25,45 +16,4 @@ To enable *Labs*, contact your administrator, or configure the <<presentation-la
 * *Session* &mdash; Enables the lab for this browser session, then resets after you close the browser.
 
 . Click *Close*.
-
-[float]
-[[migrate-timelion-app-worksheets]]
-=== Migrate Timelion app worksheets
-
-deprecated::[The *Timelion* app is deprecated in 7.0.0, and will be removed in 7.16.0. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
-
-. Open the main menu, then click *Dashboard*.
-
-. On the *Dashboards* page, click *Create dashboard*.
-
-. For each *Timelion* app worksheet, create a visualization with the *Timelion* editor.
-
-.. On the dashboard, click *All types > Aggregation based*, then select *Timelion*.
-
-.. In your browser, open a new tab, the open the *Timelion* app.
-
-.. Select the chart you want to copy, then copy the chart expression.
-+
-[role="screenshot"]
-image::images/timelion-copy-expression.png[Timelion app chart]
-
-.. Go to the *Timelion* editor, paste the chart expression in the *Timelion expression* field, then click *Update*.
-+
-[role="screenshot"]
-image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
-
-. Save the visualization.
-
-.. In the toolbar, click *Save to library*.
-
-.. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
-
-.. Make sure that *Add to Dashboard after saving* is selected.
-
-.. Click *Save and return*.
-+
-The Timelion visualization panel appears on the dashboard.
-+
-[role="screenshot"]
-image::user/dashboard/images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
 

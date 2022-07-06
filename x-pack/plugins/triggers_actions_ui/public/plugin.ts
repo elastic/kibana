@@ -38,6 +38,7 @@ import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
 import { getRulesListLazy } from './common/get_rules_list';
 import { getActionFormLazy } from './common/get_action_form';
+import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -54,6 +55,7 @@ import type {
   RuleTagFilterProps,
   RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleTagBadgeOptions,
   RuleEventLogListProps,
   RulesListNotifyBadgeProps,
   AlertsTableConfigurationRegistry,
@@ -67,6 +69,7 @@ import { PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -98,12 +101,15 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
   getRuleTagFilter: (props: RuleTagFilterProps) => ReactElement<RuleTagFilterProps>;
   getRuleStatusFilter: (props: RuleStatusFilterProps) => ReactElement<RuleStatusFilterProps>;
-  getRuleTagBadge: (props: RuleTagBadgeProps) => ReactElement<RuleTagBadgeProps>;
+  getRuleTagBadge: <T extends RuleTagBadgeOptions>(
+    props: RuleTagBadgeProps<T>
+  ) => ReactElement<RuleTagBadgeProps<T>>;
   getRuleEventLogList: (props: RuleEventLogListProps) => ReactElement<RuleEventLogListProps>;
   getRulesListNotifyBadge: (
     props: RulesListNotifyBadgeProps
   ) => ReactElement<RulesListNotifyBadgeProps>;
   getRulesList: () => ReactElement;
+  getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
 }
 
 interface PluginsSetup {
@@ -305,7 +311,7 @@ export class Plugin
       getRuleStatusFilter: (props: RuleStatusFilterProps) => {
         return getRuleStatusFilterLazy(props);
       },
-      getRuleTagBadge: (props: RuleTagBadgeProps) => {
+      getRuleTagBadge: <T extends RuleTagBadgeOptions>(props: RuleTagBadgeProps<T>) => {
         return getRuleTagBadgeLazy(props);
       },
       getRuleEventLogList: (props: RuleEventLogListProps) => {
@@ -316,6 +322,9 @@ export class Plugin
       },
       getRulesList: () => {
         return getRulesListLazy({ connectorServices: this.connectorServices! });
+      },
+      getRuleStatusPanel: (props: RuleStatusPanelProps) => {
+        return getRuleStatusPanelLazy(props);
       },
     };
   }

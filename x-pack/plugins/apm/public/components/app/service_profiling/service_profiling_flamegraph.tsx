@@ -60,7 +60,7 @@ const TooltipContainer = euiStyled.div`
   background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
   border-radius: ${(props) => props.theme.eui.euiBorderRadius};
   color: ${(props) => props.theme.eui.euiColorLightestShade};
-  padding: ${(props) => props.theme.eui.paddingSizes.s};
+  padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 const formatValue = (

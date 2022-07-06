@@ -16,7 +16,7 @@ const ActionWrapper = euiStyled.div`
   width: 0;
   transform: translate(6px);
   transition: transform 50ms ease-in-out;
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const OverviewPanel = euiStyled(EuiPanel)<{
@@ -24,7 +24,7 @@ const OverviewPanel = euiStyled(EuiPanel)<{
 }>`
   &&& {
     background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
-    padding: ${({ theme }) => theme.eui.paddingSizes.s};
+    padding: ${({ theme }) => theme.eui.euiSizeS};
     height: 78px;
   }
 

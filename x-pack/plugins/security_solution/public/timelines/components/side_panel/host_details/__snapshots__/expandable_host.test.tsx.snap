@@ -65,7 +65,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
 }
 
 .c4 {
-  padding: 16px;
+  padding: 12px;
   background: rgba(250,251,253,0.9);
   bottom: 0;
   left: 0;
@@ -327,7 +327,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
             data-test-subj="loading-spinner"
             role="progressbar"
           />

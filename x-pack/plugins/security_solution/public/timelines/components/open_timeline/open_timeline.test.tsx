@@ -35,9 +35,7 @@ jest.mock('react-router-dom', () => {
 const mockTheme = getMockTheme({
   eui: {
     euiSizeL: '10px',
-    paddingSizes: {
-      s: '10px',
-    },
+    euiSizeS: '10px',
     euiBreakpoints: {
       l: '1200px',
     },
