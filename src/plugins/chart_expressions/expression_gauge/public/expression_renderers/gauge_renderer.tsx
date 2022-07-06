@@ -9,31 +9,37 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ExpressionGaugePluginStart } from '../plugin';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
-import { getFormatService, getPaletteService, getThemeService } from '../services';
+import { getFormatService, getPaletteService } from '../services';
+import { extractOriginatingApp } from '../../../common';
 
 interface ExpressionGaugeRendererDependencies {
-  theme: ThemeServiceStart;
+  getStartDeps: StartServicesGetter<ExpressionGaugePluginStart>;
 }
 
 export const gaugeRenderer: (
   deps: ExpressionGaugeRendererDependencies
-) => ExpressionRenderDefinition<GaugeExpressionProps> = ({ theme }) => ({
+) => ExpressionRenderDefinition<GaugeExpressionProps> = ({ getStartDeps }) => ({
   name: EXPRESSION_GAUGE_NAME,
   displayName: i18n.translate('expressionGauge.renderer.visualizationName', {
     defaultMessage: 'Gauge',
   }),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const { core, plugins } = getStartDeps();
+
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     const renderComplete = () => {
       let type: string;
+
       switch (config.args.shape) {
         case GaugeShapes.HORIZONTAL_BULLET:
           type = `${EXPRESSION_GAUGE_NAME}_horizontal`;
@@ -45,11 +51,12 @@ export const gaugeRenderer: (
           type = EXPRESSION_GAUGE_NAME;
       }
 
-      if (config.context?.originatingApp) {
-        handlers.logRenderTelemetry({
-          originatingApp: config.context.originatingApp,
-          counterEvents: type,
-        });
+      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+
+      if (originatingApp) {
+        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
+          `render_${originatingApp}_${type}`,
+        ]);
       }
 
       handlers.done();
@@ -57,12 +64,12 @@ export const gaugeRenderer: (
 
     const { GaugeComponent } = await import('../components/gauge_component');
     render(
-      <KibanaThemeProvider theme$={theme.theme$}>
+      <KibanaThemeProvider theme$={core.theme.theme$}>
         <div className="gauge-container" data-test-subj="gaugeChart">
           <GaugeComponent
             {...config}
             formatFactory={getFormatService().deserialize}
-            chartsThemeService={getThemeService()}
+            chartsThemeService={plugins.charts.theme}
             paletteService={getPaletteService()}
             renderComplete={renderComplete}
             uiState={handlers.uiState as PersistedState}

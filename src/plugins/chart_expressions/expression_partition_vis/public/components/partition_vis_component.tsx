@@ -60,7 +60,6 @@ import {
 } from '../utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
-import { VisTypePiePluginStartDependencies } from '../plugin';
 import {
   partitionVisWrapperStyle,
   partitionVisContainerStyle,
@@ -68,7 +67,7 @@ import {
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
-import { FilterEvent } from '../types';
+import { FilterEvent, StartDeps } from '../types';
 
 declare global {
   interface Window {
@@ -87,7 +86,7 @@ export interface PartitionVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
-  services: VisTypePiePluginStartDependencies;
+  services: Pick<StartDeps, 'data' | 'fieldFormats'>;
   syncColors: boolean;
 }
 

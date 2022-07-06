@@ -18,7 +18,6 @@ import {
   validateAxes,
 } from './validate';
 import { appendLayerIds, getDataLayers } from '../helpers';
-import { extractRenderContext } from '../../../common';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');
@@ -52,7 +51,6 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
       },
-      context: extractRenderContext(handlers.getExecutionContext()),
     },
   };
 };

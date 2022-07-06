@@ -18,7 +18,6 @@ import {
   GaugeTicksPositions,
 } from '../constants';
 import { isRoundShape } from '../utils';
-import { extractRenderContext } from '../../../common';
 
 export const errors = {
   centralMajorNotSupportedForShapeError: (shape: string) =>
@@ -232,7 +231,6 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
             (handlers.variables?.embeddableTitle as string) ??
             handlers.getExecutionContext?.()?.description,
         },
-        context: extractRenderContext(handlers.getExecutionContext()),
       },
     };
   },

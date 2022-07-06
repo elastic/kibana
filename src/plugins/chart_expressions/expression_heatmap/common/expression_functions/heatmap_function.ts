@@ -20,7 +20,6 @@ import {
   EXPRESSION_HEATMAP_GRID_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
 } from '../constants';
-import { extractRenderContext } from '../../../common/utils';
 
 const convertToVisDimension = (
   columns: DatatableColumn[],
@@ -231,7 +230,6 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
             (handlers.variables?.embeddableTitle as string) ??
             handlers.getExecutionContext?.()?.description,
         },
-        context: extractRenderContext(handlers.getExecutionContext()),
       },
     };
   },

@@ -18,7 +18,6 @@ import {
   MOSAIC_VIS_EXPRESSION_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
-import { extractRenderContext } from '../../../common';
 
 export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
   name: MOSAIC_VIS_EXPRESSION_NAME,
@@ -172,7 +171,6 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
         params: {
           listenOnChange: true,
         },
-        context: extractRenderContext(handlers.getExecutionContext()),
       },
     };
   },

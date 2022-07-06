@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { I18nStart, IUiSettingsClient, CoreStart } from '@kbn/core/public';
+import type { I18nStart, IUiSettingsClient, CoreStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -27,3 +28,6 @@ export const [getDataViewsStart, setDataViewsStart] =
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 
 export const [getCharts, setCharts] = createGetterSetter<ChartsPluginStart>('ChartsPluginStart');
+
+export const [getUsageCollectionStart, setUsageCollectionStart] =
+  createGetterSetter<UsageCollectionStart>('UsageCollection', false);

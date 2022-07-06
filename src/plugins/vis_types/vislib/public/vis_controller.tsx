@@ -9,11 +9,12 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { mountReactNode } from '@kbn/core/public/utils';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-
+import { getUsageCollectionStart } from './services';
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { BasicVislibParams } from './types';
@@ -32,7 +33,17 @@ const renderComplete = (
   visParams: BasicVislibParams | PieVisParams,
   handlers: IInterpreterRenderHandlers
 ) => {
-  handlers.logRenderTelemetry({ originatingApp: 'agg_based', counterEvents: visParams.type });
+  const usageCollection = getUsageCollectionStart();
+  const originatingApp = 'agg_based';
+
+  if (usageCollection) {
+    usageCollection?.reportUiCounter(
+      originatingApp,
+      METRIC_TYPE.COUNT,
+      `render_${originatingApp}_${visParams.type}`
+    );
+  }
+
   handlers.done();
 };
 

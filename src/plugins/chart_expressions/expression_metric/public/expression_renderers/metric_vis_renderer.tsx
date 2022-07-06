@@ -9,7 +9,6 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ExpressionValueVisDimension,
@@ -20,8 +19,12 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common/expression_renderers';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { Datatable } from '@kbn/expressions-plugin';
+import type { Datatable } from '@kbn/expressions-plugin';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { ExpressionMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
+import { extractOriginatingApp } from '../../../common';
 
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
@@ -53,49 +56,54 @@ async function metricFilterable(
   );
 }
 
-export const getMetricVisRenderer = (
-  theme: ThemeServiceStart
-): (() => ExpressionRenderDefinition<MetricVisRenderConfig>) => {
-  return () => ({
-    name: EXPRESSION_METRIC_NAME,
-    displayName: 'metric visualization',
-    reuseDomNode: true,
-    render: async (domNode, { visData, visConfig, context }, handlers) => {
-      handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
-      });
+interface ExpressionMetricVisRendererDependencies {
+  getStartDeps: StartServicesGetter<ExpressionMetricPluginStart>;
+}
 
-      const renderComplete = () => {
-        if (context?.originatingApp) {
-          handlers.logRenderTelemetry({
-            originatingApp: context.originatingApp,
-            counterEvents: 'metric',
-          });
-        }
-        handlers.done();
-      };
+export const getMetricVisRenderer: (
+  deps: ExpressionMetricVisRendererDependencies
+) => ExpressionRenderDefinition<MetricVisRenderConfig> = ({ getStartDeps }) => ({
+  name: EXPRESSION_METRIC_NAME,
+  displayName: 'metric visualization',
+  reuseDomNode: true,
+  render: async (domNode, { visData, visConfig }, handlers) => {
+    const { core, plugins } = getStartDeps();
 
-      const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
+    handlers.onDestroy(() => {
+      unmountComponentAtNode(domNode);
+    });
 
-      render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <VisualizationContainer
-            data-test-subj="mtrVis"
-            className="mtrVis"
-            showNoResult={!visData.rows?.length}
-            handlers={handlers}
-          >
-            <MetricVisComponent
-              visData={visData}
-              visParams={visConfig}
-              renderComplete={renderComplete}
-              fireEvent={handlers.event}
-              filterable={filterable}
-            />
-          </VisualizationContainer>
-        </KibanaThemeProvider>,
-        domNode
-      );
-    },
-  });
-};
+    const renderComplete = () => {
+      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+
+      if (originatingApp) {
+        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
+          `render_${originatingApp}_metric`,
+        ]);
+      }
+      handlers.done();
+    };
+
+    const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
+
+    render(
+      <KibanaThemeProvider theme$={core.theme.theme$}>
+        <VisualizationContainer
+          data-test-subj="mtrVis"
+          className="mtrVis"
+          showNoResult={!visData.rows?.length}
+          handlers={handlers}
+        >
+          <MetricVisComponent
+            visData={visData}
+            visParams={visConfig}
+            renderComplete={renderComplete}
+            fireEvent={handlers.event}
+            filterable={filterable}
+          />
+        </VisualizationContainer>
+      </KibanaThemeProvider>,
+      domNode
+    );
+  },
+});

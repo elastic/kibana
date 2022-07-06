@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
-import { METRIC_TYPE } from '@kbn/analytics';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 import {
   ExpressionRenderError,
@@ -22,7 +22,7 @@ import {
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
 import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
 
-import { getRenderersRegistry, getUsageCollection } from './services';
+import { getRenderersRegistry } from './services';
 
 export type IExpressionRendererExtraHandlers = Record<string, unknown>;
 
@@ -33,6 +33,7 @@ export interface ExpressionRenderHandlerParams {
   syncTooltips?: boolean;
   interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
+  executionContext?: KibanaExecutionContext;
 }
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
@@ -60,6 +61,7 @@ export class ExpressionRenderHandler {
       syncTooltips,
       interactive,
       hasCompatibleActions = async () => false,
+      executionContext
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
@@ -86,15 +88,8 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
-      logRenderTelemetry({ originatingApp, counterEvents }) {
-        const usageCollection = getUsageCollection();
-        const uiCounterEvents = (Array.isArray(counterEvents) ? counterEvents : [counterEvents])
-          .filter((item) => item !== undefined)
-          .map((item) => ['render', originatingApp, item].filter(Boolean).join('_'));
-
-        if (usageCollection && uiCounterEvents?.length) {
-          usageCollection.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, uiCounterEvents);
-        }
+      getExecutionContext() {
+        return executionContext;
       },
       update: (params: UpdateValue) => {
         this.updateSubject.next(params);

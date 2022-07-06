@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { ExpressionAstExpression } from '../ast';
 
 export interface ExpressionRenderDefinition<Config = unknown> {
@@ -105,5 +106,5 @@ export interface IInterpreterRenderHandlers {
    */
   uiState?: unknown;
 
-  logRenderTelemetry(renderTelemetry: IInterpreterRenderTelemetry): void;
+  getExecutionContext: () => KibanaExecutionContext | undefined;
 }

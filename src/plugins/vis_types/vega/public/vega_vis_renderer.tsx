@@ -8,11 +8,12 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
+import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { VegaVisualizationDependencies } from './plugin';
+import { getUsageCollectionStart } from './services';
 import { RenderValue } from './vega_fn';
 const LazyVegaVisComponent = lazy(() =>
   import('./async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
@@ -29,14 +30,19 @@ export const getVegaVisRenderer: (
     });
 
     const renderComplete = () => {
-      handlers.logRenderTelemetry({
-        originatingApp: 'vega',
-        counterEvents: [
-          '',
-          visData.useMap ? 'map' : undefined,
-          visData.isVegaLite ? 'lite' : 'normal',
-        ],
-      });
+      const usageCollection = getUsageCollectionStart();
+      const originatingApp = 'vega';
+
+      if (usageCollection) {
+        const counterEvents = [
+          `render_${originatingApp}`,
+          visData.useMap ? `render_${originatingApp}_map` : undefined,
+          `render_${originatingApp}_${visData.isVegaLite ? 'lite' : 'normal'}`,
+        ].filter(Boolean) as string[];
+
+        usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, counterEvents);
+      }
+
       handlers.done();
     };
 

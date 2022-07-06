@@ -13,8 +13,10 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { RangeFilterParams } from '@kbn/es-query';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
+import { getUsageCollection } from './helpers/plugin_services';
 
 const LazyTimelionVisComponent = lazy(() =>
   import('./async_services').then(({ TimelionVisComponent }) => ({ default: TimelionVisComponent }))
@@ -52,7 +54,15 @@ export const getTimelionVisRenderer: (
     };
 
     const renderComplete = () => {
-      handlers.logRenderTelemetry({ counterEvents: 'timelion', originatingApp: 'agg_based' });
+      const usageCollection = getUsageCollection();
+
+      if (usageCollection) {
+        usageCollection.reportUiCounter(
+          'agg_based',
+          METRIC_TYPE.COUNT,
+          `render_agg_based_timelion`
+        );
+      }
       handlers.done();
     };
 

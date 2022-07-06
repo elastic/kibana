@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
@@ -53,9 +52,7 @@ const createPlugin = async () => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
-  const setup = await plugin.setup(coreSetup, {
-    usageCollection: usageCollectionPluginMock.createSetupContract(),
-  });
+  const setup = await plugin.setup(coreSetup);
 
   return {
     pluginInitializerContext,

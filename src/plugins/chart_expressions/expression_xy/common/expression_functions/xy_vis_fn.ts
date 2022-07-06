@@ -35,7 +35,6 @@ import {
   validateLinesVisibilityForChartType,
   validateAxes,
 } from './validate';
-import { extractRenderContext } from '../../../common';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
   const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
@@ -157,7 +156,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
       },
-      context: extractRenderContext(handlers.getExecutionContext()),
     },
   };
 };

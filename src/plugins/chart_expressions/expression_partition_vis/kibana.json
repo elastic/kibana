@@ -14,5 +14,5 @@
   ],
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "fieldFormats", "presentationUtil"],
   "requiredBundles": ["kibanaReact"],
-  "optionalPlugins": []
+  "optionalPlugins": ["usageCollection"]
 }

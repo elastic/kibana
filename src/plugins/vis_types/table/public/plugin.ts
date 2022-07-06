@@ -9,10 +9,10 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { setFormatService } from './services';
+import { setFormatService, setUsageCollectionStart } from './services';
 import { registerTableVis } from './register_vis';
 
 /** @internal */
@@ -25,6 +25,7 @@ export interface TablePluginSetupDependencies {
 /** @internal */
 export interface TablePluginStartDependencies {
   data: DataPublicPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 /** @internal */
@@ -35,7 +36,11 @@ export class TableVisPlugin
     registerTableVis(core, deps);
   }
 
-  public start(core: CoreStart, { data }: TablePluginStartDependencies) {
+  public start(core: CoreStart, { data, usageCollection }: TablePluginStartDependencies) {
     setFormatService(data.fieldFormats);
+
+    if (usageCollection) {
+      setUsageCollectionStart(usageCollection);
+    }
   }
 }

@@ -9,7 +9,7 @@
 import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
-
+import { METRIC_TYPE } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
 import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 
@@ -17,6 +17,7 @@ import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plug
 
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { getUsageCollectionStart } from './services';
 import { TIME_RANGE_DATA_MODES } from '../common/enums';
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
@@ -54,18 +55,23 @@ export const getTimeseriesVisRenderer: (deps: {
     const canNavigateToLens = await triggerTSVBtoLensConfiguration(model);
 
     const initialRender = () => {
-      const withVisType = (item?: string) => [model.type, item].filter(Boolean).join('_');
-      handlers.logRenderTelemetry({
-        originatingApp: 'tsvb',
-        counterEvents: [
-          model.type,
-          withVisType(model.use_kibana_indexes === false ? 'index_pattern_string' : undefined),
-          withVisType(
-            model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE ? 'last_value' : undefined
-          ),
-          withVisType(canNavigateToLens ? 'convertable' : undefined),
-        ],
-      });
+      const usageCollection = getUsageCollectionStart();
+      const originatingApp = 'tsvb';
+
+      if (usageCollection) {
+        const counterEvents = [
+          `render_${originatingApp}`,
+          model.use_kibana_indexes === false
+            ? `render_${originatingApp}_index_pattern_string`
+            : undefined,
+          model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
+            ? `render_${originatingApp}_last_value`
+            : undefined,
+          canNavigateToLens ? `render_${originatingApp}_convertable` : undefined,
+        ].filter(Boolean) as string[];
+
+        usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, counterEvents);
+      }
 
       handlers.done();
     };

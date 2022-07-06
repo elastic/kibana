@@ -11,5 +11,5 @@
   "ui": true,
   "requiredPlugins": ["expressions", "fieldFormats", "charts", "visualizations", "presentationUtil"],
   "requiredBundles": ["kibanaUtils", "kibanaReact"],
-  "optionalPlugins": []
+  "optionalPlugins": ["usageCollection"]
 }

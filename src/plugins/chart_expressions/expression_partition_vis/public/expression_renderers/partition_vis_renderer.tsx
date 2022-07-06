@@ -15,9 +15,11 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { ChartTypes, RenderValue } from '../../common/types';
+import { extractOriginatingApp } from '../../../common';
 
 export const strings = {
   getDisplayName: () =>
@@ -41,35 +43,37 @@ const partitionVisRenderer = css({
 
 export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
-) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, getStartDeps }) => ({
+) => ExpressionRenderDefinition<RenderValue> = ({ getStartDeps }) => ({
   name: PARTITION_VIS_RENDERER_NAME,
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render: async (domNode, { visConfig, visData, visType, syncColors, context }, handlers) => {
+  render: async (domNode, { visConfig, visData, visType, syncColors }, handlers) => {
+    const { core, plugins } = getStartDeps();
+
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     const renderComplete = () => {
-      if (context?.originatingApp) {
-        handlers.logRenderTelemetry({
-          originatingApp: context.originatingApp,
-          counterEvents: visType,
-        });
+      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+
+      if (originatingApp) {
+        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
+          `render_${originatingApp}_${visType}`,
+        ]);
       }
       handlers.done();
     };
 
-    const services = await getStartDeps();
-    const palettesRegistry = await palettes.getPalettes();
+    const palettesRegistry = await plugins.charts.palettes.getPalettes();
 
     render(
       <I18nProvider>
-        <KibanaThemeProvider theme$={services.kibanaTheme.theme$}>
+        <KibanaThemeProvider theme$={core.theme.theme$}>
           <div css={partitionVisRenderer}>
             <PartitionVisComponent
-              chartsThemeService={theme}
+              chartsThemeService={plugins.charts.theme}
               palettesRegistry={palettesRegistry}
               visParams={visConfig}
               visData={visData}
@@ -77,7 +81,7 @@ export const getPartitionVisRenderer: (
               renderComplete={renderComplete}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
-              services={{ data: services.data, fieldFormats: services.fieldFormats }}
+              services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
               syncColors={syncColors}
             />
           </div>

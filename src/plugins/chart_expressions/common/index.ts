@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { ExpressionRenderContext } from './types';
-export { extractRenderContext } from './utils';
+export { extractOriginatingApp } from './utils';

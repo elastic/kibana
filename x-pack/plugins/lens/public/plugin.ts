@@ -263,7 +263,8 @@ export class LensPlugin {
         expressions,
         fieldFormats,
         plugins.fieldFormats.deserialize,
-        eventAnnotation
+        eventAnnotation,
+        plugins.usageCollection
       );
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
       const datasourceMap = await this.editorFrameService!.loadDatasources();
@@ -332,7 +333,8 @@ export class LensPlugin {
           expressions,
           fieldFormats,
           deps.fieldFormats.deserialize,
-          eventAnnotation
+          eventAnnotation,
+          deps.usageCollection
         );
 
         const { mountApp, stopReportManager, getLensAttributeService } = await import(
@@ -388,7 +390,8 @@ export class LensPlugin {
     expressions: ExpressionsServiceSetup,
     fieldFormats: FieldFormatsSetup,
     formatFactory: FormatFactory,
-    eventAnnotation: EventAnnotationPluginSetup
+    eventAnnotation: EventAnnotationPluginSetup,
+    usageCollection?: UsageCollectionStart
   ) {
     const {
       DatatableVisualization,
@@ -423,6 +426,7 @@ export class LensPlugin {
       editorFrame: editorFrameSetupInterface,
       formatFactory,
       eventAnnotation,
+      usageCollection,
     };
     this.indexpatternDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);

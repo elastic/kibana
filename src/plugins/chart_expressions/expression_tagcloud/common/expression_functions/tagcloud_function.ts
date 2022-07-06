@@ -15,7 +15,6 @@ import {
 import { TagCloudRendererParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
 import { EXPRESSION_NAME, ScaleOptions, Orientation } from '../constants';
-import { extractRenderContext } from '../../../common';
 
 const strings = {
   help: i18n.translate('expressionTagcloud.functions.tagcloudHelpText', {
@@ -176,7 +175,6 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
           visType: EXPRESSION_NAME,
           visParams,
           syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-          context: extractRenderContext(handlers.getExecutionContext()),
         },
       };
     },

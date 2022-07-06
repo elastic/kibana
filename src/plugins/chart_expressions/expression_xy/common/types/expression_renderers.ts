@@ -13,11 +13,9 @@ import {
 } from '@kbn/event-annotation-plugin/common';
 import { XY_VIS_RENDERER } from '../constants';
 import { XYProps } from './expression_functions';
-import type { ExpressionRenderContext } from '../../../common';
 
 export interface XYChartProps {
   args: XYProps;
-  context?: ExpressionRenderContext;
 }
 
 export interface XYRender {

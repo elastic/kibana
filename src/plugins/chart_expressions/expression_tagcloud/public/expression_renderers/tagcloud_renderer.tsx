@@ -14,9 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { ExpressioTagcloudRendererDependencies } from '../plugin';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ExpressionTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
+import { extractOriginatingApp } from '../../../common';
 
 export const strings = {
   getDisplayName: () =>
@@ -36,33 +38,37 @@ const tagCloudVisClass = {
 const TagCloudChart = lazy(() => import('../components/tagcloud_component'));
 
 export const tagcloudRenderer: (
-  deps: ExpressioTagcloudRendererDependencies
-) => ExpressionRenderDefinition<TagcloudRendererConfig> = ({ palettes, theme }) => ({
+  deps: ExpressionTagcloudRendererDependencies
+) => ExpressionRenderDefinition<TagcloudRendererConfig> = ({ getStartDeps }) => ({
   name: EXPRESSION_NAME,
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const { core, plugins } = getStartDeps();
+
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     const renderComplete = () => {
-      if (config.context?.originatingApp) {
-        handlers.logRenderTelemetry({
-          originatingApp: config.context.originatingApp,
-          counterEvents: EXPRESSION_NAME,
-        });
+      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+
+      if (originatingApp) {
+        plugins.usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, [
+          `render_${originatingApp}_${EXPRESSION_NAME}`,
+        ]);
       }
+
       handlers.done();
     };
 
-    const palettesRegistry = await palettes.getPalettes();
+    const palettesRegistry = await plugins.charts.palettes.getPalettes();
 
     const showNoResult = config.visData.rows.length === 0;
 
     render(
-      <KibanaThemeProvider theme$={theme.theme$}>
+      <KibanaThemeProvider theme$={core.theme.theme$}>
         <I18nProvider>
           <ClassNames>
             {({ css, cx }) => (

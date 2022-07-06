@@ -8,7 +8,6 @@
 
 import { pick } from 'lodash';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
@@ -16,7 +15,6 @@ import {
   setRenderersRegistry,
   setNotifications,
   setExpressionsService,
-  setUsageCollection,
 } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer_wrapper';
 import type { IExpressionLoader } from './loader';
@@ -36,9 +34,8 @@ export interface ExpressionsStart extends ExpressionsServiceStart {
   ReactExpressionRenderer: typeof ReactExpressionRenderer;
 }
 
-export interface ExpressionsStartDependencies {
-  usageCollection?: UsageCollectionStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ExpressionsStartDependencies {}
 
 export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, ExpressionsStart> {
   private static logger = {
@@ -56,19 +53,12 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(
-    core: CoreSetup,
-    { usageCollection }: ExpressionsStartDependencies
-  ): ExpressionsSetup {
+  public setup(core: CoreSetup): ExpressionsSetup {
     const { expressions } = this;
     const { renderers } = expressions;
 
     setRenderersRegistry(renderers);
     setExpressionsService(expressions);
-
-    if (usageCollection) {
-      setUsageCollection(usageCollection);
-    }
 
     const setup = expressions.setup(pick(core, 'getStartServices'));
 

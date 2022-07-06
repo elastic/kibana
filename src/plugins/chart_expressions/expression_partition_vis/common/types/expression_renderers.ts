@@ -13,7 +13,6 @@ import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { ChartTypes, ExpressionValuePartitionLabels } from './expression_functions';
-import type { ExpressionRenderContext } from '../../../common';
 
 export enum EmptySizeRatios {
   SMALL = 0.3,
@@ -109,7 +108,6 @@ export interface RenderValue {
   visType: ChartTypes;
   visConfig: PartitionVisParams;
   syncColors: boolean;
-  context?: ExpressionRenderContext;
 }
 
 export enum LabelPositions {

@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeServiceStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { METRIC_TYPE } from '@kbn/analytics';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -18,10 +19,12 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYLayerConfig, XYChartProps } from '../../common';
 import type { BrushEvent, FilterEvent } from '../types';
+import { extractOriginatingApp } from '../../../common';
 
 export type GetStartDepsFn = () => Promise<{
   data: DataPublicPluginStart;
@@ -33,13 +36,14 @@ export type GetStartDepsFn = () => Promise<{
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   eventAnnotationService: EventAnnotationServiceType;
+  usageCollection?: UsageCollectionStart;
 }>;
 
 interface XyChartRendererDeps {
   getStartDeps: GetStartDepsFn;
 }
 
-const extractRenderTelemetryContext = (originatingApp: string, layers: CommonXYLayerConfig[]) => {
+const extractCounterEvents = (originatingApp: string, layers: CommonXYLayerConfig[]) => {
   const dataLayer = layers.find(isDataLayer);
   if (dataLayer) {
     const type =
@@ -64,16 +68,15 @@ const extractRenderTelemetryContext = (originatingApp: string, layers: CommonXYL
       }
     );
 
-    return {
-      originatingApp,
-      counterEvents: [
-        type,
-        isPercentageOrStacked.length ? `${type}_${isPercentageOrStacked.join('_')}` : undefined,
-        byTypes[LayerTypes.REFERENCELINE] ? 'reference_layer' : undefined,
-        byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
-        byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
-      ],
-    };
+    return [
+      type,
+      isPercentageOrStacked.length ? `${type}_${isPercentageOrStacked.join('_')}` : undefined,
+      byTypes[LayerTypes.REFERENCELINE] ? 'reference_layer' : undefined,
+      byTypes[LayerTypes.ANNOTATIONS] ? 'annotation_layer' : undefined,
+      byTypes[LayerTypes.DATA] > 1 ? 'multiple_data_layers' : undefined,
+    ]
+      .filter(Boolean)
+      .map((item) => `render_${originatingApp}_${item}`);
   }
 };
 
@@ -88,6 +91,8 @@ export const getXyChartRenderer = ({
   validate: () => undefined,
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, handlers) => {
+    const deps = await getStartDeps();
+
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     const onClickValue = (data: FilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
@@ -97,17 +102,17 @@ export const getXyChartRenderer = ({
     };
 
     const renderComplete = () => {
-      const { originatingApp } = config.context ?? {};
-      if (originatingApp) {
-        const context = extractRenderTelemetryContext(originatingApp, config.args.layers);
-        if (context) {
-          handlers.logRenderTelemetry(context);
+      const originatingApp = extractOriginatingApp(handlers.getExecutionContext());
+
+      if (deps.usageCollection && originatingApp) {
+        const uiEvents = extractCounterEvents(originatingApp, config.args.layers);
+        if (uiEvents) {
+          deps.usageCollection.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, uiEvents);
         }
       }
+
       handlers.done();
     };
-
-    const deps = await getStartDeps();
 
     const [{ XYChartReportable }, { calculateMinInterval }] = await Promise.all([
       import('../components/xy_chart'),

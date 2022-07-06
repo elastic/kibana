@@ -9,11 +9,12 @@
 import './table_visualization.scss';
 import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
-
+import { METRIC_TYPE } from '@kbn/analytics';
 import { CoreStart } from '@kbn/core/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { getUsageCollectionStart } from '../services';
 import { TableVisConfig, TableVisData } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';
@@ -35,10 +36,17 @@ const TableVisualizationComponent = ({
   useLayoutEffect(() => {
     // Temporary solution: DataGrid should provide onRender callback
     setTimeout(() => {
-      handlers.logRenderTelemetry({
-        originatingApp: 'agg_based',
-        counterEvents: ['table', !table ? 'table_split' : undefined],
-      });
+      const usageCollection = getUsageCollectionStart();
+      const originatingApp = 'agg_based';
+
+      if (usageCollection) {
+        const counterEvents = [
+          `render_${originatingApp}_table`,
+          !table ? `render_${originatingApp}_table_split` : undefined,
+        ].filter(Boolean) as string[];
+
+        usageCollection?.reportUiCounter(originatingApp, METRIC_TYPE.COUNT, counterEvents);
+      }
       handlers.done();
     }, 300);
   }, [handlers, table]);

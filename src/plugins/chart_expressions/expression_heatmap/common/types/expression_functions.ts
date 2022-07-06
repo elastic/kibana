@@ -22,7 +22,6 @@ import {
   EXPRESSION_HEATMAP_GRID_NAME,
   HEATMAP_FUNCTION_RENDERER_NAME,
 } from '../constants';
-import type { ExpressionRenderContext } from '../../../common';
 
 export interface HeatmapLegendConfig {
   /**
@@ -93,7 +92,6 @@ export type HeatmapInput = Datatable;
 export interface HeatmapExpressionProps {
   data: Datatable;
   args: HeatmapArguments;
-  context?: ExpressionRenderContext;
 }
 
 export interface HeatmapRender {

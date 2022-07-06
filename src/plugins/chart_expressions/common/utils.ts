@@ -7,11 +7,8 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { ExpressionRenderContext } from './types';
 
-export const extractRenderContext = (
-  context?: KibanaExecutionContext
-): ExpressionRenderContext | undefined => {
+export const extractOriginatingApp = (context?: KibanaExecutionContext): string | undefined => {
   if (context) {
     const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
       if (item.child) {
@@ -20,13 +17,6 @@ export const extractRenderContext = (
         return item;
       }
     };
-
-    const deepestChild = recursiveGet(context);
-
-    if (deepestChild) {
-      return {
-        originatingApp: deepestChild.type,
-      };
-    }
+    return recursiveGet(context)?.type;
   }
 };
