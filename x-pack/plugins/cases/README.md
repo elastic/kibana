@@ -48,7 +48,7 @@ To initialize the `CasesContext` you can use this code:
 // somewhere high on your plugin render tree
 <CasesContext
   owner={[PLUGIN_CASES_OWNER_ID]}
-  userCanCrud={CASES_USER_CAN_CRUD}
+  permissions={CASES_PERMISSIONS}
   features={CASES_FEATURES}
 >
   <RouteRender /> {/* or something similar */}
@@ -57,11 +57,11 @@ To initialize the `CasesContext` you can use this code:
 
 props:
 
-| prop                  | type            | description                                                    |
-| --------------------- | --------------- | -------------------------------------------------------------- |
-| PLUGIN_CASES_OWNER_ID | `string`        | The owner string for your plugin. e.g: securitySolution        |
-| CASES_USER_CAN_CRUD   | `boolean`       | Defines if the user has access to cases to CRUD                |
-| CASES_FEATURES        | `CasesFeatures` | `CasesFeatures` object defining the features to enable/disable |
+| prop                  | type                | description                                                    |
+| --------------------- | ------------------- | -------------------------------------------------------------- |
+| PLUGIN_CASES_OWNER_ID | `string`            | The owner string for your plugin. e.g: securitySolution        |
+| CASES_PERMISSIONS     | `CasesPermissions`  | `CasesPermissions` object defining the user's permissions      |
+| CASES_FEATURES        | `CasesFeatures`     | `CasesFeatures` object defining the features to enable/disable |
 
 
 ### Cases UI client
@@ -83,7 +83,10 @@ const { cases } = useKibana().services;
 // call in the return as you would any component
 cases.getCases({
   basePath: '/investigate/cases',
-  userCanCrud: true,
+  permissions: {
+    all: true,
+    read: true,
+  },
   owner: ['securitySolution'],
   features: { alerts: { sync: false }, metrics: ['alerts.count', 'lifespan'] }
   timelineIntegration: {
@@ -206,7 +209,7 @@ Arguments:
 
 | Property                                                             | Description                                                                                                                                                                |
 | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| userCanCrud                                                          | `boolean;` user permissions to crud                                                                                                                                        |
+| permissions                                                          | `CasesPermissions` object defining the user's permissions                                                                                                                                        |
 | owner                                                                | `string[];` owner ids of the cases                                                                                                                                         |
 | basePath                                                             | `string;` path to mount the Cases router on top of                                                                                                                         |
 | useFetchAlertData                                                    | `(alertIds: string[]) => [boolean, Record<string, unknown>];` fetch alerts                                                                                                 |
@@ -236,7 +239,7 @@ Arguments:
 
 | Property        | Description                                                                        |
 | --------------- | ---------------------------------------------------------------------------------- |
-| userCanCrud     | `boolean;` user permissions to crud                                                |
+| permissions     | `CasesPermissions` object defining the user's permissions                          |
 | owner           | `string[];` owner ids of the cases                                                 |
 | alertData?      | `Omit<CommentRequestAlertType, 'type'>;` alert data to post to case                |
 | hiddenStatuses? | `CaseStatuses[];` array of hidden statuses                                         |
@@ -253,7 +256,7 @@ Arguments:
 
 | Property          | Description                                                                                                        |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| userCanCrud       | `boolean;` user permissions to crud                                                                                |
+| permissions       | `CasesPermissions` object defining the user's permissions                                                          |
 | owner             | `string[];` owner ids of the cases                                                                                 |
 | onClose           | `() => void;` callback when create case is canceled                                                                |
 | onSuccess         | `(theCase: Case) => Promise<void>;` callback passing newly created case after pushCaseToExternalService is called  |
@@ -267,11 +270,11 @@ UI component:
 
 Arguments:
 
-| Property       | Description                                 |
-| -------------- | ------------------------------------------- |
-| userCanCrud    | `boolean;` user permissions to crud         |
-| owner          | `string[];` owner ids of the cases          |
-| maxCasesToShow | `number;` number of cases to show in widget |
+| Property       | Description                                                |
+| -------------- | ---------------------------------------------------------- |
+| permissions    | `CasesPermissions` object defining the user's permissions  |
+| owner          | `string[];` owner ids of the cases                         |
+| maxCasesToShow | `number;` number of cases to show in widget                |
 
 UI component:
 ![Recent Cases Component][recent-cases-img]
@@ -289,7 +292,7 @@ Arguments:
 
 | Property          | Description                                                                                                        |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| userCanCrud       | `boolean;` user permissions to crud                                                                                |
+| permissions       | `CasesPermissions` object defining the user's permissions                                                          |
 | onClose           | `() => void;` callback when create case is canceled                                                                |
 | onSuccess         | `(theCase: Case) => Promise<void>;` callback passing newly created case after pushCaseToExternalService is called  |
 | afterCaseCreated? | `(theCase: Case) => Promise<void>;` callback passing newly created case before pushCaseToExternalService is called |

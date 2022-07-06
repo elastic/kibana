@@ -47,7 +47,6 @@ export interface AddCommentRefObject {
 export interface AddCommentProps {
   id: string;
   caseId: string;
-  userCanCrud?: boolean;
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
@@ -57,20 +56,12 @@ export interface AddCommentProps {
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      {
-        id,
-        caseId,
-        userCanCrud,
-        onCommentPosted,
-        onCommentSaving,
-        showLoading = true,
-        statusActionButton,
-      },
+      { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
       ref
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const { owner } = useCasesContext();
+      const { permissions, owner } = useCasesContext();
       const { isLoading, createAttachments } = useCreateAttachments();
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -156,7 +147,7 @@ export const AddComment = React.memo(
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && <MySpinner data-test-subj="loading-spinner" size="xl" />}
-          {userCanCrud && (
+          {permissions.all && (
             <Form form={form}>
               <UseField
                 path={fieldName}

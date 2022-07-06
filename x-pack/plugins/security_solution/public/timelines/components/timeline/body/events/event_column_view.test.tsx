@@ -39,29 +39,33 @@ jest.mock('../../../../../common/components/user_privileges', () => {
   };
 });
 
-jest.mock('../../../../../common/lib/kibana', () => ({
-  useKibana: () => ({
-    services: {
-      timelines: { ...mockTimelines },
-      data: {
-        search: jest.fn(),
-        query: jest.fn(),
-      },
-      application: {
-        capabilities: {
-          siem: { crud_alerts: true, read_alerts: true },
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    useKibana: () => ({
+      services: {
+        timelines: { ...mockTimelines },
+        data: {
+          search: jest.fn(),
+          query: jest.fn(),
         },
+        application: {
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract(),
       },
-      cases: mockCasesContract(),
-    },
-  }),
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-  }),
-  useGetUserCasesPermissions: jest.fn(),
-}));
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+    useGetUserCasesPermissions: originalModule.useGetUserCasesPermissions,
+  };
+});
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);

@@ -139,7 +139,6 @@ describe('AllCasesListGeneric', () => {
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     isSelectorView: false,
-    userCanCrud: true,
   };
 
   let appMockRenderer: AppMockRenderer;

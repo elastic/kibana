@@ -201,7 +201,7 @@ function ObservabilityActions({
 
   const actionsMenuItems = useMemo(() => {
     return [
-      ...(casePermissions?.crud
+      ...(casePermissions.crud
         ? [
             <EuiContextMenuItem
               data-test-subj="add-to-existing-case-action"
@@ -246,7 +246,7 @@ function ObservabilityActions({
       ],
     ];
   }, [
-    casePermissions?.crud,
+    casePermissions.crud,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
     linkToRule,

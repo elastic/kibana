@@ -23,6 +23,13 @@ import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pag
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
+const originalKibanaLib = jest.requireActual('../../../lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+
 jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
@@ -132,7 +139,7 @@ describe('useSecuritySolutionNavigation', () => {
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {
-    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValueOnce(false);
+    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(false);
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }

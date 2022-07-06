@@ -12,8 +12,16 @@ import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
 import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
 import { SessionsComponentsProps } from './types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');
+
+const originalKibanaLib = jest.requireActual('../../lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
 jest.mock('../url_state/normalize_time_range');
 

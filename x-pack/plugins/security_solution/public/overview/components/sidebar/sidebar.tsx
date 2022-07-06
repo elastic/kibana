@@ -41,7 +41,7 @@ export const Sidebar = React.memo<{
   );
 
   // only render the recently created cases view if the user has at least read permissions
-  const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
+  const hasCasesReadPermissions = useGetUserCasesPermissions().read;
 
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="l">

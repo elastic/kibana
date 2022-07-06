@@ -43,6 +43,7 @@ import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { severities } from '../severity/config';
 import { useUpdateCase } from '../../containers/use_update_case';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -61,7 +62,6 @@ export interface GetCasesColumn {
   handleIsLoading: (a: boolean) => void;
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
-  userCanCrud: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
 
@@ -72,7 +72,6 @@ export const useCasesColumns = ({
   handleIsLoading,
   refreshCases,
   isSelectorView,
-  userCanCrud,
   connectors = [],
   onRowClick,
   showSolutionColumn,
@@ -88,6 +87,7 @@ export const useCasesColumns = ({
   } = useDeleteCases();
 
   const { isAlertsEnabled } = useCasesFeatures();
+  const { permissions } = useCasesContext();
 
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
     id: '',
@@ -319,7 +319,7 @@ export const useCasesColumns = ({
               return (
                 <StatusContextMenu
                   currentStatus={theCase.status}
-                  disabled={!userCanCrud || isLoadingUpdateCase}
+                  disabled={!permissions.all || isLoadingUpdateCase}
                   onStatusChanged={(status) =>
                     handleDispatchUpdate({
                       updateKey: 'status',
@@ -372,7 +372,7 @@ export const useCasesColumns = ({
           },
         ]
       : []),
-    ...(userCanCrud && !isSelectorView
+    ...(permissions.all && !isSelectorView
       ? [
           {
             name: (

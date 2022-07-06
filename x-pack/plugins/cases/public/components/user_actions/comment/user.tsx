@@ -20,7 +20,6 @@ import { UserActionBuilderArgs, UserActionBuilder } from '../types';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
-  | 'userCanCrud'
   | 'handleManageMarkdownEditId'
   | 'handleSaveComment'
   | 'handleManageQuote'
@@ -35,7 +34,6 @@ type BuilderArgs = Pick<
 
 export const createUserAttachmentUserActionBuilder = ({
   comment,
-  userCanCrud,
   outlined,
   isEdit,
   isLoading,
@@ -95,7 +93,6 @@ export const createUserAttachmentUserActionBuilder = ({
           onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
           onQuote={handleManageQuote.bind(null, comment.comment)}
           onDelete={handleDeleteComment.bind(null, comment.id)}
-          userCanCrud={userCanCrud}
         />
       ),
     },

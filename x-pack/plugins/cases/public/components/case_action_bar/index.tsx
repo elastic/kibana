@@ -29,6 +29,7 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { getStatusDate, getStatusTitle } from './helpers';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -45,16 +46,15 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 
 export interface CaseActionBarProps {
   caseData: Case;
-  userCanCrud: boolean;
   isLoading: boolean;
   onUpdateField: (args: OnUpdateFields) => void;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,
-  userCanCrud,
   isLoading,
   onUpdateField,
 }) => {
+  const { permissions } = useCasesContext();
   const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
   const date = useMemo(() => getStatusDate(caseData), [caseData]);
   const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
@@ -107,7 +107,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                   <EuiDescriptionListDescription>
                     <StatusContextMenu
                       currentStatus={caseData.status}
-                      disabled={!userCanCrud || isLoading}
+                      disabled={!permissions.all || isLoading}
                       onStatusChanged={onStatusChanged}
                     />
                   </EuiDescriptionListDescription>
@@ -134,7 +134,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                 responsive={false}
                 justifyContent="spaceBetween"
               >
-                {userCanCrud && isSyncAlertsEnabled && (
+                {permissions.all && isSyncAlertsEnabled && (
                   <EuiFlexItem grow={false}>
                     <EuiDescriptionListTitle>
                       <EuiFlexGroup
@@ -172,7 +172,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                     </EuiButtonEmpty>
                   </span>
                 </EuiFlexItem>
-                {userCanCrud && (
+                {permissions.all && (
                   <EuiFlexItem grow={false} data-test-subj="case-view-actions">
                     <Actions
                       caseData={caseData}

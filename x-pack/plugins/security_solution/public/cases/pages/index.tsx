@@ -46,6 +46,7 @@ const CaseContainerComponent: React.FC = () => {
   const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userPermissions = useGetUserCasesPermissions();
+  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
@@ -147,7 +148,7 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
           useFetchAlertData,
-          userCanCrud: userPermissions?.crud ?? false,
+          permissions: casesPermissions,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

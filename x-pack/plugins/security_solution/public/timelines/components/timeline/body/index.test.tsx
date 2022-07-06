@@ -34,7 +34,6 @@ import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import { createStore, State } from '../../../../common/store';
 
-jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges', () => {
   return {
@@ -84,7 +83,6 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
       },
     }),
-    useGetUserSavedObjectPermissions: jest.fn(),
   };
 });
 

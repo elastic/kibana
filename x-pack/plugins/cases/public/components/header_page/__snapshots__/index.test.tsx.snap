@@ -41,7 +41,10 @@ exports[`HeaderPage it renders 1`] = `
               "owner": Array [
                 "securitySolution",
               ],
-              "userCanCrud": true,
+              "permissions": Object {
+                "all": true,
+                "read": true,
+              },
             }
           }
         >

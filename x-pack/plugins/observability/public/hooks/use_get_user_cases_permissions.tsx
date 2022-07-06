@@ -15,7 +15,10 @@ export interface UseGetUserCasesPermissions {
 }
 
 export function useGetUserCasesPermissions() {
-  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions | null>(null);
+  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions>({
+    crud: false,
+    read: false,
+  });
   const uiCapabilities = useKibana().services.application.capabilities;
 
   useEffect(() => {

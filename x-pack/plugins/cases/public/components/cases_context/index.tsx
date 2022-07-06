@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useReducer, Dispatch } from 'react';
 import { merge } from 'lodash';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
@@ -27,7 +28,10 @@ export interface CasesContextValue {
   owner: string[];
   appId: string;
   appTitle: string;
-  userCanCrud: boolean;
+  permissions: {
+    all: boolean;
+    read: boolean;
+  };
   basePath: string;
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
@@ -37,7 +41,7 @@ export interface CasesContextValue {
 export interface CasesContextProps
   extends Pick<
     CasesContextValue,
-    'owner' | 'userCanCrud' | 'externalReferenceAttachmentTypeRegistry'
+    'owner' | 'permissions' | 'externalReferenceAttachmentTypeRegistry'
   > {
   basePath?: string;
   features?: CasesFeatures;
@@ -56,7 +60,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   value: {
     externalReferenceAttachmentTypeRegistry,
     owner,
-    userCanCrud,
+    permissions,
     basePath = DEFAULT_BASE_PATH,
     features = {},
     releasePhase = 'ga',
@@ -67,7 +71,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   const [value, setValue] = useState<CasesContextStateValue>(() => ({
     externalReferenceAttachmentTypeRegistry,
     owner,
-    userCanCrud,
+    permissions,
     basePath,
     /**
      * The empty object at the beginning avoids the mutation
@@ -83,7 +87,14 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   }));
 
   /**
-   * `userCanCrud` prop may change by the parent plugin.
+   * Only update the context if the nested permissions fields changed, this avoids a rerender when the object's reference
+   * changes.
+   */
+  useDeepCompareEffect(() => {
+    setValue((prev) => ({ ...prev, permissions }));
+  }, [permissions]);
+
+  /**
    * `appId` and `appTitle` are dynamically retrieved from kibana context.
    * We need to update the state if any of these values change, the rest of props are never updated.
    */
@@ -93,10 +104,9 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
         ...prev,
         appId,
         appTitle,
-        userCanCrud,
       }));
     }
-  }, [appTitle, appId, userCanCrud]);
+  }, [appTitle, appId]);
 
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
@@ -108,7 +118,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 CasesProvider.displayName = 'CasesProvider';
 
 function isCasesContextValue(value: CasesContextStateValue): value is CasesContextValue {
-  return value.appId != null && value.appTitle != null && value.userCanCrud != null;
+  return value.appId != null && value.appTitle != null && value.permissions != null;
 }
 
 // eslint-disable-next-line import/no-default-export
