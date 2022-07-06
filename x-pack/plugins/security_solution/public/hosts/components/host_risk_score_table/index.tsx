@@ -9,6 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import styled from 'styled-components';
 import type { Columns, Criteria, ItemsPerRow } from '../../../common/components/paginated_table';
 import { PaginatedTable } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -41,6 +42,10 @@ export const rowItems: ItemsPerRow[] = [
     numberOfRow: 10,
   },
 ];
+
+const IconWrapper = styled.span`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
 
 const tableType = hostsModel.HostsTableType.risk;
 
@@ -146,9 +151,9 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   );
 
   const headerTitle = (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{i18nHosts.HOST_RISK_TITLE}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
+    <>
+      {i18nHosts.HOST_RISK_TITLE}
+      <IconWrapper>
         <EuiIconTip
           color="subdued"
           content={i18nHosts.HOST_RISK_TABLE_TOOLTIP}
@@ -156,8 +161,8 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
           size="l"
           type="iInCircle"
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </IconWrapper>
+    </>
   );
 
   const getHostRiskScoreFilterQuerySelector = useMemo(

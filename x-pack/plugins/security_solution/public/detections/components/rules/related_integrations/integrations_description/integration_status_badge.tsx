@@ -49,7 +49,9 @@ const IntegrationStatusBadgeComponent: React.FC<IntegrationStatusBadgeProps> = (
 
   return (
     <EuiToolTip content={badgeTooltip}>
-      <PaddedBadge color={badgeColor}>{badgeText}</PaddedBadge>
+      <PaddedBadge color={badgeColor} data-test-subj={'statusBadge'}>
+        {badgeText}
+      </PaddedBadge>
     </EuiToolTip>
   );
 };

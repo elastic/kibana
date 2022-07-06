@@ -37,23 +37,21 @@ export const PickTimeline = ({
 
   useEffect(() => {
     const { id, title } = field.value as FieldValueTimeline;
-    if (timelineTitle !== title && timelineId !== id) {
+    if (timelineId !== id) {
       setTimelineId(id);
       setTimelineTitle(title);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [field.value]);
+  }, [field.value, timelineId]);
 
   const handleOnTimelineChange = useCallback(
     (title: string, id: string | null) => {
       if (id === null) {
         field.setValue({ id, title: null });
-      } else if (timelineTitle !== title && timelineId !== id) {
+      } else if (timelineId !== id) {
         field.setValue({ id, title });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [field]
+    [field, timelineId]
   );
 
   return (

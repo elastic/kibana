@@ -1783,11 +1783,7 @@ module.exports = {
      */
     {
       files: ['**/*'],
-      rules: {
-        ...require('eslint-config-prettier').rules,
-        ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
-      },
+      rules: require('eslint-config-prettier').rules,
     },
     /**
      * Enterprise Search Prettier override
