@@ -11,8 +11,11 @@ import {
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { fromKueryExpression } from '@kbn/es-query';
 import { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { getFlattenedObject } from '@kbn/std';
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
 import {
@@ -21,6 +24,7 @@ import {
   FileSavedObject,
   UpdatableFileAttributes,
   FileKind,
+  FileJSON,
 } from '../../common';
 import { File } from '../file';
 import { FileKindsRegistry } from '../file_kinds_registry';
@@ -51,9 +55,19 @@ export interface ListFilesArgs {
   perPage?: number;
 }
 
-export interface FindFileArgs {
+export interface GetByIdArgs {
   id: string;
   fileKind: string;
+}
+
+export interface FindFileArgs {
+  kind?: string[];
+  name?: string[];
+  extension?: string[];
+  meta?: Record<string, string>;
+  mimeType?: string[];
+  page?: number;
+  perPage?: number;
 }
 
 /**
@@ -88,16 +102,16 @@ export class InternalFileService {
   }
 
   public async updateFile({ attributes, fileKind, id }: UpdateFileArgs): Promise<IFile> {
-    const file = await this.find({ fileKind, id });
+    const file = await this.getById({ fileKind, id });
     return await file.update(attributes);
   }
 
   public async deleteFile({ id, fileKind }: DeleteFileArgs): Promise<void> {
-    const file = await this.find({ id, fileKind });
+    const file = await this.getById({ id, fileKind });
     await file.delete();
   }
 
-  public async find({ fileKind, id }: FindFileArgs): Promise<IFile> {
+  public async getById({ fileKind, id }: GetByIdArgs): Promise<IFile> {
     try {
       const result = await this.soClient.get<FileSavedObjectAttributes>(this.savedObjectType, id);
       const { FileKind: actualFileKind, Status } = result.attributes;
@@ -166,5 +180,61 @@ export class InternalFileService {
   ): Promise<FileSavedObject> {
     const updateResponse = await this.soClient.update(this.savedObjectType, id, attributes);
     return updateResponse as FileSavedObject;
+  }
+
+  public async findFilesJSON({
+    kind,
+    name,
+    extension,
+    mimeType,
+    meta,
+    page,
+    perPage,
+  }: FindFileArgs): Promise<FileJSON[]> {
+    const toTermsQuery = (fieldName: string, values?: string[]): QueryDslQueryContainer[] =>
+      values
+        ? values.map((value) => ({
+            term: { [`${this.savedObjectType}.attributes.${fieldName}`]: value },
+          }))
+        : [];
+
+    const filter = [
+      ...toTermsQuery('file_kind', kind),
+      ...toTermsQuery('name', name),
+      ...toTermsQuery('extension', extension),
+      ...toTermsQuery('mimeType', mimeType),
+    ];
+
+    const metaFields = meta ? getFlattenedObject(meta) : {};
+    Object.entries(metaFields).forEach(([fieldName, value]) => {
+      const termsQueries = toTermsQuery(
+        `meta.${fieldName}`,
+        Array.isArray(value) ? value : [value]
+      );
+      termsQueries.forEach((query) => filter.push(query));
+    });
+
+    const result = await this.soClient.find<FileSavedObjectAttributes>({
+      type: this.savedObjectType,
+      filter: filter.length
+        ? fromKueryExpression({
+            bool: {
+              must: filter,
+              filter: [
+                {
+                  term: { [`${this.savedObjectType}.attributes.status`]: 'READY' },
+                },
+              ],
+            },
+          })
+        : undefined,
+      defaultSearchOperator: 'AND',
+      page,
+      perPage,
+    });
+    return result.saved_objects.map((so) => ({
+      id: so.id,
+      ...so.attributes,
+    }));
   }
 }

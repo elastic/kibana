@@ -115,9 +115,34 @@ export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { ok: true }
 >;
 
-export type FindFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type FindFilesHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
-  unknown,
-  {},
+  { perPage?: number; page?: number },
+  {
+    /**
+     * Filter for set of file-kinds
+     */
+    kind?: string[];
+
+    /**
+     * Filter for match on names
+     */
+    name?: string[];
+
+    /**
+     * Filter for set of meta attributes matching this object
+     */
+    meta: {};
+
+    /**
+     * Filter for exact match on MIME types
+     */
+    mimeType?: string[];
+
+    /**
+     * Filter for match on extensions
+     */
+    extensions?: string[];
+  },
   { files: FileJSON[] }
 >;
