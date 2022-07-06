@@ -6,5 +6,9 @@
  */
 
 import { createContext } from 'react';
+import type { TopNSample, TopNSubchart } from '../../../common/topn';
 
-export const TopNContext = createContext({});
+export const TopNContext = createContext<{ subcharts: TopNSubchart[]; samples: TopNSample[] }>({
+  subcharts: [],
+  samples: [],
+});

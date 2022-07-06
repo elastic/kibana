@@ -118,6 +118,7 @@ export function runLengthDecodeReverse(input: Buffer, outputSize?: number): numb
 // decodeStackTrace unpacks an encoded stack trace from Elasticsearch
 export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   const countsFrameIDs = input.FrameID.length / BASE64_FRAME_ID_LENGTH;
+
   const fileIDs: string[] = new Array(countsFrameIDs);
   const frameIDs: string[] = new Array(countsFrameIDs);
 

@@ -9,6 +9,13 @@
   "description": "",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "data", "kibanaUtils", "share"],
+  "requiredPlugins": [
+    "navigation",
+    "data",
+    "kibanaUtils",
+    "share",
+    "observability",
+    "features"
+  ],
   "optionalPlugins": []
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface ProjectTimeQuery {
   bool: {

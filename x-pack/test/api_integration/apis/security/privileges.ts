@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
             maps: ['all', 'read', 'minimal_all', 'minimal_read'],
             generalCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read'],
+            profiling: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
             fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],

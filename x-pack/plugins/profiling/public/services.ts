@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart, HttpFetchError, HttpFetchQuery } from '@kbn/core/public';
+import { CoreStart, HttpFetchQuery } from '@kbn/core/public';
 import { getRoutePaths } from '../common';
+import { ElasticFlameGraph } from '../common/flamegraph';
+import { TopNSamples } from '../common/topn';
 
 export interface Services {
   fetchTopN: (
@@ -16,14 +18,14 @@ export interface Services {
     timeFrom: number,
     timeTo: number,
     n: number
-  ) => Promise<any[] | HttpFetchError>;
+  ) => Promise<TopNSamples>;
   fetchElasticFlamechart: (
     index: string,
     projectID: number,
     timeFrom: number,
     timeTo: number,
     n: number
-  ) => Promise<any[] | HttpFetchError>;
+  ) => Promise<ElasticFlameGraph>;
 }
 
 export function getServices(core: CoreStart): Services {

@@ -17,6 +17,7 @@ import {
 } from './types';
 import { mySearchStrategyProvider } from './my_strategy';
 import { registerRoutes } from './routes';
+import { PROFILING_FEATURE } from './feature';
 
 export class ProfilingPlugin
   implements
@@ -36,6 +37,8 @@ export class ProfilingPlugin
   public setup(core: CoreSetup<ProfilingPluginStartDeps>, deps: ProfilingPluginSetupDeps) {
     this.logger.debug('profiling: Setup');
     const router = core.http.createRouter<DataRequestHandlerContext>();
+
+    deps.features.registerKibanaFeature(PROFILING_FEATURE);
 
     core.getStartServices().then(([_, depsStart]) => {
       const myStrategy = mySearchStrategyProvider(depsStart.data);

@@ -5,30 +5,45 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useContext } from 'react';
 
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { timeFormatter } from '@elastic/charts';
 
-export interface BarChartProps {
+import { TopNContext } from './contexts/topn';
+
+export interface StackedBarChartProps {
   id: string;
   name: string;
   height: number;
-  data: any[];
   x: string;
   y: string;
+  category: string;
 }
 
-export const BarChart: React.FC<BarChartProps> = ({ id, name, height, data, x, y }) => {
-  useEffect(() => {
-    console.log(new Date().toISOString(), 'updated bar-chart');
-  }, [id, name, height, data, x, y]);
+export const StackedBarChart: React.FC<StackedBarChartProps> = ({
+  id,
+  name,
+  height,
+  x,
+  y,
+  category,
+}) => {
+  const ctx = useContext(TopNContext);
 
   return (
     <Chart size={{ height }}>
       <Settings showLegend={false} />
-      <BarSeries id={id} name={name} data={data} xScaleType="time" xAccessor={x} yAccessors={[y]} />
+      <BarSeries
+        id={id}
+        name={name}
+        data={ctx.samples}
+        xAccessor={x}
+        yAccessors={[y]}
+        stackAccessors={[x]}
+        splitSeriesAccessors={[category]}
+      />
       <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter('YYYY-MM-DD HH:mm:ss')} />
       <Axis id="left-axis" position="left" showGridLines tickFormat={(d) => Number(d).toFixed(0)} />
     </Chart>

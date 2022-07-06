@@ -21,6 +21,7 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/navigation/tsconfig.json" },
     { "path": "../../../src/plugins/share/tsconfig.json" },
+    { "path": "../observability/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

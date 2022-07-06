@@ -7,13 +7,6 @@
 
 import { orderBy } from 'lodash';
 
-import {
-  AggregationsHistogramAggregate,
-  AggregationsHistogramBucket,
-} from '@elastic/elasticsearch/lib/api/types';
-
-import { StackFrameMetadata } from './profiling';
-
 export interface CountPerTime {
   Timestamp: number;
   Count: number;
@@ -27,19 +20,28 @@ export interface TopNSamples {
   TopN: TopNSample[];
 }
 
-interface TopNTraces extends TopNSamples {
-  Metadata: Record<string, StackFrameMetadata[]>;
+export interface TopNSamplesHistogramResponse {
+  buckets: Array<{
+    key: string;
+    doc_count: number;
+    group_by: {
+      buckets: Array<{ doc_count: number; key: string; count: { value: number } }>;
+    };
+  }>;
 }
 
-export function createTopNSamples(histogram: AggregationsHistogramAggregate): TopNSample[] {
+export function createTopNSamples(
+  histogram: TopNSamplesHistogramResponse | undefined
+): TopNSample[] {
   const bucketsByTimestamp = new Map();
   const uniqueCategories = new Set<string>();
 
   // Convert the histogram into nested maps and record the unique categories
-  const histogramBuckets = (histogram?.buckets as AggregationsHistogramBucket[]) ?? [];
+  const histogramBuckets = histogram?.buckets ?? [];
   for (let i = 0; i < histogramBuckets.length; i++) {
     const frameCountsByCategory = new Map();
     const items = histogramBuckets[i].group_by.buckets;
+
     for (let j = 0; j < items.length; j++) {
       uniqueCategories.add(items[j].key);
       frameCountsByCategory.set(items[j].key, items[j].count.value);

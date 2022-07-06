@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ProdfilerPlugin } from './plugin';
+import { ProfilingPlugin } from './plugin';
 
 export function plugin() {
-  return new ProdfilerPlugin();
+  return new ProfilingPlugin();
 }
