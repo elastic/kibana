@@ -25,6 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('home');
     });
     after(async () => {
+      await PageObjects.spaceSelector.openSpacesNav();
+      await PageObjects.spaceSelector.clickManageSpaces();
+      await PageObjects.spaceSelector.clickOnDeleteSpaceButton('space_a');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
