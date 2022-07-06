@@ -36,7 +36,7 @@ async function queryFlameGraph(
     }
   );
 
-  let { totalCount, stackTraceEvents } = await searchEventsGroupByStackTrace(
+  const { totalCount, stackTraceEvents } = await searchEventsGroupByStackTrace(
     logger,
     client,
     eventsIndex,
@@ -44,17 +44,17 @@ async function queryFlameGraph(
   );
 
   // Manual downsampling if totalCount exceeds sampleSize by 10%.
+  let downsampledTotalCount = totalCount;
   if (totalCount > sampleSize * 1.1) {
     const p = sampleSize / totalCount;
     logger.info('downsampling events with p=' + p);
     await logExecutionLatency(logger, 'downsampling events', async () => {
-      totalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
+      downsampledTotalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
     });
-    logger.info('downsampled total count: ' + totalCount);
+    logger.info('downsampled total count: ' + downsampledTotalCount);
     logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
   }
 
-  // profiling-stacktraces is configured with 16 shards
   const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces(
     logger,
     client,
@@ -67,7 +67,7 @@ async function queryFlameGraph(
   ]).then(([stackFrames, executables]) => {
     return new FlameGraph(
       eventsIndex.sampleRate,
-      totalCount,
+      downsampledTotalCount,
       stackTraceEvents,
       stackTraces,
       stackFrames,

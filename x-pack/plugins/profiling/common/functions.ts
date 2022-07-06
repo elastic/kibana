@@ -109,10 +109,10 @@ export function createTopNFunctions(
     endIndex = topN.length;
   }
 
-  const framesAndCounts = topN.slice(startIndex, endIndex).map((topN) => ({
-    Frame: topN.Frame,
-    CountExclusive: topN.CountExclusive,
-    CountInclusive: topN.CountInclusive,
+  const framesAndCounts = topN.slice(startIndex, endIndex).map((frameAndCount) => ({
+    Frame: frameAndCount.Frame,
+    CountExclusive: frameAndCount.CountExclusive,
+    CountInclusive: frameAndCount.CountInclusive,
   }));
 
   return {

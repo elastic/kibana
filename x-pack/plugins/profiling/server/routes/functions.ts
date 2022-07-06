@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { ElasticsearchClient, IRouter, Logger } from '@kbn/core/server';
-import type { DataRequestHandlerContext } from '../../../data/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRoutePaths } from '../../common';
 import { createTopNFunctions } from '../../common/functions';
 import { logExecutionLatency } from './logger';
@@ -38,7 +38,7 @@ async function queryTopNFunctions(
     }
   );
 
-  let { totalCount, stackTraceEvents } = await searchEventsGroupByStackTrace(
+  const { totalCount, stackTraceEvents } = await searchEventsGroupByStackTrace(
     logger,
     client,
     eventsIndex,
@@ -47,12 +47,13 @@ async function queryTopNFunctions(
 
   // Manual downsampling if totalCount exceeds sampleSize by 10%.
   if (totalCount > sampleSize * 1.1) {
+    let downsampledTotalCount = totalCount;
     const p = sampleSize / totalCount;
     logger.info('downsampling events with p=' + p);
     await logExecutionLatency(logger, 'downsampling events', async () => {
-      totalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
+      downsampledTotalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
     });
-    logger.info('downsampled total count: ' + totalCount);
+    logger.info('downsampled total count: ' + downsampledTotalCount);
     logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
   }
 
