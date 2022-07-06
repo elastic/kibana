@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import { difference } from 'lodash';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiButtonEmpty, EuiIcon, EuiSelectable, EuiWrappingPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,7 +14,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUpdateTags } from '../hooks';
 
 interface Props {
-  agentId: string;
+  agentId?: string;
+  agents?: string[] | string;
   allTags: string[];
   selectedTags: string[];
   button: HTMLElement;
@@ -22,12 +24,14 @@ interface Props {
 
 export const TagsAddRemove: React.FC<Props> = ({
   agentId,
+  agents,
   allTags,
   selectedTags,
   button,
   onTagsUpdated,
 }: {
-  agentId: string;
+  agentId?: string;
+  agents?: string[] | string;
   allTags: string[];
   selectedTags: string[];
   button: HTMLElement;
@@ -54,16 +58,31 @@ export const TagsAddRemove: React.FC<Props> = ({
     setLabels(labelsFromTags(allTags));
   }, [allTags, labelsFromTags]);
 
-  const updateTags = async (newTags: string[]) => {
-    updateTagsHook.updateTags(agentId, newTags, () => onTagsUpdated());
+  const updateTags = async (tagsToAdd: string[], tagsToRemove: string[]) => {
+    if (agentId) {
+      updateTagsHook.updateTags(
+        agentId,
+        difference(selectedTags, tagsToRemove).concat(tagsToAdd),
+        () => onTagsUpdated()
+      );
+    } else {
+      updateTagsHook.bulkUpdateTags(agents!, tagsToAdd, tagsToRemove, () => onTagsUpdated());
+    }
   };
 
   const setOptions = (newOptions: Array<EuiSelectableOption<any>>) => {
     setLabels(newOptions);
 
-    updateTags(
-      newOptions.filter((option) => option.checked === 'on').map((option) => option.label)
-    );
+    const existingCheckedTags = labels
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.label);
+    const newCheckedTags = newOptions
+      .filter((option) => option.checked === 'on')
+      .map((option) => option.label);
+    const tagsToAdd = difference(newCheckedTags, existingCheckedTags);
+    const tagsToRemove = difference(existingCheckedTags, newCheckedTags);
+
+    updateTags(tagsToAdd, tagsToRemove);
   };
 
   return (
@@ -91,7 +110,7 @@ export const TagsAddRemove: React.FC<Props> = ({
               if (!searchValue) {
                 return;
               }
-              updateTags([...selectedTags, searchValue]);
+              updateTags([searchValue], []);
             }}
           >
             <EuiIcon type="plus" />{' '}

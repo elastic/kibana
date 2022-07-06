@@ -28,7 +28,7 @@ import {
   failedFleetActionErrorCode,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-  GET_RUNNING_PROCESSES_ROUTE,
+  GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   ENDPOINT_ACTIONS_INDEX,
@@ -147,7 +147,7 @@ export function registerResponseActionRoutes(
 
   router.post(
     {
-      path: GET_RUNNING_PROCESSES_ROUTE,
+      path: GET_PROCESSES_ROUTE,
       validate: NoParametersRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
