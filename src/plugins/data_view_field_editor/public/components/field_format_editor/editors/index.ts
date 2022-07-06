@@ -7,9 +7,9 @@
  */
 
 export type { FieldFormatEditor, FieldFormatEditorFactory, FormatEditorProps } from './types';
+export type { DefaultFormatEditor } from './default';
 
-export { DefaultFormatEditor, defaultFormatEditorFactory } from './default';
-
+export { defaultFormatEditorFactory } from './default';
 export { BytesFormatEditor, bytesFormatEditorFactory } from './bytes';
 export { ColorFormatEditor, colorFormatEditorFactory } from './color';
 export { DateFormatEditor, dateFormatEditorFactory } from './date';

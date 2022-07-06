@@ -8,7 +8,7 @@
 
 import { isEqual } from 'lodash';
 
-interface RollupJob {
+export interface RollupJob {
   fields: { [key: string]: Array<{ agg: string; interval: string }> };
 }
 
