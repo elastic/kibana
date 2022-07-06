@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/** Initial commit feature branch */
+
 import {
   EuiBasicTableColumn,
   EuiButton,
