@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiLoadingContent } from '@elastic/eui';
 import { createGlobalStyle } from 'styled-components';
 import { useFetchStatus } from '../fleet_integration/use_fetch_status';
@@ -15,8 +15,6 @@ import {
   PERMISSION_DENIED,
   SHORT_EMPTY_TITLE,
 } from '../shared_components/osquery_action/translations';
-
-type ConnectorValidationFunc = () => Promise<{ message: ReactNode } | void | undefined>;
 
 // Osquery connector has an additional validation, but no real Settings
 // thus we hide all the fields besides the Osquery validation message
@@ -32,23 +30,9 @@ const OverwriteGlobalStyle = createGlobalStyle`
   }
 
 `;
-const OsqueryConnectorForm: React.FunctionComponent<{
-  registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
-}> = ({ registerPreSubmitValidator }) => {
+const OsqueryConnectorForm: React.FunctionComponent<{}> = () => {
   const { loading, disabled, permissionDenied } = useFetchStatus();
 
-  const preSubmitValidator = useCallback(async () => {
-    if (permissionDenied || disabled) {
-      return {
-        message: '',
-      };
-    }
-  }, [disabled, permissionDenied]);
-
-  useEffect(
-    () => registerPreSubmitValidator(preSubmitValidator),
-    [preSubmitValidator, registerPreSubmitValidator]
-  );
   const renderError = useMemo(() => {
     if (loading) {
       return <EuiLoadingContent lines={5} />;
