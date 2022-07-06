@@ -63,19 +63,20 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     },
 
     async deleteMonitors() {
+      let isSuccessful: boolean = false;
       while (true) {
         if ((await page.$(this.byTestId('syntheticsMonitorListActions'))) === null) {
-          return true;
+          break;
         }
         await page.click(this.byTestId('syntheticsMonitorListActions'), { delay: 800 });
         await page.click('text=delete', { delay: 800 });
         await page.waitForSelector('[data-test-subj="confirmModalTitleText"]');
         await this.clickByTestSubj('confirmModalConfirmButton');
-        // isSuccessful = Boolean(await this.findByTestSubj('uptimeDeleteMonitorSuccess'));
+        isSuccessful = Boolean(await this.findByTestSubj('uptimeDeleteMonitorSuccess'));
         await this.navigateToMonitorManagement();
         await page.waitForTimeout(5 * 1000);
       }
-      return true;
+      return isSuccessful;
     },
 
     async navigateToEditMonitor() {
