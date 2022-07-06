@@ -78,6 +78,7 @@ export {
 } from './lifecycle';
 export type {
   OnPreAuthToolkit,
+  AuthenticationHandler,
   AuthHeaders,
   AuthRedirectedParams,
   AuthResult,

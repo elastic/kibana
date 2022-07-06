@@ -15,10 +15,16 @@ export type {
   AuthResultParams,
   AuthResultRedirected,
   AuthToolkit,
+  AuthenticationHandler,
 } from './auth';
 export { AuthResultType } from './auth';
 
-export type { OnPostAuthHandler, OnPostAuthNextResult, OnPostAuthToolkit, OnPostAuthResult } from './on_post_auth';
+export type {
+  OnPostAuthHandler,
+  OnPostAuthNextResult,
+  OnPostAuthToolkit,
+  OnPostAuthResult,
+} from './on_post_auth';
 export { OnPostAuthResultType } from './on_post_auth';
 
 export type {

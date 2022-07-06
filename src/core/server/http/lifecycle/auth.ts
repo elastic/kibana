@@ -9,9 +9,7 @@
 import { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
-  KibanaRequest,
-  IKibanaResponse,
-  LifecycleResponseFactory,
+  AuthenticationHandler,
   ResponseHeaders,
   AuthResultParams,
   AuthResult,
@@ -69,16 +67,6 @@ const toolkit: AuthToolkit = {
   notHandled: authResult.notHandled,
   redirected: authResult.redirected,
 };
-
-/**
- * See {@link AuthToolkit}.
- * @public
- */
-export type AuthenticationHandler = (
-  request: KibanaRequest,
-  response: LifecycleResponseFactory,
-  toolkit: AuthToolkit
-) => AuthResult | IKibanaResponse | Promise<AuthResult | IKibanaResponse>;
 
 /** @internal */
 export function adoptToHapiAuthFormat(

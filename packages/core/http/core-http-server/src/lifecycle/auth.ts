@@ -7,6 +7,9 @@
  */
 
 import type { ResponseHeaders } from '../headers';
+import type { IKibanaResponse } from '../response';
+import type { KibanaRequest } from '../request';
+import type { LifecycleResponseFactory } from '../response_factory';
 
 export enum AuthResultType {
   authenticated = 'authenticated',
@@ -87,3 +90,13 @@ export interface AuthToolkit {
    * */
   redirected: (headers: { location: string } & ResponseHeaders) => AuthResult;
 }
+
+/**
+ * See {@link AuthToolkit}.
+ * @public
+ */
+export type AuthenticationHandler = (
+  request: KibanaRequest,
+  response: LifecycleResponseFactory,
+  toolkit: AuthToolkit
+) => AuthResult | IKibanaResponse | Promise<AuthResult | IKibanaResponse>;
