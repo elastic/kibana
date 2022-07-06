@@ -174,11 +174,11 @@ describe('DiscoverGrid', () => {
   });
 
   describe('edit field button', () => {
-    it('should render the edit field button if onEditRuntimeField is provided', () => {
+    it('should render the edit field button if onFieldEdited is provided', () => {
       const component = getComponent({
         ...getProps(),
         columns: ['message'],
-        onEditRuntimeField: jest.fn(),
+        onFieldEdited: jest.fn(),
       });
       expect(findTestSubject(component, 'dataGridHeaderCellActionGroup-message').exists()).toBe(
         false
@@ -190,7 +190,7 @@ describe('DiscoverGrid', () => {
       expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(true);
     });
 
-    it('should not render the edit field button if onEditRuntimeField is not provided', () => {
+    it('should not render the edit field button if onFieldEdited is not provided', () => {
       const component = getComponent({
         ...getProps(),
         columns: ['message'],

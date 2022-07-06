@@ -199,7 +199,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
-                onEditRuntimeField={() => {
+                onFieldEdited={() => {
                   fetchAllRows();
                 }}
               />

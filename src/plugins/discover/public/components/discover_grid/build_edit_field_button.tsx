@@ -37,7 +37,9 @@ export const buildEditFieldButton = ({
 
   const editFieldButton: EuiListGroupItemProps = {
     size: 'xs',
-    label: <FormattedMessage id="discover.grid.editFieldButton" defaultMessage="Edit field" />,
+    label: (
+      <FormattedMessage id="discover.grid.editFieldButton" defaultMessage="Edit data view field" />
+    ),
     iconType: 'pencil',
     iconProps: { size: 'm' },
     onClick: () => {

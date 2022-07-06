@@ -42,7 +42,7 @@ export interface ContextAppContentProps {
   isLegacy: boolean;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
-  onEditRuntimeField: () => void;
+  onFieldEdited: () => void;
 }
 
 const controlColumnIds = ['openDetails'];
@@ -73,7 +73,7 @@ export function ContextAppContent({
   isLegacy,
   setAppState,
   addFilter,
-  onEditRuntimeField,
+  onFieldEdited,
 }: ContextAppContentProps) {
   const { uiSettings: config } = useDiscoverServices();
 
@@ -162,7 +162,7 @@ export function ContextAppContent({
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
-            onEditRuntimeField={onEditRuntimeField}
+            onFieldEdited={onFieldEdited}
           />
         </div>
       )}

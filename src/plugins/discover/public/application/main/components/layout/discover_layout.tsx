@@ -176,7 +176,7 @@ export function DiscoverLayout({
     [filterManager, indexPattern, indexPatterns, trackUiMetric, capabilities]
   );
 
-  const onEditRuntimeField = useCallback(() => {
+  const onFieldEdited = useCallback(() => {
     savedSearchRefetch$.next('reset');
   }, [savedSearchRefetch$]);
 
@@ -239,7 +239,7 @@ export function DiscoverLayout({
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
         onChangeIndexPattern={onChangeIndexPattern}
-        onEditRuntimeField={onEditRuntimeField}
+        onFieldEdited={onFieldEdited}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -262,7 +262,7 @@ export function DiscoverLayout({
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
-              onEditRuntimeField={onEditRuntimeField}
+              onFieldEdited={onFieldEdited}
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
@@ -346,7 +346,7 @@ export function DiscoverLayout({
                       setExpandedDoc={setExpandedDoc}
                       state={state}
                       stateContainer={stateContainer}
-                      onEditRuntimeField={onEditRuntimeField}
+                      onFieldEdited={onFieldEdited}
                     />
                   ) : (
                     <FieldStatisticsTableMemoized

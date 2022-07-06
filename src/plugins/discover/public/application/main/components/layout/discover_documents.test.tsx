@@ -46,7 +46,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     state: { columns: [] },
     stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     navigateTo: jest.fn(),
-    onEditRuntimeField: jest.fn(),
+    onFieldEdited: jest.fn(),
   };
 
   return mountWithIntl(

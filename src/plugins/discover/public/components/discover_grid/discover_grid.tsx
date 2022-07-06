@@ -169,7 +169,7 @@ export interface DiscoverGridProps {
   /**
    * Callback to execute on edit runtime field
    */
-  onEditRuntimeField?: () => void;
+  onFieldEdited?: () => void;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -203,7 +203,7 @@ export const DiscoverGrid = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
-  onEditRuntimeField,
+  onFieldEdited,
 }: DiscoverGridProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
@@ -336,7 +336,7 @@ export const DiscoverGrid = ({
 
   const editField = useMemo(
     () =>
-      onEditRuntimeField
+      onFieldEdited
         ? (fieldName: string) => {
             closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
               ctx: {
@@ -344,12 +344,12 @@ export const DiscoverGrid = ({
               },
               fieldName,
               onSave: async () => {
-                onEditRuntimeField();
+                onFieldEdited();
               },
             });
           }
         : undefined,
-    [indexPattern, onEditRuntimeField, services.dataViewFieldEditor]
+    [indexPattern, onFieldEdited, services.dataViewFieldEditor]
   );
 
   const euiGridColumns = useMemo(
