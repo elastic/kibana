@@ -2670,7 +2670,7 @@
         "description": [
           "\nA policy describing whether access to an external destination is allowed."
         ],
-        "path": "src/core/server/external_url/external_url_config.ts",
+        "path": "src/core/server/http/external_url/external_url_config.ts",
         "deprecated": false,
         "children": [
           {
@@ -2682,7 +2682,7 @@
             "description": [
               "\nIndicates if this policy allows or denies access to the described destination."
             ],
-            "path": "src/core/server/external_url/external_url_config.ts",
+            "path": "src/core/server/http/external_url/external_url_config.ts",
             "deprecated": false
           },
           {
@@ -2697,7 +2697,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/external_url/external_url_config.ts",
+            "path": "src/core/server/http/external_url/external_url_config.ts",
             "deprecated": false
           },
           {
@@ -2712,7 +2712,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/core/server/external_url/external_url_config.ts",
+            "path": "src/core/server/http/external_url/external_url_config.ts",
             "deprecated": false
           }
         ],
@@ -6988,14 +6988,14 @@
           {
             "parentPluginId": "core",
             "id": "def-public.TelemetryCounter.type",
-            "type": "Enum",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [
-              "\r\nIndicates if the event contains data about succeeded, failed or dropped events."
+              "\r\n{@link TelemetryCounterType}"
             ],
             "signature": [
-              "TelemetryCounterType"
+              "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -7465,21 +7465,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "core",
-        "id": "def-public.TelemetryCounterType",
-        "type": "Enum",
-        "tags": [],
-        "label": "TelemetryCounterType",
-        "description": [
-          "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
-        ],
-        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "core",
@@ -8034,6 +8020,22 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-public.TelemetryCounterType",
+        "type": "Type",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\r\nIndicates if the event contains data about succeeded, failed or dropped events:\r\n- enqueued: The event was accepted and will be sent to the shippers when they become available (and opt-in === true).\r\n- sent_to_shipper: The event was sent to at least one shipper.\r\n- succeeded: The event was successfully sent by the shipper.\r\n- failed: There was an error when processing/shipping the event. Refer to the Telemetry Counter's code for the reason.\r\n- dropped: The event was dropped from the queue. Refer to the Telemetry Counter's code for the reason."
+        ],
+        "signature": [
+          "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
+        ],
+        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.Toast",
         "type": "Type",
         "tags": [],
@@ -8500,110 +8502,6 @@
   },
   "server": {
     "classes": [
-      {
-        "parentPluginId": "core",
-        "id": "def-server.CspConfig",
-        "type": "Class",
-        "tags": [],
-        "label": "CspConfig",
-        "description": [
-          "\nCSP configuration for use in Kibana."
-        ],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.CspConfig",
-            "text": "CspConfig"
-          },
-          " implements ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.ICspConfig",
-            "text": "ICspConfig"
-          }
-        ],
-        "path": "src/core/server/csp/csp_config.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.DEFAULT",
-            "type": "Object",
-            "tags": [],
-            "label": "DEFAULT",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CspConfig",
-                "text": "CspConfig"
-              }
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.directives",
-            "type": "Object",
-            "tags": [],
-            "label": "#directives",
-            "description": [],
-            "signature": [
-              "CspDirectives"
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.strict",
-            "type": "boolean",
-            "tags": [],
-            "label": "strict",
-            "description": [],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.warnLegacyBrowsers",
-            "type": "boolean",
-            "tags": [],
-            "label": "warnLegacyBrowsers",
-            "description": [],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.disableEmbedding",
-            "type": "boolean",
-            "tags": [],
-            "label": "disableEmbedding",
-            "description": [],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.CspConfig.header",
-            "type": "string",
-            "tags": [],
-            "label": "header",
-            "description": [],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "core",
         "id": "def-server.ElasticsearchConfig",
@@ -11842,32 +11740,6 @@
               "\nIndicates whether Elasticsearch configuration includes credentials (`username`, `password` or `serviceAccountToken`)."
             ],
             "path": "src/core/server/elasticsearch/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.ElasticsearchErrorDetails",
-        "type": "Interface",
-        "tags": [],
-        "label": "ElasticsearchErrorDetails",
-        "description": [],
-        "path": "src/core/server/elasticsearch/client/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ElasticsearchErrorDetails.error",
-            "type": "Object",
-            "tags": [],
-            "label": "error",
-            "description": [],
-            "signature": [
-              "{ type: string; reason?: string | undefined; } | undefined"
-            ],
-            "path": "src/core/server/elasticsearch/client/types.ts",
             "deprecated": false
           }
         ],
@@ -15668,69 +15540,6 @@
       },
       {
         "parentPluginId": "core",
-        "id": "def-server.ICspConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "ICspConfig",
-        "description": [
-          "\nCSP configuration for use in Kibana."
-        ],
-        "path": "src/core/server/csp/csp_config.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ICspConfig.strict",
-            "type": "boolean",
-            "tags": [],
-            "label": "strict",
-            "description": [
-              "\nSpecify whether browsers that do not support CSP should be\nable to use Kibana. Use `true` to block and `false` to allow."
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ICspConfig.warnLegacyBrowsers",
-            "type": "boolean",
-            "tags": [],
-            "label": "warnLegacyBrowsers",
-            "description": [
-              "\nSpecify whether users with legacy browsers should be warned\nabout their lack of Kibana security compliance."
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ICspConfig.disableEmbedding",
-            "type": "boolean",
-            "tags": [],
-            "label": "disableEmbedding",
-            "description": [
-              "\nWhether or not embedding (using iframes) should be allowed by the CSP. If embedding is disabled, a restrictive 'frame-ancestors' rule will be added to the default CSP rules."
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.ICspConfig.header",
-            "type": "string",
-            "tags": [],
-            "label": "header",
-            "description": [
-              "\nThe CSP rules in a formatted directives string for use\nin a `Content-Security-Policy` header."
-            ],
-            "path": "src/core/server/csp/csp_config.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
         "id": "def-server.ICustomClusterClient",
         "type": "Interface",
         "tags": [],
@@ -15819,100 +15628,6 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.IExternalUrlConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "IExternalUrlConfig",
-        "description": [
-          "\nExternal Url configuration for use in Kibana."
-        ],
-        "path": "src/core/server/external_url/external_url_config.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IExternalUrlConfig.policy",
-            "type": "Array",
-            "tags": [],
-            "label": "policy",
-            "description": [
-              "\nA set of policies describing which external urls are allowed."
-            ],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IExternalUrlPolicy",
-                "text": "IExternalUrlPolicy"
-              },
-              "[]"
-            ],
-            "path": "src/core/server/external_url/external_url_config.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.IExternalUrlPolicy",
-        "type": "Interface",
-        "tags": [],
-        "label": "IExternalUrlPolicy",
-        "description": [
-          "\nA policy describing whether access to an external destination is allowed."
-        ],
-        "path": "src/core/server/external_url/external_url_config.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IExternalUrlPolicy.allow",
-            "type": "boolean",
-            "tags": [],
-            "label": "allow",
-            "description": [
-              "\nIndicates if this policy allows or denies access to the described destination."
-            ],
-            "path": "src/core/server/external_url/external_url_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IExternalUrlPolicy.host",
-            "type": "string",
-            "tags": [],
-            "label": "host",
-            "description": [
-              "\nOptional host describing the external destination.\nMay be combined with `protocol`.\n"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/external_url/external_url_config.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "core",
-            "id": "def-server.IExternalUrlPolicy.protocol",
-            "type": "string",
-            "tags": [],
-            "label": "protocol",
-            "description": [
-              "\nOptional protocol describing the external destination.\nMay be combined with `host`.\n"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/server/external_url/external_url_config.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -23363,14 +23078,14 @@
           {
             "parentPluginId": "core",
             "id": "def-server.TelemetryCounter.type",
-            "type": "Enum",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [
-              "\r\nIndicates if the event contains data about succeeded, failed or dropped events."
+              "\r\n{@link TelemetryCounterType}"
             ],
             "signature": [
-              "TelemetryCounterType"
+              "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -24080,19 +23795,6 @@
         "label": "PluginType",
         "description": [],
         "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.TelemetryCounterType",
-        "type": "Enum",
-        "tags": [],
-        "label": "TelemetryCounterType",
-        "description": [
-          "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
-        ],
-        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
@@ -27095,6 +26797,22 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.TelemetryCounterType",
+        "type": "Type",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\r\nIndicates if the event contains data about succeeded, failed or dropped events:\r\n- enqueued: The event was accepted and will be sent to the shippers when they become available (and opt-in === true).\r\n- sent_to_shipper: The event was sent to at least one shipper.\r\n- succeeded: The event was successfully sent by the shipper.\r\n- failed: There was an error when processing/shipping the event. Refer to the Telemetry Counter's code for the reason.\r\n- dropped: The event was dropped from the queue. Refer to the Telemetry Counter's code for the reason."
+        ],
+        "signature": [
+          "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
+        ],
+        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.UiSettingsType",
         "type": "Type",
         "tags": [],
@@ -27106,21 +26824,6 @@
           "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"json\" | \"markdown\" | \"select\" | \"array\""
         ],
         "path": "src/core/types/ui_settings.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-server.UnauthorizedError",
-        "type": "Type",
-        "tags": [],
-        "label": "UnauthorizedError",
-        "description": [],
-        "signature": [
-          "ResponseError",
-          " & { statusCode: 401; }"
-        ],
-        "path": "src/core/server/elasticsearch/client/errors.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

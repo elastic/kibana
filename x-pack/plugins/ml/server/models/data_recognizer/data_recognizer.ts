@@ -1109,8 +1109,8 @@ export class DataRecognizer {
     );
 
     return {
-      start: timeFieldRange.end.epoch - moment.duration(3, 'months').asMilliseconds(),
-      end: timeFieldRange.end.epoch,
+      start: timeFieldRange.end - moment.duration(3, 'months').asMilliseconds(),
+      end: timeFieldRange.end,
     };
   }
 
