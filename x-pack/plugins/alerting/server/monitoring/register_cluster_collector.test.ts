@@ -128,18 +128,18 @@ describe('registerClusterCollector()', () => {
           type: 'long',
           script: {
             source: `
-                def runAt = doc['task.runAt'];
-                if(!runAt.empty) {
-                  emit(new Date().getTime() - runAt.value.getMillis());
-                } else {
-                  def retryAt = doc['task.retryAt'];
-                  if(!retryAt.empty) {
-                    emit(new Date().getTime() - retryAt.value.getMillis());
-                  } else {
-                    emit(0);
-                  }
-                }
-              `,
+            def runAt = doc['task.runAt'];
+            if(!runAt.empty) {
+              emit(new Date().getTime() - runAt.value.getMillis());
+            } else {
+              def retryAt = doc['task.retryAt'];
+              if(!retryAt.empty) {
+                emit(new Date().getTime() - retryAt.value.getMillis());
+              } else {
+                emit(0);
+              }
+            }
+          `,
           },
         },
       },

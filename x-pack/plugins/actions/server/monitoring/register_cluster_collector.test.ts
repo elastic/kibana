@@ -128,18 +128,18 @@ describe('registerClusterCollector()', () => {
           type: 'long',
           script: {
             source: `
-                def runAt = doc['task.runAt'];
-                if(!runAt.empty) {
-                  emit(new Date().getTime() - runAt.value.getMillis());
-                } else {
-                  def retryAt = doc['task.retryAt'];
-                  if(!retryAt.empty) {
-                    emit(new Date().getTime() - retryAt.value.getMillis());
-                  } else {
-                    emit(0);
-                  }
-                }
-              `,
+            def runAt = doc['task.runAt'];
+            if(!runAt.empty) {
+              emit(new Date().getTime() - runAt.value.getMillis());
+            } else {
+              def retryAt = doc['task.retryAt'];
+              if(!retryAt.empty) {
+                emit(new Date().getTime() - retryAt.value.getMillis());
+              } else {
+                emit(0);
+              }
+            }
+          `,
           },
         },
       },
@@ -213,11 +213,11 @@ describe('registerClusterCollector()', () => {
 
     const metricTypes = Object.keys(metrics);
     expect(metricTypes.length).toBe(1);
-    expect(metricTypes[0]).toBe('cluster_rules');
+    expect(metricTypes[0]).toBe('cluster_actions');
 
     taskManagerAggregate.mockRejectedValue(new Error('Failure'));
 
-    const result = (await metrics.cluster_rules.fetch()) as ClusterActionsMetric;
+    const result = (await metrics.cluster_actions.fetch()) as ClusterActionsMetric;
     expect(result.overdue.count).toEqual(0);
     expect(result.overdue.delay.p50).toEqual(0);
     expect(result.overdue.delay.p99).toEqual(0);
