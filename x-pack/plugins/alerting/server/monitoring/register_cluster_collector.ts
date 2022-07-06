@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import stats from 'stats-lite';
+import type {
+  AggregationsKeyedPercentiles,
+  AggregationsPercentilesAggregateBase,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import {
   IdleTaskWithExpiredRunAt,
@@ -40,8 +43,7 @@ export function registerClusterCollector({
     },
     fetch: async () => {
       const [_, pluginStart] = await core.getStartServices();
-      const now = +new Date();
-      const { docs: overdueTasks } = await pluginStart.taskManager.fetch({
+      const results = await pluginStart.taskManager.aggregate({
         query: {
           bool: {
             must: [
@@ -60,18 +62,64 @@ export function registerClusterCollector({
             ],
           },
         },
+        runtime_mappings: {
+          overdueBy: {
+            type: 'long',
+            script: {
+              source: `
+                def runAt = doc['task.runAt'];
+                if(!runAt.empty) {
+                  emit(new Date().getTime() - runAt.value.getMillis());
+                } else {
+                  def retryAt = doc['task.retryAt'];
+                  if(!retryAt.empty) {
+                    emit(new Date().getTime() - retryAt.value.getMillis());
+                  } else {
+                    emit(0);
+                  }
+                }
+              `,
+            },
+          },
+        },
+        aggs: {
+          overdueByPercentiles: {
+            percentiles: {
+              field: 'overdueBy',
+              percents: [50, 99],
+            },
+          },
+        },
       });
 
-      const overdueTasksDelay = overdueTasks.map(
-        (overdueTask) => now - +new Date(overdueTask.runAt || overdueTask.retryAt)
-      );
+      const totalOverdueTasks =
+        typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
+      const aggregations = results.aggregations as {
+        overdueByPercentiles: AggregationsPercentilesAggregateBase;
+      };
+      const overdueByValues: AggregationsKeyedPercentiles =
+        (aggregations?.overdueByPercentiles?.values as AggregationsKeyedPercentiles) ?? {};
+
+      /**
+       * Response format
+       * {
+       *   "aggregations": {
+       *     "overdueBy": {
+       *       "values": {
+       *         "50.0": 3027400
+       *         "99.0": 3035402
+       *       }
+       *     }
+       *   }
+       * }
+       */
 
       const metrics: ClusterRulesMetric = {
         overdue: {
-          count: overdueTasks.length,
+          count: totalOverdueTasks ?? 0,
           delay: {
-            p50: stats.percentile(overdueTasksDelay, 0.5),
-            p99: stats.percentile(overdueTasksDelay, 0.99),
+            p50: (overdueByValues['50.0'] as number) ?? 0,
+            p99: (overdueByValues['99.0'] as number) ?? 0,
           },
         },
       };
