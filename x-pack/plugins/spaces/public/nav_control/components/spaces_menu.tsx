@@ -7,14 +7,14 @@
 
 import './spaces_menu.scss';
 
-import { EuiAvatar, EuiPopoverFooter, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
+import { EuiAvatar, EuiPopoverFooter, EuiPopoverTitle, EuiSelectable, EuiText } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import React, { Component } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import { injectI18n } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
@@ -56,6 +56,15 @@ class SpacesMenuUI extends Component<Props, State> {
 
     const spaceMenuOptions: EuiSelectableOption[] = this.getSpaceOptions();
 
+    const noMatchesMessage = (
+      <EuiText color="subdued" className="eui-textCenter">
+        <FormattedMessage
+          id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
+          defaultMessage=" no spaces found "
+        />
+      </EuiText>
+    );
+
     const panelProps = {
       id: this.props.id,
       className: 'spcMenu',
@@ -79,14 +88,41 @@ class SpacesMenuUI extends Component<Props, State> {
               } as any)
             : undefined
         }
+        noMatchesMessage={noMatchesMessage}
+        emptyMessage={noMatchesMessage}
         options={spaceMenuOptions}
         singleSelection={true}
         style={{ width: 300 }}
         onChange={this.spaceSelectionChange}
-        listProps={{
-          rowHeight: 40,
-          showIcons: false,
-        }}
+        listProps={{ showIcons: false }}
+        // onChange={(newOptions, event) => {
+        //   const selectedSpaceItem = newOptions.filter((item) => item.checked === 'on')[0];
+
+        //   if (!!selectedSpaceItem) {
+        //     const urlToSelectedSpace = addSpaceIdToPath(
+        //       this.props.serverBasePath,
+        //       selectedSpaceItem.key, // selectedSpace.id
+        //       ENTER_SPACE_PATH
+        //     );
+
+        //     console.log(event);
+        //     console.log(`**** Event Class: ${event.constructor.name}`);
+        //     // console.log(`**** Event Type: ${event.type}`);
+
+        //     if (event.shiftKey) {
+        //       console.log(`**** SHIFT CLICK`);
+        //     } else if (event.ctrlKey || event.metaKey) {
+        //       // (event instanceof MouseEvent && (event.button === 1 || event.ctrlKey))
+        //       console.log(`**** CTRL/CMD CLICK`);
+        //     } else {
+        //       console.log(`**** NORMAL CLICK`);
+        //     }
+        //   }
+        // }}
+        // listProps={{
+        //   rowHeight: 40,
+        //   showIcons: false,
+        // }}
       >
         {(list, search) => (
           <>
@@ -123,7 +159,6 @@ class SpacesMenuUI extends Component<Props, State> {
   private spaceSelectionChange = (
     newOptions: EuiSelectableOption[],
     event: EuiSelectableOnChangeEvent
-    // event: React.MouseEvent | React.KeyboardEvent
   ) => {
     const selectedSpaceItem = newOptions.filter((item) => item.checked === 'on')[0];
 
@@ -136,15 +171,13 @@ class SpacesMenuUI extends Component<Props, State> {
 
       // ToDo: handle options (middle click or cmd/ctrl (new tab), shift click (new window))
       console.log(`**** Event Class: ${event.constructor.name}`);
+      console.log(`**** Native Event: ${event.nativeEvent}`);
 
       if (event.shiftKey) {
         // Open in new window, shift is given priority over other modifiers
         console.log(`**** SHIFT CLICK`);
         window.open(urlToSelectedSpace);
-      } else if (
-        (event instanceof KeyboardEvent && event.ctrlKey) ||
-        (event instanceof MouseEvent && (event.button === 1 || event.ctrlKey))
-      ) {
+      } else if (event.ctrlKey || event.metaKey) {
         // Open in new tab - either a ctrl click or middle mouse button
         console.log(`**** CTRL/CMD CLICK`);
         // window.open(urlToSelectedSpace); // ToDo: replace with new tab
