@@ -155,7 +155,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
           <EuiIcon type={`${option.checked === 'on' ? 'check' : 'empty'}`} color="primary" />
         </EuiFlexItem>
         <TimelineContentItem grow={true}>
-          <EuiFlexGroup gutterSize="none" direction="column">
+          <EuiFlexGroup gutterSize="none" direction="column" responsive={false}>
             <EuiFlexItem data-test-subj="timeline">
               <EuiToolTip content={title} anchorClassName="eui-textTruncate eui-alignMiddle">
                 <EuiHighlight search={searchValue}>{title}</EuiHighlight>
