@@ -27,7 +27,7 @@ export interface FormatSelectEditorProps {
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
-  onChange: (change?: FieldFormatConfig) => void;
+  onChange: (change?: unknown) => void;
   onError: (error?: string) => void;
   value?: FieldFormatConfig;
 }
@@ -88,7 +88,7 @@ export class FormatSelectEditor extends PureComponent<
       kbnType,
     };
   }
-  onFormatChange = (formatId: string, params?: any) =>
+  onFormatChange = (formatId: string, params?: unknown) =>
     this.props.onChange(
       formatId
         ? {
@@ -98,7 +98,7 @@ export class FormatSelectEditor extends PureComponent<
         : undefined
     );
 
-  onFormatParamsChange = (newParams: { [key: string]: any }) => {
+  onFormatParamsChange = (newParams: FieldFormatConfig) => {
     const { fieldFormatId } = this.state;
     this.onFormatChange(fieldFormatId as string, newParams);
   };

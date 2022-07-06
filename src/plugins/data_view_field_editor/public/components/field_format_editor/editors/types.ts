@@ -9,7 +9,6 @@
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ComponentType } from 'react';
 import type { FormatSelectEditorProps } from '../field_format_editor';
-import { UrlFormatEditorFormatParams } from './url/url';
 
 /**
  * Props for received by {@link FieldFormatEditor}
@@ -19,7 +18,7 @@ export interface FormatEditorProps<P> {
   fieldType: string;
   format: FieldFormat;
   formatParams: { type?: string } & P;
-  onChange: (newParams: UrlFormatEditorFormatParams) => void;
+  onChange: (newParams: unknown) => void;
   onError: FormatSelectEditorProps['onError'];
 }
 
