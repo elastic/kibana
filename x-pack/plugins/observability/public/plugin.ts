@@ -49,6 +49,8 @@ import { getExploratoryViewEmbeddable } from './components/shared/exploratory_vi
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
+import { getSharedMethod, registerSharedMethod, unregisterSharedMethod } from './method_registry';
+import { getService, GetServiceOptions } from './entities/get_service';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
@@ -267,6 +269,11 @@ export class Plugin
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+      sharedMethods: {
+        register: registerSharedMethod,
+        unregister: unregisterSharedMethod,
+        get: getSharedMethod,
+      },
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
@@ -315,6 +322,10 @@ export class Plugin
         pluginsStart.lens
       ),
       useRulesLink: createUseRulesLink(),
+      entities: {
+        getService: (opts: Omit<GetServiceOptions, 'client'>) =>
+          getService({ ...opts, client: pluginsStart.data }),
+      },
     };
   }
 }
