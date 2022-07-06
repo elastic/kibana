@@ -141,7 +141,7 @@ export function getState({
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
-  const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;
+  const globalStateInitial = stateStorage.get<GlobalState>(GLOBAL_STATE_URL_KEY) ?? { filters: [] };
   const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
