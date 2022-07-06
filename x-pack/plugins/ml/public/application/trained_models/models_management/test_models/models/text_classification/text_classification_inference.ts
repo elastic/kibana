@@ -19,6 +19,11 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
     'xpack.ml.trainedModels.testModelsFlyout.textClassification.label',
     { defaultMessage: 'Text classification' }
   );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.textClassification.info1', {
+      defaultMessage: 'Test how well the model classifies your input text',
+    }),
+  ];
 
   public async infer() {
     try {
