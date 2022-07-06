@@ -6,20 +6,12 @@
  */
 
 import { useEffect, useState } from 'react';
+import { CasesPermissions } from '@kbn/cases-plugin/common';
 import { useKibana } from '../utils/kibana_react';
 import { casesFeatureId } from '../../common';
 
-export interface UseGetUserCasesPermissions {
-  all: boolean;
-  read: boolean;
-  create: boolean;
-  update: boolean;
-  delete: boolean;
-  push: boolean;
-}
-
 export function useGetUserCasesPermissions() {
-  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions>({
+  const [casesPermissions, setCasesPermissions] = useState<CasesPermissions>({
     all: false,
     read: false,
     create: false,

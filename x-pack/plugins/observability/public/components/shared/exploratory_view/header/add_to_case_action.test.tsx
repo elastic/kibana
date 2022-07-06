@@ -84,7 +84,14 @@ describe('AddToCaseAction', function () {
   it('should be able to click add to case button', async function () {
     const mockUseGetUserCasesPermissions = jest
       .spyOn(useGetUserCasesPermissionsModule, 'useGetUserCasesPermissions')
-      .mockImplementation(() => ({ crud: false, read: false }));
+      .mockImplementation(() => ({
+        all: false,
+        create: false,
+        read: false,
+        update: false,
+        delete: false,
+        push: false,
+      }));
 
     const initSeries = {
       data: [

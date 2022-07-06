@@ -10,7 +10,12 @@ import React from 'react';
 import { MemoryRouterProps } from 'react-router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { readCasesPermissions, TestProviders } from '../../common/mock';
+import {
+  noCreateCasesPermissions,
+  noUpdateCasesPermissions,
+  readCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { CasesRoutes } from './routes';
 import { CasesPermissions } from '../../../common';
 
@@ -85,8 +90,8 @@ describe('Cases routes', () => {
       expect(screen.getByText('Create case')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if user is read only', () => {
-      renderWithRouter(['/cases/create'], readCasesPermissions());
+    it('shows the no privileges page if the user does not have create privileges', () => {
+      renderWithRouter(['/cases/create'], noCreateCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });
@@ -97,8 +102,8 @@ describe('Cases routes', () => {
       expect(screen.getByText('Configure cases')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if user is read only', () => {
-      renderWithRouter(['/cases/configure'], readCasesPermissions());
+    it('shows the no privileges page if the user does not have update privileges', () => {
+      renderWithRouter(['/cases/configure'], noUpdateCasesPermissions());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });

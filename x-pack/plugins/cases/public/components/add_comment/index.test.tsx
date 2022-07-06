@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { waitFor, act } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
-import { noCasesPermissions, TestProviders } from '../../common/mock';
+import { noCreateCasesPermissions, TestProviders } from '../../common/mock';
 
 import { CommentRequest, CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -113,13 +113,13 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
-  it('should hide the component when the user does not have crud permissions', () => {
+  it('should hide the component when the user does not have create permissions', () => {
     useCreateAttachmentsMock.mockImplementation(() => ({
       ...defaultResponse,
       isLoading: true,
     }));
     const wrapper = mount(
-      <TestProviders permissions={noCasesPermissions()}>
+      <TestProviders permissions={noCreateCasesPermissions()}>
         <AddComment {...{ ...addCommentProps }} />
       </TestProviders>
     );

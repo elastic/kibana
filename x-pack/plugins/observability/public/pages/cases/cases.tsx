@@ -7,16 +7,16 @@
 
 import React, { Suspense, useCallback, useState } from 'react';
 
+import { CasesPermissions } from '@kbn/cases-plugin/common';
 import { useKibana } from '../../utils/kibana_react';
 import { CASES_OWNER, CASES_PATH } from './constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../..';
 import { useFetchAlertDetail } from './use_fetch_alert_detail';
 import { useFetchAlertData } from './use_fetch_alert_data';
-import { UseGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 
 interface CasesProps {
-  permissions: UseGetUserCasesPermissions;
+  permissions: CasesPermissions;
 }
 export const Cases = React.memo<CasesProps>(({ permissions }) => {
   const {

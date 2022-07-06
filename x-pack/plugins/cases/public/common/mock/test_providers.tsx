@@ -115,6 +115,8 @@ export const noCasesPermissions = () =>
   buildCasesPermissions({ read: false, create: false, update: false, delete: false, push: false });
 export const readCasesPermissions = () =>
   buildCasesPermissions({ read: true, create: false, update: false, delete: false, push: false });
+export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
+export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: false });
 
 export const createAppMockRenderer = ({
   features,
