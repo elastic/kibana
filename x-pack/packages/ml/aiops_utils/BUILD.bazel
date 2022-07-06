@@ -38,9 +38,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//react",
-  "@npm//@elastic/charts",
-  "@npm//@elastic/eui",
-  "//packages/kbn-i18n-react",
   "//packages/kbn-logging"
 ]
 
@@ -57,9 +54,6 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/react",
-  "@npm//@elastic/charts",
-  "@npm//@elastic/eui",
-  "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-logging:npm_module_types"
 ]
 

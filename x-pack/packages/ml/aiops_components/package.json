@@ -1,5 +1,8 @@
 {
   "name": "@kbn/aiops-components",
+  "description": "React components for AIOps related efforts.",
+  "author": "Machine Learning UI",
+  "homepage": "https://docs.elastic.dev/kibana-dev-docs/api/kbn-aiops-components",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",
