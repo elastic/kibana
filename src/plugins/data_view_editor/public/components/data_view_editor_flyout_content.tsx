@@ -25,6 +25,8 @@ import {
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
 
+import { removeSpaces } from '../lib';
+
 import {
   MatchedItem,
   DataViewEditorContext,
@@ -79,7 +81,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   editData,
 }: Props) => {
   const {
-    services: { http, dataViews, uiSettings, searchClient, overlays },
+    services: { http, dataViews, uiSettings, overlays },
   } = useKibana<DataViewEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
@@ -106,7 +108,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       }
 
       const indexPatternStub: DataViewSpec = {
-        title: formData.title,
+        title: removeSpaces(formData.title),
         timeFieldName: formData.timestampField?.value,
         id: formData.id,
         name: formData.name,
@@ -268,7 +270,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
           ? await loadMatchedIndices(query, allowHidden, allSources, {
               isRollupIndex,
               http,
-              searchClient,
             })
           : {
               matchedIndicesResult: {
@@ -299,21 +300,22 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
       return fetchIndices(newTitle);
     },
-    [http, allowHidden, allSources, type, rollupIndicesCapabilities, searchClient, isLoadingSources]
+    [http, allowHidden, allSources, type, rollupIndicesCapabilities, isLoadingSources]
   );
 
   // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
   useEffect(() => {
     if (editData) {
       loadSources();
-      reloadMatchedIndices(editData.title);
+      reloadMatchedIndices(editData.title.replace(/,\s+/, ','));
     }
     // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editData]);
 
   useEffect(() => {
-    loadTimestampFieldOptions(editData ? editData.title : title);
+    const timeFieldQuery = editData ? editData.title : title;
+    loadTimestampFieldOptions(timeFieldQuery.replace(/,\s+/, ','));
     if (!editData) getFields().timestampField?.setValue('');
     // We use the below eslint-disable as adding editData as a dependency create an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -442,11 +444,9 @@ const loadMatchedIndices = memoizeOne(
     {
       isRollupIndex,
       http,
-      searchClient,
     }: {
       isRollupIndex: (index: string) => boolean;
       http: DataViewEditorContext['http'];
-      searchClient: DataViewEditorContext['searchClient'];
     }
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;
@@ -454,6 +454,7 @@ const loadMatchedIndices = memoizeOne(
     partialMatched: MatchedItem[];
   }> => {
     const indexRequests = [];
+    console.log('loadMatchedIndices', query);
 
     if (query?.endsWith('*')) {
       const exactMatchedQuery = getIndices({
