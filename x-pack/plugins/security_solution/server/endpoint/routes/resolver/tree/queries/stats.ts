@@ -191,7 +191,7 @@ export class StatsQuery {
     nodes: NodeID[],
     alertsClient: AlertsClient,
     includeHits: boolean
-  ): Promise<{ eventStats?: Record<string, EventStats>; alertIds?: string[]}> {
+  ): Promise<{ eventStats?: Record<string, EventStats>; alertIds?: string[] }> {
     if (nodes.length <= 0) {
       return {};
     }
