@@ -16,6 +16,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceSetup } from '../authentication';
@@ -166,7 +167,9 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
     <AuthenticationProvider authc={authc}>
       <SecurityApiClientsProvider {...securityApiClients}>
         <I18nProvider>
-          <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+          <KibanaThemeProvider theme$={theme$}>
+            <RedirectAppLinks coreStart={services}>{children}</RedirectAppLinks>
+          </KibanaThemeProvider>
         </I18nProvider>
       </SecurityApiClientsProvider>
     </AuthenticationProvider>
