@@ -6,20 +6,21 @@
  * Side Public License, v 1.
  */
 
-export type { FieldFormatEditor, FieldFormatEditorFactory, FormatEditorProps } from './types';
 export type { DefaultFormatEditor } from './default';
+export type { FieldFormatEditor, FieldFormatEditorFactory, FormatEditorProps } from './types';
+export type { UrlFormatEditorFormatParams } from './url';
 
-export { defaultFormatEditorFactory } from './default';
 export { BytesFormatEditor, bytesFormatEditorFactory } from './bytes';
 export { ColorFormatEditor, colorFormatEditorFactory } from './color';
 export { DateFormatEditor, dateFormatEditorFactory } from './date';
 export { DateNanosFormatEditor, dateNanosFormatEditorFactory } from './date_nanos';
+export { defaultFormatEditorFactory } from './default';
 export { DurationFormatEditor, durationFormatEditorFactory } from './duration';
 export { GeoPointFormatEditor, geoPointFormatEditorFactory } from './geo_point';
+export { HistogramFormatEditor, histogramFormatEditorFactory } from './histogram';
 export { NumberFormatEditor, numberFormatEditorFactory } from './number';
 export { PercentFormatEditor, percentFormatEditorFactory } from './percent';
 export { StaticLookupFormatEditor, staticLookupFormatEditorFactory } from './static_lookup';
 export { StringFormatEditor, stringFormatEditorFactory } from './string';
 export { TruncateFormatEditor, truncateFormatEditorFactory } from './truncate';
-export { UrlFormatEditor, urlFormatEditorFactory, UrlFormatEditorFormatParams } from './url';
-export { HistogramFormatEditor, histogramFormatEditorFactory } from './histogram';
+export { UrlFormatEditor, urlFormatEditorFactory } from './url';
