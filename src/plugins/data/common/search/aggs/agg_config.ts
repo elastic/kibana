@@ -152,7 +152,7 @@ export class AggConfig {
         const isDeserialized = isType || isObject;
 
         if (!isDeserialized) {
-          val = aggParam.deserialize(val, this);
+          val = aggParam.deserialize(_.cloneDeep(val), this);
         }
 
         to[aggParam.name] = val;

@@ -15,8 +15,8 @@ import { hostname } from 'os';
 import url from 'url';
 
 import type { Duration } from 'moment';
-import { CspConfigType, CspConfig, ICspConfig } from '../csp';
-import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
+import { CspConfigType, CspConfig, ICspConfig } from './csp';
+import { ExternalUrlConfig, IExternalUrlConfig } from './external_url';
 import {
   securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
