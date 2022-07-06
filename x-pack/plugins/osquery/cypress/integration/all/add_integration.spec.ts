@@ -118,7 +118,6 @@ describe('ALL - Add Integration', () => {
     cy.contains(/^Advanced$/).click();
     cy.contains('"Integration":');
     cy.contains('Cancel').click();
-    cy.contains('Confirm').click();
     cy.get('tr')
       .should('contain', 'osquery_manager-2')
       .and('contain', 'Osquery Manager')
