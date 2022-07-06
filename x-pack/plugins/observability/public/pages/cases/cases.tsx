@@ -7,13 +7,14 @@
 
 import React, { Suspense, useCallback, useState } from 'react';
 
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CASES_OWNER, CASES_PATH } from './constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../..';
 import { useFetchAlertDetail } from './use_fetch_alert_detail';
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { paths } from '../../config';
+import { ObservabilityAppServices } from '../../application/types';
 
 interface CasesProps {
   userCanCrud: boolean;
@@ -21,8 +22,11 @@ interface CasesProps {
 export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
   const {
     cases,
+    http: {
+      basePath: { prepend },
+    },
     application: { navigateToUrl },
-  } = useKibana().services;
+  } = useKibana<ObservabilityAppServices>().services;
   const { observabilityRuleTypeRegistry } = usePluginContext();
   const [selectedAlertId, setSelectedAlertId] = useState<string>('');
 
@@ -54,18 +58,16 @@ export const Cases = React.memo<CasesProps>(({ userCanCrud }) => {
         },
         ruleDetailsNavigation: {
           href: (ruleId) => {
-            return ruleId ? paths.observability.ruleDetails(ruleId) : paths.observability.rules;
+            return prepend(paths.observability.ruleDetails(ruleId));
           },
           onClick: async (ruleId, ev) => {
-            const linkToRule = ruleId
-              ? paths.observability.ruleDetails(ruleId)
-              : paths.observability.rules;
+            const ruleLink = prepend(paths.observability.ruleDetails(ruleId));
 
             if (ev != null) {
               ev.preventDefault();
             }
 
-            return navigateToUrl(linkToRule);
+            return navigateToUrl(ruleLink);
           },
         },
       })}
