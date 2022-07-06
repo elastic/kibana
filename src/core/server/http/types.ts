@@ -7,7 +7,7 @@
  */
 
 import { IContextProvider, IContextContainer } from '../context';
-import { ICspConfig } from '../csp';
+import { ICspConfig } from './csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { IAuthHeadersStorage } from './auth_headers_storage';
 import { IRouter } from './router';
@@ -20,8 +20,8 @@ import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
-import { ExternalUrlConfig } from '../external_url';
-import type { PluginOpaqueId, RequestHandlerContext } from '..';
+import { ExternalUrlConfig } from './external_url';
+import type { PluginOpaqueId, RequestHandlerContextBase } from '..';
 
 /**
  * An object that handles registration of http request context providers.
@@ -36,7 +36,7 @@ export type RequestHandlerContextContainer = IContextContainer;
  * @public
  */
 export type RequestHandlerContextProvider<
-  Context extends RequestHandlerContext,
+  Context extends RequestHandlerContextBase,
   ContextName extends keyof Context
 > = IContextProvider<Context, ContextName>;
 
@@ -117,7 +117,9 @@ export interface HttpAuth {
  * ```
  * @public
  */
-export interface HttpServicePreboot {
+export interface HttpServicePreboot<
+  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+> {
   /**
    * Provides ability to acquire `preboot` {@link IRouter} instance for a particular top-level path and register handler
    * functions for any number of nested routes.
@@ -135,7 +137,10 @@ export interface HttpServicePreboot {
    * ```
    * @public
    */
-  registerRoutes(path: string, callback: (router: IRouter) => void): void;
+  registerRoutes<ContextType extends DefaultRequestHandlerType = DefaultRequestHandlerType>(
+    path: string,
+    callback: (router: IRouter<ContextType>) => void
+  ): void;
 
   /**
    * Access or manipulate the Kibana base path
@@ -162,7 +167,12 @@ export interface InternalHttpServicePreboot
     | 'server'
     | 'getServerInfo'
   > {
-  registerRoutes(path: string, callback: (router: IRouter) => void): void;
+  registerRoutes<
+    DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+  >(
+    path: string,
+    callback: (router: IRouter<DefaultRequestHandlerType>) => void
+  ): void;
 }
 
 /**
@@ -237,7 +247,9 @@ export interface InternalHttpServicePreboot
  * ```
  * @public
  */
-export interface HttpServiceSetup {
+export interface HttpServiceSetup<
+  DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+> {
   /**
    * Creates cookie based session storage factory {@link SessionStorageFactory}
    * @param cookieOptions {@link SessionStorageCookieOptions} - options to configure created cookie session storage.
@@ -333,7 +345,7 @@ export interface HttpServiceSetup {
    * @public
    */
   createRouter: <
-    Context extends RequestHandlerContext = RequestHandlerContext
+    Context extends DefaultRequestHandlerType = DefaultRequestHandlerType
   >() => IRouter<Context>;
 
   /**
@@ -365,7 +377,7 @@ export interface HttpServiceSetup {
    * @public
    */
   registerRouteHandlerContext: <
-    Context extends RequestHandlerContext,
+    Context extends DefaultRequestHandlerType,
     ContextName extends keyof Omit<Context, 'resolve'>
   >(
     contextName: ContextName,
@@ -384,7 +396,7 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   externalUrl: ExternalUrlConfig;
-  createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+  createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
@@ -392,7 +404,7 @@ export interface InternalHttpServiceSetup
   registerStaticDir: (path: string, dirPath: string) => void;
   authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
-    Context extends RequestHandlerContext,
+    Context extends RequestHandlerContextBase,
     ContextName extends keyof Omit<Context, 'resolve'>
   >(
     pluginOpaqueId: PluginOpaqueId,
