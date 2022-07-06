@@ -260,7 +260,10 @@ export function getState({
       filterManager: FilterManager,
       data: DataPublicPluginStart
     ) => {
-      if (appStateContainer.getState().index !== indexPattern.id) {
+      const dataViewId = !isDataViewSpec(appStateContainer.getState().index)
+        ? appStateContainer.getState().index
+        : '';
+      if (dataViewId && dataViewId !== indexPattern.id) {
         // used index pattern is different than the given by url/state which is invalid
         setState(appStateContainerModified, { index: indexPattern.id });
       }
@@ -419,4 +422,8 @@ function createUrlGeneratorState({
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
   };
+}
+
+function isDataViewSpec(dataView: string | DataViewSpec | undefined): dataView is DataViewSpec {
+  return Boolean(dataView) && typeof dataView !== 'string';
 }
