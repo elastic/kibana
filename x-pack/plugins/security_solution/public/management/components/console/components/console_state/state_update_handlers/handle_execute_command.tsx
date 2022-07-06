@@ -10,9 +10,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
-import { EuiCode } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ConsoleCodeBlock } from '../../console_code_block';
 import { handleInputAreaState } from './handle_input_area_state';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
 import {
@@ -51,6 +51,21 @@ const getUnknownArguments = (
   });
 
   return response;
+};
+
+const getExclusiveOrArgs = (argDefinitions: CommandDefinition['args']): string[] => {
+  if (!argDefinitions) {
+    return [];
+  }
+
+  const exclusiveOrArgs: string[] = [];
+
+  return Object.entries(argDefinitions).reduce((acc, [argName, argDef]) => {
+    if (argDef.exclusiveOr) {
+      acc.push(argName);
+    }
+    return acc;
+  }, exclusiveOrArgs);
 };
 
 const updateStateWithNewCommandHistoryItem = (
@@ -144,6 +159,19 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     commandDefinition,
   };
   const requiredArgs = getRequiredArguments(commandDefinition.args);
+  const exclusiveOrArgs = getExclusiveOrArgs(commandDefinition.args);
+
+  const exclusiveOrErrorMessage = (
+    <FormattedMessage
+      id="xpack.securitySolution.console.commandValidation.exlcusiveOr"
+      defaultMessage="This command supports only one of the following arguments: {argNames}"
+      values={{
+        argNames: (
+          <ConsoleCodeBlock>{exclusiveOrArgs.map(toCliArgumentOption).join(', ')}</ConsoleCodeBlock>
+        ),
+      }}
+    />
+  );
 
   // If args were entered, then validate them
   if (parsedInput.hasArgs) {
@@ -190,11 +218,15 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not support by this command: {unknownArgs}"
                 values={{
                   countOfInvalidArgs: unknownInputArgs.length,
-                  command: <EuiCode transparentBackground={true}>{parsedInput.name}</EuiCode>,
+                  command: (
+                    <ConsoleCodeBlock transparentBackground={true}>
+                      {parsedInput.name}
+                    </ConsoleCodeBlock>
+                  ),
                   unknownArgs: (
-                    <EuiCode transparentBackground={true}>
+                    <ConsoleCodeBlock transparentBackground={true}>
                       {unknownInputArgs.map(toCliArgumentOption).join(', ')}
-                    </EuiCode>
+                    </ConsoleCodeBlock>
                   ),
                 }}
               />
@@ -226,6 +258,20 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           )
         );
       }
+    }
+
+    // Validate exclusiveOr arguments, can only have one.
+    const exclusiveArgsUsed = exclusiveOrArgs.filter((arg) => parsedInput.args[arg]);
+    if (exclusiveArgsUsed.length > 1) {
+      return updateStateWithNewCommandHistoryItem(
+        state,
+        createCommandHistoryEntry(
+          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          createCommandExecutionState({
+            errorMessage: exclusiveOrErrorMessage,
+          })
+        )
+      );
     }
 
     // Validate each argument given to the command
@@ -311,6 +357,16 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               },
             }
           ),
+        })
+      )
+    );
+  } else if (exclusiveOrArgs.length > 0) {
+    return updateStateWithNewCommandHistoryItem(
+      state,
+      createCommandHistoryEntry(
+        cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        createCommandExecutionState({
+          errorMessage: exclusiveOrErrorMessage,
         })
       )
     );

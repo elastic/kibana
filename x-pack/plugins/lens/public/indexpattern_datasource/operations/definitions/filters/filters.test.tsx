@@ -36,6 +36,14 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
+  existingFields: {
+    my_index_pattern: {
+      timestamp: true,
+      bytes: true,
+      memory: true,
+      source: true,
+    },
+  },
 };
 
 // mocking random id generator function
@@ -304,7 +312,7 @@ describe('filters', () => {
         <InlineOptions
           {...defaultProps}
           layer={layer}
-          updateLayer={updateLayerSpy}
+          paramEditorUpdater={updateLayerSpy}
           columnId="col1"
           currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
         />
@@ -357,7 +365,7 @@ describe('filters', () => {
           <InlineOptions
             {...defaultProps}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
           />
@@ -382,7 +390,7 @@ describe('filters', () => {
           <InlineOptions
             {...defaultProps}
             layer={layer}
-            updateLayer={updateLayerSpy}
+            paramEditorUpdater={updateLayerSpy}
             columnId="col1"
             currentColumn={layer.columns.col1 as FiltersIndexPatternColumn}
           />
