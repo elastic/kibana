@@ -136,7 +136,15 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
-        <EuiFormRow id="indexSelectSearchBox" fullWidth>
+        <EuiFormRow
+          id="indexSelectSearchBox"
+          fullWidth
+          css={`
+            .euiPanel {
+              padding: 0;
+            }
+          `}
+        >
           <DataViewsList
             dataViewsList={dataViewItems}
             onChangeDataView={(newId) => {
