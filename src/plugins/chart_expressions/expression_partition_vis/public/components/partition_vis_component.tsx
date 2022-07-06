@@ -93,7 +93,6 @@ export interface PartitionVisComponentProps {
 const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const { visData, visParams: preVisParams, visType, services, syncColors } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
-
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
 

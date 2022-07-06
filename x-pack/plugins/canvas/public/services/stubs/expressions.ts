@@ -28,9 +28,7 @@ export const expressionsServiceFactory: CanvasExpressionsServiceFactory = (
 ) => {
   const placeholder = {} as any;
   const expressionsPlugin = plugin(placeholder);
-  const setup = expressionsPlugin.setup(placeholder, {
-    usageCollection: undefined,
-  });
+  const setup = expressionsPlugin.setup(placeholder);
   const fork = setup.fork('canvas');
   const expressionsService = fork.setup();
 

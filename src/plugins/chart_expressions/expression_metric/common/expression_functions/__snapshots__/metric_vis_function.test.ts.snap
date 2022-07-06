@@ -26,7 +26,6 @@ Object {
   "as": "metricVis",
   "type": "render",
   "value": Object {
-    "context": undefined,
     "visConfig": Object {
       "dimensions": Object {
         "metrics": Array [

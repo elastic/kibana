@@ -53,7 +53,6 @@ Object {
       "shape": "arc",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -106,7 +105,6 @@ Object {
       "shape": "arc",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -157,7 +155,6 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -208,7 +205,6 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -259,7 +255,6 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "bands",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -312,7 +307,6 @@ Object {
       "shape": "circle",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -365,7 +359,6 @@ Object {
       "shape": "circle",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -416,7 +409,6 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -467,7 +459,6 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "hidden",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -518,7 +509,6 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -569,7 +559,6 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -620,7 +609,6 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -671,7 +659,6 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {
@@ -722,7 +709,6 @@ Object {
       "shape": "verticalBullet",
       "ticksPosition": "auto",
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {

@@ -77,7 +77,6 @@ Object {
       "xAccessor": "col-1-2",
       "yAccessor": undefined,
     },
-    "context": undefined,
     "data": Object {
       "columns": Array [
         Object {

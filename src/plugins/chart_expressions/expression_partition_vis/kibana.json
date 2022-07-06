@@ -13,6 +13,6 @@
     "common"
   ],
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "fieldFormats", "presentationUtil"],
-  "requiredBundles": ["kibanaReact"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
   "optionalPlugins": ["usageCollection"]
 }

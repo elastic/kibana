@@ -13,6 +13,7 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import { ExpressionMetricVisRendererDependencies } from '../expression_renderers/metric_vis_renderer';
 import { getMetricVisRenderer } from '../expression_renderers';
 import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
 import { LabelPosition } from '../../common/constants';
@@ -124,7 +125,18 @@ const containerSize = {
   height: '700px',
 };
 
-const metricVisRenderer = getMetricVisRenderer({ theme$: from([{ darkMode: false }]) });
+const getStartDeps = (() => ({
+  core: {
+    theme: {
+      theme$: from([{ darkMode: false }]),
+    },
+  },
+})) as unknown as ExpressionMetricVisRendererDependencies['getStartDeps'];
+
+const metricVisRenderer = () =>
+  getMetricVisRenderer({
+    getStartDeps,
+  });
 
 storiesOf('renderers/visMetric', module)
   .add('Default', () => {

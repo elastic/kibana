@@ -56,7 +56,7 @@ async function metricFilterable(
   );
 }
 
-interface ExpressionMetricVisRendererDependencies {
+export interface ExpressionMetricVisRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionMetricPluginStart>;
 }
 
