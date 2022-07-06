@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './metric_vis.scss';
-
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -15,6 +13,7 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { css } from '@emotion/react';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
 
 const MetricVis = lazy(() => import('../components/metric_vis'));
@@ -35,7 +34,10 @@ export const getMetricVisRenderer = (
         <KibanaThemeProvider theme$={theme.theme$}>
           <VisualizationContainer
             data-test-subj="mtrVis"
-            className="mtrVis"
+            css={css`
+              height: 100%;
+              width: 100%;
+            `}
             showNoResult={!visData.rows.length}
             handlers={handlers}
           >
