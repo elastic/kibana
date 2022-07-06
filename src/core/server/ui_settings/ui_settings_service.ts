@@ -26,6 +26,7 @@ import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
+import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -70,7 +71,7 @@ export class UiSettingsService
     this.log.debug('Setting up ui settings service');
 
     savedObjects.registerType(uiSettingsType);
-    registerRoutes(http.createRouter(''));
+    registerRoutes(http.createRouter<InternalUiSettingsRequestHandlerContext>(''));
 
     const config = await firstValueFrom(this.config$);
     this.overrides = config.overrides;

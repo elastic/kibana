@@ -19,6 +19,7 @@ import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { registerBundleRoutes } from './bundle_routes';
 import { UiPlugins } from '../plugins';
+import type { InternalCoreAppRequestHandlerContext } from './internal_types';
 
 /** @internal */
 interface CommonRoutesParams {
@@ -85,7 +86,7 @@ export class CoreApp {
 
   private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     const httpSetup = coreSetup.http;
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter<InternalCoreAppRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get({ path: '/', validate: false }, async (context, req, res) => {
