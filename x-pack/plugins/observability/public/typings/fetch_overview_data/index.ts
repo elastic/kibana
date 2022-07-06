@@ -164,9 +164,3 @@ export interface ObservabilityHasDataResponse {
   synthetics: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
 }
-
-export type SharedMethodGetMetricsIndices = () => Promise<string[]>;
-
-export interface AllowableSharedObservabilityMethods {
-  getMetricsIndices: SharedMethodGetMetricsIndices;
-}
