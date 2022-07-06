@@ -78,3 +78,14 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     location: string;
   };
 };
+
+/**
+ * HTTP response parameters
+ * @public
+ */
+export interface ErrorHttpResponseOptions {
+  /** HTTP message to send to the client */
+  body?: ResponseError;
+  /** HTTP Headers with additional information about response */
+  headers?: ResponseHeaders;
+}

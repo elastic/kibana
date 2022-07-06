@@ -38,6 +38,7 @@ export type {
   IKibanaResponse,
   RedirectResponseOptions,
   ResponseErrorAttributes,
+  ErrorHttpResponseOptions,
 } from './response';
 export type {
   RouteConfigOptions,
@@ -60,3 +61,10 @@ export type {
 export { RouteValidationError } from './route_validator';
 export type { IRouter, RouteRegistrar, RouterRoute } from './router';
 export type { IKibanaSocket } from './socket';
+export type {
+  KibanaErrorResponseFactory,
+  KibanaRedirectionResponseFactory,
+  KibanaSuccessResponseFactory,
+  KibanaResponseFactory,
+  LifecycleResponseFactory,
+} from './response_factory';
