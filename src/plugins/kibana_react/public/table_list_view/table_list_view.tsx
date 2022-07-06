@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-/** Initial commit feature branch */
+/* eslint react-hooks/exhaustive-deps: 2 */
 
 import React, { useReducer, useCallback, useEffect, useRef, ReactNode } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -178,6 +178,7 @@ function reducer<T>(state: State<T>, action: Action<T>): State<T> {
       return {
         ...state,
         filter: action.data,
+        isFetchingItems: true,
       };
     }
     case 'onTableChange': {
