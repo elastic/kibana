@@ -19,6 +19,7 @@ import { ObservabilityExploratoryView } from '../components/shared/exploratory_v
 import { RulesPage } from '../pages/rules';
 import { RuleDetailsPage } from '../pages/rule_details';
 import { AlertingPages } from '../config';
+import { EntitiesSandbox } from '../entities/entities_sandbox';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -115,6 +116,18 @@ export const routes = {
       return <RuleDetailsPage />;
     },
     params: {},
+    exact: true,
+  },
+  '/sandbox/entities': {
+    handler: ({ query }: any) => <EntitiesSandbox routeParams={{ query }} />,
+    params: {
+      query: t.partial({
+        rangeFrom: t.string,
+        rangeTo: t.string,
+        service: t.string,
+        environment: t.string,
+      }),
+    },
     exact: true,
   },
 };
