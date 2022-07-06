@@ -7,9 +7,9 @@
  */
 
 import { URL } from 'url';
-import { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
-import { Observable } from 'rxjs';
-import { RecursiveReadonly } from '@kbn/utility-types';
+import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
+import type { Observable } from 'rxjs';
+import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { IKibanaSocket } from './socket';
 import type { RouteMethod, RouteConfigOptions } from './route';
 import type { Headers } from './headers';

@@ -27,11 +27,17 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "//packages/kbn-config-schema",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//rxjs",
+  "@npm//@hapi/hapi",
+  "@npm//@types/hapi__hapi",
+  "@npm//@hapi/boom",
+  "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types"
 ]
 
