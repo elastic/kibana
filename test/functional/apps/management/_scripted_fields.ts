@@ -256,7 +256,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should see scripted field value in Discover', async function () {
         await PageObjects.common.navigateToApp('discover');
-        // await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
