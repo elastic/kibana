@@ -95,7 +95,7 @@ export function printLocals(
       const exportLocally =
         local.exported?.type === 'named' &&
         (local.decs.every(isTypeDeclaration) || !local.exported.typeOnly) &&
-        names.get(local.rootSymbol, local.exported.name) === local.exported.name;
+        decName === local.exported.name;
 
       for (const dec of local.decs) {
         for (const s of snipper.toSnippets(dec)) {
