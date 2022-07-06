@@ -6,26 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
-
 import {
+  EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
   EuiLink,
   EuiSelect,
   EuiSwitch,
-  EuiFieldNumber,
 } from '@elastic/eui';
-
+import { UrlFormat } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context as contextType } from '@kbn/kibana-react-plugin/public';
-import { UrlFormat } from '@kbn/field-formats-plugin/common';
-import { DefaultFormatEditor } from '../default/default';
-
+import React, { Fragment } from 'react';
 import { FormatEditorSamples } from '../../samples';
-import { formatId } from './constants';
-
+import { DefaultFormatEditor } from '../default/default';
 import { FormatEditorProps } from '../types';
+import { formatId } from './constants';
 
 interface OnChangeParam {
   type: string;

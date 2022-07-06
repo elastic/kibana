@@ -141,7 +141,6 @@ export function Tabs({
   saveIndexPattern,
   fields,
   history,
-  location,
   refreshFields,
   relationships,
   allowedTypes,
