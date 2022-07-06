@@ -20,8 +20,16 @@ import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
+import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');
+const originalKibanaLib = jest.requireActual('../../lib/kibana');
+
+// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
+// The returned permissions object will indicate that the user does not have permissions by default
+const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
+mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+
 jest.mock('../../containers/cti/event_enrichment');
 
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {

@@ -39,9 +39,8 @@ export type {
   RuleEventLogListProps,
   AlertTableFlyoutComponent,
   GetRenderCellValue,
+  RuleDefinitionProps,
 } from './types';
-
-export { AlertsTableFlyoutState } from './types';
 
 export {
   ActionForm,

@@ -14,7 +14,7 @@ export type { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_sto
 export {
   isKibanaRequest,
   isRealRequest,
-  KibanaRequest,
+  CoreKibanaRequest,
   kibanaResponseFactory,
   validBodyOutput,
 } from './router';
@@ -25,6 +25,7 @@ export type {
   HttpResponseOptions,
   HttpResponsePayload,
   ErrorHttpResponseOptions,
+  KibanaRequest,
   KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
@@ -96,3 +97,9 @@ export type {
 } from './types';
 export { BasePath } from './base_path_service';
 export type { IBasePath } from './base_path_service';
+
+export { cspConfig, CspConfig } from './csp';
+export type { ICspConfig } from './csp';
+
+export { externalUrlConfig, ExternalUrlConfig } from './external_url';
+export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';

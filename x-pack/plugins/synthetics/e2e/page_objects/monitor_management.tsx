@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { expect, Page } from '@elastic/synthetics';
+import { getQuerystring } from '@kbn/observability-plugin/e2e/utils';
 import { DataStream } from '../../common/runtime_types/monitor_management';
-import { getQuerystring } from '../journeys/utils';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
 
