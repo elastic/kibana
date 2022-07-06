@@ -19,6 +19,8 @@ import { isAgentUpgradeable } from '../../../common/services';
 import { appContextService } from '../app_context';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
+import { getDefaultSourceUri } from '../../routes/agent/helpers';
+
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { errorsToResults, processAgentsInBatches } from './crud';
@@ -169,11 +171,12 @@ async function upgradeBatch(
     return agents;
   }, []);
 
+  const sourceUri = options.sourceUri ? options.sourceUri : await getDefaultSourceUri(soClient);
   // Create upgrade action for each agent
   const now = new Date().toISOString();
   const data = {
     version: options.version,
-    source_uri: options.sourceUri,
+    source_uri: sourceUri,
   };
 
   const rollingUpgradeOptions = options?.upgradeDurationSeconds

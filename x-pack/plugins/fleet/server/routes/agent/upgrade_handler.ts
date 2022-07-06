@@ -37,11 +37,10 @@ export const postAgentUpgradeHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { version, source_uri: sourceUri, force } = request.body;
+  const { version, source_uri: sourceUriParameter, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkKibanaVersion(version, kibanaVersion);
-    checkSourceUriAllowed(sourceUri);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -52,7 +51,9 @@ export const postAgentUpgradeHandler: RequestHandler<
   }
 
   const agent = await getAgentById(esClient, request.params.agentId);
-  const sourceUriForAgent = await getSourceUriForAgent(soClient, agent);
+  const sourceUri = sourceUriParameter
+    ? sourceUriParameter
+    : await getSourceUriForAgent(soClient, agent);
 
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return response.customError({
@@ -77,7 +78,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       esClient,
       agentId: request.params.agentId,
       version,
-      sourceUri: sourceUriForAgent,
+      sourceUri,
     });
 
     const body: PostAgentUpgradeResponse = {};
@@ -107,7 +108,6 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkKibanaVersion(version, kibanaVersion);
-    checkSourceUriAllowed(sourceUri);
     const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
     checkFleetServerVersion(version, fleetServerAgents);
   } catch (err) {
@@ -170,14 +170,6 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string) => {
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
     );
-};
-
-const checkSourceUriAllowed = (sourceUri?: string) => {
-  if (sourceUri && !appContextService.getConfig()?.developer?.allowAgentUpgradeSourceUri) {
-    throw new Error(
-      `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
-    );
-  }
 };
 
 // Check the installed fleet server version

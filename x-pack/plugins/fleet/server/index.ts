@@ -141,7 +141,6 @@ export const config: PluginConfigDescriptor = {
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
     developer: schema.object({
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
-      allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
       bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
     }),
     packageVerification: schema.object({

@@ -37,3 +37,16 @@ export const getSourceUriForAgentPolicy = async (
   }
   return downloadSource.host;
 };
+
+export const getDefaultSourceUri = async (soClient: SavedObjectsClientContract) => {
+  const defaultDownloadSourceId = await downloadSourceService.getDefaultDownloadSourceId(soClient);
+
+  if (!defaultDownloadSourceId) {
+    throw new Error('Default download source host is not setup');
+  }
+  const defaultDownloadSource = await downloadSourceService.get(soClient, defaultDownloadSourceId);
+  if (!defaultDownloadSource) {
+    throw new Error(`Download source host not found ${defaultDownloadSourceId}`);
+  }
+  return defaultDownloadSource.host;
+};
