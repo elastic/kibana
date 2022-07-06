@@ -93,4 +93,41 @@ describe('CustomRecurrenceScheduler', () => {
     wrapper.find('option[data-test-subj="ruleSnoozeSchedulerRecurWeek"]').first().simulate('click');
     expect(onChange).toHaveBeenCalled();
   });
+
+  test('should enforce minimum recurrence days', () => {
+    const wrapper = mountWithIntl(
+      <CustomRecurrenceScheduler
+        startDate={startDate}
+        onChange={onChange}
+        initialState={initialState}
+        minimumRecurrenceDays={3}
+      />
+    );
+    expect(
+      wrapper.find('input[data-test-subj="customRecurrenceSchedulerInterval"]').first().props()
+        .value
+    ).toEqual(3);
+    wrapper
+      .find('input[data-test-subj="customRecurrenceSchedulerInterval"]')
+      .first()
+      .simulate('change', { target: { value: 4 } });
+    expect(onChange).toHaveBeenCalledWith({
+      bymonth: [],
+      bymonthday: [],
+      byweekday: [],
+      freq: 3,
+      interval: 4,
+    });
+    wrapper
+      .find('input[data-test-subj="customRecurrenceSchedulerInterval"]')
+      .first()
+      .simulate('change', { target: { value: 1 } });
+    expect(onChange).toHaveBeenCalledWith({
+      bymonth: [],
+      bymonthday: [],
+      byweekday: [],
+      freq: 3,
+      interval: 3,
+    });
+  });
 });

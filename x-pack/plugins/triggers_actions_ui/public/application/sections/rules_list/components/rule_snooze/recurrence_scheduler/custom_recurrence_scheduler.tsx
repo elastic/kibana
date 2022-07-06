@@ -147,6 +147,7 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
           )}
           startControl={
             <EuiFieldNumber
+              data-test-subj="customRecurrenceSchedulerInterval"
               min={intervalMin}
               value={interval}
               onChange={(e) => setInterval(Number(e.target.value))}
