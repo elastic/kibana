@@ -75,41 +75,43 @@ describe('SecurityNavControlService', () => {
 
     expect(target).toMatchInlineSnapshot(`
       <div>
-        <div
-          class="euiPopover euiPopover--anchorDownRight"
-          id="headerUserMenu"
-        >
+        <div>
           <div
-            class="euiPopover__anchor"
+            class="euiPopover euiPopover--anchorDownRight"
+            id="headerUserMenu"
           >
-            <button
-              aria-controls="headerUserMenu"
-              aria-expanded="false"
-              aria-haspopup="true"
-              aria-label="Account menu"
-              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-              data-test-subj="userMenuButton"
-              style="line-height: normal;"
-              type="button"
+            <div
+              class="euiPopover__anchor"
             >
-              <span
-                class="euiButtonContent euiButtonEmpty__content"
+              <button
+                aria-controls="headerUserMenu"
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Account menu"
+                class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                data-test-subj="userMenuButton"
+                style="line-height: normal;"
+                type="button"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="euiButtonContent euiButtonEmpty__content"
                 >
                   <span
-                    class="euiHeaderSectionItemButton__content"
+                    class="euiButtonEmpty__text"
                   >
                     <span
-                      aria-label="Loading"
-                      class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-                      role="progressbar"
-                    />
+                      class="euiHeaderSectionItemButton__content"
+                    >
+                      <span
+                        aria-label="Loading"
+                        class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                        role="progressbar"
+                      />
+                    </span>
                   </span>
                 </span>
-              </span>
-            </button>
+              </button>
+            </div>
           </div>
         </div>
       </div>
