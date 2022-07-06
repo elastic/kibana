@@ -9,17 +9,21 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const { common } = getPageObjects(['common']);
+  const kibanaServer = getService('kibanaServer');
 
   describe('Enterprise Search Accessibility', () => {
     // NOTE: These accessibility tests currently only run against Enterprise Search in Kibana
     // without a sidecar Enterprise Search service/host configured, and as such only test
     // the basic setup guides and not the full application(s)
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Overview', () => {
