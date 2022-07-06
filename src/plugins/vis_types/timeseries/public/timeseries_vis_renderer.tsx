@@ -47,7 +47,6 @@ export const getTimeseriesVisRenderer: (deps: {
       unmountComponentAtNode(domNode);
     });
     const { visParams: model, visData, syncColors, syncTooltips } = config;
-
     const showNoResult = !checkIfDataExists(visData, model);
 
     render(
@@ -68,14 +67,14 @@ export const getTimeseriesVisRenderer: (deps: {
               syncColors={syncColors}
               syncTooltips={syncTooltips}
               uiState={handlers.uiState! as PersistedState}
+              initialRender={() => {
+                handlers.done();
+              }}
             />
           </VisualizationContainer>
         </KibanaThemeProvider>
       </I18nProvider>,
-      domNode,
-      () => {
-        handlers.done();
-      }
+      domNode
     );
   },
 });

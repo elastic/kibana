@@ -37,8 +37,8 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "//packages/kbn-logging",
-  "@npm//react"
+  "@npm//react",
+  "//packages/kbn-logging"
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -51,10 +51,10 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "//packages/kbn-logging:npm_module_types",
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/react",
+  "//packages/kbn-logging:npm_module_types"
 ]
 
 jsts_transpiler(

@@ -45,21 +45,18 @@ const resizeViewport = async (
 
 /**
  * Get screenshots of multiple areas of the page
- *
- * @async
- * @param {HeadlessChromiumDriver} browser - used for its methods to control the page
- * @param {EventLogger} eventLogger
- * @param {ElementsPositionAndAttribute[]} elements[] - position data about all the elements to capture
- * @param {Layout} layout - used for client-side layout data from the job params
- * @returns {Promise<Screenshot[]>}
  */
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
   eventLogger: EventLogger,
-  elements: ElementsPositionAndAttribute[],
-  layout: Layout
+  options: {
+    elements: ElementsPositionAndAttribute[];
+    layout: Layout;
+    error?: Error;
+  }
 ): Promise<Screenshot[]> => {
   const { kbnLogger } = eventLogger;
+  const { elements, layout } = options;
   kbnLogger.info(`taking screenshots`);
 
   const screenshots: Screenshot[] = [];
@@ -78,7 +75,11 @@ export const getScreenshots = async (
         eventLogger.getPixelsFromElementPosition(position)
       );
 
-      const data = await browser.screenshot(position);
+      const data = await browser.screenshot({
+        elementPosition: position,
+        layout: options.layout,
+        error: options.error,
+      });
 
       if (!data?.byteLength) {
         throw new Error(`Failure in getScreenshots! Screenshot data is void`);
