@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesPermissions } from '../client/helpers/capabilities';
+import { CasesPermissions } from '../../common';
 
 export const isReadOnlyPermissions = (permissions: CasesPermissions) => {
   return (

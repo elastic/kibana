@@ -14,7 +14,7 @@ import { render as reactRender, RenderOptions, RenderResult } from '@testing-lib
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { CasesFeatures } from '../../../common/ui/types';
+import { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
 import {
   createKibanaContextProviderMock,
@@ -23,7 +23,6 @@ import {
 import { FieldHook } from '../shared_imports';
 import { StartServices } from '../../types';
 import { ReleasePhase } from '../../components/types';
-import { CasesPermissions } from '../../client/helpers/capabilities';
 import { AttachmentTypeRegistry } from '../../client/attachment_framework/registry';
 import { ExternalReferenceAttachmentType } from '../../client/attachment_framework/types';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';

@@ -11,7 +11,8 @@ import {
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import { CasesPermissions, getUICapabilities } from './capabilities';
+import { getUICapabilities } from './capabilities';
+import { CasesPermissions } from '../../../common';
 
 export type CasesOwners =
   | typeof SECURITY_SOLUTION_OWNER

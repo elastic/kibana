@@ -12,7 +12,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { readCasesPermissions, TestProviders } from '../../common/mock';
 import { CasesRoutes } from './routes';
-import { CasesPermissions } from '../../client/helpers/capabilities';
+import { CasesPermissions } from '../../../common';
 
 jest.mock('../all_cases', () => ({
   AllCases: () => <div>{'All cases'}</div>,

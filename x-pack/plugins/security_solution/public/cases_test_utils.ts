@@ -30,6 +30,7 @@ export const allCasesCapabilities = () => ({
 });
 
 export const noCasesPermissions = () => ({
+  all: false,
   create: false,
   read: false,
   update: false,
@@ -38,6 +39,7 @@ export const noCasesPermissions = () => ({
 });
 
 export const readCasesPermissions = () => ({
+  all: false,
   create: false,
   read: true,
   update: false,
@@ -46,6 +48,7 @@ export const readCasesPermissions = () => ({
 });
 
 export const writeCasesPermissions = () => ({
+  all: false,
   create: true,
   read: false,
   update: true,
@@ -54,6 +57,7 @@ export const writeCasesPermissions = () => ({
 });
 
 export const allCasesPermissions = () => ({
+  all: true,
   create: true,
   read: true,
   update: true,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CasesPermissions } from '../../../common';
 import {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
@@ -12,15 +13,6 @@ import {
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '../../../common/constants';
-
-export interface CasesPermissions {
-  all: boolean;
-  create: boolean;
-  read: boolean;
-  update: boolean;
-  delete: boolean;
-  push: boolean;
-}
 
 export const getUICapabilities = (
   featureCapabilities: Partial<Record<string, boolean | Record<string, boolean>>> | undefined

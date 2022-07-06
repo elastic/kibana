@@ -6,7 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-// import { APP_ID } from '@kbn/cases-plugin/common/constants';
+import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
+import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
+import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUsersAndRoles,
@@ -19,13 +21,29 @@ import {
   deleteCases,
   getCase,
 } from '../../../cases_api_integration/common/lib/utils';
-import { casesAllUser, casesNoDeleteUser, casesOnlyDeleteUser, users } from './common/users';
+import {
+  casesAllUser,
+  casesNoDeleteUser,
+  casesOnlyDeleteUser,
+  obsCasesAllUser,
+  obsCasesNoDeleteUser,
+  obsCasesOnlyDeleteUser,
+  secAllCasesNoDeleteUser,
+  secAllCasesNoneUser,
+  secAllCasesOnlyDeleteUser,
+  secAllCasesReadUser,
+  secAllUser,
+  secReadCasesAllUser,
+  secReadCasesNoneUser,
+  secReadCasesReadUser,
+  secReadUser,
+  users,
+} from './common/users';
 import { roles } from './common/roles';
 import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 
 export default ({ getService }: FtrProviderContext): void => {
   describe('feature privilege', () => {
-    const APP_ID = 'cases';
     const es = getService('es');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const supertest = getService('supertest');
@@ -42,18 +60,34 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    for (const user of [casesAllUser, casesNoDeleteUser]) {
+    for (const { user, owner } of [
+      { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secReadCasesAllUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesAllUser, owner: CASES_APP_ID },
+      { user: casesNoDeleteUser, owner: CASES_APP_ID },
+      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
+      { user: obsCasesNoDeleteUser, owner: OBSERVABILITY_APP_ID },
+    ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, async () => {
-        await createCase(supertestWithoutAuth, getPostCaseRequest({ owner: APP_ID }), 200, {
+        await createCase(supertestWithoutAuth, getPostCaseRequest({ owner }), 200, {
           user,
           space: null,
         });
       });
     }
 
-    for (const user of [casesAllUser, casesNoDeleteUser]) {
+    for (const { user, owner } of [
+      { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secReadCasesAllUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secReadCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesAllUser, owner: CASES_APP_ID },
+      { user: casesNoDeleteUser, owner: CASES_APP_ID },
+      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
+      { user: obsCasesNoDeleteUser, owner: OBSERVABILITY_APP_ID },
+    ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can get a case`, async () => {
-        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner: APP_ID }));
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
         const retrievedCase = await getCase({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
@@ -65,20 +99,34 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     }
 
-    for (const user of [casesOnlyDeleteUser]) {
+    for (const { user, owner } of [
+      { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secAllCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secReadCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secReadCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
+      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
+    ]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} cannot create a case`, async () => {
-        await createCase(supertestWithoutAuth, getPostCaseRequest({ owner: APP_ID }), 403, {
+        await createCase(supertestWithoutAuth, getPostCaseRequest({ owner }), 403, {
           user,
           space: null,
         });
       });
     }
 
-    for (const user of [casesOnlyDeleteUser]) {
+    for (const { user, owner } of [
+      { user: secAllCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secReadCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secAllCasesOnlyDeleteUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
+      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
+    ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} cannot get a case`, async () => {
-        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner: APP_ID }));
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
 
         await getCase({
           supertest: supertestWithoutAuth,
@@ -89,9 +137,16 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     }
 
-    for (const user of [casesAllUser, casesOnlyDeleteUser]) {
+    for (const { user, owner } of [
+      { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secAllCasesOnlyDeleteUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesAllUser, owner: CASES_APP_ID },
+      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
+      { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
+      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
+    ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can delete a case`, async () => {
-        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner: APP_ID }));
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
         await deleteCases({
           caseIDs: [caseInfo.id],
           supertest: supertestWithoutAuth,
@@ -101,11 +156,16 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     }
 
-    for (const user of [casesNoDeleteUser]) {
+    for (const { user, owner } of [
+      { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: secAllCasesNoDeleteUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesNoDeleteUser, owner: CASES_APP_ID },
+      { user: obsCasesNoDeleteUser, owner: OBSERVABILITY_APP_ID },
+    ]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} cannot delete a case`, async () => {
-        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner: APP_ID }));
+        const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
         await deleteCases({
           caseIDs: [caseInfo.id],
           supertest: supertestWithoutAuth,

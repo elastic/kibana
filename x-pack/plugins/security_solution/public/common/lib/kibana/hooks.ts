@@ -14,6 +14,7 @@ import { camelCase, isArray, isObject } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { NavigateToAppOptions } from '@kbn/core/public';
+import { CasesPermissions } from '@kbn/cases-plugin/common/ui';
 import {
   APP_UI_ID,
   CASES_FEATURE_ID,
@@ -146,18 +147,8 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   return user;
 };
 
-// TODO: should I just rely on the definition in the cases plugin?
-export interface UseGetUserCasesPermissions {
-  all: boolean;
-  create: boolean;
-  read: boolean;
-  update: boolean;
-  delete: boolean;
-  push: boolean;
-}
-
 export const useGetUserCasesPermissions = () => {
-  const [casesPermissions, setCasesPermissions] = useState<UseGetUserCasesPermissions>({
+  const [casesPermissions, setCasesPermissions] = useState<CasesPermissions>({
     all: false,
     create: false,
     read: false,

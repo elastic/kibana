@@ -27,7 +27,13 @@ export {
 
 export { CommentType, CaseStatuses, getCasesFromAlertsUrl, throwErrors } from './api';
 
-export type { Case, Ecs, CasesFeatures, CaseViewRefreshPropInterface } from './ui/types';
+export type {
+  Case,
+  Ecs,
+  CasesFeatures,
+  CaseViewRefreshPropInterface,
+  CasesPermissions,
+} from './ui/types';
 
 export { StatusAll } from './ui/types';
 

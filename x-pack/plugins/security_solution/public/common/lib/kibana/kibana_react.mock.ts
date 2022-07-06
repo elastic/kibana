@@ -40,6 +40,8 @@ import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { noCasesPermissions } from '../../../cases_test_utils';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -97,16 +99,12 @@ export const createStartServicesMock = (
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+  const cases = mockCasesContract();
+  cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
 
   return {
     ...core,
-    cases: {
-      getAllCases: jest.fn(),
-      getCaseView: jest.fn(),
-      getConfigureCases: jest.fn(),
-      getCreateCase: jest.fn(),
-      getRecentCases: jest.fn(),
-    },
+    cases: mockCasesContract(),
     unifiedSearch,
     data: {
       ...data,
