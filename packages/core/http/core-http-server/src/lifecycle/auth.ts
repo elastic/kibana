@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ResponseHeaders } from '../headers';
-import type { IKibanaResponse } from '../response';
-import type { KibanaRequest } from '../request';
-import type { LifecycleResponseFactory } from '../response_factory';
+import type {
+  ResponseHeaders,
+  IKibanaResponse,
+  KibanaRequest,
+  LifecycleResponseFactory,
+} from '../router';
 
+/** @public */
 export enum AuthResultType {
   authenticated = 'authenticated',
   notHandled = 'notHandled',

@@ -6,56 +6,20 @@
  * Side Public License, v 1.
  */
 
-export {
-  OnPreRoutingResultType,
-  AuthResultType,
-  OnPostAuthResultType,
-  OnPreResponseResultType,
-  OnPreAuthResultType,
-} from './lifecycle';
-export type {
-  OnPreAuthToolkit,
-  AuthenticationHandler,
-  AuthHeaders,
-  AuthRedirectedParams,
-  AuthResult,
-  AuthResultAuthenticated,
-  AuthResultNotHandled,
-  AuthResultParams,
-  AuthResultRedirected,
-  AuthToolkit,
-  OnPostAuthHandler,
-  OnPostAuthNextResult,
-  OnPostAuthToolkit,
-  OnPostAuthResult,
-  OnPreAuthHandler,
-  OnPreAuthNextResult,
-  OnPreAuthResult,
-  OnPreResponseExtensions,
-  OnPreResponseHandler,
-  OnPreResponseInfo,
-  OnPreResponseRender,
-  OnPreResponseResult,
-  OnPreResponseResultNext,
-  OnPreResponseResultRender,
-  OnPreResponseToolkit,
-  OnPreRoutingHandler,
-  OnPreRoutingResult,
-  OnPreRoutingResultNext,
-  OnPreRoutingResultRewriteUrl,
-  OnPreRoutingToolkit,
-} from './lifecycle';
-
 export type {
   IContextProvider,
   HandlerContextType,
   HandlerFunction,
   HandlerParameters,
+} from './context_provider';
+export type {
   Headers,
   KnownHeaders,
   KnownKeys,
   ResponseHeaders,
   StringKeysAsVals,
+} from './headers';
+export type {
   KibanaRequest,
   KibanaRequestAuth,
   KibanaRequestEvents,
@@ -63,9 +27,10 @@ export type {
   KibanaRequestRouteOptions,
   KibanaRequestState,
   KibanaRouteOptions,
-  RequestHandlerWrapper,
-  RequestHandler,
-  RequestHandlerContextBase,
+} from './request';
+export type { RequestHandlerWrapper, RequestHandler } from './request_handler';
+export type { RequestHandlerContextBase } from './request_handler_context';
+export type {
   ResponseError,
   CustomHttpResponseOptions,
   HttpResponseOptions,
@@ -74,6 +39,8 @@ export type {
   RedirectResponseOptions,
   ResponseErrorAttributes,
   ErrorHttpResponseOptions,
+} from './response';
+export type {
   RouteConfigOptions,
   RouteMethod,
   DestructiveRouteMethod,
@@ -81,20 +48,25 @@ export type {
   RouteConfigOptionsBody,
   RouteContentType,
   SafeRouteMethod,
+} from './route';
+export { validBodyOutput } from './route';
+export type {
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationSpec,
   RouteValidatorConfig,
   RouteValidatorFullConfig,
   RouteValidatorOptions,
-  IRouter,
-  RouteRegistrar,
-  RouterRoute,
-  IKibanaSocket,
+} from './route_validator';
+export { RouteValidationError } from './route_validator';
+export type { IRouter, RouteRegistrar, RouterRoute } from './router';
+export type { IKibanaSocket } from './socket';
+export type {
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
-} from './router';
-export { validBodyOutput, RouteValidationError } from './router';
+} from './response_factory';
+
+

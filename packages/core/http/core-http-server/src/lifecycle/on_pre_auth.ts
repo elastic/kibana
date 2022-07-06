@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { IKibanaResponse } from '../response';
-import type { KibanaRequest } from '../request';
-import type { LifecycleResponseFactory } from '../response_factory';
+import type { IKibanaResponse, KibanaRequest, LifecycleResponseFactory } from '../router';
 
+/**
+ * @public
+ */
 export enum OnPreAuthResultType {
   next = 'next',
 }
