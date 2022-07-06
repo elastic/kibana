@@ -41,7 +41,9 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFo
 
   addLookup = () => {
     const lookupEntries = [...(this.props.formatParams.lookupEntries || [])];
-    this.onChange({ lookupEntries });
+    this.onChange({
+      lookupEntries: [...lookupEntries, {} as { key: string; value: string }],
+    });
   };
 
   removeLookup = (index: number) => {
