@@ -42,7 +42,10 @@ exports[`EditableTitle renders 1`] = `
               "owner": Array [
                 "securitySolution",
               ],
-              "userCanCrud": true,
+              "permissions": Object {
+                "all": true,
+                "read": true,
+              },
             }
           }
         >
@@ -50,7 +53,6 @@ exports[`EditableTitle renders 1`] = `
             isLoading={false}
             onSubmit={[MockFunction]}
             title="Test title"
-            userCanCrud={true}
           />
         </CasesProvider>
       </QueryClientProvider>

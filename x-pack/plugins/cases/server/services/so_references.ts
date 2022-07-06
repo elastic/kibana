@@ -6,7 +6,7 @@
  */
 
 import { SavedObject, SavedObjectReference } from '@kbn/core/types';
-import { uniqWith } from 'lodash';
+import { isEqual, uniqWith } from 'lodash';
 import {
   CommentAttributesWithoutSORefs,
   CommentRequest,
@@ -77,4 +77,4 @@ export const extractAttachmentSOReferences = (
 };
 
 export const getUniqueReferences = (references: SavedObjectReference[]) =>
-  uniqWith(references, (a, b) => a.id === b.id && a.name === b.name && a.type === b.type);
+  uniqWith(references, isEqual);
