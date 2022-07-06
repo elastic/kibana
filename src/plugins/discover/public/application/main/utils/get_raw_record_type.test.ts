@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { getTextBasedLanguageMode } from './get_text_based_language_mode';
+import { RecordRawType } from '../hooks/use_saved_search';
+import { getRawRecordType } from './get_raw_record_type';
 
-describe('getTextBasedLanguageMode', () => {
+describe('getRawRecordType', () => {
   it('returns empty string for Query type query', () => {
-    const mode = getTextBasedLanguageMode({ query: '', language: 'lucene' });
-    expect(mode).toEqual('');
+    const mode = getRawRecordType({ query: '', language: 'lucene' });
+    expect(mode).toEqual(RecordRawType.DOCUMENT);
   });
 
   it('returns sql for Query type query', () => {
-    const mode = getTextBasedLanguageMode({ sql: 'SELECT * from foo' });
+    const mode = getRawRecordType({ sql: 'SELECT * from foo' });
 
-    expect(mode).toEqual('sql');
+    expect(mode).toEqual(RecordRawType.PLAIN);
   });
 });

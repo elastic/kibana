@@ -170,11 +170,10 @@ describe('discover responsive sidebar', function () {
     const initialProps = getCompProps();
     const propsWithTextBasedMode = {
       ...initialProps,
-      documents$: new BehaviorSubject({
-        fetchStatus: FetchStatus.COMPLETE,
-        result: [],
-        textBasedLanguageMode: 'sql',
-      }) as unknown as DataDocuments$,
+      state: {
+        ...initialProps.state,
+        query: { sql: 'SELECT * FROM `index`' },
+      },
     };
     const compInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockServices}>
