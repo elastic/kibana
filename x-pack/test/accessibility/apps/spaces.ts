@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'spaceSelector', 'home', 'header', 'security']);
   const a11y = getService('a11y');
   const browser = getService('browser');
+  const spacesService = getService('spaces');
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -25,9 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('home');
     });
     after(async () => {
-      await PageObjects.spaceSelector.openSpacesNav();
-      await PageObjects.spaceSelector.clickManageSpaces();
-      await PageObjects.spaceSelector.clickOnDeleteSpaceButton('space_a');
+      await spacesService.delete('space_a');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
