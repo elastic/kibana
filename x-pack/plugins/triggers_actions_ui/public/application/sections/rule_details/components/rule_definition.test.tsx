@@ -141,7 +141,7 @@ describe('Rule Definition', () => {
   it('show rule conditions "', async () => {
     const ruleConditions = wrapper.find('[data-test-subj="ruleSummaryRuleConditions"]');
     expect(ruleConditions).toBeTruthy();
-    expect(ruleConditions.find('div.euiText').text()).toEqual(`0${'\xa0'}conditions`);
+    expect(ruleConditions.find('div.euiText').text()).toEqual(`0 conditions`);
   });
 
   it('show rule interval with human readable value', async () => {
