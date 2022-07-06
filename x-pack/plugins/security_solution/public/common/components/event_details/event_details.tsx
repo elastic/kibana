@@ -199,8 +199,6 @@ const EventDetailsComponent: React.FC<Props> = ({
     getAlerts();
   }, [http, id]);
 
-  console.log(alertIds);
-
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
