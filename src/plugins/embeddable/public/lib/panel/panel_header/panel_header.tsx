@@ -213,26 +213,28 @@ export function PanelHeader({
     );
   };
 
-  return (
-    <span data-test-subj="dashboardPanelTitle__wrapper">
-      <figcaption
-        className={classes}
-        data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
-      >
-        <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
-          <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
-          {renderTitle()}
-          {renderBadges(badges, embeddable)}
-        </h2>
-        {renderNotifications(notifications, embeddable)}
-        <PanelOptionsMenu
-          isViewMode={isViewMode}
-          getActionContextMenuPanel={getActionContextMenuPanel}
-          closeContextMenu={closeContextMenu}
-          title={title}
-          index={index}
-        />
-      </figcaption>
-    </span>
-  );
+  if (!hidePanelTitle) {
+    return (
+      <span data-test-subj="dashboardPanelTitle__wrapper">
+        <figcaption
+          className={classes}
+          data-test-subj={`embeddablePanelHeading-${(title || '').replace(/\s/g, '')}`}
+        >
+          <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
+            <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
+            {renderTitle()}
+            {renderBadges(badges, embeddable)}
+          </h2>
+          {renderNotifications(notifications, embeddable)}
+          <PanelOptionsMenu
+            isViewMode={isViewMode}
+            getActionContextMenuPanel={getActionContextMenuPanel}
+            closeContextMenu={closeContextMenu}
+            title={title}
+            index={index}
+          />
+        </figcaption>
+      </span>
+    );
+  }
 }
