@@ -7,7 +7,7 @@
  */
 
 import { IContextProvider, IContextContainer } from '../context';
-import { ICspConfig } from '../csp';
+import { ICspConfig } from './csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { IAuthHeadersStorage } from './auth_headers_storage';
 import { IRouter } from './router';
@@ -20,7 +20,7 @@ import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
-import { ExternalUrlConfig } from '../external_url';
+import { ExternalUrlConfig } from './external_url';
 import type { PluginOpaqueId, RequestHandlerContextBase } from '..';
 
 /**
