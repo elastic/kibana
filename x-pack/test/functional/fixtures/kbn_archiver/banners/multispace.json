@@ -1,0 +1,15 @@
+{
+  "attributes": {
+    "buildNum": 8467,
+    "dateFormat:tz": "UTC",
+    "defaultRoute": "http://example.com/evil"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "6.0.0",
+  "migrationVersion": {
+    "config": "8.1.0"
+  },
+  "references": [],
+  "type": "config",
+  "version": "WzMsMl0="
+}
