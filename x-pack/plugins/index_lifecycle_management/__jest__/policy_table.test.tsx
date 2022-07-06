@@ -11,14 +11,8 @@ import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 
-import {
-  fatalErrorsServiceMock,
-  injectedMetadataServiceMock,
-  docLinksServiceMock,
-} from '@kbn/core/public/mocks';
-// FIXME plugins should not use core's internal service implementations
-import { HttpService } from '@kbn/core-http-browser-internal';
-import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 import { PolicyFromES } from '../common/types';
@@ -28,13 +22,7 @@ import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { KibanaContextProvider } from '../public/shared_imports';
 import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
 
-initHttp(
-  new HttpService().setup({
-    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-    executionContext: executionContextServiceMock.createSetupContract(),
-  })
-);
+initHttp(httpServiceMock.createSetupContract());
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
 // use a date far in the past to check the sorting
