@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { ValidationError, ObjectType, Type, schema, isConfigSchema } from '@kbn/config-schema';
 import { Stream } from 'stream';
-import { RouteValidationError } from './validator_error';
-
+import { ValidationError, Type, schema, isConfigSchema } from '@kbn/config-schema';
+import type {
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorConfig,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+  RouteValidatorOptions,
+} from '@kbn/core-http-server';
+import { RouteValidationError } from '@kbn/core-http-server';
 
 // Ugly as hell but we need this conditional typing to have proper type inference
 type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> = NonNullable<
@@ -18,7 +25,7 @@ type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> =
     : T extends Type<any>
     ? T['type']
     : undefined
-  >;
+>;
 
 /**
  * Route validator class to define the validation logic for each new route.

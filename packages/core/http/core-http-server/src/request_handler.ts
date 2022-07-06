@@ -10,10 +10,7 @@ import type { RouteMethod } from './route';
 import type { KibanaRequest } from './request';
 import type { RequestHandlerContextBase } from './request_handler_context';
 import type { IKibanaResponse } from './response';
-
-// TODO: fixme
-// import { KibanaResponseFactory } from 'kibana/server';
-type KibanaResponseFactory = any;
+import type { KibanaResponseFactory } from './response_factory';
 
 /**
  * A function executed when route path matched requested resource path.

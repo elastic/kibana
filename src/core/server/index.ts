@@ -28,7 +28,6 @@
  * @packageDocumentation
  */
 
-import { AwaitedProperties } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
@@ -42,6 +41,7 @@ import type {
   ExecutionContextSetup,
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
+import type { RequestHandlerContextBase } from '@kbn/core-http-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -475,8 +475,6 @@ export type {
 } from '@kbn/core-analytics-server';
 
 export type { CoreRequestHandlerContext } from './core_route_handler_context';
-
-
 
 /**
  * Base context passed to a route handler, containing the `core` context part.
