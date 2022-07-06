@@ -101,6 +101,7 @@ export function ChangeDataView({
     Boolean(textBasedLanguage)
   );
   const [isTextLangTransitionModalVisible, setIsTextLangTransitionModalVisible] = useState(false);
+  const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
   const kibana = useKibana<IDataPluginServices>();
   const { application, data, storage } = kibana.services;
@@ -253,10 +254,12 @@ export function ChangeDataView({
         <DataViewsList
           dataViewsList={dataViewsList}
           onChangeDataView={(newId) => {
-            onChangeDataView(newId);
+            setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
               setIsTextLangTransitionModalVisible(true);
+            } else {
+              onChangeDataView(newId);
             }
           }}
           currentDataViewId={currentDataViewId}
@@ -321,14 +324,23 @@ export function ChangeDataView({
     (shouldDismissModal: boolean) => {
       setIsTextLangTransitionModalVisible(false);
       setIsTextBasedLangSelected(false);
-      // clean up the Text based language jQuery
+      // clean up the Text based language query
       onTextLangQuerySubmit?.();
+      if (selectedDataViewId) {
+        onChangeDataView(selectedDataViewId);
+      }
       setTriggerLabel(trigger.label);
       if (shouldDismissModal) {
         onTransitionModalDismiss();
       }
     },
-    [onTextLangQuerySubmit, onTransitionModalDismiss, trigger.label]
+    [
+      onChangeDataView,
+      onTextLangQuerySubmit,
+      onTransitionModalDismiss,
+      selectedDataViewId,
+      trigger.label,
+    ]
   );
 
   const onModalClose = useCallback(
