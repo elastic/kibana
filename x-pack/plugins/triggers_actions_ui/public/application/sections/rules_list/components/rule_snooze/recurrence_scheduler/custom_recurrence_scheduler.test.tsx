@@ -32,6 +32,7 @@ describe('CustomRecurrenceScheduler', () => {
         startDate={startDate}
         onChange={onChange}
         initialState={initialState}
+        minimumRecurrenceDays={1}
       />
     );
     expect(wrapper.find('[data-test-subj="customRecurrenceScheduler"]').exists()).toBeTruthy();
@@ -50,6 +51,7 @@ describe('CustomRecurrenceScheduler', () => {
         startDate={startDate}
         onChange={onChange}
         initialState={{ ...initialState, freq: RRuleFrequency.WEEKLY }}
+        minimumRecurrenceDays={1}
       />
     );
     expect(
@@ -66,6 +68,7 @@ describe('CustomRecurrenceScheduler', () => {
         startDate={startDate}
         onChange={onChange}
         initialState={{ ...initialState, freq: RRuleFrequency.MONTHLY }}
+        minimumRecurrenceDays={1}
       />
     );
     expect(
@@ -82,6 +85,7 @@ describe('CustomRecurrenceScheduler', () => {
         startDate={startDate}
         onChange={onChange}
         initialState={initialState}
+        minimumRecurrenceDays={1}
       />
     );
 
