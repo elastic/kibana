@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, uniqWith } from 'lodash';
+import _ from 'lodash';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, toggleFilterNegated } from '@kbn/es-query';
 import { getIndexPatterns, getSearchService } from '../../services';
@@ -91,7 +91,7 @@ const createFilter = async (
     .sourceParams as any;
   const aggConfigsInstance = getSearchService().aggs.createAggConfigs(
     await getIndexPatterns().get(indexPatternId),
-    [cloneDeep(aggConfigParams) as AggConfigSerialized]
+    [aggConfigParams as AggConfigSerialized]
   );
   const aggConfig = aggConfigsInstance.aggs[0];
   let filter: Filter[] = [];
@@ -144,7 +144,7 @@ export const createFiltersFromValueClickAction = async ({
       })
   );
 
-  return uniqWith(mapAndFlattenFilters(filters), (a, b) =>
+  return _.uniqWith(mapAndFlattenFilters(filters), (a, b) =>
     compareFilters(a, b, COMPARE_ALL_OPTIONS)
   );
 };
