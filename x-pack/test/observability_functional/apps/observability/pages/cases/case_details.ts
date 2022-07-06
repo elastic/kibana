@@ -10,6 +10,7 @@ import { CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const cases = getService('cases');
   const observability = getService('observability');
@@ -65,9 +66,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await (await find.byCssSelector('[data-test-subj*="alert-rule-link"]')).click();
 
-        expect(
-          await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
-        ).to.eql('Observability');
+        const url = await browser.getCurrentUrl();
+        expect(url.includes('/app/observability/alerts/rules')).to.be(true);
       });
     });
   });
