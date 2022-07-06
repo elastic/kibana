@@ -15,7 +15,7 @@ jest.mock('../../../../common/containers/use_search_strategy', () => ({
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
 
-const localProps = {
+const defaultProps = {
   endDate: '2020-07-08T08:20:18.966Z',
   hostName: 'my-macbook',
   id: ID,
@@ -39,7 +39,7 @@ describe('useHostDetails', () => {
   });
 
   it('runs search', () => {
-    renderHook(() => useHostDetails(localProps), {
+    renderHook(() => useHostDetails(defaultProps), {
       wrapper: TestProviders,
     });
 
@@ -48,7 +48,7 @@ describe('useHostDetails', () => {
 
   it('does not run search when skip = true', () => {
     const props = {
-      ...localProps,
+      ...defaultProps,
       skip: true,
     };
     renderHook(() => useHostDetails(props), {
@@ -58,10 +58,13 @@ describe('useHostDetails', () => {
     expect(mockSearch).not.toHaveBeenCalled();
   });
   it('skip = true will cancel any running request', () => {
-    const { rerender } = renderHook(() => useHostDetails(localProps), {
+    const props = {
+      ...defaultProps,
+    };
+    const { rerender } = renderHook(() => useHostDetails(props), {
       wrapper: TestProviders,
     });
-    localProps.skip = true;
+    props.skip = true;
     act(() => rerender());
     expect(mockUseSearchStrategy).toHaveBeenCalledTimes(2);
     expect(mockUseSearchStrategy.mock.calls[1][0].abort).toEqual(true);
