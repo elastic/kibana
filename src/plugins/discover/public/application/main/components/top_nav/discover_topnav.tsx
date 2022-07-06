@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
@@ -25,7 +25,7 @@ export type DiscoverTopNavProps = Pick<
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
-  onChangeIndexPattern: (indexPattern: string) => void;
+  onChangeIndexPattern: (indexPattern: string | DataView) => void;
   onEditRuntimeField: () => void;
 };
 
@@ -114,9 +114,10 @@ export const DiscoverTopNav = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
-                  onChangeIndexPattern(dataView.id);
+                  onChangeIndexPattern(dataView);
                 }
               },
+              allowAdHocDataView: true,
             });
           }
         : undefined,

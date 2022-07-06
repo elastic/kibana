@@ -8,6 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -134,8 +135,14 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
-        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
+        if (typeof nextState.index === 'string') {
+          const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
+          savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
+        } else {
+          const { runtimeFieldMap, ...nextStateIndex } = nextState.index;
+          const nextIndexPattern = await services.data.dataViews.create(nextStateIndex);
+          savedSearch.searchSource.setField('index', nextIndexPattern);
+        }
 
         reset();
       }
@@ -156,6 +163,7 @@ export function useDiscoverState({
     data$,
     reset,
     savedSearch.searchSource,
+    services.data.dataViews,
   ]);
 
   /**
@@ -187,8 +195,8 @@ export function useDiscoverState({
    * Function triggered when user changes index pattern in the sidebar
    */
   const onChangeIndexPattern = useCallback(
-    async (id: string) => {
-      const nextIndexPattern = await indexPatterns.get(id);
+    async (id: DataView | string) => {
+      const nextIndexPattern = typeof id === 'string' ? await indexPatterns.get(id) : id;
       if (nextIndexPattern && indexPattern) {
         const nextAppState = getSwitchIndexPatternAppState(
           indexPattern,
