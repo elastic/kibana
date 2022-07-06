@@ -7,24 +7,42 @@
 
 import React from 'react';
 
-import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  CurveType,
+  ScaleType,
+  Settings,
+  timeFormatter,
+} from '@elastic/charts';
 
-import { timeFormatter } from '@elastic/charts';
+import { CountPerTime } from '../../common/topn';
 
-export interface BarChartProps {
+export interface SubChartProps {
   id: string;
   name: string;
   height: number;
-  data: any[];
+  data: CountPerTime[];
   x: string;
   y: string;
 }
 
-export const BarChart: React.FC<BarChartProps> = ({ id, name, height, data, x, y }) => {
+export const SubChart: React.FC<SubChartProps> = ({ id, name, height, data, x, y }) => {
   return (
     <Chart size={{ height }}>
       <Settings showLegend={false} />
-      <BarSeries id={id} name={name} data={data} xScaleType="time" xAccessor={x} yAccessors={[y]} />
+      <AreaSeries
+        id={id}
+        name={name}
+        data={data}
+        xAccessor={x}
+        yAccessors={[y]}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        areaSeriesStyle={{ area: { opacity: 0.3 }, line: { opacity: 1 } }}
+        curve={CurveType.CURVE_STEP_AFTER}
+      />
       <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter('YYYY-MM-DD HH:mm:ss')} />
       <Axis id="left-axis" position="left" showGridLines tickFormat={(d) => Number(d).toFixed(0)} />
     </Chart>
