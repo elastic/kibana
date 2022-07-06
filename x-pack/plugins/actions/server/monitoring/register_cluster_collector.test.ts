@@ -203,4 +203,23 @@ describe('registerClusterCollector()', () => {
     expect(result.overdue.delay.p50).toEqual(0);
     expect(result.overdue.delay.p99).toEqual(0);
   });
+
+  it('should gracefully handle search errors', async () => {
+    const metrics: Record<string, Metric<unknown>> = {};
+    monitoringCollection.registerMetric.mockImplementation((metric) => {
+      metrics[metric.type] = metric;
+    });
+    registerClusterCollector({ monitoringCollection, core: coreSetup });
+
+    const metricTypes = Object.keys(metrics);
+    expect(metricTypes.length).toBe(1);
+    expect(metricTypes[0]).toBe('cluster_rules');
+
+    taskManagerAggregate.mockRejectedValue(new Error('Failure'));
+
+    const result = (await metrics.cluster_rules.fetch()) as ClusterActionsMetric;
+    expect(result.overdue.count).toEqual(0);
+    expect(result.overdue.delay.p50).toEqual(0);
+    expect(result.overdue.delay.p99).toEqual(0);
+  });
 });
