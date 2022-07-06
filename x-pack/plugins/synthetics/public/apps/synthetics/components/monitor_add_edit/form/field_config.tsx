@@ -28,7 +28,7 @@ import {
   EuiLink,
   EuiTextArea,
 } from '@elastic/eui';
-import { useMonitorName } from '../fields/use_monitor_name';
+import { useMonitorName } from '../hooks/use_monitor_name';
 import { MonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
 import {
   ConfigKey,

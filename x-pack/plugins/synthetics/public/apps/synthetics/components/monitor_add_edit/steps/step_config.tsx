@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { FormMonitorType, Step, StepMap } from '../types';
 import { StepFields } from './step_fields';
 
@@ -49,6 +49,13 @@ const MONITOR_DETAILS_STEP: Step = {
 
 const SCRIPT_RECORDER_BTNS = (
   <EuiFlexGroup justifyContent="flexStart">
+    <EuiFlexItem grow={false}>
+      <EuiButton href={`elastic-synthetics-recorder://`} iconType="popout" iconSide="right">
+        {i18n.translate('xpack.synthetics.monitorConfig.monitorScriptStep.scriptRecorder.launch', {
+          defaultMessage: 'Launch Script Recorder',
+        })}
+      </EuiButton>
+    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
         href="https://github.com/elastic/synthetics-recorder/releases/"
