@@ -21,7 +21,7 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
 import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -170,6 +170,12 @@ describe('discover responsive sidebar', function () {
     const initialProps = getCompProps();
     const propsWithTextBasedMode = {
       ...initialProps,
+      onAddFilter: undefined,
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: RecordRawType.PLAIN,
+        result: getDataTableRecords(stubLogstashIndexPattern),
+      }) as DataDocuments$,
       state: {
         ...initialProps.state,
         query: { sql: 'SELECT * FROM `index`' },

@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang('SQL');
 
         expect(await testSubjects.exists('fieldFilterSearchInput')).to.be(true);
-        expect(await testSubjects.exists('unifiedTextLandEditor')).to.be(true);
+        expect(await testSubjects.exists('unifiedTextLangEditor')).to.be(true);
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(false);
