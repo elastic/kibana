@@ -74,10 +74,6 @@ export const MonitorDetailsPanel = () => {
         <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
           <EuiLink href={data.url?.full} external>
             {data.url?.full}
-            {data.url?.full}
-            {data.url?.full}
-            {data.url?.full}
-            {data.url?.full}
           </EuiLink>
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
