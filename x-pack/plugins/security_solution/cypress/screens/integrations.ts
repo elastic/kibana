@@ -9,6 +9,6 @@ export const ADD_INTEGRATION_BTN = '[data-test-subj="addIntegrationPolicyButton"
 
 export const INTEGRATION_ADDED_POP_UP = '[data-test-subj="postInstallAddAgentModal"]';
 
-export const QUEU_URL = '.euiFieldText.euiFormControlLayout--1icons';
+export const QUEUE_URL = '.euiFieldText.euiFormControlLayout--1icons';
 
 export const SAVE_AND_CONTINUE_BTN = '[data-test-subj="createPackagePolicySaveButton"]';
