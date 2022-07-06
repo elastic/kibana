@@ -1736,7 +1736,7 @@ export const ViewStrings = {
       }),
     getLegendPositionDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionTitle', {
-        defaultMessage: 'Legend position',
+        defaultMessage: 'Placement',
       }),
     getLegendPositionHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendPositionLabel', {
@@ -1760,7 +1760,7 @@ export const ViewStrings = {
       }),
     getLegendDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayTitle', {
-        defaultMessage: 'Legend visibility',
+        defaultMessage: 'Legend view',
       }),
     getLegendDisplayHelp: () =>
       i18n.translate('xpack.canvas.uis.views.partitionVis.args.legendDisplayLabel', {
