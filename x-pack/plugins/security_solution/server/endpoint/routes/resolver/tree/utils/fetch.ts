@@ -91,7 +91,7 @@ export class Fetcher {
       isInternalRequest,
     });
 
-    const eventStats = await query.search(
+    const { eventStats, alertIds } = await query.search(
       this.client,
       statsIDs,
       this.alertsClient,
@@ -106,16 +106,21 @@ export class Fetcher {
       // at this point id should never be undefined, it should be enforced by the Elasticsearch query
       // but let's check anyway
       if (id !== undefined) {
+        const stats = (eventStats && eventStats[id]) ?? { total: 0, byCategory: {} };
         statsNodes.push({
           id,
           parent,
           name,
           data: node,
-          stats: eventStats[id] ?? { total: 0, byCategory: {} },
+          stats,
         });
       }
     }
-    return statsNodes;
+    if (options.includeHits) {
+      return { alertIds, statsNodes };
+    } else {
+      return statsNodes;
+    }
   }
 
   private static getNextAncestorsToFind(

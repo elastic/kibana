@@ -69,7 +69,6 @@ export const useTimelineEventsDetails = ({
   const [ecsData, setEcsData] = useState<EventsArgs['ecs']>(null);
 
   const [rawEventData, setRawEventData] = useState<object | undefined>(undefined);
-
   const timelineDetailsSearch = useCallback(
     (request: TimelineEventsDetailsRequestOptions | null) => {
       if (request == null || skip || isEmpty(request.eventId)) {

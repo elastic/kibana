@@ -121,14 +121,6 @@ export class StatsQuery {
             ],
           },
         },
-        fields: [
-          'kibana.alert.rule.id',
-          'kibana.alert.rule.uuid',
-          'kibana.alert.rule.rule_id',
-          'event.id',
-          'kibana.alert.rule.parameters.rule_id',
-          '_id',
-        ],
         index,
         aggs: {
           ids: {
@@ -167,15 +159,11 @@ export class StatsQuery {
     }
   }
 
-  private static getEventStats(catAgg: CategoriesAgg, alertsBody): EventStats {
-    const eventId = catAgg.key;
-    const eventAlertCount = alertsBody.find(
-      ({ key }: { key: string }) => key === eventId
-    ).doc_count;
-    const total = catAgg.doc_count + eventAlertCount;
+  private static getEventStats(catAgg: CategoriesAgg): EventStats {
+    const total = catAgg.doc_count;
     if (!catAgg.categories?.buckets) {
       return {
-        total: 0,
+        total,
         byCategory: {},
       };
     }
@@ -187,13 +175,9 @@ export class StatsQuery {
       }),
       {}
     );
-
     return {
       total,
-      byCategory:
-        eventAlertCount && eventAlertCount > 0
-          ? { ...byCategory, alerts: eventAlertCount }
-          : byCategory,
+      byCategory,
     };
   }
 
@@ -207,7 +191,7 @@ export class StatsQuery {
     nodes: NodeID[],
     alertsClient: AlertsClient,
     includeHits: boolean
-  ): Promise<Record<string, EventStats>> {
+  ): Promise<{ eventStats?: Record<string, EventStats>; alertIds?: string[]}> {
     if (nodes.length <= 0) {
       return {};
     }
@@ -223,28 +207,78 @@ export class StatsQuery {
       }),
       await alertsClient.find(this.alertStatsQuery(nodes, alertIndex, includeHits)),
     ]);
-    const alertsAggs = alertsBody.aggregations?.ids.buckets;
-    console.log(alertsBody);
-    const eventAggs = body.aggregations?.ids?.buckets;
-    // @ts-expect-error declare aggegations type explicitly
-    const formattedEventAggs = body.aggregations?.ids?.buckets.reduce(
-      (cummulative: Record<string, number>, bucket: CategoriesAgg) => ({
-        ...cummulative,
-        [bucket.key]: StatsQuery.getEventStats(bucket, alertsAggs),
-      }),
-      {}
+    const eventAggs = body.aggregations?.ids?.buckets ?? [];
+    const alertAggs = alertsBody.aggregations?.ids?.buckets ?? [];
+    const eventsWithAggs = new Set([
+      ...eventAggs.map((agg) => agg.key),
+      ...alertAggs.map((agg) => agg.key),
+    ]);
+    const alertsAggsMap = new Map(
+      alertsBody.aggregations?.ids.buckets.map(({ key, doc_count }) => [key, doc_count])
     );
-    // TODO Ugly
-    if (eventAggs.length === 0) {
-      if (alertsAggs.length > 0) {
-        return alertsAggs.reduce((response, bucket) => {
-          return {
-            ...response,
-            [bucket.key]: { total: bucket.doc_count, byCategory: { alerts: bucket.doc_count } },
-          };
-        }, {});
-      }
+    const eventAggsMap = new Map(
+      eventAggs.map(({ key, doc_count, categories }) => [
+        key,
+        {
+          ...StatsQuery.getEventStats({ key, doc_count, categories }),
+        },
+      ])
+    );
+    const alertIds = alertsBody.hits.hits
+      .map((hit) => {
+        return hit._source['kibana.alert.uuid'];
+      })
+      .filter((hit) => hit !== undefined);
+    const eventStats = [...eventsWithAggs.values()].reduce(
+      (cummulative: Record<string, number>, id: string) => {
+        const alertCount = alertsAggsMap.get(id);
+        const otherEvents = eventAggsMap.get(id);
+        if (alertCount !== undefined) {
+          if (otherEvents !== undefined) {
+            return {
+              ...cummulative,
+              [id]: {
+                total: alertCount + otherEvents.total,
+                byCategory: {
+                  alerts: alertCount,
+                  ...otherEvents.byCategory,
+                },
+              },
+            };
+          } else {
+            return {
+              ...cummulative,
+              [id]: {
+                total: alertCount,
+                byCategory: {
+                  alerts: alertCount,
+                },
+              },
+            };
+          }
+        } else {
+          if (otherEvents !== undefined) {
+            return {
+              ...cummulative,
+              [id]: {
+                total: otherEvents.total,
+                byCategory: otherEvents.byCategory,
+              },
+            };
+          } else {
+            return {
+              total: 0,
+              byCategory: {},
+            };
+          }
+        }
+      },
+      includeHits ? { alertIds } : {}
+    );
+    if (includeHits) {
+      return { alertIds, eventStats };
+    } else {
+      return { eventStats };
     }
-    return formattedEventAggs;
   }
 }
