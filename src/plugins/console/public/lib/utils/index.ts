@@ -8,6 +8,7 @@
 
 import _ from 'lodash';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import type { RequestResult } from '../../application/hooks/use_send_current_request/send_request';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
@@ -94,3 +95,16 @@ export function splitOnUnquotedCommaSpace(s: string) {
   arr.push(buffer);
   return arr;
 }
+
+/**
+ *  Sorts the request data by statusCode in increasing order and
+ *  returns the last one which will be rendered in network request status bar
+ */
+export const getResponseWithMostSevereStatusCode = (requestData: RequestResult[] | null) => {
+  if (requestData) {
+    return requestData
+      .slice()
+      .sort((a, b) => a.response.statusCode - b.response.statusCode)
+      .pop();
+  }
+};
