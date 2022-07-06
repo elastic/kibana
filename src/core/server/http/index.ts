@@ -12,28 +12,6 @@ export { HttpService } from './http_service';
 export type { GetAuthHeaders, SetAuthHeaders, IAuthHeadersStorage } from './auth_headers_storage';
 export type { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
 export { isKibanaRequest, isRealRequest, CoreKibanaRequest, kibanaResponseFactory } from './router';
-export type { OnPreRoutingHandler, OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
-export type {
-  AuthenticationHandler,
-  AuthHeaders,
-  AuthResultParams,
-  AuthRedirected,
-  AuthRedirectedParams,
-  AuthToolkit,
-  AuthResult,
-  Authenticated,
-  AuthNotHandled,
-  AuthResultType,
-} from './lifecycle/auth';
-export type { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
-export type { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
-export type {
-  OnPreResponseHandler,
-  OnPreResponseToolkit,
-  OnPreResponseRender,
-  OnPreResponseExtensions,
-  OnPreResponseInfo,
-} from './lifecycle/on_pre_response';
 export type { SessionStorageFactory, SessionStorage } from './session_storage';
 export type {
   SessionStorageCookieOptions,

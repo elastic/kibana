@@ -13,8 +13,13 @@ import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-
-import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory, KibanaRequest } from '../http';
+import type {
+  IRouter,
+  IKibanaResponse,
+  KibanaResponseFactory,
+  KibanaRequest,
+} from '@kbn/core-http-server';
+import { IBasePath } from '../http';
 import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { registerBundleRoutes } from './bundle_routes';

@@ -9,9 +9,10 @@
 import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
 import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
-import { HttpAuth, KibanaRequest } from '../../http';
+import { HttpAuth } from '../../http';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
 import { getThemeTag } from './get_theme_tag';
