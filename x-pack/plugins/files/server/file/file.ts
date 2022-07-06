@@ -135,7 +135,7 @@ export class File<M = unknown> implements IFile {
     validUntil,
   }: {
     name?: string;
-    validUntil?: string;
+    validUntil?: number;
   }): Promise<FileShareJSON> {
     const shareObject = await this.fileShareService.share({ file: this, name, validUntil });
     this.internalFileService.createAuditLog(

@@ -144,7 +144,7 @@ export interface File<Meta = unknown> {
 
   delete(): Promise<void>;
 
-  share(opts?: { name?: string; validUntil?: string }): Promise<FileShareJSON>;
+  share(opts?: { name?: string; validUntil?: number }): Promise<FileShareJSON>;
 
   listShares(): Promise<FileShareJSON[]>;
 
