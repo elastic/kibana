@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { useSavedSearch } from './use_saved_search';
+import { RecordRawType, useSavedSearch } from './use_saved_search';
 import { getState, AppState } from '../services/discover_state';
 import { uiSettingsMock } from '../../../__mocks__/ui_settings';
 import { useDiscoverState } from './use_discover_state';
@@ -129,7 +129,7 @@ describe('test useSavedSearch', () => {
     expect(result.current.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
   });
 
-  test('useSavedSearch returns textBasedLanguageMode', async () => {
+  test('useSavedSearch returns plain record raw type', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
       getStateDefaults: () =>
@@ -153,6 +153,6 @@ describe('test useSavedSearch', () => {
       });
     });
 
-    expect(result.current.data$.main$.getValue().textBasedLanguageMode).toBe('sql');
+    expect(result.current.data$.main$.getValue().recordRawType).toBe(RecordRawType.PLAIN);
   });
 });

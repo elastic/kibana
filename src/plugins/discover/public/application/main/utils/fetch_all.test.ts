@@ -260,9 +260,10 @@ describe('test fetchAll', () => {
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: 'sql' },
+      { fetchStatus: FetchStatus.LOADING, recordRawType: 'plain' },
       {
         fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: 'plain',
         result: documents,
       },
     ]);

@@ -98,7 +98,7 @@ test('getTopNavLinks result for sql mode', () => {
     state,
     searchSource: {} as ISearchSource,
     onOpenSavedSearch: () => {},
-    textBasedLanguageMode: 'sql',
+    isPlainRecord: true,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
