@@ -14,6 +14,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Serializable } from '@kbn/utility-types';
 
 const fieldType = 'string';
 const format = {
@@ -84,7 +85,7 @@ describe('UrlFormatEditor', () => {
   });
 
   it('should append base path to preview images', async () => {
-    let sampleImageUrlTemplate = '';
+    let sampleImageUrlTemplate: Serializable = '';
     const { getByLabelText } = renderWithContext(
       <UrlFormatEditor
         fieldType={fieldType}
