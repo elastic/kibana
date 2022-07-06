@@ -60,7 +60,7 @@ To review the breaking changes in previous versions, refer to the following:
 === Bug fixes
 Discover::
 * Hide Alerts menu item when user does not have access to Stack Rules {kibana-pull}135655[#135655]
-* Fixes loading of a single doc JSON {kibana-pull}135446[#135446]
+* Fixes loading of a single doc JSON when using index alias based data views {kibana-pull}135446[#135446]
 
 Elastic Security::
 For the Elastic Security 8.3.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
