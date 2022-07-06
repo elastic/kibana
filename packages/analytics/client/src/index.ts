@@ -37,8 +37,13 @@ export type {
   EventTypeOpts,
 } from './analytics_client';
 
-export type { Event, EventContext, EventType, TelemetryCounter } from './events';
-export { TelemetryCounterType } from './events';
+export type {
+  Event,
+  EventContext,
+  EventType,
+  TelemetryCounter,
+  TelemetryCounterType,
+} from './events';
 
 export type {
   RootSchema,

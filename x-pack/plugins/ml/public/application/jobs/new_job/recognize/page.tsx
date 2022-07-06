@@ -142,8 +142,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
       });
       return {
-        start: start.epoch,
-        end: end.epoch,
+        start,
+        end,
       };
     } else {
       return Promise.resolve(timeRange);
