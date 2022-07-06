@@ -92,7 +92,6 @@ export async function topNElasticSearchQuery(
   logger.info('events total count: ' + totalCount + ' (' + totalDocCount + ' docs)');
   logger.info('unique stacktraces: ' + stackTraceEvents.size);
 
-  // profiling-stacktraces is configured with 16 shards
   const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces(
     logger,
     client,
