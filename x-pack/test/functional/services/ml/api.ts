@@ -1178,6 +1178,23 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return modelIds;
     },
 
+    async createTestTrainedModelConfig(modelId: string, modelType: ModelType) {
+      const compressedDefinition = this.getCompressedModelDefinition(modelType);
+
+      return {
+        model_id: modelId,
+        body: {
+          compressed_definition: compressedDefinition,
+          inference_config: {
+            [modelType]: {},
+          },
+          input: {
+            field_names: ['common_field'],
+          },
+        } as PutTrainedModelConfig,
+      };
+    },
+
     /**
      * Retrieves compressed model definition from the test resources.
      * @param modelType
