@@ -23,8 +23,12 @@ get:
       content:
         application/json; charset=utf-8:
           schema:
-            type: string
-        examples: {}
+            type: array
+            items:
+              type: string
+          examples:
+            getTagsResponse:
+              $ref: '../components/examples/get_tags_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

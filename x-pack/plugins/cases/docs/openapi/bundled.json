@@ -2608,10 +2608,17 @@
             "content": {
               "application/json; charset=utf-8": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "examples": {
+                  "getTagsResponse": {
+                    "$ref": "#/components/examples/get_tags_response"
+                  }
                 }
-              },
-              "examples": {}
+              }
             }
           }
         },
@@ -5924,10 +5931,17 @@
             "content": {
               "application/json; charset=utf-8": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "examples": {
+                  "getTagsResponse": {
+                    "$ref": "#/components/examples/get_tags_response"
+                  }
                 }
-              },
-              "examples": {}
+              }
             }
           }
         },
@@ -7414,6 +7428,15 @@
             "full_name": "User 2",
             "email": "user2@elastic.co"
           }
+        ]
+      },
+      "get_tags_response": {
+        "summary": "A list of tags that are used in cases",
+        "value": [
+          "observability",
+          "security",
+          "tag 1",
+          "tag 2"
         ]
       },
       "add_comment_request": {
