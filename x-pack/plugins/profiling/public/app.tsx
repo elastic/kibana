@@ -5,88 +5,54 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
+import React, { useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters } from '@kbn/core/public';
+import { Router } from 'react-router-dom';
 
-import dateMath from '@elastic/datemath';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiSuperDatePicker,
-  EuiTabbedContent,
-} from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 
-import { SettingsFlyout } from './components/settings_flyout';
-
-import { TopNContext } from './components/contexts/topn';
-import { StackTraceNavigation } from './components/stacktrace_nav';
-import { StackedBarChart } from './components/stacked_bar_chart';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ChartGrid } from './components/chart_grid';
+import { TopNContext } from './components/contexts/topn';
+import { StackedBarChart } from './components/stacked_bar_chart';
+import { StackTraceNavigation } from './components/stacktrace_nav';
 
 import { FlameGraphContext } from './components/contexts/flamegraph';
-import { FlameGraphNavigation } from './components/flamegraph_nav';
 import { FlameGraph } from './components/flamegraph';
+import { FlameGraphNavigation } from './components/flamegraph_nav';
 
-import { Services } from './services';
-import { TimeRange } from '../common/types';
-import { TopNSample, TopNSubchart } from '../common/topn';
+import { buildTimeRange } from '../common/build_time_range';
+import { commonlyUsedRanges } from '../common/commonly_used_ranges';
 import { ElasticFlameGraph } from '../common/flamegraph';
+import { TopNSample, TopNSubchart } from '../common/topn';
+import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';
+import { ProfilingAppPageTemplate } from './components/profiling_app_page_template';
+import { Services } from './services';
+import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 
-interface CommonlyUsedRange {
-  start: string;
-  end: string;
-  label: string;
+interface Props {
+  profilingFetchServices: Services;
+  coreStart: CoreStart;
+  coreSetup: CoreSetup;
+  pluginsStart: ProfilingPluginPublicStartDeps;
+  pluginsSetup: ProfilingPluginPublicSetupDeps;
+  theme$: AppMountParameters['theme$'];
+  history: AppMountParameters['history'];
 }
 
-const commonlyUsedRanges: CommonlyUsedRange[] = [
-  {
-    start: 'now-30m',
-    end: 'now',
-    label: 'Last 30 minutes',
-  },
-  {
-    start: 'now-1h',
-    end: 'now',
-    label: 'Last hour',
-  },
-  {
-    start: 'now-24h',
-    end: 'now',
-    label: 'Last 24 hours',
-  },
-  {
-    start: 'now-1w',
-    end: 'now',
-    label: 'Last 7 days',
-  },
-  {
-    start: 'now-30d',
-    end: 'now',
-    label: 'Last 30 days',
-  },
-];
+const storage = new Storage(localStorage);
 
-function buildTimeRange(start: string, end: string): TimeRange {
-  const timeStart = dateMath.parse(start)!;
-  const timeEnd = dateMath.parse(end)!;
-  return {
-    start,
-    end,
-    isoStart: timeStart.toISOString(),
-    isoEnd: timeEnd.toISOString(),
-    unixStart: timeStart.utc().unix(),
-    unixEnd: timeEnd.utc().unix(),
-  };
-}
-
-type Props = Services;
-
-function App({ fetchTopN, fetchElasticFlamechart }: Props) {
+function App({
+  coreStart,
+  coreSetup,
+  pluginsStart,
+  pluginsSetup,
+  profilingFetchServices: { fetchTopN, fetchElasticFlamechart },
+  theme$,
+  history,
+}: Props) {
   const defaultTimeRange = buildTimeRange(commonlyUsedRanges[0].start, commonlyUsedRanges[0].end);
   const [timeRange, setTimeRange] = useState(defaultTimeRange);
 
@@ -100,15 +66,6 @@ function App({ fetchTopN, fetchElasticFlamechart }: Props) {
   });
 
   const [elasticFlamegraph, setElasticFlamegraph] = useState<ElasticFlameGraph>();
-
-  const handleTimeChange = (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
-    if (selectedTime.isInvalid) {
-      return;
-    }
-
-    const tr = buildTimeRange(selectedTime.start, selectedTime.end);
-    setTimeRange(tr);
-  };
 
   const updateIndex = (idx: string) => setIndex(idx);
   const updateProjectID = (projectId: number) => setProjectID(projectId);
@@ -165,38 +122,40 @@ function App({ fetchTopN, fetchElasticFlamechart }: Props) {
     },
   ];
 
+  const profilingDependencies = useMemo(() => {
+    return {
+      start: {
+        core: coreStart,
+        ...pluginsStart,
+      },
+      setup: {
+        core: coreSetup,
+        ...pluginsSetup,
+      },
+    };
+  }, [coreStart, coreSetup, pluginsStart, pluginsSetup]);
+
   return (
-    <EuiPage>
-      <EuiPageBody paddingSize="none">
-        <EuiPageHeader
-          paddingSize="s"
-          pageTitle="Continuous Profiling"
-          rightSideItems={[
-            <EuiSuperDatePicker
-              start={timeRange.start}
-              end={timeRange.end}
-              isPaused={true}
-              onTimeChange={handleTimeChange}
-              commonlyUsedRanges={commonlyUsedRanges}
-            />,
-            <SettingsFlyout
-              title={'Settings'}
-              defaultIndex={index}
-              updateIndex={updateIndex}
-              defaultProjectID={projectID}
-              updateProjectID={updateProjectID}
-              defaultN={n}
-              updateN={updateN}
-            />,
-          ]}
-        />
-        <EuiPageContent>
-          <EuiPageContentBody paddingSize="none">
-            <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <KibanaThemeProvider theme$={theme$}>
+      <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
+        <Router history={history}>
+          <ProfilingDependenciesContextProvider value={profilingDependencies}>
+            <ProfilingAppPageTemplate
+              timeRange={timeRange}
+              onTimeRangeChange={setTimeRange}
+              index={index}
+              onIndexChange={updateIndex}
+              projectID={projectID}
+              onProjectIDChange={updateProjectID}
+              n={n}
+              onNChange={updateN}
+            >
+              <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+            </ProfilingAppPageTemplate>
+          </ProfilingDependenciesContextProvider>
+        </Router>
+      </KibanaContextProvider>
+    </KibanaThemeProvider>
   );
 }
 
