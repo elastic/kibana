@@ -116,6 +116,7 @@ export const CreateControlButton = ({
           </PresentationUtilProvider>
         ),
         {
+          'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),
           outsideClickCloses: false,
           onClose: (flyout) => {
             onCancel(flyout);
