@@ -8,12 +8,21 @@
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { HomePage } from '.';
-import { SavedQuery } from '@kbn/data-plugin/public';
+import { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import { CONSTANTS } from '../../common/components/url_state/constants';
 
-import { TestProviders } from '../../common/mock';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  TestProviders,
+} from '../../common/mock';
 import { inputsActions } from '../../common/store/inputs';
 import { setSearchBarFilter } from '../../common/store/inputs/actions';
+import { coreMock } from '@kbn/core/public/mocks';
+import { Filter } from '@kbn/es-query';
+import { createStore } from '../../common/store';
 
 jest.mock('../../common/store/inputs/actions');
 
@@ -53,8 +62,26 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-const mockSetFilters = jest.fn();
+const mockedFilterManager = new FilterManager(coreMock.createStart().uiSettings);
 const mockGetSavedQuery = jest.fn();
+
+const dummyFilter: Filter = {
+  meta: {
+    alias: null,
+    negate: false,
+    disabled: false,
+    type: 'phrase',
+    key: 'dummy',
+    params: {
+      query: 'value',
+    },
+  },
+  query: {
+    term: {
+      dummy: 'value',
+    },
+  },
+};
 
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
@@ -68,7 +95,7 @@ jest.mock('../../common/lib/kibana', () => {
           ...original.useKibana().services.data,
           query: {
             ...original.useKibana().services.data.query,
-            filterManager: { setFilters: mockSetFilters },
+            filterManager: mockedFilterManager,
             savedQueries: { getSavedQuery: mockGetSavedQuery },
           },
         },
@@ -90,6 +117,7 @@ jest.mock('react-redux', () => {
 describe('HomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedFilterManager.setFilters([]);
   });
 
   it('calls useInitializeUrlParam for appQuery, filters and savedQuery', () => {
@@ -190,6 +218,7 @@ describe('HomePage', () => {
     it('sets filter initial value in the store and filterManager', () => {
       const state = [{ testFilter: 'test' }];
       mockUseInitializeUrlParam(CONSTANTS.filters, state);
+      const spySetFilters = jest.spyOn(mockedFilterManager, 'setFilters');
 
       render(
         <TestProviders>
@@ -204,12 +233,44 @@ describe('HomePage', () => {
         filters: state,
       });
 
-      expect(mockSetFilters).toHaveBeenCalledWith(state);
+      expect(spySetFilters).toHaveBeenCalledWith(state);
     });
 
-    it('clears filterManager when URL param has no value', () => {
+    it('sets filter from store when URL param has no value', () => {
       const state = null;
       mockUseInitializeUrlParam(CONSTANTS.filters, state);
+      const spySetAppFilters = jest.spyOn(mockedFilterManager, 'setAppFilters');
+      const { storage } = createSecuritySolutionStorageMock();
+
+      const mockstate = {
+        ...mockGlobalState,
+        inputs: {
+          ...mockGlobalState.inputs,
+          global: {
+            ...mockGlobalState.inputs.global,
+            filters: [dummyFilter],
+          },
+        },
+      };
+
+      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+      render(
+        <TestProviders store={mockStore}>
+          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+            <span />
+          </HomePage>
+        </TestProviders>
+      );
+
+      expect(spySetAppFilters).toHaveBeenCalledWith([dummyFilter]);
+    });
+
+    it('preserves pinned filters when URL param has no value', () => {
+      const state = null;
+      mockUseInitializeUrlParam(CONSTANTS.filters, state);
+      // pin filter
+      mockedFilterManager.setGlobalFilters([dummyFilter]);
 
       render(
         <TestProviders>
@@ -219,7 +280,14 @@ describe('HomePage', () => {
         </TestProviders>
       );
 
-      expect(mockSetFilters).toHaveBeenCalledWith([]);
+      expect(mockedFilterManager.getFilters()).toEqual([
+        {
+          ...dummyFilter,
+          $state: {
+            store: 'globalState',
+          },
+        },
+      ]);
     });
   });
 });

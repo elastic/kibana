@@ -30,7 +30,12 @@ import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../../tasks/hos
 import { openAllHosts } from '../../tasks/hosts/main';
 
 import { waitForIpsTableToBeLoaded } from '../../tasks/network/flows';
-import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../../tasks/security_header';
+import {
+  clearSearchBar,
+  kqlSearch,
+  navigateFromHeaderTo,
+  saveQuery,
+} from '../../tasks/security_header';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { addNameToTimeline, closeTimeline, populateTimeline } from '../../tasks/timeline';
 
@@ -39,6 +44,10 @@ import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 
 import { getTimeline } from '../../objects/timeline';
 import { TIMELINE } from '../../screens/create_new_case';
+import {
+  GLOBAL_SEARCH_BAR_FILTER_ITEM_AT,
+  GLOBAL_SEARCH_BAR_PINNED_FILTER,
+} from '../../screens/search_bar';
 
 const ABSOLUTE_DATE = {
   endTime: 'Aug 1, 2019 @ 20:33:29.186',
@@ -56,6 +65,29 @@ const ABSOLUTE_DATE = {
 describe('url state', () => {
   before(() => {
     login();
+  });
+
+  it('sets filters from the url', () => {
+    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlFiltersHostsHosts);
+
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(0)).should('have.text', 'host.name: test-host');
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(0))
+      .find(GLOBAL_SEARCH_BAR_PINNED_FILTER)
+      .should('exist');
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(1)).should('have.text', 'host.os.name: test-os');
+  });
+
+  it('sets saved query from the url', () => {
+    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlFiltersHostsHosts);
+    saveQuery('test-query');
+    // refresh the page to force loading the saved query from the URL
+    cy.reload();
+
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(0)).should('have.text', 'host.name: test-host');
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(0))
+      .find(GLOBAL_SEARCH_BAR_PINNED_FILTER)
+      .should('exist');
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(1)).should('have.text', 'host.os.name: test-os');
   });
 
   it('sets the global start and end dates from the url', () => {

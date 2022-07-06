@@ -37,7 +37,6 @@ jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
 
 describe('useSecuritySolutionNavigation', () => {
   const mockUrlState = {
-    [CONSTANTS.savedQuery]: '',
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',

@@ -88,41 +88,6 @@ describe('SearchBarComponent', () => {
     jest.resetAllMocks();
   });
 
-  it('calls setAppFilters on mount', () => {
-    const state = {
-      ...mockGlobalState,
-      inputs: {
-        ...mockGlobalState.inputs,
-        global: {
-          ...mockGlobalState.inputs.global,
-          filters: [
-            {
-              meta: {
-                negate: false,
-                alias: null,
-                disabled: false,
-                type: 'phrase',
-                key: 'host.name',
-              },
-              query: { match_phrase: { 'host.name': 'testValue' } },
-            },
-          ],
-        },
-      },
-    };
-
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
-    render(
-      <TestProviders store={store}>
-        <SearchBarComponent {...props} />
-      </TestProviders>
-    );
-
-    expect(mockSetAppFilters).toHaveBeenCalled();
-  });
-
   it('calls pollForSignalIndex on Refresh button click', () => {
     const { getByTestId } = render(
       <TestProviders>

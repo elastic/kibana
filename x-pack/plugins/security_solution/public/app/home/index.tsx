@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import type { Filter, Query } from '@kbn/es-query';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
@@ -30,7 +30,7 @@ import {
   useSyncGlobalQueryString,
 } from '../../common/utils/global_query_string';
 import { CONSTANTS } from '../../common/components/url_state/constants';
-import { inputsActions } from '../../common/store/inputs';
+import { inputsActions, inputsSelectors } from '../../common/store/inputs';
 import { useKibana } from '../../common/lib/kibana';
 
 interface HomePageProps {
@@ -80,6 +80,11 @@ export const HomePage = React.memo(HomePageComponent);
 const useInitSearchBarUrlParams = () => {
   const dispatch = useDispatch();
   const { filterManager, savedQueries } = useKibana().services.data.query;
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const filtersFromStore = useSelector(getGlobalFiltersQuerySelector);
 
   const onInitializeAppQueryUrlParam = useCallback(
     (initialState: Query | null) => {
@@ -99,20 +104,26 @@ const useInitSearchBarUrlParams = () => {
   const onInitializeFiltersUrlParam = useCallback(
     (initialState: Filter[] | null) => {
       if (initialState != null) {
+        filterManager.setFilters(initialState);
         dispatch(
           inputsActions.setSearchBarFilter({
             id: 'global',
             filters: initialState,
           })
         );
-
-        filterManager.setFilters(initialState);
       } else {
-        // Clear filters to ensure that other App filters don't leak into security solution.
-        filterManager.setFilters([]);
+        // Clear app filters and preserve pinned filters. It ensures that other App filters don't leak into security solution.
+        filterManager.setAppFilters(filtersFromStore);
+
+        dispatch(
+          inputsActions.setSearchBarFilter({
+            id: 'global',
+            filters: filterManager.getFilters(),
+          })
+        );
       }
     },
-    [filterManager, dispatch]
+    [filterManager, dispatch, filtersFromStore]
   );
 
   const onInitializeSavedQueryUrlParam = useCallback(

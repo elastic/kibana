@@ -90,11 +90,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       dispatch(hostsActions.setHostTablesActivePageToZero());
       dispatch(networkActions.setNetworkTablesActivePageToZero());
     }, [dispatch]);
-    const getGlobalFiltersQuerySelector = useMemo(
-      () => inputsSelectors.globalFiltersQuerySelector(),
-      []
-    );
-    const filtersFromStore = useSelector(getGlobalFiltersQuerySelector);
 
     useSyncSearchBarUrlParam();
 
@@ -290,11 +285,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           },
         })
       );
-
-      // for the initial state
-      if (filtersFromStore.length > 0) {
-        filterManager.setAppFilters(filtersFromStore);
-      }
 
       return () => {
         isSubscribed = false;
