@@ -16,7 +16,7 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { File, FileSavedObjectAttributes } from '../../common';
 import { fileObjectType, fileShareObjectType } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
-import { FileShareServiceStart, InternalFileShareService } from '../file_share_service';
+import { InternalFileShareService } from '../file_share_service';
 import {
   CreateFileArgs,
   FindFileArgs,
@@ -76,9 +76,8 @@ export class FileServiceFactory {
       async list<M>(args: ListFilesArgs) {
         return internalFileService.list(args) as Promise<Array<File<M>>>;
       },
-      getFileShareService(): FileShareServiceStart {
-        return internalFileShareService;
-      },
+      getShareObject: internalFileShareService.get.bind(internalFileShareService),
+      updateShareObject: internalFileShareService.update.bind(internalFileShareService),
     };
   }
 
