@@ -100,6 +100,7 @@ describe('GaugeComponent', function () {
       formatFactory: formatService.deserialize,
       paletteService: await paletteThemeService.getPalettes(),
       uiState,
+      renderComplete: jest.fn(),
     };
   });
 

@@ -15,6 +15,7 @@ import { UserActionMarkdownRefObject } from './markdown_form';
 import { CasesNavigation } from '../links';
 import { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -36,6 +37,7 @@ export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, Unsupporte
 
 export interface UserActionBuilderArgs {
   caseData: Case;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   userAction: CaseUserActions;
   caseServices: CaseServices;
   comments: Comment[];

@@ -20,7 +20,7 @@ export const getBuiltinCommands = (): CommandDefinition[] => {
       RenderComponent: HelpCommand,
     },
     {
-      name: 'clear',
+      name: 'cls',
       about: i18n.translate('xpack.securitySolution.console.builtInCommands.clearAbout', {
         defaultMessage: 'Clear the console buffer',
       }),

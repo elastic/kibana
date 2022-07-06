@@ -137,6 +137,15 @@ export const UpdateAgentRequestSchema = {
   }),
 };
 
+export const PostBulkUpdateAgentTagsRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    tagsToAdd: schema.maybe(schema.arrayOf(schema.string())),
+    tagsToRemove: schema.maybe(schema.arrayOf(schema.string())),
+    batchSize: schema.maybe(schema.number()),
+  }),
+};
+
 export const GetAgentStatusRequestSchema = {
   query: schema.object({
     policyId: schema.maybe(schema.string()),

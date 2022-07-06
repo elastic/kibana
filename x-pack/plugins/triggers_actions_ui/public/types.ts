@@ -343,6 +343,12 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   ruleTypeIndex?: RuleTypeIndex;
   filteredSolutions?: string[] | undefined;
 }
+export interface RuleDefinitionProps {
+  rule: Rule;
+  ruleTypeRegistry: RuleTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onEditRule: () => Promise<void>;
+}
 
 export enum Percentiles {
   P50 = 'P50',
@@ -413,6 +419,7 @@ export type AlertTableFlyoutComponent =
   | React.FunctionComponent<AlertsTableFlyoutBaseProps>
   | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
   | null;
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
@@ -423,6 +430,10 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
+  useActionsColumn?: () => {
+    renderCustomActionsRow: (alert?: EcsFieldsResponse) => JSX.Element;
+    width?: number;
+  };
 }
 
 export interface AlertsTableFlyoutBaseProps {

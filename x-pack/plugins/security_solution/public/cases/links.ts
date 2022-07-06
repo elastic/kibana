@@ -22,7 +22,7 @@ export const getCasesLinkItems = (): LinkItem => {
     extend: {
       [SecurityPageName.case]: {
         globalNavEnabled: true,
-        globalNavOrder: 4,
+        globalNavOrder: 5,
         capabilities: [`${CASES_FEATURE_ID}.${READ_CASES_CAPABILITY}`],
       },
       [SecurityPageName.caseConfigure]: {

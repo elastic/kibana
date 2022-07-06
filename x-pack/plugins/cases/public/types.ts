@@ -6,7 +6,7 @@
  */
 
 import { CoreStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { ReactElement, ReactNode } from 'react';
+import React, { ReactElement } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -38,6 +38,8 @@ import { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import { Cases, CasesStatus, CasesMetrics } from '../common/ui';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
+import { AttachmentFramework } from './client/attachment_framework/types';
+import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -72,6 +74,11 @@ export interface RenderAppProps {
   pluginsStart: CasesPluginStart;
   storage: Storage;
   kibanaVersion: string;
+  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+}
+
+export interface CasesUiSetup {
+  attachmentFramework: AttachmentFramework;
 }
 
 export interface CasesUiStart {
@@ -90,9 +97,8 @@ export interface CasesUiStart {
      * @return {ReactElement<GetCasesProps>}
      */
     getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
-    getCasesContext: () => (
-      props: GetCasesContextProps & { children: ReactNode }
-    ) => ReactElement<GetCasesContextProps>;
+    getCasesContext: () => React.FC<GetCasesContextProps>;
+
     /**
      * Modal to select a case in a list of all owner cases
      * @param props GetAllCasesSelectorModalProps

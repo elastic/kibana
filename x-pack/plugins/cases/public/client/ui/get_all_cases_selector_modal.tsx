@@ -10,19 +10,24 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCasesSelectorModalProps } from '../../components/all_cases/selector_modal';
 import { CasesProvider, CasesContextProps } from '../../components/cases_context';
 
-export type GetAllCasesSelectorModalProps = AllCasesSelectorModalProps & CasesContextProps;
+type GetAllCasesSelectorModalPropsInternal = AllCasesSelectorModalProps & CasesContextProps;
+export type GetAllCasesSelectorModalProps = Omit<
+  GetAllCasesSelectorModalPropsInternal,
+  'externalReferenceAttachmentTypeRegistry'
+>;
 
 const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
   () => import('../../components/all_cases/selector_modal')
 );
 export const getAllCasesSelectorModalLazy = ({
+  externalReferenceAttachmentTypeRegistry,
   owner,
   permissions,
   hiddenStatuses,
   onRowClick,
   onClose,
-}: GetAllCasesSelectorModalProps) => (
-  <CasesProvider value={{ owner, permissions }}>
+}: GetAllCasesSelectorModalPropsInternal) => (
+  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, permissions }}>
     <Suspense fallback={<EuiLoadingSpinner />}>
       <AllCasesSelectorModalLazy
         hiddenStatuses={hiddenStatuses}
