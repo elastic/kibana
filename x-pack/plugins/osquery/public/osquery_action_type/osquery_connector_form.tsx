@@ -28,8 +28,8 @@ const OverwriteGlobalStyle = createGlobalStyle`
       display: ${(props: { hidden: boolean }) => (props.hidden ? 'none' : 'inherit')}
     }
   }
-
 `;
+
 const OsqueryConnectorForm: React.FunctionComponent<{}> = () => {
   const { loading, disabled, permissionDenied } = useFetchStatus();
 
