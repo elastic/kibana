@@ -82,6 +82,7 @@ export class MapPage extends Component<Props, State> {
           onAppLeave={this.props.onAppLeave}
           setHeaderActionMenu={this.props.setHeaderActionMenu}
           saveCounter={this.state.saveCounter}
+          stateTransfer={this.props.stateTransfer}
         />
       </Provider>
     );

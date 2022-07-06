@@ -12,7 +12,7 @@ import type { Query } from '@kbn/es-query';
 export interface MapsAppState {
   query?: Query | null;
   savedQueryId?: string;
-  filters?: Filter[];
+  filters?: Filter | Filter[];
 }
 
 export class AppStateManager {
@@ -33,6 +33,10 @@ export class AppStateManager {
       this._filters = filters;
     }
     this._updated$.next();
+  }
+
+  setFilters(filters: Filter[]) {
+    this._filters = filters;
   }
 
   getQuery() {

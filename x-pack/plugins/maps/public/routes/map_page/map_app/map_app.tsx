@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from '@kbn/core/public';
-import { Adapters } from '@kbn/embeddable-plugin/public';
+import { Adapters, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-plugin/common';
@@ -80,6 +80,7 @@ export interface Props {
   query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   history: AppMountParameters['history'];
+  stateTransfer: EmbeddableStateTransfer;
 }
 
 export interface State {
@@ -132,6 +133,19 @@ export class MapApp extends React.Component<Props, State> {
 
     this._globalSyncUnsubscribe = startGlobalStateSyncing();
     this._appSyncUnsubscribe = startAppStateSyncing(this._appStateManager);
+    const { stateTransfer } = this.props;
+    const { filterManager } = getData().query;
+
+    if (
+      stateTransfer?.getIncomingEditorState('maps') &&
+      stateTransfer?.getIncomingEditorState('maps')?.filters
+    ) {
+      const filters = stateTransfer?.getIncomingEditorState('maps')?.filters;
+      if (filters) {
+        this._appStateManager.setFilters(_.cloneDeep(filters));
+        filterManager.setAppFilters(_.cloneDeep(filters));
+      }
+    }
     this._globalSyncChangeMonitorSubscription = getData().query.state$.subscribe(
       this._updateFromGlobalState
     );

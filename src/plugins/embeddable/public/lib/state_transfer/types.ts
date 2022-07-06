@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Filter } from '@kbn/es-query';
 import { Optional } from '@kbn/utility-types';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
 
@@ -26,6 +27,7 @@ export interface EmbeddableEditorState {
    * Editors could use it continue previous search session
    */
   searchSessionId?: string;
+  filters?: Filter[];
 }
 
 export function isEmbeddableEditorState(state: unknown): state is EmbeddableEditorState {

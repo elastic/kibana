@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from '@kbn/core/public';
-import { Filter } from '@kbn/es-query';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
@@ -89,16 +88,8 @@ export class EditPanelAction implements Action<ActionContext> {
         const options = {
           path: appTarget.path,
           state: appTarget.state,
+          filters: context.embeddable?.getInput().filters,
         };
-        if (context.embeddable) {
-          let filters: Filter[] = [];
-          if (context.embeddable?.filterManager) {
-            filters = context.embeddable?.filterManager.getAppFilters();
-          } else if (context.embeddable?.filters) {
-            filters = context.embeddable?.filters;
-          }
-          options.filters = filters;
-        }
         await this.stateTransfer.navigateToEditor(appTarget.app, options);
       } else {
         await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
