@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
-  const kibanaServer = getService('kibanaServer');
 
   describe('ml Accessibility', () => {
     const esArchiver = getService('esArchiver');
