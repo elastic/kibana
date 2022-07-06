@@ -15,12 +15,12 @@ import { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { RequestHandlerContextBase, IRouter } from '@kbn/core-http-server';
 
-import type { RequestHandlerContextBase } from '..';
 import { InternalContextSetup, InternalContextPreboot } from '../context';
 import { CspConfigType, cspConfig } from './csp';
 
-import { Router, IRouter } from './router';
+import { Router } from './router';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';

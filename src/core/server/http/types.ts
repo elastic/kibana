@@ -7,7 +7,15 @@
  */
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
+import type {
+  IRouter,
+  RequestHandlerContextBase,
+  AuthenticationHandler,
+  OnPreRoutingHandler,
+  OnPreAuthHandler,
+  OnPostAuthHandler,
+  OnPreResponseHandler,
+} from '@kbn/core-http-server';
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from './csp';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
@@ -15,11 +23,6 @@ import { IAuthHeadersStorage } from './auth_headers_storage';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
 import { SessionStorageFactory } from './session_storage';
-import { AuthenticationHandler } from './lifecycle/auth';
-import { OnPreRoutingHandler } from './lifecycle/on_pre_routing';
-import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
-import { OnPostAuthHandler } from './lifecycle/on_post_auth';
-import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
 import { ExternalUrlConfig } from './external_url';
 

@@ -10,7 +10,13 @@ import { flatten } from 'lodash';
 import { ShallowPromise } from '@kbn/utility-types';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreId } from '@kbn/core-base-common-internal';
-import type { RequestHandler, RequestHandlerContextBase } from '../..';
+import type {
+  RequestHandler,
+  RequestHandlerContextBase,
+  IContextProvider,
+  HandlerParameters,
+  HandlerContextType,
+} from '@kbn/core-http-server';
 
 /**
  * An object that handles registration of context providers and configuring handlers with context.

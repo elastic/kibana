@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './context';
+export { ContextContainer } from './context';
+export type { IContextContainer } from './context';
