@@ -21,6 +21,9 @@ const CasesWebhookComponent: React.FunctionComponent<
         isLoading={false}
         listItems={[]}
         title={connector.name}
+        showCommentsWarning={
+          !connector.config?.createCommentUrl || !connector.config?.createCommentJson
+        }
       />
     )}
   </>

@@ -34,8 +34,8 @@ export type CasesWebhookSecretConfigurationType = TypeOf<
 export type CasesWebhookActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 export interface ExternalServiceCredentials {
-  config: Record<keyof CasesWebhookPublicConfigurationType, unknown>;
-  secrets: Record<string, unknown>;
+  config: CasesWebhookPublicConfigurationType;
+  secrets: CasesWebhookSecretConfigurationType;
 }
 
 export interface ExternalServiceValidation {

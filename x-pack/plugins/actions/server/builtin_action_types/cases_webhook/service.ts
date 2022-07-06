@@ -217,6 +217,9 @@ export const createExternalService = (
 
   const createComment = async ({ externalId, comment }: CreateCommentParams): Promise<unknown> => {
     try {
+      if (!createCommentUrl || !createCommentJson) {
+        return {};
+      }
       const res = await request({
         axios: axiosInstance,
         method: createCommentMethod,

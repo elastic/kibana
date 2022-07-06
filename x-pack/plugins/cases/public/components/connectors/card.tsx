@@ -6,18 +6,27 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
 import { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon } from '../utils';
+import * as i18n from './translations';
 
 interface ConnectorCardProps {
   connectorType: ConnectorTypes;
   title: string;
   listItems: Array<{ title: string; description: React.ReactNode }>;
   isLoading: boolean;
+  showCommentsWarning: boolean;
 }
 
 const StyledText = styled.span`
@@ -31,6 +40,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   title,
   listItems,
   isLoading,
+  showCommentsWarning = false,
 }) => {
   const { triggersActionsUi } = useKibana().services;
 
@@ -69,7 +79,17 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
               paddingSize="none"
               title={title}
               titleSize="xs"
-            />
+            >
+              {showCommentsWarning && (
+                <EuiCallOut
+                  title={i18n.CREATE_COMMENT_WARNING_TITLE}
+                  color="warning"
+                  iconType="help"
+                >
+                  <p>{i18n.CREATE_COMMENT_WARNING_DESC(title)}</p>
+                </EuiCallOut>
+              )}
+            </EuiCard>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
         </EuiFlexGroup>
