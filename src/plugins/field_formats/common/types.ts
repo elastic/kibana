@@ -128,7 +128,7 @@ export type FieldFormatInstanceType = (new (
  * Params provided when creating a formatter.
  * Params are vary per formatter
  *
- * TODO: support strict typing depending on P
+ * TODO: support strict typing for params depending on format type
  * https://github.com/elastic/kibana/issues/108158
  */
 export type FieldFormatParams<P = {}> = SerializableRecord & P;
