@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
-import { HttpFetchError } from '@kbn/core/public';
+import { useMutation } from 'react-query';
+import type { UseMutationOptions, UseMutationResult } from 'react-query';
+import type { HttpFetchError } from '@kbn/core/public';
 import type {
   KillOrSuspendProcessRequestBody,
   ResponseActionApiResponse,

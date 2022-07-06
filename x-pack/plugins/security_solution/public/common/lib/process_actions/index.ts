@@ -13,7 +13,7 @@ import { KibanaServices } from '../kibana';
 import { KILL_PROCESS_ROUTE, SUSPEND_PROCESS_ROUTE } from '../../../../common/endpoint/constants';
 
 /** Kills a process specified by pid or entity id on a host running Endpoint Security */
-export const killProcess = async (
+export const killProcess = (
   params: KillOrSuspendProcessRequestBody
 ): Promise<ResponseActionApiResponse> => {
   return KibanaServices.get().http.post<ResponseActionApiResponse>(KILL_PROCESS_ROUTE, {
@@ -22,7 +22,7 @@ export const killProcess = async (
 };
 
 /** Suspends a process specified by pid or entity id on a host running Endpoint Security */
-export const suspendProcess = async (
+export const suspendProcess = (
   params: KillOrSuspendProcessRequestBody
 ): Promise<ResponseActionApiResponse> => {
   return KibanaServices.get().http.post<ResponseActionApiResponse>(SUSPEND_PROCESS_ROUTE, {

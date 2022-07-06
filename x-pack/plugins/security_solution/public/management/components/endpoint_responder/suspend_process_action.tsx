@@ -31,7 +31,7 @@ export const SuspendProcessActionResult = memo<
   const isPending = status === 'pending';
   const actionRequestSent = Boolean(store.actionRequestSent);
 
-  const suspendProcessApi = useSendSuspendProcessRequest();
+  const { mutate, data, isSuccess, error } = useSendSuspendProcessRequest();
 
   const { data: actionDetails } = useGetActionDetails(actionId ?? '-', {
     enabled: Boolean(actionId) && isPending,
@@ -43,7 +43,7 @@ export const SuspendProcessActionResult = memo<
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
 
     if (!actionRequestSent && endpointId && parameters) {
-      suspendProcessApi.mutate({
+      mutate({
         endpoint_ids: [endpointId],
         comment: command.args.args?.comment?.[0],
         parameters,
@@ -52,22 +52,16 @@ export const SuspendProcessActionResult = memo<
         return { ...prevState, actionRequestSent: true };
       });
     }
-  }, [actionRequestSent, command.args.args, endpointId, suspendProcessApi, setStore]);
+  }, [actionRequestSent, command.args.args, endpointId, mutate, setStore]);
 
   // If suspend-process request was created, store the action id if necessary
   useEffect(() => {
-    if (suspendProcessApi.isSuccess && actionId !== suspendProcessApi.data.data.id) {
+    if (isSuccess && actionId !== data.data.id) {
       setStore((prevState) => {
-        return { ...prevState, actionId: suspendProcessApi.data.data.id };
+        return { ...prevState, actionId: data.data.id };
       });
     }
-  }, [
-    actionId,
-    suspendProcessApi?.data?.data.id,
-    suspendProcessApi.isSuccess,
-    suspendProcessApi.error,
-    setStore,
-  ]);
+  }, [actionId, data?.data.id, isSuccess, error, setStore]);
 
   useEffect(() => {
     if (actionDetails?.data.isCompleted) {
