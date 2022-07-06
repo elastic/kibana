@@ -110,7 +110,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         errorMessages={formFields.frequency.errorMessages}
         helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelpText', {
           defaultMessage:
-            'The interval between checks for changes in the source indices when the transform is running continuously. Also determines the retry interval in the event of transient failures while the transform is searching or indexing. The minimum value is 1s and the maximum is 1h.',
+            'The interval to check for changes in source indices when the transformation runs continuously.',
         })}
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
           defaultMessage: 'Frequency',
@@ -346,7 +346,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
               'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelptext',
               {
                 defaultMessage:
-                  'Defines the initial page size to use for the composite aggregation for each checkpoint.',
+                  'The initial page size to use for the composite aggregation for each checkpoint.',
               }
             )}
             label={i18n.translate(
