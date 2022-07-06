@@ -10,7 +10,7 @@ import Path from 'path';
 import { Writable } from 'stream';
 
 import chalk from 'chalk';
-import * as LmdbStore from 'lmdb-store';
+import * as LmdbStore from 'lmdb';
 
 const GLOBAL_ATIME = `${Date.now()}`;
 const MINUTE = 1000 * 60;
@@ -167,7 +167,6 @@ export class Cache {
       const validKeys: string[] = [];
       const invalidKeys: string[] = [];
 
-      // @ts-expect-error See https://github.com/DoctorEvidence/lmdb-store/pull/18
       for (const { key, value } of this.atimes.getRange()) {
         const atime = parseInt(`${value}`, 10);
         if (Number.isNaN(atime) || atime < ATIME_LIMIT) {
