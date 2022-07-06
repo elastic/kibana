@@ -46,6 +46,7 @@ import {
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
   RULES_TAGS_POPOVER_WRAPPER,
   INTEGRATIONS_POPOVER,
+  RULES_TAGS_POPOVER_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -278,10 +279,12 @@ export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(INPUT_FILE).should('not.exist');
 };
 
-export const testTagsBadge = ($el: JQuery<HTMLElement>, tags: string[]) => {
-  // open tags popover
-  cy.wrap($el).click();
-  cy.get(RULES_TAGS_POPOVER_WRAPPER).should('have.text', tags.join(''));
-  // close tags popover
-  cy.wrap($el).click();
+export const testAllTagsBadges = (tags: string[]) => {
+  cy.get(RULES_TAGS_POPOVER_BTN).each(($el) => {
+    // open tags popover
+    cy.wrap($el).click();
+    cy.get(RULES_TAGS_POPOVER_WRAPPER).should('have.text', tags.join(''));
+    // close tags popover
+    cy.wrap($el).click();
+  });
 };
