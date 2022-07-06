@@ -8,6 +8,7 @@
 import { KbnClient } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { sendEndpointMetadataUpdate } from '../common/endpoint_metadata_services';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
@@ -20,7 +21,7 @@ import {
   EndpointActionResponse,
   LogsEndpointActionResponse,
   ActionResponseOutput,
-  RunningProcessesEntry,
+  ProcessesEntry,
 } from '../../../common/endpoint/types';
 import { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -87,8 +88,6 @@ export const sendEndpointActionResponse = async (
   action: ActionDetails,
   { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<LogsEndpointActionResponse> => {
-  // FIXME:PT Generate command specific responses
-
   const endpointResponse = endpointActionGenerator.generateResponse({
     agent: { id: action.agents[0] },
     EndpointActions: {
@@ -115,6 +114,36 @@ export const sendEndpointActionResponse = async (
     refresh: 'wait_for',
   });
 
+  // ------------------------------------------
+  // Post Action Response tasks
+  // ------------------------------------------
+
+  // For isolate, If the response is not an error, then also send a metadata update
+  if (action.command === 'isolate' && !endpointResponse.error) {
+    for (const agentId of action.agents) {
+      await sendEndpointMetadataUpdate(esClient, agentId, {
+        Endpoint: {
+          state: {
+            isolation: true,
+          },
+        },
+      });
+    }
+  }
+
+  // For UnIsolate, if response is not an Error, then also send metadata update
+  if (action.command === 'unisolate' && !endpointResponse.error) {
+    for (const agentId of action.agents) {
+      await sendEndpointMetadataUpdate(esClient, agentId, {
+        Endpoint: {
+          state: {
+            isolation: false,
+          },
+        },
+      });
+    }
+  }
+
   return endpointResponse;
 };
 
@@ -126,9 +155,9 @@ const getOutputDataIfNeeded = (
         output: {
           type: 'json',
           content: {
-            entries: endpointActionGenerator.randomResponseActionRunningProcesses(100),
+            entries: endpointActionGenerator.randomResponseActionProcesses(100),
           },
         },
-      } as { output: ActionResponseOutput<RunningProcessesEntry> })
+      } as { output: ActionResponseOutput<ProcessesEntry> })
     : {};
 };
