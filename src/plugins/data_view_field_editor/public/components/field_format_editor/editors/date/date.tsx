@@ -69,9 +69,7 @@ export class DateFormatEditor extends DefaultFormatEditor<DateFormatEditorFormat
             value={formatParams.pattern}
             placeholder={defaultPattern}
             onChange={(e) => {
-              this.onChange({
-                pattern: e.target.value,
-              });
+              this.onChange({ pattern: e.target.value });
             }}
             isInvalid={!!error}
           />
