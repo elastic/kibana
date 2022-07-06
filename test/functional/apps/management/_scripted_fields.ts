@@ -144,78 +144,93 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should see scripted field value in Discover', async function () {
-        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
-        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
-        await retry.try(async function () {
-          await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName);
+      describe('discover scripted field', async () => {
+        before(async () => {
+          const from = 'Sep 17, 2015 @ 06:31:44.000';
+          const to = 'Sep 18, 2015 @ 18:31:44.000';
+          await PageObjects.common.setTime({ from, to });
         });
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function () {
-          const rowData = (await dataGrid.getRowsText())[0];
-          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.91618');
+        it('should see scripted field value in Discover', async function () {
+          await PageObjects.common.navigateToApp('discover');
+
+          await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
+          await retry.try(async function () {
+            await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName);
+          });
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async function () {
+            const rowData = (await dataGrid.getRowsText())[0];
+            expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.91618');
+          });
+        });
+
+        // add a test to sort numeric scripted field
+        it('should sort scripted field value in Discover', async function () {
+          await clickSort(scriptedPainlessFieldName, 1);
+          await PageObjects.common.sleep(500);
+
+          // after the first click on the scripted field, it becomes secondary sort after time.
+          // click on the timestamp twice to make it be the secondary sort key.
+          await clickSort('@timestamp', 1);
+          await clickSort('@timestamp', 0);
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await retry.try(async function () {
+            const rowData = (await dataGrid.getRowsText())[0];
+            expect(rowData).to.be('Sep 17, 2015 @ 10:53:14.181-1');
+          });
+
+          await clickSort(scriptedPainlessFieldName, 2);
+          // after the first click on the scripted field, it becomes primary sort after time.
+          // click on the scripted field twice then, makes it be the secondary sort key.
+          await clickSort(scriptedPainlessFieldName, 2);
+          await clickSort(scriptedPainlessFieldName, 2);
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await retry.try(async function () {
+            const rowData = (await dataGrid.getRowsText())[0];
+            expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.47920');
+          });
+        });
+
+        it('should filter by scripted field value in Discover', async function () {
+          await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
+          await log.debug('filter by the first value (14) in the expanded scripted field list');
+          await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async function () {
+            expect(await PageObjects.discover.getHitCount()).to.be('31');
+          });
+        });
+
+        it('should visualize scripted field in vertical bar chart', async function () {
+          await filterBar.removeAllFilters();
+          await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          // verify Lens opens a visualization
+          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+            '@timestamp',
+            'Median of ram_Pain1'
+          );
         });
       });
 
-      // add a test to sort numeric scripted field
-      it('should sort scripted field value in Discover', async function () {
-        await clickSort(scriptedPainlessFieldName, 1);
-        await PageObjects.common.sleep(500);
-
-        // after the first click on the scripted field, it becomes secondary sort after time.
-        // click on the timestamp twice to make it be the secondary sort key.
-        await clickSort('@timestamp', 1);
-        await clickSort('@timestamp', 0);
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = (await dataGrid.getRowsText())[0];
-          expect(rowData).to.be('Sep 17, 2015 @ 10:53:14.181-1');
-        });
-
-        await clickSort(scriptedPainlessFieldName, 2);
-        // after the first click on the scripted field, it becomes primary sort after time.
-        // click on the scripted field twice then, makes it be the secondary sort key.
-        await clickSort(scriptedPainlessFieldName, 2);
-        await clickSort(scriptedPainlessFieldName, 2);
-
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          const rowData = (await dataGrid.getRowsText())[0];
-          expect(rowData).to.be('Sep 17, 2015 @ 06:32:29.47920');
-        });
-      });
-
-      it('should filter by scripted field value in Discover', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
-        await log.debug('filter by the first value (14) in the expanded scripted field list');
-        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be('31');
-        });
-      });
-
-      it('should visualize scripted field in vertical bar chart', async function () {
-        await filterBar.removeAllFilters();
-        await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        // verify Lens opens a visualization
-        expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
-          '@timestamp',
-          'Median of ram_Pain1'
-        );
+      after(async () => {
+        await PageObjects.common.unsetTime();
       });
     });
 
     describe('creating and using Painless string scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painString';
+
+      before(async () => {
+        const from = 'Sep 17, 2015 @ 06:31:44.000';
+        const to = 'Sep 18, 2015 @ 18:31:44.000';
+        await PageObjects.common.setTime({ from, to });
+      });
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
@@ -240,10 +255,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
-        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        // await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -306,10 +319,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Top 5 values of painString'
         );
       });
+
+      after(async () => {
+        await PageObjects.common.unsetTime();
+      });
     });
 
     describe('creating and using Painless boolean scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painBool';
+
+      before(async () => {
+        const from = 'Sep 17, 2015 @ 06:31:44.000';
+        const to = 'Sep 18, 2015 @ 18:31:44.000';
+        await PageObjects.common.setTime({ from, to });
+      });
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
@@ -334,10 +357,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
-        const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -393,10 +413,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Top 5 values of painBool'
         );
       });
+
+      after(async () => {
+        await PageObjects.common.unsetTime();
+      });
     });
 
     describe('creating and using Painless date scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painDate';
+
+      before(async () => {
+        const from = 'Sep 17, 2015 @ 19:22:00.000';
+        const to = 'Sep 18, 2015 @ 07:00:00.000';
+        await PageObjects.common.setTime({ from, to });
+      });
 
       it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
@@ -421,10 +451,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should see scripted field value in Discover', async function () {
-        const fromTime = 'Sep 17, 2015 @ 19:22:00.000';
-        const toTime = 'Sep 18, 2015 @ 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -481,6 +508,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // verify Lens opens a visualization
         expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain('painDate');
       });
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
   });
 }
