@@ -28,7 +28,7 @@ export function getActionType(): ActionTypeModel<
     actionTypeTitle: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.actionTypeTitle',
       {
-        defaultMessage: 'Cases Webhook data',
+        defaultMessage: 'Webhook - Case Management data',
       }
     ),
     validateParams: async (

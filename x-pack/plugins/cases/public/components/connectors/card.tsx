@@ -26,7 +26,7 @@ interface ConnectorCardProps {
   title: string;
   listItems: Array<{ title: string; description: React.ReactNode }>;
   isLoading: boolean;
-  showCommentsWarning: boolean;
+  showCommentsWarning?: boolean;
 }
 
 const StyledText = styled.span`

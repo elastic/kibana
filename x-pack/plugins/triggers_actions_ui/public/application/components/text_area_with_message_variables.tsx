@@ -6,17 +6,32 @@
  */
 
 import React, { useState } from 'react';
-import { EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiTextArea, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
+const CREATE_COMMENT_WARNING_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningTitle',
+  {
+    defaultMessage: 'Incomplete connector',
+  }
+);
 
+const CREATE_COMMENT_WARNING_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.textAreaWithMessageVariable.createCommentWarningDesc',
+  {
+    defaultMessage:
+      'In order to update comments in external service, the connector needs to be updated with Create Comment URL and JSON',
+  }
+);
 interface Props {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   index: number;
   inputTargetValue?: string;
+  isDisabled?: boolean;
   editAction: (property: string, value: any, index: number) => void;
   label: string;
   errors?: string[];
@@ -27,6 +42,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   paramsProperty,
   index,
   inputTargetValue,
+  isDisabled = false,
   editAction,
   label,
   errors,
@@ -52,6 +68,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
     <EuiFormRow
       fullWidth
       error={errors}
+      isDisabled={isDisabled}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
@@ -62,22 +79,38 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
         />
       }
     >
-      <EuiTextArea
-        fullWidth
-        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-        name={paramsProperty}
-        value={inputTargetValue || ''}
-        data-test-subj={`${paramsProperty}TextArea`}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
-        onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-          setCurrentTextElement(e.target);
-        }}
-        onBlur={() => {
-          if (!inputTargetValue) {
-            editAction(paramsProperty, '', index);
-          }
-        }}
-      />
+      <>
+        {isDisabled && paramsProperty === 'comments' && (
+          <>
+            <EuiCallOut
+              title={CREATE_COMMENT_WARNING_TITLE}
+              color="warning"
+              iconType="help"
+              size="s"
+            >
+              <p>{CREATE_COMMENT_WARNING_DESC}</p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <EuiTextArea
+          disabled={isDisabled}
+          fullWidth
+          isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+          name={paramsProperty}
+          value={inputTargetValue || ''}
+          data-test-subj={`${paramsProperty}TextArea`}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
+          onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+            setCurrentTextElement(e.target);
+          }}
+          onBlur={() => {
+            if (!inputTargetValue) {
+              editAction(paramsProperty, '', index);
+            }
+          }}
+        />
+      </>
     </EuiFormRow>
   );
 };
