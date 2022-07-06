@@ -8,6 +8,7 @@
 import { Logger } from '@kbn/core/server';
 import mimeType from 'mime';
 import { Readable } from 'stream';
+import { FileShareJSON } from '../../common/types';
 import {
   File as IFile,
   FileKind,
@@ -25,6 +26,7 @@ import {
 } from './file_attributes_reducer';
 import { createAuditEvent } from '../audit_events';
 import { InternalFileService } from '../file_service/internal_file_service';
+import { InternalFileShareService } from '../file_share_service';
 import { BlobStorage } from '../blob_storage_service/types';
 import { enforceMaxByteSizeTransform } from './stream_transforms';
 
@@ -43,6 +45,7 @@ export class File<M = unknown> implements IFile {
     private readonly fileKindDescriptor: FileKind,
     private readonly internalFileService: InternalFileService,
     private readonly blobStorageService: BlobStorageService,
+    private readonly fileShareService: InternalFileShareService,
     private readonly logger: Logger
   ) {
     this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
@@ -116,6 +119,7 @@ export class File<M = unknown> implements IFile {
     if (attributes.content_ref) {
       await this.blobStorage.delete(attributes.content_ref);
     }
+    await this.fileShareService.deleteForFile({ file: this });
     await this.internalFileService.deleteSO(id);
     this.logAuditEvent(
       createAuditEvent({
@@ -126,40 +130,35 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  /**
-   * Static method for creating files so that we can keep all of the audit logging for files
-   * in the same place.
-   */
-  public static async create(
-    {
-      name,
-      fileKind,
-      alt,
-      meta,
-      mime,
-    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
-    internalFileService: InternalFileService
-  ) {
-    const fileSO = await internalFileService.createSO({
-      ...createDefaultFileAttributes(),
-      file_kind: fileKind.id,
-      name,
-      alt,
-      meta,
-      mime,
-      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
-    });
-
-    const file = internalFileService.toFile(fileSO, fileKind);
-
-    internalFileService.createAuditLog(
+  public async share({
+    name,
+    validUntil,
+  }: {
+    name?: string;
+    validUntil?: number;
+  }): Promise<FileShareJSON> {
+    const shareObject = await this.fileShareService.share({ file: this, name, validUntil });
+    this.internalFileService.createAuditLog(
       createAuditEvent({
         action: 'create',
-        message: `Created file "${file.name}" of kind "${file.fileKind}" and id "${file.id}"`,
+        message: `Shared file "${this.name}" with id "${this.id}"`,
       })
     );
+    return shareObject;
+  }
 
-    return file;
+  async listShares(): Promise<FileShareJSON[]> {
+    return await this.fileShareService.list({ file: this });
+  }
+
+  async unshare(opts: { shareId: string }): Promise<void> {
+    await this.fileShareService.delete({ tokenId: opts.shareId });
+    this.internalFileService.createAuditLog(
+      createAuditEvent({
+        action: 'delete',
+        message: `Removed share for "${this.name}" with id "${this.id}"`,
+      })
+    );
   }
 
   public toJSON(): FileJSON {
@@ -203,5 +202,41 @@ export class File<M = unknown> implements IFile {
 
   public get extension(): undefined | string {
     return this.attributes.extension;
+  }
+
+  /**
+   * Static method for creating files so that we can keep all of the audit logging for files
+   * in the same place.
+   */
+  public static async create(
+    {
+      name,
+      fileKind,
+      alt,
+      meta,
+      mime,
+    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown; mime?: string },
+    internalFileService: InternalFileService
+  ) {
+    const fileSO = await internalFileService.createSO({
+      ...createDefaultFileAttributes(),
+      file_kind: fileKind.id,
+      name,
+      alt,
+      meta,
+      mime,
+      extension: (mime && mimeType.getExtension(mime)) ?? undefined,
+    });
+
+    const file = internalFileService.toFile(fileSO, fileKind);
+
+    internalFileService.createAuditLog(
+      createAuditEvent({
+        action: 'create',
+        message: `Created file "${file.name}" of kind "${file.fileKind}" and id "${file.id}"`,
+      })
+    );
+
+    return file;
   }
 }

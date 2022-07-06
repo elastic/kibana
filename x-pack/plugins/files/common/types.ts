@@ -65,6 +65,9 @@ export type FileSavedObjectAttributes<Meta = unknown> = {
   meta?: Meta;
 };
 
+/**
+ * Attributes of a file that represent a serialised version of the file.
+ */
 export type FileJSON = FileSavedObjectAttributes & { id: string };
 
 export type FileSavedObject<Meta = unknown> = SavedObject<FileSavedObjectAttributes<Meta>>;
@@ -73,6 +76,33 @@ export type UpdatableFileAttributes<Meta = unknown> = Pick<
   FileSavedObjectAttributes<Meta>,
   'meta' | 'alt' | 'name'
 >;
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type FileShareSavedObjectAttributes = {
+  created_at: string;
+
+  /**
+   * Human friendly name for this share token.
+   */
+  name?: string;
+
+  /**
+   * The date-time this file share will expire.
+   *
+   * @note default date-time is determined by this application
+   *
+   * TODO: in future we could add a special value like "forever", but this should
+   * not be the default.
+   */
+  valid_until?: number;
+};
+
+/**
+ * Attributes of a file that represent a serialised version of the file.
+ */
+export type FileShareJSON = FileShareSavedObjectAttributes & { id: string; fileId: string };
+
+export type UpdatableFileShareAttributes = Pick<FileSavedObjectAttributes, 'name'>;
 
 /**
  * The set of properties and behaviors of the "smart" file object. This is built
@@ -113,6 +143,17 @@ export interface File<Meta = unknown> {
   downloadContent(): Promise<Readable>;
 
   delete(): Promise<void>;
+
+  share(opts?: { name?: string; validUntil?: number }): Promise<FileShareJSON>;
+
+  listShares(): Promise<FileShareJSON[]>;
+
+  unshare(opts: {
+    /**
+     * Specify the share instance to remove
+     */
+    shareId: string;
+  }): Promise<void>;
 
   toJSON(): FileJSON;
 }

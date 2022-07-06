@@ -6,6 +6,7 @@
  */
 
 import { File } from '../../common';
+import { FileShareServiceStart } from '../file_share_service/types';
 import {
   CreateFileArgs,
   UpdateFileArgs,
@@ -44,4 +45,6 @@ export interface FileServiceStart {
    * List all files of specific file kind.
    */
   list<M>(args: ListFilesArgs): Promise<Array<File<M>>>;
+
+  getFileShareService(): FileShareServiceStart;
 }

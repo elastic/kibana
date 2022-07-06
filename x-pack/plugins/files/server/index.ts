@@ -9,6 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { FilesPlugin } from './plugin';
 
 export type { FilesSetup, FilesStart } from './types';
+export type { FileShareServiceStart } from './file_share_service';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new FilesPlugin(initializerContext);

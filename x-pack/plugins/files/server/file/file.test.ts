@@ -16,11 +16,13 @@ import { Readable } from 'stream';
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileService } from '../file_service/internal_file_service';
 import { fileKindsRegistry } from '../file_kinds_registry';
+import { InternalFileShareService } from '../file_share_service';
 
 describe('File', () => {
   let esClient: ElasticsearchClient;
   let fileService: InternalFileService;
   let blobStorageService: BlobStorageService;
+  let fileShareService: InternalFileShareService;
   let soClient: ISavedObjectsRepository;
 
   const sandbox = createSandbox();
@@ -35,10 +37,12 @@ describe('File', () => {
     soClient = savedObjectsServiceMock.createStartContract().createInternalRepository();
     const logger = loggingSystemMock.createLogger();
     blobStorageService = new BlobStorageService(esClient, logger);
+    fileShareService = new InternalFileShareService(soClient);
     fileService = new InternalFileService(
       'test',
       soClient,
       blobStorageService,
+      fileShareService,
       undefined,
       fileKindsRegistry,
       logger
