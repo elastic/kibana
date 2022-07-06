@@ -14,11 +14,14 @@ import {
   EuiFlexItem,
   EuiTourStep,
   EuiTourStepProps,
-  EuiOverlayMask,
+  EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import './tour.scss';
+import { useKibana } from '../../lib/kibana';
+
+import { tourConfig } from './tour_config';
 
 const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
 const SECURITY_TOUR_STEP_KEY = 'guidedOnboarding.security.tourStep';
@@ -30,63 +33,16 @@ const saveIsTourActiveToLocalStorage = (isTourActive: boolean): void => {
 };
 
 const getTourStepFromLocalStorage = (): number => {
-  return Number(JSON.parse(String(localStorage.getItem(SECURITY_TOUR_STEP_KEY))));
+  return Number(JSON.parse(String(localStorage.getItem(SECURITY_TOUR_STEP_KEY) ?? 1)));
 };
 const saveTourStepToLocalStorage = (step: number): void => {
   localStorage.setItem(SECURITY_TOUR_STEP_KEY, JSON.stringify(step));
 };
 
-type TourConfig = Array<
-  Pick<EuiTourStepProps, 'step' | 'content' | 'anchor' | 'anchorPosition' | 'title' | 'subtitle'>
->;
-
 const minWidth: EuiTourStepProps['minWidth'] = 360;
 const maxWidth: EuiTourStepProps['maxWidth'] = 360;
 const offset: EuiTourStepProps['offset'] = 30;
 const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = false;
-
-const tourConfig: TourConfig = [
-  {
-    step: 1,
-    subtitle: 'Step #1',
-    title: 'Welcome to Elastic Security',
-    content: 'Take a quick tour of the Security solution to get a feel for how it works.',
-    anchor: `[id^="KibanaPageTemplateSolutionNav"]`,
-    anchorPosition: 'rightUp',
-  },
-  {
-    step: 2,
-    subtitle: 'Step #2',
-    title: 'Create and install rules to detect and prevent malicious activity',
-    content: 'Reprehenderit aute laborum ea amet proident voluptate minim do cillum anim.',
-    anchor: `[data-test-subj="navigation-rules"]`,
-    anchorPosition: 'rightUp',
-  },
-  {
-    step: 3,
-    subtitle: 'Step #3',
-    title: 'Get notified when your security rules are triggered',
-    content: 'Culpa enim consequat officia Lorem exercitation ex.',
-    anchor: `[data-test-subj="navigation-alerts"]`,
-    anchorPosition: 'rightUp',
-  },
-  {
-    step: 4,
-    subtitle: 'Step #4',
-    title: 'Create a case to track activity that triggered your rules',
-    content: 'Id et sit minim consectetur ea ut quis id laboris.',
-    anchor: `[data-test-subj="navigation-cases"]`,
-    anchorPosition: 'rightUp',
-  },
-  {
-    step: 5,
-    subtitle: 'Step #5',
-    title: `You're ready!`,
-    content: `View and add your first integration to start protecting your environment. Return to the Security solution when you're done.`,
-    anchor: `[data-test-subj="add-data"]`,
-    anchorPosition: 'rightUp',
-  },
-];
 
 const getSteps = (
   activeStep: number,
@@ -99,12 +55,12 @@ const getSteps = (
         <EuiButtonEmpty size="xs" color="text" onClick={() => skipTour()}>
           <FormattedMessage
             id="xpack.securitySolution.guided_onboarding.skipTour.buttonLabel"
-            defaultMessage="Skip"
+            defaultMessage="Skip tour"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton size="s" fill onClick={() => incrementStep()} color="success">
+        <EuiButton size="s" onClick={() => incrementStep()} color="success">
           <FormattedMessage
             id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
             defaultMessage="Next"
@@ -122,16 +78,22 @@ const getSteps = (
     </EuiButtonEmpty>
   );
   return tourConfig.map((stepConfig) => {
+    const { content, ...rest } = stepConfig;
     return (
       // @ts-expect-error
       <EuiTourStep
-        {...stepConfig}
+        {...rest}
         minWidth={minWidth}
         maxWidth={maxWidth}
         offset={offset}
         repositionOnScroll={repositionOnScroll}
         stepsTotal={tourConfig.length}
         isStepOpen={stepConfig.step === activeStep}
+        content={
+          <EuiText size="xs">
+            <p>{content}</p>
+          </EuiText>
+        }
         footerAction={activeStep === tourConfig.length ? lastStepFooter : footerAction}
       />
     );
@@ -167,7 +129,7 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
 
   const incrementStep = useCallback(() => {
     _setActiveStep((prevState) => {
-      const nextStep = prevState + 1;
+      const nextStep = (prevState >= tourConfig.length ? 0 : prevState) + 1;
       saveTourStepToLocalStorage(nextStep);
       return nextStep;
     });
@@ -180,16 +142,15 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
 
   const context: TourContextValue = { incrementStep, skipTour, resetTour, isTourActive };
 
+  const { services } = useKibana();
+  const hideAnnouncements = Boolean(services.uiSettings?.get('hideAnnouncements'));
+  const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
+  const showTour = isTourActive && !hideAnnouncements && !isSmallScreen;
   return (
     <TourContext.Provider value={context}>
       <>
         {children}
-        {isTourActive && (
-          <>
-            {getSteps(activeStep, incrementStep, skipTour)}
-            <EuiOverlayMask className="securityTour__overlayMask" headerZindexLocation="below" />
-          </>
-        )}
+        {showTour && <>{getSteps(activeStep, incrementStep, skipTour)}</>}
       </>
     </TourContext.Provider>
   );
