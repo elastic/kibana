@@ -36,10 +36,12 @@ export const RuleAlertsSummary = ({ rule, filteredSolutions }: RuleAlertsSummary
   if (isLoadingRuleAlertsAggs) return <EuiLoadingSpinner />;
   if (errorRuleAlertsAggs) return <EuiFlexItem>Error</EuiFlexItem>;
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>Total: {ruleAlertsAggs.active + ruleAlertsAggs.recovered}</EuiFlexItem>
-      <EuiFlexItem>Active: {ruleAlertsAggs.active}</EuiFlexItem>
-      <EuiFlexItem>Recovered: {ruleAlertsAggs.recovered}</EuiFlexItem>
+    <EuiFlexGroup direction="column">
+      <EuiFlexGroup>
+        <EuiFlexItem>Total: {ruleAlertsAggs.active + ruleAlertsAggs.recovered}</EuiFlexItem>
+        <EuiFlexItem>Active: {ruleAlertsAggs.active}</EuiFlexItem>
+        <EuiFlexItem>Recovered: {ruleAlertsAggs.recovered}</EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 };
