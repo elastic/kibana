@@ -44,8 +44,9 @@ import {
   INPUT_FILE,
   RULE_IMPORT_OVERWRITE_CHECKBOX,
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
-  RULES_TAGS_POPOVER_BTN,
   RULES_TAGS_POPOVER_WRAPPER,
+  INTEGRATIONS_POPOVER,
+  RULES_TAGS_POPOVER_BTN,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -154,7 +155,7 @@ export const goToRuleDetails = () => {
 };
 
 export const goToTheRuleDetailsOf = (ruleName: string) => {
-  cy.get(RULE_NAME).contains(ruleName).click({ force: true });
+  cy.contains(RULE_NAME, ruleName).click({ force: true });
 };
 
 export const loadPrebuiltDetectionRules = () => {
@@ -162,6 +163,10 @@ export const loadPrebuiltDetectionRules = () => {
     .should('exist')
     .pipe(($el) => $el.trigger('click'))
     .should('be.disabled');
+};
+
+export const openIntegrationsPopover = () => {
+  cy.get(INTEGRATIONS_POPOVER).click();
 };
 
 export const reloadDeletedRules = () => {
