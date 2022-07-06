@@ -462,7 +462,8 @@ export class LegacyCoreEditor implements CoreEditor {
   getAllFoldRanges(): Range[] {
     const session = this.editor.getSession();
     // @ts-ignore
-    // missing type definition for getAllFolds method in brace. Ace editor provides this method. See https://github.com/ajaxorg/ace/blob/13dc911dbc0ea31ca343d5744b3f472767458fc3/ace.d.ts#L82
+    // Brace does not expose type definition for session.getAllFolds, though we have access to this method provided by the underlying Ace editor.
+    // See https://github.com/ajaxorg/ace/blob/13dc911dbc0ea31ca343d5744b3f472767458fc3/ace.d.ts#L82
     return session.getAllFolds().map((fold) => fold.range);
   }
 

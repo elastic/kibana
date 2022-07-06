@@ -33,6 +33,7 @@ import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
 import type { SenseEditor } from '../../../../models/sense_editor';
+import { StorageKeys } from '../../../../../services';
 
 const { useUIAceKeyboardMode } = ace;
 
@@ -201,7 +202,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
 
     function restoreFolds() {
       if (editor) {
-        const foldRanges = storage.get('folds', []);
+        const foldRanges = storage.get(StorageKeys.FOLDS, []);
         editor.getCoreEditor().addFoldsAtRanges(foldRanges);
       }
     }
@@ -212,7 +213,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       if (editor) {
         editor.getCoreEditor().on('changeFold', () => {
           const foldRanges = editor.getCoreEditor().getAllFoldRanges();
-          storage.set('folds', foldRanges);
+          storage.set(StorageKeys.FOLDS, foldRanges);
         });
       }
     }
