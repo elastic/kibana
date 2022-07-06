@@ -33,7 +33,7 @@ import { KubernetesWidget } from '../kubernetes_widget';
 import { PercentWidget } from '../percent_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { AggregateResult } from '../../../common/types/aggregate';
-import { useLastUpdated } from '../../hooks/use_last_updated';
+import { useLastUpdated } from '../../hooks';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
 import { WidgetsToggle } from '../widgets_toggle';
