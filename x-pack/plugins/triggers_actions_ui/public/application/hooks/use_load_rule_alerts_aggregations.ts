@@ -31,6 +31,9 @@ interface LoadRuleAlertsAggs {
   ruleAlertsAggs: Omit<RuleAlertsAggs, 'error'>;
   errorRuleAlertsAggs?: string;
 }
+interface IndexName {
+  index: string;
+}
 
 export function useLoadRuleAlertsAggs({ http, features, ruleId }: UseLoadRuleAlertsAggs) {
   const [ruleAlertsAggs, setRuleAlertsAggs] = useState<LoadRuleAlertsAggs>({
@@ -82,10 +85,6 @@ export function useLoadRuleAlertsAggs({ http, features, ruleId }: UseLoadRuleAle
   return ruleAlertsAggs;
 }
 
-interface IndexName {
-  index: string;
-}
-
 export async function fetchIndexNameAPI({
   http,
   features,
@@ -135,6 +134,7 @@ export async function fetchRuleAlertsAggByTimeRange({
               {
                 range: {
                   '@timestamp': {
+                    // When needed, we can make this range configurable via a function argument.
                     gte: 'now-30d',
                     lt: 'now',
                   },
