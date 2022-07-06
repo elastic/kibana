@@ -22,6 +22,9 @@ import {
 import { ComponentTemplateForm } from '../component_template_form';
 import type { WizardSection } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';
+import { useKibana } from '../../../..';
+
+import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover_modal';
 
 interface MatchParams {
   name: string;
@@ -57,6 +60,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
+  const { overlays } = useKibana();
+
   const { api, breadcrumbs } = useComponentTemplatesContext();
   const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
   const redirectTo = useRedirectPath(history);
@@ -85,6 +90,25 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
+    if (updatedComponentTemplate._meta?.managed_by === 'fleet') {
+      const { data } = await api.getComponentTemplateDatastreams(updatedComponentTemplate.name);
+      if (!data?.data_streams.length) {
+        return;
+      }
+
+      const ref = overlays.openModal(
+        <MappingsDatastreamRolloverModal
+          componentTemplatename={updatedComponentTemplate.name}
+          datastreams={data.data_streams}
+          api={api}
+          onClose={() => {
+            ref.close();
+          }}
+        />
+      );
+
+      await ref.onClose;
+    }
     redirectTo({
       pathname: encodeURI(
         `/component_templates/${encodeURIComponent(updatedComponentTemplate.name)}`

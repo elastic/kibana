@@ -35,7 +35,7 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n, docLinks, notifications, application, executionContext } = core;
+  const { i18n, docLinks, notifications, application, executionContext, overlays } = core;
   const { Context: I18nContext } = i18n;
   const { services, history, setBreadcrumbs, uiSettings, kibanaVersion, theme$ } = dependencies;
 
@@ -44,6 +44,7 @@ export const renderApp = (
     createKibanaReactContext<KibanaReactContextServices>({
       application,
       uiSettings,
+      overlays,
       kibanaVersion: {
         get: () => kibanaVersion,
       },
@@ -92,6 +93,7 @@ interface KibanaReactContextServices {
   kibanaVersion: {
     get: () => SemVer;
   };
+  overlays: CoreStart['overlays'];
 }
 
 // We override useKibana() from the react plugin to return a typed version for this app

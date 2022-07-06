@@ -10,6 +10,7 @@ import {
   ComponentTemplateListItem,
   ComponentTemplateDeserialized,
   ComponentTemplateSerialized,
+  ComponentTemplateDatastreams,
 } from '../shared_imports';
 import {
   UIM_COMPONENT_TEMPLATE_DELETE_MANY,
@@ -18,6 +19,7 @@ import {
   UIM_COMPONENT_TEMPLATE_UPDATE,
 } from '../constants';
 import { UseRequestHook, SendRequestHook } from './request';
+
 export const getApi = (
   useRequest: UseRequestHook,
   sendRequest: SendRequestHook,
@@ -79,11 +81,27 @@ export const getApi = (
     return result;
   }
 
+  async function getComponentTemplateDatastreams(name: string) {
+    return sendRequest<ComponentTemplateDatastreams>({
+      path: `${apiBasePath}/component_templates/${encodeURIComponent(name)}/datastreams`,
+      method: 'get',
+    });
+  }
+
+  async function postComponentTemplateDatastreamsRollover(name: string) {
+    return sendRequest<ComponentTemplateDatastreams>({
+      path: `${apiBasePath}/component_templates/${encodeURIComponent(name)}/datastreams_rollover`,
+      method: 'post',
+    });
+  }
+
   return {
     useLoadComponentTemplates,
     deleteComponentTemplates,
     useLoadComponentTemplate,
     createComponentTemplate,
     updateComponentTemplate,
+    getComponentTemplateDatastreams,
+    postComponentTemplateDatastreamsRollover,
   };
 };

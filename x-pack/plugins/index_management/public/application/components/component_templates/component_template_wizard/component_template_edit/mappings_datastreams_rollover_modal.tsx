@@ -1,0 +1,113 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiConfirmModal, EuiCode, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+
+import type { useComponentTemplatesContext } from '../../component_templates_context';
+
+interface Props {
+  componentTemplatename: string;
+  datastreams: string[];
+  onClose: () => void;
+  api: ReturnType<typeof useComponentTemplatesContext>['api'];
+}
+
+export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = ({
+  componentTemplatename,
+  datastreams,
+  onClose,
+  api,
+}) => {
+  const [error, setError] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onConfirm = useCallback(() => {
+    async function confirm() {
+      try {
+        setIsLoading(true);
+        await api.postComponentTemplateDatastreamsRollover(componentTemplatename);
+        await onClose();
+      } catch (err) {
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    confirm();
+  }, [api, onClose, componentTemplatename]);
+
+  return (
+    <EuiConfirmModal
+      isLoading={isLoading}
+      title={
+        <FormattedMessage
+          id="xpack.idxMgmt.componentTemplateEdit.mappingRolloverModalTitle"
+          defaultMessage="Mappings will be applied on next rollover"
+        />
+      }
+      onCancel={onClose}
+      onConfirm={onConfirm}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.idxMgmt.componentTemplateMappingsRollover.cancelButton"
+          defaultMessage="Apply on next rollover"
+        />
+      }
+      confirmButtonText={
+        <FormattedMessage
+          id="xpack.idxMgmt.componentTemplateMappingsRollover.confirmButtom"
+          defaultMessage="Apply now and rollover"
+        />
+      }
+    >
+      {error && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateMappingsRollover.saveError"
+                defaultMessage="Unable to apply rollover"
+              />
+            }
+            color="danger"
+            iconType="alert"
+            data-test-subj="applyMappingsRolloverError"
+          >
+            <div>{error.message || error.statusText}</div>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      <EuiText>
+        <FormattedMessage
+          id="xpack.idxMgmt.componentTemplateMappingsRollover.modalDescription"
+          defaultMessage="New mappings for {templateName} component template require a rollover for the following data streams: {datastreams} You can apply the new mappings to incoming data now and force a rollover, or wait until the next rollover. Rollover timing is defined by your index lifecycle policy."
+          values={{
+            templateName: <EuiCode>{componentTemplatename}</EuiCode>,
+            datastreams: (
+              <>
+                <EuiSpacer size="m" />
+                <ul>
+                  {datastreams.map((datastream) => (
+                    <li>
+                      <EuiCode>{datastream}</EuiCode>
+                      <br />
+                    </li>
+                  ))}
+                </ul>
+                <EuiSpacer size="s" />
+              </>
+            ),
+          }}
+        />
+      </EuiText>
+    </EuiConfirmModal>
+  );
+};
