@@ -18,22 +18,20 @@ export default function enterSpaceFunctionalTests({
   describe('Enter Space', function () {
     this.tags('includeFirefox');
     before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/spaces/enter_space'
-      );
       await spacesService.create({
         id: 'another-space',
         name: 'Another Space',
         disabledFeatures: [],
       });
-      await kibanaServer.uiSettings.replace(
-        {
-          defaultRoute: '/app/canvas',
-          buildNum: 8467,
-          'dateFormat:tz': 'UTC',
-        },
-        { space: 'another-space' }
-      );
+      const config = await kibanaServer.savedObjects.get({
+        id: await kibanaServer.version.get(),
+        type: 'config',
+      });
+      await kibanaServer.savedObjects.update({
+        id: config.id,
+        type: config.type,
+        attributes: { defaultRoute: 'http://example.com/evil' },
+      });
       await PageObjects.security.forceLogout();
     });
     after(async () => {
