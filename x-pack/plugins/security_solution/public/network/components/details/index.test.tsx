@@ -53,7 +53,6 @@ describe('IP Overview Component', () => {
       updateFlowTargetAction: jest.fn() as unknown as ActionCreator<{
         flowTarget: FlowTargetSourceDest;
       }>,
-      docValueFields: [],
       indexPatterns: [],
     };
 

@@ -144,7 +144,6 @@ export default function ({ getService }: FtrProviderContext) {
         options: {
           factoryQueryType: FirstLastSeenQuery,
           defaultIndex: ['auditbeat-*'],
-          docValueFields: [],
           field: 'host.name',
           value: 'zeek-sensor-san-francisco',
           order: 'asc',
@@ -160,7 +159,6 @@ export default function ({ getService }: FtrProviderContext) {
         options: {
           factoryQueryType: FirstLastSeenQuery,
           defaultIndex: ['auditbeat-*'],
-          docValueFields: [],
           field: 'host.name',
           value: 'zeek-sensor-san-francisco',
           order: 'desc',
