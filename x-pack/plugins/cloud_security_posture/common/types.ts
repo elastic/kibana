@@ -47,15 +47,29 @@ export interface ComplianceDashboardData {
   trend: PostureTrend[];
 }
 
-export type Status = 'indexed' | 'indexing' | 'index timeout' | 'not deployed' | 'not installed';
+export type Status =
+  | 'indexed' // latest findings index exists
+  | 'indexing' // index timeout was not surpassed since installation, assumes data is being indexed
+  | 'index-timeout' // index timeout was surpassed since installation
+  | 'not-deployed' // no healthy agents were deployed
+  | 'not-installed'; // number of installed csp integrations is 0;
 
-export interface CspSetupStatus {
-  status: Status;
-  installed_pkg_ver?: string;
-  latest_pkg_ver: string;
-  installed_integration: number;
-  healthy_agents: number;
+interface BaseCspSetupStatus {
+  latestPackageVersion: string;
+  installedIntegrations: number;
+  healthyAgents: number;
 }
+
+interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
+  status: Extract<Status, 'not-installed'>;
+}
+
+interface CspSetupInstalledStatus extends BaseCspSetupStatus {
+  status: Exclude<Status, 'not-installed'>;
+  installedPackageVersion: string;
+}
+
+export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
 
 export interface CspRulesStatus {
   all: number;

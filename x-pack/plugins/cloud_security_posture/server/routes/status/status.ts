@@ -6,92 +6,65 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   AgentPolicyServiceInterface,
   AgentService,
   PackagePolicyServiceInterface,
   PackageService,
 } from '@kbn/fleet-plugin/server';
-import { Installation, ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import moment from 'moment';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   INFO_ROUTE_PATH,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '../../../common/constants';
-import { CspAppContext } from '../../plugin';
+import type { CspAppContext } from '../../plugin';
 import type { CspRouter } from '../../types';
-import { CspSetupStatus, Status } from '../../../common/types';
+import type { CspSetupStatus, Status } from '../../../common/types';
 import {
   addRunningAgentToAgentPolicy,
   getCspAgentPolicies,
   getCspPackagePolicies,
 } from '../../lib/fleet_util';
 
-export const INDEX_TIMEOUT_IN_HOURS = 5;
+export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
-const isFindingsExists = async (esClient: ElasticsearchClient): Promise<boolean> => {
+const isFindingsIndexExists = async (esClient: ElasticsearchClient): Promise<boolean> => {
   try {
-    const queryResult = await esClient.search({
+    const latestFindingsIndexExists = await esClient.indices.exists({
       index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-      query: {
-        match_all: {},
-      },
-      size: 1,
     });
 
-    const hasLatestFinding = !!queryResult.hits.hits.length;
-
-    return hasLatestFinding ? true : false;
+    return latestFindingsIndexExists;
   } catch (e) {
     return false;
   }
 };
 
-const getHealthyAgents = async (
-  soClient: SavedObjectsClientContract,
-  cspPackagePolicies: ListResult<PackagePolicy>,
-  agentPolicyService: AgentPolicyServiceInterface,
-  agentService: AgentService
-): Promise<number> => {
-  const agentPolicies = await getCspAgentPolicies(
-    soClient,
-    cspPackagePolicies.items,
-    agentPolicyService
+const getHealthyAgents = (enrichedAgentPolicies: GetAgentPoliciesResponseItem[]): number =>
+  enrichedAgentPolicies.reduce(
+    (previousValue, currentValue) => previousValue + (currentValue.agents || 0),
+    0
   );
-  const enrichAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
-  const initialValue = 0;
-  const totalAgents = enrichAgentPolicies
-    .map((agentPolicy) => (agentPolicy.agents ? agentPolicy.agents : 0))
-    .reduce((previousValue, currentValue) => previousValue + currentValue, initialValue);
 
-  return totalAgents;
-};
+const getTimePassedSinceDate = (date: Date | string): number =>
+  moment().diff(moment(date), 'minutes');
 
-const getTimeDeltaSinceInstallation = (packageInfo: Installation): number => {
-  const installTime = packageInfo!.install_started_at;
-
-  // calculate time delta and convert to hours
-  const dt = (new Date().getTime() - new Date(installTime).getTime()) / (1000 * 60 * 60);
-
-  return dt;
-};
-
-const getStatus = async (
-  esClient: ElasticsearchClient,
+const getStatus = (
+  findingsIndexExists: boolean,
   installedIntegrations: number,
   healthyAgents: number,
-  timeDeltaSinceInstallation: number
-): Promise<Status> => {
-  if (await isFindingsExists(esClient)) return 'indexed';
+  minutesPassedSinceInstallation: number
+): Status => {
+  if (findingsIndexExists) return 'indexed';
+  if (installedIntegrations === 0) return 'not-installed';
+  if (healthyAgents === 0) return 'not-deployed';
+  if (minutesPassedSinceInstallation < INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
+  if (minutesPassedSinceInstallation > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
-  if (installedIntegrations === 0) return 'not installed';
-
-  if (healthyAgents === 0) return 'not deployed';
-
-  if (timeDeltaSinceInstallation < INDEX_TIMEOUT_IN_HOURS) return 'indexing';
-
-  return 'index timeout';
+  throw new Error('could not determine csp setup status');
 };
 
 const getCspSetupStatus = async (
@@ -102,45 +75,49 @@ const getCspSetupStatus = async (
   agentPolicyService: AgentPolicyServiceInterface,
   agentService: AgentService
 ): Promise<CspSetupStatus> => {
-  const packageInfo = await packageService.asInternalUser.getInstallation(
-    CLOUD_SECURITY_POSTURE_PACKAGE_NAME
-  );
+  const [findingsIndexExists, installedPackageInfo, latestPackageInfo, installedIntegrations] =
+    await Promise.all([
+      isFindingsIndexExists(esClient),
+      packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
+      packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
+      getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
+        per_page: 10000,
+      }),
+    ]);
+  if (!installedPackageInfo) throw new Error('package installation info could not be found');
 
-  const cspPackageInstalled = await getCspPackagePolicies(
+  const agentPolicies = await getCspAgentPolicies(
     soClient,
-    packagePolicyService,
-    CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-    { per_page: 10000 }
+    installedIntegrations.items,
+    agentPolicyService
   );
 
-  const healthyAgents = await getHealthyAgents(
-    soClient,
-    cspPackageInstalled,
-    agentPolicyService,
-    agentService
-  );
+  const enrichedAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
+  const healthyAgents = getHealthyAgents(enrichedAgentPolicies);
+  const installedIntegrationsTotal = installedIntegrations.total;
+  const latestPackageVersion = latestPackageInfo.version;
 
-  const latestPkgVersion = (
-    await packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME)
-  )?.version;
-
-  const timeDeltaSinceInstallation = packageInfo
-    ? await getTimeDeltaSinceInstallation(packageInfo)
-    : 0;
-
-  const status = await getStatus(
-    esClient,
-    cspPackageInstalled.total,
+  const status = getStatus(
+    findingsIndexExists,
+    installedIntegrationsTotal,
     healthyAgents,
-    timeDeltaSinceInstallation
+    getTimePassedSinceDate(installedPackageInfo.install_started_at)
   );
+
+  if (status === 'not-installed')
+    return {
+      status,
+      latestPackageVersion,
+      healthyAgents,
+      installedIntegrations: installedIntegrationsTotal,
+    };
 
   return {
     status,
-    latest_pkg_ver: latestPkgVersion,
-    installed_integration: cspPackageInstalled.total,
-    healthy_agents: healthyAgents,
-    installed_pkg_ver: packageInfo?.install_version,
+    latestPackageVersion,
+    healthyAgents,
+    installedIntegrations: installedIntegrationsTotal,
+    installedPackageVersion: installedPackageInfo.install_version,
   };
 };
 
@@ -173,9 +150,7 @@ export const defineGetCspSetupStatusRoute = (router: CspRouter, cspContext: CspA
           agentService
         );
 
-        const body: CspSetupStatus = {
-          ...cspSetupStatus,
-        };
+        const body: CspSetupStatus = cspSetupStatus;
 
         return response.ok({
           body,

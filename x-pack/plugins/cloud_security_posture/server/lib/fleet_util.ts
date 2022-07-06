@@ -39,7 +39,7 @@ export const addRunningAgentToAgentPolicy = async (
   agentService: AgentService,
   agentPolicies: AgentPolicy[]
 ): Promise<GetAgentPoliciesResponseItem[]> => {
-  if (!agentPolicies?.length) return [];
+  if (!agentPolicies.length) return [];
   return Promise.all(
     agentPolicies.map((agentPolicy) =>
       agentService.asInternalUser
@@ -56,12 +56,8 @@ export const getCspAgentPolicies = async (
   soClient: SavedObjectsClientContract,
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface
-): Promise<AgentPolicy[]> => {
-  const agentPolicyIds = uniq(map(packagePolicies, 'policy_id'));
-  const agentPolicies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
-
-  return agentPolicies;
-};
+): Promise<AgentPolicy[]> =>
+  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')));
 
 export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
@@ -69,15 +65,11 @@ export const getCspPackagePolicies = (
   packageName: string,
   queryParams: Partial<BenchmarksQuerySchema>
 ): Promise<ListResult<PackagePolicy>> => {
-  if (!packagePolicyService) {
-    throw new Error('packagePolicyService is undefined');
-  }
-
   const sortField = queryParams.sort_field?.startsWith(BENCHMARK_PACKAGE_POLICY_PREFIX)
     ? queryParams.sort_field.substring(BENCHMARK_PACKAGE_POLICY_PREFIX.length)
     : queryParams.sort_field;
 
-  return packagePolicyService?.list(soClient, {
+  return packagePolicyService.list(soClient, {
     kuery: getPackageNameQuery(packageName, queryParams.benchmark_name),
     page: queryParams.page,
     perPage: queryParams.per_page,

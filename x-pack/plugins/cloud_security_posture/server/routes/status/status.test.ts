@@ -147,7 +147,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toEqual({
       status: 'indexed',
       latest_pkg_ver: '0.0.14',
-      installed_integration: 0,
+      installedIntegrations: 0,
       healthy_agents: 0,
       installed_pkg_ver: undefined,
     });
@@ -192,7 +192,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toEqual({
       status: 'indexed',
       latest_pkg_ver: '0.0.14',
-      installed_integration: 3,
+      installedIntegrations: 3,
       healthy_agents: 0,
       installed_pkg_ver: '0.0.14',
     });
@@ -249,7 +249,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toEqual({
       status: 'indexed',
       latest_pkg_ver: '0.0.14',
-      installed_integration: 3,
+      installedIntegrations: 3,
       healthy_agents: 1,
       installed_pkg_ver: '0.0.14',
     });
@@ -291,7 +291,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toMatchObject({
       status: 'not installed',
       latest_pkg_ver: '0.0.14',
-      installed_integration: 0,
+      installedIntegrations: 0,
       healthy_agents: 0,
       installed_pkg_ver: undefined,
     });
@@ -347,7 +347,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toMatchObject({
       status: 'not deployed',
       latest_pkg_ver: '0.0.14',
-      installed_integration: 1,
+      installedIntegrations: 1,
       healthy_agents: 0,
       installed_pkg_ver: '0.0.14',
     });
@@ -409,7 +409,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toMatchObject({
       status: 'indexing',
       latest_pkg_ver: '0.0.14',
-      installed_integration: 1,
+      installedIntegrations: 1,
       healthy_agents: 1,
       installed_pkg_ver: '0.0.14',
     });
@@ -472,7 +472,7 @@ describe('CspSetupStatus route', () => {
     await expect(body).toMatchObject({
       status: 'index timeout',
       latest_pkg_ver: '0.0.14',
-      installed_integration: 1,
+      installedIntegrations: 1,
       healthy_agents: 1,
       installed_pkg_ver: '0.0.14',
     });
