@@ -45,7 +45,7 @@ export const GRID_CONFIG: GridConfig = {
 };
 
 export const MarkdownGridPanel = () => (
-  <div>
+  <div style={{ padding: '4px' }}>
     <EuiText>
       <h3>Sample Logs Data</h3>
       <p>
@@ -57,7 +57,7 @@ export const MarkdownGridPanel = () => (
 );
 
 export const ControlsPanel = () => (
-  <EuiFlexGroup>
+  <EuiFlexGroup style={{ padding: '4px' }}>
     <EuiFlexItem>
       <EuiFormRow label="Source country">
         <EuiSelect
@@ -125,7 +125,7 @@ export const MetricsPanel = ({
 );
 
 export const UniqueVisitorsPanel = () => (
-  <span>
+  <div style={{ height: '100%', width: '100%' }}>
     <img
       src={GAUGE_GRAPH}
       style={{
@@ -145,10 +145,10 @@ export const UniqueVisitorsPanel = () => (
     >
       Unique Visitors
     </EuiText>
-  </span>
+  </div>
 );
 
-export const ResponseCodesPanel = () => {
+export const ResponseCodesPanel = ({ title }: { title?: string }) => {
   const CircleSVG = ({ color }: { color: string }) => (
     <span style={{ height: '8px', width: '8px', fill: color }}>
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -179,11 +179,7 @@ export const ResponseCodesPanel = () => {
 
   return (
     <>
-      <GraphPanel
-        title="[Logs] Response Codes Over Time + Annotations"
-        graph={RESPONSE_CODE_GRAPH}
-        height="83%"
-      />
+      <GraphPanel title={title} graph={RESPONSE_CODE_GRAPH} height="83%" />
       <EuiText size="xs">
         <EuiFlexGroup>
           <LegendItem label="HTTP 5xx" color="rgb(211, 96, 134)" percent="0%" />
@@ -200,14 +196,16 @@ export const GraphPanel = ({
   graph,
   height = '95%',
 }: {
-  title: string;
   graph: string;
+  title?: string;
   height?: string;
 }) => (
   <>
-    <EuiText size="s" style={{ paddingBottom: '5px' }}>
-      <h5>{title}</h5>
-    </EuiText>
+    {title ? (
+      <EuiText size="s" style={{ paddingBottom: '5px' }}>
+        <h5>{title}</h5>
+      </EuiText>
+    ) : null}
     <img
       style={{
         maxWidth: '100%',

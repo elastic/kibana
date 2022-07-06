@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 import { GridStackWidget } from '../lib/gridstack_helpers';
 
@@ -15,34 +15,35 @@ interface Props {
 }
 
 export const GridItem: FC<Props> = ({ panel, children }) => {
-  const content = panel.render ? panel.render() : panel.content;
+  const content = panel.render ? panel.render() : panel.content || `I am panel: ${panel.id}`;
 
   return (
     <EuiPanel
       key={panel.id}
       id={panel.id as string}
-      className="grid-stack-item-content embPanel"
-      hasShadow
-      hasBorder
-      paddingSize="m"
+      className="grid-stack-item-content embPanel embPanel--editing"
+      paddingSize="none"
+      style={{ overflow: 'hidden' }}
     >
       <span data-test-subj="dashboardPanelTitle__wrapper">
-        <figcaption className="embPanel__header" data-test-subj="embeddablePanelHeading-">
-          <h2 data-test-subj="dashboardPanelTitle" className="embPanel__title embPanel__dragger">
+        <figcaption className="embPanel__header" style={{ height: '24px' }}>
+          <h2 className="embPanel__title embPanel__dragger">
             <span className="embPanel__titleInner">
-              <button
-                className="euiLink embPanel__titleText embPanel__placeholderTitleText css-qzrsgm-euiLink-text"
-                type="button"
-                data-test-subj="embeddablePanelTitleLink"
-                aria-label="Click to edit title: [No Title]"
-              >
-                {panel.render ? panel.render() : panel.id}
-              </button>
+              <span className="embPanel__titleText">
+                {panel.title ?? (
+                  <EuiText size="xs" color="subdued">
+                    {'[No title]'}
+                  </EuiText>
+                )}
+              </span>
             </span>
           </h2>
+          <EuiButtonIcon iconType="gear" />
         </figcaption>
       </span>
-      {children}
+      <div style={{ padding: '4px', overflow: 'scroll', width: '100%', height: '100%' }}>
+        {content}
+      </div>
     </EuiPanel>
   );
 };

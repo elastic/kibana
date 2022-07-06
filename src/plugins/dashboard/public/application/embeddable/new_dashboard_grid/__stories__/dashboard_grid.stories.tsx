@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 // import 'gridstack/dist/h5/gridstack-dd-native';
-import { Grid } from '../components/grid';
+// import { Grid } from '../components/grid';
 import { smallGridData, mediumGridData, largeGridData } from './fixtures';
 
 import {
@@ -26,8 +26,8 @@ import DESTINATION_HEATMAP from '../images/destination_heatmap.png';
 import REQUEST_MAP from '../images/total_requests_map.png';
 import BYTES_BAR_GRAPH from '../images/bytes_bar_graph.png';
 import { TestReactGrid } from '../components/new_grid';
-import { ControlledStack } from '../components/test_react_grid_demo';
-import { SubgridDemo } from '../components/test_subgrid_demo';
+// import { ControlledStack } from '../components/test_react_grid_demo';
+import { StyledSubgridDemo } from '../components/styled_subgrid_demo';
 
 export default {
   component: EuiPanel,
@@ -80,7 +80,7 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 13,
       id: '15',
-      render: () => <ResponseCodesPanel />,
+      render: () => <ResponseCodesPanel title="[Logs] Response Codes Over Time + Annotations" />,
     },
     {
       x: 0,
@@ -170,7 +170,7 @@ export const SmallGridExample = () => {
 };
 
 export const SubgridExample = () => {
-  return <SubgridDemo />;
+  return <StyledSubgridDemo />;
 };
 
 // export const EmptyExample = () => {

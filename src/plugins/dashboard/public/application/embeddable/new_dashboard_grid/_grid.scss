@@ -18,13 +18,23 @@ h1 {
 }
 
 .grid-stack {
-  background: rgb(245, 248, 249);
+  // background: rgb(245, 248, 249);
 }
 
 .grid-stack-item-content {
-  .euiPanel {
-    height: 100%;
+  &.embPanel {
+    height: unset;
   }
+  
+  &:hover {
+    @include euiScrollBar
+  }
+
+  .euiPanel {
+    height: unset;
+  }
+
+  
 }
 
 .grid-stack-placeholder {
@@ -36,8 +46,8 @@ h1 {
 }
 
 .grid-stack-item .grid-stack-nested {
-  background: #e4e4c1;
-  margin-top: 10px !important;
+  // background: #e4e4c1;
+  // margin-top: 10px !important;
   // padding-top: 10px !important;
 }
 

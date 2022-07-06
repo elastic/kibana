@@ -7,4 +7,7 @@
  */
 
 import '../../../../node_modules/gridstack/dist/gridstack.min.css';
+
+import '@kbn/embeddable-plugin/public/index.scss';
+import '@kbn/visualizations-plugin/public/vis.scss';
 import '../public/application/index.scss';
