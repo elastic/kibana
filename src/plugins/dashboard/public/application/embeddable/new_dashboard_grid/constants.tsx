@@ -23,25 +23,35 @@ import RESPONSE_CODE_GRAPH from './images/response_codes_graph.png';
 export type ColumnOptions = 12 | 24 | 48;
 export type PanelTypes = 'panel' | 'group';
 export type CustomType = GridStackWidget & { type: PanelTypes };
+
 export const GRID_CLASS = 'dshGrid';
-export const HANDLE_CLASS = 'dshPanel__wrapper';
-export const PANEL_CLASS = 'embPanel';
+export const HANDLE_CLASS = 'embPanel__dragger';
+export const PANEL_CLASS = 'dshPanel';
+export const GROUP_CLASS = 'dshPanelGroup';
 export const NUM_COLUMNS = 48;
-export const DEFAULT_CELL_HEIGHT = 24;
-export const DEFAULT_GROUP_HEIGHT = NUM_COLUMNS / 6;
-export const DEFAULT_GUTTERSIZE = 3;
+export const DEFAULT_CELL_HEIGHT = 32;
+export const DEFAULT_GUTTERSIZE = 4;
 
 type GridConfig = {
   [columns in ColumnOptions]: {
     class: string;
     cellHeight: number;
+    gridHeightOffset: number;
   };
 };
 
 export const GRID_CONFIG: GridConfig = {
-  12: { class: 'dshLayout__grid--small', cellHeight: DEFAULT_CELL_HEIGHT * 4 },
-  24: { class: 'dshLayout__grid--medium', cellHeight: DEFAULT_CELL_HEIGHT * 2 },
-  48: { class: 'dshLayout__grid--large', cellHeight: DEFAULT_CELL_HEIGHT },
+  12: {
+    class: 'dshLayout__grid--small',
+    cellHeight: DEFAULT_CELL_HEIGHT * 4,
+    gridHeightOffset: 1,
+  },
+  24: {
+    class: 'dshLayout__grid--medium',
+    cellHeight: DEFAULT_CELL_HEIGHT * 2,
+    gridHeightOffset: 2,
+  },
+  48: { class: 'dshLayout__grid--large', cellHeight: DEFAULT_CELL_HEIGHT, gridHeightOffset: 3 },
 };
 
 export const MarkdownGridPanel = () => (
@@ -148,7 +158,7 @@ export const UniqueVisitorsPanel = () => (
   </div>
 );
 
-export const ResponseCodesPanel = ({ title }: { title?: string }) => {
+export const ResponseCodesPanel = () => {
   const CircleSVG = ({ color }: { color: string }) => (
     <span style={{ height: '8px', width: '8px', fill: color }}>
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -179,7 +189,7 @@ export const ResponseCodesPanel = ({ title }: { title?: string }) => {
 
   return (
     <>
-      <GraphPanel title={title} graph={RESPONSE_CODE_GRAPH} height="83%" />
+      <GraphPanel graph={RESPONSE_CODE_GRAPH} height="83%" />
       <EuiText size="xs">
         <EuiFlexGroup>
           <LegendItem label="HTTP 5xx" color="rgb(211, 96, 134)" percent="0%" />
@@ -191,21 +201,8 @@ export const ResponseCodesPanel = ({ title }: { title?: string }) => {
   );
 };
 
-export const GraphPanel = ({
-  title,
-  graph,
-  height = '95%',
-}: {
-  graph: string;
-  title?: string;
-  height?: string;
-}) => (
+export const GraphPanel = ({ graph, height = '95%' }: { graph: string; height?: string }) => (
   <>
-    {title ? (
-      <EuiText size="s" style={{ paddingBottom: '5px' }}>
-        <h5>{title}</h5>
-      </EuiText>
-    ) : null}
     <img
       style={{
         maxWidth: '100%',
@@ -215,7 +212,7 @@ export const GraphPanel = ({
         marginRight: 'auto',
       }}
       src={graph}
-      alt={title}
+      alt={'Alt text'}
     />
   </>
 );

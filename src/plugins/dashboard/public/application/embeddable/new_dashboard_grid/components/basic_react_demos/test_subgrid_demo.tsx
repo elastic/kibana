@@ -35,6 +35,7 @@ const Item = ({ id }: { id: string }) => (
     className="grid-stack-item-content"
     style={{
       backgroundColor: 'pink',
+      cursor: 'move',
     }}
   >
     I am item: {id}

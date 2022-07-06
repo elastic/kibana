@@ -23,30 +23,17 @@ import ReactDOM from 'react-dom';
 import { GridStackNode, GridStackWidget } from '../lib/gridstack_helpers';
 import { GridItem } from './grid_item';
 import { GridGroup } from './grid_group';
+import { TestGridItem } from './new_grid_item';
 
-type ColumnOptions = 12 | 24 | 48;
-
-const GRID_CLASS = 'dshGrid';
-const HANDLE_CLASS = 'dshPanel__wrapper';
-const PANEL_CLASS = 'dshPanel';
-const GROUP_CLASS = 'dshPanelGroup';
-const NUM_COLUMNS = 48;
-const DEFAULT_CELL_HEIGHT = 32;
-const DEFAULT_GUTTERSIZE = 4;
-
-const GRID_CONFIG = {
-  12: {
-    class: 'dshLayout__grid--small',
-    cellHeight: DEFAULT_CELL_HEIGHT * 4,
-    gridHeightOffset: 1,
-  },
-  24: {
-    class: 'dshLayout__grid--medium',
-    cellHeight: DEFAULT_CELL_HEIGHT * 2,
-    gridHeightOffset: 2,
-  },
-  48: { class: 'dshLayout__grid--large', cellHeight: DEFAULT_CELL_HEIGHT, gridHeightOffset: 3 },
-};
+import {
+  ColumnOptions,
+  DEFAULT_GUTTERSIZE,
+  GRID_CLASS,
+  GRID_CONFIG,
+  HANDLE_CLASS,
+  NUM_COLUMNS,
+  PANEL_CLASS,
+} from '../constants';
 
 // TODO: Remove this prototype override once removeChild bug is fixed
 // This suppresses an error resulting from the `movePanel` callback function that updates panels by
@@ -106,6 +93,7 @@ export const Grid: FC<Props> = ({
       cellHeight: `${GRID_CONFIG[columns].cellHeight}px`,
       column: columns,
       handleClass: HANDLE_CLASS,
+      itemClass: PANEL_CLASS, // THIS IS VERY IMPORTANT - DO NOT REMOVE LOL
       margin: guttersize,
       minRow: columns / 6,
     }),
@@ -261,32 +249,33 @@ export const Grid: FC<Props> = ({
 
   return (
     <div>
-      <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>&nbsp;
+      {/* <EuiButton onClick={addNewPanel}>Add Panel</EuiButton>&nbsp;
       <EuiButton onClick={addNewPanelGroup}>Add Grid</EuiButton>&nbsp;
       <div>{info}</div>
       <div>Count:{panels.length}</div>
       <EuiAccordion id={`accordion`} buttonContent="Panel data">
         <div>{JSON.stringify(panels, null, 2)}</div>
-      </EuiAccordion>
+      </EuiAccordion> */}
       <div
         id={dashboardId}
         className={`grid-stack dshGrid dshLayout--editing ${GRID_CONFIG[columns].class}`}
       >
         {panels.map((panel) => {
           return (
-            <div
-              ref={panelRefs.current[panel.id]}
-              key={panel.id}
-              className={`grid-stack-item react-grid-item ${
-                panel.subGrid ? GROUP_CLASS : PANEL_CLASS
-              }`}
-            >
-              {panel.subGrid ? (
-                <GridGroup group={panel} movePanel={movePanel} />
-              ) : (
-                <GridItem panel={panel} />
-              )}
-            </div>
+            <GridItem panel={panel} ref={panelRefs.current[panel.id]} />
+
+            // <div
+            //   ref={panelRefs.current[panel.id]}
+            //   key={panel.id}
+            //   className={`grid-stack-item react-grid-item ${
+            //     panel.subGrid ? GROUP_CLASS : PANEL_CLASS
+            //   }`}
+            // >
+            //  {panel.subGrid ? (
+            //     <GridGroup group={panel} movePanel={movePanel} />
+            //   ) : (
+            //  )}
+            // </div>
           );
         })}
       </div>

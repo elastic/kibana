@@ -11,7 +11,7 @@ import 'gridstack/dist/h5/gridstack-dd-native';
 import React, { FC, createRef, useState, RefObject, useEffect, useRef } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { GridItem } from './grid_item';
-import { GridStackNode, GridStackWidget } from '../lib/gridstack_helpers';
+import { GridStackNode, GridStackWidget } from '../../lib/gridstack_helpers';
 
 interface Props {
   group: GridStackWidget;

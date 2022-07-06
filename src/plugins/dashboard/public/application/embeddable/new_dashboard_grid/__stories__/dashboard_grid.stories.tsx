@@ -25,10 +25,9 @@ import SANKEY_CHART_GRAPH from '../images/sankey_chart.png';
 import DESTINATION_HEATMAP from '../images/destination_heatmap.png';
 import REQUEST_MAP from '../images/total_requests_map.png';
 import BYTES_BAR_GRAPH from '../images/bytes_bar_graph.png';
-import { TestReactGrid } from '../components/new_grid';
-import { ControlledStack } from '../components/test_react_grid_demo';
+import { ControlledStack } from '../components/basic_react_demos/test_react_grid_demo';
 import { StyledSubgridDemo } from '../components/styled_subgrid_demo';
-import { SubgridDemo } from '../components/test_subgrid_demo';
+import { SubgridDemo } from '../components/basic_react_demos/test_subgrid_demo';
 
 export default {
   component: EuiPanel,
@@ -37,8 +36,12 @@ export default {
   argTypes: {},
 };
 
-export const DefaultReactExample = () => {
+export const BasicReactExample = () => {
   return <ControlledStack />;
+};
+
+export const NestedReactExample = () => {
+  return <SubgridDemo />;
 };
 
 export const LogsDashboardExample = () => {
@@ -81,6 +84,7 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 13,
       id: '15',
+      title: '[Logs] Response Codes Over Time + Annotations',
       render: () => <ResponseCodesPanel title="[Logs] Response Codes Over Time + Annotations" />,
     },
     {
@@ -105,7 +109,8 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 18,
       id: '20',
-      render: () => <GraphPanel title="[Logs] Total Requests and Bytes" graph={REQUEST_MAP} />,
+      title: '[Logs] Total Requests and Bytes',
+      render: () => <GraphPanel graph={REQUEST_MAP} />,
     },
     {
       x: 24,
@@ -113,12 +118,8 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 33,
       id: '14',
-      render: () => (
-        <GraphPanel
-          title="[Logs] Machine OS and Destination Sankey Chart"
-          graph={SANKEY_CHART_GRAPH}
-        />
-      ),
+      title: '[Logs] Machine OS and Destination Sankey Chart',
+      render: () => <GraphPanel graph={SANKEY_CHART_GRAPH} />,
     },
     {
       x: 0,
@@ -126,13 +127,8 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 15,
       id: '8e59c7cf-6e42-4343-a113-c4a255fcf2ce',
-      render: () => (
-        <GraphPanel
-          title="[Logs] Unique Destination Heatmap"
-          graph={DESTINATION_HEATMAP}
-          height="94%"
-        />
-      ),
+      title: '[Logs] Unique Destination Heatmap',
+      render: () => <GraphPanel graph={DESTINATION_HEATMAP} height="94%" />,
     },
     {
       x: 0,
@@ -140,6 +136,7 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 13,
       id: '9',
+      title: '[Logs] Host, Visits and Bytes Table',
       render: () => <LogsTable />,
     },
 
@@ -149,29 +146,24 @@ export const LogsDashboardExample = () => {
       w: 24,
       h: 13,
       id: '10',
-      render: () => (
-        <GraphPanel title="[Logs] Bytes distribution" graph={BYTES_BAR_GRAPH} height="93%" />
-      ),
+      title: '[Logs] Bytes distribution',
+      render: () => <GraphPanel graph={BYTES_BAR_GRAPH} height="93%" />,
     },
   ];
 
-  return <TestReactGrid columns={48} gridData={gridData} />;
+  return <Grid columns={48} gridData={gridData} />;
 };
 
 export const Columns48GridExample = () => {
-  return <TestReactGrid columns={48} gridData={largeGridData} />;
+  return <Grid columns={48} gridData={largeGridData} />;
 };
 
 export const Columns24GridExample = () => {
-  return <TestReactGrid columns={24} gridData={mediumGridData} />;
+  return <Grid columns={24} gridData={mediumGridData} />;
 };
 
 export const Columns12GridExample = () => {
-  return <TestReactGrid columns={12} gridData={smallGridData} />;
-};
-
-export const SubGridExample = () => {
-  return <SubgridDemo />;
+  return <Grid columns={12} gridData={smallGridData} />;
 };
 
 export const PanelGroupExample = () => {
