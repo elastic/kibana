@@ -35,7 +35,7 @@ export const useAddToCaseActions = ({
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
-  const hasWritePermissions = casePermissions?.crud ?? false;
+  const hasWritePermissions = casePermissions.crud;
 
   const isAlert = useMemo(() => {
     return ecsData?.event?.kind?.includes('signal');
