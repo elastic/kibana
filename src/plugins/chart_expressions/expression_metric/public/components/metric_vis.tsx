@@ -13,7 +13,12 @@ import { i18n } from '@kbn/i18n';
 import { Chart, Metric, MetricSpec, RenderChangeListener, Settings } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Datatable, DatatableRow, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import {
+  Datatable,
+  DatatableColumn,
+  DatatableRow,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { euiLightVars } from '@kbn/ui-theme';
 import { VisParams } from '../../common';
@@ -132,7 +137,7 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getFormatter(config.dimensions.metric, data.columns);
 
-  let secondaryMetricColumn;
+  let secondaryMetricColumn: DatatableColumn | undefined;
   let formatSecondaryMetric: ReturnType<typeof getFormatter>;
   if (config.dimensions.secondaryMetric) {
     secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, data.columns);
@@ -142,8 +147,6 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
   const breakdownByColumn = config.dimensions.breakdownBy
     ? getColumnByAccessor(config.dimensions.breakdownBy, data.columns)
     : undefined;
-
-  const metricConfigs: MetricSpec['data'][number] = [];
 
   let getProgressBarConfig = (_row: DatatableRow) => ({});
 
@@ -160,51 +163,30 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
     }
   }
 
-  const commonProps = {
-    valueFormatter: formatPrimaryMetric,
-  };
-
-  if (!breakdownByColumn) {
-    const value = data.rows[0][primaryMetricColumn.id];
-
-    metricConfigs.push({
-      ...commonProps,
+  const metricConfigs: MetricSpec['data'][number] = (
+    breakdownByColumn ? data.rows : data.rows.slice(0, 1)
+  ).map((row) => {
+    const value = row[primaryMetricColumn.id];
+    const title = breakdownByColumn ? row[breakdownByColumn.id] : primaryMetricColumn.name;
+    const subtitle = breakdownByColumn
+      ? primaryMetricColumn.name
+      : secondaryMetricColumn?.name ?? config.metric.subtitle;
+    return {
       value,
-      title: primaryMetricColumn.name,
-      subtitle: secondaryMetricColumn?.name ?? config.metric.subtitle,
+      valueFormatter: formatPrimaryMetric,
+      title,
+      subtitle,
       extra: (
         <span>
           {secondaryMetricColumn
-            ? formatSecondaryMetric!(data.rows[0][secondaryMetricColumn.id])
+            ? formatSecondaryMetric!(row[secondaryMetricColumn.id])
             : config.metric.extraText}
         </span>
       ),
       color: getColor(value, config.metric.palette),
-      ...getProgressBarConfig(data.rows[0]),
-    });
-  }
-
-  if (breakdownByColumn) {
-    for (const row of data.rows) {
-      const value = row[primaryMetricColumn.id];
-
-      metricConfigs.push({
-        ...commonProps,
-        value,
-        title: row[breakdownByColumn.id],
-        subtitle: primaryMetricColumn.name,
-        extra: (
-          <span>
-            {secondaryMetricColumn
-              ? formatSecondaryMetric!(row[secondaryMetricColumn.id])
-              : config.metric.extraText}
-          </span>
-        ),
-        color: getColor(value, config.metric.palette),
-        ...getProgressBarConfig(row),
-      });
-    }
-  }
+      ...getProgressBarConfig(row),
+    };
+  });
 
   if (config.metric.minTiles) {
     while (metricConfigs.length < config.metric.minTiles) metricConfigs.push(undefined);
