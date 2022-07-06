@@ -22,6 +22,7 @@ export const FILE_KIND_API_ROUTES_SERVER = {
   getDeleteRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
   getListRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/list`,
   getByIdRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/{id}`,
+  getFindRoute: (fileKind: string) => `${FILES_API_BASE_PATH}/${fileKind}/find`,
 };
 
 export const FILE_KIND_API_ROUTES_CLIENT = {
@@ -52,7 +53,7 @@ export interface HttpApiInterfaceEntryDefinition<
   output: R;
 }
 
-export type CreateHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type CreateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   unknown,
   {
@@ -64,7 +65,7 @@ export type CreateHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { file: FileJSON }
 >;
 
-export type DeleteHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type DeleteFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     id: string;
   },
@@ -73,7 +74,7 @@ export type DeleteHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { ok: true }
 >;
 
-export type DownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type DownloadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     id: string;
     fileName?: string;
@@ -84,7 +85,7 @@ export type DownloadHttpEndpoint = HttpApiInterfaceEntryDefinition<
   any
 >;
 
-export type GetByIdHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type GetByIdFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   {
     id: string;
   },
@@ -93,23 +94,30 @@ export type GetByIdHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { file: FileJSON }
 >;
 
-export type ListHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type ListFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   unknown,
   { page?: number; perPage?: number },
   unknown,
   { files: FileJSON[] }
 >;
 
-export type UpdateHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type UpdateFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { id: string },
   unknown,
   { name?: string; alt?: string; meta?: Record<string, unknown> },
   { file: FileJSON }
 >;
 
-export type UploadHttpEndpoint = HttpApiInterfaceEntryDefinition<
+export type UploadFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
   { id: string },
   unknown,
   any,
   { ok: true }
+>;
+
+export type FindFileKindHttpEndpoint = HttpApiInterfaceEntryDefinition<
+  unknown,
+  unknown,
+  {},
+  { files: FileJSON[] }
 >;
