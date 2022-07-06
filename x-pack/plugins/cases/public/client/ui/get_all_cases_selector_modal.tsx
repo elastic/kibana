@@ -13,7 +13,7 @@ import { CasesProvider, CasesContextProps } from '../../components/cases_context
 type GetAllCasesSelectorModalPropsInternal = AllCasesSelectorModalProps & CasesContextProps;
 export type GetAllCasesSelectorModalProps = Omit<
   GetAllCasesSelectorModalPropsInternal,
-  'externalReferenceAttachmentTypeRegistry'
+  'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
 >;
 
 const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
@@ -21,13 +21,21 @@ const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
 );
 export const getAllCasesSelectorModalLazy = ({
   externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   owner,
   userCanCrud,
   hiddenStatuses,
   onRowClick,
   onClose,
 }: GetAllCasesSelectorModalPropsInternal) => (
-  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, userCanCrud }}>
+  <CasesProvider
+    value={{
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      owner,
+      userCanCrud,
+    }}
+  >
     <Suspense fallback={<EuiLoadingSpinner />}>
       <AllCasesSelectorModalLazy
         hiddenStatuses={hiddenStatuses}

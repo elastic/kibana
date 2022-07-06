@@ -96,7 +96,8 @@ export const UserActions = React.memo(
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
     const currentUser = useCurrentUser();
-    const { externalReferenceAttachmentTypeRegistry } = useCasesContext();
+    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
+      useCasesContext();
 
     const alertIdsWithoutRuleInfo = useMemo(
       () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -191,6 +192,7 @@ export const UserActions = React.memo(
             const userActionBuilder = builder({
               caseData,
               externalReferenceAttachmentTypeRegistry,
+              persistableStateAttachmentTypeRegistry,
               userAction,
               caseServices,
               comments: caseData.comments,
@@ -219,6 +221,7 @@ export const UserActions = React.memo(
       [
         caseUserActions,
         externalReferenceAttachmentTypeRegistry,
+        persistableStateAttachmentTypeRegistry,
         descriptionCommentListObj,
         caseData,
         caseServices,

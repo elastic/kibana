@@ -41,7 +41,7 @@ import { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
 import {
   ExternalReferenceAttachmentType,
-  ExternalReferenceAttachmentViewObject,
+  AttachmentViewObject,
 } from '../client/attachment_framework/types';
 
 export { connectorsMock } from '../common/mock/connectors';
@@ -735,7 +735,7 @@ export const getExternalReferenceUserAction = (): SnakeToCamelCase<
 });
 
 export const getExternalReferenceAttachment = (
-  viewObject: ExternalReferenceAttachmentViewObject = {}
+  viewObject: AttachmentViewObject = {}
 ): ExternalReferenceAttachmentType => ({
   id: '.test',
   icon: 'casesApp',

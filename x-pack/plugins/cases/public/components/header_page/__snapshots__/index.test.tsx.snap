@@ -42,6 +42,10 @@ exports[`HeaderPage it renders 1`] = `
               "owner": Array [
                 "securitySolution",
               ],
+              "persistableStateAttachmentTypeRegistry": PersistableStateAttachmentTypeRegistry {
+                "collection": Map {},
+                "name": "PersistableStateAttachmentTypeRegistry",
+              },
               "userCanCrud": true,
             }
           }

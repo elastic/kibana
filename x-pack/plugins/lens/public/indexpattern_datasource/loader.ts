@@ -192,7 +192,9 @@ export function injectReferences(
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
     layers[layerId] = {
       ...persistedLayer,
-      indexPatternId: references.find(({ name }) => name === getLayerReferenceName(layerId))!.id,
+      indexPatternId: references.find(
+        ({ name }) => name === getLayerReferenceName(layerId.toLocaleLowerCase())
+      )!.id,
     };
   });
   return {

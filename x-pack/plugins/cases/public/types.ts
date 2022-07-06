@@ -39,6 +39,7 @@ import { Cases, CasesStatus, CasesMetrics } from '../common/ui';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { AttachmentFramework } from './client/attachment_framework/types';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -74,6 +75,7 @@ export interface RenderAppProps {
   storage: Storage;
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
 
 export interface CasesUiSetup {

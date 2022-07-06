@@ -13,7 +13,7 @@ import { CasesProvider, CasesContextProps } from '../../components/cases_context
 type GetCreateCaseFlyoutPropsInternal = CreateCaseFlyoutProps & CasesContextProps;
 export type GetCreateCaseFlyoutProps = Omit<
   GetCreateCaseFlyoutPropsInternal,
-  'externalReferenceAttachmentTypeRegistry'
+  'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
 >;
 
 export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
@@ -21,6 +21,7 @@ export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
 );
 export const getCreateCaseFlyoutLazy = ({
   externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   owner,
   userCanCrud,
   features,
@@ -29,7 +30,15 @@ export const getCreateCaseFlyoutLazy = ({
   onSuccess,
   attachments,
 }: GetCreateCaseFlyoutPropsInternal) => (
-  <CasesProvider value={{ externalReferenceAttachmentTypeRegistry, owner, userCanCrud, features }}>
+  <CasesProvider
+    value={{
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      owner,
+      userCanCrud,
+      features,
+    }}
+  >
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CreateCaseFlyoutLazy
         afterCaseCreated={afterCaseCreated}

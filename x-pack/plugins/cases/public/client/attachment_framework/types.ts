@@ -7,34 +7,49 @@
 
 import type React from 'react';
 import { EuiCommentProps, IconType } from '@elastic/eui';
-import { CommentRequestExternalReferenceType } from '../../../common/api';
+import {
+  CommentRequestExternalReferenceType,
+  CommentRequestPersistableStateType,
+} from '../../../common/api';
 import { Case } from '../../containers/types';
 
-export interface ExternalReferenceAttachmentViewObject {
+export interface AttachmentViewObject<Props = {}> {
   type?: EuiCommentProps['type'];
   timelineIcon?: EuiCommentProps['timelineIcon'];
   actions?: EuiCommentProps['actions'];
   event?: EuiCommentProps['event'];
-  children?: React.LazyExoticComponent<React.FC>;
+  children?: React.LazyExoticComponent<React.FC<Props>>;
 }
 
-export interface ExternalReferenceAttachmentViewProps {
-  externalReferenceId: CommentRequestExternalReferenceType['externalReferenceId'];
-  externalReferenceMetadata: CommentRequestExternalReferenceType['externalReferenceMetadata'];
+export interface CommonAttachmentViewProps {
   caseData: Pick<Case, 'id' | 'title'>;
 }
 
-export interface ExternalReferenceAttachmentType {
+export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
+  externalReferenceId: CommentRequestExternalReferenceType['externalReferenceId'];
+  externalReferenceMetadata: CommentRequestExternalReferenceType['externalReferenceMetadata'];
+}
+
+export interface PersistableStateAttachmentViewProps extends CommonAttachmentViewProps {
+  persistableStateAttachmentTypeId: CommentRequestPersistableStateType['persistableStateAttachmentTypeId'];
+  persistableStateAttachmentState: CommentRequestPersistableStateType['persistableStateAttachmentState'];
+}
+
+export interface AttachmentType<Props> {
   id: string;
   icon: IconType;
   displayName: string;
-  getAttachmentViewObject: (
-    props: ExternalReferenceAttachmentViewProps
-  ) => ExternalReferenceAttachmentViewObject;
+  getAttachmentViewObject: () => AttachmentViewObject<Props>;
 }
+
+export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
+export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
 
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
+  ) => void;
+  registerPersistableState: (
+    persistableStateAttachmentType: PersistableStateAttachmentType
   ) => void;
 }

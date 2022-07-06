@@ -204,7 +204,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-external-reference-.test')).toBeInTheDocument();
+      expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(result.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
       expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
       expect(screen.getByText('added a chart')).toBeInTheDocument();
@@ -227,7 +227,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-external-reference-not-found')).toBeInTheDocument();
+      expect(result.getByTestId('comment-externalReference-not-found')).toBeInTheDocument();
       expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
       expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
     });
@@ -259,7 +259,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-external-reference-.test')).toBeInTheDocument();
+      expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(screen.getByText('Attachment actions')).toBeInTheDocument();
     });
   });

@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { CommentResponseExternalReferenceType } from '../../../../common/api';
+import { CommentResponseTypePersistableState } from '../../../../common/api';
 import { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { SnakeToCamelCase } from '../../../../common/types';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
-  'userAction' | 'externalReferenceAttachmentTypeRegistry' | 'caseData'
+  'userAction' | 'persistableStateAttachmentTypeRegistry' | 'caseData'
 > & {
-  comment: SnakeToCamelCase<CommentResponseExternalReferenceType>;
+  comment: SnakeToCamelCase<CommentResponseTypePersistableState>;
 };
 
-export const createExternalReferenceAttachmentUserActionBuilder = ({
+export const createPersistableStateAttachmentUserActionBuilder = ({
   userAction,
   comment,
-  externalReferenceAttachmentTypeRegistry,
+  persistableStateAttachmentTypeRegistry,
   caseData,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
     comment,
-    registry: externalReferenceAttachmentTypeRegistry,
+    registry: persistableStateAttachmentTypeRegistry,
     caseData,
-    getId: () => comment.externalReferenceAttachmentTypeId,
+    getId: () => comment.persistableStateAttachmentTypeId,
     getAttachmentViewProps: () => ({
-      externalReferenceId: comment.externalReferenceId,
-      externalReferenceMetadata: comment.externalReferenceMetadata,
+      persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
+      persistableStateAttachmentState: comment.persistableStateAttachmentState,
     }),
   });
 };
