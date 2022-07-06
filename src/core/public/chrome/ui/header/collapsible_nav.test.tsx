@@ -78,7 +78,7 @@ function clickGroup(component: ReactWrapper, group: string) {
 }
 
 describe('CollapsibleNav', () => {
-  // this test is mostly an "EUI works as expected" sanity check
+  // this test is mostly an "EUI works as expected" check
   it('renders the default nav', () => {
     const component = mount(<CollapsibleNav {...mockProps()} />);
     expect(component).toMatchSnapshot();

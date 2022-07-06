@@ -12,7 +12,7 @@ import { getOrElse, isSome, map as mapOptional, Option } from 'fp-ts/lib/Option'
 
 import uuid from 'uuid';
 import { chunk, pick } from 'lodash';
-import { merge, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
 import { mustBeAllOf } from './queries/query_clauses';
@@ -42,7 +42,7 @@ import {
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
-import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
+import { TaskLifecycleEvent } from './polling_lifecycle';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
@@ -52,8 +52,7 @@ const VERSION_CONFLICT_STATUS = 409;
 export interface TaskSchedulingOpts {
   logger: Logger;
   taskStore: TaskStore;
-  taskPollingLifecycle: TaskPollingLifecycle;
-  ephemeralTaskLifecycle: EphemeralTaskLifecycle;
+  ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   middleware: Middleware;
   definitions: TaskTypeDictionary;
   taskManagerId: string;
@@ -84,8 +83,7 @@ export interface RunNowResult {
 
 export class TaskScheduling {
   private store: TaskStore;
-  private taskPollingLifecycle: TaskPollingLifecycle;
-  private ephemeralTaskLifecycle: EphemeralTaskLifecycle;
+  private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private logger: Logger;
   private middleware: Middleware;
   private definitions: TaskTypeDictionary;
@@ -99,7 +97,6 @@ export class TaskScheduling {
   constructor(opts: TaskSchedulingOpts) {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
-    this.taskPollingLifecycle = opts.taskPollingLifecycle;
     this.ephemeralTaskLifecycle = opts.ephemeralTaskLifecycle;
     this.store = opts.taskStore;
     this.definitions = opts.definitions;
@@ -239,6 +236,12 @@ export class TaskScheduling {
     task: EphemeralTask,
     options?: Record<string, unknown>
   ): Promise<RunNowResult> {
+    if (!this.ephemeralTaskLifecycle) {
+      throw new EphemeralTaskRejectedDueToCapacityError(
+        `Ephemeral Task of type ${task.taskType} was rejected because ephemeral tasks are not supported`,
+        task
+      );
+    }
     const id = uuid.v4();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
@@ -261,7 +264,7 @@ export class TaskScheduling {
           .catch((err: Error) => {
             reject(err);
           });
-        const attemptToRunResult = this.ephemeralTaskLifecycle.attemptToRun({
+        const attemptToRunResult = this.ephemeralTaskLifecycle!.attemptToRun({
           id,
           scheduledAt: new Date(),
           runAt: new Date(),
@@ -307,64 +310,68 @@ export class TaskScheduling {
 
   private awaitTaskRunResult(taskId: string, cancel?: Promise<void>): Promise<RunNowResult> {
     return new Promise((resolve, reject) => {
+      if (!this.ephemeralTaskLifecycle) {
+        reject(
+          new Error(
+            `Failed to run task "${taskId}" because ephemeral tasks are not supported. Rescheduled the task to ensure it is picked up as soon as possible.`
+          )
+        );
+      }
       // listen for all events related to the current task
-      const subscription = merge(
-        this.taskPollingLifecycle.events,
-        this.ephemeralTaskLifecycle.events
-      )
-        .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
-        .subscribe((taskEvent: TaskLifecycleEvent) => {
-          if (isTaskClaimEvent(taskEvent)) {
-            mapErr(async (error: ClaimTaskErr) => {
+      const subscription = this.ephemeralTaskLifecycle!.events.pipe(
+        filter(({ id }: TaskLifecycleEvent) => id === taskId)
+      ).subscribe((taskEvent: TaskLifecycleEvent) => {
+        if (isTaskClaimEvent(taskEvent)) {
+          mapErr(async (error: ClaimTaskErr) => {
+            // reject if any error event takes place for the requested task
+            subscription.unsubscribe();
+            if (
+              isSome(error.task) &&
+              error.errorType === TaskClaimErrorType.CLAIMED_BY_ID_OUT_OF_CAPACITY
+            ) {
+              const task = error.task.value;
+              const definition = this.definitions.get(task.taskType);
+              return reject(
+                new Error(
+                  `Failed to run task "${taskId}" as we would exceed the max concurrency of "${
+                    definition?.title ?? task.taskType
+                  }" which is ${
+                    definition?.maxConcurrency
+                  }. Rescheduled the task to ensure it is picked up as soon as possible.`
+                )
+              );
+            } else {
+              return reject(await this.identifyTaskFailureReason(taskId, error.task));
+            }
+          }, taskEvent.event);
+        } else {
+          either<OkResultOf<TaskLifecycleEvent>, ErrResultOf<TaskLifecycleEvent>>(
+            taskEvent.event,
+            (taskInstance: OkResultOf<TaskLifecycleEvent>) => {
+              // resolve if the task has run sucessfully
+              if (isTaskRunEvent(taskEvent)) {
+                subscription.unsubscribe();
+                resolve(pick((taskInstance as RanTask).task, ['id', 'state']));
+              }
+            },
+            async (errorResult: ErrResultOf<TaskLifecycleEvent>) => {
               // reject if any error event takes place for the requested task
               subscription.unsubscribe();
-              if (
-                isSome(error.task) &&
-                error.errorType === TaskClaimErrorType.CLAIMED_BY_ID_OUT_OF_CAPACITY
-              ) {
-                const task = error.task.value;
-                const definition = this.definitions.get(task.taskType);
-                return reject(
-                  new Error(
-                    `Failed to run task "${taskId}" as we would exceed the max concurrency of "${
-                      definition?.title ?? task.taskType
-                    }" which is ${
-                      definition?.maxConcurrency
-                    }. Rescheduled the task to ensure it is picked up as soon as possible.`
-                  )
-                );
-              } else {
-                return reject(await this.identifyTaskFailureReason(taskId, error.task));
-              }
-            }, taskEvent.event);
-          } else {
-            either<OkResultOf<TaskLifecycleEvent>, ErrResultOf<TaskLifecycleEvent>>(
-              taskEvent.event,
-              (taskInstance: OkResultOf<TaskLifecycleEvent>) => {
-                // resolve if the task has run sucessfully
-                if (isTaskRunEvent(taskEvent)) {
-                  subscription.unsubscribe();
-                  resolve(pick((taskInstance as RanTask).task, ['id', 'state']));
-                }
-              },
-              async (errorResult: ErrResultOf<TaskLifecycleEvent>) => {
-                // reject if any error event takes place for the requested task
-                subscription.unsubscribe();
-                return reject(
-                  new Error(
-                    `Failed to run task "${taskId}": ${
-                      isTaskRunRequestEvent(taskEvent)
-                        ? `Task Manager is at capacity, please try again later`
-                        : isTaskRunEvent(taskEvent)
-                        ? `${(errorResult as ErroredTask).error}`
-                        : `${errorResult}`
-                    }`
-                  )
-                );
-              }
-            );
-          }
-        });
+              return reject(
+                new Error(
+                  `Failed to run task "${taskId}": ${
+                    isTaskRunRequestEvent(taskEvent)
+                      ? `Task Manager is at capacity, please try again later`
+                      : isTaskRunEvent(taskEvent)
+                      ? `${(errorResult as ErroredTask).error}`
+                      : `${errorResult}`
+                  }`
+                )
+              );
+            }
+          );
+        }
+      });
 
       if (cancel) {
         cancel.then(() => {
