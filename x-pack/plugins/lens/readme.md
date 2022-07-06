@@ -66,7 +66,7 @@ The `attributes` variable contains the configuration for the Lens visualization.
 yarn start --run-examples
 ```
 
-This will add an `Open in Playground` action to the menu bar in the Lens editor. This works for any possible Lens visualization.
+This will add an `Open in Playground` action to the menu bar in the Lens editor. With this option, try to configure the chart configuration directly in the editor, then open it in the playground to see the attributes object to copy. This works for any possible Lens visualization.
 
 ![Go to playground](./to_playground.gif "Go to playground")
 
