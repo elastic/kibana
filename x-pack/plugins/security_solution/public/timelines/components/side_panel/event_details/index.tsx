@@ -20,6 +20,8 @@ import { useHostRiskScore, HostRisk } from '../../../../risk_score/containers';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData } from './helpers';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -52,11 +54,15 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
   isReadOnly,
 }) => {
+  const spaceId = useSpaceId();
+  const indexName = expandedEvent.indexName.includes(DEFAULT_ALERTS_INDEX)
+    ? `${DEFAULT_ALERTS_INDEX}-${spaceId}`
+    : expandedEvent.indexName;
   const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
     {
       docValueFields,
       entityType,
-      indexName: expandedEvent.indexName ?? '',
+      indexName: indexName ?? '',
       eventId: expandedEvent.eventId ?? '',
       runtimeMappings,
       skip: !expandedEvent.eventId,

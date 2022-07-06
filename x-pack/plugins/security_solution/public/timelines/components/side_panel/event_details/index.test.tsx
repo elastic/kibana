@@ -23,8 +23,10 @@ import {
   mockDocValueFields,
   mockRuntimeMappings,
 } from '../../../../common/containers/source/mock';
+import * as containers from '../../../containers/details';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 
 const ecsData: Ecs = {
   _id: '1',
@@ -102,6 +104,12 @@ jest.mock(
 jest.mock('../../../../detections/components/alerts_table/actions');
 const mockSearchStrategy = jest.fn();
 
+jest.mock('../../../../common/hooks/use_space_id', () => ({
+  useSpaceId: jest.fn().mockReturnValue('mockSpace'),
+}));
+
+const useTimelineEventDetailsSpy = jest.spyOn(containers, 'useTimelineEventsDetails');
+
 const defaultProps = {
   timelineId: TimelineId.test,
   loadingEventDetails: false,
@@ -175,5 +183,53 @@ describe('event details footer component', () => {
     );
     const element = wrapper.queryByTestId('side-panel-flyout-footer');
     expect(element).toBeNull();
+  });
+
+  test(`it properly passes ${DEFAULT_ALERTS_INDEX} when viewing an alert`, () => {
+    const propsToUse = {
+      ...defaultProps,
+      expandedEvent: {
+        eventId: ecsData._id,
+        indexName: '.internal.alerts-security.alerts-default',
+      },
+    };
+    render(
+      <TestProviders>
+        <EventDetailsPanel {...propsToUse} />
+      </TestProviders>
+    );
+
+    expect(useTimelineEventDetailsSpy).toHaveBeenCalledWith({
+      docValueFields: mockDocValueFields,
+      runtimeMappings: mockRuntimeMappings,
+      indexName: `${DEFAULT_ALERTS_INDEX}-mockSpace`,
+      entityType: 'events',
+      eventId: ecsData._id,
+      skip: false,
+    });
+  });
+
+  test(`it properly passes a unmodified indexName when viewing an event`, () => {
+    const propsToUse = {
+      ...defaultProps,
+      expandedEvent: {
+        eventId: ecsData._id,
+        indexName: '.some-other-index',
+      },
+    };
+    render(
+      <TestProviders>
+        <EventDetailsPanel {...propsToUse} />
+      </TestProviders>
+    );
+
+    expect(useTimelineEventDetailsSpy).toHaveBeenCalledWith({
+      docValueFields: mockDocValueFields,
+      runtimeMappings: mockRuntimeMappings,
+      indexName: '.some-other-index',
+      entityType: 'events',
+      eventId: ecsData._id,
+      skip: false,
+    });
   });
 });
