@@ -9,7 +9,7 @@
 import { EuiDelayRender, EuiLoadingContent } from '@elastic/eui';
 import { memoize } from 'lodash';
 import React, { PureComponent, LazyExoticComponent } from 'react';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat, FieldFormatConfig } from '@kbn/field-formats-plugin/common';
 import { FieldFormatEditorFactory, FieldFormatEditor } from './editors';
 
 export interface FormatEditorProps {
@@ -18,7 +18,7 @@ export interface FormatEditorProps {
   fieldFormatId: string;
   fieldFormatParams: { [key: string]: unknown };
   fieldFormatEditors: any;
-  onChange: (change: unknown) => void;
+  onChange: (change: FieldFormatConfig['params']) => void;
   onError: (error?: string) => void;
 }
 
