@@ -18,6 +18,7 @@ import {
   EuiFormControlLayout,
   EuiText,
   transparentize,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import moment from 'moment';
@@ -28,8 +29,8 @@ import {
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-plugin/common/types';
 import { pick } from 'lodash';
-import { Query, search } from '@kbn/data-plugin/public';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import { search } from '@kbn/data-plugin/public';
+import type { DatatableUtilitiesService, Query } from '@kbn/data-plugin/common';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
@@ -121,6 +122,7 @@ const sanitizeProperties = (annotation: EventAnnotationConfig) => {
       'color',
       'icon',
       'textVisibility',
+      'textSource',
       'query',
       'additionalFields',
     ]);
@@ -266,33 +268,49 @@ export const AnnotationsPanel = (
           }}
         />
         {!isRange && (
-          <IconSelectSetting
-            setConfig={setAnnotations}
-            defaultIcon="triangle"
-            currentConfig={{
-              axisMode: 'bottom',
-              ...currentAnnotation,
-            }}
-            customIconSet={annotationsIconSet}
-          />
+          <>
+            <IconSelectSetting
+              setConfig={setAnnotations}
+              defaultIcon="triangle"
+              currentConfig={{
+                axisMode: 'bottom',
+                ...currentAnnotation,
+              }}
+              customIconSet={annotationsIconSet}
+            />
+            <TextDecorationSetting
+              setConfig={setAnnotations}
+              currentConfig={{
+                axisMode: 'bottom',
+                ...currentAnnotation,
+              }}
+              isQueryBased={isQueryBased}
+            >
+              {(textDecorationSelected) => {
+                if (textDecorationSelected !== 'field') {
+                  return null;
+                }
+                return (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <FieldPicker
+                      options={[]}
+                      onChoose={function (choice: FieldOptionValue | undefined): void {
+                        throw new Error('Function not implemented.');
+                      }}
+                      fieldIsInvalid={false}
+                    />
+                  </>
+                );
+              }}
+            </TextDecorationSetting>
+            <LineStyleSettings
+              isHorizontal={isHorizontal}
+              setConfig={setAnnotations}
+              currentConfig={currentAnnotation}
+            />
+          </>
         )}
-        {!isRange && (
-          <TextDecorationSetting
-            setConfig={setAnnotations}
-            currentConfig={{
-              axisMode: 'bottom',
-              ...currentAnnotation,
-            }}
-          />
-        )}
-        {!isRange && (
-          <LineStyleSettings
-            isHorizontal={isHorizontal}
-            setConfig={setAnnotations}
-            currentConfig={currentAnnotation}
-          />
-        )}
-
         {isRange && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.xyChart.fillStyle', {
@@ -374,6 +392,8 @@ const ConfigPanelQueryAnnotation = ({
   state: XYState;
 }) => {
   const inputQuery = annotation?.query ?? defaultQuery;
+  // list only supported field by operation, remove the rest
+  const options = [];
   return (
     <>
       <EuiFormRow

@@ -64,6 +64,7 @@ export type PointInTimeQueryEventAnnotationConfig = {
   };
   additionalFields?: string[];
   query: Query;
+  textSource?: 'name' | 'field';
 } & PointStyleProps;
 
 export type RangeStyleProps = StyleSharedProps & {

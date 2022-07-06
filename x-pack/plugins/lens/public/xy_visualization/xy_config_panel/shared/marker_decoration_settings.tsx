@@ -77,17 +77,63 @@ export interface MarkerDecorationConfig<T extends string = string> {
   icon?: T;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
+  textSource?: 'name' | 'field';
+}
+
+function getSelectedOption(
+  { textSource, textVisibility }: MarkerDecorationConfig = {},
+  isQueryBased: boolean
+) {
+  if (!textVisibility) {
+    return 'none';
+  }
+  if (!isQueryBased && textSource === 'field') {
+    return 'name';
+  }
+  return textSource ?? 'name';
 }
 
 export function TextDecorationSetting<Icon extends string = string>({
   currentConfig,
   setConfig,
   customIconSet,
+  isQueryBased,
+  children,
 }: {
   currentConfig?: MarkerDecorationConfig<Icon>;
   setConfig: (config: MarkerDecorationConfig<Icon>) => void;
   customIconSet?: IconSet<Icon>;
+  isQueryBased: boolean;
+  children: (textDecoration: 'none' | 'name' | 'field') => JSX.Element | null;
 }) {
+  const options = [
+    {
+      id: `${idPrefix}none`,
+      label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.none', {
+        defaultMessage: 'None',
+      }),
+      'data-test-subj': 'lnsXY_textVisibility_none',
+    },
+    {
+      id: `${idPrefix}name`,
+      label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.name', {
+        defaultMessage: 'Name',
+      }),
+      'data-test-subj': 'lnsXY_textVisibility_name',
+    },
+  ];
+  if (isQueryBased) {
+    options.push({
+      id: `${idPrefix}field`,
+      label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.field', {
+        defaultMessage: 'Field',
+      }),
+      'data-test-subj': 'lnsXY_textVisibility_field',
+    });
+  }
+
+  // Override the only conflictual scenario
+  const selectedVisibleOption = getSelectedOption(currentConfig, isQueryBased);
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.lineMarker.textVisibility', {
@@ -96,35 +142,30 @@ export function TextDecorationSetting<Icon extends string = string>({
       display="columnCompressed"
       fullWidth
     >
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.lens.lineMarker.textVisibility', {
-          defaultMessage: 'Text decoration',
-        })}
-        data-test-subj="lns-lineMarker-text-visibility"
-        name="textVisibilityStyle"
-        buttonSize="compressed"
-        options={[
-          {
-            id: `${idPrefix}none`,
-            label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.none', {
-              defaultMessage: 'None',
-            }),
-            'data-test-subj': 'lnsXY_textVisibility_none',
-          },
-          {
-            id: `${idPrefix}name`,
-            label: i18n.translate('xpack.lens.xyChart.lineMarker.textVisibility.name', {
-              defaultMessage: 'Name',
-            }),
-            'data-test-subj': 'lnsXY_textVisibility_name',
-          },
-        ]}
-        idSelected={`${idPrefix}${Boolean(currentConfig?.textVisibility) ? 'name' : 'none'}`}
-        onChange={(id) => {
-          setConfig({ textVisibility: id === `${idPrefix}name` });
-        }}
-        isFullWidth
-      />
+      <div>
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.lens.lineMarker.textVisibility', {
+            defaultMessage: 'Text decoration',
+          })}
+          data-test-subj="lns-lineMarker-text-visibility"
+          name="textVisibilityStyle"
+          buttonSize="compressed"
+          options={options}
+          idSelected={
+            currentConfig?.textVisibility
+              ? `${idPrefix}none`
+              : `${idPrefix}${selectedVisibleOption ?? 'name'}`
+          }
+          onChange={(id) => {
+            setConfig({
+              textVisibility: id !== `${idPrefix}none`,
+              textSource: id.replace(idPrefix, '') as 'name' | 'field',
+            });
+          }}
+          isFullWidth
+        />
+        {children(selectedVisibleOption)}
+      </div>
     </EuiFormRow>
   );
 }
