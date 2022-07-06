@@ -260,6 +260,7 @@ const getSavedObjectTypes = (
         install_version: { type: 'keyword' },
         install_status: { type: 'keyword' },
         install_source: { type: 'keyword' },
+        install_format_schema_version: { type: 'version' },
       },
     },
     migrations: {

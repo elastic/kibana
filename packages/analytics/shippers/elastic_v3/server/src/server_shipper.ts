@@ -21,6 +21,7 @@ import {
   tap,
   delayWhen,
   takeUntil,
+  map,
 } from 'rxjs';
 import type {
   AnalyticsClientInitContext,
@@ -29,7 +30,6 @@ import type {
   IShipper,
   TelemetryCounter,
 } from '@kbn/analytics-client';
-import { TelemetryCounterType } from '@kbn/analytics-client';
 import type { ElasticV3ShipperOptions } from '@kbn/analytics-shippers-elastic-v3-common';
 import {
   buildHeaders,
@@ -142,7 +142,7 @@ export class ElasticV3ServerShipper implements IShipper {
       const toDrop = events.length - freeSpace;
       const droppedEvents = events.splice(-toDrop, toDrop);
       this.reportTelemetryCounters(droppedEvents, {
-        type: TelemetryCounterType.dropped,
+        type: 'dropped',
         code: 'queue_full',
       });
     }
@@ -228,16 +228,20 @@ export class ElasticV3ServerShipper implements IShipper {
             (this.internalQueue.length > 0 &&
               (this.shutdown$.isStopped || Date.now() - this.lastBatchSent >= 10 * MINUTE)) ||
             (Date.now() - this.lastBatchSent >= 10 * SECOND &&
-              (this.internalQueue.length === 1000 ||
+              (this.internalQueue.length === MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE ||
                 this.getQueueByteSize(this.internalQueue) >= 10 * KIB))
         ),
 
-        // Send the events
-        concatMap(async () => {
+        // Send the events:
+        // 1. Set lastBatchSent and retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
+        map(() => {
           this.lastBatchSent = Date.now();
-          const eventsToSend = this.getEventsToSend();
-          await this.sendEvents(eventsToSend);
-        })
+          return this.getEventsToSend();
+        }),
+        // 2. Skip empty buffers
+        filter((events) => events.length > 0),
+        // 3. Actually send the events
+        concatMap(async (eventsToSend) => await this.sendEvents(eventsToSend))
       )
       .subscribe();
   }

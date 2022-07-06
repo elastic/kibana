@@ -306,6 +306,7 @@ export function DimensionEditor(
     paletteService: PaletteRegistry;
   }
 ) {
+  if (props.accessor !== Object.values(props.state.layers)[0].groups[0]) return null;
   return (
     <PalettePicker
       palettes={props.paletteService}
