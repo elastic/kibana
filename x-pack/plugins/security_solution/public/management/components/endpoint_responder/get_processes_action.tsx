@@ -58,8 +58,6 @@ export const GetProcessesActionResult = memo<
   const isError = status === 'error';
   const actionRequestSent = Boolean(store.actionRequestSent);
 
-  console.log();
-
   const {
     mutate: getProcesses,
     data: getProcessesData,
