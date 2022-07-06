@@ -10,7 +10,7 @@ import { generateShareToken } from './generate_share_token';
 describe('generateShareToken', () => {
   it('should contain only expected chars of a given length', () => {
     for (let i = 0; i < 50; i++) {
-      expect(generateShareToken()).toMatch(/^[a-zA-S0-9]{40}$/);
+      expect(generateShareToken()).toMatch(/^[a-zA-O0-9]{40}$/);
     }
   });
 });
