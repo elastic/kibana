@@ -23,10 +23,8 @@ import {
 } from '../../saved_objects';
 import moment from 'moment';
 
-const { startES } = createTestServers({
-  adjustTimeout: (t: number) => jest.setTimeout(t),
-});
 const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();
+
 function createRawObject(date: moment.MomentInput) {
   const pid = Math.round(Math.random() * 10000);
   const instanceUuid = 'mock_instance';
@@ -56,40 +54,47 @@ const outdatedRawEventLoopDelaysDaily = [
   createRawObject(moment().subtract(7, 'days')),
 ];
 
-describe('daily rollups integration test', () => {
-  let esServer: TestElasticsearchUtils;
-  let root: TestKibanaUtils['root'];
-  let internalRepository: ISavedObjectsRepository;
-  let logger: Logger;
+describe.each(new Array(100).fill(0).map((v, idx) => idx + 1))(
+  `daily rollups integration test #%i`,
+  () => {
+    let esServer: TestElasticsearchUtils;
+    let root: TestKibanaUtils['root'];
+    let internalRepository: ISavedObjectsRepository;
+    let logger: Logger;
 
-  beforeAll(async () => {
-    esServer = await startES();
-    root = createRootWithCorePlugins();
+    beforeAll(async () => {
+      const { startES } = createTestServers({
+        adjustTimeout: (t: number) => jest.setTimeout(t),
+      });
 
-    await root.preboot();
-    await root.setup();
-    const start = await root.start();
-    logger = root.logger.get('test daily rollups');
-    internalRepository = start.savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
+      esServer = await startES();
+      root = createRootWithCorePlugins();
 
-    await internalRepository.bulkCreate<EventLoopDelaysDaily>(
-      [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
-      { refresh: true }
-    );
-  });
+      await root.preboot();
+      await root.setup();
+      const start = await root.start();
+      logger = root.logger.get('test daily rollups');
+      internalRepository = start.savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
 
-  afterAll(async () => {
-    await esServer.stop();
-    await root.shutdown();
-  });
+      await internalRepository.bulkCreate<EventLoopDelaysDaily>(
+        [...rawEventLoopDelaysDaily, ...outdatedRawEventLoopDelaysDaily],
+        { refresh: true }
+      );
+    });
 
-  it('deletes documents older that 3 days from the saved objects repository', async () => {
-    await rollDailyData(logger, internalRepository);
-    const { total, saved_objects: savedObjects } =
-      await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
-    expect(total).toBe(rawEventLoopDelaysDaily.length);
-    expect(savedObjects.map(({ id, type, attributes }) => ({ id, type, attributes }))).toEqual(
-      rawEventLoopDelaysDaily
-    );
-  });
-});
+    afterAll(async () => {
+      await esServer.stop();
+      await root.shutdown();
+    });
+
+    it('deletes documents older that 3 days from the saved objects repository', async () => {
+      await rollDailyData(logger, internalRepository);
+      const { total, saved_objects: savedObjects } =
+        await internalRepository.find<EventLoopDelaysDaily>({ type: SAVED_OBJECTS_DAILY_TYPE });
+      expect(total).toBe(rawEventLoopDelaysDaily.length);
+      expect(savedObjects.map(({ id, type, attributes }) => ({ id, type, attributes }))).toEqual(
+        rawEventLoopDelaysDaily
+      );
+    });
+  }
+);
