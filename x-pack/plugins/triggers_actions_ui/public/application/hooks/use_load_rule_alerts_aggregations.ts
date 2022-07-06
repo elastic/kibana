@@ -145,17 +145,31 @@ export async function fetchRuleAlertsAggByTimeRange({
           },
         },
         aggs: {
-          alert_status_aggs: {
+          alert_status_aggs_total: {
             terms: {
               field: 'kibana.alert.status',
               size: 2,
+            },
+          },
+          alert_status_aggs: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: '1d',
+            },
+            aggs: {
+              alert_status_aggs_per_day: {
+                terms: {
+                  field: 'kibana.alert.status',
+                  size: 2,
+                },
+              },
             },
           },
         },
       }),
     });
 
-    const list = res?.aggregations?.alert_status_aggs?.buckets as Array<{
+    const list = res?.aggregations?.alert_status_aggs_total?.buckets as Array<{
       key: string;
       doc_count: number;
     }>;
