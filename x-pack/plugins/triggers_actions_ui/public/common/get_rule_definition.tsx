@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { PageTitle } from './page_title';
-export { ItemTitleRuleSummary } from './item_title_rule_summary';
-export { ItemValueRuleSummary } from './item_value_rule_summary';
+import React from 'react';
+import { RuleDefinition } from '../application/sections';
+import { RuleDefinitionProps } from '../types';
+export const getRuleDefinitionLazy = (props: RuleDefinitionProps) => <RuleDefinition {...props} />;
