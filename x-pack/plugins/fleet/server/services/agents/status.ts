@@ -16,6 +16,8 @@ import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
 import { FleetUnauthorizedError } from '../../errors';
 
+import { appContextService } from '../app_context';
+
 import {
   closePointInTime,
   getAgentById,
@@ -61,7 +63,18 @@ export async function getAgentStatusForAgentPolicy(
   agentPolicyId?: string,
   filterKuery?: string
 ) {
-  const pitId = await openPointInTime(esClient);
+  let pitId: string | undefined;
+  try {
+    pitId = await openPointInTime(esClient);
+  } catch (error) {
+    if (error.statusCode === 404) {
+      appContextService
+        .getLogger()
+        .debug('Index .fleet-agents does not exist yet, skipping point in time.');
+    } else {
+      throw error;
+    }
+  }
   const [all, allActive, online, error, offline, updating] = await pMap(
     [
       undefined, // All agents, including inactive
@@ -90,7 +103,9 @@ export async function getAgentStatusForAgentPolicy(
     }
   );
 
-  await closePointInTime(esClient, pitId);
+  if (pitId) {
+    await closePointInTime(esClient, pitId);
+  }
 
   const result = {
     total: allActive.total,
