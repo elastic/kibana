@@ -17635,6 +17635,32 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.PostBulkUpdateAgentTagsRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "PostBulkUpdateAgentTagsRequest",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PostBulkUpdateAgentTagsRequest.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "{ agents: string | string[]; tagsToAdd?: string[] | undefined; tagsToRemove?: string[] | undefined; }"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.PostDownloadSourceRequest",
         "type": "Interface",
         "tags": [],
@@ -23540,6 +23566,21 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getBulkUpdateTagsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getBulkUpdateTagsPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
