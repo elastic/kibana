@@ -15,9 +15,12 @@ import type { CoreTheme } from '@kbn/core/public';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
+import type { FleetErrorResponse } from '../../../../common';
+
 import type { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage, useLink } from '../../../hooks';
 import { InstallStatus } from '../../../types';
+import { isVerificationError } from '../services';
 
 interface PackagesInstall {
   [key: string]: PackageInstallItem;
@@ -26,13 +29,16 @@ interface PackagesInstall {
 interface PackageInstallItem {
   status: InstallStatus;
   version: string | null;
+  error?: FleetErrorResponse;
 }
 
 type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
   isReinstall?: boolean;
   fromUpdate?: boolean;
+  force?: boolean;
 };
-type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
+type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> &
+  PackageInstallItem & { error?: FleetErrorResponse };
 
 function usePackageInstall({
   notifications,
@@ -46,10 +52,11 @@ function usePackageInstall({
   const [packages, setPackage] = useState<PackagesInstall>({});
 
   const setPackageInstallStatus = useCallback(
-    ({ name, status, version }: SetPackageInstallStatusProps) => {
+    ({ name, status, version, error }: SetPackageInstallStatusProps) => {
       const packageProps: PackageInstallItem = {
         status,
         version,
+        error,
       };
       setPackage((prev: PackagesInstall) => ({
         ...prev,
@@ -73,6 +80,7 @@ function usePackageInstall({
       title,
       fromUpdate = false,
       isReinstall = false,
+      force = false,
     }: InstallPackageProps) => {
       const currStatus = getPackageInstallStatus(name);
       const newStatus = {
@@ -82,15 +90,24 @@ function usePackageInstall({
       };
       setPackageInstallStatus(newStatus);
 
-      const res = await sendInstallPackage(name, version, isReinstall);
+      const res = await sendInstallPackage(name, version, isReinstall || force);
       if (res.error) {
         if (fromUpdate) {
           // if there is an error during update, set it back to the previous version
           // as handling of bad update is not implemented yet
           setPackageInstallStatus({ ...currStatus, name });
         } else {
-          setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
+          setPackageInstallStatus({
+            name,
+            status: InstallStatus.notInstalled,
+            version,
+            error: res.error,
+          });
         }
+
+        // no toast for verification errors as we give the user the option to proceed
+        if (isVerificationError(res.error)) return;
+
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
