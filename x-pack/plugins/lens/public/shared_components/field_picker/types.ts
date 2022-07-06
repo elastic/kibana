@@ -13,10 +13,14 @@ export interface FieldOptionValue {
   dataType?: DataType;
 }
 
-export interface FieldOption<T extends FieldOptionValue> extends EuiComboBoxOptionOption<T> {
+interface FieldValue<T> {
   label: string;
   value: T;
   exists: boolean;
   compatible: number | boolean;
   'data-test-subj'?: string;
+  // defined in groups
+  options?: Array<FieldValue<T>>;
 }
+
+export type FieldOption<T extends FieldOptionValue> = FieldValue<T> & EuiComboBoxOptionOption<T>;

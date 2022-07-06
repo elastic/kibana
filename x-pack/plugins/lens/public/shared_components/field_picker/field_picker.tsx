@@ -39,15 +39,31 @@ export function FieldPicker<T extends FieldOptionValue>({
   ['data-test-subj']: dataTestSub,
   ...rest
 }: FieldPickerProps<T>) {
-  const styledOptions = options?.map(({ compatible, exists, ...otherAttr }) => ({
-    ...otherAttr,
-    compatible,
-    exists,
-    className: classNames({
-      'lnFieldPicker__option--incompatible': !compatible,
-      'lnFieldPicker__option--nonExistant': !exists,
-    }),
-  }));
+  const styledOptions = options?.map(({ compatible, exists, ...otherAttr }) => {
+    if (otherAttr.options) {
+      return {
+        ...otherAttr,
+        compatible,
+        exists,
+        options: otherAttr.options.map((fieldOption) => ({
+          ...fieldOption,
+          className: classNames({
+            'lnFieldPicker__option--incompatible': !fieldOption.compatible,
+            'lnFieldPicker__option--nonExistant': !fieldOption.exists,
+          }),
+        })),
+      };
+    }
+    return {
+      ...otherAttr,
+      compatible,
+      exists,
+      className: classNames({
+        'lnFieldPicker__option--incompatible': !compatible,
+        'lnFieldPicker__option--nonExistant': !exists,
+      }),
+    };
+  });
   const comboBoxRef = useRef<HTMLInputElement>(null);
   const [labelProps, setLabelProps] = React.useState<{
     width: number;
