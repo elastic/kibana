@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { FieldFormatEditors, FieldFormatEditorStart } from './field_format_editors';
+export { FieldFormatEditors } from './field_format_editors';
+export type { FieldFormatEditorStart } from './field_format_editors';
