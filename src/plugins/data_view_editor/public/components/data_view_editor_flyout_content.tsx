@@ -454,7 +454,6 @@ const loadMatchedIndices = memoizeOne(
     partialMatched: MatchedItem[];
   }> => {
     const indexRequests = [];
-    console.log('loadMatchedIndices', query);
 
     if (query?.endsWith('*')) {
       const exactMatchedQuery = getIndices({
