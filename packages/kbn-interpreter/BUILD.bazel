@@ -80,6 +80,7 @@ ts_project(
   deps = TYPES_DEPS,
   allow_js = True,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

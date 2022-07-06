@@ -93,7 +93,6 @@ export const PROJECTS = [
     'test/plugin_functional/plugins/*/tsconfig.json',
     'test/interpreter_functional/plugins/*/tsconfig.json',
     'test/server_integration/__fixtures__/plugins/*/tsconfig.json',
-    'packages/kbn-type-summarizer/tests/tsconfig.json',
     ...BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/tsconfig.json`),
   ]),
 ];

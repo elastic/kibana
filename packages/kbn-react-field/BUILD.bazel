@@ -44,6 +44,7 @@ TYPES_DEPS = [
   "@npm//@types/classnames",
   "@npm//@types/jest",
   "@npm//@types/prop-types",
+  "@npm//@types/node",
   "@npm//@types/react",
 ]
 
@@ -83,6 +84,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

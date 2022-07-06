@@ -1762,13 +1762,6 @@ module.exports = {
       },
     },
 
-    {
-      files: ['packages/kbn-type-summarizer/**/*.ts'],
-      rules: {
-        'no-bitwise': 'off',
-      },
-    },
-
     /**
      * Prettier disables all conflicting rules, listing as last override so it takes precedence
      */

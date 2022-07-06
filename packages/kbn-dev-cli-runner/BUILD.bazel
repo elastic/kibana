@@ -71,6 +71,7 @@ TYPES_DEPS = [
   "//packages/kbn-ci-stats-reporter:npm_module_types",
   "//packages/kbn-dev-proc-runner:npm_module_types",
   "//packages/kbn-tooling-log:npm_module_types",
+  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
 ]
 
@@ -95,6 +96,7 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

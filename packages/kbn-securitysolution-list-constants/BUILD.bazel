@@ -62,6 +62,7 @@ ts_project(
   deps = TYPES_DEPS,
   args = ["--pretty"],
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",

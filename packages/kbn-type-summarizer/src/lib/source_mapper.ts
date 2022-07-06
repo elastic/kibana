@@ -9,46 +9,53 @@
 import * as ts from 'typescript';
 import { SourceNode, SourceMapConsumer, BasicSourceMapConsumer } from 'source-map';
 
-import { Logger } from './log';
-import { tryReadFile } from './helpers/fs';
-import { parseJson } from './helpers/json';
-import { isNodeModule } from './is_node_module';
-import * as Path from './path';
+import { Logger, tryReadFile, parseJson, Path, describeNode } from '@kbn/type-summarizer-core';
+
+import { SourceFileMapper } from './source_file_mapper';
 
 type SourceMapConsumerEntry = [ts.SourceFile, BasicSourceMapConsumer | undefined];
 
+/**
+ * Wrapper class for utilities that deal with reading the source maps produced by
+ * tsc along with the .d.ts, as well as creating the SourceNode instances we use to
+ * create our type summary along with source maps.
+ */
 export class SourceMapper {
   static async forSourceFiles(
     log: Logger,
-    dtsDir: string,
+    sources: SourceFileMapper,
     repoRelativePackageDir: string,
-    sourceFiles: readonly ts.SourceFile[]
+    program: ts.Program
   ) {
     const entries = await Promise.all(
-      sourceFiles.map(async (sourceFile): Promise<undefined | SourceMapConsumerEntry> => {
-        if (isNodeModule(dtsDir, sourceFile.fileName)) {
-          return;
-        }
+      program
+        .getSourceFiles()
+        .filter((f) => !sources.isNodeModule(f.fileName))
+        .sort((a, b) => a.fileName.localeCompare(b.fileName))
+        .map(async (sourceFile): Promise<undefined | SourceMapConsumerEntry> => {
+          if (sources.isNodeModule(sourceFile.fileName)) {
+            return;
+          }
 
-        const text = sourceFile.getText();
-        const match = text.match(/^\/\/#\s*sourceMappingURL=(.*)/im);
-        if (!match) {
-          return [sourceFile, undefined];
-        }
+          const text = sourceFile.getText();
+          const match = text.match(/^\/\/#\s*sourceMappingURL=(.*)/im);
+          if (!match) {
+            return [sourceFile, undefined];
+          }
 
-        const relSourceFile = Path.cwdRelative(sourceFile.fileName);
-        const sourceMapPath = Path.join(Path.dirname(sourceFile.fileName), match[1]);
-        const relSourceMapPath = Path.cwdRelative(sourceMapPath);
-        const sourceJson = await tryReadFile(sourceMapPath, 'utf8');
-        if (!sourceJson) {
-          throw new Error(
-            `unable to find source map for [${relSourceFile}] expected at [${match[1]}]`
-          );
-        }
+          const relSourceFile = Path.cwdRelative(sourceFile.fileName);
+          const sourceMapPath = Path.join(Path.dirname(sourceFile.fileName), match[1]);
+          const relSourceMapPath = Path.cwdRelative(sourceMapPath);
+          const sourceJson = await tryReadFile(sourceMapPath, 'utf8');
+          if (!sourceJson) {
+            throw new Error(
+              `unable to find source map for [${relSourceFile}] expected at [${match[1]}]`
+            );
+          }
 
-        const json = parseJson(sourceJson, `source map at [${relSourceMapPath}]`);
-        return [sourceFile, await new SourceMapConsumer(json)];
-      })
+          const json = parseJson(sourceJson, `source map at [${relSourceMapPath}]`);
+          return [sourceFile, await new SourceMapConsumer(json)];
+        })
     );
 
     const consumers = new Map(entries.filter((e): e is SourceMapConsumerEntry => !!e));
@@ -78,39 +85,12 @@ export class SourceMapper {
    * the absolute version of the `repoRelativePackageDir` to the absolute version of the `source`, which should give
    * us the path to the source, relative to the `repoRelativePackageDir`.
    */
-  fixSourcePath(source: string) {
+  private fixSourcePath(source: string) {
     return Path.relative(this.sourceFixDir, Path.join('/', source));
   }
 
-  getSourceNode(generatedNode: ts.Node, code: string) {
-    const pos = this.findOriginalPosition(generatedNode);
-
-    if (pos) {
-      return new SourceNode(pos.line, pos.column, pos.source, code, pos.name ?? undefined);
-    }
-
-    return new SourceNode(null, null, null, code);
-  }
-
-  sourceFileCache = new WeakMap<ts.Node, ts.SourceFile>();
-  // abstracted so we can cache this
-  getSourceFile(node: ts.Node): ts.SourceFile {
-    if (ts.isSourceFile(node)) {
-      return node;
-    }
-
-    const cached = this.sourceFileCache.get(node);
-    if (cached) {
-      return cached;
-    }
-
-    const sourceFile = this.getSourceFile(node.parent);
-    this.sourceFileCache.set(node, sourceFile);
-    return sourceFile;
-  }
-
-  findOriginalPosition(node: ts.Node) {
-    const dtsSource = this.getSourceFile(node);
+  private findOriginalPosition(node: ts.Node) {
+    const dtsSource = node.getSourceFile();
 
     if (!this.consumers.has(dtsSource)) {
       throw new Error(`sourceFile for [${dtsSource.fileName}] didn't have sourcemaps loaded`);
@@ -135,9 +115,35 @@ export class SourceMapper {
     };
   }
 
+  getOriginalSourcePath(sourceFile: ts.SourceFile) {
+    const consumer = this.consumers.get(sourceFile);
+    if (!consumer) {
+      throw new Error(`no source map defined for ${describeNode(sourceFile)}`);
+    }
+
+    if (consumer.sources.length !== 1) {
+      throw new Error(
+        `tsc sourcemap produced ${
+          consumer.sources.length
+        } source entries, expected 1: ${describeNode(sourceFile)}`
+      );
+    }
+
+    return this.fixSourcePath(consumer.sources[0]);
+  }
+
+  getSourceNode(generatedNode: ts.Node, code: string) {
+    const pos = this.findOriginalPosition(generatedNode);
+
+    if (pos && pos.line && pos.column && pos.source) {
+      return new SourceNode(pos.line, pos.column, pos.source, code, pos.name ?? undefined);
+    }
+  }
+
   close() {
     for (const consumer of this.consumers.values()) {
       consumer?.destroy();
     }
+    this.consumers.clear();
   }
 }
