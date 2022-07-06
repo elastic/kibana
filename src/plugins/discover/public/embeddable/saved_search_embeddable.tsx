@@ -291,7 +291,7 @@ export class SavedSearchEmbeddable
         });
         this.updateInput({ sort: sortOrderArr });
       },
-      sampleSize: 500,
+      sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
       onFilter: async (field, value, operator) => {
         let filters = generateFilters(
           this.filterManager,
