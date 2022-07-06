@@ -58,7 +58,7 @@ describe('Discover url generator', () => {
   test('can specify specific data view', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
-      dataViewId,
+      indexPatternId: dataViewId,
     });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
@@ -229,7 +229,7 @@ describe('Discover url generator', () => {
       test('when using default, sets data view ID in the generated URL', async () => {
         const { locator } = await setup();
         const { path } = await locator.getLocation({
-          dataViewId,
+          indexPatternId: dataViewId,
         });
 
         expect(path.indexOf(dataViewId) > -1).toBe(true);
@@ -239,7 +239,7 @@ describe('Discover url generator', () => {
         const { locator } = await setup();
         const { path } = await locator.getLocation({
           useHash: true,
-          dataViewId,
+          indexPatternId: dataViewId,
         });
 
         expect(path.indexOf(dataViewId) > -1).toBe(false);
@@ -250,7 +250,7 @@ describe('Discover url generator', () => {
       test('when using default, does not set data view ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
-          dataViewId,
+          indexPatternId: dataViewId,
         });
 
         expect(path.indexOf(dataViewId) > -1).toBe(false);
@@ -260,7 +260,7 @@ describe('Discover url generator', () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
           useHash: false,
-          dataViewId,
+          indexPatternId: dataViewId,
         });
 
         expect(path.indexOf(dataViewId) > -1).toBe(true);
