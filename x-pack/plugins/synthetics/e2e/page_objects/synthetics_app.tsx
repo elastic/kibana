@@ -66,6 +66,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       let isSuccessful: boolean = false;
       while (true) {
         if ((await page.$(this.byTestId('syntheticsMonitorListActions'))) === null) {
+          isSuccessful = true;
           break;
         }
         await page.click(this.byTestId('syntheticsMonitorListActions'), { delay: 800 });

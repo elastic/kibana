@@ -5,7 +5,7 @@
  * 2.0.
  */
 import uuid from 'uuid';
-import { journey, step, expect, before, Page } from '@elastic/synthetics';
+import { journey, step, expect, Page } from '@elastic/synthetics';
 import { FormMonitorType } from '../../../common/runtime_types/monitor_management';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 
@@ -148,15 +148,8 @@ const createMonitorJourney = ({
     async ({ page, params }: { page: Page; params: any }) => {
       const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
-      before(async () => {
-        await syntheticsApp.waitForLoadingToFinish();
+      step('Go to monitor management', async () => {
         await syntheticsApp.navigateToMonitorManagement();
-        const isSuccessful = await syntheticsApp.deleteMonitors();
-        expect(isSuccessful).toBeTruthy();
-      });
-
-      step('Go to add monitor', async () => {
-        await syntheticsApp.navigateToAddMonitor();
       });
 
       step('login to Kibana', async () => {
@@ -167,7 +160,15 @@ const createMonitorJourney = ({
         expect(await invalid.isVisible()).toBeFalsy();
       });
 
+      step('Ensure all montiors are deleted', async () => {
+        await syntheticsApp.navigateToMonitorManagement();
+        await syntheticsApp.waitForLoadingToFinish();
+        const isSuccessful = await syntheticsApp.deleteMonitors();
+        expect(isSuccessful).toBeTruthy();
+      });
+
       step(`create ${monitorName}`, async () => {
+        await syntheticsApp.navigateToAddMonitor();
         await syntheticsApp.createMonitor({ monitorConfig, monitorType });
         const isSuccessful = await syntheticsApp.confirmAndSave();
         expect(isSuccessful).toBeTruthy();
@@ -191,6 +192,7 @@ const createMonitorJourney = ({
 
       step('delete monitor', async () => {
         await syntheticsApp.navigateToMonitorManagement();
+        await syntheticsApp.findByText('Monitor name');
         const isSuccessful = await syntheticsApp.deleteMonitors();
         expect(isSuccessful).toBeTruthy();
       });
