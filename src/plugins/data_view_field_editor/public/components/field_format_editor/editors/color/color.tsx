@@ -33,14 +33,12 @@ export interface ColorFormatEditorFormatParams {
   colors: Color[];
 }
 
-type ColorFormatEditorProps = FormatEditorProps<ColorFormatEditorFormatParams>;
-
 export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorFormatParams> {
   static formatId = formatId;
-  constructor(props: ColorFormatEditorProps) {
+  constructor(props: FormatEditorProps<ColorFormatEditorFormatParams>) {
     super(props);
     this.onChange({
-      fieldType: props.fieldType, // FIXME: should this key be `type` ?
+      fieldType: props.fieldType, // FIXME: why add `fieldType` as an EditorFormatParam?
     } as unknown as ColorFormatEditorFormatParams);
   }
 
