@@ -8,10 +8,10 @@
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  ExceptionListTypeEnum,
   UpdateExceptionListSchemaDecoded,
   exceptionListSchema,
   updateExceptionListSchema,
-  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 

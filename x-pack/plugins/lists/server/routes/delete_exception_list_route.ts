@@ -9,9 +9,9 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   DeleteExceptionListSchemaDecoded,
+  ExceptionListTypeEnum,
   deleteExceptionListSchema,
   exceptionListSchema,
-  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
@@ -56,7 +56,10 @@ export const deleteExceptionListRoute = (router: ListsPluginRouter): void => {
             namespaceType,
           });
 
-          if (exceptionList != null && exceptionList.type === ExceptionListTypeEnum.DETECTION_RULE) {
+          if (
+            exceptionList != null &&
+            exceptionList.type === ExceptionListTypeEnum.DETECTION_RULE
+          ) {
             return siemResponse.error({
               body: `exception list type: "${ExceptionListTypeEnum.DETECTION_RULE}" cannot be deleted - it is a system only exception list`,
               statusCode: 405,

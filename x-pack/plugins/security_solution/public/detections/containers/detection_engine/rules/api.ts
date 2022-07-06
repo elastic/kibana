@@ -115,13 +115,17 @@ export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Pro
  *
  * @throws An error if response is not OK
  */
- export const createDefaultExceptionListForRule = async ({ list, ruleSoId, ruleId, signal }: PatchRuleProps): Promise<RulesSchema> =>
- KibanaServices.get().http.fetch<RulesSchema>(`${DETECTION_ENGINE_RULES_URL}/exceptions`, {
-   method: 'POST',
-   body: JSON.stringify({ list, rule_so_id: ruleSoId, rule_id: ruleId }),
-   signal,
- });
-
+export const createDefaultExceptionListForRule = async ({
+  list,
+  ruleSoId,
+  ruleId,
+  signal,
+}: PatchRuleProps): Promise<RulesSchema> =>
+  KibanaServices.get().http.fetch<RulesSchema>(`${DETECTION_ENGINE_RULES_URL}/exceptions`, {
+    method: 'POST',
+    body: JSON.stringify({ list, rule_so_id: ruleSoId, rule_id: ruleId }),
+    signal,
+  });
 
 /**
  * Preview provided Rule

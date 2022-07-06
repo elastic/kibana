@@ -26,7 +26,11 @@ import type {
   SeverityMappingOrUndefined,
   MaxSignalsOrUndefined,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ExceptionListTypeEnum, ListArray, ListArrayOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListTypeEnum,
+  ListArray,
+  ListArrayOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
 import type { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 import { SavedObjectReference } from '@kbn/core/server';
 import { RuleAction, RuleNotifyWhenType, SanitizedRule } from '@kbn/alerting-plugin/common';
@@ -473,7 +477,7 @@ export const legacyMigrate = async ({
  * @param muteAll If the existing alert has all actions muted
  * @param throttle If the existing alert has a throttle set
  */
- export const checkExceptionListReferences = async ({
+export const checkExceptionListReferences = async ({
   ruleSoId,
   rulesClient,
   exceptionLists,
@@ -482,45 +486,53 @@ export const legacyMigrate = async ({
   rulesClient: RulesClient;
   exceptionLists: ListArray | undefined;
 }): Promise<null | ListArray> => {
-  console.log({ LISTS: exceptionLists})
+  console.log({ LISTS: exceptionLists });
 
   if (exceptionLists == null) {
     return null;
   }
 
-  const ruleDefaultExceptionLists = exceptionLists.filter((list) => list.type === ExceptionListTypeEnum.DETECTION_RULE);
+  const ruleDefaultExceptionLists = exceptionLists.filter(
+    (list) => list.type === ExceptionListTypeEnum.DETECTION_RULE
+  );
 
   if (!ruleDefaultExceptionLists.length) {
     return null;
   } else {
-    console.log({ RULE_ID: ruleSOId})
-    const foundReferences: Array<FindResult<RuleParams>> = await Promise.all(ruleDefaultExceptionLists.flatMap(({ type, id }) => {
-      const foundRules = rulesClient.find({
-        options: {
-          hasReference: {
-            type,
-            id,
-          }
-        },
-      });
-      return foundRules.data;
-    }));
-    console.log({ FOUND_REFERENCES: foundReferences})
+    console.log({ RULE_ID: ruleSOId });
+    const foundReferences: Array<FindResult<RuleParams>> = await Promise.all(
+      ruleDefaultExceptionLists.flatMap(({ type, id }) => {
+        const foundRules = rulesClient.find({
+          options: {
+            hasReference: {
+              type,
+              id,
+            },
+          },
+        });
+        return foundRules.data;
+      })
+    );
+    console.log({ FOUND_REFERENCES: foundReferences });
 
     if (!foundReferences.length) {
       return null;
     }
 
-    const {
-      referenceNotMatchingRule: foundReferenceNotMatchingRule,
-      listsNotMatchingRule
-    } = foundReferences.reduce((acc, foundReference) => {
-      if (acc || foundReference.id !== ruleSoId) {
-        return { referenceNotMatchingRule: true, listsNotMatchingRule: [...acc.listsNotMatchingRule, foundReference] };
-      }
+    const { referenceNotMatchingRule: foundReferenceNotMatchingRule, listsNotMatchingRule } =
+      foundReferences.reduce(
+        (acc, foundReference) => {
+          if (acc || foundReference.id !== ruleSoId) {
+            return {
+              referenceNotMatchingRule: true,
+              listsNotMatchingRule: [...acc.listsNotMatchingRule, foundReference],
+            };
+          }
 
-      return acc;
-    }, { referenceNotMatchingRule: false, listsNotMatchingRule: [] });
+          return acc;
+        },
+        { referenceNotMatchingRule: false, listsNotMatchingRule: [] }
+      );
 
     if (!foundReferenceNotMatchingRule) {
       return null;

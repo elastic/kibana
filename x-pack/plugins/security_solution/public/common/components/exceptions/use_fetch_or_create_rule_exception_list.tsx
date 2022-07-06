@@ -6,25 +6,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import type {
-  List,
-  ListArray,
-  ExceptionListSchema,
-  CreateExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import {
-  fetchExceptionListById,
-  addExceptionList,
-  addEndpointExceptionList,
-} from '@kbn/securitysolution-list-api';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { HttpStart } from '@kbn/core/public';
 
 import { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import {
   createDefaultExceptionListForRule,
   fetchRuleById,
-  patchRule,
 } from '../../../detections/containers/detection_engine/rules/api';
 
 export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSchema | null];
@@ -74,7 +62,7 @@ export const useFetchOrCreateRuleExceptionList = ({
           list_id: undefined,
           tags: undefined,
           meta: undefined,
-        }
+        },
       });
 
       return Promise.resolve(newExceptionList);
@@ -93,9 +81,8 @@ export const useFetchOrCreateRuleExceptionList = ({
         const ruleResponse = await fetchRule();
         // const exceptionLists = await fetchRuleExceptionLists(ruleResponse);
 
-        
-          const exceptionListToUse = await createAndAssociateExceptionList(ruleResponse);
-        console.log({exceptionListToUse})
+        const exceptionListToUse = await createAndAssociateExceptionList(ruleResponse);
+        console.log({ exceptionListToUse });
 
         if (isSubscribed) {
           setExceptionList(exceptionListToUse);

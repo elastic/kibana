@@ -7,7 +7,10 @@
 
 import * as t from 'io-ts';
 
-import { createExceptionListSchema, CreateExceptionListSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  createExceptionListSchema,
+  CreateExceptionListSchemaDecoded,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { RequiredKeepUndefined } from '@kbn/osquery-plugin/common/types';
 
 export const createRuleDefaultExceptionListSchema = t.exact(
@@ -18,8 +21,9 @@ export const createRuleDefaultExceptionListSchema = t.exact(
   })
 );
 
-export type CreateRuleDefaultExceptionListSchema = t.TypeOf<typeof createRuleDefaultExceptionListSchema>;
-
+export type CreateRuleDefaultExceptionListSchema = t.TypeOf<
+  typeof createRuleDefaultExceptionListSchema
+>;
 
 // This type is used after a decode since some things are defaults after a decode.
 export type CreateRuleDefaultExceptionListSchemaDecoded = Omit<
