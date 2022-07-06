@@ -5,8 +5,8 @@
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
-# Virtual teams
-/x-pack/plugins/rule_registry/ @elastic/rac @elastic/response-ops
+# Alerting commmunal ownership
+/x-pack/plugins/rule_registry/ @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 
 # Data Discovery
 /src/plugins/discover/ @elastic/kibana-data-discovery
@@ -240,7 +240,7 @@
 /packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
 /packages/kbn-test/ @elastic/kibana-operations
-/packages/kbn-type-summarizer/ @elastic/kibana-operations
+/packages/kbn-type-summarizer*/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-npm/ @elastic/kibana-operations
 /packages/kbn-ui-shared-deps-src/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
@@ -595,6 +595,7 @@ x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 
 # Cloud Security Posture
 /x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+/x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
