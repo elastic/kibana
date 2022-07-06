@@ -22,7 +22,7 @@ const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<
 });
 
 const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<
-  { fields: string },
+  { fields?: string },
   unknown
 > = (doc) => {
   if (!doc.attributes.fields) return doc;
