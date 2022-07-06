@@ -15,16 +15,14 @@ export function normalizeTable(data: Datatable, xAccessor?: string | ExpressionV
   const xColumn = xAccessor && getColumnByAccessor(xAccessor, data.columns);
   if (xColumn && xColumn?.meta.type === 'date') {
     const xColumnId = xColumn.id;
-    const rows = data.rows.reduce<Datatable['rows']>((normalizedRows, row) => {
-      return [
-        ...normalizedRows,
-        {
-          ...row,
-          [xColumnId]:
-            typeof row[xColumnId] === 'string' ? moment(row[xColumnId]).valueOf() : row[xColumnId],
-        },
-      ];
-    }, []);
+    if (!data.rows.some((row) => typeof row[xColumnId] === 'string')) return data;
+    const rows = data.rows.map((row) => {
+      return {
+        ...row,
+        [xColumnId]:
+          typeof row[xColumnId] === 'string' ? moment(row[xColumnId]).valueOf() : row[xColumnId],
+      };
+    });
     return { ...data, rows };
   }
 
