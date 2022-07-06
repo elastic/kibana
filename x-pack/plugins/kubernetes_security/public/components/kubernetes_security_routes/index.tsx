@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
@@ -18,12 +18,9 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { CoreStart } from '@kbn/core/public';
-import type { StartPlugins } from '../../types';
 import {
   KUBERNETES_PATH,
   KUBERNETES_TITLE,
@@ -36,6 +33,7 @@ import { KubernetesWidget } from '../kubernetes_widget';
 import { PercentWidget } from '../percent_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { AggregateResult } from '../../../common/types/aggregate';
+import { useLastUpdated } from '../../hooks/use_last_updated';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
 import { WidgetsToggle } from '../widgets_toggle';
@@ -51,7 +49,7 @@ const KubernetesSecurityRoutesComponent = ({
     false
   );
   const styles = useStyles();
-  const { timelines: timelinesUi } = useKibana<CoreStart & StartPlugins>().services;
+  const lastUpdated = useLastUpdated(globalFilter);
 
   const onReduceInteractiveAggs = useCallback(
     (result: AggregateResult[]): Record<string, number> =>
@@ -81,10 +79,6 @@ const KubernetesSecurityRoutesComponent = ({
     setShouldHideWidgets(!shouldHideWidgets);
   }, [setShouldHideWidgets, shouldHideWidgets]);
 
-  // Only reset updated at on refresh or after globalFilter gets updated
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updatedAt = useMemo(() => Date.now(), [globalFilter]);
-
   return (
     <Switch>
       <Route strict exact path={KUBERNETES_PATH}>
@@ -96,11 +90,7 @@ const KubernetesSecurityRoutesComponent = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.titleActions}>
-            <div css={styles.updatedAt}>
-              {timelinesUi.getLastUpdated({
-                updatedAt: updatedAt || Date.now(),
-              })}
-            </div>
+            <div css={styles.updatedAt}>{lastUpdated}</div>
             <WidgetsToggle
               shouldHideWidgets={shouldHideWidgets}
               handleToggleHideWidgets={handleToggleHideWidgets}
