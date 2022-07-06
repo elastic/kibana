@@ -166,6 +166,24 @@ describe('discover responsive sidebar', function () {
     expect(findTestSubject(comp, 'indexPattern-add-field_btn').length).toBe(1);
   });
 
+  it('should not show "Add a field" button on the sql mode', () => {
+    const initialProps = getCompProps();
+    const propsWithTextBasedMode = {
+      ...initialProps,
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: [],
+        textBasedLanguageMode: 'sql',
+      }) as unknown as DataDocuments$,
+    };
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverSidebarResponsive {...propsWithTextBasedMode} />
+      </KibanaContextProvider>
+    );
+    expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
+  });
+
   it('should not show "Add a field" button in viewer mode', () => {
     const mockedServicesInViewerMode = {
       ...mockServices,

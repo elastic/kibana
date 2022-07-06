@@ -87,3 +87,58 @@ test('getTopNavLinks result', () => {
     ]
   `);
 });
+
+test('getTopNavLinks result for sql mode', () => {
+  const topNavLinks = getTopNavLinks({
+    indexPattern: indexPatternMock,
+    navigateTo: jest.fn(),
+    onOpenInspector: jest.fn(),
+    savedSearch: savedSearchMock,
+    services,
+    state,
+    searchSource: {} as ISearchSource,
+    onOpenSavedSearch: () => {},
+    textBasedLanguageMode: 'sql',
+  });
+  expect(topNavLinks).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "description": "Options",
+        "id": "options",
+        "label": "Options",
+        "run": [Function],
+        "testId": "discoverOptionsButton",
+      },
+      Object {
+        "description": "New Search",
+        "id": "new",
+        "label": "New",
+        "run": [Function],
+        "testId": "discoverNewButton",
+      },
+      Object {
+        "description": "Open Saved Search",
+        "id": "open",
+        "label": "Open",
+        "run": [Function],
+        "testId": "discoverOpenButton",
+      },
+      Object {
+        "description": "Open Inspector for search",
+        "id": "inspect",
+        "label": "Inspect",
+        "run": [Function],
+        "testId": "openInspectorButton",
+      },
+      Object {
+        "description": "Save Search",
+        "emphasize": true,
+        "iconType": "save",
+        "id": "save",
+        "label": "Save",
+        "run": [Function],
+        "testId": "discoverSaveButton",
+      },
+    ]
+  `);
+});

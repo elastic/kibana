@@ -31,9 +31,7 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
   discoverServiceMock.capabilities.discover!.save = savePermissions;
 
   return {
-    stateContainer: {
-      stateContainer: {} as GetStateReturn,
-    } as unknown as GetStateReturn,
+    stateContainer: {} as GetStateReturn,
     indexPattern: indexPatternMock,
     savedSearch: savedSearchMock,
     navigateTo: jest.fn(),

@@ -25,6 +25,7 @@ import {
 } from '../hooks/use_saved_search';
 
 import { fetchDocuments } from './fetch_documents';
+import { fetchSql } from './fetch_sql';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
@@ -32,6 +33,10 @@ import { buildDataTableRecord } from '../../../utils/build_data_record';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
+}));
+
+jest.mock('./fetch_sql', () => ({
+  fetchSql: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('./fetch_chart', () => ({
@@ -45,6 +50,7 @@ jest.mock('./fetch_total_hits', () => ({
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
 const mockFetchTotalHits = fetchTotalHits as unknown as jest.MockedFunction<typeof fetchTotalHits>;
 const mockFetchChart = fetchChart as unknown as jest.MockedFunction<typeof fetchChart>;
+const mockFetchSQL = fetchSql as unknown as jest.MockedFunction<typeof fetchSql>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
   const promise = firstValueFrom(
@@ -89,6 +95,7 @@ describe('test fetchAll', () => {
     searchSource = savedSearchMock.searchSource.createChild();
 
     mockFetchDocuments.mockReset().mockResolvedValue([]);
+    mockFetchSQL.mockReset().mockResolvedValue([]);
     mockFetchTotalHits.mockReset().mockResolvedValue(42);
     mockFetchChart
       .mockReset()
@@ -224,6 +231,40 @@ describe('test fetchAll', () => {
         recordRawType: 'document',
       },
       // Here should be no COMPLETE coming anymore
+    ]);
+  });
+
+  test('emits loading and documents on documents$ correctly for SQL query', async () => {
+    const collect = subjectCollector(subjects.documents$);
+    const hits = [
+      { _id: '1', _index: 'logs' },
+      { _id: '2', _index: 'logs' },
+    ];
+    const documents = hits.map((hit) => buildDataTableRecord(hit, indexPatternMock));
+    mockFetchSQL.mockResolvedValue(documents);
+    deps = {
+      appStateContainer: {
+        getState: () => {
+          return { interval: 'auto', query: { sql: 'SELECT * from foo' } };
+        },
+      } as unknown as ReduxLikeStateContainer<AppState>,
+      abortController: new AbortController(),
+      data: discoverServiceMock.data,
+      inspectorAdapters: { requests: new RequestAdapter() },
+      searchSessionId: '123',
+      initialFetchStatus: FetchStatus.UNINITIALIZED,
+      useNewFieldsApi: true,
+      savedSearch: savedSearchMock,
+      services: discoverServiceMock,
+    };
+    await fetchAll(subjects, searchSource, false, deps);
+    expect(await collect()).toEqual([
+      { fetchStatus: FetchStatus.UNINITIALIZED },
+      { fetchStatus: FetchStatus.LOADING, textBasedLanguageMode: 'sql' },
+      {
+        fetchStatus: FetchStatus.COMPLETE,
+        result: documents,
+      },
     ]);
   });
 });

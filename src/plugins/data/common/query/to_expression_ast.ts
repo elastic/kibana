@@ -5,7 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  getAggregateQueryMode,
+  getIndexPatternFromSQLQuery,
+} from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
@@ -15,14 +19,6 @@ import {
   aggregateQueryToAst,
   timerangeToAst,
 } from '..';
-
-function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
-  const matches = sqlQuery?.match(/FROM\s+"([^\s]+)"/);
-  if (matches) {
-    return matches[1];
-  }
-  return '';
-}
 
 interface Args extends QueryState {
   dataViewsService: DataViewsContract;
@@ -43,6 +39,7 @@ export async function queryStateToExpressionAst({ filters, query, time, dataView
 
   if (query && isOfAggregateQueryType(query)) {
     const mode = getAggregateQueryMode(query);
+    // sql query
     if (mode === 'sql') {
       const idxPattern = getIndexPatternFromSQLQuery(query.sql);
       const idsTitles = await dataViewsService.getIdsWithTitle();

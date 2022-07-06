@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
 import { EuiTourStep } from '@elastic/eui';
-import type { DataViewPickerPropsExtended } from '.';
+import { DataViewPickerPropsExtended, TextBasedLanguages } from '.';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
@@ -138,5 +138,22 @@ describe('DataView component', () => {
     );
     component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
     expect(addDataViewSpy).toHaveBeenCalled();
+  });
+
+  it('should render the text based languages panels if languages are given', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          showNewMenuTour: true,
+          textBasedLanguages: [TextBasedLanguages.ESQL, TextBasedLanguages.SQL],
+          textBasedLanguage: TextBasedLanguages.SQL,
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    const text = component.find('[data-test-subj="select-text-based-language-panel"]');
+    expect(text.length).not.toBe(0);
   });
 });

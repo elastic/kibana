@@ -11,7 +11,7 @@ import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useSavedSearch } from './use_saved_search';
-import { getState } from '../services/discover_state';
+import { getState, AppState } from '../services/discover_state';
 import { uiSettingsMock } from '../../../__mocks__/ui_settings';
 import { useDiscoverState } from './use_discover_state';
 import { FetchStatus } from '../../types';
@@ -127,5 +127,32 @@ describe('test useSavedSearch', () => {
 
     result.current.reset();
     expect(result.current.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
+  });
+
+  test('useSavedSearch returns textBasedLanguageMode', async () => {
+    const { history, searchSessionManager } = createSearchSessionMock();
+    const stateContainer = getState({
+      getStateDefaults: () =>
+        ({
+          index: 'the-index-pattern-id',
+          query: { sql: 'SELECT * FROM test' },
+        } as unknown as AppState),
+      history,
+      uiSettings: uiSettingsMock,
+    });
+
+    const { result } = renderHook(() => {
+      return useSavedSearch({
+        initialFetchStatus: FetchStatus.LOADING,
+        savedSearch: savedSearchMock,
+        searchSessionManager,
+        searchSource: savedSearchMock.searchSource.createCopy(),
+        services: discoverServiceMock,
+        stateContainer,
+        useNewFieldsApi: true,
+      });
+    });
+
+    expect(result.current.data$.main$.getValue().textBasedLanguageMode).toBe('sql');
   });
 });

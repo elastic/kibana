@@ -9,6 +9,7 @@
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
@@ -42,7 +43,8 @@ setHeaderActionMenuMounter(jest.fn());
 function mountComponent(
   indexPattern: DataView,
   prevSidebarClosed?: boolean,
-  mountOptions: { attachTo?: HTMLElement } = {}
+  mountOptions: { attachTo?: HTMLElement } = {},
+  query?: Query | AggregateQuery
 ) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
@@ -148,7 +150,7 @@ function mountComponent(
     savedSearchData$,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-    state: { columns: [] },
+    state: { columns: [], query },
     stateContainer: {
       setAppState: () => {},
       appStateContainer: {
@@ -177,6 +179,16 @@ describe('Discover component', () => {
   test('selected index pattern with time field displays chart toggle', () => {
     const component = mountComponent(indexPatternWithTimefieldMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+  });
+
+  test('sql query displays no chart toggle', () => {
+    const component = mountComponent(
+      indexPatternWithTimefieldMock,
+      false,
+      {},
+      { sql: 'SELECT * FROM test' }
+    );
+    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
 
   test('the saved search title h1 gains focus on navigate', () => {

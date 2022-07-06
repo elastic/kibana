@@ -56,7 +56,7 @@ export function DataViewsList({
               }
             )}
           >
-            <EuiIcon type="alert" color="warning" />
+            <EuiIcon type="alert" color="warning" data-test-subj="textBasedLang-warning" />
           </EuiToolTip>
         ) : null,
       }))}

@@ -9,6 +9,7 @@
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
+import { getIndexPatternFromSQLQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 export const useDebounceWithOptions = (
@@ -32,15 +33,6 @@ export const useDebounceWithOptions = (
     newDeps
   );
 };
-
-function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
-  const sql = sqlQuery?.replaceAll('"', '');
-  const matches = sql?.match(/FROM\s+([\w*]+)/);
-  if (matches) {
-    return matches[1];
-  }
-  return '';
-}
 
 export const parseErrors = (errors: Error[], code: string) => {
   return errors.map((error) => {
@@ -72,25 +64,26 @@ export const parseErrors = (errors: Error[], code: string) => {
         let indexWithError = 1;
         let lineWithError = '';
         linesText.forEach((line, index) => {
-          if (line.includes('FROM')) {
+          if (line.includes('FROM') || line.includes('from')) {
             indexWithError = index + 1;
             lineWithError = line;
           }
         });
+        const lineWithErrorUpperCase = lineWithError.toUpperCase();
         return {
           message: error.message,
-          startColumn: lineWithError.indexOf('FROM') + 1,
+          startColumn: lineWithErrorUpperCase.indexOf('FROM') + 1,
           startLineNumber: indexWithError,
-          endColumn: lineWithError.indexOf('FROM') + 1 + errorLength,
+          endColumn: lineWithErrorUpperCase.indexOf('FROM') + 1 + errorLength,
           endLineNumber: indexWithError,
           severity: monaco.MarkerSeverity.Error,
         };
       } else {
         return {
           message: error.message,
-          startColumn: code.indexOf('FROM') + 1,
+          startColumn: code.toUpperCase().indexOf('FROM') + 1,
           startLineNumber: 1,
-          endColumn: code.indexOf('FROM') + 1 + errorLength,
+          endColumn: code.toUpperCase().indexOf('FROM') + 1 + errorLength,
           endLineNumber: 1,
           severity: monaco.MarkerSeverity.Error,
         };
@@ -116,16 +109,20 @@ export const getDocumentationSections = async (language: string) => {
     items: Array<{ label: string; description?: JSX.Element }>;
   }> = [];
   if (language === 'sql') {
-    const { comparisonOperators, logicalOperators, mathOperators, initialSection } = await import(
-      './sql_documentation_sections'
-    );
+    const {
+      comparisonOperators,
+      logicalOperators,
+      mathOperators,
+      initialSection,
+      aggregateFunctions,
+    } = await import('./sql_documentation_sections');
     groups.push({
       label: i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.howItWorks', {
         defaultMessage: 'How it works',
       }),
       items: [],
     });
-    groups.push(comparisonOperators, logicalOperators, mathOperators);
+    groups.push(comparisonOperators, logicalOperators, mathOperators, aggregateFunctions);
     return {
       groups,
       initialSection,

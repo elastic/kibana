@@ -59,4 +59,83 @@ describe('queryStateToExpressionAst', () => {
       }
     `);
   });
+
+  it('returns an object with the correct structure for an SQL query', async () => {
+    const dataViewsService = {
+      getIdsWithTitle: jest.fn(() => {
+        return [
+          {
+            title: 'foo',
+            id: 'bar',
+          },
+        ];
+      }),
+      get: jest.fn(() => {
+        return {
+          title: 'foo',
+          id: 'bar',
+          timeFieldName: 'baz',
+        };
+      }),
+    } as unknown as DataViewsContract;
+    const actual = await queryStateToExpressionAst({
+      filters: [],
+      query: { sql: 'SELECT * FROM foo' },
+      time: {
+        from: 'now',
+        to: 'now+7d',
+      },
+      dataViewsService,
+    });
+
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {},
+            "function": "kibana",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {
+              "timeRange": Array [
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "from": Array [
+                          "now",
+                        ],
+                        "to": Array [
+                          "now+7d",
+                        ],
+                      },
+                      "function": "timerange",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
+              ],
+            },
+            "function": "kibana_context",
+            "type": "function",
+          },
+          Object {
+            "arguments": Object {
+              "query": Array [
+                "SELECT * FROM foo",
+              ],
+              "timeField": Array [
+                "baz",
+              ],
+            },
+            "function": "essql",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
+  });
 });

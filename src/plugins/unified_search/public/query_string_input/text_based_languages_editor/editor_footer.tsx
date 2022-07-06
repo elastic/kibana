@@ -41,13 +41,14 @@ export const EditorFooter = memo(function EditorFooter({
     <EuiFlexGroup
       gutterSize="s"
       justifyContent="spaceBetween"
+      data-test-subj="unifiedTextLangEditor-footer"
       css={containerCSS}
       responsive={false}
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
+            <EuiText size="s" color="subdued" data-test-subj="unifiedTextLangEditor-footer-lines">
               <p>
                 {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.lineCount', {
                   defaultMessage: '{count} {count, plural, one {line} other {lines}}',
@@ -91,7 +92,7 @@ export const EditorFooter = memo(function EditorFooter({
                     isOpen={isPopoverOpen}
                     closePopover={() => setIsPopoverOpen(false)}
                   >
-                    <div style={{ width: 300 }}>
+                    <div style={{ width: 500 }}>
                       <EuiPopoverTitle paddingSize="s">
                         {i18n.translate(
                           'unifiedSearch.query.textBasedLanguagesEditor.errorsTitle',

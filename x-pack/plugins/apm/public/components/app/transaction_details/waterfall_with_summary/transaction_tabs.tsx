@@ -125,6 +125,7 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
   const framePaddingMs = 1000 * 60 * 60 * 24; // 24 hours
   return (
     <LogStream
+      logView={{ type: 'log-view-reference', logViewId: 'default' }}
       startTimestamp={startTimestamp - framePaddingMs}
       endTimestamp={endTimestamp + framePaddingMs}
       query={`trace.id:"${transaction.trace.id}" OR "${transaction.trace.id}"`}
