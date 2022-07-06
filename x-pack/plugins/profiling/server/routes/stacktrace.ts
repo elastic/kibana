@@ -288,8 +288,8 @@ export async function searchStackTraces(
   );
 
   const stackTraces = new Map<StackTraceID, StackTrace>();
-  const stackFrameDocIDs = new Set<string>(); // Set of unique FrameIDs
-  const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
+  const stackFrameDocIDs = new Set<string>();
+  const executableDocIDs = new Set<string>();
 
   await logExecutionLatency(logger, 'processing data', async () => {
     const traces = stackResponses.flatMap((response) => getHitsItems(response));
@@ -348,8 +348,8 @@ export async function mgetStackTraces(
 
   let totalFrames = 0;
   const stackTraces = new Map<StackTraceID, StackTrace>();
-  const stackFrameDocIDs = new Set<string>(); // Set of unique FrameIDs
-  const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
+  const stackFrameDocIDs = new Set<string>();
+  const executableDocIDs = new Set<string>();
 
   await logExecutionLatency(logger, 'processing data', async () => {
     // flatMap() is significantly slower than an explicit for loop
