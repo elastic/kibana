@@ -8,11 +8,15 @@
 
 import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest, LifecycleResponseFactory } from '@kbn/core-http-server';
+import type {
+  KibanaRequest,
+  LifecycleResponseFactory,
+  IKibanaResponse,
+} from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,
-  KibanaResponse,
+  isKibanaResponse,
   lifecycleResponseFactory,
 } from '../router';
 
@@ -56,7 +60,7 @@ export type OnPreAuthHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPreAuthToolkit
-) => OnPreAuthResult | KibanaResponse | Promise<OnPreAuthResult | KibanaResponse>;
+) => OnPreAuthResult | IKibanaResponse | Promise<OnPreAuthResult | IKibanaResponse>;
 
 /**
  * @public
@@ -73,7 +77,7 @@ export function adoptToHapiOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
 
     try {
       const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
-      if (result instanceof KibanaResponse) {
+      if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
 

@@ -12,11 +12,12 @@ import type {
   KibanaRequest,
   LifecycleResponseFactory,
   KibanaRequestState,
+  IKibanaResponse,
 } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,
-  KibanaResponse,
+  isKibanaResponse,
   lifecycleResponseFactory,
 } from '../router';
 
@@ -75,7 +76,7 @@ export type OnPreRoutingHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPreRoutingToolkit
-) => OnPreRoutingResult | KibanaResponse | Promise<OnPreRoutingResult | KibanaResponse>;
+) => OnPreRoutingResult | IKibanaResponse | Promise<OnPreRoutingResult | IKibanaResponse>;
 
 /**
  * @public
@@ -92,7 +93,7 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
 
     try {
       const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
-      if (result instanceof KibanaResponse) {
+      if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
 

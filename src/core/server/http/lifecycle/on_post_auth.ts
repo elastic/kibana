@@ -8,12 +8,16 @@
 
 import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest, LifecycleResponseFactory } from '@kbn/core-http-server';
+import type {
+  KibanaRequest,
+  LifecycleResponseFactory,
+  IKibanaResponse,
+} from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,
-  KibanaResponse,
   lifecycleResponseFactory,
+  isKibanaResponse,
 } from '../router';
 
 enum ResultType {
@@ -52,7 +56,7 @@ export type OnPostAuthHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,
   toolkit: OnPostAuthToolkit
-) => OnPostAuthResult | KibanaResponse | Promise<OnPostAuthResult | KibanaResponse>;
+) => OnPostAuthResult | IKibanaResponse | Promise<OnPostAuthResult | IKibanaResponse>;
 
 const toolkit: OnPostAuthToolkit = {
   next: postAuthResult.next,
@@ -72,7 +76,7 @@ export function adoptToHapiOnPostAuthFormat(fn: OnPostAuthHandler, log: Logger) 
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       const result = await fn(CoreKibanaRequest.from(request), lifecycleResponseFactory, toolkit);
-      if (result instanceof KibanaResponse) {
+      if (isKibanaResponse(result)) {
         return hapiResponseAdapter.handle(result);
       }
       if (postAuthResult.isNext(result)) {
