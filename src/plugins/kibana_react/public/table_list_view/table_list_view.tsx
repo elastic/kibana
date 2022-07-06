@@ -30,10 +30,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
-import { keyBy, sortBy, uniq, get } from 'lodash';
+import { keyBy, uniq, get } from 'lodash';
 import moment from 'moment';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
+import type { Action } from './actions';
+import { reducer } from './reducer';
 
 export interface Props<V> {
   createItem?(): void;
@@ -71,58 +73,6 @@ export interface Props<V> {
   children?: ReactNode | undefined;
 }
 
-interface OnFetchItemsAction {
-  type: 'onFetchItems';
-}
-interface OnFetchItemsSuccessAction<T> {
-  type: 'onFetchItemsSuccess';
-  data: {
-    response: {
-      total: number;
-      hits: T[];
-    };
-    listingLimit: number;
-  };
-}
-
-interface OnFetchItemsErrorAction {
-  type: 'onFetchItemsError';
-  data: HttpFetchError;
-}
-
-interface DeleteItemsActions {
-  type: 'onCancelDeleteItems' | 'onDeleteItems' | 'onItemsDeleted';
-}
-
-interface OnSelectionChangeAction<T> {
-  type: 'onSelectionChange';
-  data: T[];
-}
-
-interface OnTableChangeAction<T> {
-  type: 'onTableChange';
-  data: CriteriaWithPagination<T>;
-}
-
-interface OnClickDeleteItemsAction {
-  type: 'onClickDeleteItems';
-}
-
-interface OnFilterChangeAction {
-  type: 'onFilterChange';
-  data: string;
-}
-
-type Action<T> =
-  | OnFetchItemsAction
-  | OnFetchItemsSuccessAction<T>
-  | OnFetchItemsErrorAction
-  | DeleteItemsActions
-  | OnSelectionChangeAction<T>
-  | OnTableChangeAction<T>
-  | OnClickDeleteItemsAction
-  | OnFilterChangeAction;
-
 export interface State<T = unknown> {
   items: T[];
   hasInitialFetchReturned: boolean;
@@ -140,94 +90,6 @@ export interface State<T = unknown> {
     field: keyof T;
     direction: Direction;
   };
-}
-
-function reducer<T>(state: State<T>, action: Action<T>): State<T> {
-  switch (action.type) {
-    case 'onFetchItems': {
-      return {
-        ...state,
-        isFetchingItems: true,
-      };
-    }
-
-    case 'onFetchItemsSuccess': {
-      return {
-        ...state,
-        hasInitialFetchReturned: true,
-        isFetchingItems: false,
-        items: !state.filter
-          ? sortBy<T>(action.data.response.hits, 'title')
-          : action.data.response.hits,
-        totalItems: action.data.response.total,
-        showLimitError: action.data.response.total > action.data.listingLimit,
-      };
-    }
-    case 'onFetchItemsError': {
-      return {
-        ...state,
-        hasInitialFetchReturned: true,
-        isFetchingItems: false,
-        items: [],
-        totalItems: 0,
-        showLimitError: false,
-        fetchError: action.data,
-      };
-    }
-    case 'onFilterChange': {
-      return {
-        ...state,
-        filter: action.data,
-        isFetchingItems: true,
-      };
-    }
-    case 'onTableChange': {
-      const tableSort = action.data.sort ?? state.tableSort;
-      return {
-        ...state,
-        pagination: {
-          ...state.pagination,
-          pageIndex: action.data.page.index,
-          pageSize: action.data.page.size,
-        },
-        tableSort,
-      };
-    }
-    case 'onClickDeleteItems': {
-      return {
-        ...state,
-        showDeleteModal: true,
-      };
-    }
-    case 'onDeleteItems': {
-      return {
-        ...state,
-        isDeletingItems: true,
-      };
-    }
-    case 'onCancelDeleteItems': {
-      return {
-        ...state,
-        showDeleteModal: false,
-      };
-    }
-    case 'onItemsDeleted': {
-      return {
-        ...state,
-        isDeletingItems: false,
-        selectedIds: [],
-        showDeleteModal: false,
-      };
-    }
-    case 'onSelectionChange': {
-      return {
-        ...state,
-        selectedIds: action.data
-          .map((item) => (item as unknown as { id?: string })?.id)
-          .filter((id): id is string => Boolean(id)),
-      };
-    }
-  }
 }
 
 function TableListView<T>({
