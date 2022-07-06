@@ -16,6 +16,7 @@ export interface DimensionsVisParam {
   metric: ExpressionValueVisDimension | string;
   secondaryMetric?: ExpressionValueVisDimension | string;
   breakdownBy?: ExpressionValueVisDimension | string;
+  progressMax?: ExpressionValueVisDimension | string;
 }
 
 export interface MetricVisParam {
@@ -23,7 +24,6 @@ export interface MetricVisParam {
   extraText?: string;
   palette?: CustomPaletteState;
   progressMin?: number;
-  progressMax?: number;
   progressDirection: LayoutDirection;
   maxCols: number;
   minTiles?: number;

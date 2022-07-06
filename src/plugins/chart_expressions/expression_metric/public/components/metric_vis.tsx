@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { Chart, Metric, MetricSpec, RenderChangeListener, Settings } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Datatable, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { Datatable, DatatableRow, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { euiLightVars } from '@kbn/ui-theme';
 import { VisParams } from '../../common';
@@ -145,17 +145,23 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
 
   const metricConfigs: MetricSpec['data'][number] = [];
 
-  const useProgressBar =
-    typeof config.metric.progressMin === 'number' && typeof config.metric.progressMax === 'number';
+  let getProgressBarConfig = (_row: DatatableRow) => ({});
+
+  if (typeof config.metric.progressMin === 'number' && config.dimensions.progressMax) {
+    const maxColId = getColumnByAccessor(config.dimensions.progressMax, data.columns)?.id;
+    if (maxColId) {
+      getProgressBarConfig = (_row: DatatableRow) => ({
+        domain: {
+          min: config.metric.progressMin,
+          max: _row[maxColId],
+        },
+        progressBarDirection: config.metric.progressDirection,
+      });
+    }
+  }
 
   const commonProps = {
     valueFormatter: formatPrimaryMetric,
-    ...(useProgressBar
-      ? {
-          domain: { min: config.metric.progressMin, max: config.metric.progressMax },
-          progressBarDirection: config.metric.progressDirection,
-        }
-      : {}),
   };
 
   if (!breakdownByColumn) {
@@ -174,6 +180,7 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
         </span>
       ),
       color: getColor(value, config.metric.palette),
+      ...getProgressBarConfig(data.rows[0]),
     });
   }
 
@@ -194,6 +201,7 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
           </span>
         ),
         color: getColor(value, config.metric.palette),
+        ...getProgressBarConfig(row),
       });
     }
   }

@@ -25,7 +25,7 @@ export interface MetricArguments {
   subtitle?: string;
   extraText?: string;
   progressMin?: number;
-  progressMax?: number;
+  progressMax?: ExpressionValueVisDimension | string;
   progressDirection: LayoutDirection;
   palette?: PaletteOutput<CustomPaletteState>;
   maxCols: number;

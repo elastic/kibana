@@ -279,7 +279,7 @@ describe('MetricVisComponent', function () {
     });
 
     it('should display progress bar if min and max provided', () => {
-      const getConfig = (min?: number, max?: number, direction: LayoutDirection = 'vertical') =>
+      const getConfig = (min?: number, max?: string, direction: LayoutDirection = 'vertical') =>
         shallow(
           <MetricVis
             config={{
@@ -287,8 +287,11 @@ describe('MetricVisComponent', function () {
               metric: {
                 ...config.metric,
                 progressMin: min,
-                progressMax: max,
                 progressDirection: direction,
+              },
+              dimensions: {
+                ...config.dimensions,
+                progressMax: max,
               },
             }}
             data={table}
@@ -301,19 +304,22 @@ describe('MetricVisComponent', function () {
       expect(getConfig(0, undefined)).not.toHaveProperty('domain');
       expect(getConfig(0, undefined)).not.toHaveProperty('progressBarDirection');
 
-      expect(getConfig(undefined, 30)).not.toHaveProperty('domain');
-      expect(getConfig(undefined, 30)).not.toHaveProperty('progressBarDirection');
+      expect(getConfig(undefined, basePriceColumnId)).not.toHaveProperty('domain');
+      expect(getConfig(undefined, basePriceColumnId)).not.toHaveProperty('progressBarDirection');
 
-      const configWithProgress = getConfig(0, 30) as MetricWProgress;
+      expect(getConfig(undefined, 'foobar')).not.toHaveProperty('domain');
+      expect(getConfig(undefined, 'foobar')).not.toHaveProperty('progressBarDirection');
 
-      expect(configWithProgress.domain).toEqual({ min: 0, max: 30 });
+      const configWithProgress = getConfig(0, basePriceColumnId) as MetricWProgress;
+
+      expect(configWithProgress.domain).toEqual({ min: 0, max: table.rows[0][basePriceColumnId] });
       expect(configWithProgress.progressBarDirection).toBe('vertical');
 
       expect(configWithProgress).toMatchInlineSnapshot(`
         Object {
           "color": "#343741",
           "domain": Object {
-            "max": 30,
+            "max": 28.984375,
             "min": 0,
           },
           "extra": <span />,
@@ -325,9 +331,9 @@ describe('MetricVisComponent', function () {
         }
       `);
 
-      expect((getConfig(0, 30, 'horizontal') as MetricWProgress).progressBarDirection).toBe(
-        'horizontal'
-      );
+      expect(
+        (getConfig(0, basePriceColumnId, 'horizontal') as MetricWProgress).progressBarDirection
+      ).toBe('horizontal');
     });
     it('should fetch color from palette if provided', () => {
       // TODO
@@ -583,7 +589,10 @@ describe('MetricVisComponent', function () {
               metric: {
                 ...config.metric,
                 progressMin: 0,
-                progressMax: 30,
+              },
+              dimensions: {
+                ...config.dimensions,
+                progressMax: basePriceColumnId,
               },
             }}
             data={table}
@@ -598,7 +607,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#343741",
               "domain": Object {
-                "max": 30,
+                "max": 28.984375,
                 "min": 0,
               },
               "extra": <span />,
@@ -611,7 +620,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#343741",
               "domain": Object {
-                "max": 30,
+                "max": 28.984375,
                 "min": 0,
               },
               "extra": <span />,
@@ -624,7 +633,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#343741",
               "domain": Object {
-                "max": 30,
+                "max": 25.984375,
                 "min": 0,
               },
               "extra": <span />,
@@ -637,7 +646,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#343741",
               "domain": Object {
-                "max": 30,
+                "max": 25.784375,
                 "min": 0,
               },
               "extra": <span />,
@@ -650,7 +659,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#343741",
               "domain": Object {
-                "max": 30,
+                "max": 25.348011363636363,
                 "min": 0,
               },
               "extra": <span />,
@@ -665,7 +674,7 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#343741",
               "domain": Object {
-                "max": 30,
+                "max": 24.984375,
                 "min": 0,
               },
               "extra": <span />,

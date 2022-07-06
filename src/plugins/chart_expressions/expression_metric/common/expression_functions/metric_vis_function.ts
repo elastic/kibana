@@ -63,9 +63,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
     },
     progressMax: {
-      types: ['number'],
+      types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.progressMax.help.', {
-        defaultMessage: 'The number at which the progress bar should be full.',
+        defaultMessage: 'The dimension containing the maximum value.',
       }),
     },
     progressDirection: {
@@ -133,6 +133,16 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           }),
         ]);
       }
+
+      if (args.progressMax) {
+        argsTable.push([
+          [args.progressMax],
+          i18n.translate('expressionMetricVis.function.dimension.maximum', {
+            defaultMessage: 'Maximum',
+          }),
+        ]);
+      }
+
       const logTable = prepareLogTable(input, argsTable, true);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
@@ -149,7 +159,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             extraText: args.extraText,
             palette: args.palette?.params,
             progressMin: args.progressMin,
-            progressMax: args.progressMax,
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
@@ -158,6 +167,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             metric: args.metric,
             secondaryMetric: args.secondaryMetric,
             breakdownBy: args.breakdownBy,
+            progressMax: args.progressMax,
           },
         },
       },
