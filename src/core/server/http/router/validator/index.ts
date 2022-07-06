@@ -15,4 +15,3 @@ export type {
   RouteValidatorFullConfig,
   RouteValidationResultFactory,
 } from './validator';
-export { RouteValidationError } from './validator_error';

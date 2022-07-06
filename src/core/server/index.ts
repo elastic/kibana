@@ -476,25 +476,7 @@ export type {
 
 export type { CoreRequestHandlerContext } from './core_route_handler_context';
 
-/**
- * Base, abstract type for request handler contexts.
- * @public
- **/
-export interface RequestHandlerContextBase {
-  /**
-   * Await all the specified context parts and return them.
-   *
-   * @example
-   * ```ts
-   * const resolved = await context.resolve(['core', 'pluginA']);
-   * const esClient = resolved.core.elasticsearch.client;
-   * const pluginAService = resolved.pluginA.someService;
-   * ```
-   */
-  resolve: <T extends keyof Omit<this, 'resolve'>>(
-    parts: T[]
-  ) => Promise<AwaitedProperties<Pick<this, T>>>;
-}
+
 
 /**
  * Base context passed to a route handler, containing the `core` context part.

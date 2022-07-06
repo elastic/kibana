@@ -3172,6 +3172,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-http-context-server-internal@link:bazel-bin/packages/core/http/core-http-context-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-http-context-server-mocks@link:bazel-bin/packages/core/http/core-http-context-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-http-server-internal@link:bazel-bin/packages/core/http/core-http-server-internal":
   version "0.0.0"
   uid ""
@@ -6701,6 +6709,14 @@
   uid ""
 
 "@types/kbn__core-fatal-errors-browser@link:bazel-bin/packages/core/fatal-errors/core-fatal-errors-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-context-server-internal@link:bazel-bin/packages/core/http/core-http-context-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-http-context-server-mocks@link:bazel-bin/packages/core/http/core-http-context-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
