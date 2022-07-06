@@ -50,8 +50,8 @@ interface UseUncommonProcesses {
 }
 
 export const useUncommonProcesses = ({
-  filterQuery,
   endDate,
+  filterQuery,
   indexNames,
   skip = false,
   startDate,

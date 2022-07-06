@@ -17,6 +17,14 @@ jest.mock('../../../common/containers/use_search_strategy', () => ({
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
 
+const props = {
+  endDate: '2020-07-08T08:20:18.966Z',
+  indexNames: ['cool'],
+  skip: false,
+  startDate: '2020-07-07T08:20:18.966Z',
+  type: HostsType.page,
+};
+
 describe('useUncommonProcesses', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,14 +46,7 @@ describe('useUncommonProcesses', () => {
   });
 
   it('runs search', () => {
-    const localProps = {
-      startDate: '2020-07-07T08:20:18.966Z',
-      endDate: '2020-07-08T08:20:18.966Z',
-      indexNames: ['cool'],
-      type: HostsType.page,
-      skip: false,
-    };
-    renderHook(() => useUncommonProcesses(localProps), {
+    renderHook(() => useUncommonProcesses(props), {
       wrapper: TestProviders,
     });
 
@@ -54,10 +55,7 @@ describe('useUncommonProcesses', () => {
 
   it('does not run search when skip = true', () => {
     const localProps = {
-      startDate: '2020-07-07T08:20:18.966Z',
-      endDate: '2020-07-08T08:20:18.966Z',
-      indexNames: ['cool'],
-      type: HostsType.page,
+      ...props,
       skip: true,
     };
     renderHook(() => useUncommonProcesses(localProps), {
@@ -68,11 +66,7 @@ describe('useUncommonProcesses', () => {
   });
   it('skip = true will cancel any running request', () => {
     const localProps = {
-      startDate: '2020-07-07T08:20:18.966Z',
-      endDate: '2020-07-08T08:20:18.966Z',
-      indexNames: ['cool'],
-      type: HostsType.page,
-      skip: false,
+      ...props,
     };
     const { rerender } = renderHook(() => useUncommonProcesses(localProps), {
       wrapper: TestProviders,
