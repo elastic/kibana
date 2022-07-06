@@ -4,6 +4,8 @@ steps:
     agents:
       queue: n2-4-spot
     key: test-1
+    concurrency: 1
+    concurrency_group: 'kibana-reuse-test'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -15,7 +17,8 @@ steps:
     agents:
       queue: n2-4-spot
     key: test-2
-    depends_on: test-1
+    concurrency: 1
+    concurrency_group: 'kibana-reuse-test'
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -27,7 +30,8 @@ steps:
     agents:
       queue: n2-4-spot
     key: test-3
-    depends_on: test-2
+    concurrency: 1
+    concurrency_group: 'kibana-reuse-test'
     timeout_in_minutes: 60
     retry:
       automatic:
