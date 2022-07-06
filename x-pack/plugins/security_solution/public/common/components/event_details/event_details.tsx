@@ -81,7 +81,7 @@ interface Props {
   indexName: string;
   isAlert: boolean;
   isDraggable?: boolean;
-  rawEventData: AlertRawEventData | undefined;
+  rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
   hostRisk: HostRisk | null;
@@ -349,7 +349,11 @@ const EventDetailsComponent: React.FC<Props> = ({
     [rawEventData]
   );
 
-  const osqueryTab = useOsqueryTab({ isOsqueryDetectionActionEnabled, rawEventData, id });
+  const osqueryTab = useOsqueryTab({
+    isOsqueryDetectionActionEnabled,
+    rawEventData: rawEventData as AlertRawEventData,
+    id,
+  });
 
   const tabs = useMemo(() => {
     return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(

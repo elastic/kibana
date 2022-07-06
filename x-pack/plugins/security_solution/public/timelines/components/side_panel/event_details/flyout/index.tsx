@@ -9,7 +9,6 @@ import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { AlertRawEventData } from '../../../../../common/components/event_details/event_details';
 import { buildHostNamesFilter } from '../../../../../../common/search_strategy';
 import { HostRisk, useHostRiskScore } from '../../../../../risk_score/containers';
 import { useHostIsolationTools } from '../use_host_isolation_tools';
@@ -102,7 +101,7 @@ export const useToGetInternalFlyout = () => {
           isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           loading={isLoading || loading}
-          rawEventData={rawEventData as AlertRawEventData}
+          rawEventData={rawEventData}
           showAlertDetails={showAlertDetails}
           timelineId={TimelineId.casePage}
           isReadOnly={false}
