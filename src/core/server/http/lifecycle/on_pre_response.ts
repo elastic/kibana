@@ -52,7 +52,6 @@ const toolkit: OnPreResponseToolkit = {
 };
 
 /**
- * @public
  * Adopt custom request interceptor to Hapi lifecycle system.
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests.

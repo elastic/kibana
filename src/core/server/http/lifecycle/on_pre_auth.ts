@@ -36,7 +36,6 @@ const toolkit: OnPreAuthToolkit = {
 };
 
 /**
- * @public
  * Adopt custom request interceptor to Hapi lifecycle system.
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests before a user has been authenticated.

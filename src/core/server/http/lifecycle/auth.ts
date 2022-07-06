@@ -57,11 +57,6 @@ const authResult = {
   },
 };
 
-/**
- * Auth Headers map
- * @public
- */
-
 const toolkit: AuthToolkit = {
   authenticated: authResult.authenticated,
   notHandled: authResult.notHandled,
