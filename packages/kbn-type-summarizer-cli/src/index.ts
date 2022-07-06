@@ -11,7 +11,7 @@ import Fsp from 'fs/promises';
 import { Path } from '@kbn/type-summarizer-core';
 import { summarizePackage } from '@kbn/type-summarizer';
 
-import { parseCliConfig, findRepoRoot } from './cli_config';
+import { parseCliConfig } from './cli_config';
 
 import { run } from './run';
 
@@ -23,10 +23,6 @@ a package directory.
 Usage:
 
   node scripts/type_summarizer <pathToPackageDir>
-
-Flags:
-  --dump         Create a debug directory that includes the source maps and the source files to stick
-                  into https://sokra.github.io/source-map-visualization/
 `;
 
 run(
@@ -79,29 +75,6 @@ run(
 
     await Fsp.writeFile(Path.join(outputDir, 'index.d.ts'), code);
     await Fsp.writeFile(Path.join(outputDir, 'index.d.ts.map'), JSON.stringify(source.map));
-
-    if (argv.includes('--dump')) {
-      const dbg = Path.join(outputDir, '__debug__');
-      await Fsp.mkdir(dbg);
-      await Fsp.writeFile(Path.join(dbg, 'index.d.ts'), code);
-
-      const map = source.map.toJSON();
-
-      const sourceRoot = Path.join(findRepoRoot(), repoRelativePackageDir);
-      map.sources = await Promise.all(
-        map.sources.map(async (src) => {
-          const name = src.split('/').join('_');
-          const path = Path.join(dbg, name);
-          await Fsp.writeFile(path, await Fsp.readFile(Path.join(sourceRoot, src), 'utf8'));
-          return name;
-        })
-      );
-
-      await Fsp.writeFile(
-        Path.join(dbg, 'index.d.ts.map'),
-        JSON.stringify({ ...map, sourceRoot: '.' })
-      );
-    }
 
     log.success('type summary created for', packageName);
   },

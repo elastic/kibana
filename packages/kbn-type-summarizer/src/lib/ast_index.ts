@@ -23,8 +23,8 @@ export interface AstIndex {
 }
 
 /**
- * ImportedDecs represent the declarations of a "root symbol" which are found in
- * node_modules AND are imported in the source code. These will result in `import`
+ * ImportedDecs represent the declarations of a "root symbol" which is found in
+ * node_modules AND in imported in the source code. These will result in `import`
  * and `export` statements in the type summary, based on if they are used locally
  * or just re-exported.
  */
