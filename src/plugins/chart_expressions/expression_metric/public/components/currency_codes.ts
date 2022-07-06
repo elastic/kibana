@@ -7,7 +7,7 @@
  */
 
 // NOTE: needs to be kept in line with https://github.com/elastic/numeral-js/blob/kibana-fork/languages.js + USD
-export const currencyCodeMap: Record<string, string> = {
+const currencyCodeMap: Record<string, string> = {
   'en-$': 'USD',
   'be-nl-€': 'EUR',
   'chs-¥': 'CNY',
@@ -26,7 +26,7 @@ export const currencyCodeMap: Record<string, string> = {
   'hu-ft': 'HUF',
   'it-€': 'EUR',
   'ja-¥': 'JPY',
-  'nl-nl-€ ': 'EUR',
+  'nl-nl-€': 'EUR',
   'pl-pln': 'PLN',
   'pt-br-r$': 'BRL',
   'pt-pt-€': 'EUR',
@@ -36,4 +36,11 @@ export const currencyCodeMap: Record<string, string> = {
   'th-฿': 'THB',
   'tr-₺': 'TRY',
   'uk-ua-₴': 'UAH',
+};
+
+/**
+ * Returns currency code for use with the Intl API.
+ */
+export const getCurrencyCode = (localeId: string, currencySymbol: string) => {
+  return currencyCodeMap[`${localeId.trim()}-${currencySymbol.trim()}`.toLowerCase()];
 };

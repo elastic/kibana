@@ -18,7 +18,7 @@ import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { euiLightVars } from '@kbn/ui-theme';
 import { VisParams } from '../../common';
 import { getPaletteService, getThemeService, getFormatService } from '../services';
-import { currencyCodeMap } from './currency_code_map';
+import { getCurrencyCode } from './currency_codes';
 
 const defaultColor = euiLightVars.euiColorDarkestShade;
 
@@ -98,7 +98,7 @@ const getFormatter = (
       // @ts-expect-error
     } = numeral.languageData();
 
-    intlOptions.currency = currencyCodeMap[`${locale}-${currencySymbol}`.toLowerCase()];
+    intlOptions.currency = getCurrencyCode(locale, currencySymbol);
     intlOptions.style = 'currency';
   }
 
