@@ -33,8 +33,8 @@ paths:
     $ref: 'paths/api@cases@reporters.yaml'
 #  '/api/cases/status':
 #    $ref: 'paths/api@cases@status.yaml'
-#  '/api/cases/tags':
-#    $ref: 'paths/api@cases@tags.yaml'
+  '/api/cases/tags':
+    $ref: 'paths/api@cases@tags.yaml'
 #  '/api/cases/{caseId}':
 #    $ref: 'paths/api@cases@{caseid}.yaml'
 #  '/api/cases/{caseId}/alerts':
@@ -64,8 +64,8 @@ paths:
     $ref: 'paths/s@{spaceid}@api@cases@reporters.yaml'
  # '/s/{spaceId}/api/cases/status':
  #   $ref: 'paths/s@{spaceid}@api@cases@status.yaml'
- # '/s/{spaceId}/api/cases/tags':
- #   $ref: 'paths/s@{spaceid}@api@cases@tags.yaml'
+  '/s/{spaceId}/api/cases/tags':
+    $ref: 'paths/s@{spaceid}@api@cases@tags.yaml'
  # '/s/{spaceId}/api/cases/{caseId}':
  #   $ref: 'paths/s@{spaceid}@api@cases@{caseid}.yaml'
  # '/s/{spaceId}/api/cases/{caseId}/alerts':

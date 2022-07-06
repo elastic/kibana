@@ -86,7 +86,7 @@
         "signature": [
           "(params: ",
           "Params",
-          ") => ",
+          ", action?: ActionFn) => ",
           {
             "pluginId": "@kbn/shared-ux-prompt-no-data-views",
             "scope": "common",
@@ -107,6 +107,20 @@
             "description": [],
             "signature": [
               "Params"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/src/mocks.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.getStoryServices.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "ActionFn"
             ],
             "path": "packages/shared-ux/prompt/no_data_views/src/mocks.ts",
             "deprecated": false,
