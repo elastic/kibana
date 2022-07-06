@@ -123,6 +123,10 @@ export enum SecurityPageName {
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
   noPage = '',
+  cloudSecurityPosture = 'cloud_security_posture',
+  cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureFindings = 'cloud_security_posture-findings',
+  cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
 }
 
 export const EXPLORE_PATH = '/explore' as const;
@@ -151,6 +155,10 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 export const RESPONSE_ACTIONS_PATH = `${MANAGEMENT_PATH}/response_actions` as const;
+export const CLOUD_SECURITY_POSTURE_PATH = '/cloud_security_posture' as const;
+export const CLOUD_SECURITY_POSTURE_DASHBOARD_PATH = '/cloud_security_posture/dashboard' as const;
+export const CLOUD_SECURITY_POSTURE_FINDINGS_PATH = '/cloud_security_posture/findings' as const;
+export const CLOUD_SECURITY_POSTURE_BENCHMARKS_PATH = '/cloud_security_posture/benchmarks' as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
 export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
