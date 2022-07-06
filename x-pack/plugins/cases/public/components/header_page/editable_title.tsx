@@ -37,19 +37,13 @@ const MySpinner = styled(EuiLoadingSpinner)`
 `;
 
 export interface EditableTitleProps {
-  userCanCrud: boolean;
   isLoading: boolean;
   title: string;
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent: React.FC<EditableTitleProps> = ({
-  userCanCrud = false,
-  onSubmit,
-  isLoading,
-  title,
-}) => {
-  const { releasePhase } = useCasesContext();
+const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoading, title }) => {
+  const { releasePhase, permissions } = useCasesContext();
   const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [newTitle, setNewTitle] = useState<string>(title);
@@ -124,7 +118,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
   ) : (
     <Title title={title} releasePhase={releasePhase}>
       {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
-      {!isLoading && userCanCrud && (
+      {!isLoading && permissions.all && (
         <MyEuiButtonIcon
           aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
           iconType="pencil"
