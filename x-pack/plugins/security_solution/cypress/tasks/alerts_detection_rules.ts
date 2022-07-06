@@ -44,10 +44,8 @@ import {
   INPUT_FILE,
   RULE_IMPORT_OVERWRITE_CHECKBOX,
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
-  RULES_TAGS_POPOVER_BTN,
   RULES_TAGS_POPOVER_WRAPPER,
   INTEGRATIONS_POPOVER,
-  SELECTED_RULES_NUMBER_LABEL,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS } from '../screens/rule_details';
 import { LOADING_INDICATOR } from '../screens/security_header';
@@ -286,14 +284,4 @@ export const testTagsBadge = ($el: JQuery<HTMLElement>, tags: string[]) => {
   cy.get(RULES_TAGS_POPOVER_WRAPPER).should('have.text', tags.join(''));
   // close tags popover
   cy.wrap($el).click();
-};
-
-export const testAllTagsBadges = (tags: string[]) => {
-  cy.get(RULES_TAGS_POPOVER_BTN).each(($el) => {
-    testTagsBadge($el, tags);
-  });
-};
-
-export const testMultipleSelectedRulesLabel = (rulesCount: number) => {
-  cy.get(SELECTED_RULES_NUMBER_LABEL).should('have.text', `Selected ${rulesCount} rules`);
 };
