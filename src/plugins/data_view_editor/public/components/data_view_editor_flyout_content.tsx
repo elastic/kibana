@@ -307,7 +307,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     if (editData) {
       loadSources();
-      reloadMatchedIndices(editData.title.replace(/,\s+/, ','));
+      reloadMatchedIndices(removeSpaces(editData.title));
     }
     // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -315,7 +315,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   useEffect(() => {
     const timeFieldQuery = editData ? editData.title : title;
-    loadTimestampFieldOptions(timeFieldQuery.replace(/,\s+/, ','));
+    loadTimestampFieldOptions(removeSpaces(timeFieldQuery));
     if (!editData) getFields().timestampField?.setValue('');
     // We use the below eslint-disable as adding editData as a dependency create an infinite loop
     // eslint-disable-next-line react-hooks/exhaustive-deps
