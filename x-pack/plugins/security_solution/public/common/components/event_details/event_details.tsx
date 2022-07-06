@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
@@ -42,6 +42,7 @@ import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { HostRisk } from '../../../risk_score/containers';
 import { RelatedCases } from './related_cases';
+import { useKibana } from '../../lib/kibana';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -106,6 +107,27 @@ const TabContentWrapper = styled.div`
   position: relative;
 `;
 
+interface EntityResponse {
+  id: string;
+  name: string;
+  schema: object;
+}
+
+interface TreeResponse {
+  statsNodes: Array<{
+    data: object;
+    id: string;
+    parent: string;
+    stats: {
+      total: number;
+      byCategory: {
+        alerts?: number;
+      };
+    };
+  }>;
+  alertIds: string[];
+}
+
 const EventDetailsComponent: React.FC<Props> = ({
   browserFields,
   data,
@@ -120,6 +142,8 @@ const EventDetailsComponent: React.FC<Props> = ({
   handleOnEventClosed,
   isReadOnly,
 }) => {
+  const { http } = useKibana().services;
+
   const [selectedTabId, setSelectedTabId] = useState<EventViewId>(EventsViewType.summaryView);
   const handleTabClick = useCallback(
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
@@ -143,6 +167,39 @@ const EventDetailsComponent: React.FC<Props> = ({
     setRange,
     range,
   } = useInvestigationTimeEnrichment(eventFields);
+
+  const [alertIds, setAlertIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    // TODO: remove
+    const getProcessLineage = async (eventID: string) => {
+      const [{ id, schema }] = await http.get<EntityResponse[]>(`/api/endpoint/resolver/entity`, {
+        query: {
+          _id: eventID,
+          indices: ['.alerts-security.alerts-default', 'logs-*'],
+        },
+      });
+      const tree = await http.post<TreeResponse>(`/api/endpoint/resolver/tree`, {
+        body: JSON.stringify({
+          schema,
+          ancestors: 200,
+          descendants: 500,
+          indexPatterns: ['.alerts-security.alerts-default', 'logs-*'],
+          nodes: [id],
+          timeRange: { from: '2021-07-05T04:00:00.000Z', to: '2023-07-06T03:59:59.999Z' },
+          includeHits: true,
+        }),
+      });
+      return tree;
+    };
+    async function getAlerts() {
+      const { alertIds } = await getProcessLineage(id);
+      setAlertIds(alertIds);
+    }
+    getAlerts();
+  }, [http, id]);
+
+  console.log(alertIds);
 
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
@@ -176,6 +233,12 @@ const EventDetailsComponent: React.FC<Props> = ({
                 <EuiSpacer size="l" />
                 <Reason eventId={id} data={data} />
                 <RelatedCases eventId={id} isReadOnly={isReadOnly} />
+                <EuiSpacer size="l" />
+                <span>
+                  {`There are `}
+                  <b>{`${alertIds.length > 0 ? alertIds.length - 1 : 0}`}</b>
+                  {` other alerts in the process lineage of this alert`}
+                </span>
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{
@@ -215,6 +278,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         : undefined,
     [
       id,
+      alertIds,
       indexName,
       isAlert,
       data,
