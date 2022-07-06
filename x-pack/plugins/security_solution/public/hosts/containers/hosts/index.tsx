@@ -44,8 +44,8 @@ export interface HostsArgs {
 
 interface UseAllHost {
   docValueFields?: DocValueFields[];
-  filterQuery?: ESTermQuery | string;
   endDate: string;
+  filterQuery?: ESTermQuery | string;
   indexNames: string[];
   skip?: boolean;
   startDate: string;
@@ -54,8 +54,8 @@ interface UseAllHost {
 
 export const useAllHost = ({
   docValueFields,
-  filterQuery,
   endDate,
+  filterQuery,
   indexNames,
   skip = false,
   startDate,
