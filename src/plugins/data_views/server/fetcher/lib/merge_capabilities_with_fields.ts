@@ -11,7 +11,7 @@
 import { FieldDescriptor } from '../index_patterns_fetcher';
 
 export const mergeCapabilitiesWithFields = (
-  rollupIndexCapabilities: { [key: string]: any },
+  rollupIndexCapabilities: { [key: string]: unknown },
   fieldsFromFieldCapsApi: Record<string, FieldDescriptor>,
   previousFields: FieldDescriptor[] = []
 ) => {
@@ -20,7 +20,7 @@ export const mergeCapabilitiesWithFields = (
 
   Object.keys(rollupIndexCapabilities).forEach((agg) => {
     // Field names of the aggregation
-    const fields = Object.keys(rollupIndexCapabilities[agg]);
+    const fields = Object.keys(rollupIndexCapabilities[agg] as {});
 
     // Default field information
     const defaultField = {

@@ -8,13 +8,22 @@
 
 import { isEqual } from 'lodash';
 
+interface RollupJob {
+  fields: { [key: string]: Array<{ agg: string; interval: string }> };
+}
+
+// FIXME: remove usage of any
+interface MergedJobConfiguration {
+  aggs: { [key: string]: { [key: string]: { interval: any } } };
+}
+
 /**
  * Checks if given job configs are compatible by attempting to merge them
  *
  * @param jobs
  * @returns {boolean}
  */
-export function areJobsCompatible(jobs = []) {
+export function areJobsCompatible(jobs: RollupJob[] = []): boolean {
   if (!jobs || !Array.isArray(jobs)) return false;
   if (jobs.length <= 1) return true;
 
@@ -32,17 +41,17 @@ export function areJobsCompatible(jobs = []) {
  * by aggregation, then by field
  *
  * @param jobs
- * @returns {{}}
+ * @returns {boolean}
  */
-export function mergeJobConfigurations(jobs = []) {
+export function mergeJobConfigurations(jobs: RollupJob[] = []): MergedJobConfiguration {
   if (!jobs || !Array.isArray(jobs) || !jobs.length) {
     throw new Error('No capabilities available');
   }
 
-  const allAggs: { [key: string]: any } = {};
+  const allAggs: MergedJobConfiguration['aggs'] = {};
 
   // For each job, look through all of its fields
-  jobs.forEach((job: { fields: { [key: string]: any } }) => {
+  jobs.forEach((job) => {
     const fields = job.fields;
     const fieldNames = Object.keys(fields);
 

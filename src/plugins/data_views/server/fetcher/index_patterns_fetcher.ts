@@ -105,7 +105,7 @@ export class IndexPatternsFetcher {
    *  @param patternList string[]
    *  @return {Promise<string[]>}
    */
-  async validatePatternListActive(patternList: string[]) {
+  async validatePatternListActive(patternList: string[]): Promise<string[]> {
     const result = await Promise.all(
       patternList
         .map(async (index) => {

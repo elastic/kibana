@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mergeJobConfigurations } from './jobs_compatibility';
+import { mergeJobConfigurations, RollupJob } from './jobs_compatibility';
 
 /**
  * Get rollup job capabilities
@@ -14,15 +14,18 @@ import { mergeJobConfigurations } from './jobs_compatibility';
  * @param indices rollup job index capabilites
  */
 
-export function getCapabilitiesForRollupIndices(indices: Record<string, { rollup_jobs: any }>) {
+export function getCapabilitiesForRollupIndices(
+  indices: Record<string, { rollup_jobs: RollupJob[] }>
+) {
   const indexNames = Object.keys(indices);
-  const capabilities = {} as { [key: string]: any };
+  const capabilities: { [key: string]: { aggs: { [key: string]: unknown }; error?: string } } = {};
 
   indexNames.forEach((index) => {
     try {
       capabilities[index] = mergeJobConfigurations(indices[index].rollup_jobs);
     } catch (e) {
       capabilities[index] = {
+        ...capabilities[index],
         error: e.message,
       };
     }
