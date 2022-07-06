@@ -323,7 +323,6 @@ export async function pickTestGroupRunOrder() {
   const functionalGroups: Array<{
     title: string;
     key: string;
-    sortBy: number | string;
     queue: string;
   }> = [];
   // the map that we will write to the artifacts for informing ftr config jobs of what they should do
@@ -339,20 +338,10 @@ export async function pickTestGroupRunOrder() {
       }
 
       const key = `ftr_configs_${configCounter++}`;
-      let sortBy;
-      let title;
-      if (group.names.length === 1) {
-        title = group.names[0];
-        sortBy = title;
-      } else {
-        sortBy = ++groupCounter;
-        title = `FTR Configs #${sortBy}`;
-      }
-
+      const title = `FTR Configs #${++groupCounter} - ${group.names.join()}`;
       functionalGroups.push({
         title,
         key,
-        sortBy,
         queue: queue ?? defaultQueue,
       });
       ftrRunOrder[key] = {
@@ -419,40 +408,27 @@ export async function pickTestGroupRunOrder() {
             group: 'FTR Configs',
             key: 'ftr-configs',
             depends_on: FTR_CONFIGS_DEPS,
-            steps: functionalGroups
-              .sort((a, b) =>
-                // if both groups are sorted by number then sort by that
-                typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
-                  ? a.sortBy - b.sortBy
-                  : // if both groups are sorted by string, sort by that
-                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
-                  ? a.sortBy.localeCompare(b.sortBy)
-                  : // if a is sorted by number then order it later than b
-                  typeof a.sortBy === 'number'
-                  ? 1
-                  : -1
-              )
-              .map(
-                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
-                  label: title,
-                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 150,
-                  agents: {
-                    queue,
-                  },
-                  env: {
-                    FTR_CONFIG_GROUP_KEY: key,
-                  },
-                  retry: {
-                    automatic: [
-                      { exit_status: '-1', limit: 3 },
-                      ...(FTR_CONFIGS_RETRY_COUNT > 0
-                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                        : []),
-                    ],
-                  },
-                })
-              ),
+            steps: functionalGroups.map(
+              ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                label: title,
+                command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                timeout_in_minutes: 150,
+                agents: {
+                  queue,
+                },
+                env: {
+                  FTR_CONFIG_GROUP_KEY: key,
+                },
+                retry: {
+                  automatic: [
+                    { exit_status: '-1', limit: 3 },
+                    ...(FTR_CONFIGS_RETRY_COUNT > 0
+                      ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                      : []),
+                  ],
+                },
+              })
+            ),
           }
         : [],
     ].flat()
