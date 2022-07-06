@@ -16,7 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
     });
@@ -24,7 +23,6 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
-      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('for user with full ML access', function () {
