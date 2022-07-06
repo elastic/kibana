@@ -25,7 +25,7 @@ const CHAR_SET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNO0123456789';
  * sOi94wwygidgKozwfDnoeIhpFywMwyMkBFcd5oCi
  */
 export function generateShareToken(): string {
-  return [...crypto.randomBytes(40)].reduce((acc, byte) => {
-    return acc + CHAR_SET[byte % CHAR_SET.length];
+  return [...crypto.randomBytes(40)].reduce((acc, nr) => {
+    return acc + CHAR_SET[nr % CHAR_SET.length];
   }, '');
 }
