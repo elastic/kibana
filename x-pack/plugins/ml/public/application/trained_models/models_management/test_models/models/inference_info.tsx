@@ -6,7 +6,6 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
 
 interface Props {
@@ -24,12 +23,7 @@ const InferenceInfo: FC<Props> = ({ taskLabel, info }) => {
   }
   return (
     <>
-      <EuiCallOut
-        title={i18n.translate('xpack.ml.editModelSnapshotFlyout.calloutTitle', {
-          defaultMessage: 'Task: {taskLabel}',
-          values: { taskLabel },
-        })}
-      >
+      <EuiCallOut title={taskLabel}>
         {info.map((i) => (
           <EuiText size="s">{i}</EuiText>
         ))}
