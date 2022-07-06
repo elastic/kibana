@@ -13,7 +13,7 @@ import React from 'react';
 import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 import { themeServiceMock, applicationServiceMock } from '@kbn/core/public/mocks';
-import { TableListView, TableListViewProps } from './table_list_view';
+import { TableListView, Props as TableListViewProps } from './table_list_view';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

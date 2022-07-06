@@ -8,10 +8,11 @@
 import type { HttpFetchError } from '@kbn/core/public';
 import type { CriteriaWithPagination } from '@elastic/eui';
 
-interface OnFetchItemsAction {
+export interface OnFetchItemsAction {
   type: 'onFetchItems';
 }
-interface OnFetchItemsSuccessAction<T> {
+
+export interface OnFetchItemsSuccessAction<T> {
   type: 'onFetchItemsSuccess';
   data: {
     response: {
@@ -22,30 +23,30 @@ interface OnFetchItemsSuccessAction<T> {
   };
 }
 
-interface OnFetchItemsErrorAction {
+export interface OnFetchItemsErrorAction {
   type: 'onFetchItemsError';
   data: HttpFetchError;
 }
 
-interface DeleteItemsActions {
+export interface DeleteItemsActions {
   type: 'onCancelDeleteItems' | 'onDeleteItems' | 'onItemsDeleted';
 }
 
-interface OnSelectionChangeAction<T> {
+export interface OnSelectionChangeAction<T> {
   type: 'onSelectionChange';
   data: T[];
 }
 
-interface OnTableChangeAction<T> {
+export interface OnTableChangeAction<T> {
   type: 'onTableChange';
   data: CriteriaWithPagination<T>;
 }
 
-interface OnClickDeleteItemsAction {
+export interface OnClickDeleteItemsAction {
   type: 'onClickDeleteItems';
 }
 
-interface OnFilterChangeAction {
+export interface OnFilterChangeAction {
   type: 'onFilterChange';
   data: string;
 }

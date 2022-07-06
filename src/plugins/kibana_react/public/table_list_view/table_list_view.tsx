@@ -25,25 +25,23 @@ import {
   EuiSpacer,
   EuiTableActionsColumnType,
   SearchFilterConfig,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
 import { keyBy, uniq, get } from 'lodash';
-import moment from 'moment';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
 import type { Action } from './actions';
 import { reducer } from './reducer';
 
-export interface Props<V> {
+export interface Props<T> {
   createItem?(): void;
-  deleteItems?(items: V[]): Promise<void>;
-  editItem?(item: V): void;
+  deleteItems?(items: T[]): Promise<void>;
+  editItem?(item: T): void;
   entityName: string;
   entityNamePlural: string;
-  findItems(query: string): Promise<{ total: number; hits: V[] }>;
+  findItems(query: string): Promise<{ total: number; hits: T[] }>;
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
@@ -51,7 +49,7 @@ export interface Props<V> {
    * Should be an EuiEmptyPrompt (but TS doesn't support this typing)
    */
   emptyPrompt?: JSX.Element;
-  tableColumns: Array<EuiBasicTableColumn<V>>;
+  tableColumns: Array<EuiBasicTableColumn<T>>;
   tableListTitle: string;
   toastNotifications: ToastsStart;
   /**
@@ -76,7 +74,6 @@ export interface Props<V> {
 export interface State<T = unknown> {
   items: T[];
   hasInitialFetchReturned: boolean;
-  hasUpdatedAtMetadata: boolean | null;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
   showDeleteModal: boolean;
@@ -85,6 +82,7 @@ export interface State<T = unknown> {
   filter: string;
   selectedIds: string[];
   totalItems: number;
+  tableColumns: Array<EuiBasicTableColumn<T>> | null;
   pagination: Pagination;
   tableSort?: {
     field: keyof T;
@@ -121,12 +119,12 @@ function TableListView<T>({
     items: [],
     totalItems: 0,
     hasInitialFetchReturned: false,
-    hasUpdatedAtMetadata: null,
     isFetchingItems: false,
     isDeletingItems: false,
     showDeleteModal: false,
     showLimitError: false,
     selectedIds: [],
+    tableColumns: null,
     filter: initialFilter,
     pagination: {
       pageIndex: 0,
@@ -144,10 +142,10 @@ function TableListView<T>({
     fetchError,
     showDeleteModal,
     isDeletingItems,
-    hasUpdatedAtMetadata,
     selectedIds,
     showLimitError,
     totalItems,
+    tableColumns: stateTableColumns,
     pagination,
     tableSort,
   } = state;
@@ -221,52 +219,10 @@ function TableListView<T>({
   ]);
 
   const getTableColumns = useCallback(() => {
-    const columns = tableColumns.slice();
+    let columns = tableColumns.slice();
 
-    // Add "Last update" column
-    if (hasUpdatedAtMetadata) {
-      const renderUpdatedAt = (dateTime?: string) => {
-        if (!dateTime) {
-          return (
-            <EuiToolTip
-              content={i18n.translate('kibana-react.tableListView.updatedDateUnknownLabel', {
-                defaultMessage: 'Last updated unknown',
-              })}
-            >
-              <span>-</span>
-            </EuiToolTip>
-          );
-        }
-        const updatedAt = moment(dateTime);
-
-        if (updatedAt.diff(moment(), 'days') > -7) {
-          return (
-            <FormattedRelative value={new Date(dateTime).getTime()}>
-              {(formattedDate: string) => (
-                <EuiToolTip content={updatedAt.format('LL LT')}>
-                  <span>{formattedDate}</span>
-                </EuiToolTip>
-              )}
-            </FormattedRelative>
-          );
-        }
-        return (
-          <EuiToolTip content={updatedAt.format('LL LT')}>
-            <span>{updatedAt.format('LL')}</span>
-          </EuiToolTip>
-        );
-      };
-
-      columns.push({
-        field: 'updatedAt',
-        name: i18n.translate('kibana-react.tableListView.lastUpdatedColumnTitle', {
-          defaultMessage: 'Last updated',
-        }),
-        render: (field: string, record: { updatedAt?: string }) =>
-          renderUpdatedAt(record.updatedAt),
-        sortable: true,
-        width: '150px',
-      });
+    if (stateTableColumns) {
+      columns = columns.concat(stateTableColumns);
     }
 
     // Add "Actions" column
@@ -303,7 +259,7 @@ function TableListView<T>({
     }
 
     return columns;
-  }, [editItem, hasUpdatedAtMetadata, rowHeader, tableColumns]);
+  }, [editItem, stateTableColumns, rowHeader, tableColumns]);
 
   const renderCreateButton = useCallback(() => {
     if (createItem) {
