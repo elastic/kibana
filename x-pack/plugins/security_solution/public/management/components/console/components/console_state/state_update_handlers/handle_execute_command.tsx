@@ -164,7 +164,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   const exclusiveOrErrorMessage = (
     <ConsoleCodeBlock>
       <FormattedMessage
-        id="xpack.securitySolution.console.commandValidation.exlcusiveOr"
+        id="xpack.securitySolution.console.commandValidation.exclusiveOr"
         defaultMessage="This command supports only one of the following arguments: {argNames}"
         values={{
           argNames: (
