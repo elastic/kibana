@@ -34,11 +34,18 @@ exports[`HeaderPage it renders 1`] = `
         <CasesProvider
           value={
             Object {
+              "externalReferenceAttachmentTypeRegistry": ExternalReferenceAttachmentTypeRegistry {
+                "collection": Map {},
+                "name": "ExternalReferenceAttachmentTypeRegistry",
+              },
               "features": undefined,
               "owner": Array [
                 "securitySolution",
               ],
-              "userCanCrud": true,
+              "permissions": Object {
+                "all": true,
+                "read": true,
+              },
             }
           }
         >

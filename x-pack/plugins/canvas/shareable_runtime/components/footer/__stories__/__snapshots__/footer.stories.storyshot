@@ -1272,7 +1272,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
               }
             >
               <a
-                className="euiLink css-102pf9n-euiLink-primary"
+                className="euiLink emotion-euiLink-primary"
                 href="https://www.elastic.co"
                 rel=""
                 title="Powered by Elastic.co"
@@ -1295,7 +1295,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
               }
             >
               <div
-                className="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
+                className="euiText emotion-euiText-s-euiTextColor-ghost"
                 style={Object {}}
               >
                 <div
@@ -1360,7 +1360,7 @@ exports[`Storyshots shareables/Footer contextual: austin 1`] = `
                       className="euiButtonEmpty__text"
                     >
                       <div
-                        className="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
+                        className="euiText emotion-euiText-s-euiTextColor-ghost"
                         style={Object {}}
                       >
                         Page 
@@ -1524,7 +1524,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
               }
             >
               <a
-                className="euiLink css-102pf9n-euiLink-primary"
+                className="euiLink emotion-euiLink-primary"
                 href="https://www.elastic.co"
                 rel=""
                 title="Powered by Elastic.co"
@@ -1547,7 +1547,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
               }
             >
               <div
-                className="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
+                className="euiText emotion-euiText-s-euiTextColor-ghost"
                 style={Object {}}
               >
                 <div
@@ -1612,7 +1612,7 @@ exports[`Storyshots shareables/Footer contextual: hello 1`] = `
                       className="euiButtonEmpty__text"
                     >
                       <div
-                        className="euiText css-1rmuwqj-euiText-s-euiTextColor-ghost"
+                        className="euiText emotion-euiText-s-euiTextColor-ghost"
                         style={Object {}}
                       >
                         Page 

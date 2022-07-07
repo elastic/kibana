@@ -41,10 +41,7 @@ import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import {
-  SavedSearchURLConflictCallout,
-  useSavedSearchAliasMatchRedirect,
-} from '../../../../services/saved_searches';
+import { SavedSearchURLConflictCallout } from '../../../../services/saved_searches';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
@@ -121,8 +118,6 @@ export function DiscoverLayout({
     }
   }, [dataState.fetchStatus]);
 
-  useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
-
   // We treat rollup v1 data views as non time based in Discover, since we query them
   // in a non time based way using the regular _search API, since the internal
   // representation of those documents does not have the time field that _field_caps
@@ -181,7 +176,7 @@ export function DiscoverLayout({
     [filterManager, indexPattern, indexPatterns, trackUiMetric, capabilities]
   );
 
-  const onEditRuntimeField = useCallback(() => {
+  const onFieldEdited = useCallback(() => {
     savedSearchRefetch$.next('reset');
   }, [savedSearchRefetch$]);
 
@@ -244,7 +239,7 @@ export function DiscoverLayout({
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
         onChangeIndexPattern={onChangeIndexPattern}
-        onEditRuntimeField={onEditRuntimeField}
+        onFieldEdited={onFieldEdited}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -267,7 +262,7 @@ export function DiscoverLayout({
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
-              onEditRuntimeField={onEditRuntimeField}
+              onFieldEdited={onFieldEdited}
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={savedSearchData$.availableFields$}
@@ -351,6 +346,7 @@ export function DiscoverLayout({
                       setExpandedDoc={setExpandedDoc}
                       state={state}
                       stateContainer={stateContainer}
+                      onFieldEdited={onFieldEdited}
                     />
                   ) : (
                     <FieldStatisticsTableMemoized

@@ -51,14 +51,14 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should clear the command output history when `clear` is entered', async () => {
+  it('should clear the command output history when `cls` is entered', async () => {
     render();
     enterCommand('help');
     enterCommand('help');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(2);
 
-    enterCommand('clear');
+    enterCommand('cls');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(0);
   });
@@ -110,7 +110,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-unknownCommandError').textContent).toEqual(
-        'Unsupported text/command!The text you entered foo-foo is unsupported! Click  or type help for assistance.'
+        'Unsupported text/commandThe text you entered foo-foo is unsupported! Click  or type help for assistance.'
       );
     });
   });
@@ -132,7 +132,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'The following cmd2 argument is not support by this command: --foo'
+        'The following cmd2 argument is not supported by this command: --foo'
       );
     });
   });
@@ -143,7 +143,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-        'The following cmd2 arguments are not support by this command: --foo, --bar'
+        'The following cmd2 arguments are not supported by this command: --foo, --bar'
       );
     });
   });
@@ -181,7 +181,7 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should show error no options were provided, bug command requires some', async () => {
+  it('should show error no options were provided, but command requires some', async () => {
     render();
     enterCommand('cmd2');
 
@@ -219,6 +219,46 @@ describe('When a Console command is entered by the user', () => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'command is invalid'
       );
+    });
+  });
+
+  it('should show error no options were provided, but has exclusive or arguments', async () => {
+    render();
+    enterCommand('cmd6');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'This command supports only one of the following arguments: --foo, --bar'
+      );
+    });
+  });
+
+  it('should show error when it has multiple exclusive arguments', async () => {
+    render();
+    enterCommand('cmd6 --foo 234 --bar 123');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'This command supports only one of the following arguments: --foo, --bar'
+      );
+    });
+  });
+
+  it('should show success when one exlusive argument is used', async () => {
+    render();
+    enterCommand('cmd6 --foo 234');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+    });
+  });
+
+  it('should show success when the other exlusive argument is used', async () => {
+    render();
+    enterCommand('cmd6 --bar 234');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('exec-output')).toBeTruthy();
     });
   });
 });

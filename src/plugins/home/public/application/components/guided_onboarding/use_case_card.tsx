@@ -46,7 +46,7 @@ const constants: UseCaseConstants = {
       }),
       description: i18n.translate('home.guidedOnboarding.gettingStarted.search.cardDescription', {
         defaultMessage:
-          'Create a search experience for your websites, applications, workplace content, or anything in between.',
+          'Create a finely-tuned search experience for your websites, applications, workplace content, and more.',
       }),
     },
     icon: {
@@ -63,13 +63,13 @@ const constants: UseCaseConstants = {
   observability: {
     i18nTexts: {
       title: i18n.translate('home.guidedOnboarding.gettingStarted.observability.cardTitle', {
-        defaultMessage: 'Monitor my infrastructure',
+        defaultMessage: 'Monitor my environments',
       }),
       description: i18n.translate(
         'home.guidedOnboarding.gettingStarted.observability.cardDescription',
         {
           defaultMessage:
-            'Monitor your infrastructure by consolidating your logs, metrics, and traces for end‑to‑end observability.',
+            'Get end-to-end observability into your environments by consolidating your logs, metrics, and traces.',
         }
       ),
     },
@@ -91,7 +91,7 @@ const constants: UseCaseConstants = {
       }),
       description: i18n.translate('home.guidedOnboarding.gettingStarted.security.cardDescription', {
         defaultMessage:
-          'Protect your environment by unifying SIEM, endpoint security, and cloud security to protect against threats.',
+          'Protect your environment against threats by unifying SIEM, endpoint security, and cloud security in one place.',
       }),
     },
     icon: {
@@ -172,6 +172,8 @@ export const UseCaseCard = ({ useCase }: UseCaseProps) => {
       image={<div css={cardCss} />}
       title={title}
       description={description}
+      // Used for FS tracking
+      data-test-subj={`onboarding--${useCase}UseCaseCard`}
       onClick={onUseCaseSelection}
     />
   );
